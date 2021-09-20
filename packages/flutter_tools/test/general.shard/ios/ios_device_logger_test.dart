@@ -2,43 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fake_vm_services.dart';
 
 void main() {
   FakeProcessManager processManager;
   Artifacts artifacts;
-  FakeCache fakeCache;
+  Cache fakeCache;
   BufferLogger logger;
   String ideviceSyslogPath;
 
   setUp(() {
-    processManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeCache = FakeCache();
+    processManager = FakeProcessManager.empty();
+    fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
-    ideviceSyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios);
+    ideviceSyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
   });
 
   group('syslog stream', () {
     testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
       final String decoded = decodeSyslog(
-          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\'
-          r'134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
+          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
+          r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
 
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });
@@ -147,7 +150,29 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('VM service', () {
     testWithoutContext('IOSDeviceLogReader can listen to VM Service logs', () async {
-      final MockVmService vmService = MockVmService();
+      final Event stdoutEvent = Event(
+        kind: 'Stdout',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  This is a message ')),
+      );
+      final Event stderrEvent = Event(
+        kind: 'Stderr',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  And this is an error ')),
+      );
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+        FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+        FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+      ]).vmService;
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -157,47 +182,39 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      final StreamController<Event> stdoutController = StreamController<Event>();
-      final StreamController<Event> stderController = StreamController<Event>();
-      final Completer<Success> stdoutCompleter = Completer<Success>();
-      final Completer<Success> stderrCompleter = Completer<Success>();
-      when(vmService.streamListen('Stdout')).thenAnswer((Invocation invocation) {
-        return stdoutCompleter.future;
-      });
-      when(vmService.streamListen('Stderr')).thenAnswer((Invocation invocation) {
-        return stderrCompleter.future;
-      });
-      when(vmService.onStdoutEvent).thenAnswer((Invocation invocation) {
-        return stdoutController.stream;
-      });
-      when(vmService.onStderrEvent).thenAnswer((Invocation invocation) {
-        return stderController.stream;
-      });
       logReader.connectedVMService = vmService;
-
-      stdoutCompleter.complete(Success());
-      stderrCompleter.complete(Success());
-      stdoutController.add(Event(
-        kind: 'Stdout',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  This is a message ')),
-      ));
-      stderController.add(Event(
-        kind: 'Stderr',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  And this is an error ')),
-      ));
 
       // Wait for stream listeners to fire.
       await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
         equals('  This is a message '),
         equals('  And this is an error '),
       ]));
-      verify(vmService.streamListen('Debug'));
     });
 
     testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to debugger', () async {
-      final MockVmService vmService = MockVmService();
+      final Event stdoutEvent = Event(
+        kind: 'Stdout',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  This is a message ')),
+      );
+      final Event stderrEvent = Event(
+        kind: 'Stderr',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  And this is an error ')),
+      );
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+        FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+        FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+      ]).vmService;
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -207,44 +224,15 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      final StreamController<Event> stdoutController = StreamController<Event>();
-      final StreamController<Event> stderController = StreamController<Event>();
-      final Completer<Success> stdoutCompleter = Completer<Success>();
-      final Completer<Success> stderrCompleter = Completer<Success>();
-      when(vmService.streamListen('Stdout')).thenAnswer((Invocation invocation) {
-        return stdoutCompleter.future;
-      });
-      when(vmService.streamListen('Stderr')).thenAnswer((Invocation invocation) {
-        return stderrCompleter.future;
-      });
-      when(vmService.onStdoutEvent).thenAnswer((Invocation invocation) {
-        return stdoutController.stream;
-      });
-      when(vmService.onStderrEvent).thenAnswer((Invocation invocation) {
-        return stderController.stream;
-      });
       logReader.connectedVMService = vmService;
 
-      stdoutCompleter.complete(Success());
-      stderrCompleter.complete(Success());
-      stdoutController.add(Event(
-        kind: 'Stdout',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  This is a message ')),
-      ));
-      stderController.add(Event(
-        kind: 'Stderr',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  And this is an error ')),
-      ));
-
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.debuggerAttached).thenReturn(true);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
         'Message from debugger'
       ]);
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
 
       // Wait for stream listeners to fire.
@@ -272,8 +260,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
       final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -297,8 +285,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         useSyslog: false,
       );
       final Completer<void> streamComplete = Completer<void>();
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => debuggingLogs);
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
       logReader.logLines.listen(null, onError: (Object error) => streamComplete.complete());
       logReader.debuggerStream = iosDeployDebugger;
 
@@ -315,15 +303,26 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ),
         useSyslog: false,
       );
-      final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
-      when(iosDeployDebugger.logLines).thenAnswer((Invocation invocation) => const Stream<String>.empty());
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
 
       logReader.dispose();
-      verify(iosDeployDebugger.detach());
+      expect(iosDeployDebugger.detached, true);
     });
   });
 }
 
-class MockVmService extends Mock implements VmService {}
-class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
+class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
+  bool detached = false;
+
+  @override
+  bool debuggerAttached = false;
+
+  @override
+  Stream<String> logLines = const Stream<String>.empty();
+
+  @override
+  void detach() {
+    detached = true;
+  }
+}

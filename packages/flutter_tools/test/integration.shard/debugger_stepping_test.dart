@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
 import 'package:file/file.dart';
 
@@ -12,9 +12,17 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWithoutContext('can step over statements', () async {
-    final Directory tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
+  Directory tempDir;
 
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
+  });
+
+  tearDown(() async {
+    tryToDelete(tempDir);
+  });
+
+  testWithoutContext('can step over statements', () async {
     final SteppingProject _project = SteppingProject();
     await _project.setUpIn(tempDir);
 
@@ -22,8 +30,7 @@ void main() {
 
     await _flutter.run(withDebugger: true, startPaused: true);
     await _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
-    await _flutter.resume();
-    await _flutter.waitForPause(); // Now we should be on the breakpoint.
+    await _flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
 
     expect((await _flutter.getSourceLocation()).line, equals(_project.breakpointLine));
 
@@ -43,6 +50,5 @@ void main() {
     }
 
     await _flutter.stop();
-    tryToDelete(tempDir);
   });
 }

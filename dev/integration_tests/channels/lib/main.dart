@@ -15,12 +15,14 @@ import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(TestApp());
+  runApp(const TestApp());
 }
 
 class TestApp extends StatefulWidget {
+  const TestApp({Key? key}) : super(key: key);
+
   @override
-  _TestAppState createState() => _TestAppState();
+  State<TestApp> createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
@@ -58,6 +60,17 @@ class _TestAppState extends State<TestApp> {
     -0x7fffffffffffffff - 1,
     0,
     0x7fffffffffffffff,
+  ]);
+  static final Float32List someFloat32s = Float32List.fromList(<double>[
+    double.nan,
+    double.negativeInfinity,
+    -double.maxFinite,
+    -double.minPositive,
+    -0.0,
+    0.0,
+    double.minPositive,
+    double.maxFinite,
+    double.infinity,
   ]);
   static final Float64List someFloat64s =
       Float64List.fromList(<double>[
@@ -140,6 +153,7 @@ class _TestAppState extends State<TestApp> {
     () => basicStandardHandshake(someUint8s),
     () => basicStandardHandshake(someInt32s),
     () => basicStandardHandshake(someInt64s),
+    () => basicStandardHandshake(someFloat32s),
     () => basicStandardHandshake(someFloat64s),
     () => basicStandardHandshake(<dynamic>[]),
     () => basicStandardHandshake(aList),
@@ -153,7 +167,7 @@ class _TestAppState extends State<TestApp> {
     () => basicJsonMessageToUnknownChannel(),
     () => basicStandardMessageToUnknownChannel(),
   ];
-  Future<TestStepResult> _result;
+  Future<TestStepResult>? _result;
   int _step = 0;
 
   void _executeNextStep() {

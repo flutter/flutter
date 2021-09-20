@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -49,13 +51,13 @@ void main() {
 // and [invertColors] applied for testing the invert colors.
 class InvertColorTestWidget extends LeafRenderObjectWidget {
   const InvertColorTestWidget({
-    this.color,
+    required this.color,
     this.filter,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final Color color;
-  final ColorFilter filter;
+  final ColorFilter? filter;
 
   @override
   RenderInvertColorTest createRenderObject(BuildContext context) {
@@ -83,9 +85,9 @@ class RenderInvertColorTest extends RenderProxyBox {
   }
 
 
-  ColorFilter get filter => _filter;
-  ColorFilter _filter;
-  set filter(ColorFilter value) {
+  ColorFilter? get filter => _filter;
+  ColorFilter? _filter;
+  set filter(ColorFilter? value) {
     if (filter == value)
       return;
     _filter = value;

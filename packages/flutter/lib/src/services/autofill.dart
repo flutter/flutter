@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'text_input.dart';
 
@@ -12,6 +11,8 @@ import 'text_input.dart';
 /// documentation for their availability on each platform, and the platform
 /// values each autofill hint corresponds to.
 class AutofillHints {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
   AutofillHints._();
 
   /// The input field expects an address locality (city/town).
@@ -479,6 +480,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  ///   As of iOS 14.2 this hint does not trigger autofill.
   /// * web: ["address-line2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine2 = 'streetAddressLine2';
@@ -628,11 +630,39 @@ class AutofillConfiguration {
   /// Creates autofill related configuration information that can be sent to the
   /// platform.
   const AutofillConfiguration({
+    required String uniqueIdentifier,
+    required List<String> autofillHints,
+    required TextEditingValue currentEditingValue,
+    String? hintText,
+  }) : this._(
+    enabled: true,
+    uniqueIdentifier: uniqueIdentifier,
+    autofillHints: autofillHints,
+    currentEditingValue: currentEditingValue,
+    hintText: hintText,
+  );
+
+  const AutofillConfiguration._({
+    required this.enabled,
     required this.uniqueIdentifier,
-    required this.autofillHints,
+    this.autofillHints = const <String>[],
+    this.hintText,
     required this.currentEditingValue,
   }) : assert(uniqueIdentifier != null),
        assert(autofillHints != null);
+
+  /// An [AutofillConfiguration] that indicates the [AutofillClient] does not
+  /// wish to be autofilled.
+  static const AutofillConfiguration disabled = AutofillConfiguration._(
+    enabled: false,
+    uniqueIdentifier: '',
+    currentEditingValue: TextEditingValue.empty,
+  );
+
+  /// Whether autofill should be enabled for the [AutofillClient].
+  ///
+  /// To retrieve a disabled [AutofillConfiguration], use [disabled].
+  final bool enabled;
 
   /// A string that uniquely identifies the current [AutofillClient].
   ///
@@ -645,9 +675,9 @@ class AutofillConfiguration {
   /// A list of strings that helps the autofill service identify the type of the
   /// [AutofillClient].
   ///
-  /// Must not be null or empty.
+  /// Must not be null.
   ///
-  /// {@template flutter.services.autofill.autofillHints}
+  /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
   /// [AutofillHints], as well as their availability on different platforms.
@@ -694,14 +724,23 @@ class AutofillConfiguration {
   /// The current [TextEditingValue] of the [AutofillClient].
   final TextEditingValue currentEditingValue;
 
+  /// The optional hint text placed on the view that typically suggests what
+  /// sort of input the field accepts, for example "enter your password here".
+  ///
+  /// If the developer does not specify any [autofillHints], the [hintText] can
+  /// be a useful indication to the platform autofill service.
+  final String? hintText;
+
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJson() {
-    assert(autofillHints.isNotEmpty);
-    return <String, dynamic>{
-      'uniqueIdentifier': uniqueIdentifier,
-      'hints': autofillHints,
-      'editingValue': currentEditingValue.toJSON(),
-    };
+  Map<String, dynamic>? toJson() {
+    return enabled
+      ? <String, dynamic>{
+          'uniqueIdentifier': uniqueIdentifier,
+          'hints': autofillHints,
+          'editingValue': currentEditingValue.toJSON(),
+          if (hintText != null) 'hintText': hintText,
+        }
+      : null;
   }
 }
 
@@ -712,7 +751,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null.
+  /// Must not be null and the identifier must not be changed.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -723,12 +762,12 @@ abstract class AutofillClient {
 
   /// Requests this [AutofillClient] update its [TextEditingValue] to the given
   /// value.
-  void updateEditingValue(TextEditingValue newEditingValue);
+  void autofill(TextEditingValue newEditingValue);
 }
 
 /// An ordered group within which [AutofillClient]s are logically connected.
 ///
-/// {@template flutter.services.autofill.AutofillScope}
+/// {@template flutter.services.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
@@ -803,7 +842,7 @@ mixin AutofillScopeMixin implements AutofillScope {
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
     assert(trigger != null);
     assert(
-      !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
+      !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
 

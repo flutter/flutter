@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Key blockKey = Key('test');
 
@@ -17,10 +14,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 200.0, // less than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),
@@ -45,10 +42,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 2000.0, // more than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),
@@ -218,7 +215,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text('top'), findsOneWidget);
 
-    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle'))).position;
+    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle')))!.position;
     expect(position.viewportDimension, 600.0);
     expect(position.pixels, 0.0);
 

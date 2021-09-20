@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import 'test_widgets.dart';
 
 class StatefulWrapper extends StatefulWidget {
   const StatefulWrapper({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -37,8 +36,8 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;

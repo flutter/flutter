@@ -2,7 +2,7 @@
   "datePickerHourSemanticsLabelFew": "$hour sata",
   "datePickerMinuteSemanticsLabelFew": "$minute minute",
   "timerPickerHourLabelFew": "sata",
-  "timerPickerMinuteLabelFew": "min.",
+  "timerPickerMinuteLabelFew": "min",
   "timerPickerSecondLabelFew": "sec.",
   "datePickerHourSemanticsLabelOne": "$hour sat",
   "datePickerHourSemanticsLabelOther": "$hour sati",
@@ -16,8 +16,8 @@
   "alertDialogLabel": "Upozorenje",
   "timerPickerHourLabelOne": "sat",
   "timerPickerHourLabelOther": "sati",
-  "timerPickerMinuteLabelOne": "min.",
-  "timerPickerMinuteLabelOther": "min.",
+  "timerPickerMinuteLabelOne": "min",
+  "timerPickerMinuteLabelOther": "min",
   "timerPickerSecondLabelOne": "sec.",
   "timerPickerSecondLabelOther": "sec.",
   "cutButtonLabel": "Izreži",
@@ -25,5 +25,6 @@
   "pasteButtonLabel": "Zalijepi",
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
-  "modalBarrierDismissLabel": "Odbaci"
+  "modalBarrierDismissLabel": "Odbaci",
+  "searchTextFieldPlaceholderLabel": "Pretraživanje"
 }

@@ -5,12 +5,11 @@
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
-Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
+Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   void walker(Element child) {
     if (child.widget.runtimeType == targetType)
       throw child;
@@ -24,12 +23,14 @@ Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   return null;
 }
 
-Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
-  Element result;
+Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
+  Element? result;
   bool walker(Element ancestor) {
-    if (ancestor.widget.runtimeType == targetType)
+    if (ancestor.widget.runtimeType == targetType) {
       result = ancestor;
-    return result == null;
+      return false;
+    }
+    return true;
   }
   node.visitAncestorElements(walker);
   return result;
@@ -38,11 +39,10 @@ Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
 final RegExp materialIconAssetNameColorExtractor = RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
 
 void checkIconColor(WidgetTester tester, String label, Color color) {
-  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
-  expect(listTile, isNotNull);
-  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
+  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
   final RichText richText = asset.widget as RichText;
-  expect(richText.text.style.color, equals(color));
+  expect(richText.text.style!.color, equals(color));
 }
 
 void main() {
@@ -84,7 +84,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the color of the icon - dark mode
-    checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
+    checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.white38); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });

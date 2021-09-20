@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +11,7 @@ void main() {
     int outerTickCount = 0;
     int innerTickCount = 0;
 
-    Widget nestedTickerModes({bool innerEnabled, bool outerEnabled}) {
+    Widget nestedTickerModes({required bool innerEnabled, required bool outerEnabled}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: TickerMode(
@@ -103,7 +101,7 @@ void main() {
 }
 
 class _TickingWidget extends StatefulWidget {
-  const _TickingWidget({this.onTick});
+  const _TickingWidget({required this.onTick});
 
   final VoidCallback onTick;
 
@@ -112,7 +110,7 @@ class _TickingWidget extends StatefulWidget {
 }
 
 class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProviderStateMixin {
-  Ticker _ticker;
+  late Ticker _ticker;
 
   @override
   void initState() {

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater);
+  const StockSettings(this.configuration, this.updater, {Key? key}) : super(key: key);
 
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
@@ -17,7 +17,7 @@ class StockSettings extends StatefulWidget {
 }
 
 class StockSettingsState extends State<StockSettings> {
-  void _handleOptimismChanged(bool value) {
+  void _handleOptimismChanged(bool? value) {
     value ??= false;
     sendUpdates(widget.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
@@ -111,7 +111,7 @@ class StockSettingsState extends State<StockSettings> {
         onTap: _confirmOptimismChange,
         trailing: Checkbox(
           value: widget.configuration.stockMode == StockMode.optimistic,
-          onChanged: (bool value) => _confirmOptimismChange(),
+          onChanged: (bool? value) => _confirmOptimismChange(),
         ),
       ),
       ListTile(

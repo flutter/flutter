@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'constants.dart';
+import 'gesture_settings.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
 
@@ -229,7 +230,8 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [dart:ui.FlutterView.devicePixelRatio], which defines the device's
+///    current resolution.
 ///  * [Listener], a widget that calls callbacks in response to common pointer
 ///    events.
 @immutable
@@ -650,7 +652,7 @@ mixin _PointerEventDescription on PointerEvent {
   }
 }
 
-abstract class _AbstractPointerEvent implements PointerEvent {}
+abstract class _AbstractPointerEvent implements PointerEvent { }
 
 // The base class for transformed pointer event classes.
 //
@@ -1221,15 +1223,6 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
          embedderId: embedderId,
        );
 
-  /// Creates an enter event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerEnterEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  factory PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) => PointerEnterEvent.fromMouseEvent(event);
-
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
@@ -1332,7 +1325,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
-/// not in contact with the device, and entered a target object.
+/// not in contact with the device, and exited a target object.
 ///
 /// See also:
 ///
@@ -1395,15 +1388,6 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
          synthesized: synthesized,
          embedderId: embedderId,
        );
-
-  /// Creates an enter event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerExitEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  factory PointerExitEvent.fromHoverEvent(PointerHoverEvent event) => PointerExitEvent.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
   ///
@@ -1864,6 +1848,8 @@ class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPoin
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
 abstract class PointerSignalEvent extends PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1933,6 +1919,8 @@ mixin _CopyPointerScrollEvent on PointerEvent {
 ///
 ///  * [Listener.onPointerSignal], which allows callers to be notified of these
 ///    events in a widget tree.
+///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
+///    participating agents may disambiguate an event's target.
 class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScrollEvent {
   /// Creates a pointer scroll event.
   ///
@@ -2111,39 +2099,39 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
   }
 }
 
-/// Determine the approriate hit slop pixels based on the [kind] of pointer.
-double computeHitSlop(PointerDeviceKind kind) {
+/// Determine the appropriate hit slop pixels based on the [kind] of pointer.
+double computeHitSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
   switch (kind) {
     case PointerDeviceKind.mouse:
-    case PointerDeviceKind.stylus:
-    case PointerDeviceKind.invertedStylus:
       return kPrecisePointerHitSlop;
-    case PointerDeviceKind.unknown:
-    case PointerDeviceKind.touch:
-      return kTouchSlop;
-  }
-}
-
-/// Determine the approriate pan slop pixels based on the [kind] of pointer.
-double computePanSlop(PointerDeviceKind kind) {
-  switch (kind) {
-    case PointerDeviceKind.mouse:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerPanSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
-      return kPanSlop;
+      return settings?.touchSlop ?? kTouchSlop;
   }
 }
 
-/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+/// Determine the appropriate pan slop pixels based on the [kind] of pointer.
+double computePanSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
+  switch (kind) {
+    case PointerDeviceKind.mouse:
+      return kPrecisePointerPanSlop;
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+    case PointerDeviceKind.unknown:
+    case PointerDeviceKind.touch:
+      return settings?.panSlop ?? kPanSlop;
+  }
+}
+
+/// Determine the appropriate scale slop pixels based on the [kind] of pointer.
 double computeScaleSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kScaleSlop;

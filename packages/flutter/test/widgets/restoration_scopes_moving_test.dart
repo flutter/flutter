@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('widget moves scopes during restore', (WidgetTester tester) async {
-    await tester.pumpWidget(RootRestorationScope(
+    await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -113,6 +111,8 @@ void main() {
 }
 
 class TestWidgetWithCounterChild extends StatefulWidget {
+  const TestWidgetWithCounterChild({Key? key}) : super(key: key);
+
   @override
   State<TestWidgetWithCounterChild> createState() => TestWidgetWithCounterChildState();
 }
@@ -123,13 +123,13 @@ class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> 
   int toggleCount = 0;
 
   @override
-  void didToggleBucket(RestorationBucket oldBucket) {
+  void didToggleBucket(RestorationBucket? oldBucket) {
     super.didToggleBucket(oldBucket);
     toggleCount++;
   }
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(childRestorationEnabled, 'childRestorationEnabled');
   }
 
@@ -161,9 +161,9 @@ class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> 
 }
 
 class Counter extends StatefulWidget {
-  const Counter({this.restorationId});
+  const Counter({Key? key, this.restorationId}) : super(key: key);
 
-  final String restorationId;
+  final String? restorationId;
 
   @override
   State<Counter> createState() => CounterState();
@@ -173,10 +173,10 @@ class CounterState extends State<Counter> with RestorationMixin {
   final RestorableInt count = RestorableInt(0);
 
   @override
-  String get restorationId => widget.restorationId;
+  String? get restorationId => widget.restorationId;
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(count, 'counter');
   }
 
@@ -202,20 +202,20 @@ class CounterState extends State<Counter> with RestorationMixin {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({@required this.restorationId});
+  const TestWidget({Key? key, required this.restorationId}) : super(key: key);
 
-  final String restorationId;
+  final String? restorationId;
 
   @override
   State<TestWidget> createState() => TestWidgetState();
 }
 
 class TestWidgetState extends State<TestWidget> with RestorationMixin {
-  List<RestorationBucket> buckets = <RestorationBucket>[];
+  List<RestorationBucket?> buckets = <RestorationBucket?>[];
   List<bool> flags = <bool>[];
 
   @override
-  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     buckets.add(oldBucket);
     flags.add(initialRestore);
   }
@@ -223,13 +223,13 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   int toggleCount = 0;
 
   @override
-  void didToggleBucket(RestorationBucket oldBucket) {
+  void didToggleBucket(RestorationBucket? oldBucket) {
     super.didToggleBucket(oldBucket);
     toggleCount++;
   }
 
   @override
-  String get restorationId => widget.restorationId;
+  String? get restorationId => widget.restorationId;
 
   @override
   Widget build(BuildContext context) {

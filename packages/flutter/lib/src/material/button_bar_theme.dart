@@ -202,10 +202,11 @@ class ButtonBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('height', buttonHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', buttonPadding, defaultValue: null));
     properties.add(FlagProperty(
-        'buttonAlignedDropdown',
-        value: buttonAlignedDropdown,
-        ifTrue: 'dropdown width matches button',
-        defaultValue: null));
+      'buttonAlignedDropdown',
+      value: buttonAlignedDropdown,
+      ifTrue: 'dropdown width matches button',
+      defaultValue: null,
+    ));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: null));
   }
@@ -252,7 +253,7 @@ class ButtonBarTheme extends InheritedWidget {
   /// ```
   static ButtonBarThemeData of(BuildContext context) {
     final ButtonBarTheme? buttonBarTheme = context.dependOnInheritedWidgetOfExactType<ButtonBarTheme>();
-    return buttonBarTheme?.data ?? Theme.of(context)!.buttonBarTheme;
+    return buttonBarTheme?.data ?? Theme.of(context).buttonBarTheme;
   }
 
   @override

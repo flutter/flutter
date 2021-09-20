@@ -16,7 +16,7 @@ import 'framework.dart';
 ///
 ///  * [ValueListenableBuilder], a widget which invokes this builder each time
 ///    a [ValueListenable] changes value.
-typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T? value, Widget? child);
+typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
 /// A widget whose content stays synced with a [ValueListenable].
 ///
@@ -47,11 +47,11 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T? value, 
 ///
 /// ```dart
 /// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key, this.title}) : super(key: key);
+///   const MyHomePage({Key? key, required this.title}) : super(key: key);
 ///   final String title;
 ///
 ///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+///   State<MyHomePage> createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
@@ -67,16 +67,16 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T? value, 
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('You have pushed the button this many times:'),
-///             ValueListenableBuilder(
-///               builder: (BuildContext context, int value, Widget child) {
+///             const Text('You have pushed the button this many times:'),
+///             ValueListenableBuilder<int>(
+///               builder: (BuildContext context, int value, Widget? child) {
 ///                 // This builder will only get called when the _counter
 ///                 // is updated.
 ///                 return Row(
 ///                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///                   children: <Widget>[
 ///                     Text('$value'),
-///                     child,
+///                     child!,
 ///                   ],
 ///                 );
 ///               },
@@ -90,7 +90,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T? value, 
 ///         ),
 ///       ),
 ///       floatingActionButton: FloatingActionButton(
-///         child: Icon(Icons.plus_one),
+///         child: const Icon(Icons.plus_one),
 ///         onPressed: () => _counter.value += 1,
 ///       ),
 ///     );
@@ -153,7 +153,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 }
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
-  T? value;
+  late T value;
 
   @override
   void initState() {

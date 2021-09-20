@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,22 +15,22 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: Flex(
             direction: Axis.horizontal,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 75.0,
-                child: const Text('1'),
+                child: Text('1'),
               ),
-              Container(
+              SizedBox(
                 width: 75.0,
-                child: const Text('2'),
+                child: Text('2'),
               ),
-              Container(
+              SizedBox(
                 width: 75.0,
-                child: const Text('3'),
+                child: Text('3'),
               ),
             ],
           ),
@@ -43,7 +40,9 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
@@ -73,26 +72,26 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: Flex(
             direction: Axis.horizontal,
             children: <Widget>[
-              Container(
+              const SizedBox(
                 width: 75.0,
-                child: const Text('1'),
+                child: Text('1'),
               ),
               MergeSemantics(
                 child: Flex(
                   direction: Axis.horizontal,
-                  children: <Widget>[
-                    Container(
+                  children: const <Widget>[
+                    SizedBox(
                       width: 75.0,
-                      child: const Text('2'),
+                      child: Text('2'),
                     ),
-                    Container(
+                    SizedBox(
                       width: 75.0,
-                      child: const Text('3'),
+                      child: Text('3'),
                     ),
                   ],
                 ),
@@ -105,7 +104,9 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(

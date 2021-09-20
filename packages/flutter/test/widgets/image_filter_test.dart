@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Image filter - blur', (WidgetTester tester) async {
@@ -62,7 +64,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/45213
+  });
 
   testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {
@@ -78,8 +80,7 @@ void main() {
 
     await pumpWithSigma(5.0);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer = renderObject.debugLayer as ImageFilterLayer;
-    expect(originalLayer, isNotNull);
+    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);

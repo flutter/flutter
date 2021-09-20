@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -21,10 +23,8 @@ import '../../../src/context.dart';
 void main() {
   Environment environment;
   FileSystem fileSystem;
-  Platform platform;
 
   setUp(() {
-    platform = FakePlatform();
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
@@ -32,6 +32,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      platform: FakePlatform(),
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -80,7 +81,6 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testUsingContext('Copies files to correct asset directory', () async {
@@ -88,7 +88,7 @@ flutter:
 
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
     // See https://github.com/flutter/flutter/issues/35293
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
     // See https://github.com/flutter/flutter/issues/46163
@@ -96,7 +96,6 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testUsingContext('Throws exception if pubspec contains missing files', () async {
@@ -111,12 +110,10 @@ flutter:
 
 ''');
 
-    expect(() async => await const CopyAssets().build(environment),
-      throwsA(isA<Exception>()));
+    expect(() async => const CopyAssets().build(environment), throwsException);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => platform,
   });
 
   testWithoutContext('processSkSLBundle returns null if there is no path '
@@ -140,7 +137,7 @@ flutter:
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
   });
 
   testWithoutContext('processSkSLBundle throws exception if the bundle is not '
@@ -156,7 +153,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
@@ -173,7 +170,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: null,
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
@@ -194,7 +191,7 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: '2',
-    ), throwsA(isA<Exception>()));
+    ), throwsException);
     expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
   });
 

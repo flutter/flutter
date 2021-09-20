@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'tabs.dart';
@@ -46,6 +45,10 @@ class TabBarTheme with Diagnosticable {
   final Color? labelColor;
 
   /// Default value for [TabBar.labelPadding].
+  ///
+  /// If there are few tabs with both icon and text and few
+  /// tabs with only icon or text, this padding is vertically
+  /// adjusted to provide uniform padding to all tabs.
   final EdgeInsetsGeometry? labelPadding;
 
   /// Default value for [TabBar.labelStyle].
@@ -81,7 +84,7 @@ class TabBarTheme with Diagnosticable {
 
   /// The data from the closest [TabBarTheme] instance given the build context.
   static TabBarTheme of(BuildContext context) {
-    return Theme.of(context)!.tabBarTheme;
+    return Theme.of(context).tabBarTheme;
   }
 
   /// Linearly interpolate between two tab bar themes.

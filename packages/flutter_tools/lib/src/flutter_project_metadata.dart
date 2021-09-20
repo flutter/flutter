@@ -13,6 +13,8 @@ enum FlutterProjectType {
   /// It is different than the "module" template in that it exposes and doesn't
   /// manage the platform code.
   app,
+  /// A List/Detail app template that follows community best practices.
+  skeleton,
   /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
   module,
@@ -23,14 +25,14 @@ enum FlutterProjectType {
   plugin,
 }
 
-extension FlutterProjectTypeExtension on FlutterProjectType {
-  String get name => getEnumName(this);
+String flutterProjectTypeToString(FlutterProjectType type) {
+  return getEnumName(type);
 }
 
-FlutterProjectType stringToProjectType(String value) {
-  FlutterProjectType result;
+FlutterProjectType? stringToProjectType(String value) {
+  FlutterProjectType? result;
   for (final FlutterProjectType type in FlutterProjectType.values) {
-    if (value == type.name) {
+    if (value == flutterProjectTypeToString(type)) {
       result = type;
       break;
     }
@@ -49,10 +51,10 @@ class FlutterProjectMetadata {
   final File _metadataFile;
   final Logger _logger;
 
-  String get versionChannel => _versionValue('channel');
-  String get versionRevision => _versionValue('revision');
+  String? get versionChannel => _versionValue('channel');
+  String? get versionRevision => _versionValue('revision');
 
-  FlutterProjectType get projectType {
+  FlutterProjectType? get projectType {
     final dynamic projectTypeYaml = _metadataValue('project_type');
     if (projectTypeYaml is String) {
       return stringToProjectType(projectTypeYaml);
@@ -62,8 +64,8 @@ class FlutterProjectMetadata {
     }
   }
 
-  YamlMap _versionYaml;
-  String _versionValue(String key) {
+  YamlMap? _versionYaml;
+  String? _versionValue(String key) {
     if (_versionYaml == null) {
       final dynamic versionYaml = _metadataValue('version');
       if (versionYaml is YamlMap) {
@@ -73,19 +75,24 @@ class FlutterProjectMetadata {
         return null;
       }
     }
-    if (_versionYaml != null && _versionYaml.containsKey(key) && _versionYaml[key] is String) {
-      return _versionYaml[key] as String;
+    if (_versionYaml != null && _versionYaml!.containsKey(key) && _versionYaml![key] is String) {
+      return _versionYaml![key] as String;
     }
     return null;
   }
 
-  YamlMap _metadataYaml;
+  YamlMap? _metadataYaml;
   dynamic _metadataValue(String key) {
     if (_metadataYaml == null) {
       if (!_metadataFile.existsSync()) {
         return null;
       }
-      final dynamic metadataYaml = loadYaml(_metadataFile.readAsStringSync());
+      dynamic metadataYaml;
+      try {
+        metadataYaml = loadYaml(_metadataFile.readAsStringSync());
+      } on YamlException {
+        // Handled in return below.
+      }
       if (metadataYaml is YamlMap) {
         _metadataYaml = metadataYaml;
       } else {
@@ -94,6 +101,6 @@ class FlutterProjectMetadata {
       }
     }
 
-    return _metadataYaml[key];
+    return _metadataYaml![key];
   }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -382,30 +380,29 @@ void main() {
       canceledPressed = true;
     }
 
-    final ControlsWidgetBuilder builder =
-      (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
-        return Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints.tightFor(height: 48.0),
-            child: Row(
-              children: <Widget>[
-                TextButton(
-                  onPressed: onStepContinue,
-                  child: const Text('Let us continue!'),
+    Widget builder(BuildContext context, ControlsDetails details) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: details.onStepContinue,
+                child: const Text('Let us continue!'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: details.onStepCancel,
+                  child: const Text('Cancel This!'),
                 ),
-                Container(
-                  margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: TextButton(
-                    onPressed: onStepCancel,
-                    child: const Text('Cancel This!'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      };
+        ),
+      );
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -451,6 +448,100 @@ void main() {
     expect(continuePressed, isTrue);
   });
 
+testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
+
+    int currentStep = 0;
+    void setContinue() {
+      currentStep += 1;
+    }
+
+    void setCanceled() {
+      currentStep -= 1;
+    }
+
+    Widget builder(BuildContext context, ControlsDetails details) {
+      // For the purposes of testing, only render something for the active
+      // step.
+      if (!details.isActive)
+        return Container();
+
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: details.onStepContinue,
+                child: Text('Continue to ${details.stepIndex + 1}'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: details.onStepCancel,
+                  child: Text('Return to ${details.stepIndex - 1}'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  currentStep: currentStep,
+                  controlsBuilder: builder,
+                  onStepCancel: () => setState(setCanceled),
+                  onStepContinue: () => setState(setContinue),
+                  steps: const <Step>[
+                    Step(
+                      title: Text('A'),
+                      state: StepState.complete,
+                      content: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                      ),
+                    ),
+                    Step(
+                      title: Text('C'),
+                      content: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Never mind that there is no Step -1 or Step 2 -- actual build method
+    // implementations would make those checks.
+    expect(find.text('Return to -1'), findsNWidgets(1));
+    expect(find.text('Continue to 1'), findsNWidgets(1));
+    expect(find.text('Return to 0'), findsNWidgets(0));
+    expect(find.text('Continue to 2'), findsNWidgets(0));
+
+    await tester.tap(find.text('Continue to 1').first);
+    await tester.pumpAndSettle();
+
+    // Never mind that there is no Step -1 or Step 2 -- actual build method
+    // implementations would make those checks.
+    expect(find.text('Return to -1'), findsNWidgets(0));
+    expect(find.text('Continue to 1'), findsNWidgets(0));
+    expect(find.text('Return to 0'), findsNWidgets(1));
+    expect(find.text('Continue to 2'), findsNWidgets(1));
+  });
+
   testWidgets('Stepper error test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -477,8 +568,8 @@ void main() {
   });
 
   testWidgets('Nested stepper error test', (WidgetTester tester) async {
-    FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };
@@ -518,7 +609,6 @@ void main() {
       FlutterError.onError = oldHandler;
     }
 
-    expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
     final String fullErrorMessage = errorDetails.toString();
@@ -531,7 +621,7 @@ void main() {
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
     expect(errorMessage, startsWith(
       '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
-      'The following assertion was thrown building Stepper('
+      'The following assertion was thrown building Stepper(',
     ));
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
@@ -540,7 +630,7 @@ void main() {
       'Steppers must not be nested.\n'
       'The material specification advises that one should avoid\n'
       'embedding steppers within steppers.\n'
-      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
     ));
   });
 
@@ -627,7 +717,7 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
@@ -653,7 +743,7 @@ void main() {
     );
     await tester.pump();
 
-    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), nullOk: true, scopeOk: true);
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
     disabledNode.requestFocus();
     await tester.pump();
     expect(disabledNode.hasPrimaryFocus, isFalse);
@@ -672,7 +762,7 @@ void main() {
                 steps: const <Step>[
                   Step(
                     title: Text(longText),
-                    content: Text('Text content')
+                    content: Text('Text content'),
                   ),
                 ],
               ),
@@ -699,7 +789,7 @@ void main() {
                   Step(
                     title: Text('Regular title'),
                     subtitle: Text(longText),
-                    content: Text('Text content')
+                    content: Text('Text content'),
                   ),
                 ],
               ),
@@ -734,7 +824,7 @@ void main() {
 
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
 
@@ -748,26 +838,26 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
-    expect(buttonMaterial('CONTINUE').color.value, 0xff2196f3);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0xffffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0xff2196f3);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x8a000000);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x8a000000);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0xb3ffffff);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0xb3ffffff);
     expect(buttonMaterial('CANCEL').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
   });
@@ -792,7 +882,7 @@ void main() {
 
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
 
@@ -802,20 +892,20 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61000000);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61000000);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61000000);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61000000);
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
-    expect(buttonMaterial('CONTINUE').color.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle.color.value, 0x61ffffff);
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61ffffff);
 
-    expect(buttonMaterial('CANCEL').color.value, 0);
-    expect(buttonMaterial('CANCEL').textStyle.color.value, 0x61ffffff);
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61ffffff);
   });
 
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
@@ -846,4 +936,262 @@ void main() {
       expect(listView.physics, physics);
     }
   });
+
+  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/77732
+    Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
+      return MaterialApp(
+        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
+        home: Scaffold(
+          body: Center(
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: <Step>[
+                Step(
+                  title: const Text('step'),
+                  content: const Text('content'),
+                  isActive: isActive,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color? circleFillColor() {
+      final Finder container = find.widgetWithText(AnimatedContainer, '1');
+      return (tester.widget<AnimatedContainer>(container).decoration as BoxDecoration?)?.color;
+    }
+
+    // Light theme
+    final ColorScheme light = ThemeData.light().colorScheme;
+    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.light));
+    expect(circleFillColor(), light.primary);
+    await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), light.onSurface.withOpacity(0.38));
+
+    // Dark theme
+    final ColorScheme dark = ThemeData.dark().colorScheme;
+    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.dark));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), dark.secondary);
+    await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.dark));
+    await tester.pumpAndSettle();
+    expect(circleFillColor(), dark.background);
+  });
+
+  testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+     const double elevation = 4.0;
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               elevation: elevation,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content'),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, elevation);
+   });
+
+   testWidgets('Stepper with default elevation', (WidgetTester tester) async {
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, 2.0);
+   });
+
+  testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
+    const Color untappedColor = Colors.blue;
+    const Color tappedColor = Colors.red;
+    int index = 0;
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            // Must break this out into its own widget purely to be able to call `setState()`
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  onStepTapped: (int i) => setState(() => index = i),
+                  currentStep: index,
+                  type: StepperType.horizontal,
+                  steps: const <Step>[
+                    Step(
+                      title: Text('Step 1'),
+                      content: _TappableColorWidget(
+                        key: Key('tappable-color'),
+                        tappedColor: tappedColor,
+                        untappedColor: untappedColor,
+                      ),
+                    ),
+                    Step(
+                      title: Text('Step 2'),
+                      content: Text('Step 2 Content'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Widget widget = buildFrame();
+    await tester.pumpWidget(widget);
+
+    // Set up a getter to examine the MacGuffin's color
+    Color getColor() => tester.widget<ColoredBox>(
+      find.descendant(of: find.byKey(const Key('tappable-color')), matching: find.byType(ColoredBox)),
+    ).color;
+
+    // We are on step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+    expect(getColor(), untappedColor);
+
+    await tester.tap(find.byKey(const Key('tap-me')));
+    await tester.pumpAndSettle();
+    expect(getColor(), tappedColor);
+
+    // Now flip to step 2
+    await tester.tap(find.text('Step 2'));
+    await tester.pumpAndSettle();
+
+    // Confirm that we did in fact flip to step 2
+    expect(find.text('Step 2 Content'), findsOneWidget);
+
+    // Now go back to step 1
+    await tester.tap(find.text('Step 1'));
+    await tester.pumpAndSettle();
+
+    // Confirm that we flipped back to step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+
+    // The color should still be `tappedColor`
+    expect(getColor(), tappedColor);
+  });
+       testWidgets('Stepper custom margin', (WidgetTester tester) async {
+
+      const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
+        bottom: 20,
+        top: 20,
+      );
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               margin: margin,
+               type: StepperType.vertical,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Stepper material = tester.firstWidget<Stepper>(
+       find.descendant(
+         of: find.byType(Material),
+         matching: find.byType(Stepper),
+       ),
+     );
+
+     expect(material.margin, equals(margin));
+   });
+}
+
+class _TappableColorWidget extends StatefulWidget {
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+
+  final Color tappedColor;
+  final Color untappedColor;
+
+  @override
+  State<StatefulWidget> createState() => _TappableColorWidgetState();
+}
+
+class _TappableColorWidgetState extends State<_TappableColorWidget> {
+
+  Color? color;
+
+  @override
+  void initState() {
+    super.initState();
+    color = widget.untappedColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState((){
+          color = widget.tappedColor;
+        });
+      },
+      child: Container(
+        key: const Key('tap-me'),
+        height: 50,
+        width: 50,
+        color: color,
+      ),
+    );
+  }
 }

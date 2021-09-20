@@ -137,101 +137,12 @@ class PageStorageBucket {
 /// `keepScrollOffset` false to prevent saving.
 ///
 /// {@tool dartpad --template=freeform}
-///
 /// This sample shows how to explicitly use a [PageStorage] to
 /// store the states of its children pages. Each page includes a scrollable
 /// list, whose position is preserved when switching between the tabs thanks to
 /// the help of [PageStorageKey].
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(MyApp());
-/// ```
-///
-/// ```dart
-/// class MyApp extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatefulWidget {
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
-///   final List<Widget> pages = <Widget>[
-///     ColorBoxPage(
-///       key: PageStorageKey('pageOne'),
-///     ),
-///     ColorBoxPage(
-///       key: PageStorageKey('pageTwo'),
-///     )
-///   ];
-///   int currentTab = 0;
-///   final PageStorageBucket _bucket = PageStorageBucket();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text("Persistence Example"),
-///       ),
-///       body: PageStorage(
-///         child: pages[currentTab],
-///         bucket: _bucket,
-///       ),
-///       bottomNavigationBar: BottomNavigationBar(
-///         currentIndex: currentTab,
-///         onTap: (int index) {
-///           setState(() {
-///             currentTab = index;
-///           });
-///         },
-///         items: <BottomNavigationBarItem>[
-///           BottomNavigationBarItem(
-///             icon: Icon(Icons.home),
-///             label: 'page 1',
-///           ),
-///           BottomNavigationBarItem(
-///             icon: Icon(Icons.settings),
-///             label: 'page2',
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-///
-/// class ColorBoxPage extends StatelessWidget {
-///   ColorBoxPage({
-///     Key key,
-///   }) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return ListView.builder(
-///       itemExtent: 250.0,
-///       itemBuilder: (context, index) => Container(
-///         padding: EdgeInsets.all(10.0),
-///         child: Material(
-///           color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
-///           child: Center(
-///             child: Text(index.toString()),
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/page_storage/page_storage.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -250,7 +161,7 @@ class PageStorage extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The page storage bucket to use for this subtree.
@@ -265,6 +176,8 @@ class PageStorage extends StatelessWidget {
   /// ```dart
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
   static PageStorageBucket? of(BuildContext context) {
     final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;

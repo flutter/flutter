@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -16,9 +18,6 @@ import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
 
-/// The input key for an SkSL bundle path.
-const String kBundleSkSLPath = 'BundleSkSLPath';
-
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
@@ -31,9 +30,10 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
   @required TargetPlatform targetPlatform,
+  BuildMode buildMode,
 }) async {
   // Check for an SkSL bundle.
-  final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+  final String shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
   final DevFSContent skslBundle = processSkSLBundle(
     shaderBundlePath,
     engineVersion: environment.engineVersion,
@@ -44,11 +44,18 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
 
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
-  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance.createBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    platform: environment.platform,
+    splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
+  ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     assetDirPath: null,
+    deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+    targetPlatform: targetPlatform,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
@@ -107,6 +114,56 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         resource.release();
       }
   }));
+
+  // Copy deferred components assets only for release or profile builds.
+  // The assets are included in assetBundle.entries as a normal asset when
+  // building as debug.
+  if (environment.defines[kDeferredComponents] == 'true') {
+    await Future.wait<void>(
+      assetBundle.deferredComponentsEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+        final Directory componentOutputDir =
+            environment.projectDir
+                .childDirectory('build')
+                .childDirectory(componentEntries.key)
+                .childDirectory('intermediates')
+                .childDirectory('flutter');
+        await Future.wait<void>(
+          componentEntries.value.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+            final PoolResource resource = await pool.request();
+            try {
+              // This will result in strange looking files, for example files with `/`
+              // on Windows or files that end up getting URI encoded such as `#.ext`
+              // to `%23.ext`. However, we have to keep it this way since the
+              // platform channels in the framework will URI encode these values,
+              // and the native APIs will look for files this way.
+
+              // If deferred components are disabled, then copy assets to regular location.
+              final File file = environment.defines[kDeferredComponents] == 'true'
+                ? environment.fileSystem.file(
+                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.name, 'deferred_assets', 'flutter_assets', entry.key))
+                : environment.fileSystem.file(
+                    environment.fileSystem.path.join(outputDirectory.path, entry.key));
+              outputs.add(file);
+              file.parent.createSync(recursive: true);
+              final DevFSContent content = entry.value;
+              if (content is DevFSFileContent && content.file is File) {
+                inputs.add(content.file as File);
+                if (!await iconTreeShaker.subsetFont(
+                  input: content.file as File,
+                  outputPath: file.path,
+                  relativePath: entry.key,
+                )) {
+                  await (content.file as File).copy(file.path);
+                }
+              } else {
+                await file.writeAsBytes(await entry.value.contentsAsBytes());
+              }
+            } finally {
+              resource.release();
+            }
+        }));
+    }));
+  }
   final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
   if (shaderBundlePath != null) {
     final File skSLBundleFile = environment.fileSystem
@@ -176,7 +233,7 @@ DevFSContent processSkSLBundle(String bundlePath, {
     bundle['platform'] as String);
   if (bundleTargetPlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the curent '
+      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );

@@ -9,10 +9,39 @@ import 'routes.dart';
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
 ///
+/// {@tool snippet --template=stateful_widget}
+///
+/// Whenever the back button is pressed, you will get a callback at [onWillPop],
+/// which returns a [Future]. If the [Future] returns true, the screen is
+/// popped.
+///
+/// ```dart
+/// bool shouldPop = true;
+/// @override
+/// Widget build(BuildContext context) {
+///   return WillPopScope (
+///     onWillPop: () async {
+///       return shouldPop;
+///     },
+///     child: const Text('WillPopScope sample'),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+///
+/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
 ///    which this widget uses to register and unregister [onWillPop].
+///  * [Form], which provides an `onWillPop` callback that enables the form
+///    to veto a `pop` initiated by the app's back button.
+///
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
@@ -27,7 +56,7 @@ class WillPopScope extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Called to veto attempts by the user to dismiss the enclosing [ModalRoute].
@@ -37,7 +66,7 @@ class WillPopScope extends StatefulWidget {
   final WillPopCallback? onWillPop;
 
   @override
-  _WillPopScopeState createState() => _WillPopScopeState();
+  State<WillPopScope> createState() => _WillPopScopeState();
 }
 
 class _WillPopScopeState extends State<WillPopScope> {

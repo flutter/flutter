@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 
 void main() {
   test('LinearGradient scale test', () {
@@ -52,8 +55,8 @@ void main() {
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
-      begin: Alignment(0.0, -1.0),
-      end: Alignment(-1.0, 0.0),
+      begin: Alignment.topCenter,
+      end: Alignment.centerLeft,
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x77777777),
@@ -90,8 +93,8 @@ void main() {
 
     final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
-      begin: Alignment(0.0, -1.0),
-      end: Alignment(-1.0, 0.0),
+      begin: Alignment.topCenter,
+      end: Alignment.centerLeft,
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x55555555),
@@ -187,7 +190,7 @@ void main() {
         ],
       ).toString(),
       equals(
-        'LinearGradient(topLeft, bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
       ),
     );
   });
@@ -291,7 +294,7 @@ void main() {
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       radius: 15.0,
       colors: <Color>[
         Color(0x3B3B3B3B),
@@ -333,7 +336,7 @@ void main() {
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
 
     expect(actual, const RadialGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       radius: 15.0,
       colors: <Color>[
         Color(0x3B3B3B3B),
@@ -453,8 +456,8 @@ void main() {
 
     final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
-      center: Alignment(0.0, -1.0),
-      focal: Alignment(0.0, 0.0),
+      center: Alignment.topCenter,
+      focal: Alignment.center,
       radius: 15.0,
       focalRadius: 7.5,
       colors: <Color>[
@@ -469,7 +472,7 @@ void main() {
 
     final RadialGradient? actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
     expect(actual2, const RadialGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       focal: Alignment(-0.5, 0.0),
       radius: 15.0,
       focalRadius: 5.0,
@@ -506,7 +509,7 @@ void main() {
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       startAngle: math.pi / 4,
       endAngle: math.pi * 3/4,
       colors: <Color>[
@@ -550,7 +553,7 @@ void main() {
 
     final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       startAngle: math.pi / 4,
       endAngle: math.pi * 3/4,
       colors: <Color>[
@@ -675,7 +678,7 @@ void main() {
       ],
     );
     const RadialGradient testGradient2 = RadialGradient(
-      center: Alignment(0.0, -1.0),
+      center: Alignment.topCenter,
       radius: 15.0,
       colors: <Color>[
         Color(0x3B3B3B3B),
@@ -802,7 +805,7 @@ void main() {
           child: RepaintBoundary(
             key: painterKey,
             child: CustomPaint(
-              painter: GradientPainter(shader, rect)
+              painter: GradientPainter(shader, rect),
             ),
           ),
         ),
@@ -817,7 +820,7 @@ void main() {
       for (final Gradient gradient in gradients45) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
 
@@ -825,7 +828,7 @@ void main() {
       for (final Gradient gradient in gradients90) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
   });

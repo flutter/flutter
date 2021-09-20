@@ -2,23 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 class Leaf extends StatefulWidget {
-  const Leaf({ Key key, this.child }) : super(key: key);
+  const Leaf({ required Key key, required this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => _LeafState();
+  State<Leaf> createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
   bool _keepAlive = false;
-  KeepAliveHandle _handle;
+  KeepAliveHandle? _handle;
 
   @override
   void deactivate() {
@@ -32,7 +30,7 @@ class _LeafState extends State<Leaf> {
     if (_keepAlive) {
       if (_handle == null) {
         _handle = KeepAliveHandle();
-        KeepAliveNotification(_handle).dispatch(context);
+        KeepAliveNotification(_handle!).dispatch(context);
       }
     } else {
       _handle?.release();
@@ -44,13 +42,13 @@ class _LeafState extends State<Leaf> {
   Widget build(BuildContext context) {
     if (_keepAlive && _handle == null) {
       _handle = KeepAliveHandle();
-      KeepAliveNotification(_handle).dispatch(context);
+      KeepAliveNotification(_handle!).dispatch(context);
     }
     return widget.child;
   }
 }
 
-List<Widget> generateList(Widget child, { @required bool impliedMode }) {
+List<Widget> generateList(Widget child, { required bool impliedMode }) {
   return List<Widget>.generate(
     100,
     (int index) {
@@ -66,7 +64,7 @@ List<Widget> generateList(Widget child, { @required bool impliedMode }) {
   );
 }
 
-void tests({ @required bool impliedMode }) {
+void tests({ required bool impliedMode }) {
   testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -95,7 +93,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
@@ -105,7 +103,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -125,7 +123,7 @@ void tests({ @required bool impliedMode }) {
           addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: generateList(
-            Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
+            const SizedBox(height: 12.3, child: Placeholder()), // about 50 widgets visible
             impliedMode: impliedMode,
           ),
         ),
@@ -145,7 +143,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
@@ -155,7 +153,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -177,7 +175,7 @@ void tests({ @required bool impliedMode }) {
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
           cacheExtent: 0.0,
           children: generateList(
-            Container(child: const Placeholder()),
+            const Placeholder(),
             impliedMode: impliedMode,
           ),
         ),
@@ -197,7 +195,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(GridView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
@@ -207,7 +205,7 @@ void tests({ @required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(60).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -233,7 +231,7 @@ void main() {
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -241,15 +239,15 @@ void main() {
                 ]),
               ),
             ),
-            AutomaticKeepAlive(
-              child: Container(
-                key: const GlobalObjectKey<_LeafState>(2),
+            const AutomaticKeepAlive(
+              child: SizedBox(
+                key: GlobalObjectKey<_LeafState>(2),
                 height: 400.0,
               ),
             ),
-            AutomaticKeepAlive(
-              child: Container(
-                key: const GlobalObjectKey<_LeafState>(3),
+            const AutomaticKeepAlive(
+              child: SizedBox(
+                key: GlobalObjectKey<_LeafState>(3),
                 height: 400.0,
               ),
             ),
@@ -273,7 +271,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
@@ -282,7 +280,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    const GlobalObjectKey<_LeafState>(1).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(1).currentState!.setKeepAlive(true);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
@@ -290,7 +288,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
@@ -298,7 +296,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    const GlobalObjectKey<_LeafState>(1).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(1).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsNothing);
@@ -317,7 +315,7 @@ void main() {
           cacheExtent: 0.0,
           children: <Widget>[
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -326,7 +324,7 @@ void main() {
               ),
             ),
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
@@ -335,7 +333,7 @@ void main() {
               ),
             ),
             AutomaticKeepAlive(
-              child: Container(
+              child: SizedBox(
                 height: 400.0,
                 child: Stack(children: const <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
@@ -353,7 +351,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsNothing);
-    const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(true);
+    const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
@@ -373,7 +371,7 @@ void main() {
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
@@ -381,7 +379,7 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
@@ -390,7 +388,7 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
@@ -420,7 +418,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
-    const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(false);
+    const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
@@ -437,7 +435,7 @@ void main() {
         cacheExtent: 0.0,
         children: <Widget>[
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
@@ -446,14 +444,13 @@ void main() {
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
-              ]),
+              child: Stack(children: const <Widget>[]),
             ),
           ),
           AutomaticKeepAlive(
-            child: Container(
+            child: SizedBox(
               height: 400.0,
               child: Stack(children: const <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
@@ -488,7 +485,7 @@ void main() {
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
           }
-          return Container(
+          return SizedBox(
             height: 44.0,
             child: Text('FooBar $index'),
           );
@@ -517,12 +514,12 @@ void main() {
         addSemanticIndexes: false,
         itemCount: 250,
         itemBuilder: (BuildContext context, int index) {
-          if (index % 2 == 0) {
+          if (index.isEven) {
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
             );
           }
-          return Container(
+          return SizedBox(
             height: 44.0,
             child: Text('FooBar $index'),
           );
@@ -562,7 +559,7 @@ void main() {
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
-  const _AlwaysKeepAlive({Key key}) : super(key: key);
+  const _AlwaysKeepAlive({ required Key key }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AlwaysKeepAliveState();
@@ -575,9 +572,9 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
+    return const SizedBox(
       height: 48.0,
-      child: const Text('keep me alive'),
+      child: Text('keep me alive'),
     );
   }
 }
@@ -593,14 +590,14 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
+    return const SizedBox(
       height: 48.0,
-      child: const Text('keep me alive'),
+      child: Text('keep me alive'),
     );
   }
 }
 
-abstract class KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
+mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
   bool keptAlive = false;
 
@@ -614,16 +611,16 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager childManager,
+    RenderSliverBoxChildManager? childManager,
   }) : _childManager = childManager;
 
   @protected
-  RenderSliverBoxChildManager get childManager => _childManager;
-  final RenderSliverBoxChildManager _childManager;
+  RenderSliverBoxChildManager? get childManager => _childManager;
+  final RenderSliverBoxChildManager? _childManager;
 
   final List<RenderBox> children = <RenderBox>[];
 
-  void insert(RenderBox child, { RenderBox after }) {
+  void insert(RenderBox child, { RenderBox? after }) {
     children.add(child);
   }
 

@@ -4,13 +4,12 @@
 
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
-Manifest loadTaskManifest([ String yaml ]) {
+Manifest loadTaskManifest([ String? yaml ]) {
   final dynamic manifestYaml = yaml == null
     ? loadYaml(file('manifest.yaml').readAsStringSync())
     : loadYamlNode(yaml);
@@ -30,13 +29,13 @@ class Manifest {
 /// A CI task.
 class ManifestTask {
   ManifestTask._({
-    @required this.name,
-    @required this.description,
-    @required this.stage,
-    @required this.requiredAgentCapabilities,
-    @required this.isFlaky,
-    @required this.timeoutInMinutes,
-    @required this.onLuci,
+    required this.name,
+    required this.description,
+    required this.stage,
+    required this.requiredAgentCapabilities,
+    required this.isFlaky,
+    required this.timeoutInMinutes,
+    required this.onLuci,
   }) {
     final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
@@ -102,12 +101,12 @@ Manifest _validateAndParseManifest(YamlMap manifestYaml) {
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is YamlMap, tasksYaml, 'Value of "tasks"', 'dictionary');
-  final List<dynamic> sortedKeys = (tasksYaml as YamlMap).keys.toList()..sort();
-  return sortedKeys.map<ManifestTask>((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  final List<String> sortedKeys = (tasksYaml as YamlMap).keys.toList().cast<String>()..sort();
+  // ignore: avoid_dynamic_calls
+  return sortedKeys.map<ManifestTask>((String taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
-ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
-  _checkType(taskName is String, taskName, 'Task name', 'string');
+ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
   _checkType(taskYaml is YamlMap, taskYaml, 'Value of task "$taskName"', 'dictionary');
   _checkKeys(taskYaml as YamlMap, 'Value of task "$taskName"', const <String>[
     'description',
@@ -117,42 +116,48 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'timeout_in_minutes',
     'on_luci',
   ]);
-
+  // ignore: avoid_dynamic_calls
   final dynamic isFlaky = taskYaml['flaky'];
   if (isFlaky != null) {
     _checkType(isFlaky is bool, isFlaky, 'flaky', 'boolean');
   }
 
+  // ignore: avoid_dynamic_calls
   final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
   if (timeoutInMinutes != null) {
     _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes', 'integer');
   }
 
-  final List<dynamic> capabilities = _validateAndParseCapabilities(taskName as String, taskYaml['required_agent_capabilities']);
+  // ignore: avoid_dynamic_calls
+  final List<dynamic> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
 
+  // ignore: avoid_dynamic_calls
   final dynamic onLuci = taskYaml['on_luci'];
   if (onLuci != null) {
     _checkType(onLuci is bool, onLuci, 'on_luci', 'boolean');
   }
 
   return ManifestTask._(
-    name: taskName as String,
+    name: taskName,
+    // ignore: avoid_dynamic_calls
     description: taskYaml['description'] as String,
+    // ignore: avoid_dynamic_calls
     stage: taskYaml['stage'] as String,
     requiredAgentCapabilities: capabilities as List<String>,
-    isFlaky: isFlaky as bool ?? false,
+    isFlaky: isFlaky as bool,
     timeoutInMinutes: timeoutInMinutes as int,
-    onLuci: onLuci as bool ?? false,
+    onLuci: onLuci as bool,
   );
 }
 
 List<String> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
   _checkType(capabilitiesYaml is List, capabilitiesYaml, 'required_agent_capabilities', 'list');
-  for (int i = 0; i < (capabilitiesYaml as List<dynamic>).length; i++) {
-    final dynamic capability = capabilitiesYaml[i];
+  final List<dynamic> capabilities = capabilitiesYaml as List<dynamic>;
+  for (int i = 0; i < capabilities.length; i++) {
+    final dynamic capability = capabilities[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
-  return (capabilitiesYaml as List<dynamic>).cast<String>();
+  return capabilitiesYaml.cast<String>();
 }
 
 void _checkType(bool isValid, dynamic value, String variableName, String typeName) {

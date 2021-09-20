@@ -2,25 +2,85 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210704"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
-import '../rendering/mock_canvas.dart';
-import '../rendering/recording_canvas.dart';
+// The test_api package is not for general use... it's literally for our use.
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
+
+import 'mock_canvas.dart';
+import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
-class FakeEditableTextState with TextSelectionDelegate {
+class _FakeEditableTextState with TextSelectionDelegate {
   @override
-  TextEditingValue textEditingValue = const TextEditingValue();
+  TextEditingValue textEditingValue = TextEditingValue.empty;
 
   @override
-  void hideToolbar() { }
+  void hideToolbar([bool hideHandles = true]) { }
+
+  @override
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) { }
 
   @override
   void bringIntoView(TextPosition position) { }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) { }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) {
+    return Future<void>.value(null);
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) { }
+
+  @override
+  void copySelection(SelectionChangedCause cause) { }
+}
+
+@isTest
+void testVariants(
+  String description,
+  AsyncValueGetter<void> callback, {
+  bool? skip,
+  test_package.Timeout? timeout,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
+  dynamic tags,
+}) {
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+  for (final dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () async {
+        Object? memento;
+        try {
+          memento = await variant.setUp(value);
+          await callback();
+        } finally {
+          await variant.tearDown(value, memento);
+        }
+      },
+      skip: skip, // [intended] just part of the API.
+      timeout: timeout,
+      tags: tags,
+    );
+  }
 }
 
 void main() {
@@ -37,11 +97,11 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: FakeEditableTextState(),
+      textSelectionDelegate: _FakeEditableTextState(),
       selection: const TextSelection(baseOffset: 0, extentOffset: 0),
     );
     layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultEditable.paint(context, Offset.zero);
+    context.paintChild(defaultEditable, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
@@ -52,18 +112,18 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         offset: ViewportOffset.zero(),
-        textSelectionDelegate: FakeEditableTextState(),
+        textSelectionDelegate: _FakeEditableTextState(),
         selection: const TextSelection(baseOffset: 0, extentOffset: 0),
         clipBehavior: clip,
       );
       layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      editable.paint(context, Offset.zero);
+      context.paintChild(editable, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
 
   test('editable intrinsics', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
@@ -79,14 +139,14 @@ void main() {
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 51.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
     expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 
     expect(
       editable.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE DETACHED\n'
         ' │ parentData: MISSING\n'
         ' │ constraints: MISSING\n'
         ' │ size: MISSING\n'
@@ -106,7 +166,7 @@ void main() {
         '   ║   size: 10.0\n'
         '   ║   height: 1.0x\n'
         '   ║   "12345"\n'
-        '   ╚═══════════\n'
+        '   ╚═══════════\n',
       ),
     );
   });
@@ -115,7 +175,7 @@ void main() {
   // region if the start position of the text is offset (e.g. during scrolling
   // animation).
   test('correct clipping', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
@@ -132,15 +192,17 @@ void main() {
         offset: 0,
       ),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 10.0)),
     );
   });
 
   test('Can change cursor color, radius, visibility', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
     EditableText.debugDeterministicCursor = true;
 
@@ -167,6 +229,9 @@ void main() {
     layout(editable);
 
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
+
     expect(
       editable,
       // Draw no cursor by default.
@@ -174,7 +239,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -185,7 +250,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -196,7 +261,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -209,13 +274,13 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
 
   test('Can change textAlign', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
 
     final RenderEditable editable = RenderEditable(
       textAlign: TextAlign.start,
@@ -239,7 +304,7 @@ void main() {
   });
 
   test('Cursor with ideographic script', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
     EditableText.debugDeterministicCursor = true;
 
@@ -263,9 +328,8 @@ void main() {
       ),
     );
 
-    layout(editable);
-
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       editable,
       // Draw no cursor by default.
@@ -273,7 +337,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -284,7 +348,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -295,7 +359,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -308,13 +372,16 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
+
+    // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
+    //                sensitive to browser/OS when running in web mode:
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/83129
 
   test('text is painted above selection', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -352,7 +419,7 @@ void main() {
   });
 
   test('cursor can paint above or below the text', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
@@ -391,7 +458,7 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
 
     editable.paintCursorAboveText = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -403,60 +470,10 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
   });
 
-  test('ignore key event from web platform', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset viewportOffset = ViewportOffset.zero();
-    late TextSelection currentSelection;
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
-      textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
-      offset: viewportOffset,
-      // This makes the scroll axis vertical.
-      maxLines: 2,
-      textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
-      },
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: const TextSpan(
-        text: 'test\ntest',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
-      ),
-      selection: const TextSelection.collapsed(
-        offset: 4,
-      ),
-    );
-
-    layout(editable);
-    editable.hasFocus = true;
-
-    expect(
-      editable,
-      paints..paragraph(offset: Offset.zero),
-    );
-
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
-    editable.selection = const TextSelection.collapsed(offset: 0);
-    pumpFrame();
-
-    if(kIsWeb) {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 0);
-    } else {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 1);
-    }
-  });
-
   test('selects correct place with offsets', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = 'test\ntest';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -474,7 +491,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
-        text: 'test\ntest',
+        text: text,
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -499,7 +516,7 @@ void main() {
 
     viewportOffset.correctBy(10);
 
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -538,10 +555,142 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
+  });
+
+  test('selects readonly renderEditable matches native behavior for android', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    const String text = '  test';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      readOnly: true,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 2);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  test('selects renderEditable matches native behavior for iOS case 1', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String text = '  test';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, false);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 6);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  test('selects renderEditable matches native behavior for iOS case 2', () {
+    // Regression test for https://github.com/flutter/flutter/issues/79166.
+    final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String text = '   ';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+
+    // Select the second white space, where the text position = 1.
+    editable.selectWordsInRange(from: const Offset(10, 2), cause:SelectionChangedCause.longPress);
+    pumpFrame();
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 1);
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
 
   test('selects correct place when offsets are flipped', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const String text = 'abc def ghi';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
@@ -555,7 +704,7 @@ void main() {
         currentSelection = selection;
       },
       text: const TextSpan(
-        text: 'abc def ghi',
+        text: text,
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
@@ -570,16 +719,18 @@ void main() {
     pumpFrame();
 
     expect(currentSelection.isCollapsed, isFalse);
-    expect(currentSelection.baseOffset, 1);
-    expect(currentSelection.extentOffset, 3);
+    expect(currentSelection.baseOffset, 3);
+    expect(currentSelection.extentOffset, 1);
   });
 
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
     TextSelection? updatedSelection;
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    const TextSpan text = TextSpan(
-      text: 'abc def ghi',
+    const String text = 'abc def ghi';
+    final TextSelectionDelegate delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    const TextSpan span = TextSpan(
+      text: text,
       style: TextStyle(
         height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
       ),
@@ -596,7 +747,7 @@ void main() {
       },
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
-      text: text,
+      text: span,
     );
 
     layout(editable1);
@@ -617,7 +768,7 @@ void main() {
         selectionChangedCount++;
         updatedSelection = selection;
       },
-      text: text,
+      text: span,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
     );
@@ -635,7 +786,7 @@ void main() {
 
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
@@ -652,7 +803,9 @@ void main() {
       promptRectColor: promptRectColor,
       promptRectRange: const TextRange(start: 0, end: 1),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
+    layout(editable, constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -662,9 +815,9 @@ void main() {
     editable.promptRectColor = null;
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable.promptRectColor, promptRectColor);
+    expect(editable.promptRectColor, null);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       isNot(paints..rect(color: promptRectColor)),
@@ -673,7 +826,7 @@ void main() {
 
   test('editable hasFocus correctly initialized', () {
     // Regression test for https://github.com/flutter/flutter/issues/21640
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
@@ -695,7 +848,7 @@ void main() {
   });
 
   test('has correct maxScrollExtent', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     EditableText.debugDeterministicCursor = true;
 
     final RenderEditable editable = RenderEditable(
@@ -735,208 +888,10 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
-
-  test('arrow keys and delete handle simple text correctly', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset viewportOffset = ViewportOffset.zero();
-    late TextSelection currentSelection;
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
-      textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
-      offset: viewportOffset,
-      textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
-      },
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: const TextSpan(
-        text: 'test',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
-      ),
-      selection: const TextSelection.collapsed(
-        offset: 0,
-      ),
-    );
-
-    layout(editable);
-    editable.hasFocus = true;
-
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
-    editable.selection = const TextSelection.collapsed(offset: 0);
-    pumpFrame();
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 1);
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 0);
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-    expect(delegate.textEditingValue.text, 'est');
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
-
-  test('arrow keys and delete handle surrogate pairs correctly', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset viewportOffset = ViewportOffset.zero();
-    late TextSelection currentSelection;
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
-      textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
-      offset: viewportOffset,
-      textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
-      },
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: const TextSpan(
-        text: '0123😆6789',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
-      ),
-      selection: const TextSelection.collapsed(
-        offset: 0,
-      ),
-    );
-
-    layout(editable);
-    editable.hasFocus = true;
-
-    editable.selection = const TextSelection.collapsed(offset: 4);
-    pumpFrame();
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 6);
-    editable.selection = currentSelection;
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-    expect(delegate.textEditingValue.text, '01236789');
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
-
-  test('arrow keys and delete handle grapheme clusters correctly', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset viewportOffset = ViewportOffset.zero();
-    late TextSelection currentSelection;
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
-      textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
-      offset: viewportOffset,
-      textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
-      },
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: const TextSpan(
-        text: '0123👨‍👩‍👦2345',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
-      ),
-      selection: const TextSelection.collapsed(
-        offset: 0,
-      ),
-    );
-
-    layout(editable);
-    editable.hasFocus = true;
-
-    editable.selection = const TextSelection.collapsed(offset: 4);
-    pumpFrame();
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 12);
-    editable.selection = currentSelection;
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-    expect(delegate.textEditingValue.text, '01232345');
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
-
-  test('arrow keys and delete handle surrogate pairs correctly', () async {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ViewportOffset viewportOffset = ViewportOffset.zero();
-    late TextSelection currentSelection;
-    final RenderEditable editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
-      textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
-      offset: viewportOffset,
-      textSelectionDelegate: delegate,
-      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
-        currentSelection = selection;
-      },
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      text: const TextSpan(
-        text: '\u{1F44D}',  // Thumbs up
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
-      ),
-      selection: const TextSelection.collapsed(
-        offset: 0,
-      ),
-    );
-
-    layout(editable);
-    editable.hasFocus = true;
-
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
-    editable.selection = const TextSelection.collapsed(offset: 0);
-    pumpFrame();
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 2);
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 0);
-
-    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-    expect(delegate.textEditingValue.text, '');
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+  });
 
   test('getEndpointsForSelection handles empty characters', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       // This is a Unicode left-to-right mark character that will not render
       // any glyphs.
@@ -950,60 +905,14 @@ void main() {
     );
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
     final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
-      const TextSelection(baseOffset: 0, extentOffset: 1));
+      const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
     expect(endpoints[0].point.dx, 0);
-  });
-
-  group('nextCharacter', () {
-    test('handles normal strings correctly', () {
-      expect(RenderEditable.nextCharacter(0, '01234567'), 1);
-      expect(RenderEditable.nextCharacter(3, '01234567'), 4);
-      expect(RenderEditable.nextCharacter(7, '01234567'), 8);
-      expect(RenderEditable.nextCharacter(8, '01234567'), 8);
-    });
-
-    test('throws for invalid indices', () {
-      expect(() => RenderEditable.nextCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => RenderEditable.nextCharacter(9, '01234567'), throwsAssertionError);
-    });
-
-    test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(RenderEditable.nextCharacter(3, '0123 5678', false), 5);
-      expect(RenderEditable.nextCharacter(4, '0123 5678', false), 5);
-      expect(RenderEditable.nextCharacter(3, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(2, '0123      0123', false), 3);
-      expect(RenderEditable.nextCharacter(4, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(9, '0123      0123', false), 10);
-      expect(RenderEditable.nextCharacter(10, '0123      0123', false), 11);
-      // If the subsequent characters are all whitespace, it returns the length
-      // of the string.
-      expect(RenderEditable.nextCharacter(5, '0123      ', false), 10);
-    });
-
-    test('handles surrogate pairs correctly', () {
-      expect(RenderEditable.nextCharacter(3, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.nextCharacter(4, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.nextCharacter(5, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.nextCharacter(6, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.nextCharacter(7, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.nextCharacter(8, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.nextCharacter(9, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.nextCharacter(10, '0123👨👩👦0123'), 11);
-    });
-
-    test('handles extended grapheme clusters correctly', () {
-      expect(RenderEditable.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
-      // Even when extent falls within an extended grapheme cluster, it still
-      // identifies the whole grapheme cluster.
-      expect(RenderEditable.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
-      expect(RenderEditable.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
-    });
   });
 
   group('getRectForComposingRange', () {
     const TextSpan emptyTextSpan = TextSpan(text: '\u200e');
-    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       maxLines: null,
       textAlign: TextAlign.start,
@@ -1030,7 +939,8 @@ void main() {
       expect(
         editable.getRectForComposingRange(const TextRange(start: 0, end: 1)),
         // On web this evaluates to a zero-width Rect.
-        anyOf(isNull, (Rect rect) => rect.width == 0));
+        anyOf(isNull, (Rect rect) => rect.width == 0),
+      );
     });
 
     test('more than 1 run on the same line', () {
@@ -1040,7 +950,7 @@ void main() {
         children: <TextSpan>[
           const TextSpan(text: 'A', style: tinyText),
           TextSpan(text: 'A' * 20, style: normalText),
-          const TextSpan(text: 'A', style: tinyText)
+          const TextSpan(text: 'A', style: tinyText),
         ],
       );
       // Give it a width that forces the editable to wrap.
@@ -1054,50 +964,803 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
   });
 
-  group('previousCharacter', () {
-    test('handles normal strings correctly', () {
-      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
-      expect(RenderEditable.previousCharacter(0, '01234567'), 0);
-      expect(RenderEditable.previousCharacter(1, '01234567'), 0);
-      expect(RenderEditable.previousCharacter(5, '01234567'), 4);
-      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+  group('custom painters', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+
+    final _TestRenderEditable editable = _TestRenderEditable(
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    setUp(() { EditableText.debugDeterministicCursor = true; });
+    tearDown(() {
+      EditableText.debugDeterministicCursor = false;
+      _TestRenderEditablePainter.paintHistory.clear();
+      editable.foregroundPainter = null;
+      editable.painter = null;
+      editable.paintCount = 0;
+
+      final AbstractNode? parent = editable.parent;
+      if (parent is RenderConstrainedBox)
+        parent.child = null;
     });
 
-    test('throws for invalid indices', () {
-      expect(() => RenderEditable.previousCharacter(-1, '01234567'), throwsAssertionError);
-      expect(() => RenderEditable.previousCharacter(9, '01234567'), throwsAssertionError);
+    test('paints in the correct order', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      // Foreground painter.
+      editable.foregroundPainter = _TestRenderEditablePainter();
+      pumpFrame(phase: EnginePhase.compositingBits);
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+
+      // Background painter.
+      editable.foregroundPainter = null;
+      editable.painter = _TestRenderEditablePainter();
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph(),
+      );
+
+      editable.foregroundPainter = _TestRenderEditablePainter();
+      editable.painter = _TestRenderEditablePainter();
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
     });
 
-    test('skips spaces in normal strings when includeWhitespace is false', () {
-      expect(RenderEditable.previousCharacter(10, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(11, '0123      0123', false), 10);
-      expect(RenderEditable.previousCharacter(9, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(4, '0123      0123', false), 3);
-      expect(RenderEditable.previousCharacter(3, '0123      0123', false), 2);
-      // If the previous characters are all whitespace, it returns zero.
-      expect(RenderEditable.previousCharacter(3, '          0123', false), 0);
+    test('changing foreground painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.foregroundPainter = currentPainter;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
     });
 
-    test('handles surrogate pairs correctly', () {
-      expect(RenderEditable.previousCharacter(11, '0123👨👩👦0123'), 10);
-      expect(RenderEditable.previousCharacter(10, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.previousCharacter(9, '0123👨👩👦0123'), 8);
-      expect(RenderEditable.previousCharacter(8, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.previousCharacter(7, '0123👨👩👦0123'), 6);
-      expect(RenderEditable.previousCharacter(6, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.previousCharacter(5, '0123👨👩👦0123'), 4);
-      expect(RenderEditable.previousCharacter(4, '0123👨👩👦0123'), 3);
-      expect(RenderEditable.previousCharacter(3, '0123👨👩👦0123'), 2);
+    test('changing background painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.painter = currentPainter;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
     });
 
-    test('handles extended grapheme clusters correctly', () {
-      expect(RenderEditable.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
-      // Even when extent falls within an extended grapheme cluster, it still
-      // identifies the whole grapheme cluster.
-      expect(RenderEditable.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
-      expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
+    test('swapping painters', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter();
+      final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter();
+
+      editable.painter = painter1;
+      editable.foregroundPainter = painter2;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter1, painter2],
+      );
+
+      _TestRenderEditablePainter.paintHistory.clear();
+      editable.painter = painter2;
+      editable.foregroundPainter = painter1;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter2, painter1],
+      );
+    });
+
+    test('reusing the same painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      FlutterErrorDetails? errorDetails;
+      editable.painter = painter;
+      editable.foregroundPainter = painter;
+      pumpFrame(phase: EnginePhase.paint, onErrors: () {
+        errorDetails = renderer.takeFlutterErrorDetails();
+      });
+      expect(errorDetails, isNull);
+
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter, painter],
+      );
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+    });
+    test('does not repaint the render editable when custom painters need repaint', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      painter.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 0);
+      expect(painter.paintCount, 1);
+    });
+
+    test('repaints when its RenderEditable repaints', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      editable.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 1);
+      expect(painter.paintCount, 1);
+    });
+
+    test('correct coordinate space', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      editable.offset = ViewportOffset.fixed(1000);
+
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph(),
+      );
+    });
+
+    group('hit testing', () {
+      test('hits correct TextSpan when not scrolled', () {
+        final TextSelectionDelegate delegate = _FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        // We expect two hit test entries in the path because the RenderEditable
+        // will add itself as well.
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+        // Only testing the RenderEditable entry here once, not anymore below.
+        expect(result.path.last.target, isA<RenderEditable>());
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
+
+      test('hits correct TextSpan when scrolled vertically', () {
+        final TextSelectionDelegate delegate = _FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B\n'),
+              TextSpan(text: 'C'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of null and an offset of 5, the editable will be
+          // scrolled vertically by 5 pixels.
+          maxLines: null,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        BoxHitTestResult result = BoxHitTestResult();
+        editable.hitTest(result, position: Offset.zero);
+        expect(result.path, hasLength(2));
+        HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'A');
+
+        result = BoxHitTestResult();
+        editable.hitTest(result, position: const Offset(15.0, 0.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B\n');
+
+        result = BoxHitTestResult();
+        // When we hit at y=6 and are scrolled by -5 vertically, we expect "C"
+        // to be hit because the font size is 10.
+        editable.hitTest(result, position: const Offset(0.0, 6.0));
+        expect(result.path, hasLength(2));
+        target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'C');
+      });
+
+      test('hits correct TextSpan when scrolled horizontally', () {
+        final TextSelectionDelegate delegate = _FakeEditableTextState();
+        final RenderEditable editable = RenderEditable(
+          text: const TextSpan(
+            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            children: <InlineSpan>[
+              TextSpan(text: 'A'),
+              TextSpan(text: 'B'),
+            ],
+          ),
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          // Given maxLines of 1 and an offset of 5, the editable will be
+          // scrolled by 5 pixels to the left.
+          maxLines: 1,
+          offset: ViewportOffset.fixed(5.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(
+            offset: 0,
+          ),
+        );
+        layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+        // Prepare for painting after layout.
+        pumpFrame(phase: EnginePhase.compositingBits);
+
+        final BoxHitTestResult result = BoxHitTestResult();
+        // At x=6, we should hit "B" as we are scrolled to the left by 6
+        // pixels.
+        editable.hitTest(result, position: const Offset(6.0, 0));
+        expect(result.path, hasLength(2));
+        final HitTestTarget target = result.path.first.target;
+        expect(target, isA<TextSpan>());
+        expect((target as TextSpan).text, 'B');
+      });
     });
   });
+
+  group('WidgetSpan support', () {
+    test('able to render basic WidgetSpan', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: TextSpan(
+          style: const TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            const TextSpan(text: 'test'),
+            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        children: renderBoxes,
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 5))!;
+      expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 54.0, 14.0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('able to render multiple WidgetSpans', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'd'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: TextSpan(
+          style: const TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            const TextSpan(text: 'test'),
+            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        children: renderBoxes,
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 7))!;
+      expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 82.0, 14.0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('able to render WidgetSpans with line wrap', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'd'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            TextSpan(text: 'test'),
+            WidgetSpan(child: Text('b')),
+            WidgetSpan(child: Text('c')),
+            WidgetSpan(child: Text('d')),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        maxLines: 2,
+        minLines: 2,
+        children: renderBoxes,
+      );
+
+      // Force a line wrap
+      layout(editable, constraints: const BoxConstraints(maxWidth: 75));
+      editable.hasFocus = true;
+      pumpFrame();
+
+      Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 6))!;
+      expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
+      expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('able to render WidgetSpans with line wrap alternating spans', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'd'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'e'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            TextSpan(text: 'test'),
+            WidgetSpan(child: Text('b')),
+            WidgetSpan(child: Text('c')),
+            WidgetSpan(child: Text('d')),
+            TextSpan(text: 'HI'),
+            WidgetSpan(child: Text('e')),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        maxLines: 2,
+        minLines: 2,
+        children: renderBoxes,
+      );
+
+      // Force a line wrap
+      layout(editable, constraints: const BoxConstraints(maxWidth: 75));
+      editable.hasFocus = true;
+      pumpFrame();
+
+      Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 6))!;
+      expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 68.0, 14.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7))!;
+      expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8))!; // H
+      expect(composingRect, const Rect.fromLTRB(14.0, 18.0, 24.0, 28.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 8, end: 9))!; // I
+      expect(composingRect, const Rect.fromLTRB(24.0, 18.0, 34.0, 28.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 9, end: 10))!;
+      expect(composingRect, const Rect.fromLTRB(34.0, 14.0, 48.0, 28.0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('able to render WidgetSpans nested spans', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            TextSpan(text: 'test'),
+            WidgetSpan(child: Text('a')),
+            TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('b')),
+                WidgetSpan(child: Text('c')),
+              ],
+            ),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        maxLines: 2,
+        minLines: 2,
+        children: renderBoxes,
+      );
+
+      // Force a line wrap
+      layout(editable, constraints: const BoxConstraints(maxWidth: 75));
+      editable.hasFocus = true;
+      pumpFrame();
+
+      Rect? composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 5));
+      expect(composingRect, const Rect.fromLTRB(40.0, 0.0, 54.0, 14.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 5, end: 6));
+      expect(composingRect, const Rect.fromLTRB(54.0, 0.0, 68.0, 14.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 6, end: 7));
+      expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
+      composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8));
+      expect(composingRect, null);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('can compute IntrinsicWidth for WidgetSpans', () {
+      // Regression test for https://github.com/flutter/flutter/issues/59316
+      const double screenWidth = 1000.0;
+      const double fixedHeight = 1000.0;
+      const String sentence = 'one two';
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+          children: <InlineSpan>[
+            TextSpan(text: 'test'),
+            WidgetSpan(child: Text('a')),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        maxLines: 2,
+        minLines: 2,
+        textScaleFactor: 2.0,
+        children: renderBoxes,
+      );
+      layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+      editable.hasFocus = true;
+      final double maxIntrinsicWidth = editable.computeMaxIntrinsicWidth(fixedHeight);
+      pumpFrame();
+
+      expect(maxIntrinsicWidth, 278);
+    });
+
+    test('hits correct WidgetSpan when not scrolled', () {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+      ];
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+          children: <InlineSpan>[
+            TextSpan(text: 'test'),
+            WidgetSpan(child: Text('a')),
+            TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('b')),
+                WidgetSpan(child: Text('c')),
+              ],
+            ),
+          ],
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(0.0),
+        textSelectionDelegate: delegate,
+        selection: const TextSelection.collapsed(
+          offset: 0,
+        ),
+        children: renderBoxes,
+      );
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      // Prepare for painting after layout.
+      pumpFrame(phase: EnginePhase.compositingBits);
+      BoxHitTestResult result = BoxHitTestResult();
+      editable.hitTest(result, position: Offset.zero);
+      // We expect two hit test entries in the path because the RenderEditable
+      // will add itself as well.
+      expect(result.path, hasLength(2));
+      HitTestTarget target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'test');
+      // Only testing the RenderEditable entry here once, not anymore below.
+      expect(result.path.last.target, isA<RenderEditable>());
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(15.0, 0.0));
+      expect(result.path, hasLength(2));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'test');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(41.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'a');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(55.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'b');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(69.0, 5.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'c');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(5.0, 15.0));
+      expect(result.path, hasLength(0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
+
+  test('does not skip TextPainter.layout because of invalid cache', () {
+    // Regression test for https://github.com/flutter/flutter/issues/84896.
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const BoxConstraints constraints = BoxConstraints(minWidth: 100, maxWidth: 500);
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'A',
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      forceLine: true,
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(offset: 0),
+      cursorColor: const Color(0xFFFFFFFF),
+      showCursor: ValueNotifier<bool>(true),
+    );
+    layout(editable, constraints: constraints);
+
+    final double initialWidth = editable.computeDryLayout(constraints).width;
+    expect(initialWidth, 500);
+
+    // Turn off forceLine. Now the width should be significantly smaller.
+    editable.forceLine = false;
+    expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
+  });
+}
+
+class _TestRenderEditable extends RenderEditable {
+  _TestRenderEditable({
+    required TextDirection textDirection,
+    required ViewportOffset offset,
+    required TextSelectionDelegate textSelectionDelegate,
+    TextSpan? text,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
+    TextSelection? selection,
+  }) : super(
+      textDirection: textDirection,
+      offset: offset,
+      textSelectionDelegate: textSelectionDelegate,
+      text: text,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      selection: selection,
+    );
+
+  int paintCount = 0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    paintCount += 1;
+  }
+}
+
+class _TestRenderEditablePainter extends RenderEditablePainter {
+  bool repaint = true;
+  int paintCount = 0;
+  static final List<_TestRenderEditablePainter> paintHistory = <_TestRenderEditablePainter>[];
+
+  @override
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+    paintCount += 1;
+    canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = const Color(0x12345678));
+    paintHistory.add(this);
+  }
+
+  @override
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) => repaint;
+
+  void markNeedsPaint() {
+    notifyListeners();
+  }
 }

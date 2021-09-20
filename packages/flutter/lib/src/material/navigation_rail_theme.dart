@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'navigation_rail.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 /// Defines default property values for descendant [NavigationRail]
 /// widgets.
@@ -202,13 +201,12 @@ class NavigationRailTheme extends InheritedTheme {
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
     final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
-    return navigationRailTheme?.data ?? Theme.of(context)!.navigationRailTheme;
+    return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final NavigationRailTheme? ancestorTheme = context.findAncestorWidgetOfExactType<NavigationRailTheme>();
-    return identical(this, ancestorTheme) ? child : NavigationRailTheme(data: data, child: child);
+    return NavigationRailTheme(data: data, child: child);
   }
 
   @override

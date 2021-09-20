@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../globals.dart' as globals;
+// @dart = 2.8
+
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {

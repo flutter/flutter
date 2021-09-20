@@ -59,7 +59,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -95,7 +95,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -318,6 +318,7 @@ void main() {
             increasedValue: '60%',
             decreasedValue: '40%',
             textDirection: TextDirection.ltr,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ],
@@ -341,7 +342,14 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      TestSemantics.root(),
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
+          ),
+        ],
+      ),
       ignoreRect: true,
       ignoreTransform: true,
     ));
@@ -365,6 +373,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '50%',
@@ -387,6 +396,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '60%',
@@ -577,7 +587,7 @@ void main() {
       ..rrect()
       ..rrect()
       ..rrect()
-      ..rrect(color: CupertinoColors.systemPurple.color)
+      ..rrect(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -600,7 +610,7 @@ void main() {
           ..rrect()
           ..rrect()
           ..rrect()
-          ..rrect(color: CupertinoColors.activeOrange.color)
+          ..rrect(color: CupertinoColors.activeOrange.color),
     );
   });
 }

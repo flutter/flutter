@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
@@ -83,7 +82,7 @@ void main() {
         child: AnimatedPadding(
           curve: Curves.easeInOutBack,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.only(right: 0.0),
+          padding: EdgeInsets.zero,
           child: SizedBox.expand(key: target),
         ),
       ),

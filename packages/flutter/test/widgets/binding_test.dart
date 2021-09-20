@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class MemoryPressureObserver with WidgetsBindingObserver {
   bool sawMemoryPressure = false;
@@ -21,7 +17,7 @@ class MemoryPressureObserver with WidgetsBindingObserver {
 }
 
 class AppLifecycleStateObserver with WidgetsBindingObserver {
-  AppLifecycleState lifecycleState;
+  late AppLifecycleState lifecycleState;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -30,7 +26,7 @@ class AppLifecycleStateObserver with WidgetsBindingObserver {
 }
 
 class PushRouteObserver with WidgetsBindingObserver {
-  String pushedRoute;
+  late String pushedRoute;
 
   @override
   Future<bool> didPushRoute(String route) async {
@@ -40,7 +36,7 @@ class PushRouteObserver with WidgetsBindingObserver {
 }
 
 class PushRouteInformationObserver with WidgetsBindingObserver {
-  RouteInformation pushedRouteInformation;
+  late RouteInformation pushedRouteInformation;
 
   @override
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
@@ -54,114 +50,128 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
   });
 
+  Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+    final ByteData? message =
+        const StringCodec().encodeMessage(state.toString());
+    await ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+  }
+
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
-    WidgetsBinding.instance.addObserver(observer);
-    final ByteData message = const JSONMessageCodec().encodeMessage(
-      <String, dynamic>{'type': 'memoryPressure'});
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    WidgetsBinding.instance!.addObserver(observer);
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
-    WidgetsBinding.instance.removeObserver(observer);
+    WidgetsBinding.instance!.removeObserver(observer);
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
-    WidgetsBinding.instance.addObserver(observer);
+    WidgetsBinding.instance!.addObserver(observer);
 
-    ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.paused);
     expect(observer.lifecycleState, AppLifecycleState.paused);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.resumed);
     expect(observer.lifecycleState, AppLifecycleState.resumed);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.inactive);
     expect(observer.lifecycleState, AppLifecycleState.inactive);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.detached);
     expect(observer.lifecycleState, AppLifecycleState.detached);
+
+    setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
-    WidgetsBinding.instance.addObserver(observer);
+    WidgetsBinding.instance!.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRoute', testRouteName));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
-    WidgetsBinding.instance.removeObserver(observer);
+    WidgetsBinding.instance!.removeObserver(observer);
   });
 
   testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
-    WidgetsBinding.instance.addObserver(observer);
+    WidgetsBinding.instance!.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
-      'restorationData': <dynamic, dynamic>{'test': 'config'}
+      'restorationData': <dynamic, dynamic>{'test': 'config'},
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRouteInformation', testRouteInformation));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
+    await ServicesBinding.instance!.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRoute, 'testRouteName');
-    WidgetsBinding.instance.removeObserver(observer);
+    WidgetsBinding.instance!.removeObserver(observer);
   });
 
   testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
-    WidgetsBinding.instance.addObserver(observer);
+    WidgetsBinding.instance!.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
     };
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('pushRouteInformation', testRouteInformation));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
-    WidgetsBinding.instance.removeObserver(observer);
+    WidgetsBinding.instance!.removeObserver(observer);
+  });
+
+  testWidgets('didPushRouteInformation callback with null state', (WidgetTester tester) async {
+    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    WidgetsBinding.instance!.addObserver(observer);
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': null,
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    expect(observer.pushedRouteInformation.location, 'testRouteName');
+    expect(observer.pushedRouteInformation.state, null);
+    WidgetsBinding.instance!.removeObserver(observer);
   });
 
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
-    ByteData message;
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.paused);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.resumed);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.inactive);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.detached);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.inactive);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.paused);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     tester.binding.scheduleFrame();
@@ -173,7 +183,9 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     int frameCount = 0;
-    tester.binding.addPostFrameCallback((Duration duration) { frameCount += 1; });
+    tester.binding.addPostFrameCallback((Duration duration) {
+      frameCount += 1;
+    });
     expect(tester.binding.hasScheduledFrame, isFalse);
     await tester.pump(const Duration(milliseconds: 1));
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -184,14 +196,13 @@ void main() {
     expect(frameCount, 1);
 
     // Get the tester back to a resumed state for subsequent tests.
-    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.resumed);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
-    FlutterError error;
+    late FlutterError error;
     try {
       tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
     } on FlutterError catch (e) {
@@ -205,7 +216,7 @@ void main() {
       equalsIgnoringHashCodes(
         'If this is the initial registration of the callback, or if the\n'
         'callback is asynchronous, then do not use the "rescheduling"\n'
-        'argument.\n'
+        'argument.\n',
       ),
     );
     expect(
@@ -218,17 +229,15 @@ void main() {
       '   and only then if the callback itself is entirely synchronous.\n'
       '   If this is the initial registration of the callback, or if the\n'
       '   callback is asynchronous, then do not use the "rescheduling"\n'
-      '   argument.\n'
+      '   argument.\n',
     );
   });
 
   testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
-    String filteredStack;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
     FlutterError.onError = (FlutterErrorDetails details) {
-      expect(details.exception, isAssertionError);
-      expect(filteredStack, isNull);
-      filteredStack = details.toString();
+      errorDetails = details;
     };
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -238,7 +247,10 @@ void main() {
             return Opacity(
               opacity: .5,
               child: Builder(
-                builder: (BuildContext context) => Text(null),
+                builder: (BuildContext context) {
+                  assert(false);
+                  return const Text('');
+                },
               ),
             );
           },
@@ -246,13 +258,14 @@ void main() {
       ),
     ));
     FlutterError.onError = oldHandler;
+    expect(errorDetails.exception, isAssertionError);
     const String toMatch = '...     Normal element mounting (';
-    expect(toMatch.allMatches(filteredStack)?.length, 1);
-  });
+    expect(toMatch.allMatches(errorDetails.toString()).length, 1);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87875
 }
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({this.child, Key key}) : super(key: key);
+  const TestStatefulWidget({required this.child, Key? key}) : super(key: key);
 
   final Widget child;
 

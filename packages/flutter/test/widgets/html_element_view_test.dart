@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('chrome')
-
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
@@ -31,6 +28,40 @@ void main() {
           ),
         ),
       );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeHtmlPlatformView>[
+          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+
+    testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      bool hasPlatformViewCreated = false;
+      void onPlatformViewCreatedCallBack(int id) {
+        hasPlatformViewCreated = true;
+      }
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(
+              viewType: 'webview',
+              onPlatformViewCreated: onPlatformViewCreatedCallBack,
+            ),
+          ),
+        ),
+      );
+
+      // Check the onPlatformViewCreatedCallBack has been called.
+      expect(hasPlatformViewCreated, true);
 
       expect(
         viewsController.views,
@@ -155,12 +186,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(viewType: 'webview', key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(viewType: 'webview', key: key),
           ),
         ),
       );

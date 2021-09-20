@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // web has different stack traces
+@TestOn('!chrome')
 
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // TODO(ianh): These tests and the filtering mechanism should be revisited to

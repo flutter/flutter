@@ -43,7 +43,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  late TextDirection _textDirection;
 
   /// Creates an object that provides localized resource values for the
   /// lowest levels of the Flutter framework.

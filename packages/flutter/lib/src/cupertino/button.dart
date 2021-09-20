@@ -40,9 +40,11 @@ class CupertinoButton extends StatefulWidget {
     this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert(alignment != null),
        _filled = false,
        super(key: key);
 
@@ -60,9 +62,11 @@ class CupertinoButton extends StatefulWidget {
     this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert(alignment != null),
        color = null,
        _filled = true,
        super(key: key);
@@ -116,6 +120,16 @@ class CupertinoButton extends StatefulWidget {
   /// Defaults to round corners of 8 logical pixels.
   final BorderRadius? borderRadius;
 
+  /// The alignment of the button's [child].
+  ///
+  /// Typically buttons are sized to be just big enough to contain the child and its
+  /// [padding]. If the button's size is constrained to a fixed size, for example by
+  /// enclosing it with a [SizedBox], this property defines how the child is aligned
+  /// within the available space.
+  ///
+  /// Always defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
+
   final bool _filled;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
@@ -123,7 +137,7 @@ class CupertinoButton extends StatefulWidget {
   bool get enabled => onPressed != null;
 
   @override
-  _CupertinoButtonState createState() => _CupertinoButtonState();
+  State<CupertinoButton> createState() => _CupertinoButtonState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -134,8 +148,8 @@ class CupertinoButton extends StatefulWidget {
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
-  static const Duration kFadeOutDuration = Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = Duration(milliseconds: 100);
+  static const Duration kFadeOutDuration = Duration(milliseconds: 120);
+  static const Duration kFadeInDuration = Duration(milliseconds: 180);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
   late AnimationController _animationController;
@@ -199,8 +213,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       return;
     final bool wasHeldDown = _buttonHeldDown;
     final TickerFuture ticker = _buttonHeldDown
-        ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
-        : _animationController.animateTo(0.0, duration: kFadeInDuration);
+        ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
+        : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
@@ -214,9 +228,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color primaryColor = themeData.primaryColor;
     final Color? backgroundColor = widget.color == null
       ? (widget._filled ? primaryColor : null)
-      : CupertinoDynamicColor.resolve(widget.color, context);
+      : CupertinoDynamicColor.maybeResolve(widget.color, context);
 
-    final Color? foregroundColor = backgroundColor != null
+    final Color foregroundColor = backgroundColor != null
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
@@ -252,7 +266,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 padding: widget.padding ?? (backgroundColor != null
                   ? _kBackgroundButtonPadding
                   : _kButtonPadding),
-                child: Center(
+                child: Align(
+                  alignment: widget.alignment,
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: DefaultTextStyle(

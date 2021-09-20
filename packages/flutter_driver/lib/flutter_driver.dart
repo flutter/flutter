@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// Provides API to test Flutter applications that run on real
 /// devices and emulators.
 ///
@@ -13,6 +11,7 @@
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
 library flutter_driver;
 
+export 'src/common/deserialization_factory.dart';
 export 'src/common/diagnostics_tree.dart';
 export 'src/common/enum_util.dart';
 export 'src/common/error.dart';

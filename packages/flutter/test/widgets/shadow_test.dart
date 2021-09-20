@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   tearDown(() {
@@ -79,7 +81,7 @@ void main() {
             color: Colors.yellow[200],
             child: PhysicalModel(
               elevation: 9.0,
-              color: Colors.blue[900],
+              color: Colors.blue[900]!,
               child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
@@ -111,9 +113,12 @@ void main() {
             padding: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
             child: PhysicalShape(
-              color: Colors.green[900],
-              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0))),
+              color: Colors.green[900]!,
+              clipper: ShapeBorderClipper(
+                shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ),
               elevation: elevation,
               child: const SizedBox(
                 height: 100.0,

@@ -5,12 +5,10 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:flutter/widgets.dart';
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'binding.dart';
 import 'finders.dart';
@@ -49,27 +47,49 @@ class MatchesGoldenFile extends AsyncMatcher {
 
   @override
   Future<String?> matchAsync(dynamic item) async {
-    Future<ui.Image> imageFuture;
-    if (item is Future<ui.Image>) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+
+    Uint8List? buffer;
+    if (item is Future<List<int>>) {
+      buffer = Uint8List.fromList(await item);
+    } else if (item is List<int>) {
+      buffer = Uint8List.fromList(item);
+    }
+    if (buffer != null) {
+      if (autoUpdateGoldenFiles) {
+        await goldenFileComparator.update(testNameUri, buffer);
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(buffer, testNameUri);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
+      }
+    }
+    Future<ui.Image?> imageFuture;
+    if (item is Future<ui.Image?>) {
       imageFuture = item;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
-    } else {
-      final Finder finder = item as Finder;
-      final Iterable<Element> elements = finder.evaluate();
+    } else if (item is Finder) {
+      final Iterable<Element> elements = item.evaluate();
       if (elements.isEmpty) {
         return 'could not be rendered because no widget was found';
       } else if (elements.length > 1) {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+    } else {
+      throw 'must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>';
     }
-
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
     return binding.runAsync<String?>(() async {
-      final ui.Image image = await imageFuture;
+      final ui.Image? image = await imageFuture;
+      if (image == null) {
+        throw 'Future<Image> completed to null';
+      }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
         return 'could not encode screenshot.';

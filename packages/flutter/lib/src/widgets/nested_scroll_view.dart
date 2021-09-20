@@ -6,16 +6,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'basic.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_activity.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -23,11 +21,7 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
 import 'sliver_fill.dart';
-import 'ticker_provider.dart';
 import 'viewport.dart';
-
-// Examples can assume:
-// List<String> _tabs;
 
 /// Signature used by [NestedScrollView] for building its header.
 ///
@@ -61,8 +55,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
-///
+/// {@tool sample --template=stateless_widget_material}
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
 /// [SliverOverlapAbsorber]/[SliverOverlapInjector] pair to make the inner lists
@@ -71,111 +64,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// [PageStorageKey]s are used to remember the scroll position of each tab's
 /// list.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
-///   return DefaultTabController(
-///     length: _tabs.length, // This is the number of tabs.
-///     child: NestedScrollView(
-///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///         // These are the slivers that show up in the "outer" scroll view.
-///         return <Widget>[
-///           SliverOverlapAbsorber(
-///             // This widget takes the overlapping behavior of the SliverAppBar,
-///             // and redirects it to the SliverOverlapInjector below. If it is
-///             // missing, then it is possible for the nested "inner" scroll view
-///             // below to end up under the SliverAppBar even when the inner
-///             // scroll view thinks it has not been scrolled.
-///             // This is not necessary if the "headerSliverBuilder" only builds
-///             // widgets that do not overlap the next sliver.
-///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///             sliver: SliverAppBar(
-///               title: const Text('Books'), // This is the title in the app bar.
-///               pinned: true,
-///               expandedHeight: 150.0,
-///               // The "forceElevated" property causes the SliverAppBar to show
-///               // a shadow. The "innerBoxIsScrolled" parameter is true when the
-///               // inner scroll view is scrolled beyond its "zero" point, i.e.
-///               // when it appears to be scrolled below the SliverAppBar.
-///               // Without this, there are cases where the shadow would appear
-///               // or not appear inappropriately, because the SliverAppBar is
-///               // not actually aware of the precise position of the inner
-///               // scroll views.
-///               forceElevated: innerBoxIsScrolled,
-///               bottom: TabBar(
-///                 // These are the widgets to put in each tab in the tab bar.
-///                 tabs: _tabs.map((String name) => Tab(text: name)).toList(),
-///               ),
-///             ),
-///           ),
-///         ];
-///       },
-///       body: TabBarView(
-///         // These are the contents of the tab views, below the tabs.
-///         children: _tabs.map((String name) {
-///           return SafeArea(
-///             top: false,
-///             bottom: false,
-///             child: Builder(
-///               // This Builder is needed to provide a BuildContext that is
-///               // "inside" the NestedScrollView, so that
-///               // sliverOverlapAbsorberHandleFor() can find the
-///               // NestedScrollView.
-///               builder: (BuildContext context) {
-///                 return CustomScrollView(
-///                   // The "controller" and "primary" members should be left
-///                   // unset, so that the NestedScrollView can control this
-///                   // inner scroll view.
-///                   // If the "controller" property is set, then this scroll
-///                   // view will not be associated with the NestedScrollView.
-///                   // The PageStorageKey should be unique to this ScrollView;
-///                   // it allows the list to remember its scroll position when
-///                   // the tab view is not on the screen.
-///                   key: PageStorageKey<String>(name),
-///                   slivers: <Widget>[
-///                     SliverOverlapInjector(
-///                       // This is the flip side of the SliverOverlapAbsorber
-///                       // above.
-///                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///                     ),
-///                     SliverPadding(
-///                       padding: const EdgeInsets.all(8.0),
-///                       // In this example, the inner scroll view has
-///                       // fixed-height list items, hence the use of
-///                       // SliverFixedExtentList. However, one could use any
-///                       // sliver widget here, e.g. SliverList or SliverGrid.
-///                       sliver: SliverFixedExtentList(
-///                         // The items in this example are fixed to 48 pixels
-///                         // high. This matches the Material Design spec for
-///                         // ListTile widgets.
-///                         itemExtent: 48.0,
-///                         delegate: SliverChildBuilderDelegate(
-///                           (BuildContext context, int index) {
-///                             // This builder is called for each child.
-///                             // In this example, we just number each list item.
-///                             return ListTile(
-///                               title: Text('Item $index'),
-///                             );
-///                           },
-///                           // The childCount of the SliverChildBuilderDelegate
-///                           // specifies how many children this inner list
-///                           // has. In this example, each tab has a list of
-///                           // exactly 30 items, but this is arbitrary.
-///                           childCount: 30,
-///                         ),
-///                       ),
-///                     ),
-///                   ],
-///                 );
-///               },
-///             ),
-///           );
-///         }).toList(),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.0.dart **
 /// {@end-tool}
 ///
 /// ## [SliverAppBar]s with [NestedScrollView]s
@@ -222,43 +111,12 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// while the primary portion of the app bar remains pinned.
 ///
 /// {@tool sample --template=stateless_widget_material}
-///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
 /// floating behavior is coordinated between the outer and inner [Scrollable]s,
 /// so it behaves as it would in a single scrollable.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: NestedScrollView(
-///       // Setting floatHeaderSlivers to true is required in order to float
-///       // the outer slivers over the inner scrollable.
-///       floatHeaderSlivers: true,
-///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///         return <Widget>[
-///           SliverAppBar(
-///             title: const Text('Floating Nested SliverAppBar'),
-///             floating: true,
-///             expandedHeight: 200.0,
-///             forceElevated: innerBoxIsScrolled,
-///           ),
-///         ];
-///       },
-///       body: ListView.builder(
-///         padding: const EdgeInsets.all(8),
-///         itemCount: 30,
-///         itemBuilder: (BuildContext context, int index) {
-///           return Container(
-///             height: 50,
-///             child: Center(child: Text('Item $index')),
-///           );
-///         }
-///       )
-///     )
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.1.dart **
 /// {@end-tool}
 ///
 /// ### Snapping [SliverAppBar]s
@@ -283,7 +141,6 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// even when the inner scroll view thinks it has not been scrolled.
 ///
 /// {@tool sample --template=stateless_widget_material}
-///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
 /// e.g [NestedScrollView.floatHeaderSlivers], the [SliverAppBar] will animate
@@ -291,49 +148,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// [SliverOverlapInjector] maintain the proper alignment between the two
 /// separate scroll views.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: NestedScrollView(
-///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///         return <Widget>[
-///           SliverOverlapAbsorber(
-///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///             sliver: SliverAppBar(
-///               title: const Text('Snapping Nested SliverAppBar'),
-///               floating: true,
-///               snap: true,
-///               expandedHeight: 200.0,
-///               forceElevated: innerBoxIsScrolled,
-///             ),
-///           )
-///         ];
-///       },
-///       body: Builder(
-///         builder: (BuildContext context) {
-///           return CustomScrollView(
-///             // The "controller" and "primary" members should be left
-///             // unset, so that the NestedScrollView can control this
-///             // inner scroll view.
-///             // If the "controller" property is set, then this scroll
-///             // view will not be associated with the NestedScrollView.
-///             slivers: <Widget>[
-///               SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-///               SliverFixedExtentList(
-///                 itemExtent: 48.0,
-///                 delegate: SliverChildBuilderDelegate(
-///                     (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-///                   childCount: 30,
-///                 ),
-///               ),
-///             ],
-///           );
-///         }
-///       )
-///     )
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.2.dart **
 /// {@end-tool}
 ///
 /// ### Snapping and Floating [SliverAppBar]s
@@ -345,7 +160,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Stretching [SliverAppBar]s
 ///
-// TODO(Piinks): Support stretching, https://github.com/flutter/flutter/issues/54059
+// See https://github.com/flutter/flutter/issues/54059
 /// Currently, [NestedScrollView] does not support stretching the outer
 /// scrollable, e.g. when using [SliverAppBar.stretch].
 ///
@@ -374,6 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.floatHeaderSlivers = false,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.scrollBehavior,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -411,6 +227,10 @@ class NestedScrollView extends StatefulWidget {
   /// user stops dragging the scroll view (providing a custom implementation of
   /// [ScrollPhysics.createBallisticSimulation] allows this particular aspect of
   /// the physics to be overridden).
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   ///
   /// Defaults to matching platform conventions.
   ///
@@ -450,13 +270,27 @@ class NestedScrollView extends StatefulWidget {
   /// is expected to float. This cannot be null.
   final bool floatHeaderSlivers;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
+
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar]. This is because the
+  /// NestedScrollView cannot assume the configuration of the outer and inner
+  /// [Scrollable] widgets, particularly whether to treat them as one scrollable,
+  /// or separate and desirous of unique behaviors.
+  final ScrollBehavior? scrollBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -506,31 +340,7 @@ class NestedScrollView extends StatefulWidget {
 /// Using the following setup, you can access the inner scroll controller
 /// using `globalKey.currentState.innerController`.
 ///
-/// ```dart preamble
-/// final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-/// ```
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return NestedScrollView(
-///     key: globalKey,
-///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
-///         SliverAppBar(
-///           title: Text('NestedScrollViewState Demo!'),
-///         ),
-///       ];
-///     },
-///     body: CustomScrollView(
-///       // Body slivers go here!
-///     ),
-///   );
-/// }
-///
-/// ScrollController get innerController {
-///   return globalKey.currentState.innerController;
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view_state.0.dart **
 /// {@end-tool}
 class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
@@ -618,6 +428,10 @@ class NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollPhysics _scrollPhysics = widget.physics?.applyTo(const ClampingScrollPhysics())
+      ?? widget.scrollBehavior?.getScrollPhysics(context).applyTo(const ClampingScrollPhysics())
+      ?? const ClampingScrollPhysics();
+
     return _InheritedNestedScrollView(
       state: this,
       child: Builder(
@@ -627,9 +441,8 @@ class NestedScrollViewState extends State<NestedScrollView> {
             dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
-            physics: widget.physics != null
-              ? widget.physics!.applyTo(const ClampingScrollPhysics())
-              : const ClampingScrollPhysics(),
+            physics: _scrollPhysics,
+            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
             controller: _coordinator!._outerController,
             slivers: widget._buildSlivers(
               context,
@@ -651,6 +464,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required Axis scrollDirection,
     required bool reverse,
     required ScrollPhysics physics,
+    required ScrollBehavior scrollBehavior,
     required ScrollController controller,
     required List<Widget> slivers,
     required this.handle,
@@ -661,6 +475,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          scrollDirection: scrollDirection,
          reverse: reverse,
          physics: physics,
+         scrollBehavior: scrollBehavior,
          controller: controller,
          slivers: slivers,
          dragStartBehavior: dragStartBehavior,
@@ -800,8 +615,13 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (final _NestedScrollPosition position in _innerPositions) {
-      assert(position.minScrollExtent != null && position.hasPixels);
-      if (position.pixels > position.minScrollExtent) {
+      if (!position.hasContentDimensions || !position.hasPixels) {
+        // It's possible that NestedScrollView built twice before layout phase
+        // in the same frame. This can happen when the FocusManager schedules a microTask
+        // that marks NestedScrollView dirty during the warm up frame.
+        // https://github.com/flutter/flutter/pull/75308
+        continue;
+      } else if (position.pixels > position.minScrollExtent) {
         return true;
       }
     }
@@ -1070,6 +890,70 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
+  void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
+    goIdle();
+    updateUserScrollDirection(
+        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+    );
+
+    // Set the isScrollingNotifier. Even if only one position actually receives
+    // the delta, the NestedScrollView's intention is to treat multiple
+    // ScrollPositions as one.
+    _outerPosition!.isScrollingNotifier.value = true;
+    for (final _NestedScrollPosition position in _innerPositions)
+      position.isScrollingNotifier.value = true;
+
+    if (_innerPositions.isEmpty) {
+      // Does not enter overscroll.
+      _outerPosition!.applyClampedPointerSignalUpdate(delta);
+    } else if (delta > 0.0) {
+      // Dragging "up" - delta is positive
+      // Prioritize getting rid of any inner overscroll, and then the outer
+      // view, so that the app bar will scroll out of the way asap.
+      double outerDelta = delta;
+      for (final _NestedScrollPosition position in _innerPositions) {
+        if (position.pixels < 0.0) { // This inner position is in overscroll.
+          final double potentialOuterDelta = position.applyClampedPointerSignalUpdate(delta);
+          // In case there are multiple positions in varying states of
+          // overscroll, the first to 'reach' the outer view above takes
+          // precedence.
+          outerDelta = math.max(outerDelta, potentialOuterDelta);
+        }
+      }
+      if (outerDelta != 0.0) {
+        final double innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(
+            outerDelta,
+        );
+        if (innerDelta != 0.0) {
+          for (final _NestedScrollPosition position in _innerPositions)
+            position.applyClampedPointerSignalUpdate(innerDelta);
+        }
+      }
+    } else {
+      // Dragging "down" - delta is negative
+      double innerDelta = delta;
+      // Apply delta to the outer header first if it is configured to float.
+      if (_floatHeaderSlivers)
+        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
+
+      if (innerDelta != 0.0) {
+        // Apply the innerDelta, if we have not floated in the outer scrollable,
+        // any leftover delta after this will be passed on to the outer
+        // scrollable by the outerDelta.
+        double outerDelta = 0.0; // it will go negative if it changes
+        for (final _NestedScrollPosition position in _innerPositions) {
+          final double overscroll = position.applyClampedPointerSignalUpdate(innerDelta);
+          outerDelta = math.min(outerDelta, overscroll);
+        }
+        if (outerDelta != 0.0)
+          _outerPosition!.applyClampedPointerSignalUpdate(outerDelta);
+      }
+    }
+    goBallistic(0.0);
+  }
+
   @override
   double setPixels(double newPixels) {
     assert(false);
@@ -1110,7 +994,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(
-      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+      delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
     );
     assert(delta != 0.0);
     if (_innerPositions.isEmpty) {
@@ -1131,7 +1015,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
       if (outerDelta != 0.0) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
-          outerDelta
+          outerDelta,
         );
         if (innerDelta != 0.0) {
           for (final _NestedScrollPosition position in _innerPositions)
@@ -1161,10 +1045,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta -= _outerPosition!.applyClampedDragUpdate(outerDelta);
 
         // Now deal with any overscroll
-        // TODO(Piinks): Configure which scrollable receives overscroll to
-        // support stretching app bars. createOuterBallisticScrollActivity will
-        // need to be updated as it currently assumes the outer position will
-        // never overscroll, https://github.com/flutter/flutter/issues/54059
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0)
@@ -1181,7 +1061,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context)
+      _parent ?? PrimaryScrollController.of(_state.context),
     );
   }
 
@@ -1235,6 +1115,7 @@ class _NestedScrollController extends ScrollController {
   @override
   void detach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
+    (position as _NestedScrollPosition).setParent(null);
     position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
@@ -1249,7 +1130,7 @@ class _NestedScrollController extends ScrollController {
     SchedulerBinding.instance!.addPostFrameCallback(
       (Duration timeStamp) {
         coordinator.updateShadow();
-      }
+      },
     );
   }
 
@@ -1341,7 +1222,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0
       ? double.infinity
-      : math.max(maxScrollExtent, pixels);
+      // If pixels < 0.0, then we are currently in overscroll. The max should be
+      // 0.0, representing the end of the overscrolled portion.
+      : pixels < 0.0 ? 0.0 : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;
@@ -1380,6 +1263,32 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       return overscroll;
     }
     return 0.0;
+  }
+
+
+  // Returns the amount of delta that was not used.
+  //
+  // Negative delta represents a forward ScrollDirection, while the positive
+  // would be a reverse ScrollDirection.
+  //
+  // The method doesn't take into account the effects of [ScrollPhysics].
+  double applyClampedPointerSignalUpdate(double delta) {
+    assert(delta != 0.0);
+
+    final double min = delta > 0.0
+        ? -double.infinity
+        : math.min(minScrollExtent, pixels);
+    // The logic for max is equivalent but on the other side.
+    final double max = delta < 0.0
+        ? double.infinity
+        : math.max(maxScrollExtent, pixels);
+    final double newPixels = (pixels + delta).clamp(min, max);
+    final double clampedDelta = newPixels - pixels;
+    if (clampedDelta == 0.0)
+      return delta;
+    forcePixels(newPixels);
+    didUpdateScrollPositionBy(clampedDelta);
+    return delta - clampedDelta;
   }
 
   @override
@@ -1472,6 +1381,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
+  void pointerScroll(double delta) {
+    return coordinator.pointerScroll(delta);
+  }
+
+
+  @override
   void jumpToWithoutSettling(double value) {
     assert(false);
   }
@@ -1504,12 +1419,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     return coordinator.drag(details, dragCancelCallback);
-  }
-
-  @override
-  void dispose() {
-    _parent?.detach(this);
-    super.dispose();
   }
 }
 
@@ -1570,14 +1479,14 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   @override
   void resetActivity() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 
   @override
   void applyNewDimensions() {
     delegate.beginActivity(
-      coordinator.createOuterBallisticScrollActivity(velocity)
+      coordinator.createOuterBallisticScrollActivity(velocity),
     );
   }
 
@@ -1809,7 +1718,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
     );
     if (child == null) {
-      geometry = const SliverGeometry();
+      geometry = SliverGeometry.zero;
       return;
     }
     child!.layout(constraints, parentUsesSize: true);

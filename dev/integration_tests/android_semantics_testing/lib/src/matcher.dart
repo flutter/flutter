@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:test/test.dart' hide isInstanceOf;
+
 import 'common.dart';
 import 'constants.dart';
-import 'flutter_test_alternative.dart';
 
 /// Matches an [AndroidSemanticsNode].
 ///

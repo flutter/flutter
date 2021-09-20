@@ -8,27 +8,31 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'keys.dart' as keys;
 
 void main() {
-  enableFlutterDriverExtension(handler: (String message) async {
+  enableFlutterDriverExtension(handler: (String? message) async {
     // TODO(cbernaschina): remove when test flakiness is resolved
     return 'keyboard_resize';
   });
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Text Editing',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -56,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key(keys.kUnfocusButton),
-        onPressed: () { textField.focusNode.unfocus(); },
+        onPressed: () { textField.focusNode!.unfocus(); },
         tooltip: 'Unfocus',
         child: const Icon(Icons.done),
       ),

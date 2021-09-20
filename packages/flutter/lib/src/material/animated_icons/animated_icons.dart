@@ -10,7 +10,7 @@ part of material_animated_icons;
 // generic vector graphics support in Flutter.
 
 // Examples can assume:
-// AnimationController controller;
+// late AnimationController controller;
 
 /// Shows an animated icon at a given animation [progress].
 ///
@@ -30,7 +30,6 @@ part of material_animated_icons;
 /// {@end-tool}
 ///
 class AnimatedIcon extends StatelessWidget {
-
   /// Creates an AnimatedIcon.
   ///
   /// The [progress] and [icon] arguments must not be null.
@@ -100,7 +99,7 @@ class AnimatedIcon extends StatelessWidget {
   /// horizontally (e.g back arrow will point right).
   final TextDirection? textDirection;
 
-  static final _UiPathFactory _pathFactory = () => ui.Path();
+  static ui.Path _pathFactory() => ui.Path();
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +108,7 @@ class AnimatedIcon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     assert(iconTheme.isConcrete);
     final double iconSize = size ?? iconTheme.size!;
-    final TextDirection textDirection = this.textDirection ?? Directionality.of(context)!;
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0)

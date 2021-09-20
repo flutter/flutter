@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -22,9 +24,8 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   ),
   stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-  timeoutConfiguration: const TimeoutConfiguration(),
 ));
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
@@ -99,7 +100,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);
@@ -123,7 +123,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);

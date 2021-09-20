@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Plak",
   "selectAllButtonLabel": "Kies alles",
   "tabSemanticsLabel": "Oortjie $tabIndex van $tabCount",
-  "modalBarrierDismissLabel": "Maak toe"
+  "modalBarrierDismissLabel": "Maak toe",
+  "searchTextFieldPlaceholderLabel": "Soek"
 }

@@ -42,12 +42,14 @@ class PointerEventResampler {
   bool _isTracked = false;
   bool _isDown = false;
   int _pointerIdentifier = 0;
+  int _hasButtons = 0;
 
   PointerEvent _toHoverEvent(
     PointerEvent event,
     Offset position,
     Offset delta,
     Duration timeStamp,
+    int buttons,
   ) {
     return PointerHoverEvent(
       timeStamp: timeStamp,
@@ -79,6 +81,7 @@ class PointerEventResampler {
     Offset delta,
     int pointerIdentifier,
     Duration timeStamp,
+    int buttons,
   ) {
     return PointerMoveEvent(
       timeStamp: timeStamp,
@@ -87,7 +90,7 @@ class PointerEventResampler {
       device: event.device,
       position: position,
       delta: delta,
-      buttons: event.buttons,
+      buttons: buttons,
       obscured: event.obscured,
       pressure: event.pressure,
       pressureMin: event.pressureMin,
@@ -113,9 +116,12 @@ class PointerEventResampler {
     int pointerIdentifier,
     Duration timeStamp,
     bool isDown,
+    int buttons,
   ) {
-    return isDown ? _toMoveEvent(event, position, delta, pointerIdentifier, timeStamp)
-                  : _toHoverEvent(event, position, delta, timeStamp);
+    return isDown
+        ? _toMoveEvent(
+            event, position, delta, pointerIdentifier, timeStamp, buttons)
+        : _toHoverEvent(event, position, delta, timeStamp, buttons);
   }
 
   Offset _positionAt(Duration sampleTime) {
@@ -163,59 +169,54 @@ class PointerEventResampler {
   }
 
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
-      Duration sampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    Duration nextSampleTime,
+    HandleEventCallback callback,
   ) {
-    while (_queuedEvents.isNotEmpty) {
-      final PointerEvent event = _queuedEvents.first;
+    Duration endTime = sampleTime;
+    // Scan queued events to determine end time.
+    final Iterator<PointerEvent> it = _queuedEvents.iterator;
+    while (it.moveNext()) {
+      final PointerEvent event = it.current;
 
       // Potentially stop dispatching events if more recent than `sampleTime`.
       if (event.timeStamp > sampleTime) {
-        // Stop if event is not up or removed. Otherwise, continue to
-        // allow early processing of up and remove events as this improves
-        // resampling of these events, which is important for fling
-        // animations.
-        if (event is! PointerUpEvent && event is! PointerRemovedEvent) {
+        // Definitely stop if more recent than `nextSampleTime`.
+        if (event.timeStamp >= nextSampleTime) {
           break;
         }
 
-        // When this line is reached, the following two invariants hold:
-        // (1) `event.timeStamp > sampleTime`
-        // (2) `_next` has the smallest time stamp that's no less than
-        //     `sampleTime`
-        //
-        // Therefore, event must satisfy `event.timeStamp >= _next.timeStamp`.
-        //
-        // Those events with the minimum `event.timeStamp == _next.timeStamp`
-        // time stamp are processed early for smoother fling. For events with
-        // `event.timeStamp > _next.timeStamp`, the following lines break the
-        // while loop to stop the early processing.
-        //
-        // Specifically, when `sampleTime < _next.timeStamp`, there must be
-        // at least one event with `_next.timeStamp == event.timeStamp`
-        // and that event is `_next` itself, and it will be processed early.
-        //
-        // When `sampleTime == _next.timeStamp`, all events with
-        // `event.timeStamp > sampleTime` must also have
-        // `event.timeStamp > _next.timeStamp` so no events will be processed
-        // early.
-        //
-        // When the input frequency is no greater than the sampling
-        // frequency, this early processing should guarantee that `up` and
-        // `remove` events are always re-sampled.
-        final Duration nextTimeStamp = _next?.timeStamp ?? Duration.zero;
-        assert(event.timeStamp >= nextTimeStamp);
-        if (event.timeStamp > nextTimeStamp) {
+        // Update `endTime` to allow early processing of up and removed
+        // events as this improves resampling of these events, which is
+        // important for fling animations.
+        if (event is PointerUpEvent || event is PointerRemovedEvent) {
+          endTime = event.timeStamp;
+          continue;
+        }
+
+        // Stop if event is not move or hover.
+        if (event is! PointerMoveEvent && event is! PointerHoverEvent) {
           break;
         }
+      }
+    }
+
+    while (_queuedEvents.isNotEmpty) {
+      final PointerEvent event = _queuedEvents.first;
+
+      // Stop dispatching events if more recent than `endTime`.
+      if (event.timeStamp > endTime) {
+        break;
       }
 
       final bool wasTracked = _isTracked;
       final bool wasDown = _isDown;
+      final int hadButtons = _hasButtons;
 
       // Update pointer state.
       _isTracked = event is! PointerRemovedEvent;
       _isDown = event.down;
+      _hasButtons = event.buttons;
 
       // Position at `sampleTime`.
       final Offset position = _positionAt(sampleTime);
@@ -239,10 +240,11 @@ class PointerEventResampler {
         // Add synthetics `move` or `hover` event if position has changed.
         // Note: Devices without `hover` events are expected to always have
         // `add` and `down` events with the same position and this logic will
-        // therefor never produce `hover` events.
+        // therefore never produce `hover` events.
         if (position != _position) {
           final Offset delta = position - _position;
-          callback(_toMoveOrHoverEvent(event, position, delta, _pointerIdentifier, sampleTime, wasDown));
+          callback(_toMoveOrHoverEvent(event, position, delta,
+              _pointerIdentifier, sampleTime, wasDown, hadButtons));
           _position = position;
         }
         callback(event.copyWith(
@@ -258,8 +260,8 @@ class PointerEventResampler {
   }
 
   void _samplePointerPosition(
-      Duration sampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    HandleEventCallback callback,
   ) {
     // Position at `sampleTime`.
     final Offset position = _positionAt(sampleTime);
@@ -268,7 +270,8 @@ class PointerEventResampler {
     final PointerEvent? next = _next;
     if (position != _position && next != null) {
       final Offset delta = position - _position;
-      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier, sampleTime, _isDown));
+      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier,
+          sampleTime, _isDown, _hasButtons));
       _position = position;
     }
   }
@@ -285,11 +288,19 @@ class PointerEventResampler {
   /// state that has changed since last sample.
   ///
   /// Calling [callback] must not add or sample events.
-  void sample(Duration sampleTime, HandleEventCallback callback) {
+  ///
+  /// Positive value for `nextSampleTime` allow early processing of
+  /// up and removed events. This improves resampling of these events,
+  /// which is important for fling animations.
+  void sample(
+    Duration sampleTime,
+    Duration nextSampleTime,
+    HandleEventCallback callback,
+  ) {
     _processPointerEvents(sampleTime);
 
     // Dequeue and sample pointer events until `sampleTime`.
-    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, callback);
+    _dequeueAndSampleNonHoverOrMovePointerEventsUntil(sampleTime, nextSampleTime, callback);
 
     // Dispatch resampled pointer location event if tracked.
     if (_isTracked) {

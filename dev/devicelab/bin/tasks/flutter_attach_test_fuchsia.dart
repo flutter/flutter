@@ -7,11 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 void generateMain(Directory appDir, String sentinel) {
   final String mainCode = '''
@@ -113,8 +114,8 @@ void main() {
         'sentinel-${random.nextInt(1<<32)}': Completer<void>(),
       };
 
-      Process runProcess;
-      Process logsProcess;
+      late Process runProcess;
+      late Process logsProcess;
 
       try {
         section('Creating lib/fuchsia_main.dart');
@@ -155,12 +156,12 @@ void main() {
             print('logs:stdout: $log');
             for (final String sentinel in sentinelMessage.keys) {
               if (log.contains(sentinel)) {
-                if (sentinelMessage[sentinel].isCompleted) {
+                if (sentinelMessage[sentinel]!.isCompleted) {
                   throw Exception(
                     'Expected a single `$sentinel` message in the device log, but found more than one'
                   );
                 }
-                sentinelMessage[sentinel].complete();
+                sentinelMessage[sentinel]!.complete();
                 break;
               }
             }
@@ -202,7 +203,7 @@ void main() {
 
         section('Hot reload');
         runProcess.stdin.write('r');
-        runProcess.stdin.flush();
+        unawaited(runProcess.stdin.flush());
         await eventOrExit(reloadedCompleter.future);
 
         section('Waiting for Dart VM');
@@ -212,7 +213,7 @@ void main() {
         section('Quitting flutter run');
 
         runProcess.stdin.write('q');
-        runProcess.stdin.flush();
+        unawaited(runProcess.stdin.flush());
 
         final int runExitCode = await runProcess.exitCode;
         if (runExitCode != 0 || runStderr.isNotEmpty) {
@@ -227,7 +228,7 @@ void main() {
       }
 
       for (final String sentinel in sentinelMessage.keys) {
-        if (!sentinelMessage[sentinel].isCompleted) {
+        if (!sentinelMessage[sentinel]!.isCompleted) {
           throw Exception('Expected $sentinel in the device logs.');
         }
       }

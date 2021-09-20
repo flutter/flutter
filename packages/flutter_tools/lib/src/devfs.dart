@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -16,7 +18,6 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -63,8 +64,9 @@ class DevFSFileContent extends DevFSContent {
   FileStat _fileStat;
 
   File _getFile() {
-    if (_linkTarget != null) {
-      return _linkTarget;
+    final File linkTarget = _linkTarget;
+    if (linkTarget != null) {
+      return linkTarget;
     }
     if (file is Link) {
       // The link target.
@@ -74,9 +76,10 @@ class DevFSFileContent extends DevFSContent {
   }
 
   void _stat() {
-    if (_linkTarget != null) {
+    final File linkTarget = _linkTarget;
+    if (linkTarget != null) {
       // Stat the cached symlink target.
-      final FileStat fileStat = _linkTarget.statSync();
+      final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
         _linkTarget = null;
       } else {
@@ -86,7 +89,7 @@ class DevFSFileContent extends DevFSContent {
     }
     final FileStat fileStat = file.statSync();
     _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
-    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
+    if (_fileStat != null && _fileStat?.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final File linkTarget = file.fileSystem.file(resolved);
@@ -95,7 +98,7 @@ class DevFSFileContent extends DevFSContent {
       if (fileStat.type == FileSystemEntityType.notFound) {
         _fileStat = null;
         _linkTarget = null;
-      } else if (devFSConfig.cacheSymlinks) {
+      } else if (devFSConfig?.cacheSymlinks == true) {
         _linkTarget = linkTarget;
       }
     }
@@ -103,25 +106,27 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   bool get isModified {
-    final FileStat _oldFileStat = _fileStat;
+    final FileStat oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null) {
+    final FileStat newFileStat = _fileStat;
+    if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
-    final FileStat _oldFileStat = _fileStat;
+    final FileStat oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null) {
+    final FileStat newFileStat = _fileStat;
+    if (oldFileStat == null && newFileStat == null) {
       return false;
     }
     return time == null
-        || _oldFileStat == null
-        || _fileStat == null
-        || _fileStat.modified.isAfter(time);
+        || oldFileStat == null
+        || newFileStat == null
+        || newFileStat.modified.isAfter(time);
   }
 
   @override
@@ -134,7 +139,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
+  Future<List<int>> contentsAsBytes() async => _getFile().readAsBytes();
 
   @override
   Stream<List<int>> contentsAsStream() => _getFile().openRead();
@@ -202,6 +207,61 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
+/// A string compressing DevFSContent.
+///
+/// A specialized DevFSContent similar to DevFSByteContent where the contents
+/// are the compressed bytes of a string. Its difference is that the original
+/// uncompressed string can be compared with directly without the indirection
+/// of a compute-expensive uncompress/decode and compress/encode to compare
+/// the strings.
+///
+/// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
+/// the most common string occurrences to potentially assist with compression.
+class DevFSStringCompressingBytesContent extends DevFSContent {
+  DevFSStringCompressingBytesContent(this._string, { String hintString })
+    : _compressor = ZLibEncoder(
+      dictionary: hintString == null
+          ? null
+          : utf8.encode(hintString),
+      gzip: true,
+      level: 9,
+    );
+
+  final String _string;
+  final ZLibEncoder _compressor;
+  final DateTime _modificationTime = DateTime.now();
+
+  List<int> _bytes;
+  bool _isModified = true;
+
+  List<int> get bytes => _bytes ??= _compressor.convert(utf8.encode(_string));
+
+  /// Return true only once so that the content is written to the device only once.
+  @override
+  bool get isModified {
+    final bool modified = _isModified;
+    _isModified = false;
+    return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
+  }
+
+  @override
+  int get size => bytes.length;
+
+  @override
+  Future<List<int>> contentsAsBytes() async => bytes;
+
+  @override
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.value(bytes);
+
+  /// This checks the source string with another string.
+  bool equals(String string) => _string == string;
+}
+
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
@@ -225,32 +285,35 @@ abstract class DevFSWriter {
 class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
-    vm_service.VmService serviceProtocol, {
+    FlutterVmService serviceProtocol, {
     @required OperatingSystemUtils osUtils,
     @required HttpClient httpClient,
     @required Logger logger,
+    Duration uploadRetryThrottle,
   })
     : httpAddress = serviceProtocol.httpAddress,
       _client = httpClient,
       _osUtils = osUtils,
+      _uploadRetryThrottle = uploadRetryThrottle,
       _logger = logger;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
   final Logger _logger;
+  final Duration _uploadRetryThrottle;
 
   final String fsName;
   final Uri httpAddress;
 
-  // 3 was chosen to try to limit the varience in the time it takes to execute
+  // 3 was chosen to try to limit the variance in the time it takes to execute
   // `await request.close()` since there is a known bug in Dart where it doesn't
   // always return a status code in response to a PUT request:
   // https://github.com/dart-lang/sdk/issues/43525.
   static const int kMaxInFlight = 3;
 
   int _inFlight = 0;
-  Map<Uri, DevFSContent> _outstanding;
-  Completer<void> _completer;
+  Map<Uri, DevFSContent> _outstanding = <Uri, DevFSContent>{};
+  Completer<void> _completer = Completer<void>();
 
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter parent]) async {
@@ -296,16 +359,11 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
-        // The contents has already been streamed, closing the request should
-        // not take long but we are experiencing hangs with it, see #63869.
-        //
         // Once the bug in Dart is solved we can remove the timeout
-        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
-        // chosen to be inflated based on the max observed time when running the
-        // tests in "Google Tests".
+        // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
-            const Duration(milliseconds: 10000));
+            const Duration(seconds: 60));
           response.listen((_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');
@@ -326,7 +384,7 @@ class _DevFSHttpWriter implements DevFSWriter {
           if (retry > 0) {
             retry--;
             _logger.printTrace('trying again in a few - $retry more attempts left');
-            await Future<void>.delayed(const Duration(milliseconds: 500));
+            await Future<void>.delayed(_uploadRetryThrottle ?? const Duration(milliseconds: 500));
             continue;
           }
           _completer.completeError(error, trace);
@@ -345,18 +403,34 @@ class UpdateFSReport {
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
     this.fastReassembleClassName,
+    int scannedSourcesCount = 0,
+    Duration compileDuration = Duration.zero,
+    Duration transferDuration = Duration.zero,
+    Duration findInvalidatedDuration = Duration.zero,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
-       _syncedBytes = syncedBytes;
+       _syncedBytes = syncedBytes,
+       _scannedSourcesCount = scannedSourcesCount,
+       _compileDuration = compileDuration,
+       _transferDuration = transferDuration,
+       _findInvalidatedDuration = findInvalidatedDuration;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
   int get syncedBytes => _syncedBytes;
+  int get scannedSourcesCount => _scannedSourcesCount;
+  Duration get compileDuration => _compileDuration;
+  Duration get transferDuration => _transferDuration;
+  Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
   bool _success;
   String fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
+  int _scannedSourcesCount;
+  Duration _compileDuration;
+  Duration _transferDuration;
+  Duration _findInvalidatedDuration;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -365,19 +439,27 @@ class UpdateFSReport {
     fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
+    _scannedSourcesCount += report._scannedSourcesCount;
+    _compileDuration += report._compileDuration;
+    _transferDuration += report._transferDuration;
+    _findInvalidatedDuration += report._findInvalidatedDuration;
   }
 }
 
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
+  ///
+  /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
   DevFS(
-    vm_service.VmService serviceProtocol,
+    FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
     @required OperatingSystemUtils osUtils,
     @required Logger logger,
     @required FileSystem fileSystem,
     HttpClient httpClient,
+    Duration uploadRetryThrottle,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -386,19 +468,24 @@ class DevFS {
         serviceProtocol,
         osUtils: osUtils,
         logger: logger,
+        uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
-          : context.get<HttpClientFactory>()())
-      );
+          : context.get<HttpClientFactory>()())),
+       _stopwatchFactory = stopwatchFactory;
 
-  final vm_service.VmService _vmService;
+  final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
+  final StopwatchFactory _stopwatchFactory;
 
   final String fsName;
   final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
+
+  // A flag to indicate whether we have called `setAssetDirectory` on the target device.
+  bool hasSetAssetDirectory = false;
 
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
@@ -425,8 +512,15 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
+      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+        // This can happen if the device has been disconnected, so translate to
+        // a DevFSException, which the caller will handle.
+        throw DevFSException('Service disconnected', rpcException);
+      }
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
+        // Other RPCErrors are unexpected. Rethrow so it will hit crash
+        // logging.
         rethrow;
       }
       _logger.printTrace('DevFS: Creating failed. Destroying and trying again');
@@ -463,8 +557,9 @@ class DevFS {
   /// If any other changes were made, or there is an error scanning the file,
   /// return `null`.
   String _checkIfSingleWidgetReloadApplied() {
-    if (_widgetCacheOutputFile != null && _widgetCacheOutputFile.existsSync()) {
-      final String widget = _widgetCacheOutputFile.readAsStringSync().trim();
+    final File widgetCacheOutputFile = _widgetCacheOutputFile;
+    if (widgetCacheOutputFile != null && widgetCacheOutputFile.existsSync()) {
+      final String widget = widgetCacheOutputFile.readAsStringSync().trim();
       if (widget.isNotEmpty) {
         return widget;
       }
@@ -482,12 +577,12 @@ class DevFS {
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required String dillOutputPath,
     DevFSWriter devFSWriter,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
   }) async {
@@ -499,14 +594,38 @@ class DevFS {
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-
     int syncedBytes = 0;
+    if (fullRestart) {
+      generator.reset();
+    }
+    // On a full restart, or on an initial compile for the attach based workflow,
+    // this will produce a full dill. Subsequent invocations will produce incremental
+    // dill files that depend on the invalidated files.
+    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+
+    // Await the compiler response after checking if the bundle is updated. This allows the file
+    // stating to be done while waiting for the frontend_server response.
+    final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
+    final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(
+      mainUri,
+      invalidatedFiles,
+      outputPath: dillOutputPath,
+      fs: _fileSystem,
+      projectRootPath: projectRootPath,
+      packageConfig: packageConfig,
+    ).then((CompilerOutput result) {
+      compileTimer.stop();
+      return result;
+    });
+
     if (bundle != null) {
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
+      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
+        // If the content is backed by a real file, isModified will file stat and return true if
+        // it was modified since the last time this was called.
         if (!content.isModified || bundleFirstUpload) {
           return;
         }
@@ -521,19 +640,7 @@ class DevFS {
         }
       });
     }
-    if (fullRestart) {
-      generator.reset();
-    }
-    // On a full restart, or on an initial compile for the attach based workflow,
-    // this will produce a full dill. Subsequent invocations will produce incremental
-    // dill files that depend on the invalidated files.
-    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    final CompilerOutput compilerOutput = await generator.recompile(
-      mainUri,
-      invalidatedFiles,
-      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packageConfig: packageConfig,
-    );
+    final CompilerOutput compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
@@ -548,30 +655,31 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = _fileSystem.path.toUri(projectRootPath != null
-          ? _fileSystem.path.relative(pathToReload, from: projectRootPath)
-          : pathToReload,
-        );
+        final Uri entryUri = _fileSystem.path.toUri(pathToReload);
         final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files');
+    _logger.printTrace('Updating files.');
+    final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri, _httpWriter);
     }
+    transferTimer.stop();
     _logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(
       success: true,
       syncedBytes: syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
       fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
+      compileDuration: compileTimer.elapsed,
+      transferDuration: transferTimer.elapsed,
     );
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices

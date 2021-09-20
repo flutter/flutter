@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/convert.dart';
 import '../src/common.dart';
@@ -20,6 +22,7 @@ void main() {
       .listSync(recursive: true)
       .whereType<File>()
       .where((File file) => fileSystem.path.basename(file.path) != 'template_manifest.json' &&
+        fileSystem.path.basename(file.path) != 'README.md' &&
         fileSystem.path.basename(file.path) != '.DS_Store')
       .map((File file) => file.uri)
       .toSet();

@@ -14,6 +14,8 @@
   "nextMonthTooltip": "Další měsíc",
   "previousMonthTooltip": "Předchozí měsíc",
   "nextPageTooltip": "Další stránka",
+  "firstPageTooltip": "První stránka",
+  "lastPageTooltip": "Poslední stránka",
   "previousPageTooltip": "Předchozí stránka",
   "showMenuTooltip": "Zobrazit nabídku",
   "aboutListTileTitle": "O aplikaci $applicationName",

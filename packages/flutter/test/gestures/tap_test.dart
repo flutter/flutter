@@ -832,11 +832,11 @@ void main() {
     });
 
     tearDown(() {
-      recognized.clear();
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
       tertiary.dispose();
+      recognized.clear();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
@@ -1022,7 +1022,7 @@ void main() {
 
     final TestPointer pointer1 = TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);
     tap.addPointer(down);
 

@@ -118,17 +118,17 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key? center;
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   ///
   /// See also:
   ///
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   final double? cacheExtent;
 
-  /// {@macro flutter.rendering.viewport.cacheExtentStyle}
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   final CacheExtentStyle cacheExtentStyle;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -144,19 +144,19 @@ class Viewport extends MultiChildRenderObjectWidget {
       case AxisDirection.up:
         assert(debugCheckHasDirectionality(
           context,
-          why: 'to determine the cross-axis direction when the viewport has an \'up\' axisDirection',
-          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+          why: "to determine the cross-axis direction when the viewport has an 'up' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.right:
         return AxisDirection.down;
       case AxisDirection.down:
         assert(debugCheckHasDirectionality(
           context,
-          why: 'to determine the cross-axis direction when the viewport has a \'down\' axisDirection',
-          alternative: 'Alternatively, consider specifying the \'crossAxisDirection\' argument on the Viewport.',
+          why: "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
         ));
-        return textDirectionToAxisDirection(Directionality.of(context)!);
+        return textDirectionToAxisDirection(Directionality.of(context));
       case AxisDirection.left:
         return AxisDirection.down;
     }
@@ -188,7 +188,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  _ViewportElement createElement() => _ViewportElement(this);
+  MultiChildRenderObjectElement createElement() => _ViewportElement(this);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -218,7 +218,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _updateCenter();
   }
@@ -233,7 +233,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     // TODO(ianh): cache the keys to make this faster
     if (widget.center != null) {
       renderObject.center = children.singleWhere(
-        (Element element) => element.widget.key == widget.center
+        (Element element) => element.widget.key == widget.center,
       ).renderObject as RenderSliver?;
     } else if (children.isNotEmpty) {
       renderObject.center = children.first.renderObject as RenderSliver?;
@@ -322,7 +322,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Typically a [ScrollPosition].
   final ViewportOffset offset;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

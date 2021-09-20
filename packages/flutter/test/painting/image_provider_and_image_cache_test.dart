@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -16,9 +17,9 @@ import 'mocks_for_image_cache.dart';
 void main() {
   TestRenderingFlutterBinding();
 
-  final DecoderCallback _basicDecoder = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
     return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
-  };
+  }
 
   FlutterExceptionHandler? oldError;
   setUp(() {

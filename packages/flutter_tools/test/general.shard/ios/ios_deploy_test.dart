@@ -5,27 +5,29 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main () {
-  Artifacts artifacts;
-  String iosDeployPath;
+  late Artifacts artifacts;
+  late String iosDeployPath;
+  late FileSystem fileSystem;
 
   setUp(() {
     artifacts = Artifacts.test();
-    iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    iosDeployPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+    fileSystem = MemoryFileSystem.test();
   });
 
   testWithoutContext('IOSDeploy.iosDeployEnv returns path with /usr/bin first', () {
@@ -49,6 +51,8 @@ void main () {
             '123',
             '--bundle',
             '/',
+            '--app_deltas',
+            'app-delta',
             '--debug',
             '--args',
             <String>[
@@ -61,23 +65,26 @@ void main () {
           stdout: '(lldb)     run\nsuccess\nDid finish launching.',
         ),
       ]);
+      final Directory appDeltaDirectory = fileSystem.directory('app-delta');
       final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
       final IOSDeployDebugger iosDeployDebugger = iosDeploy.prepareDebuggerForLaunch(
         deviceId: '123',
         bundlePath: '/',
+        appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
-        interfaceType: IOSDeviceInterface.network,
+        interfaceType: IOSDeviceConnectionInterface.network,
       );
 
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
       expect(await iosDeployDebugger.logLines.toList(), <String>['Did finish launching.']);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(appDeltaDirectory, exists);
     });
   });
 
   group('IOSDeployDebugger', () {
     group('launch', () {
-      BufferLogger logger;
+      late BufferLogger logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -104,7 +111,10 @@ void main () {
           'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
           'Log on attach1',
           'Log on attach2',
-          '', '']);
+          '',
+          '',
+          'Log after process exit',
+        ]);
       });
 
       testWithoutContext('app exit', () async {
@@ -124,7 +134,34 @@ void main () {
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await logLines.toList();
-        expect(receivedLogLines, <String>['Log on attach']);
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          'Log after process exit',
+        ]);
+      });
+
+      testWithoutContext('app crash', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout:
+                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          '* thread #1, stop reason = Assertion failed:',
+        ]);
       });
 
       testWithoutContext('attach failed', () async {
@@ -196,7 +233,7 @@ void main () {
         expect(logger.errorText, contains('Your device is locked.'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('unknown app launch error', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
@@ -254,7 +291,7 @@ void main () {
       );
 
       expect(exitCode, 0);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('returns non-zero exit code when ios-deploy does the same', () async {
@@ -277,13 +314,13 @@ void main () {
       );
 
       expect(exitCode, 1);
-      expect(processManager.hasRemainingExpectations, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
-    Artifacts artifacts,
+    Artifacts? artifacts,
   }) {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',
@@ -296,6 +333,7 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
     artifacts: <ArtifactSet>[
       FakeDyldEnvironmentArtifact(),
     ],
+    processManager: FakeProcessManager.any(),
   );
 
   return IOSDeploy(

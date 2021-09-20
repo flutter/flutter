@@ -2,45 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
+import 'package:flutter_test/flutter_test.dart';
 
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
+import '../widgets/clipboard_utils.dart';
+import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          SystemChannels.platform,
+          mockClipboard.handleMethodCall,
+        );
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
   });
 
   group('canSelectAll', () {
     Widget createEditableText({
-      Key key,
-      String text,
-      TextSelection selection,
+      required Key key,
+      String? text,
+      TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
@@ -59,7 +59,7 @@ void main() {
     testWidgets('should return false when there is no text', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
-      expect(materialTextSelectionControls.canSelectAll(key.currentState), false);
+      expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
     testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
@@ -68,7 +68,7 @@ void main() {
         key: key,
         text: '123',
       ));
-      expect(materialTextSelectionControls.canSelectAll(key.currentState), true);
+      expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
     testWidgets('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
@@ -78,7 +78,7 @@ void main() {
         text: '123',
         selection: const TextSelection(baseOffset: 1, extentOffset: 2),
       ));
-      expect(materialTextSelectionControls.canSelectAll(key.currentState), true);
+      expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
     testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
@@ -88,7 +88,7 @@ void main() {
         text: '123',
         selection: const TextSelection(baseOffset: 0, extentOffset: 3),
       ));
-      expect(materialTextSelectionControls.canSelectAll(key.currentState), false);
+      expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
     });
   });
 
@@ -151,11 +151,11 @@ void main() {
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
@@ -225,7 +225,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -290,7 +290,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -364,7 +364,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -470,7 +470,7 @@ void main() {
       final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -544,7 +544,7 @@ void main() {
       final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -558,7 +558,6 @@ void main() {
               selectionHandleColor: Color(0x550000AA),
             ),
           ),
-          isMaterialAppTheme: true,
           child: Builder(
             builder: (BuildContext context) {
               return Container(
@@ -569,7 +568,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),
@@ -583,6 +582,38 @@ void main() {
         find.byType(RepaintBoundary),
         matchesGoldenFile('transparent_handle.png'),
       );
+    });
+
+    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Color(0x550000AA),
+          ),
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.white,
+              height: 800,
+              width: 800,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 250),
+                child: FittedBox(
+                  child: materialTextSelectionControls.buildHandle(
+                    context, TextSelectionHandleType.right, 10.0,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ));
+
+      // No expect here as this should simply compile / not throw any
+      // exceptions while building. The test will fail if this either does
+      // not compile or if the tester catches an exception, which we do
+      // not take here.
     });
   });
 
@@ -638,57 +669,8 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
-
-  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
-  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                controller: controller,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    // Make sure the clipboard is empty.
-    await Clipboard.setData(const ClipboardData(text: ''));
-
-    // Double tap to select the first word.
-    const int index = 4;
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    // Paste is showing even though clipboard is empty.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-
-    // Tap copy to add something to the clipboard and close the menu.
-    await tester.tapAt(tester.getCenter(find.text('Copy')));
-    await tester.pumpAndSettle();
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-
-    // Double tap to show the menu again.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    // Paste still shows.
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
+  );
 }

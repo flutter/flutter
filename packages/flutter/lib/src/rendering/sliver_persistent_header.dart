@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -19,7 +18,8 @@ import 'viewport_offset.dart';
 
 // Trims the specified edges of the given `Rect` [original], so that they do not
 // exceed the given values.
-Rect? _trim(Rect? original, {
+Rect? _trim(
+  Rect? original, {
   double top = -double.infinity,
   double right = double.infinity,
   double bottom = double.infinity,
@@ -48,7 +48,7 @@ class OverScrollHeaderStretchConfiguration {
   final AsyncCallback? onStretchTrigger;
 }
 
-/// {@template flutter.rendering.persistentHeader.showOnScreenConfiguration}
+/// {@template flutter.rendering.PersistentHeaderShowOnScreenConfiguration}
 /// Specifies how a pinned header or a floating header should react to
 /// [RenderObject.showOnScreen] calls.
 /// {@endtemplate}
@@ -66,7 +66,7 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// [RenderSliverPersistentHeader.minExtent].
   ///
   /// When a floating persistent header is told to show a [Rect] on screen, it
-  /// may expand itself to accomodate the [Rect]. The minimum extent that is
+  /// may expand itself to accommodate the [Rect]. The minimum extent that is
   /// allowed for such expansion is either
   /// [RenderSliverPersistentHeader.minExtent] or [minShowOnScreenExtent],
   /// whichever is larger. If the persistent header's current extent is already
@@ -86,7 +86,7 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// [RenderSliverPersistentHeader.maxExtent].
   ///
   /// When a floating persistent header is told to show a [Rect] on screen, it
-  /// may expand itself to accomodate the [Rect]. The maximum extent that is
+  /// may expand itself to accommodate the [Rect]. The maximum extent that is
   /// allowed for such expansion is either
   /// [RenderSliverPersistentHeader.maxExtent] or [maxShowOnScreenExtent],
   /// whichever is smaller. If the persistent header's current extent is already
@@ -500,7 +500,7 @@ class FloatingHeaderSnapConfiguration {
   FloatingHeaderSnapConfiguration({
     @Deprecated(
       'Specify SliverPersistentHeaderDelegate.vsync instead. '
-      'This feature was deprecated after v1.19.0.'
+      'This feature was deprecated after v1.19.0.',
     )
     this.vsync,
     this.curve = Curves.ease,
@@ -512,7 +512,7 @@ class FloatingHeaderSnapConfiguration {
   /// header to snap in or out of view.
   @Deprecated(
     'Specify SliverPersistentHeaderDelegate.vsync instead. '
-    'This feature was deprecated after v1.19.0.'
+    'This feature was deprecated after v1.19.0.',
   )
   final TickerProvider? vsync;
 
@@ -551,6 +551,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   late Animation<double> _animation;
   double? _lastActualScrollOffset;
   double? _effectiveScrollOffset;
+  // Important for pointer scrolling, which does not have the same concept of
+  // a hold and release scroll movement, like dragging.
+  // This keeps track of the last ScrollDirection when scrolling started.
+  ScrollDirection? _lastStartedScrollDirection;
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
@@ -593,7 +597,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///    and snapped into view via the corresponding parameters.
   FloatingHeaderSnapConfiguration? snapConfiguration;
 
-  /// {@macro flutter.rendering.persistentHeader.showOnScreenConfiguration}
+  /// {@macro flutter.rendering.PersistentHeaderShowOnScreenConfiguration}
   ///
   /// If set to null, the persistent header will delegate the `showOnScreen` call
   /// to it's parent [RenderObject].
@@ -633,12 +637,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     final AnimationController effectiveController =
       _controller ??= AnimationController(vsync: vsync!, duration: duration)
-                        ..addListener(() {
-      if (_effectiveScrollOffset == _animation.value)
-        return;
-      _effectiveScrollOffset = _animation.value;
-      markNeedsLayout();
-    });
+        ..addListener(() {
+            if (_effectiveScrollOffset == _animation.value)
+              return;
+            _effectiveScrollOffset = _animation.value;
+            markNeedsLayout();
+          });
 
     _animation = effectiveController.drive(
       Tween<double>(
@@ -646,6 +650,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         end: endValue,
       ).chain(CurveTween(curve: curve)),
     );
+  }
+
+  /// Update the last known ScrollDirection when scrolling began.
+  void updateScrollStartDirection(ScrollDirection direction) {
+    _lastStartedScrollDirection = direction;
   }
 
   /// If the header isn't already fully exposed, then scroll it into view.
@@ -681,7 +690,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
          (_effectiveScrollOffset! < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset! - constraints.scrollOffset;
 
-      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
+      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
+        || (_lastStartedScrollDirection != null && _lastStartedScrollDirection == ScrollDirection.forward);
       if (allowFloatingExpansion) {
         if (_effectiveScrollOffset! > maxExtent) // We're scrolled off-screen, but should reveal, so
           _effectiveScrollOffset = maxExtent; // pretend we're just at the limit.
@@ -755,7 +765,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         showOnScreen.maxShowOnScreenExtent,
       )
       // Clamp the value back to the valid range after applying additional
-      // constriants. Contracting is not allowed.
+      // constraints. Contracting is not allowed.
       .clamp(childExtent, effectiveMaxExtent);
 
     // Expands the header if needed, with animation.

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -39,7 +36,7 @@ bool debugPaintLayerBordersEnabled = false;
 /// [RenderBox.debugHandleEvent].
 bool debugPaintPointersEnabled = false;
 
-/// Overlay a rotating set of colors when repainting layers in checked mode.
+/// Overlay a rotating set of colors when repainting layers in debug mode.
 ///
 /// See also:
 ///
@@ -47,51 +44,8 @@ bool debugPaintPointersEnabled = false;
 ///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
-/// Overlay a rotating set of colors when repainting text in checked mode.
+/// Overlay a rotating set of colors when repainting text in debug mode.
 bool debugRepaintTextRainbowEnabled = false;
-
-/// Causes [PhysicalModelLayer]s to paint a red rectangle around themselves if
-/// they are overlapping and painted out of order with regard to their elevation.
-///
-/// Android and iOS will show the last painted layer on top, whereas Fuchsia
-/// will show the layer with the highest elevation on top.
-///
-/// For example, a rectangular elevation at 3.0 that is painted before an
-/// overlapping rectangular elevation at 2.0 would render this way on Android
-/// and iOS (with fake shadows):
-/// ```
-/// ┌───────────────────┐
-/// │                   │
-/// │      3.0          │
-/// │            ┌───────────────────┐
-/// │            │                   │
-/// └────────────│                   │
-///              │        2.0        │
-///              │                   │
-///              └───────────────────┘
-/// ```
-///
-/// But this way on Fuchsia (with real shadows):
-/// ```
-/// ┌───────────────────┐
-/// │                   │
-/// │      3.0          │
-/// │                   │────────────┐
-/// │                   │            │
-/// └───────────────────┘            │
-///              │         2.0       │
-///              │                   │
-///              └───────────────────┘
-/// ```
-///
-/// This check helps developers that want a consistent look and feel detect
-/// where this inconsistency would occur.
-///
-/// This check assumes that elevations on [PhysicalModelLayer] objects have
-/// been set to non-null values before the scene is built. If this assumption
-/// is violated, the check will throw exceptions. (The scene building would
-/// also fail in that case, however.)
-bool debugCheckElevationsEnabled = false;
 
 /// The current color to overlay when repainting a layer.
 ///
@@ -135,8 +89,9 @@ bool debugPrintLayouts = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 ///
-/// By default this is turned off since these checks are expensive, but it is
-/// enabled by the test framework.
+/// By default this is turned off since these checks are expensive. If you are
+/// implementing your own children of [RenderBox] with custom intrinsics, turn
+/// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] layout.

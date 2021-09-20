@@ -20,5 +20,6 @@
   "pasteButtonLabel": "ஒட்டு",
   "selectAllButtonLabel": "எல்லாம் தேர்ந்தெடு",
   "tabSemanticsLabel": "தாவல் $tabIndex / $tabCount",
-  "modalBarrierDismissLabel": "நிராகரிக்கும்"
+  "modalBarrierDismissLabel": "நிராகரிக்கும்",
+  "searchTextFieldPlaceholderLabel": "தேடுக"
 }

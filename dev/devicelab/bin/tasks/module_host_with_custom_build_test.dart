@@ -20,7 +20,7 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
+    final String? javaHome = await findJavaHome();
     if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
     }
@@ -28,6 +28,11 @@ Future<void> main() async {
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
+
+    await flutter(
+      'precache',
+      options: <String>['--android', '--no-ios'],
+    );
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
@@ -72,7 +77,7 @@ Future<void> main() async {
         Directory(path.join(hostAppDir.path, 'gradle', 'wrapper')),
       );
 
-      final Function clean = () async {
+      Future<void> clean() async {
         section('Clean');
         await inDirectory(hostAppDir, () async {
           await exec(gradlewExecutable,
@@ -82,7 +87,7 @@ Future<void> main() async {
             },
           );
         });
-      };
+      }
 
       if (!Platform.isWindows) {
         section('Make $gradlewExecutable executable');

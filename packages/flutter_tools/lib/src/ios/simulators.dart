@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -19,14 +21,15 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../device_port_forwarder.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import 'application_package.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
-const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
@@ -45,6 +48,9 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async => _iosSimulatorUtils.getAttachedDevices();
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
 
 class IOSSimulatorUtils {
@@ -52,8 +58,12 @@ class IOSSimulatorUtils {
     @required Xcode xcode,
     @required Logger logger,
     @required ProcessManager processManager,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager),
-      _xcode = xcode;
+  })  : _simControl = SimControl(
+          logger: logger,
+          processManager: processManager,
+          xcode: xcode,
+        ),
+        _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
@@ -70,7 +80,6 @@ class IOSSimulatorUtils {
         name: device.name,
         simControl: _simControl,
         simulatorCategory: device.category,
-        xcode: _xcode,
       );
     }).toList();
   }
@@ -81,11 +90,14 @@ class SimControl {
   SimControl({
     @required Logger logger,
     @required ProcessManager processManager,
-  }) : _logger = logger,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+    @required Xcode xcode,
+  })  : _logger = logger,
+        _xcode = xcode,
+        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
+  final Xcode _xcode;
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -107,7 +119,13 @@ class SimControl {
     //   },
     //   "pairs": { ... },
 
-    final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
+    final List<String> command = <String>[
+      ..._xcode.xcrunCommand(),
+      'simctl',
+      'list',
+      '--json',
+      section.name,
+    ];
     _logger.printTrace(command.join(' '));
     final RunResult results = await _processUtils.run(command);
     if (results.exitCode != 0) {
@@ -115,7 +133,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
     try {
-      final Object decodeResult = json.decode(results.stdout?.toString())[section.name];
+      final Object decodeResult = (json.decode(results.stdout) as Map<String, dynamic>)[section.name];
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }
@@ -156,7 +174,7 @@ class SimControl {
 
   Future<bool> isInstalled(String deviceId, String appId) {
     return _processUtils.exitsHappy(<String>[
-      _xcrunPath,
+      ..._xcode.xcrunCommand(),
       'simctl',
       'get_app_container',
       deviceId,
@@ -168,7 +186,13 @@ class SimControl {
     RunResult result;
     try {
       result = await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'simctl',
+          'install',
+          deviceId,
+          appPath,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -181,7 +205,13 @@ class SimControl {
     RunResult result;
     try {
       result = await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'simctl',
+          'uninstall',
+          deviceId,
+          appId,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -195,7 +225,7 @@ class SimControl {
     try {
       result = await _processUtils.run(
         <String>[
-          _xcrunPath,
+          ..._xcode.xcrunCommand(),
           'simctl',
           'launch',
           deviceId,
@@ -213,7 +243,14 @@ class SimControl {
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
-        <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'simctl',
+          'io',
+          deviceId,
+          'screenshot',
+          outputPath,
+        ],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
@@ -278,9 +315,7 @@ class IOSSimulator extends Device {
       this.name,
       this.simulatorCategory,
       @required SimControl simControl,
-      @required Xcode xcode,
     }) : _simControl = simControl,
-         _xcode = xcode,
          super(
            id,
            category: Category.mobile,
@@ -294,7 +329,6 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
-  final Xcode _xcode;
 
   @override
   DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
@@ -321,8 +355,6 @@ class IOSSimulator extends Device {
 
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
-
-  String get xcrunPath => globals.fs.path.join('/usr', 'bin', 'xcrun');
 
   @override
   Future<bool> isAppInstalled(
@@ -431,6 +463,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
+        if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}'
       ],
@@ -443,6 +476,7 @@ class IOSSimulator extends Device {
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
+        logger: globals.logger,
       );
     }
 
@@ -495,7 +529,7 @@ class IOSSimulator extends Device {
       app: app,
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      buildForDevice: false,
+      environmentType: EnvironmentType.simulator,
       deviceID: id,
     );
     if (!buildResult.success) {
@@ -581,12 +615,8 @@ class IOSSimulator extends Device {
     }
   }
 
-  bool get _xcodeVersionSupportsScreenshot {
-    return _xcode.majorVersion > 8 || (_xcode.majorVersion == 8 && _xcode.minorVersion >= 2);
-  }
-
   @override
-  bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
+  bool get supportsScreenshot => true;
 
   @override
   Future<void> takeScreenshot(File outputFile) {
@@ -612,7 +642,7 @@ class IOSSimulator extends Device {
 /// Launches the device log reader process on the host and parses the syslog.
 @visibleForTesting
 Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
-  return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  return globals.processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
 }
 
 /// Launches the device log reader process on the host and parses unified logging.
@@ -638,8 +668,17 @@ Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName)
     notP('eventMessage CONTAINS " libxpc.dylib "'),
   ]);
 
-  return processUtils.start(<String>[
-    _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate,
+  return globals.processUtils.start(<String>[
+    ...globals.xcode.xcrunCommand(),
+    'simctl',
+    'spawn',
+    device.id,
+    'log',
+    'stream',
+    '--style',
+    'json',
+    '--predicate',
+    predicate,
   ]);
 }
 
@@ -647,7 +686,7 @@ Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName)
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+    return globals.processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
   }
 
   // For iOS 11 and later, all relevant detail is in the device log.
@@ -660,7 +699,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       onListen: _start,
       onCancel: _stop,
     );
-    _appName = app == null ? null : app.name.replaceAll('.app', '');
+    _appName = app?.name?.replaceAll('.app', '');
   }
 
   final IOSSimulator device;

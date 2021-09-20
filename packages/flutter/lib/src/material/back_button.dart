@@ -42,7 +42,7 @@ class BackButtonIcon extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context)!.platform));
+  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
 }
 
 /// A material design back button.
@@ -98,7 +98,7 @@ class BackButton extends StatelessWidget {
     return IconButton(
       icon: const BackButtonIcon(),
       color: color,
-      tooltip: MaterialLocalizations.of(context)!.backButtonTooltip,
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();
@@ -152,7 +152,7 @@ class CloseButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.close),
       color: color,
-      tooltip: MaterialLocalizations.of(context)!.closeButtonTooltip,
+      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();

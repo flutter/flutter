@@ -28,7 +28,7 @@ enum AutofillContextAction {
 /// [AutofillClient]s that share the same closest [AutofillGroup] ancestor must
 /// be built together, and they be will be autofilled together.
 ///
-/// {@macro flutter.services.autofill.AutofillScope}
+/// {@macro flutter.services.AutofillScope}
 ///
 /// The [AutofillGroup] widget only knows about [AutofillClient]s registered to
 /// it using the [AutofillGroupState.register] API. Typically, [AutofillGroup]
@@ -41,7 +41,7 @@ enum AutofillContextAction {
 /// widget) can be used to clean up the current autofill context when the
 /// current autofill context is no longer relevant.
 ///
-/// {@macro flutter.services.autofill.autofillContext}
+/// {@macro flutter.services.TextInput.finishAutofillContext}
 ///
 /// By default, [onDisposeAction] is set to [AutofillContextAction.commit], in
 /// which case when any of the topmost [AutofillGroup]s is being disposed, the
@@ -52,93 +52,10 @@ enum AutofillContextAction {
 /// [Form] can be saved for future autofill by the platform.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// An example form with autofillable fields grouped into different
 /// `AutofillGroup`s.
 ///
-/// ```dart
-///  bool isSameAddress = true;
-///  final TextEditingController shippingAddress1 = TextEditingController();
-///  final TextEditingController shippingAddress2 = TextEditingController();
-///  final TextEditingController billingAddress1 = TextEditingController();
-///  final TextEditingController billingAddress2 = TextEditingController();
-///
-///  final TextEditingController creditCardNumber = TextEditingController();
-///  final TextEditingController creditCardSecurityCode = TextEditingController();
-///
-///  final TextEditingController phoneNumber = TextEditingController();
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return ListView(
-///      children: <Widget>[
-///        const Text('Shipping address'),
-///        // The address fields are grouped together as some platforms are
-///        // capable of autofilling all of these fields in one go.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: shippingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
-///              ),
-///              TextField(
-///                controller: shippingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Billing address'),
-///        Checkbox(
-///          value: isSameAddress,
-///          onChanged: (bool newValue) {
-///            setState(() { isSameAddress = newValue; });
-///          },
-///        ),
-///        // Again the address fields are grouped together for the same reason.
-///        if (!isSameAddress) AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: billingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
-///              ),
-///              TextField(
-///                controller: billingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Credit Card Information'),
-///        // The credit card number and the security code are grouped together
-///        // as some platforms are capable of autofilling both fields.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: creditCardNumber,
-///                autofillHints: <String>[AutofillHints.creditCardNumber],
-///              ),
-///              TextField(
-///                controller: creditCardSecurityCode,
-///                autofillHints: <String>[AutofillHints.creditCardSecurityCode],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Contact Phone Number'),
-///        // The phone number field can still be autofilled despite lacking an
-///        // `AutofillScope`.
-///        TextField(
-///          controller: phoneNumber,
-///          autofillHints: <String>[AutofillHints.telephoneNumber],
-///        ),
-///      ],
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/widgets/autofill/autofill_group.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -158,7 +75,7 @@ class AutofillGroup extends StatefulWidget {
 
   /// Returns the closest [AutofillGroupState] which encloses the given context.
   ///
-  /// {@macro flutter.widgets.autofill.AutofillGroupState}
+  /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
@@ -169,14 +86,14 @@ class AutofillGroup extends StatefulWidget {
     return scope?._scope;
   }
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The [AutofillContextAction] to be run when this [AutofillGroup] is the
   /// topmost [AutofillGroup] and it's being disposed, in order to clean up the
   /// current autofill context.
   ///
-  /// {@macro flutter.services.autofill.autofillContext}
+  /// {@macro flutter.services.TextInput.finishAutofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
   /// save the user input and destroy the current autofill context. No action
@@ -189,7 +106,7 @@ class AutofillGroup extends StatefulWidget {
 
 /// State associated with an [AutofillGroup] widget.
 ///
-/// {@template flutter.widgets.autofill.AutofillGroupState}
+/// {@template flutter.widgets.AutofillGroupState}
 /// An [AutofillGroupState] can be used to register an [AutofillClient] when it
 /// enters this [AutofillGroup] (for example, when an [EditableText] is mounted or
 /// reparented onto the [AutofillGroup]'s subtree), and unregister an
@@ -217,7 +134,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration != null);
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -238,9 +155,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// Removes an [AutofillClient] with the given `autofillId` from this
   /// [AutofillGroup].
   ///
-  /// Typically, this should be called by autofillable [TextInputClient]s in
-  /// [State.dispose] and [State.didChangeDependencies], when the input field
-  /// needs to be removed from the [AutofillGroup] it is currently registered to.
+  /// Typically, this should be called by a text field when it's being disposed,
+  /// or before it's registered with a different [AutofillGroup].
   ///
   /// See also:
   ///

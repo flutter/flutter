@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData theme }) {
+MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -40,7 +42,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.text(text)).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(find.text(text)).renderObject! as RenderParagraph;
 }
 
 void main() {
@@ -50,6 +52,7 @@ void main() {
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
       shape: null,
+      alignment: Alignment.bottomLeft,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
     ).debugFillProperties(builder);
@@ -59,6 +62,7 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
+      'alignment: Alignment.bottomLeft',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
@@ -89,7 +93,7 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
 
     await tester.pumpWidget(
-        _appWithDialog(tester, dialog, theme: theme)
+      _appWithDialog(tester, dialog, theme: theme),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -108,13 +112,54 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
     await tester.pumpWidget(
-      _appWithDialog(tester, dialog, theme: theme)
+      _appWithDialog(tester, dialog, theme: theme),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Custom dialog alignment', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 40.0);
+    expect(bottomLeft.dy, 576.0);
+  });
+
+  testWidgets('Dialog alignment takes priority over theme', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+      alignment: Alignment.topRight,
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 480.0);
+    expect(bottomLeft.dy, 104.0);
   });
 
   testWidgets('Custom dialog shape matches golden', (WidgetTester tester) async {
@@ -184,7 +229,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderParagraph title = _getTextRenderObject(tester, titleText);
-    expect(title.text.style.color, titleTextStyle.color);
+    expect(title.text.style!.color, titleTextStyle.color);
   });
 
   testWidgets('Simple Dialog - Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
@@ -232,7 +277,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderParagraph title = _getTextRenderObject(tester, titleText);
-    expect(title.text.style.color, titleTextStyle.color);
+    expect(title.text.style!.color, titleTextStyle.color);
   });
 
   testWidgets('Custom Content Text Style - Constructor Param', (WidgetTester tester) async {
@@ -283,6 +328,6 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderParagraph content = _getTextRenderObject(tester, contentText);
-    expect(content.text.style.color, contentTextStyle.color);
+    expect(content.text.style!.color, contentTextStyle.color);
   });
 }

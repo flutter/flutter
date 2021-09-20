@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'arena.dart';
 import 'constants.dart';
@@ -191,6 +191,14 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   void addAllowedPointer(PointerDownEvent event) {
     assert(event != null);
     if (state == GestureRecognizerState.ready) {
+      // If there is no result in the previous gesture arena,
+      // we ignore them and prepare to accept a new pointer.
+      if (_down != null && _up != null) {
+        assert(_down!.pointer == _up!.pointer);
+        _reset();
+      }
+
+      assert(_down == null && _up == null);
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,
       // which relies on `_down` to call `handleTapDown`.
@@ -284,6 +292,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (!_wonArenaForPrimaryPointer || _up == null) {
       return;
     }
+    assert(_up!.pointer == _down!.pointer);
     handleTapUp(down: _down!, up: _up!);
     _reset();
   }
@@ -385,6 +394,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onSecondaryTap], a similar callback but for a secondary button.
   ///  * [onTapUp], which has the same timing but with details.
   ///  * [GestureDetector.onTap], which exposes this callback.
   GestureTapCallback? onTap;

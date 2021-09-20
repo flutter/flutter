@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
@@ -18,19 +15,17 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
               children: items.map<Widget>((int item) {
-                return Container(
-                  child: GestureDetector(
-                    onTap: () { tapped.add(item); },
-                    child: Text('$item'),
-                    dragStartBehavior: DragStartBehavior.down,
-                  ),
+                return GestureDetector(
+                  onTap: () { tapped.add(item); },
+                  dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
                 );
               }).toList(),
             ),
@@ -62,19 +57,17 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.vertical,
               children: items.map<Widget>((int item) {
-                return Container(
-                  child: GestureDetector(
-                    onTap: () { tapped.add(item); },
-                    child: Text('$item'),
-                    dragStartBehavior: DragStartBehavior.down,
-                  ),
+                return GestureDetector(
+                  onTap: () { tapped.add(item); },
+                  dragStartBehavior: DragStartBehavior.down,
+                  child: Text('$item'),
                 );
               }).toList(),
             ),
@@ -98,7 +91,7 @@ void main() {
     expect(tapped, equals(<int>[]));
     await tester.tap(find.text('1'));
     expect(tapped, equals(<int>[1]));
-    await tester.tap(find.text('3'));
+    await tester.tap(find.text('3'), warnIfMissed: false);
     expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
   });
 
@@ -112,11 +105,9 @@ void main() {
           itemExtent: 290.0,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
-            return Container(
-              child: GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: Text('$item'),
-              ),
+            return GestureDetector(
+              onTap: () { tapped.add(item); },
+              child: Text('$item'),
             );
           }).toList(),
         ),
@@ -147,11 +138,9 @@ void main() {
           reverse: true,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
-            return Container(
-              child: GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: Text('$item'),
-              ),
+            return GestureDetector(
+              onTap: () { tapped.add(item); },
+              child: Text('$item'),
             );
           }).toList(),
         ),
@@ -181,11 +170,9 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: items.map<Widget>((int item) {
-            return Container(
-              child: GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: Text('$item'),
-              ),
+            return GestureDetector(
+              onTap: () { tapped.add(item); },
+              child: Text('$item'),
             );
           }).toList(),
         ),

@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
   final ByteData encoded = codec.encodeMessage(message)!;
@@ -17,13 +17,13 @@ void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes)
 
 void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
   final ByteData? encoded = codec.encodeMessage(message);
-  final T decoded = codec.decodeMessage(encoded);
+  final T? decoded = codec.decodeMessage(encoded);
   if (message == null) {
     expect(encoded, isNull);
     expect(decoded, isNull);
   } else {
     expect(deepEquals(message, decoded), isTrue);
-    final ByteData? encodedAgain = codec.encodeMessage(decoded);
+    final ByteData? encodedAgain = codec.encodeMessage(decoded as T);
     expect(
       encodedAgain!.buffer.asUint8List(),
       orderedEquals(encoded!.buffer.asUint8List()),
@@ -46,8 +46,7 @@ bool deepEquals(dynamic valueA, dynamic valueB) {
 bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   if (valueA is ByteData) {
     return valueB is ByteData
-        && deepEqualsList(
-            valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
+        && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
   if (valueA is Uint8List)
     return valueB is Uint8List && deepEqualsList(valueA, valueB);
@@ -55,6 +54,8 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     return valueB is Int32List && deepEqualsList(valueA, valueB);
   if (valueA is Int64List)
     return valueB is Int64List && deepEqualsList(valueA, valueB);
+  if (valueA is Float32List)
+    return valueB is Float32List && deepEqualsList(valueA, valueB);
   if (valueA is Float64List)
     return valueB is Float64List && deepEqualsList(valueA, valueB);
   throw 'Unexpected typed data: $valueA';

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,8 +11,8 @@ void main() {
   TextEditingValue testNewValue = TextEditingValue.empty;
 
   test('withFunction wraps formatting function', () {
-    testOldValue = const TextEditingValue();
-    testNewValue = const TextEditingValue();
+    testOldValue = TextEditingValue.empty;
+    testNewValue = TextEditingValue.empty;
 
     late TextEditingValue calledOldValue;
     late TextEditingValue calledNewValue;
@@ -21,7 +22,7 @@ void main() {
         calledOldValue = oldValue;
         calledNewValue = newValue;
         return TextEditingValue.empty;
-      }
+      },
     );
 
     formatterUnderTest.formatEditUpdate(testOldValue, testNewValue);
@@ -101,7 +102,7 @@ void main() {
 
     test('test filtering formatter, deny mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          BlacklistingTextInputFormatter(RegExp(r'[a-z]'))
+          FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -134,7 +135,7 @@ void main() {
 
     test('test single line formatter (deprecated names)', () {
       final TextEditingValue actualValue =
-          BlacklistingTextInputFormatter.singleLineFormatter
+          FilteringTextInputFormatter.singleLineFormatter
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -166,7 +167,7 @@ void main() {
 
     test('test filtering formatter, allow mode (deprecated names)', () {
       final TextEditingValue actualValue =
-          WhitelistingTextInputFormatter(RegExp(r'[a-c]'))
+          FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -198,7 +199,7 @@ void main() {
 
     test('test digits only formatter (deprecated names)', () {
       final TextEditingValue actualValue =
-          WhitelistingTextInputFormatter.digitsOnly
+          FilteringTextInputFormatter.digitsOnly
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
@@ -415,7 +416,7 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, newValue.text);
       });
@@ -435,7 +436,7 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, oldValue.text);
       });
@@ -455,9 +456,31 @@ void main() {
             LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
-          newValue
+          newValue,
         );
         expect(formatted.text, 'bbbbbbbbbb');
+      });
+    });
+
+    group('get enforcement from target platform', () {
+      // The enforcement on Web will be always `MaxLengthEnforcement.truncateAfterCompositionEnds`
+
+      test('with TargetPlatform.windows', () async {
+        final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
+          TargetPlatform.windows,
+        );
+        if (kIsWeb) {
+          expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
+        } else {
+          expect(enforcement, MaxLengthEnforcement.enforced);
+        }
+      });
+
+      test('with TargetPlatform.macOS', () async {
+        final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
+          TargetPlatform.macOS,
+        );
+        expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
       });
     });
   });
@@ -528,7 +551,7 @@ void main() {
     const TextEditingValue oldValue = TextEditingValue(text: '12345');
     const TextEditingValue newValue = TextEditingValue(text: '12345@');
 
-    final WhitelistingTextInputFormatter formatter = WhitelistingTextInputFormatter.digitsOnly;
+    final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
     final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
@@ -552,8 +575,7 @@ void main() {
 
     final TextInputFormatter formatter =
         FilteringTextInputFormatter.digitsOnly;
-    TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
-        newValue);
+    TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
     expect(oldValue.text, equals('123'));
@@ -563,8 +585,7 @@ void main() {
     expect(formatted.selection.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
-    oldValue = newValue.copyWith(
-        selection: const TextSelection.collapsed(offset: 4));
+    oldValue = newValue.copyWith(selection: const TextSelection.collapsed(offset: 4));
     newValue = oldValue.copyWith(text: '1239456');
 
     formatted = formatter.formatEditUpdate(oldValue, newValue);
@@ -583,10 +604,9 @@ void main() {
     TextEditingValue oldValue = collapsedValue('123', 0);
     TextEditingValue newValue = collapsedValue('123456', 6);
 
-    final WhitelistingTextInputFormatter formatter =
-        WhitelistingTextInputFormatter.digitsOnly;
-    TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
-        newValue);
+    final TextInputFormatter formatter =
+        FilteringTextInputFormatter.digitsOnly;
+    TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
     // assert that we are passing digits only at the first time
     expect(oldValue.text, equals('123'));
@@ -596,8 +616,7 @@ void main() {
     expect(formatted.selection.baseOffset, equals(6));
 
     // move cursor at the middle of the text and then add the number 9.
-    oldValue = newValue.copyWith(
-        selection: const TextSelection.collapsed(offset: 4));
+    oldValue = newValue.copyWith(selection: const TextSelection.collapsed(offset: 4));
     newValue = oldValue.copyWith(text: '1239456');
 
     formatted = formatter.formatEditUpdate(oldValue, newValue);

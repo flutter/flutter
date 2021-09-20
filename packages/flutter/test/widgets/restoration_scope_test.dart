@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'restoration.dart';
@@ -74,8 +71,8 @@ void main() {
       manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.restorationId, id);
-      expect(rawData[childrenMapKey].containsKey(id), isTrue);
+      expect(state.bucket!.restorationId, id);
+      expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey(id), isTrue);
     });
 
     testWidgets('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
@@ -94,8 +91,8 @@ void main() {
       manager.doSerialization();
 
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.restorationId, 'child1');
-      expect(state.bucket.read<int>('foo'), 22);
+      expect(state.bucket!.restorationId, 'child1');
+      expect(state.bucket!.read<int>('foo'), 22);
     });
 
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
@@ -115,9 +112,9 @@ void main() {
 
       // Claimed existing bucket with data.
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.restorationId, 'child1');
-      expect(state.bucket.read<int>('foo'), 22);
-      final RestorationBucket bucket = state.bucket;
+      expect(state.bucket!.restorationId, 'child1');
+      expect(state.bucket!.read<int>('foo'), 22);
+      final RestorationBucket bucket = state.bucket!;
 
       // Rename the existing bucket.
       await tester.pumpWidget(
@@ -131,8 +128,8 @@ void main() {
       );
       manager.doSerialization();
 
-      expect(state.bucket.restorationId, 'something else');
-      expect(state.bucket.read<int>('foo'), 22);
+      expect(state.bucket!.restorationId, 'something else');
+      expect(state.bucket!.read<int>('foo'), 22);
       expect(state.bucket, same(bucket));
     });
 
@@ -141,7 +138,7 @@ void main() {
       final Map<String, dynamic> rawData = _createRawDataSet();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-      expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
+      expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isTrue);
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
@@ -152,7 +149,7 @@ void main() {
         ),
       );
       manager.doSerialization();
-      expect(rawData[childrenMapKey].containsKey('child1'), isTrue);
+      expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isTrue);
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -162,7 +159,7 @@ void main() {
       );
       manager.doSerialization();
 
-      expect(rawData[childrenMapKey].containsKey('child1'), isFalse);
+      expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isFalse);
     });
 
     testWidgets('no bucket for descendants when id is null', (WidgetTester tester) async {
@@ -193,7 +190,7 @@ void main() {
       );
       manager.doSerialization();
       expect(state.bucket, isNotNull);
-      expect(state.bucket.restorationId, 'foo');
+      expect(state.bucket!.restorationId, 'foo');
 
       // Change id back to null.
       await tester.pumpWidget(
@@ -237,7 +234,7 @@ void main() {
       );
       manager.doSerialization();
       expect(state.bucket, isNotNull);
-      expect(state.bucket.restorationId, 'foo');
+      expect(state.bucket!.restorationId, 'foo');
 
       // Move out of scope again.
       await tester.pumpWidget(
@@ -288,11 +285,11 @@ void main() {
       );
       manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
-      expect(state.bucket.restorationId, 'moving-child');
-      expect(rawData[childrenMapKey]['fixed'][childrenMapKey].containsKey('moving-child'), isTrue);
-      final RestorationBucket bucket = state.bucket;
+      expect(state.bucket!.restorationId, 'moving-child');
+      expect((((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
+      final RestorationBucket bucket = state.bucket!;
 
-      state.bucket.write('value', 11);
+      state.bucket!.write('value', 11);
       manager.doSerialization();
 
       // Move scope.
@@ -316,12 +313,12 @@ void main() {
         ),
       );
       manager.doSerialization();
-      expect(state.bucket.restorationId, 'moving-child');
+      expect(state.bucket!.restorationId, 'moving-child');
       expect(state.bucket, same(bucket));
-      expect(state.bucket.read<int>('value'), 11);
+      expect(state.bucket!.read<int>('value'), 11);
 
-      expect(rawData[childrenMapKey]['fixed'], isEmpty);
-      expect(rawData[childrenMapKey].containsKey('moving-child'), isTrue);
+      expect((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed'], isEmpty);
+      expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
     });
   });
 }
@@ -336,12 +333,12 @@ Map<String, dynamic> _createRawDataSet() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'foo': 22,
-        }
+        },
       },
       'child2' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'bar': 33,
-        }
+        },
       },
     },
   };

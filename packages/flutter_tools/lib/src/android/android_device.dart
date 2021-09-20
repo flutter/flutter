@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -19,12 +21,14 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 
 import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
+import 'application_package.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -49,7 +53,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// A physical Android device or emulator.
 ///
 /// While [isEmulator] attempts to distinguish between the device categories,
-/// this is a best effort process and not a guarantee; certain phyiscal devices
+/// this is a best effort process and not a guarantee; certain physical devices
 /// identify as emulators. These device identifiers may be added to the [kKnownHardware]
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
@@ -63,7 +67,6 @@ class AndroidDevice extends Device {
     @required Platform platform,
     @required AndroidSdk androidSdk,
     @required FileSystem fileSystem,
-    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration(),
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
@@ -71,7 +74,6 @@ class AndroidDevice extends Device {
        _platform = platform,
        _fileSystem = fileSystem,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
-       _timeoutConfiguration = timeoutConfiguration,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
          id,
@@ -87,7 +89,6 @@ class AndroidDevice extends Device {
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   final String productID;
   final String modelID;
@@ -176,12 +177,12 @@ class AndroidDevice extends Device {
       try {
         await console
             .connect()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('Connection timed out'));
 
         return await console
             .getAvdName()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('"avd name" timed out'));
       } finally {
         console.destroy();
@@ -404,19 +405,45 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
+    if (!await _isAdbValid()) {
+      return false;
+    }
+    final bool wasInstalled = await isAppInstalled(app, userIdentifier: userIdentifier);
+    if (wasInstalled && await isLatestBuildInstalled(app)) {
+      _logger.printTrace('Latest build already installed.');
+      return true;
+    }
+    _logger.printTrace('Installing APK.');
+    if (await _installApp(app, userIdentifier: userIdentifier)) {
+      return true;
+    }
+    _logger.printTrace('Warning: Failed to install APK.');
+    if (!wasInstalled) {
+      return false;
+    }
+    _logger.printStatus('Uninstalling old version...');
+    if (!await uninstallApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Uninstalling old version failed.');
+      return false;
+    }
+    if (!await _installApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Failed to install APK again.');
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> _installApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
     if (!app.file.existsSync()) {
       _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
       return false;
     }
 
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
-      return false;
-    }
-
     final Status status = _logger.startProgress(
       'Installing ${_fileSystem.path.relative(app.file.path)}...',
-      timeout: _timeoutConfiguration.slowOperation,
     );
     final RunResult installResult = await _processUtils.run(
       adbCommandForDevice(<String>[
@@ -461,8 +488,7 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return false;
     }
 
@@ -487,36 +513,13 @@ class AndroidDevice extends Device {
       _logger.printError('Package uninstall error: $failure');
       return false;
     }
-
     return true;
   }
 
-  Future<bool> _installLatestApp(AndroidApk package, String userIdentifier) async {
-    final bool wasInstalled = await isAppInstalled(package, userIdentifier: userIdentifier);
-    if (wasInstalled) {
-      if (await isLatestBuildInstalled(package)) {
-        _logger.printTrace('Latest build already installed.');
-        return true;
-      }
-    }
-    _logger.printTrace('Installing APK.');
-    if (!await installApp(package, userIdentifier: userIdentifier)) {
-      _logger.printTrace('Warning: Failed to install APK.');
-      if (wasInstalled) {
-        _logger.printStatus('Uninstalling old version...');
-        if (!await uninstallApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Uninstalling old version failed.');
-          return false;
-        }
-        if (!await installApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Failed to install APK again.');
-          return false;
-        }
-        return true;
-      }
-      return false;
-    }
-    return true;
+  // Whether the adb and Android versions are aligned.
+  bool _adbIsValid;
+  Future<bool> _isAdbValid() async {
+    return _adbIsValid ??= await _checkForSupportedAdbVersion() && await _checkForSupportedAndroidVersion();
   }
 
   AndroidApk _package;
@@ -532,8 +535,7 @@ class AndroidDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return LaunchResult.failed();
     }
 
@@ -577,7 +579,8 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromAndroidProject(project.android);
+      package = await ApplicationPackageFactory.instance
+        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk;
     }
     // There was a failure parsing the android project information.
     if (package == null) {
@@ -587,18 +590,22 @@ class AndroidDevice extends Device {
     _logger.printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package, userIdentifier: userIdentifier);
 
-    if (!await _installLatestApp(package, userIdentifier)) {
+    if (!await installApp(package, userIdentifier: userIdentifier)) {
       return LaunchResult.failed();
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    _logger.printTrace('$this startApp');
-
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        await getLogReader(),
+        // Avoid using getLogReader, which returns a singleton instance, because the
+        // observatory discovery will dipose at the end. creating a new logger here allows
+        // logs to be surfaced normally during `flutter drive`.
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -625,7 +632,9 @@ class AndroidDevice extends Device {
       if (debuggingOptions.traceSkia)
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceAllowlist != null)
-        ...<String>['--ez', 'trace-allowlist', debuggingOptions.traceAllowlist],
+        ...<String>['--es', 'trace-allowlist', debuggingOptions.traceAllowlist],
+      if (debuggingOptions.traceSkiaAllowlist != null)
+        ...<String>['--es', 'trace-skia-allowlist', debuggingOptions.traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
       if (debuggingOptions.endlessTraceBuffer)
@@ -671,8 +680,6 @@ class AndroidDevice extends Device {
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
     _logger.printTrace('Waiting for observatory port to be available...');
-
-    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
@@ -1026,7 +1033,7 @@ class AdbLogReader extends DeviceLogReader {
       final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
       args.addAll(<String>[
         '-T',
-        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
@@ -1308,13 +1315,10 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       ],
       throwOnError: false,
     );
-    // The port may have already been unforwarded, for example if there
-    // are multiple attach process already connected.
-    if (runResult.exitCode == 0 || runResult
-      .stderr.contains("listener '$tcpLine' not found")) {
+    if (runResult.exitCode == 0) {
       return;
     }
-    runResult.throwException('Process exited abnormally:\n$runResult');
+    _logger.printError('Failed to unforward port: $runResult');
   }
 
   @override

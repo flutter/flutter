@@ -22,7 +22,7 @@ import 'updater.dart';
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
-    Key key,
+    Key? key,
     this.updateUrlFetcher,
     this.enablePerformanceOverlay = true,
     this.enableRasterCacheImagesCheckerboard = true,
@@ -31,26 +31,26 @@ class GalleryApp extends StatefulWidget {
     this.testMode = false,
   }) : super(key: key);
 
-  final UpdateUrlFetcher updateUrlFetcher;
+  final UpdateUrlFetcher? updateUrlFetcher;
   final bool enablePerformanceOverlay;
   final bool enableRasterCacheImagesCheckerboard;
   final bool enableOffscreenLayersCheckerboard;
-  final VoidCallback onSendFeedback;
+  final VoidCallback? onSendFeedback;
   final bool testMode;
 
   @override
-  _GalleryAppState createState() => _GalleryAppState();
+  State<GalleryApp> createState() => _GalleryAppState();
 }
 
 class _GalleryAppState extends State<GalleryApp> {
-  GalleryOptions _options;
-  Timer _timeDilationTimer;
-  AppStateModel model;
+  GalleryOptions? _options;
+  Timer? _timeDilationTimer;
+  late final AppStateModel model = AppStateModel()..loadProducts();
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
-    // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+    // https://api.flutter.dev/flutter/widgets/Navigator-class.html
     return <String, WidgetBuilder>{
       for (final GalleryDemo demo in kAllGalleryDemos) demo.routeName: demo.buildRoute,
     };
@@ -66,12 +66,11 @@ class _GalleryAppState extends State<GalleryApp> {
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
-    model = AppStateModel()..loadProducts();
   }
 
   @override
   void reassemble() {
-    _options = _options.copyWith(platform: defaultTargetPlatform);
+    _options = _options!.copyWith(platform: defaultTargetPlatform);
     super.reassemble();
   }
 
@@ -84,7 +83,7 @@ class _GalleryAppState extends State<GalleryApp> {
 
   void _handleOptionsChanged(GalleryOptions newOptions) {
     setState(() {
-      if (_options.timeDilation != newOptions.timeDilation) {
+      if (_options!.timeDilation != newOptions.timeDilation) {
         _timeDilationTimer?.cancel();
         _timeDilationTimer = null;
         if (newOptions.timeDilation > 1.0) {
@@ -108,7 +107,7 @@ class _GalleryAppState extends State<GalleryApp> {
       builder: (BuildContext context) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaleFactor: _options.textScaleFactor.scale,
+            textScaleFactor: _options!.textScaleFactor!.scale,
           ),
           child: child,
         );
@@ -131,7 +130,7 @@ class _GalleryAppState extends State<GalleryApp> {
 
     if (widget.updateUrlFetcher != null) {
       home = Updater(
-        updateUrlFetcher: widget.updateUrlFetcher,
+        updateUrlFetcher: widget.updateUrlFetcher!,
         child: home,
       );
     }
@@ -139,18 +138,23 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: kLightGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
-        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
-        themeMode: _options.themeMode,
+        // The automatically applied scrollbars on desktop can cause a crash for
+        // demos where many scrollables are all attached to the same
+        // PrimaryScrollController. The gallery needs to be migrated before
+        // enabling this. https://github.com/flutter/gallery/issues/523
+        scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        theme: kLightGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
+        themeMode: _options!.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
-        showPerformanceOverlay: _options.showPerformanceOverlay,
-        checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
-        checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
+        showPerformanceOverlay: _options!.showPerformanceOverlay,
+        checkerboardOffscreenLayers: _options!.showOffscreenLayersCheckerboard,
+        checkerboardRasterCacheImages: _options!.showRasterCacheImagesCheckerboard,
         routes: _buildRoutes(),
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Directionality(
-            textDirection: _options.textDirection,
+            textDirection: _options!.textDirection,
             child: _applyTextScaleFactor(
               // Specifically use a blank Cupertino theme here and do not transfer
               // over the Material primary color etc except the brightness to
@@ -160,7 +164,7 @@ class _GalleryAppState extends State<GalleryApp> {
                   data: CupertinoThemeData(
                     brightness: Theme.of(context).brightness,
                   ),
-                  child: child,
+                  child: child!,
                 );
               }),
             ),

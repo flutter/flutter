@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/platform.dart';
-import '../doctor.dart';
+import '../doctor_validator.dart';
 import 'chrome.dart';
 
-/// A validator for Chromium-based brosers.
+/// A validator for Chromium-based browsers.
 abstract class ChromiumValidator extends DoctorValidator {
   const ChromiumValidator(String title) : super(title);
 
@@ -19,25 +17,25 @@ abstract class ChromiumValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final bool canRunChromium = _chromiumLauncher.canFindExecutable();
-    final String chromimSearchLocation = _chromiumLauncher.findExecutable();
+    final String chromiumSearchLocation = _chromiumLauncher.findExecutable();
     final List<ValidationMessage> messages = <ValidationMessage>[
       if (_platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChromium)
-          ValidationMessage.hint('$chromimSearchLocation is not executable.')
+          ValidationMessage.hint('$chromiumSearchLocation is not executable.')
         else
-          ValidationMessage('$kChromeEnvironment = $chromimSearchLocation')
+          ValidationMessage('$kChromeEnvironment = $chromiumSearchLocation')
       else
         if (!canRunChromium)
           ValidationMessage.hint('Cannot find $_name. Try setting '
             '$kChromeEnvironment to a $_name executable.')
         else
-          ValidationMessage('$_name at $chromimSearchLocation'),
+          ValidationMessage('$_name at $chromiumSearchLocation'),
     ];
     if (!canRunChromium) {
       return ValidationResult(
         ValidationType.missing,
         messages,
-        statusInfo: 'Cannot find $_name executable at $chromimSearchLocation',
+        statusInfo: 'Cannot find $_name executable at $chromiumSearchLocation',
       );
     }
     return ValidationResult(
@@ -50,8 +48,8 @@ abstract class ChromiumValidator extends DoctorValidator {
 /// A validator that checks whether Chrome is installed and can run.
 class ChromeValidator extends ChromiumValidator {
   const ChromeValidator({
-    @required Platform platform,
-    @required ChromiumLauncher chromiumLauncher,
+    required Platform platform,
+    required ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Chrome - develop for the web');
@@ -66,11 +64,11 @@ class ChromeValidator extends ChromiumValidator {
   String get _name => 'Chrome';
 }
 
-/// A validator that checks whethere Edge is installed and can run.
+/// A validator that checks whether Edge is installed and can run.
 class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
-    @required Platform platform,
-    @required ChromiumLauncher chromiumLauncher,
+    required Platform platform,
+    required ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Edge - develop for the web');

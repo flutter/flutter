@@ -40,7 +40,7 @@ class GridTile extends StatelessWidget {
 
   /// The widget that fills the tile.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
-import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -67,7 +68,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile works with binary file', () {
     file.writeAsBytesSync(base64.decode(base64PlistBinary));
@@ -76,7 +77,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile works with json file', () {
     file.writeAsBytesSync(base64.decode(base64PlistJson));
@@ -85,13 +86,13 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile returns null for non-existent plist file', () {
     expect(parser.getValueFromFile('missing.plist', 'CFBundleIdentifier'), null);
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile returns null for non-existent key within plist', () {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
@@ -100,7 +101,7 @@ void main() {
     expect(parser.getValueFromFile(file.absolute.path, 'BadKey'), null);
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile returns null for malformed plist file', () {
     file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
@@ -108,7 +109,7 @@ void main() {
     expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), null);
     expect(logger.statusText, isNotEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.getValueFromFile throws when /usr/bin/plutil is not found', () async {
     expect(
@@ -117,5 +118,5 @@ void main() {
     );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: platform.isMacOS);
+  }, skip: platform.isMacOS); // [intended] requires macos tool chain.
 }

@@ -95,7 +95,7 @@ void main() {
   });
 
   test('SliverGeometry with no arguments is valid', () {
-    expect(const SliverGeometry().debugAssertIsValid(), isTrue);
+    expect(SliverGeometry.zero.debugAssertIsValid(), isTrue);
   });
 
   test('SliverGeometry throws error when layoutExtent exceeds paintExtent', () {

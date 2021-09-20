@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 import 'page_transitions_theme.dart';
 import 'theme.dart';
@@ -109,7 +108,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
       if (result == null) {
         throw FlutterError(
           'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.'
+          'Route builders must never return null.',
         );
       }
       return true;
@@ -123,7 +122,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final PageTransitionsTheme theme = Theme.of(context)!.pageTransitionsTheme;
+    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
@@ -157,18 +156,19 @@ class MaterialPage<T> extends Page<T> {
     LocalKey? key,
     String? name,
     Object? arguments,
+    String? restorationId,
   }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments);
+       super(key: key, name: name, arguments: arguments, restorationId: restorationId);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
 
-  /// {@macro flutter.widgets.modalRoute.maintainState}
+  /// {@macro flutter.widgets.ModalRoute.maintainState}
   final bool maintainState;
 
-  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
   @override

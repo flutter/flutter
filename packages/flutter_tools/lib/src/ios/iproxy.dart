@@ -2,24 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
+enum IOSDeviceConnectionInterface {
+  none,
+  usb,
+  network,
+}
+
 /// Wraps iproxy command line tool port forwarding.
 ///
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    @required String iproxyPath,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required MapEntry<String, String> dyLdLibEntry,
+    required String iproxyPath,
+    required Logger logger,
+    required ProcessManager processManager,
+    required MapEntry<String, String> dyLdLibEntry,
   }) : _dyLdLibEntry = dyLdLibEntry,
         _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+        _logger = logger,
         _iproxyPath = iproxyPath;
 
   /// Create a [IProxy] for testing.
@@ -27,8 +33,8 @@ class IProxy {
   /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
   /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
   factory IProxy.test({
-    @required Logger logger,
-    @required ProcessManager processManager,
+    required Logger logger,
+    required ProcessManager processManager,
   }) {
     return IProxy(
       iproxyPath: 'iproxy',
@@ -42,6 +48,7 @@ class IProxy {
 
   final String _iproxyPath;
   final ProcessUtils _processUtils;
+  final Logger _logger;
   final MapEntry<String, String> _dyLdLibEntry;
 
   Future<Process> forward(int devicePort, int hostPort, String deviceId) {
@@ -52,6 +59,8 @@ class IProxy {
         '$hostPort:$devicePort',
         '--udid',
         deviceId,
+        if (_logger.isVerbose)
+          '--debug',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry],

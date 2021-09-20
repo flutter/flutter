@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -31,7 +28,7 @@ void _tests() {
 
     final ScrollController scrollController = ScrollController();
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
-      return Container(
+      return SizedBox(
         height: appBarExpandedHeight,
         child: Text('Item $i'),
       );
@@ -296,7 +293,7 @@ void _tests() {
     );
     final List<Widget> slivers = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: containerHeight,
           child: Text('Item $i', textDirection: TextDirection.ltr),
         ),
@@ -383,7 +380,7 @@ void _tests() {
 
     final List<Widget> slivers = List<Widget>.generate(5, (int i) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: 20.0,
           child: Text('Item $i'),
         ),
@@ -462,7 +459,7 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Text('Item $i', textDirection: TextDirection.ltr),
       );
@@ -575,7 +572,7 @@ void _tests() {
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: Text('Item $i', textDirection: TextDirection.ltr),
         ),
@@ -684,7 +681,7 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Text('Item $i', textDirection: TextDirection.ltr),
       );
@@ -800,7 +797,7 @@ void _tests() {
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: Text('Item $i', textDirection: TextDirection.ltr),
         ),
@@ -914,13 +911,13 @@ void _tests() {
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     final GlobalKey forwardAppBarKey = GlobalKey(debugLabel: 'forward app bar');
     final List<Widget> forwardChildren = List<Widget>.generate(10, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Text('Forward Item $i', textDirection: TextDirection.ltr),
       );
     });
     final List<Widget> backwardChildren = List<Widget>.generate(10, (int i) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: Text('Backward Item $i', textDirection: TextDirection.ltr),
       );

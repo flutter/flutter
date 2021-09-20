@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class MenuDemo extends StatefulWidget {
-  const MenuDemo({ Key key }) : super(key: key);
+  const MenuDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/menu';
 
@@ -16,18 +16,17 @@ class MenuDemo extends StatefulWidget {
 }
 
 class MenuDemoState extends State<MenuDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final String _simpleValue1 = 'Menu item value one';
   final String _simpleValue2 = 'Menu item value two';
   final String _simpleValue3 = 'Menu item value three';
-  String _simpleValue;
+  String? _simpleValue;
 
   final String _checkedValue1 = 'One';
   final String _checkedValue2 = 'Two';
   final String _checkedValue3 = 'Free';
   final String _checkedValue4 = 'Four';
-  List<String> _checkedValues;
+  late List<String> _checkedValues;
 
   @override
   void initState() {
@@ -37,14 +36,14 @@ class MenuDemoState extends State<MenuDemo> {
   }
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
      content: Text(value),
     ));
   }
 
   void showMenuSelection(String value) {
     if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value))
-      _simpleValue = value;
+      setState(() => _simpleValue = value);
     showInSnackBar('You selected: $value');
   }
 
@@ -62,7 +61,6 @@ class MenuDemoState extends State<MenuDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Menus'),
         actions: <Widget>[
@@ -167,7 +165,7 @@ class MenuDemoState extends State<MenuDemo> {
               onSelected: showMenuSelection,
               child: ListTile(
                 title: const Text('An item with a simple menu'),
-                subtitle: Text(_simpleValue),
+                subtitle: Text(_simpleValue!),
               ),
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(

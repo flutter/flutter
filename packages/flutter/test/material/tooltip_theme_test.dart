@@ -2,33 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
-import 'package:flutter/src/material/tooltip_theme.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
-// This file uses "as dynamic" in a few places to defeat the static
-// analysis. In general you want to avoid using this style in your
-// code, as it will cause the analyzer to be unable to help you catch
-// errors.
-//
-// In this case, we do it because we are trying to call internal
-// methods of the tooltip code in order to test it. Normally, the
-// state of a tooltip is a private class, but by using a GlobalKey we
-// can get a handle to that object and by using "as dynamic" we can
-// bypass the analyzer's type checks and call methods that we aren't
-// supposed to be able to know about.
-//
-// It's ok to do this in tests, but you really don't want to do it in
-// production code.
-
 const String tooltipText = 'TIP';
 const double _customPaddingValue = 10.0;
+
+void _ensureTooltipVisible(GlobalKey key) {
+  // This function uses "as dynamic"to defeat the static analysis. In general
+  // you want to avoid using this style in your code, as it will cause the
+  // analyzer to be unable to help you catch errors.
+  //
+  // In this case, we do it because we are trying to call internal methods of
+  // the tooltip code in order to test it. Normally, the state of a tooltip is a
+  // private class, but by using a GlobalKey we can get a handle to that object
+  // and by using "as dynamic" we can bypass the analyzer's type checks and call
+  // methods that we aren't supposed to be able to know about.
+  //
+  // It's ok to do this in tests, but you really don't want to do it in
+  // production code.
+  // ignore: avoid_dynamic_calls
+  (key.currentState as dynamic).ensureTooltipVisible();
+}
 
 void main() {
   test('TooltipThemeData copyWith, ==, hashCode basics', () {
@@ -47,6 +48,8 @@ void main() {
     expect(theme.textStyle, null);
     expect(theme.waitDuration, null);
     expect(theme.showDuration, null);
+    expect(theme.triggerMode, null);
+    expect(theme.enableFeedback, null);
   });
 
   testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -65,6 +68,8 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.longPress;
+    const bool enableFeedback = true;
     const TooltipThemeData(
       height: 15.0,
       padding: EdgeInsets.all(20.0),
@@ -75,6 +80,8 @@ void main() {
       textStyle: TextStyle(decoration: TextDecoration.underline),
       waitDuration: wait,
       showDuration: show,
+      triggerMode: triggerMode,
+      enableFeedback: enableFeedback,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -92,6 +99,8 @@ void main() {
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
       'wait duration: ${wait.toString()}',
       'show duration: ${show.toString()}',
+      'triggerMode: $triggerMode',
+      'enableFeedback: true',
     ]);
   });
 
@@ -104,7 +113,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 100.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -136,7 +145,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -163,7 +172,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 100.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -194,7 +203,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -222,7 +231,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -254,7 +263,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -292,7 +301,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -323,7 +332,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -362,7 +371,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: true,
             ),
@@ -394,7 +403,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -420,7 +429,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: true,
           ),
@@ -451,7 +460,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -481,7 +490,7 @@ void main() {
                 return Theme(
                   data: ThemeData(
                     tooltipTheme: const TooltipThemeData(
-                      padding: EdgeInsets.all(0.0),
+                      padding: EdgeInsets.zero,
                       margin: EdgeInsets.all(_customPaddingValue),
                     ),
                   ),
@@ -500,7 +509,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
@@ -538,7 +547,7 @@ void main() {
               builder: (BuildContext context) {
                 return TooltipTheme(
                   data: const TooltipThemeData(
-                    padding: EdgeInsets.all(0.0),
+                    padding: EdgeInsets.zero,
                     margin: EdgeInsets.all(_customPaddingValue),
                   ),
                   child: Tooltip(
@@ -556,7 +565,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
@@ -604,7 +613,7 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -633,7 +642,7 @@ void main() {
         ),
       ),
     ));
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -676,7 +685,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
@@ -718,7 +727,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
@@ -760,7 +769,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(
@@ -805,7 +814,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    _ensureTooltipVisible(key);
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(
@@ -866,7 +875,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(customWaitDuration);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -910,7 +919,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -982,6 +991,54 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle(); // Tooltip should fade out after
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(triggerMode: triggerMode),
+          ),
+          child: const Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: SizedBox(width: 100.0, height: 100.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await gesture.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
+  });
+
+  testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
+    const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: TooltipTheme(
+          data: TooltipThemeData(triggerMode: triggerMode),
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: SizedBox(width: 100.0, height: 100.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await gesture.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
   testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
@@ -1154,7 +1211,7 @@ void main() {
 
   testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1192,12 +1249,12 @@ void main() {
       },
     ]));
     semantics.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1237,13 +1294,13 @@ void main() {
       },
     ]));
     semantics.dispose();
-    SystemChannels.accessibility.setMockMessageHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
   testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const Tooltip(message: 'message',).debugFillProperties(builder);
+    const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))

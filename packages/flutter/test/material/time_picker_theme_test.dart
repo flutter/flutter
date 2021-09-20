@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -153,15 +152,19 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyText1!
         .merge(Typography.material2014().black.bodyText1)
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       secondaryLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyText1!
         .merge(Typography.material2014().white.bodyText1)
@@ -232,7 +235,7 @@ void main() {
   testWidgets('Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
-    await tester.pumpWidget(_TimePickerLauncher(themeData: theme,));
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -294,15 +297,19 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyText1!
           .merge(Typography.material2014().black.bodyText1)
           .copyWith(color: _unselectedColor),
     );
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       secondaryLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyText1!
           .merge(Typography.material2014().white.bodyText1)
@@ -425,18 +432,18 @@ class _TimePickerLauncher extends StatelessWidget {
       home: Material(
         child: Center(
           child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    await showTimePicker(
-                      context: context,
-                      initialEntryMode: entryMode,
-                      initialTime: const TimeOfDay(hour: 7, minute: 15),
-                    );
-                  },
-                );
-              }
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialEntryMode: entryMode,
+                    initialTime: const TimeOfDay(hour: 7, minute: 15),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),
@@ -461,7 +468,7 @@ Material _dayPeriodMaterial(WidgetTester tester) {
 }
 
 Container _dayPeriodDivider(WidgetTester tester) {
-  return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(1));
+  return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(0));
 }
 
 IconButton _entryModeIconButton(WidgetTester tester) {

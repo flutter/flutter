@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -9,7 +11,7 @@ import 'package:meta/meta.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'device_port_forwarder.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -19,7 +21,6 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.throttleDuration,
-    this.throttleTimeout,
     this.hostPort,
     this.devicePort,
     this.ipv6,
@@ -37,11 +38,10 @@ class ProtocolDiscovery {
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
     Duration throttleDuration,
-    Duration throttleTimeout,
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
-    Logger logger, // TODO(jonahwilliams): make required.
+    @required Logger logger,
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -49,11 +49,10 @@ class ProtocolDiscovery {
       kObservatoryService,
       portForwarder: portForwarder,
       throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
-      throttleTimeout: throttleTimeout,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
-      logger: logger ?? globals.logger,
+      logger: logger,
     );
   }
 
@@ -67,11 +66,6 @@ class ProtocolDiscovery {
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
-
-  /// The time between URIs are discovered before timing out when scraping the [logReader].
-  ///
-  /// If null, log scanning will continue indefinitely.
-  final Duration throttleTimeout;
 
   StreamSubscription<String> _deviceLogSubscription;
   _BufferedStreamController<Uri> _uriStreamController;
@@ -99,15 +93,10 @@ class ProtocolDiscovery {
   /// Port forwarding is only attempted when this is invoked,
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
-    Stream<Uri> uriStream = _uriStreamController.stream
+    final Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
       ));
-    if (throttleTimeout != null) {
-      // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
-      uriStream = uriStream.timeout(throttleTimeout,
-          onTimeout: (EventSink<Uri> sink) => sink.close());
-    }
     return uriStream.asyncMap<Uri>(_forwardPort);
   }
 
@@ -139,7 +128,7 @@ class ProtocolDiscovery {
     } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
-    if (uri == null) {
+    if (uri == null || uri.host.isEmpty) {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
@@ -160,8 +149,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(InternetAddress(hostUri.host).isLoopback);
-    if (ipv6) {
+    if (InternetAddress(hostUri.host).isLoopback && ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;
@@ -189,8 +177,8 @@ class _BufferedStreamController<T> {
           _streamControllerInstance.add(event);
         } else {
           _streamControllerInstance.addError(
-            event.first as Object,
-            event.last as StackTrace,
+            (event as Iterable<dynamic>).first as Object,
+            (event as Iterable<dynamic>).last as StackTrace,
           );
         }
       }

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Activity indicator animate property works',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
 
@@ -96,8 +99,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 30% in progress',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -119,8 +121,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 100% in progress',
-      (WidgetTester tester) async {
+  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(

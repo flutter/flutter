@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoButtonsDemo extends StatefulWidget {
+  const CupertinoButtonsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/buttons';
 
   @override
-  _CupertinoButtonDemoState createState() => _CupertinoButtonDemoState();
+  State<CupertinoButtonsDemo> createState() => _CupertinoButtonDemoState();
 }
 
 class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
@@ -59,8 +61,8 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                             },
                           ),
                           const CupertinoButton(
-                            child: Text('Disabled'),
                             onPressed: null,
+                            child: Text('Disabled'),
                           ),
                         ],
                       ),
@@ -74,8 +76,8 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     const CupertinoButton.filled(
-                      child: Text('Disabled'),
                       onPressed: null,
+                      child: Text('Disabled'),
                     ),
                   ],
                 ),

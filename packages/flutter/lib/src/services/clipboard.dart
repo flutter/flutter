@@ -24,7 +24,6 @@ class ClipboardData {
 class Clipboard {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Clipboard._();
 
   // Constants for common [getData] [format] types.
@@ -59,5 +58,21 @@ class Clipboard {
     if (result == null)
       return null;
     return ClipboardData(text: result['text'] as String?);
+  }
+
+  /// Returns a future that resolves to true iff the clipboard contains string
+  /// data.
+  ///
+  /// See also:
+  ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
+  static Future<bool> hasStrings() async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
+      'Clipboard.hasStrings',
+      Clipboard.kTextPlain,
+    );
+    if (result == null) {
+      return false;
+    }
+    return result['value'] as bool;
   }
 }

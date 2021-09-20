@@ -5,7 +5,7 @@
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
@@ -17,7 +17,7 @@ class BackButtonMemoryTest extends MemoryTest {
   BackButtonMemoryTest() : super('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', 'test_memory/back_button.dart', packageName);
 
   @override
-  AndroidDevice get device => super.device as AndroidDevice;
+  AndroidDevice? get device => super.device as AndroidDevice?;
 
   @override
   int get iterationCount => 5;
@@ -32,7 +32,7 @@ class BackButtonMemoryTest extends MemoryTest {
 
       // Push back button, wait for it to be seen by the Flutter app.
       prepareForNextMessage('AppLifecycleState.paused');
-      await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
+      await device!.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
       await receivedNextMessage;
 
       // Give Android time to settle (e.g. run GCs) after closing the app.
@@ -40,7 +40,7 @@ class BackButtonMemoryTest extends MemoryTest {
 
       // Relaunch the app, wait for it to launch.
       prepareForNextMessage('READY');
-      final String output = await device.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
+      final String output = await device!.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
       print('adb shell am start: $output');
       if (output.contains('Error'))
         fail('unable to launch activity');

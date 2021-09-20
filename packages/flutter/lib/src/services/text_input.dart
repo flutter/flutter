@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
@@ -10,7 +9,6 @@ import 'dart:ui' show
   Offset,
   Size,
   Rect,
-  TextAffinity,
   TextAlign,
   TextDirection,
   hashValues;
@@ -18,12 +16,14 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../../services.dart' show Clipboard;
 import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
+import 'text_editing_delta.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -175,14 +175,17 @@ class TextInputType {
   /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
   static const TextInputType streetAddress = TextInputType._(9);
 
+  /// Prevent the OS from showing the on-screen virtual keyboard.
+  static const TextInputType none = TextInputType._(10);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress, none,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address', 'none',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -225,8 +228,9 @@ class TextInputType {
 ///
 /// Despite the logical meaning of each action, choosing a particular
 /// [TextInputAction] does not necessarily cause any specific behavior to
-/// happen. It is up to the developer to ensure that the behavior that occurs
-/// when an action button is pressed is appropriate for the action button chosen.
+/// happen, other than changing the focus when appropriate. It is up to the
+/// developer to ensure that the behavior that occurs when an action button is
+/// pressed is appropriate for the action button chosen.
 ///
 /// For example: If the user presses the keyboard action button on iOS when it
 /// reads "Emergency Call", the result should not be a focus change to the next
@@ -314,6 +318,8 @@ enum TextInputAction {
   /// Logical meaning: The user is done with the current input source and wants
   /// to move to the next one.
   ///
+  /// Moves the focus to the next focusable item in the same [FocusScope].
+  ///
   /// Android: Corresponds to Android's "IME_ACTION_NEXT". The OS displays a
   /// button that represents moving forward, e.g., a right-facing arrow button.
   ///
@@ -323,6 +329,8 @@ enum TextInputAction {
 
   /// Logical meaning: The user wishes to return to the previous input source
   /// in the group, e.g., a form with multiple [TextField]s.
+  ///
+  /// Moves the focus to the previous focusable item in the same [FocusScope].
   ///
   /// Android: Corresponds to Android's "IME_ACTION_PREVIOUS". The OS displays a
   /// button that represents moving backward, e.g., a left-facing arrow button.
@@ -458,7 +466,9 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
-    this.autofillConfiguration,
+    this.autofillConfiguration = AutofillConfiguration.disabled,
+    this.enableIMEPersonalizedLearning = true,
+    this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -467,7 +477,9 @@ class TextInputConfiguration {
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
-       assert(textCapitalization != null);
+       assert(textCapitalization != null),
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -493,9 +505,9 @@ class TextInputConfiguration {
   /// to the platform. This will prevent the corresponding input field from
   /// participating in autofills triggered by other fields. Additionally, on
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
-  final AutofillConfiguration? autofillConfiguration;
+  final AutofillConfiguration autofillConfiguration;
 
-  /// {@template flutter.services.textInput.smartDashesType}
+  /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
   ///
   /// This flag only affects iOS versions 11 and above. It sets
@@ -520,7 +532,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartDashesType smartDashesType;
 
-  /// {@template flutter.services.textInput.smartQuotesType}
+  /// {@template flutter.services.TextInputConfiguration.smartQuotesType}
   /// Whether to allow the platform to automatically format quotes.
   ///
   /// This flag only affects iOS. It sets
@@ -545,7 +557,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartQuotesType smartQuotesType;
 
-  /// {@template flutter.services.textInput.enableSuggestions}
+  /// {@template flutter.services.TextInputConfiguration.enableSuggestions}
   /// Whether to show input suggestions as the user types.
   ///
   /// This flag only affects Android. On iOS, suggestions are tied directly to
@@ -583,8 +595,83 @@ class TextInputConfiguration {
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
+  /// {@template flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  /// Whether to enable that the IME update personalized data such as typing
+  /// history and user dictionary data.
+  ///
+  /// This flag only affects Android. On iOS, there is no equivalent flag.
+  ///
+  /// Defaults to true. Cannot be null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#IME_FLAG_NO_PERSONALIZED_LEARNING>
+  /// {@endtemplate}
+  final bool enableIMEPersonalizedLearning;
+
+  /// Creates a copy of this [TextInputConfiguration] with the given fields
+  /// replaced with new values.
+  TextInputConfiguration copyWith({
+    TextInputType? inputType,
+    bool? readOnly,
+    bool? obscureText,
+    bool? autocorrect,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool? enableSuggestions,
+    String? actionLabel,
+    TextInputAction? inputAction,
+    Brightness? keyboardAppearance,
+    TextCapitalization? textCapitalization,
+    bool? enableIMEPersonalizedLearning,
+    AutofillConfiguration? autofillConfiguration,
+    bool? enableDeltaModel,
+  }) {
+    return TextInputConfiguration(
+      inputType: inputType ?? this.inputType,
+      readOnly: readOnly ?? this.readOnly,
+      obscureText: obscureText ?? this.obscureText,
+      autocorrect: autocorrect ?? this.autocorrect,
+      smartDashesType: smartDashesType ?? this.smartDashesType,
+      smartQuotesType: smartQuotesType ?? this.smartQuotesType,
+      enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      inputAction: inputAction ?? this.inputAction,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
+    );
+  }
+
+  /// Whether to enable that the engine sends text input updates to the
+  /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  ///
+  /// Enabling this flag results in granular text updates being received from the
+  /// platform's text input control.
+  ///
+  /// When this is enabled:
+  ///  * You must implement [DeltaTextInputClient] and not [TextInputClient] to
+  ///    receive granular updates from the platform's text input.
+  ///  * Platform text input updates will come through
+  ///    [DeltaTextInputClient.updateEditingValueWithDeltas].
+  ///  * If [TextInputClient] is implemented with this property enabled then
+  ///    you will experience unexpected behavior as [TextInputClient] does not implement
+  ///    a delta channel.
+  ///
+  /// When this is disabled:
+  ///  * If [DeltaTextInputClient] is implemented then updates for the
+  ///    editing state will continue to come through the
+  ///    [DeltaTextInputClient.updateEditingValue] channel.
+  ///  * If [TextInputClient] is implemented then updates for the editing
+  ///    state will come through [TextInputClient.updateEditingValue].
+  ///
+  /// Defaults to false. Cannot be null.
+  final bool enableDeltaModel;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
+    final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
@@ -597,7 +684,9 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      if (autofillConfiguration != null) 'autofill': autofillConfiguration!.toJson(),
+      'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
+      if (autofill != null) 'autofill': autofill,
+      'enableDeltaModel' : enableDeltaModel,
     };
   }
 }
@@ -680,19 +769,6 @@ class TextEditingValue {
     );
   }
 
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'text': text,
-      'selectionBase': selection.baseOffset,
-      'selectionExtent': selection.extentOffset,
-      'selectionAffinity': selection.affinity.toString(),
-      'selectionIsDirectional': selection.isDirectional,
-      'composingBase': composing.start,
-      'composingExtent': composing.end,
-    };
-  }
-
   /// The current text being edited.
   final String text;
 
@@ -729,6 +805,19 @@ class TextEditingValue {
   /// programming error.
   bool get isComposingRangeValid => composing.isValid && composing.isNormalized && composing.end <= text.length;
 
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'text': text,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
+    };
+  }
+
   @override
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
@@ -750,17 +839,79 @@ class TextEditingValue {
   );
 }
 
-/// An interface for manipulating the selection, to be used by the implementor
-/// of the toolbar widget.
-abstract class TextSelectionDelegate {
+/// Indicates what triggered the change in selected text (including changes to
+/// the cursor location).
+enum SelectionChangedCause {
+  /// The user tapped on the text and that caused the selection (or the location
+  /// of the cursor) to change.
+  tap,
+
+  /// The user tapped twice in quick succession on the text and that caused
+  /// the selection (or the location of the cursor) to change.
+  doubleTap,
+
+  /// The user long-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  longPress,
+
+  /// The user force-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  forcePress,
+
+  /// The user used the keyboard to change the selection or the location of the
+  /// cursor.
+  ///
+  /// Keyboard-triggered selection changes may be caused by the IME as well as
+  /// by accessibility tools (e.g. TalkBack on Android).
+  keyboard,
+
+  /// The user used the selection toolbar to change the selection or the
+  /// location of the cursor.
+  ///
+  /// An example is when the user taps on select all in the tool bar.
+  toolbar,
+
+  /// The user used the mouse to change the selection by dragging over a piece
+  /// of text.
+  drag,
+}
+
+/// A mixin for manipulating the selection, provided for toolbar or shortcut
+/// keys.
+mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
-  /// Sets the current text input (replaces the whole line).
-  set textEditingValue(TextEditingValue value);
+  /// Indicates that the user has requested the delegate to replace its current
+  /// text editing state with [value].
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
+  @Deprecated(
+    'Use the userUpdateTextEditingValue instead. '
+    'This feature was deprecated after v1.26.0-17.2.pre.',
+  )
+  set textEditingValue(TextEditingValue value) {}
+
+  /// Indicates that the user has requested the delegate to replace its current
+  /// text editing state with [value].
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.userUpdateTextEditingValue]: an implementation that
+  ///   applies additional pre-processing to the specified [value], before
+  ///   updating the text editing state.
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
-  void hideToolbar();
+  ///
+  /// By default, hideHandles is true, and the toolbar is hidden along with its
+  /// handles. If hideHandles is set to false, then the toolbar will be hidden
+  /// but the handles will remain.
+  void hideToolbar([bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
@@ -777,13 +928,45 @@ abstract class TextSelectionDelegate {
 
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
+
+  /// Cut current selection to [Clipboard].
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  void cutSelection(SelectionChangedCause cause);
+
+  /// Paste text from [Clipboard].
+  ///
+  /// If there is currently a selection, it will be replaced.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  Future<void> pasteText(SelectionChangedCause cause);
+
+  /// Set the current selection to contain the entire text value.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
+  /// will be scrolled into view.
+  void selectAll(SelectionChangedCause cause);
+
+  /// Copy current selection to [Clipboard].
+  ///
+  /// If [cause] is [SelectionChangedCause.toolbar], the position of
+  /// [bringIntoView] to selection will be called and hide toolbar.
+  void copySelection(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
 ///
+/// If [TextInputConfiguration.enableDeltaModel] is set to true,
+/// [DeltaTextInputClient] must be implemented instead of this class.
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [EditableText], a [TextInputClient] implementation.
+///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
+///    granular information from the platform's text input.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -805,12 +988,27 @@ abstract class TextInputClient {
   AutofillScope? get currentAutofillScope;
 
   /// Requests that this client update its editing state to the given value.
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
   void updateEditingValue(TextEditingValue value);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
-  /// Requests that this client perform the private command.
+  /// Request from the input method that this client perform the given private
+  /// command.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [performPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand\(java.lang.String,%20android.os.Bundle\)),
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [sendAppPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand),
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
@@ -828,11 +1026,44 @@ abstract class TextInputClient {
   void connectionClosed();
 }
 
-/// An interface for interacting with a text input control.
+/// An interface to receive granular information from [TextInput].
 ///
 /// See also:
 ///
 ///  * [TextInput.attach]
+///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
+///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
+abstract class DeltaTextInputClient extends TextInputClient {
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// Here is an example of what implementation of this method could look like:
+  /// {@tool snippet}
+  /// @override
+  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///   TextEditingValue newValue = _previousValue;
+  ///   for (final TextEditingDelta delta in textEditingDeltas) {
+  ///     newValue = delta.apply(newValue);
+  ///   }
+  ///   _localValue = newValue;
+  /// }
+  /// {@end-tool}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
+}
+
+/// An interface for interacting with a text input control.
+///
+/// See also:
+///
+///  * [TextInput.attach], a method used to establish a [TextInputConnection]
+///    between the system's text input and a [TextInputClient].
+///  * [EditableText], a [TextInputClient] that connects to and interacts with
+///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
   TextInputConnection._(this._client)
       : assert(_client != null),
@@ -841,6 +1072,7 @@ class TextInputConnection {
   Size? _cachedSize;
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
+  Rect? _cachedCaretRect;
 
   static int _nextId = 1;
   final int _id;
@@ -889,7 +1121,8 @@ class TextInputConnection {
     TextInput._instance._updateConfig(configuration);
   }
 
-  /// Requests that the text input control change its internal state to match the given state.
+  /// Requests that the text input control change its internal state to match
+  /// the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
     TextInput._instance._setEditingState(value);
@@ -924,7 +1157,8 @@ class TextInputConnection {
   /// The given `rect` can not be null. If any of the 4 coordinates of the given
   /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
   ///
-  /// The information is currently only used on iOS, for positioning the IME bar.
+  /// This information is used for positioning the IME candidates menu on each
+  /// platform.
   void setComposingRect(Rect rect) {
     assert(rect != null);
     if (rect == _cachedRect)
@@ -932,6 +1166,24 @@ class TextInputConnection {
     _cachedRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setComposingTextRect(
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
+  }
+
+  /// Sends the coordinates of caret rect. This is used on macOS for positioning
+  /// the accent selection menu.
+  void setCaretRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedCaretRect)
+      return;
+    _cachedCaretRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    TextInput._instance._setCaretRect(
       <String, dynamic>{
         'width': validRect.width,
         'height': validRect.height,
@@ -1036,15 +1288,63 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
     ? Offset(encoded['X'] as double, encoded['Y'] as double)
-    : const Offset(0, 0);
+    : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
 /// An low-level interface to the system's text input control.
 ///
+/// To start interacting with the system's text input control, call [attach] to
+/// establish a [TextInputConnection] between the system's text input control
+/// and a [TextInputClient]. The majority of commands available for
+/// interacting with the text input control reside in the returned
+/// [TextInputConnection]. The communication between the system text input and
+/// the [TextInputClient] is asynchronous.
+///
+/// The platform text input plugin (which represents the system's text input)
+/// and the [TextInputClient] usually maintain their own text editing states
+/// ([TextEditingValue]) separately. They must be kept in sync as long as the
+/// [TextInputClient] is connected. The following methods can be used to send
+/// [TextEditingValue] to update the other party, when either party's text
+/// editing states change:
+///
+/// * The [TextInput.attach] method allows a [TextInputClient] to establish a
+///   connection to the text input. An optional field in its `configuration`
+///   parameter can be used to specify an initial value for the platform text
+///   input plugin's [TextEditingValue].
+///
+/// * The [TextInputClient] sends its [TextEditingValue] to the platform text
+///   input plugin using [TextInputConnection.setEditingState].
+///
+/// * The platform text input plugin sends its [TextEditingValue] to the
+///   connected [TextInputClient] via a "TextInput.setEditingState" message.
+///
+/// * When autofill happens on a disconnected [TextInputClient], the platform
+///   text input plugin sends the [TextEditingValue] to the connected
+///   [TextInputClient]'s [AutofillScope], and the [AutofillScope] will further
+///   relay the value to the correct [TextInputClient].
+///
+/// When synchronizing the [TextEditingValue]s, the communication may get stuck
+/// in an infinite when both parties are trying to send their own update. To
+/// mitigate the problem, only [TextInputClient]s are allowed to alter the
+/// received [TextEditingValue]s while platform text input plugins are to accept
+/// the received [TextEditingValue]s unmodified. More specifically:
+///
+/// * When a [TextInputClient] receives a new [TextEditingValue] from the
+///   platform text input plugin, it's allowed to modify the value (for example,
+///   apply [TextInputFormatter]s). If it decides to do so, it must send the
+///   updated [TextEditingValue] back to the platform text input plugin to keep
+///   the [TextEditingValue]s in sync.
+///
+/// * When the platform text input plugin receives a new value from the
+///   connected [TextInputClient], it must accept the new value as-is, to avoid
+///   sending back an updated value.
+///
 /// See also:
 ///
 ///  * [TextField], a widget in which the user may enter text.
+///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
+///    wants to take user input from the keyboard.
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
@@ -1173,35 +1473,69 @@ class TextInput {
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
+    // The updateEditingStateWithTag request (autofill) can come up even to a
+    // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
+      assert(_currentConnection!._client != null);
       final TextInputClient client = _currentConnection!._client;
-      assert(client != null);
       final AutofillScope? scope = client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
-        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
       }
 
       return;
     }
 
     final int client = args[0] as int;
-    // The incoming message was for a different client.
-    if (client != _currentConnection!._id)
-      return;
+    if (client != _currentConnection!._id) {
+      // If the client IDs don't match, the incoming message was for a different
+      // client.
+      bool debugAllowAnyway = false;
+      assert(() {
+        // In debug builds we allow "-1" as a magical client ID that ignores
+        // this verification step so that tests can always get through, even
+        // when they are not mocking the engine side of text input.
+        if (client == -1)
+          debugAllowAnyway = true;
+        return true;
+      }());
+      if (!debugAllowAnyway)
+        return;
+    }
+
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+
+        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.performPrivateCommand':
+        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
-          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
+          firstArg['action'] as String,
+          firstArg['data'] as Map<String, dynamic>,
+        );
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(
@@ -1281,6 +1615,13 @@ class TextInput {
     );
   }
 
+  void _setCaretRect(Map<String, dynamic> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setCaretRect',
+      args,
+    );
+  }
+
   void _setStyle(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
@@ -1299,7 +1640,7 @@ class TextInput {
   /// automatically when they are disposed. The default behavior can be
   /// overridden in [AutofillGroup.onDisposeAction].
   ///
-  /// {@template flutter.services.autofill.autofillContext}
+  /// {@template flutter.services.TextInput.finishAutofillContext}
   /// An autofill context is a collection of input fields that live in the
   /// platform's text input plugin. The platform is encouraged to save the user
   /// input stored in the current autofill context before the context is
@@ -1333,13 +1674,14 @@ class TextInput {
   ///
   /// See also:
   ///
+  /// * [EditableText.autofillHints] for autofill save troubleshooting tips.
   /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
     TextInput._instance._channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
-      shouldSave ,
+      shouldSave,
     );
   }
 }

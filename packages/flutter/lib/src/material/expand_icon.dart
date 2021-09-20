@@ -97,7 +97,7 @@ class ExpandIcon extends StatefulWidget {
   final Color? expandedColor;
 
   @override
-  _ExpandIconState createState() => _ExpandIconState();
+  State<ExpandIcon> createState() => _ExpandIconState();
 }
 
 class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
@@ -137,8 +137,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (widget.onPressed != null)
-      widget.onPressed!(widget.isExpanded);
+    widget.onPressed?.call(widget.isExpanded);
   }
 
   /// Default icon colors and opacities for when [Theme.brightness] is set to
@@ -155,7 +154,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       return widget.color!;
     }
 
-    switch(Theme.of(context)!.brightness) {
+    switch(Theme.of(context).brightness) {
       case Brightness.light:
         return Colors.black54;
       case Brightness.dark:
@@ -167,7 +166,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
 
     return Semantics(

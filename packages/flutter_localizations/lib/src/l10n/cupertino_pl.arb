@@ -30,5 +30,6 @@
   "pasteButtonLabel": "Wklej",
   "selectAllButtonLabel": "Wybierz wszystkie",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
-  "modalBarrierDismissLabel": "Zamknij"
+  "modalBarrierDismissLabel": "Zamknij",
+  "searchTextFieldPlaceholderLabel": "Szukaj"
 }

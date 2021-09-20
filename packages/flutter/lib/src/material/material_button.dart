@@ -28,7 +28,7 @@ import 'theme_data.dart';
 /// new widgets can be customized by specifying a [ButtonStyle]
 /// or by creating a one-off style using a `styleFrom` method like
 /// [TextButton.styleFrom]. The original button classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -130,7 +130,7 @@ class MaterialButton extends StatelessWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool>? onHighlightChanged;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -176,8 +176,6 @@ class MaterialButton extends StatelessWidget {
 
   /// The button's fill color, displayed by its [Material], while it
   /// is in its default (unpressed, [enabled]) state.
-  ///
-  /// The default fill color is the theme's button color, [ThemeData.buttonColor].
   ///
   /// See also:
   ///
@@ -352,7 +350,7 @@ class MaterialButton extends StatelessWidget {
   /// [ButtonThemeData.shape].
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -399,7 +397,7 @@ class MaterialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
     return RawMaterialButton(
@@ -429,9 +427,9 @@ class MaterialButton extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       animationDuration: buttonTheme.getAnimationDuration(this),
-      child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       disabledElevation: disabledElevation ?? 0.0,
+      child: child,
     );
   }
 

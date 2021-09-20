@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'deserialization_factory.dart';
 import 'enum_util.dart';
 import 'find.dart';
 import 'message.dart';

@@ -4,17 +4,15 @@
 
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show OSError, SocketException;
-import 'dart:math' as math show Random;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_goldens_client/skia_client.dart';
 export 'package:flutter_goldens_client/skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
@@ -27,7 +25,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test. _Which_ FlutterGoldenFileComparator is
 /// instantiated is based on the current testing environment.
-Future<void> testExecutable(FutureOr<void> testMain()) async {
+Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   const Platform platform = LocalPlatform();
   if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform);
@@ -59,25 +57,14 @@ Future<void> testExecutable(FutureOr<void> testMain()) async {
 ///     repository.
 ///
 ///   * The [FlutterPreSubmitFileComparator] is utilized in pre-submit testing,
-///     before a pull request lands on the master branch. When authorized, this
+///     before a pull request lands on the master branch. This
 ///     comparator uses the [SkiaGoldClient] to execute tryjobs, allowing
 ///     contributors to view and check in visual differences before landing the
 ///     change.
 ///
-///       * When unable to authenticate the `goldctl` tool, this comparator
-///         uses the [SkiaGoldClient] to request the baseline images kept by the
-///         [Flutter Gold dashboard](https://flutter-gold.skia.org). It then
-///         compares the current test image to the baseline images using the
-///         standard [GoldenFileComparator.compareLists] to detect any pixel
-///         difference. The [SkiaGoldClient] is also used in this case to check
-///         the active ignores from the dashboard, in order to allow intended
-///         changes to pass tests.
-///
 ///   * The [FlutterLocalFileComparator] is used for local development testing.
-///     Similar to the unauthorized implementation of the
-///     [FlutterPreSubmitFileComparator], this comparator will use the
-///     [SkiaGoldClient] to request baseline images from
-///     [Flutter Gold](https://flutter-gold.skia.org) and manually compare
+///     This comparator will use the [SkiaGoldClient] to request baseline images
+///     from [Flutter Gold](https://flutter-gold.skia.org) and manually compare
 ///     pixels. If a difference is detected, this comparator will
 ///     generate failure output illustrating the found difference. If a baseline
 ///     is not found for a given test image, it will consider it a new test and
@@ -143,17 +130,14 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   static Directory getBaseDirectory(
     LocalFileComparator defaultComparator,
     Platform platform, {
-    String suffix = '',
-    bool local = false,
+    String? suffix,
   }) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     Directory comparisonRoot;
 
-    if (!local) {
-      comparisonRoot = fs.systemTempDirectory.childDirectory(
-        'skia_goldens_$suffix'
-      );
+    if (suffix != null) {
+      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
     } else {
       comparisonRoot = flutterRoot.childDirectory(
         fs.path.join(
@@ -184,7 +168,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
-    return Uri.parse(prefix + '.' + golden.toString());
+    return Uri.parse('$prefix.$golden');
   }
 }
 
@@ -237,7 +221,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: 'flutter_goldens_postsubmit.',
     );
     baseDirectory.createSync(recursive: true);
 
@@ -316,7 +300,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      suffix: '${math.Random().nextInt(10000)}',
+      suffix: 'flutter_goldens_presubmit.',
     );
 
     if (!baseDirectory.existsSync())
@@ -481,7 +465,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
-      local: true,
     );
 
     if(!baseDirectory.existsSync()) {

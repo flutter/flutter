@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // entire file needs triage.
+@TestOn('!chrome')
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -13,40 +12,88 @@ import 'feedback_tester.dart';
 
 final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
 final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TimePickerDialog');
+final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
 
-class _TimePickerLauncher extends StatelessWidget {
+class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
     Key? key,
     required this.onChanged,
-    this.locale,
     this.entryMode = TimePickerEntryMode.dial,
+    this.restorationId,
   }) : super(key: key);
 
-  final ValueChanged<TimeOfDay> onChanged;
-  final Locale? locale;
+  final ValueChanged<TimeOfDay?> onChanged;
   final TimePickerEntryMode entryMode;
+  final String? restorationId;
+
+  @override
+  _TimePickerLauncherState createState() => _TimePickerLauncherState();
+}
+
+class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  late final RestorableRouteFuture<TimeOfDay?> _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
+    onComplete: _selectTime,
+    onPresent: (NavigatorState navigator, Object? arguments) {
+      return navigator.restorablePush(
+        _timePickerRoute,
+        arguments: <String, int>{
+          'entryMode': widget.entryMode.index,
+        },
+      );
+    },
+  );
+
+  static Route<TimeOfDay> _timePickerRoute(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
+    final TimePickerEntryMode entryMode = TimePickerEntryMode.values[args['entryMode'] as int];
+    return DialogRoute<TimeOfDay>(
+      context: context,
+      builder: (BuildContext context) {
+        return TimePickerDialog(
+          restorationId: 'time_picker_dialog',
+          initialTime: const TimeOfDay(hour: 7, minute: 0),
+          initialEntryMode: entryMode,
+        );
+      },
+    );
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_restorableTimePickerRouteFuture, 'time_picker_route_future');
+  }
+
+  void _selectTime(TimeOfDay? newSelectedTime) {
+    widget.onChanged(newSelectedTime);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: locale,
-      home: Material(
-        child: Center(
-          child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    onChanged(await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 7, minute: 0),
-                      initialEntryMode: entryMode,
-                    ));
-                  },
-                );
-              }
-          ),
+    return Material(
+      child: Center(
+        child: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              child: const Text('X'),
+              onPressed: () async {
+                if (widget.restorationId == null) {
+                  widget.onChanged(await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    initialEntryMode: widget.entryMode,
+                  ));
+                } else {
+                  _restorableTimePickerRouteFuture.present();
+                }
+              },
+            );
+          },
         ),
       ),
     );
@@ -55,17 +102,26 @@ class _TimePickerLauncher extends StatelessWidget {
 
 Future<Offset?> startPicker(
     WidgetTester tester,
-    ValueChanged<TimeOfDay> onChanged, {
+    ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+      String? restorationId,
     }) async {
-  await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US'), entryMode: entryMode));
+  await tester.pumpWidget(MaterialApp(
+    restorationScopeId: 'app',
+    locale: const Locale('en', 'US'),
+    home: _TimePickerLauncher(
+      onChanged: onChanged,
+      entryMode: entryMode,
+      restorationId: restorationId,
+    ),
+  ));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return entryMode == TimePickerEntryMode.dial ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial'))) : null;
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)))!;
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ElevatedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -82,24 +138,24 @@ void main() {
 
 void _tests() {
   testWidgets('tap-select an hour', (WidgetTester tester) async {
-    late TimeOfDay result;
+    TimeOfDay? result;
 
-    Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
     await tester.tapAt(Offset(center.dx, center.dy - 50.0)); // 12:00 AM
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
     await tester.tapAt(Offset(center.dx + 50.0, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
-    center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    center = (await startPicker(tester, (TimeOfDay? time) { result = time; }))!;
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await tester.tapAt(Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
@@ -109,7 +165,7 @@ void _tests() {
   testWidgets('drag-select an hour', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
     final Offset hour0 = Offset(center.dx, center.dy - 50.0); // 12:00 AM
     final Offset hour3 = Offset(center.dx + 50.0, center.dy);
     final Offset hour6 = Offset(center.dx, center.dy + 50.0);
@@ -123,21 +179,21 @@ void _tests() {
     await finishPicker(tester);
     expect(result.hour, 0);
 
-    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
+    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
     gesture = await tester.startGesture(hour0);
     await gesture.moveBy(hour3 - hour0);
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, 3);
 
-    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
+    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
     gesture = await tester.startGesture(hour3);
     await gesture.moveBy(hour6 - hour3);
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, equals(6));
 
-    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
+    expect(await startPicker(tester, (TimeOfDay? time) { result = time!; }), equals(center));
     gesture = await tester.startGesture(hour6);
     await gesture.moveBy(hour9 - hour6);
     await gesture.up();
@@ -148,7 +204,7 @@ void _tests() {
   testWidgets('tap-select switches from hour to minute', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
 
@@ -162,7 +218,7 @@ void _tests() {
   testWidgets('drag-select switches from hour to minute', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
     final Offset hour3 = Offset(center.dx + 50.0, center.dy);
     final Offset hour6 = Offset(center.dx, center.dy + 50.0);
     final Offset hour9 = Offset(center.dx - 50.0, center.dy);
@@ -181,7 +237,7 @@ void _tests() {
   testWidgets('tap-select rounds down to nearest 5 minute increment', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min46 = Offset(center.dx - 50.0, center.dy - 5); // 46 mins
 
@@ -195,7 +251,7 @@ void _tests() {
   testWidgets('tap-select rounds up to nearest 5 minute increment', (WidgetTester tester) async {
     late TimeOfDay result;
 
-    final Offset center = (await startPicker(tester, (TimeOfDay time) { result = time; }))!;
+    final Offset center = (await startPicker(tester, (TimeOfDay? time) { result = time!; }))!;
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
     final Offset min48 = Offset(center.dx - 50.0, center.dy - 15); // 48 mins
 
@@ -220,14 +276,14 @@ void _tests() {
     });
 
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(feedback.hapticCount, 1);
     });
 
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kFastFeedbackInterval);
       await tester.tapAt(Offset(center.dx, center.dy + 50.0));
@@ -236,7 +292,7 @@ void _tests() {
     });
 
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kSlowFeedbackInterval);
       await tester.tapAt(Offset(center.dx, center.dy + 50.0));
@@ -247,7 +303,7 @@ void _tests() {
     });
 
     testWidgets('drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -259,7 +315,7 @@ void _tests() {
     });
 
     testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -275,7 +331,7 @@ void _tests() {
     });
 
     testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
-      final Offset center = (await startPicker(tester, (TimeOfDay time) { }))!;
+      final Offset center = (await startPicker(tester, (TimeOfDay? time) { }))!;
       final Offset hour0 = Offset(center.dx, center.dy - 50.0);
       final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
@@ -299,10 +355,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
   });
 
@@ -311,10 +371,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
   });
 
@@ -358,10 +422,16 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
-    expect(semantics.nodesWith(value: 'Select minutes 00'), hasLength(1),
-        reason: '00 appears once in the header');
-    expect(semantics.nodesWith(value: 'Select hours 07'), hasLength(1),
-        reason: '07 appears once in the header');
+    expect(
+      semantics.nodesWith(value: 'Select minutes 00'),
+      hasLength(1),
+      reason: '00 appears once in the header',
+    );
+    expect(
+      semantics.nodesWith(value: 'Select hours 07'),
+      hasLength(1),
+      reason: '07 appears once in the header',
+    );
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
 
@@ -428,8 +498,9 @@ void _tests() {
     );
 
     // Ensure we preserve day period as we roll over.
-    final dynamic pickerState = tester.state(_timePickerDialog); // ignore: unnecessary_nullable_for_final_variable_declarations
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
+    final dynamic pickerState = tester.state(_timePickerDialog);
+    // ignore: avoid_dynamic_calls
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
       initialValue: '1',
@@ -493,8 +564,9 @@ void _tests() {
     );
 
     // Ensure we preserve hour period as we roll over.
-    final dynamic pickerState = tester.state(_timePickerDialog); // ignore: unnecessary_nullable_for_final_variable_declarations
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
+    final dynamic pickerState = tester.state(_timePickerDialog);
+    // ignore: avoid_dynamic_calls
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(
       initialValue: '00',
@@ -659,26 +731,26 @@ void _tests() {
     const String confirmText = 'Custom OK';
     const String helperText = 'Custom Help';
     await tester.pumpWidget(MaterialApp(
-        home: Material(
-          child: Center(
-            child: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () async {
-                      await showTimePicker(
-                        context: context,
-                        initialTime: const TimeOfDay(hour: 7, minute: 0),
-                        cancelText: cancelText,
-                        confirmText: confirmText,
-                        helpText: helperText,
-                      );
-                    },
+      home: Material(
+        child: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    cancelText: cancelText,
+                    confirmText: confirmText,
+                    helpText: helperText,
                   );
-                }
-            ),
+                },
+              );
+            },
           ),
-        )
+        ),
+      ),
     ));
 
     // Open the picker.
@@ -745,8 +817,6 @@ void _tests() {
       textScaleFactor: 1.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     final double minutesDisplayHeight = tester.getSize(find.text('41')).height;
     final double amHeight = tester.getSize(find.text('AM')).height;
@@ -761,8 +831,6 @@ void _tests() {
       textScaleFactor: 2.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     final double amHeight2x = tester.getSize(find.text('AM')).height;
     expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
@@ -778,8 +846,6 @@ void _tests() {
       textScaleFactor: 3.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
     expect(tester.getSize(find.text('AM')).height, equals(amHeight2x));
@@ -794,7 +860,7 @@ void _testsInput() {
 
   testWidgets('Initial time is the default', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay time) { result = time; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 7, minute: 0)));
   });
@@ -805,11 +871,64 @@ void _testsInput() {
     expect(find.text(helpText), findsOneWidget);
   });
 
+  testWidgets('Hour label text is used - Input', (WidgetTester tester) async {
+    const String hourLabelText = 'Custom hour label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, hourLabelText: hourLabelText);
+    expect(find.text(hourLabelText), findsOneWidget);
+  });
+
+
+  testWidgets('Minute label text is used - Input', (WidgetTester tester) async {
+    const String minuteLabelText = 'Custom minute label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, minuteLabelText: minuteLabelText);
+    expect(find.text(minuteLabelText), findsOneWidget);
+  });
+
+  testWidgets('Invalid error text is used - Input', (WidgetTester tester) async {
+    const String errorInvalidText = 'Custom validation error';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, errorInvalidText: errorInvalidText);
+    // Input invalid time (hour) to force validation error
+    await tester.enterText(find.byType(TextField).first, '88');
+    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TextButton).first));
+    // Tap the ok button to trigger the validation error with custom translation
+    await tester.tap(find.text(materialLocalizations.okButtonLabel));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text(errorInvalidText), findsOneWidget);
+  });
+
   testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input);
     await tester.tap(find.byIcon(Icons.access_time));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('Switching to dial entry mode triggers entry callback', (WidgetTester tester) async {
+    bool triggeredCallback = false;
+
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, onEntryModeChange: (TimePickerEntryMode mode) {
+      if (mode == TimePickerEntryMode.dial) {
+        triggeredCallback = true;
+      }
+    });
+
+    await tester.tap(find.byIcon(Icons.access_time));
+    await tester.pumpAndSettle();
+    expect(triggeredCallback, true);
+  });
+
+  testWidgets('Switching to input entry mode triggers entry callback', (WidgetTester tester) async {
+    bool triggeredCallback = false;
+
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dial, onEntryModeChange: (TimePickerEntryMode mode) {
+      if (mode == TimePickerEntryMode.input) {
+        triggeredCallback = true;
+      }
+    });
+
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pumpAndSettle();
+    expect(triggeredCallback, true);
   });
 
   testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
@@ -898,7 +1017,7 @@ void _testsInput() {
 
   testWidgets('Entered text returns time', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay time) { result = time; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
     await tester.enterText(find.byType(TextField).first, '9');
     await tester.enterText(find.byType(TextField).last, '12');
     await finishPicker(tester);
@@ -907,7 +1026,7 @@ void _testsInput() {
 
   testWidgets('Toggle to dial mode keeps selected time', (WidgetTester tester) async {
     late TimeOfDay result;
-    await startPicker(tester, (TimeOfDay time) { result = time; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
     await tester.enterText(find.byType(TextField).first, '8');
     await tester.enterText(find.byType(TextField).last, '15');
     await tester.tap(find.byIcon(Icons.access_time));
@@ -917,7 +1036,7 @@ void _testsInput() {
 
   testWidgets('Invalid text prevents dismissing', (WidgetTester tester) async {
     TimeOfDay? result;
-    await startPicker(tester, (TimeOfDay time) { result = time; }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) { result = time; }, entryMode: TimePickerEntryMode.input);
 
     // Invalid hour.
     await tester.enterText(find.byType(TextField).first, '88');
@@ -939,12 +1058,108 @@ void _testsInput() {
 
   // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
   testWidgets('Ensure hour/minute fields are top-aligned with the separator', (WidgetTester tester) async {
-    await startPicker(tester, (TimeOfDay time) { }, entryMode: TimePickerEntryMode.input);
+    await startPicker(tester, (TimeOfDay? time) { }, entryMode: TimePickerEntryMode.input);
     final double hourFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
     final double minuteFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
     final double separatorTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
     expect(hourFieldTop, separatorTop);
     expect(minuteFieldTop, separatorTop);
+  });
+
+  testWidgets('Time Picker state restoration test - dial mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    final Offset center = (await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    ))!;
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    await tester.restartAndRestore();
+    // Setting to PM adds 12 hours (18:45)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 18, minute: 45)));
+
+    // Test restoring from before PM was selected (6:45)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
+
+  testWidgets('Time Picker state restoration test - input mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      entryMode: TimePickerEntryMode.input,
+      restorationId: 'restorable_time_picker',
+    );
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    await tester.restartAndRestore();
+
+    // Setting to PM adds 12 hours (21:12)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 21, minute: 12)));
+
+    // Restoring from before PM was set (9:12)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+  });
+
+  testWidgets('Time Picker state restoration test - switching modes', (WidgetTester tester) async {
+    TimeOfDay? result;
+    final Offset center = (await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    ))!;
+
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    // Switch to input mode from dial mode.
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    // Select time using input mode controls.
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+
+    // Restoring from dial mode.
+    await tester.restoreFrom(restorationData);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
 }
 
@@ -958,7 +1173,7 @@ class PickerObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is DialogRoute) {
       pickerCount++;
     }
     super.didPush(route, previousRoute);
@@ -966,14 +1181,18 @@ class PickerObserver extends NavigatorObserver {
 }
 
 Future<void> mediaQueryBoilerplate(
-    WidgetTester tester,
-    bool alwaysUse24HourFormat, {
-      TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-      double textScaleFactor = 1.0,
-      TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
-      String? helpText,
-      bool accessibleNavigation = false,
-    }) async {
+  WidgetTester tester,
+  bool alwaysUse24HourFormat, {
+  TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+  double textScaleFactor = 1.0,
+  TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+  String? helpText,
+  String? hourLabelText,
+  String? minuteLabelText,
+  String? errorInvalidText,
+  bool accessibleNavigation = false,
+  EntryModeChangeCallback? onEntryModeChange,
+}) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -1000,6 +1219,10 @@ Future<void> mediaQueryBoilerplate(
                         initialTime: initialTime,
                         initialEntryMode: entryMode,
                         helpText: helpText,
+                        hourLabelText: hourLabelText,
+                        minuteLabelText: minuteLabelText,
+                        errorInvalidText: errorInvalidText,
+                        onEntryModeChanged: onEntryModeChange,
                       );
                     },
                     child: const Text('X'),
@@ -1012,7 +1235,6 @@ Future<void> mediaQueryBoilerplate(
       ),
     ),
   );
-
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle();
 }

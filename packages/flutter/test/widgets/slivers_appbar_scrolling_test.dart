@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
-  final RenderObject target = key.currentContext.findRenderObject();
+  final RenderObject target = key.currentContext!.findRenderObject()!;
   expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData as SliverPhysicalParentData;
+  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
@@ -45,10 +43,10 @@ void main() {
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    verifyPaintPosition(key1, const Offset(0.0, 0.0));
-    verifyPaintPosition(key2, const Offset(0.0, 0.0));
-    verifyPaintPosition(key3, const Offset(0.0, 0.0));
-    verifyPaintPosition(key4, const Offset(0.0, 0.0));
+    verifyPaintPosition(key1, Offset.zero);
+    verifyPaintPosition(key2, Offset.zero);
+    verifyPaintPosition(key3, Offset.zero);
+    verifyPaintPosition(key4, Offset.zero);
     verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 
@@ -160,7 +158,7 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
 class RenderBigSliver extends RenderSliver {
   static const double height = 550.0;
-  double get paintExtent => (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent) as double;
+  double get paintExtent => (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
 
   @override
   void performLayout() {
@@ -173,7 +171,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({ Key key }) : super(key: key);
+  const BigSliver({ Key? key }) : super(key: key);
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return RenderBigSliver();

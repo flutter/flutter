@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Einsetzen",
   "selectAllButtonLabel": "Alles auswählen",
   "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
-  "modalBarrierDismissLabel": "Schließen"
+  "modalBarrierDismissLabel": "Schließen",
+  "searchTextFieldPlaceholderLabel": "Suche"
 }

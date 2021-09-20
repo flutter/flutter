@@ -158,7 +158,7 @@ abstract class EdgeInsetsGeometry {
     );
   }
 
-  /// Returns the a new [EdgeInsetsGeometry] object with all values greater than
+  /// Returns a new [EdgeInsetsGeometry] object with all values greater than
   /// or equal to `min`, and less than or equal to `max`.
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return _MixedEdgeInsets.fromLRSETB(
@@ -662,6 +662,22 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end = 0.0,
     this.bottom = 0.0,
   });
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.all(8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.all(double value)
+    : start = value,
+      top = value,
+      end = value,
+      bottom = value;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final Key blockKey = UniqueKey();
@@ -61,13 +64,11 @@ void main() {
                 flexibleSpace: RepaintBoundary(
                   child: FlexibleSpaceBar(
                     stretchModes: const <StretchMode>[StretchMode.blurBackground],
-                    background: Container(
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(child: Container(color: Colors.red)),
-                          Expanded(child:Container(color: Colors.blue)),
-                        ],
-                      )
+                    background: Row(
+                      children: <Widget>[
+                        Expanded(child: Container(color: Colors.red)),
+                        Expanded(child:Container(color: Colors.blue)),
+                      ],
                     ),
                   ),
                 ),

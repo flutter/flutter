@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -16,7 +16,6 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         driver.close();
     });
 
@@ -42,8 +41,7 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('home_scroll_perf', pretty: true);
       await summary.writeTimelineToFile('home_scroll_perf', pretty: true);
-    });
+    }, timeout: Timeout.none);
   });
 }

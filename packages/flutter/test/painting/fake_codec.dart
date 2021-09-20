@@ -19,6 +19,7 @@ class FakeCodec implements ui.Codec {
   final int _repetitionCount;
   final List<ui.FrameInfo> _frameInfos;
   int _nextFrame = 0;
+  int _numFramesAsked = 0;
 
   /// Creates a FakeCodec from encoded image data.
   ///
@@ -38,8 +39,11 @@ class FakeCodec implements ui.Codec {
   @override
   int get repetitionCount => _repetitionCount;
 
+  int get numFramesAsked => _numFramesAsked;
+
   @override
   Future<ui.FrameInfo> getNextFrame() {
+    _numFramesAsked += 1;
     final SynchronousFuture<ui.FrameInfo> result =
       SynchronousFuture<ui.FrameInfo>(_frameInfos[_nextFrame]);
     _nextFrame = (_nextFrame + 1) % _frameCount;

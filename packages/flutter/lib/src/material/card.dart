@@ -21,74 +21,21 @@ import 'theme.dart';
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows creation of a [Card] widget that shows album information
 /// and two actions.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: Card(
-///       child: Column(
-///         mainAxisSize: MainAxisSize.min,
-///         children: <Widget>[
-///           const ListTile(
-///             leading: Icon(Icons.album),
-///             title: Text('The Enchanted Nightingale'),
-///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-///           ),
-///           Row(
-///             mainAxisAlignment: MainAxisAlignment.end,
-///             children: <Widget>[
-///               TextButton(
-///                 child: const Text('BUY TICKETS'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///               const SizedBox(width: 8),
-///               TextButton(
-///                 child: const Text('LISTEN'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///               const SizedBox(width: 8),
-///             ],
-///           ),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/card/card.0.dart **
 /// {@end-tool}
 ///
 /// Sometimes the primary action area of a card is the card itself. Cards can be
 /// one large touch target that shows a detail screen when tapped.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows creation of a [Card] widget that can be tapped. When
 /// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
 /// entire card.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: Card(
-///       child: InkWell(
-///         splashColor: Colors.blue.withAlpha(30),
-///         onTap: () {
-///           print('Card tapped.');
-///         },
-///         child: Container(
-///           width: 300,
-///           height: 100,
-///           child: Text('A card that can be tapped'),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/material/card/card.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -155,7 +102,7 @@ class Card extends StatelessWidget {
   /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// If this property is null then [CardTheme.clipBehavior] of
   /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
@@ -185,14 +132,14 @@ class Card extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   static const double _defaultElevation = 1.0;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final CardTheme cardTheme = CardTheme.of(context);
 
     return Semantics(

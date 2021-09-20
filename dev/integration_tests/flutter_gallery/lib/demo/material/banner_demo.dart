@@ -13,12 +13,12 @@ enum BannerDemoAction {
 }
 
 class BannerDemo extends StatefulWidget {
-  const BannerDemo({ Key key }) : super(key: key);
+  const BannerDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/banner';
 
   @override
-  _BannerDemoState createState() => _BannerDemoState();
+  State<BannerDemo> createState() => _BannerDemoState();
 }
 
 class _BannerDemoState extends State<BannerDemo> {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -11,14 +13,14 @@ import 'test_utils.dart';
 
 void main() {
   test('flutter build ios --config only updates generated xcconfig file without performing build', () async {
-    final String woringDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     await processManager.run(<String>[
       flutterBin,
        ...getLocalEngineArguments(),
       'clean',
-    ], workingDirectory: woringDirectory);
+    ], workingDirectory: workingDirectory);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -29,7 +31,7 @@ void main() {
       '--obfuscate',
       '--split-debug-info=info',
       '--no-codesign',
-    ], workingDirectory: woringDirectory);
+    ], workingDirectory: workingDirectory);
 
     print(result.stdout);
     print(result.stderr);
@@ -37,19 +39,16 @@ void main() {
     expect(result.exitCode, 0);
 
     final File generatedConfig = fileSystem.file(
-      fileSystem.path.join(woringDirectory, 'ios', 'Flutter', 'Generated.xcconfig'));
+      fileSystem.path.join(workingDirectory, 'ios', 'Flutter', 'Generated.xcconfig'));
 
     // Config is updated if command succeeded.
     expect(generatedConfig, exists);
-    expect(generatedConfig.readAsStringSync(), allOf(
-      contains('DART_OBFUSCATION=true'),
-      contains('FLUTTER_FRAMEWORK_DIR=${fileSystem.path.absolute(getFlutterRoot(), 'bin', 'cache', 'artifacts', 'engine')}'),
-    ));
+    expect(generatedConfig.readAsStringSync(), contains('DART_OBFUSCATION=true'));
 
     // file that only exists if app was fully built.
     final File frameworkPlist = fileSystem.file(
-      fileSystem.path.join(woringDirectory, 'build', 'ios', 'iphoneos', 'Runner.app', 'AppFrameworkInfo.plist'));
+      fileSystem.path.join(workingDirectory, 'build', 'ios', 'iphoneos', 'Runner.app', 'AppFrameworkInfo.plist'));
 
     expect(frameworkPlist, isNot(exists));
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] iOS builds only work on macos.
 }

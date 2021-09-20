@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -94,43 +93,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 /// This sample shows a counter that animates the scale of a text widget
 /// whenever the value changes.
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Container(
-///     color: Colors.white,
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: <Widget>[
-///         AnimatedSwitcher(
-///           duration: const Duration(milliseconds: 500),
-///           transitionBuilder: (Widget child, Animation<double> animation) {
-///             return ScaleTransition(child: child, scale: animation);
-///           },
-///           child: Text(
-///             '$_count',
-///             // This key causes the AnimatedSwitcher to interpret this as a "new"
-///             // child each time the count changes, so that it will begin its animation
-///             // when the count changes.
-///             key: ValueKey<int>(_count),
-///             style: Theme.of(context).textTheme.headline4,
-///           ),
-///         ),
-///         ElevatedButton(
-///           child: const Text('Increment'),
-///           onPressed: () {
-///             setState(() {
-///               _count += 1;
-///             });
-///           },
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/animated_switcher/animated_switcher.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -249,7 +212,7 @@ class AnimatedSwitcher extends StatefulWidget {
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  _AnimatedSwitcherState createState() => _AnimatedSwitcherState();
+  State<AnimatedSwitcher> createState() => _AnimatedSwitcherState();
 
   /// The transition builder used as the default value of [transitionBuilder].
   ///
@@ -274,11 +237,11 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
+      alignment: Alignment.center,
       children: <Widget>[
         ...previousChildren,
         if (currentChild != null) currentChild,
       ],
-      alignment: Alignment.center,
     );
   }
 

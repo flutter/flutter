@@ -20,5 +20,6 @@
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
   "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
-  "modalBarrierDismissLabel": "დახურვა"
+  "modalBarrierDismissLabel": "დახურვა",
+  "searchTextFieldPlaceholderLabel": "ძიება"
 }

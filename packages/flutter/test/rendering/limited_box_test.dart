@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +10,7 @@ import 'rendering_tester.dart';
 void main() {
   test('LimitedBox: parent max size is unconstrained', () {
     final RenderBox child = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
+      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0),
     );
     final RenderBox parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
@@ -36,7 +35,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 0.0\n'
         ' │ maxWidth: Infinity\n'
         ' │ minHeight: 0.0\n'
@@ -60,7 +59,7 @@ void main() {
 
   test('LimitedBox: parent maxWidth is unconstrained', () {
     final RenderBox child = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
+      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0),
     );
     final RenderBox parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
@@ -80,7 +79,7 @@ void main() {
 
   test('LimitedBox: parent maxHeight is unconstrained', () {
     final RenderBox child = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
+      additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0),
     );
     final RenderBox parent = RenderConstrainedOverflowBox(
       minWidth: 500.0,
@@ -122,7 +121,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: 500.0\n'
         ' │ minHeight: 0.0\n'
@@ -158,7 +157,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: use parent maxWidth constraint\n'
         ' │ minHeight: use parent minHeight constraint\n'
@@ -173,5 +172,4 @@ void main() {
       ),
     );
   });
-
 }

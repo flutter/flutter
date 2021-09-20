@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
-  FlutterDriver driver;
+  late FlutterDriver driver;
 
   setUpAll(() async {
     driver = await FlutterDriver.connect();
@@ -27,7 +27,7 @@ Future<void> main() async {
     expect(errorMessage, '');
     final SerializableFinder backButton = find.byValueKey('back');
     await driver.tap(backButton);
-  });
+  }, timeout: Timeout.none);
 
   group('WindowManager', ()
   {
@@ -49,7 +49,7 @@ Future<void> main() async {
       await driver.tap(showAlertDialog);
       final String status = await driver.getText(find.byValueKey('Status'));
       expect(status, 'Success');
-    });
+    }, timeout: Timeout.none);
 
     test('Child windows can handle touches', () async {
       final SerializableFinder addWindow = find.byValueKey('AddWindow');
@@ -59,9 +59,8 @@ Future<void> main() async {
       await driver.tap(tapWindow);
       final String windowClickCount = await driver.getText(
         find.byValueKey('WindowClickCount'),
-        timeout: const Duration(seconds: 5),
       );
       expect(windowClickCount, 'Click count: 1');
-    });
+    }, timeout: Timeout.none, skip: true); // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
   });
 }

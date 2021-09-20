@@ -216,7 +216,7 @@ void main() {
 
   group('FloatingActionButton', () {
     const BoxConstraints defaultFABConstraints = BoxConstraints.tightFor(width: 56.0, height: 56.0);
-    const ShapeBorder defaultFABShape = CircleBorder(side: BorderSide(color: Color(0xff000000), width: 0.0, style: BorderStyle.none));
+    const ShapeBorder defaultFABShape = CircleBorder(side: BorderSide.none);
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
     testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
