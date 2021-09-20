@@ -975,7 +975,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
       positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
 
-      // TODO(Calamity210): Add tests to scaffold_test.dart
       // Push content down only if elevation is 0.
       if (!extendBodyBehindMaterialBanner) {
         contentTop += materialBannerSize.height;

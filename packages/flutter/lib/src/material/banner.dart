@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/material/card.dart';
 import 'package:flutter/src/material/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,7 +13,6 @@ import 'theme.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
-const Curve _materialBannerSlideOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [MaterialBanner] was closed.
 ///
