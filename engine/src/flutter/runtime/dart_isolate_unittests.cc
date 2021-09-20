@@ -247,11 +247,9 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
 
 TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
-                      FML_LOG(ERROR) << "Hello from Dart!";
-                      Signal();
-                    })));
+  AddNativeCallback(
+      "NotifyNative",
+      CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) { Signal(); })));
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto thread = CreateNewThread();
@@ -524,11 +522,9 @@ TEST_F(DartIsolateTest, DISABLED_ValidLoadingUnitSucceeds) {
   }
 
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
-                      FML_LOG(ERROR) << "Hello from Dart!";
-                      Signal();
-                    })));
+  AddNativeCallback(
+      "NotifyNative",
+      CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) { Signal(); })));
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([this](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
