@@ -230,7 +230,7 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator != null && navigator!.widget.requestFocus) {
+    if (navigator?.widget.requestFocus == true) {
       // This TickerFuture serves two purposes. First, we want to make sure
       // that animations triggered by other operations will finish before focusing the
       // navigator. Second, navigator.focusScopeNode might acquire more focused
