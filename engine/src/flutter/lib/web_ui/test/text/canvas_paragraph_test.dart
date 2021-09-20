@@ -369,6 +369,59 @@ Future<void> testMain() async {
         ],
       );
     });
+
+    test('pops boxes when segments are popped', () {
+      final CanvasParagraph paragraph = rich(ahemStyle, (ui.ParagraphBuilder builder) {
+        // Lines:
+        //   "AAA "
+        //   "B_C DD"
+        builder.pushStyle(EngineTextStyle.only(color: blue));
+        builder.addText('AAA B');
+        builder.pushStyle(EngineTextStyle.only(color: green));
+        builder.addText('_C ');
+        builder.pushStyle(EngineTextStyle.only(color: green));
+        builder.addText('DD');
+      });
+
+      // The layout algorithm will keep appending segments to the line builder
+      // until it reaches: "AAA B_". At that point, it'll try to add the "C" but
+      // realizes there isn't enough width in the line. Since the line already
+      // had a line break opportunity, the algorithm tries to revert the line to
+      // that opportunity (i.e. "AAA ") and pops the segments "_" and "B".
+      //
+      // Because the segments "B" and "_" have different directionality
+      // preferences (LTR and no-preferenece, respectively), the algorithm
+      // should've already created a box for "B". When the "B" segment is popped
+      // we want to make sure that the "B" box is also popped.
+      paragraph.layout(constrain(60));
+
+      final EngineLineMetrics firstLine = paragraph.computeLineMetrics()[0];
+      final EngineLineMetrics secondLine = paragraph.computeLineMetrics()[1];
+
+      // There should be no "B" in the first line's boxes.
+      expect(firstLine.boxes, hasLength(2));
+
+      expect((firstLine.boxes![0] as SpanBox).toText(), 'AAA');
+      expect((firstLine.boxes![0] as SpanBox).left, 0.0);
+
+      expect((firstLine.boxes![1] as SpanBox).toText(), ' ');
+      expect((firstLine.boxes![1] as SpanBox).left, 30.0);
+
+      // Make sure the second line isn't missing any boxes.
+      expect(secondLine.boxes, hasLength(4));
+
+      expect((secondLine.boxes![0] as SpanBox).toText(), 'B');
+      expect((secondLine.boxes![0] as SpanBox).left, 0.0);
+
+      expect((secondLine.boxes![1] as SpanBox).toText(), '_C');
+      expect((secondLine.boxes![1] as SpanBox).left, 10.0);
+
+      expect((secondLine.boxes![2] as SpanBox).toText(), ' ');
+      expect((secondLine.boxes![2] as SpanBox).left, 30.0);
+
+      expect((secondLine.boxes![3] as SpanBox).toText(), 'DD');
+      expect((secondLine.boxes![3] as SpanBox).left, 40.0);
+    });
   });
 
   group('$CanvasParagraph.getPositionForOffset', () {

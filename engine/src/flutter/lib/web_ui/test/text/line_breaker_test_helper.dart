@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // The following test cases contradict rule LB25, so we are replacing them
 // with correct expectations.
 const Map<String, String> _replacements = <String, String>{
@@ -91,8 +90,26 @@ bool isValidTestCase(String line) {
 }
 
 String _checkReplacement(String line) {
-  final String? replacement = _replacements[line];
-  return replacement ?? line;
+  String replacement = _replacements[line] ?? line;
+  // Special case for rule LB13 to allow line breaks after spaces.
+  if (replacement.contains('SPACE (SP) × [13.')) {
+    replacement = replacement
+        .replaceAll('0020 ×', '0020 ÷')
+        .replaceFirst('SPACE (SP) × [13.', 'SPACE (SP) ÷ [13.');
+  }
+  // Special case for rule LB14 to allow line breaks after spaces.
+  if (replacement.contains('SPACE (SP) × [14.')) {
+    replacement = replacement
+        .replaceAll('0020 ×', '0020 ÷')
+        .replaceAll('SPACE (SP) × [14.', 'SPACE (SP) ÷ [14.');
+  }
+  // Special case for rule LB15 to allow line breaks after spaces.
+  if (replacement.contains('SPACE (SP) × [15.')) {
+    replacement = replacement
+        .replaceAll('0020 ×', '0020 ÷')
+        .replaceAll('SPACE (SP) × [15.', 'SPACE (SP) ÷ [15.');
+  }
+  return replacement;
 }
 
 final RegExp spaceRegex = RegExp(r'\s+');
