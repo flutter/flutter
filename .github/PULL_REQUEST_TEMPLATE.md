@@ -12,7 +12,7 @@
 - [ ] I signed the [CLA].
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
-- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test-exempt.
+- [ ] I added new tests to check the change I am making, or this PR is test-exempt as per the [Tree Hygiene] page rules.
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
