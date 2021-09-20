@@ -563,7 +563,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      controller: this,
+      getExtent: () => extent,
     );
   }
 
@@ -599,7 +599,7 @@ class _DraggableScrollableSheetScrollPosition
     bool keepScrollOffset = true,
     ScrollPosition? oldPosition,
     String? debugLabel,
-    required this.controller,
+    required this.getExtent,
   })  : super(
           physics: physics,
           context: context,
@@ -611,9 +611,10 @@ class _DraggableScrollableSheetScrollPosition
 
   VoidCallback? _dragCancelCallback;
   VoidCallback? _ballisticCancelCallback;
-  final _DraggableScrollableSheetScrollController controller;
+  final _DraggableSheetExtent Function() getExtent;
   bool get listShouldScroll => pixels > 0.0;
-  _DraggableSheetExtent get extent => controller.extent;
+
+  _DraggableSheetExtent get extent => getExtent();
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
