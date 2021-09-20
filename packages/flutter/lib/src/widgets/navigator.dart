@@ -232,7 +232,7 @@ abstract class Route<T> {
   void didAdd() {
     if (navigator != null && navigator!.widget.takeFocus) {
       // This TickerFuture serves two purposes. First, we want to make sure
-      // animations triggered by other operations finish before focusing the
+      // that animations triggered by other operations will finish before focusing the
       // navigator. Second, navigator.focusScopeNode might acquire more focused
       // children in Route.install asynchronously. This TickerFuture will wait for
       // it to finish first.
