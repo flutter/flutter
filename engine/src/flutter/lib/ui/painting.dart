@@ -4282,7 +4282,6 @@ class Canvas extends NativeFieldWrapperClass1 {
   /// If [doAntiAlias] is true, then the clip will be anti-aliased.
   ///
   /// If multiple draw commands intersect with the clip boundary, this can result
-  /// multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that.
   void clipPath(Path path, {bool doAntiAlias = true}) {
