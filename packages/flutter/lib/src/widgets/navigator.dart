@@ -215,7 +215,7 @@ abstract class Route<T> {
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
       if (navigator?.widget?.takeFocus == true) {
-        navigator?.focusScopeNode.requestFocus();
+        navigator!.focusScopeNode.requestFocus();
       }
     });
   }
