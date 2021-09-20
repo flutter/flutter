@@ -1629,7 +1629,6 @@ void main() {
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPushed = true;
     };
-
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -2934,6 +2933,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.completed);
 
+      print('before pop');
       navigator.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 30));
