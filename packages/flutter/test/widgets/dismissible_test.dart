@@ -781,9 +781,6 @@ void main() {
   testWidgets('Pending confirmDismiss does not cause errors', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54990
 
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
     late Completer<bool?> completer;
     Widget buildFrame() {
       completer = Completer<bool?>();
@@ -844,8 +841,6 @@ void main() {
   });
 
   testWidgets('Dismissible cannot be dragged with pending confirmDismiss', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
 
     final Completer<bool?> completer = Completer<bool?>();
     await tester.pumpWidget(
@@ -873,9 +868,6 @@ void main() {
   testWidgets('Drag to end and release - items does not get stuck if confirmDismiss returns false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87556
 
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
     final Completer<bool?> completer = Completer<bool?>();
     await tester.pumpWidget(
       buildTest(
@@ -893,9 +885,6 @@ void main() {
   });
 
   testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
-    scrollDirection = Axis.vertical;
-    dismissDirection = DismissDirection.horizontal;
-
     bool resized = false;
     bool dismissed = false;
 
@@ -905,7 +894,7 @@ void main() {
         child: Dismissible(
           dragStartBehavior: DragStartBehavior.down,
           key: UniqueKey(),
-          direction: dismissDirection,
+          direction: DismissDirection.horizontal,
           resizeDuration: null,
           onDismissed: (DismissDirection direction) {
             dismissed = true;
@@ -914,8 +903,8 @@ void main() {
             resized = true;
           },
           child: const SizedBox(
-            width: itemExtent,
-            height: itemExtent,
+            width: 100.0,
+            height: 100.0,
             child: Text('0'),
           ),
         ),
