@@ -638,7 +638,7 @@ void main() {
 
     tabController.addListener(() {
       final int indexOfB = tabs.indexOf('B');
-      expect(tabController.index == indexOfB, true);
+      expect(tabController.index, indexOfB);
     });
     final Offset flingStart = tester.getCenter(find.text('CHILD C'));
     await tester.flingFrom(flingStart, const Offset(600, 0.0), 10000.0);
