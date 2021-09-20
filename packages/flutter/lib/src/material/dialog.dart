@@ -469,8 +469,6 @@ class AlertDialog extends StatelessWidget {
     String? label = semanticLabel;
     switch (theme.platform) {
       case TargetPlatform.iOS:
-        label = '';
-        break;
       case TargetPlatform.macOS:
         break;
       case TargetPlatform.android:
@@ -501,7 +499,9 @@ class AlertDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            namesRoute: label == null,
+            // For iOS platform, the focus always lands on the title.
+            // Set nameRoute to false to avoid title being announce twice.
+            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -847,9 +847,7 @@ class SimpleDialog extends StatelessWidget {
     String? label = semanticLabel;
     switch (theme.platform) {
       case TargetPlatform.macOS:
-        break;
       case TargetPlatform.iOS:
-        label = '';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -876,7 +874,9 @@ class SimpleDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            namesRoute: label == null,
+            // For iOS platform, the focus always lands on the title.
+            // Set nameRoute to false to avoid title being announce twice.
+            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),

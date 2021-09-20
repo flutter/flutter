@@ -1349,7 +1349,6 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
@@ -1516,7 +1515,6 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute,SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         // Title semantics does not merge into the semantics
                         // node 4.
