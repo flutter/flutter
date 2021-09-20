@@ -49,7 +49,7 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// See also:
   ///
-  ///  * [ScrollView.getExtent], which discusses the purpose of specifying a
+  ///  * [ScrollView.controller], which discusses the purpose of specifying a
   ///    scroll controller.
   final ScrollController? controller;
 
