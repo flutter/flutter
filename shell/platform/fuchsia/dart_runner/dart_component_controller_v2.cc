@@ -462,6 +462,10 @@ void DartComponentControllerV2::MessageEpilogue(Dart_Handle result) {
   }
 }
 
+void DartComponentControllerV2::Stop() {
+  Kill();
+}
+
 void DartComponentControllerV2::OnIdleTimer(async_dispatcher_t* dispatcher,
                                             async::WaitBase* wait,
                                             zx_status_t status,
