@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../html/paragraph/helper.dart';
 import 'layout_service_helper.dart';
 
 const ui.Color white = ui.Color(0xFFFFFFFF);
@@ -20,19 +21,6 @@ final EngineParagraphStyle ahemStyle = EngineParagraphStyle(
   fontFamily: 'ahem',
   fontSize: 10,
 );
-
-ui.ParagraphConstraints constrain(double width) {
-  return ui.ParagraphConstraints(width: width);
-}
-
-CanvasParagraph rich(
-  EngineParagraphStyle style,
-  void Function(CanvasParagraphBuilder) callback,
-) {
-  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
-  callback(builder);
-  return builder.build();
-}
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -221,6 +209,45 @@ Future<void> testMain() async {
       l('Lorem', 0, 6, hardBreak: true, width: 50.0, height: 10.0, left: 125.0),
       l('', 6, 6, hardBreak: false, width: 300.0, height: 40.0, left: 0.0),
       l('ipsum', 6, 11, hardBreak: true, width: 50.0, height: 10.0, left: 125.0),
+    ]);
+  });
+
+  test('correctly force-breaks consecutive non-breakable spans', () {
+    final CanvasParagraph paragraph = rich(ahemStyle, (ui.ParagraphBuilder builder) {
+      builder.pushStyle(EngineTextStyle.only(fontSize: 1));
+      builder.addText('A');
+      builder.pop(); // Back to fontSize: 10
+      builder.addText('A' * 20);
+      builder.pushStyle(EngineTextStyle.only(fontSize: 1));
+      builder.addText('A');
+    });
+    paragraph.layout(constrain(200));
+
+    expect(paragraph.maxIntrinsicWidth, 200.0 + 2.0);
+    expect(paragraph.height, 20.0);
+    expectLines(paragraph, <TestLine>[
+      // 1x small "A" + 19x big "A"
+      l('A' * 20, 0, 20, hardBreak: false, width: 1.0 + 190.0, height: 10.0),
+      // 1x big "A" + 1x small "A"
+      l('AA', 20, 22, hardBreak: true, width: 10.0 + 1.0, height: 10.0),
+    ]);
+  });
+
+  test('does not make prohibited line breaks', () {
+    final CanvasParagraph paragraph = rich(ahemStyle, (ui.ParagraphBuilder builder) {
+      builder.pushStyle(EngineTextStyle.only(color: blue));
+      builder.addText('AAA B');
+      builder.pushStyle(EngineTextStyle.only(color: green));
+      builder.addText('BB ');
+      builder.pushStyle(EngineTextStyle.only(color: green));
+      builder.addText('CC');
+    });
+    paragraph.layout(constrain(60));
+
+    expect(paragraph.maxIntrinsicWidth, 100.0);
+    expectLines(paragraph, <TestLine>[
+      l('AAA ', 0, 4, hardBreak: false, width: 30.0),
+      l('BBB CC', 4, 10, hardBreak: true, width: 60.0),
     ]);
   });
 }

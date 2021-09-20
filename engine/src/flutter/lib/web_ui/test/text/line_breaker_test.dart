@@ -223,6 +223,23 @@ void testMain() {
       );
     });
 
+    test('whitespace before the last character', () {
+      const String text = 'Lorem sit .';
+      const LineBreakResult expectedResult =
+          LineBreakResult(10, 10, 9, LineBreakType.opportunity);
+
+      LineBreakResult result;
+
+      result = nextLineBreak(text, 6);
+      expect(result, expectedResult);
+
+      result = nextLineBreak(text, 9);
+      expect(result, expectedResult);
+
+      result = nextLineBreak(text, 9, maxEnd: 10);
+      expect(result, expectedResult);
+    });
+
     test('comprehensive test', () {
       final List<TestCase> testCollection = parseRawTestData(rawLineBreakTestData);
       for (int t = 0; t < testCollection.length; t++) {
@@ -269,7 +286,7 @@ void testMain() {
               reason: 'Failed at test case number $t:\n'
                   '${testCase.toString()}\n'
                   '"$text"\n'
-                  '\nUnexpected line break found at {$lastLineBreak - $i}.',
+                  '\nUnexpected line break found at {$lastLineBreak - ${result.index}}.',
             );
 
             // Since this isn't a line break, passing it as a `maxEnd` should
