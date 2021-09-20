@@ -127,10 +127,11 @@ class MaterialBanner extends StatefulWidget {
   final List<Widget> actions;
 
   /// The z-coordinate at which to place the material banner. This controls the size of the shadow below the material banner.
-  //
-  // Defines the banner's [Material.elevation].
-  //
-  // If this property is null, then [MaterialBannerThemeData.elevation] of [ThemeData.materialBannerTheme] is used, if that is also null, the default value is 0.
+  ///
+  /// Defines the banner's [Material.elevation].
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.elevation] of [ThemeData.materialBannerTheme] is used, if that is also null, the default value is 0.
+  /// If the elevation is 0, the Scaffold's body will be pushed down by the MaterialBanner.
   final double? elevation;
 
   /// The (optional) leading widget of the [MaterialBanner].

@@ -259,45 +259,6 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 
-  testWidgets('Content pushed down if extendBodyBehindAppBar is true', (WidgetTester tester) async {
-    const String contentText = 'Content';
-    const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Builder(
-          builder: (BuildContext context) {
-            return GestureDetector(
-              key: tapTarget,
-              onTap: () {
-                ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-                  content: const Text(contentText),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('DISMISS'),
-                      onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                    ),
-                  ],
-                ));
-              },
-              behavior: HitTestBehavior.opaque,
-              child: const SizedBox(
-                height: 100.0,
-                width: 100.0,
-              ),
-            );
-          },
-        ),
-      ),
-    ));
-    await tester.tap(find.byKey(tapTarget));
-    await tester.pumpAndSettle();
-
-    final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
-    expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
-    expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
-  });
-
   group('MaterialBanner elevation', () {
     Widget buildBanner(Key tapTarget, {double? elevation, double? themeElevation}) {
       return MaterialApp(
@@ -372,6 +333,20 @@ void main() {
       expect(_getMaterialFromBanner(tester).elevation, 3.0);
       await tester.tap(find.text('DISMISS'));
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('Scaffold body is pushed down if elevation is 0', (WidgetTester tester) async {
+      const Key tapTarget = Key('tap-target');
+
+      await tester.pumpWidget(buildBanner(tapTarget, elevation: 0.0));
+      await tester.tap(find.byKey(tapTarget));
+      await tester.pumpAndSettle();
+
+      final Offset contentTopLeft = tester.getTopLeft(find.byKey(tapTarget));
+      final Offset bannerBottomLeft = tester.getBottomLeft(find.byType(MaterialBanner));
+
+      expect(contentTopLeft.dx, 0.0);
+      expect(contentTopLeft.dy, greaterThanOrEqualTo(bannerBottomLeft.dy));
     });
   });
 
