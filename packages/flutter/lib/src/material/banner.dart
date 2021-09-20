@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/material/card.dart';
 import 'package:flutter/src/material/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'banner_theme.dart';
 import 'divider.dart';
 import 'scaffold.dart';
@@ -292,36 +294,39 @@ class _MaterialBannerState extends State<MaterialBanner> {
 
     Widget materialBanner = SafeArea(
       top: true,
-      child: Material(
-        elevation: elevation,
-        color: backgroundColor,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: padding,
-              child: Row(
-                children: <Widget>[
-                  if (widget.leading != null)
-                    Padding(
-                      padding: leadingPadding,
-                      child: widget.leading,
+      child: Container(
+        margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+        child: Material(
+          elevation: elevation,
+          color: backgroundColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: padding,
+                child: Row(
+                  children: <Widget>[
+                    if (widget.leading != null)
+                      Padding(
+                        padding: leadingPadding,
+                        child: widget.leading,
+                      ),
+                    Expanded(
+                      child: DefaultTextStyle(
+                        style: textStyle!,
+                        child: widget.content,
+                      ),
                     ),
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: textStyle!,
-                      child: widget.content,
-                    ),
-                  ),
-                  if (isSingleRow)
-                    buttonBar,
-                ],
+                    if (isSingleRow)
+                      buttonBar,
+                  ],
+                ),
               ),
-            ),
-            if (!isSingleRow)
-              buttonBar,
-            const Divider(height: 0),
-          ],
+              if (!isSingleRow)
+                buttonBar,
+              const Divider(height: 0),
+            ],
+          ),
         ),
       ),
     );

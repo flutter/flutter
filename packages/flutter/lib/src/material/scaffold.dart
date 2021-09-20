@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'banner.dart';
+import 'banner_theme.dart';
 import 'bottom_sheet.dart';
 import 'colors.dart';
 import 'curves.dart';
@@ -904,6 +905,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.snackBarWidth,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
+    required this.extendBodyBehindMaterialBanner,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
@@ -926,6 +928,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final bool isSnackBarFloating;
   final double? snackBarWidth;
+
+  final bool extendBodyBehindMaterialBanner;
 
   @override
   void performLayout(Size size) {
@@ -971,9 +975,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
       positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
 
-      // Push content down only if elevation is 0 instead of using extendBody
-      // TODO(Calamity210): use a new extendBodyBehindBanner prop and add tests to scaffold_test.dart
-      if (extendBody) {
+      // TODO(Calamity210): Add tests to scaffold_test.dart
+      // Push content down only if elevation is 0.
+      if (!extendBodyBehindMaterialBanner) {
         contentTop += materialBannerSize.height;
       }
     }
@@ -2930,8 +2934,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
+    bool extendBodyBehindMaterialBanner = false;
     // MaterialBanner set by ScaffoldMessenger
     if (_messengerMaterialBanner != null) {
+      final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+      final double elevation = _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
+      extendBodyBehindMaterialBanner = elevation != 0;
+
       _addIfNonNull(
         children,
         _messengerMaterialBanner?._widget,
@@ -3073,6 +3082,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                 snackBarWidth: snackBarWidth,
               ),
               children: children,
