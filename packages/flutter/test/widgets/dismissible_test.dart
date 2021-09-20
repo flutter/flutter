@@ -841,7 +841,6 @@ void main() {
   });
 
   testWidgets('Dismissible cannot be dragged with pending confirmDismiss', (WidgetTester tester) async {
-
     final Completer<bool?> completer = Completer<bool?>();
     await tester.pumpWidget(
       buildTest(
