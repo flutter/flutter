@@ -238,7 +238,7 @@ abstract class Route<T> {
       // it to finish first.
       //
       // The later case can be found when subclasses manage their own focus scopes.
-      // For example, ModalRoute create a focus scope in its overlay entries. The
+      // For example, ModalRoute creates a focus scope in its overlay entries. The
       // focused child can only be attached to navigator after initState which
       // will be guarded by the asynchronous gap.
       TickerFuture.complete().then<void>((void _) {
