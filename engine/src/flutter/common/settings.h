@@ -187,6 +187,9 @@ struct Settings {
   // Selects the DisplayList for storage of rendering operations.
   bool enable_display_list = false;
 
+  // Data set by platform-specific embedders for use in font initialization.
+  uint32_t font_initialization_data = 0;
+
   // All shells in the process share the same VM. The last shell to shutdown
   // should typically shut down the VM as well. However, applications depend on
   // the behavior of "warming-up" the VM by creating a shell that does not do
