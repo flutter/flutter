@@ -2972,33 +2972,26 @@ void main() {
     testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
       // Regression Test for https://github.com/flutter/flutter/issues/86604.
       Widget buildNavigator(bool secondPage) {
-        return Navigator(
-          pages: <Page<void>>[
-            const ZeroDurationPage(
-              child: Text('page1'),
-            ),
-            if (secondPage)
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: <Page<void>>[
               const ZeroDurationPage(
-                child: Text('page2'),
+                child: Text('page1'),
               ),
-          ],
-          onPopPage: (Route<dynamic> route, dynamic result) => false,
+              if (secondPage)
+                const ZeroDurationPage(
+                  child: Text('page2'),
+                ),
+            ],
+            onPopPage: (Route<dynamic> route, dynamic result) => false,
+          ),
         );
       }
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: buildNavigator(true),
-        ),
-      );
+      await tester.pumpWidget(buildNavigator(true));
       expect(find.text('page2'), findsOneWidget);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: buildNavigator(false),
-        ),
-      );
+      await tester.pumpWidget(buildNavigator(false));
       expect(find.text('page1'), findsOneWidget);
     });
 
