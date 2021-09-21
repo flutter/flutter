@@ -41,12 +41,36 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// how the icon itself is positioned within the hit region.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
 ///
-/// ** See code in examples/api/lib/material/icon_button/icon_button.0.dart **
+/// ```dart preamble
+/// double _volume = 0.0;
+/// ```
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisSize: MainAxisSize.min,
+///     children: <Widget>[
+///       IconButton(
+///         icon: const Icon(Icons.volume_up),
+///         tooltip: 'Increase volume by 10',
+///         onPressed: () {
+///           setState(() {
+///             _volume += 10;
+///           });
+///         },
+///       ),
+///       Text('Volume : $_volume')
+///     ],
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// ### Adding a filled background
@@ -62,6 +86,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// [InkResponse] contributed by descendant widgets.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
+///
 /// In this sample the icon button's background color is defined with an [Ink]
 /// widget whose child is an [IconButton]. The icon button's filled background
 /// is a light shade of blue, it's a filled circle, and it's as big as the
@@ -69,7 +94,27 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
-/// ** See code in examples/api/lib/material/icon_button/icon_button.1.dart **
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return Material(
+///     color: Colors.white,
+///     child: Center(
+///       child: Ink(
+///         decoration: const ShapeDecoration(
+///           color: Colors.lightBlue,
+///           shape: CircleBorder(),
+///         ),
+///         child: IconButton(
+///           icon: const Icon(Icons.android),
+///           color: Colors.white,
+///           onPressed: () {},
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:

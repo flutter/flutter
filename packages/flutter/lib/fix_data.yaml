@@ -2162,6 +2162,22 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -2200,6 +2216,22 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'
@@ -2263,6 +2295,22 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -2301,6 +2349,22 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'

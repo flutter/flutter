@@ -64,9 +64,8 @@ class DevFSFileContent extends DevFSContent {
   FileStat _fileStat;
 
   File _getFile() {
-    final File linkTarget = _linkTarget;
-    if (linkTarget != null) {
-      return linkTarget;
+    if (_linkTarget != null) {
+      return _linkTarget;
     }
     if (file is Link) {
       // The link target.
@@ -76,10 +75,9 @@ class DevFSFileContent extends DevFSContent {
   }
 
   void _stat() {
-    final File linkTarget = _linkTarget;
-    if (linkTarget != null) {
+    if (_linkTarget != null) {
       // Stat the cached symlink target.
-      final FileStat fileStat = linkTarget.statSync();
+      final FileStat fileStat = _linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
         _linkTarget = null;
       } else {
@@ -89,7 +87,7 @@ class DevFSFileContent extends DevFSContent {
     }
     final FileStat fileStat = file.statSync();
     _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
-    if (_fileStat != null && _fileStat?.type == FileSystemEntityType.link) {
+    if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final File linkTarget = file.fileSystem.file(resolved);
@@ -98,7 +96,7 @@ class DevFSFileContent extends DevFSContent {
       if (fileStat.type == FileSystemEntityType.notFound) {
         _fileStat = null;
         _linkTarget = null;
-      } else if (devFSConfig?.cacheSymlinks == true) {
+      } else if (devFSConfig.cacheSymlinks) {
         _linkTarget = linkTarget;
       }
     }
@@ -106,27 +104,25 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   bool get isModified {
-    final FileStat oldFileStat = _fileStat;
+    final FileStat _oldFileStat = _fileStat;
     _stat();
-    final FileStat newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
+    if (_oldFileStat == null && _fileStat == null) {
       return false;
     }
-    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(oldFileStat.modified);
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
   bool isModifiedAfter(DateTime time) {
-    final FileStat oldFileStat = _fileStat;
+    final FileStat _oldFileStat = _fileStat;
     _stat();
-    final FileStat newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
+    if (_oldFileStat == null && _fileStat == null) {
       return false;
     }
     return time == null
-        || oldFileStat == null
-        || newFileStat == null
-        || newFileStat.modified.isAfter(time);
+        || _oldFileStat == null
+        || _fileStat == null
+        || _fileStat.modified.isAfter(time);
   }
 
   @override
@@ -139,7 +135,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() async => _getFile().readAsBytes();
+  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
 
   @override
   Stream<List<int>> contentsAsStream() => _getFile().openRead();
@@ -312,8 +308,8 @@ class _DevFSHttpWriter implements DevFSWriter {
   static const int kMaxInFlight = 3;
 
   int _inFlight = 0;
-  Map<Uri, DevFSContent> _outstanding = <Uri, DevFSContent>{};
-  Completer<void> _completer = Completer<void>();
+  Map<Uri, DevFSContent> _outstanding;
+  Completer<void> _completer;
 
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter parent]) async {
@@ -557,9 +553,8 @@ class DevFS {
   /// If any other changes were made, or there is an error scanning the file,
   /// return `null`.
   String _checkIfSingleWidgetReloadApplied() {
-    final File widgetCacheOutputFile = _widgetCacheOutputFile;
-    if (widgetCacheOutputFile != null && widgetCacheOutputFile.existsSync()) {
-      final String widget = widgetCacheOutputFile.readAsStringSync().trim();
+    if (_widgetCacheOutputFile != null && _widgetCacheOutputFile.existsSync()) {
+      final String widget = _widgetCacheOutputFile.readAsStringSync().trim();
       if (widget.isNotEmpty) {
         return widget;
       }

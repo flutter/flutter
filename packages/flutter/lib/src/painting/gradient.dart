@@ -335,7 +335,20 @@ abstract class Gradient {
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///
-/// ** See code in examples/api/lib/painting/gradient/linear_gradient.0.dart **
+/// ```dart
+///  Widget build(BuildContext context) {
+///    return Container(
+///      decoration: const BoxDecoration(
+///        gradient: LinearGradient(
+///          begin: Alignment.topLeft,
+///          end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
+///          colors: <Color>[Color(0xffee0000), Color(0xffeeee00)], // red to yellow
+///          tileMode: TileMode.repeated, // repeats the gradient over the canvas
+///        ),
+///      ),
+///    );
+///  }
+/// ```
 /// {@end-tool}
 ///
 /// See also:

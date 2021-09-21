@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -66,11 +67,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
-  ///
-  /// The default implementation returns a [BinaryMessenger] that delivers the
-  /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  late final BinaryMessenger _defaultBinaryMessenger;
+  late BinaryMessenger _defaultBinaryMessenger;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -96,11 +94,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
-  ///
-  /// Many Flutter framework components that communicate with the platform
-  /// assume messages are received by the platform in the same order in which
-  /// they are sent. When overriding this method, be sure the [BinaryMessenger]
-  /// implementation guarantees FIFO delivery.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();

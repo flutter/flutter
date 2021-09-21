@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -20,9 +22,9 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main () {
-  late Artifacts artifacts;
-  late String iosDeployPath;
-  late FileSystem fileSystem;
+  Artifacts artifacts;
+  String iosDeployPath;
+  FileSystem fileSystem;
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -84,7 +86,7 @@ void main () {
 
   group('IOSDeployDebugger', () {
     group('launch', () {
-      late BufferLogger logger;
+      BufferLogger logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -320,7 +322,7 @@ void main () {
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
-    Artifacts? artifacts,
+    Artifacts artifacts,
   }) {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',

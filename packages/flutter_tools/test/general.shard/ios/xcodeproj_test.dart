@@ -695,7 +695,6 @@ Information about project "Runner":
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -711,8 +710,6 @@ Information about project "Runner":
               '-project',
               podXcodeProject.path,
               '-showBuildSettings',
-              'BUILD_DIR=$buildDirectory',
-              'OBJROOT=$buildDirectory',
             ],
             stdout: '''
 Build settings for action build and target plugin1:
@@ -751,7 +748,6 @@ Build settings for action build and target plugin2:
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -767,8 +763,6 @@ Build settings for action build and target plugin2:
                 '-project',
                 podXcodeProject.path,
                 '-showBuildSettings',
-                'BUILD_DIR=$buildDirectory',
-                'OBJROOT=$buildDirectory',
               ],
               exitCode: 1,
           ),
@@ -795,7 +789,6 @@ Build settings for action build and target plugin2:
         final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
@@ -811,8 +804,6 @@ Build settings for action build and target plugin2:
                 '-project',
                 podXcodeProject.path,
                 '-showBuildSettings',
-                'BUILD_DIR=$buildDirectory',
-                'OBJROOT=$buildDirectory',
               ],
               stdout: '''
 Build settings for action build and target plugin1:

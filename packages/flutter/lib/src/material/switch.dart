@@ -260,9 +260,9 @@ class Switch extends StatelessWidget {
   ///
   /// | State    | Light theme                     | Dark theme                      |
   /// |----------|---------------------------------|---------------------------------|
-  /// | Default  | `Color(0x52000000)`             | `Colors.white30`                |
+  /// | Default  | `Colors.grey.shade50`           | `Colors.grey.shade400`          |
   /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
-  /// | Disabled | `Colors.black12`                | `Colors.white10`                |
+  /// | Disabled | `Color(0x52000000)`             | `Colors.white30`                |
   final MaterialStateProperty<Color?>? trackColor;
 
   /// {@template flutter.material.switch.materialTapTargetSize}

@@ -230,8 +230,6 @@ class CreateCommand extends CreateBase {
       );
     }
 
-    final String dartSdk = globals.cache.dartSdkBuild;
-
     final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
@@ -248,7 +246,7 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null safety everywhere.
-      dartSdkVersionBounds: '">=$dartSdk <3.0.0"',
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"',
       implementationTests: boolArg('implementation-tests'),
     );
 

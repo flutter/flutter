@@ -25,13 +25,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required Platform platform,
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
-    @required String dartExecutable,
+    @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
     @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
         _fileSystem = fileSystem,
-        _dartExecutable = dartExecutable,
+        _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
         _persistentToolState = persistentToolState,
@@ -39,7 +39,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
-  final String _dartExecutable;
+  final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
   final PersistentToolState _persistentToolState;
@@ -118,8 +118,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       }
 
       _devToolsProcess = await _processManager.start(<String>[
-        _dartExecutable,
-        'pub',
+        _pubExecutable,
         'global',
         'run',
         'devtools',
@@ -154,7 +153,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   /// Check if the DevTools package is already active by running "pub global list".
   Future<bool> _checkForActiveDevTools() async {
     final io.ProcessResult _pubGlobalListProcess = await _processManager.run(
-      <String>[ _dartExecutable, 'pub', 'global', 'list' ],
+      <String>[ _pubExecutable, 'global', 'list' ],
     );
     return _pubGlobalListProcess.stdout.toString().contains(_devToolsInstalledPattern);
   }
@@ -180,8 +179,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     try {
       final io.ProcessResult _devToolsActivateProcess = await _processManager
           .run(<String>[
-        _dartExecutable,
-        'pub',
+        _pubExecutable,
         'global',
         'activate',
         'devtools',

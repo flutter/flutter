@@ -137,11 +137,7 @@ void runNext({
       if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
       } else {
-        if (unappliedCherrypicks.length == 1) {
-          stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.');
-        } else {
-          stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
-        }
+        stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
         stdio.printStatus('These must be applied manually in the directory '
             '${state.engine.checkoutPath} before proceeding.\n');
       }
@@ -268,12 +264,9 @@ void runNext({
       } else if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
       } else {
-        if (unappliedCherrypicks.length == 1) {
-          stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.',);
-        }
-        else {
-          stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',);
-        }
+        stdio.printStatus(
+          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',
+        );
         stdio.printStatus(
           'These must be applied manually in the directory '
           '${state.framework.checkoutPath} before proceeding.\n',

@@ -111,7 +111,7 @@ void main() {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
       fileSystem: fakefs,
-      dartExecutable: 'dart',
+      pubExecutable: 'pub',
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       persistentToolState: null,

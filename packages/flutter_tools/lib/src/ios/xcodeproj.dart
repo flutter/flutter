@@ -228,7 +228,6 @@ class XcodeProjectInterpreter {
       return null;
     }
     final Status status = _logger.startSpinner();
-    final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -238,8 +237,6 @@ class XcodeProjectInterpreter {
       '-project',
       podXcodeProject.path,
       '-showBuildSettings',
-      'BUILD_DIR=$buildDirectory',
-      'OBJROOT=$buildDirectory',
     ];
     try {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
@@ -376,7 +373,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  const XcodeProjectInfo(
+  XcodeProjectInfo(
     this.targets,
     this.buildConfigurations,
     this.schemes,

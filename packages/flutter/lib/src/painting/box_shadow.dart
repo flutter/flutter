@@ -36,16 +36,10 @@ class BoxShadow extends ui.Shadow {
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
     this.spreadRadius = 0.0,
-    this.blurStyle = BlurStyle.normal,
   }) : super(color: color, offset: offset, blurRadius: blurRadius);
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
-
-  /// The [BlurStyle] to use for this shadow.
-  ///
-  /// Defaults to [BlurStyle.normal].
-  final BlurStyle blurStyle;
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -57,7 +51,7 @@ class BoxShadow extends ui.Shadow {
   Paint toPaint() {
     final Paint result = Paint()
       ..color = color
-      ..maskFilter = MaskFilter.blur(blurStyle, blurSigma);
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
     assert(() {
       if (debugDisableShadows)
         result.maskFilter = null;
@@ -74,7 +68,6 @@ class BoxShadow extends ui.Shadow {
       offset: offset * factor,
       blurRadius: blurRadius * factor,
       spreadRadius: spreadRadius * factor,
-      blurStyle: blurStyle,
     );
   }
 
@@ -98,7 +91,6 @@ class BoxShadow extends ui.Shadow {
       offset: Offset.lerp(a.offset, b.offset, t)!,
       blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t)!,
       spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t)!,
-      blurStyle: a.blurStyle == BlurStyle.normal ? b.blurStyle : a.blurStyle,
     );
   }
 
@@ -131,13 +123,12 @@ class BoxShadow extends ui.Shadow {
         && other.color == color
         && other.offset == offset
         && other.blurRadius == blurRadius
-        && other.spreadRadius == spreadRadius
-        && other.blurStyle == blurStyle;
+        && other.spreadRadius == spreadRadius;
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius, blurStyle);
+  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}), $blurStyle';
+  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)})';
 }

@@ -109,7 +109,7 @@ Future<void> main(List<String> args) async {
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
         fileSystem: globals.fs,
-        dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
         logger: globals.logger,
         platform: globals.platform,
         persistentToolState: globals.persistentToolState,

@@ -37,8 +37,8 @@ const String kFontManifestJson = 'FontManifest.json';
 const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
   <String, Object>{
     'family': 'MaterialIcons',
-    'fonts': <Map<String, String>>[
-      <String, String>{
+    'fonts': <Map<String, Object>>[
+      <String, Object>{
         'asset': 'fonts/MaterialIcons-Regular.otf',
       },
     ],
@@ -161,8 +161,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({ String manifestPath = defaultManifestPath }) {
-    final DateTime lastBuildTimestamp = _lastBuildTimestamp;
-    if (lastBuildTimestamp == null) {
+    if (_lastBuildTimestamp == null) {
       return true;
     }
 
@@ -180,13 +179,13 @@ class ManifestAssetBundle implements AssetBundle {
         if (dateTime == null) {
           continue;
         }
-        if (dateTime.isAfter(lastBuildTimestamp)) {
+        if (dateTime.isAfter(_lastBuildTimestamp)) {
           return true;
         }
       }
     }
 
-    return stat.modified.isAfter(lastBuildTimestamp);
+    return stat.modified.isAfter(_lastBuildTimestamp);
   }
 
   @override
@@ -268,7 +267,9 @@ class ManifestAssetBundle implements AssetBundle {
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
       // Include the assets in the regular set of assets if not using deferred
       // components.
-      deferredComponentsAssetVariants.values.forEach(assetVariants.addAll);
+      for (final String componentName in deferredComponentsAssetVariants.keys) {
+        assetVariants.addAll(deferredComponentsAssetVariants[componentName]);
+      }
       deferredComponentsAssetVariants.clear();
       deferredComponentsEntries.clear();
     }
@@ -456,7 +457,7 @@ class ManifestAssetBundle implements AssetBundle {
       return;
     }
     final DevFSStringContent oldContent = entries[key] as DevFSStringContent;
-    if (oldContent?.string != content.string) {
+    if (oldContent.string != content.string) {
       entries[key] = content;
     }
   }
@@ -478,8 +479,8 @@ class ManifestAssetBundle implements AssetBundle {
     // the uncompressed strings to not incur decompression/decoding while making
     // the comparison.
     if (!entries.containsKey(_kNoticeZippedFile) ||
-        (entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent)
-            ?.equals(combinedLicenses) != true) {
+        !(entries[_kNoticeZippedFile] as DevFSStringCompressingBytesContent)
+            .equals(combinedLicenses)) {
       entries[_kNoticeZippedFile] = DevFSStringCompressingBytesContent(
         combinedLicenses,
         // A zlib dictionary is a hinting string sequence with the most
@@ -493,16 +494,8 @@ class ManifestAssetBundle implements AssetBundle {
   List<_Asset> _getMaterialAssets() {
     final List<_Asset> result = <_Asset>[];
     for (final Map<String, Object> family in kMaterialFonts) {
-      final Object fonts = family['fonts'];
-      if (fonts == null) {
-        continue;
-      }
-      for (final Map<String, Object> font in fonts as List<Map<String, String>>) {
-        final String asset = font['asset'] as String;
-        if (asset == null) {
-          continue;
-        }
-        final Uri entryUri = _fileSystem.path.toUri(asset);
+      for (final Map<String, Object> font in family['fonts'] as List<Map<String, Object>>) {
+        final Uri entryUri = _fileSystem.path.toUri(font['asset'] as String);
         result.add(_Asset(
           baseDir: _fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
           relativeUri: Uri(path: entryUri.pathSegments.last),
@@ -584,21 +577,22 @@ class ManifestAssetBundle implements AssetBundle {
     Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
     final Map<String, List<String>> jsonObject = <String, List<String>>{};
+    final List<_Asset> assets = assetVariants.keys.toList();
     final Map<_Asset, List<String>> jsonEntries = <_Asset, List<String>>{};
-    assetVariants.forEach((_Asset main, List<_Asset> variants) {
+    for (final _Asset main in assets) {
       jsonEntries[main] = <String>[
-        for (final _Asset variant in variants)
+        for (final _Asset variant in assetVariants[main])
           variant.entryUri.path,
       ];
-    });
+    }
     if (deferredComponentsAssetVariants != null) {
       for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
-        componentAssets.forEach((_Asset main, List<_Asset> variants) {
+        for (final _Asset main in componentAssets.keys) {
           jsonEntries[main] = <String>[
-            for (final _Asset variant in variants)
+            for (final _Asset variant in componentAssets[main])
               variant.entryUri.path,
           ];
-        });
+        }
       }
     }
     final List<_Asset> sortedKeys = jsonEntries.keys.toList()
@@ -623,7 +617,7 @@ class ManifestAssetBundle implements AssetBundle {
         final Uri assetUri = fontAsset.assetUri;
         if (assetUri.pathSegments.first == 'packages' &&
             !_fileSystem.isFileSync(_fileSystem.path.fromUri(
-              packageConfig[packageName]?.packageUriRoot?.resolve('../${assetUri.path}')))) {
+              packageConfig[packageName].packageUriRoot.resolve('../${assetUri.path}')))) {
           packageFontAssets.add(FontAsset(
             fontAsset.assetUri,
             weight: fontAsset.weight,
@@ -794,17 +788,16 @@ class ManifestAssetBundle implements AssetBundle {
       final Uri relativeUri = _fileSystem.path.toUri(relativePath);
       final Uri entryUri = asset.symbolicPrefixUri == null
           ? relativeUri
-          : asset.symbolicPrefixUri?.resolveUri(relativeUri);
-      if (entryUri != null) {
-        variants.add(
-          _Asset(
-            baseDir: asset.baseDir,
-            entryUri: entryUri,
-            relativeUri: relativeUri,
-            package: attributedPackage,
-          ),
-        );
-      }
+          : asset.symbolicPrefixUri.resolveUri(relativeUri);
+
+      variants.add(
+        _Asset(
+          baseDir: asset.baseDir,
+          entryUri: entryUri,
+          relativeUri: relativeUri,
+          package: attributedPackage,
+        ),
+      );
     }
 
     result[asset] = variants;
@@ -869,9 +862,9 @@ class ManifestAssetBundle implements AssetBundle {
 @immutable
 class _Asset {
   const _Asset({
-    @required this.baseDir,
-    @required this.relativeUri,
-    @required this.entryUri,
+    this.baseDir,
+    this.relativeUri,
+    this.entryUri,
     @required this.package,
   });
 

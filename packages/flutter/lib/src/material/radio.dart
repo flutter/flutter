@@ -28,6 +28,7 @@ const double _kInnerRadius = 4.5;
 /// radio button's [groupValue].
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
 ///
@@ -43,7 +44,41 @@ const double _kInnerRadius = 4.5;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// ** See code in examples/api/lib/material/radio/radio.0.dart **
+/// ```dart preamble
+/// enum SingingCharacter { lafayette, jefferson }
+/// ```
+///
+/// ```dart
+/// SingingCharacter? _character = SingingCharacter.lafayette;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     children: <Widget>[
+///       ListTile(
+///         title: const Text('Lafayette'),
+///         leading: Radio<SingingCharacter>(
+///           value: SingingCharacter.lafayette,
+///           groupValue: _character,
+///           onChanged: (SingingCharacter? value) {
+///             setState(() { _character = value; });
+///           },
+///         ),
+///       ),
+///       ListTile(
+///         title: const Text('Thomas Jefferson'),
+///         leading: Radio<SingingCharacter>(
+///           value: SingingCharacter.jefferson,
+///           groupValue: _character,
+///           onChanged: (SingingCharacter? value) {
+///             setState(() { _character = value; });
+///           },
+///         ),
+///       ),
+///     ],
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -169,7 +204,45 @@ class Radio<T> extends StatefulWidget {
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
-  /// ** See code in examples/api/lib/material/radio/radio.toggleable.0.dart **
+  /// ```dart
+  /// int? groupValue;
+  /// static const List<String> selections = <String>[
+  ///   'Hercules Mulligan',
+  ///   'Eliza Hamilton',
+  ///   'Philip Schuyler',
+  ///   'Maria Reynolds',
+  ///   'Samuel Seabury',
+  /// ];
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: ListView.builder(
+  ///       itemBuilder: (BuildContext context, int index) {
+  ///         return Row(
+  ///           mainAxisSize: MainAxisSize.min,
+  ///           crossAxisAlignment: CrossAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             Radio<int>(
+  ///                 value: index,
+  ///                 groupValue: groupValue,
+  ///                 // TRY THIS: Try setting the toggleable value to false and
+  ///                 // see how that changes the behavior of the widget.
+  ///                 toggleable: true,
+  ///                 onChanged: (int? value) {
+  ///                   setState(() {
+  ///                     groupValue = value;
+  ///                   });
+  ///                 }),
+  ///             Text(selections[index]),
+  ///           ],
+  ///         );
+  ///       },
+  ///       itemCount: selections.length,
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   /// {@end-tool}
   final bool toggleable;
 

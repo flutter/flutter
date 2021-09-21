@@ -73,7 +73,25 @@ enum _FloatingActionButtonType {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
 ///
-/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Floating Action Button'),
+///     ),
+///     body: const Center(
+///       child: Text('Press the button below!')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       child: const Icon(Icons.navigation),
+///       backgroundColor: Colors.green,
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
@@ -83,7 +101,26 @@ enum _FloatingActionButtonType {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
-/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Floating Action Button Label'),
+///     ),
+///     body: const Center(
+///       child: Text('Press the button with a label below!'),
+///     ),
+///     floatingActionButton: FloatingActionButton.extended(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       label: const Text('Approve'),
+///       icon: const Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:

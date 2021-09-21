@@ -163,28 +163,36 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final IosProject ios = IosProject.fromFlutter(this);
+  IosProject? _ios;
+  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  late final AndroidProject android = AndroidProject._(this);
+  AndroidProject? _android;
+  AndroidProject get android => _android ??= AndroidProject._(this);
 
   /// The web sub project of this project.
-  late final WebProject web = WebProject._(this);
+  WebProject? _web;
+  WebProject get web => _web ??= WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final MacOSProject macos = MacOSProject.fromFlutter(this);
+  MacOSProject? _macos;
+  MacOSProject get macos => _macos ??= MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
-  late final LinuxProject linux = LinuxProject.fromFlutter(this);
+  LinuxProject? _linux;
+  LinuxProject get linux => _linux ??= LinuxProject.fromFlutter(this);
 
   /// The Windows sub project of this project.
-  late final WindowsProject windows = WindowsProject.fromFlutter(this);
+  WindowsProject? _windows;
+  WindowsProject get windows => _windows ??= WindowsProject.fromFlutter(this);
 
   /// The Windows UWP sub project of this project.
-  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
+  WindowsUwpProject? _windowUwp;
+  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
-  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
+  FuchsiaProject? _fuchsia;
+  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -406,7 +414,8 @@ class AndroidProject extends FlutterProjectPlatform {
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// Returns true if the current version of the Gradle plugin is supported.
-  late final bool isSupportedVersion = _computeSupportedVersion();
+  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
+  bool? _isSupportedVersion;
 
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;

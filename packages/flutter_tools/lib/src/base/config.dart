@@ -43,7 +43,7 @@ class Config {
     );
   }
 
-  /// Similar to the default config constructor, but with some different
+  /// Similiar to the default config constructor, but with some different
   /// behaviours:
   /// - will not delete the config if it's not valid JSON
   /// - will log but also rethrow any exceptions while loading the JSON, so

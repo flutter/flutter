@@ -30,8 +30,6 @@ import 'theme_data.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-///  * [RadioTheme], which is used by descendants to obtain the
-///    [RadioThemeData].
 @immutable
 class RadioThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.radioTheme].
@@ -46,43 +44,33 @@ class RadioThemeData with Diagnosticable {
 
   /// {@macro flutter.material.radio.mouseCursor}
   ///
-  /// If specified, overrides the default value of [Radio.mouseCursor]. The
-  /// default value is [MaterialStateMouseCursor.clickable].
+  /// If specified, overrides the default value of [Radio.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.radio.fillColor}
   ///
-  /// If specified, overrides the default value of [Radio.fillColor]. The
-  /// default value is the value of [ThemeData.disabledColor] in the disabled
-  /// state, [ThemeData.toggleableActiveColor] in the selected state, and
-  /// [ThemeData.unselectedWidgetColor] in the default state.
+  /// If specified, overrides the default value of [Radio.fillColor].
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.overlayColor}
   ///
-  /// If specified, overrides the default value of [Radio.overlayColor]. The
-  /// default value is [ThemeData.toggleableActiveColor] with alpha
-  /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
-  /// in the pressed, focused, and hovered state.
+  /// If specified, overrides the default value of [Radio.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
-  /// If specified, overrides the default value of [Radio.splashRadius]. The
-  /// default value is [kRadialReactionRadius].
+  /// If specified, overrides the default value of [Radio.splashRadius].
   final double? splashRadius;
 
   /// {@macro flutter.material.radio.materialTapTargetSize}
   ///
   /// If specified, overrides the default value of
-  /// [Radio.materialTapTargetSize]. The default value is the value of
-  /// [ThemeData.materialTapTargetSize].
+  /// [Radio.materialTapTargetSize].
   final MaterialTapTargetSize? materialTapTargetSize;
 
   /// {@macro flutter.material.radio.visualDensity}
   ///
-  /// If specified, overrides the default value of [Radio.visualDensity]. The
-  /// default value is the value of [ThemeData.visualDensity].
+  /// If specified, overrides the default value of [Radio.visualDensity].
   final VisualDensity? visualDensity;
 
   /// Creates a copy of this object but with the given fields replaced with the

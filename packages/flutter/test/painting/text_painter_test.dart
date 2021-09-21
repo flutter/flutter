@@ -152,16 +152,7 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
-    expect(
-      e.toString(),
-      contains('TextPainter.paint called when text geometry was not yet calculated'),
-    );
+    expect(() { painter.paint(MockCanvas(), Offset.zero); }, anyOf(throwsFlutterError, throwsAssertionError));
   });
 
   test('TextPainter requires textDirection', () {

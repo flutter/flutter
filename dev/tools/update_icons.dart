@@ -447,7 +447,7 @@ class _Icon {
         flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
       }
     }
-    // Prefix identifier rewrites.
+    // Prefix identifer rewrites.
     for (final MapEntry<String, String> rewritePair
     in identifierPrefixRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {

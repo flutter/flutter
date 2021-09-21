@@ -97,14 +97,7 @@ class IntegrationTestTestDevice implements TestDevice {
       );
     });
 
-    remoteMessages.listen(
-      (String s) => controller.local.sink.add(s),
-      onError: (Object error, StackTrace stack) => controller.local.sink.addError(error, stack),
-    );
-    unawaited(vmService.service.onDone.whenComplete(
-      () => controller.local.sink.close(),
-    ));
-
+    unawaited(remoteMessages.pipe(controller.local.sink));
     return controller.foreign;
   }
 

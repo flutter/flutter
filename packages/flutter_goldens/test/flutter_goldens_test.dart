@@ -210,7 +210,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () async {
+    test('Creates traceID correctly', () {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -232,9 +232,10 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
+
       expect(
         traceID,
-        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
+        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
       );
 
       // Browser
@@ -259,9 +260,10 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
+
       expect(
         traceID,
-        equals('e9d5c296c48e7126808520e9cc191243'),
+        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
       );
 
       // Locally - should defer to luci traceID
@@ -281,9 +283,10 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
+
       expect(
         traceID,
-        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
       );
     });
 

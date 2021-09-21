@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
+// @dart = 2.8
+
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -23,15 +25,16 @@ import 'fuchsia_sdk.dart';
 /// A simple wrapper for the Fuchsia SDK's 'device-finder' tool.
 class FuchsiaDevFinder {
   FuchsiaDevFinder({
-    required FuchsiaArtifacts? fuchsiaArtifacts,
-    required Logger logger,
-    required ProcessManager processManager,
+    @required FuchsiaArtifacts fuchsiaArtifacts,
+    @required Logger logger,
+    @required ProcessManager processManager,
   })
     : _fuchsiaArtifacts = fuchsiaArtifacts,
       _logger = logger,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  final FuchsiaArtifacts? _fuchsiaArtifacts;
+
+  final FuchsiaArtifacts _fuchsiaArtifacts;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
@@ -39,13 +42,13 @@ class FuchsiaDevFinder {
   /// formatted as follows:
   ///
   ///     192.168.42.172 scare-cable-skip-joy
-  Future<List<String>?> list({ Duration? timeout }) async {
-    final File? devFinder = _fuchsiaArtifacts?.devFinder;
-    if (devFinder == null || !devFinder.existsSync()) {
+  Future<List<String>> list({ Duration timeout }) async {
+    if (_fuchsiaArtifacts.devFinder == null ||
+        !_fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
-      devFinder.path,
+      _fuchsiaArtifacts.devFinder.path,
       'list',
       '-full',
       if (timeout != null)
@@ -67,13 +70,13 @@ class FuchsiaDevFinder {
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String?> resolve(String deviceName) async {
-    final File? devFinder = _fuchsiaArtifacts?.devFinder;
-    if (devFinder == null || !devFinder.existsSync()) {
+  Future<String> resolve(String deviceName) async {
+    if (_fuchsiaArtifacts.devFinder == null ||
+        !_fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
-      devFinder.path,
+      _fuchsiaArtifacts.devFinder.path,
       'resolve',
       '-device-limit', '1',
       deviceName,

@@ -2,10 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart' show RenderEditable;
+
 import 'actions.dart';
+import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
-import 'text_editing_action_target.dart';
+
+/// The recipient of a [TextEditingAction].
+///
+/// TextEditingActions will only be enabled when an implementer of this class is
+/// focused.
+///
+/// See also:
+///
+///   * [EditableTextState], which implements this and is the most typical
+///     target of a TextEditingAction.
+abstract class TextEditingActionTarget {
+  /// The renderer that handles [TextEditingAction]s.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.renderEditable], which overrides this.
+  RenderEditable get renderEditable;
+}
 
 /// An [Action] related to editing text.
 ///
@@ -30,14 +50,12 @@ abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
   @protected
   TextEditingActionTarget? get textEditingActionTarget {
     // If a TextEditingActionTarget is not focused, then ignore this action.
-    if (primaryFocus?.context == null ||
-        primaryFocus!.context! is! StatefulElement ||
-        ((primaryFocus!.context! as StatefulElement).state
-            is! TextEditingActionTarget)) {
+    if (primaryFocus?.context == null
+        || primaryFocus!.context! is! StatefulElement
+        || ((primaryFocus!.context! as StatefulElement).state is! TextEditingActionTarget)) {
       return null;
     }
-    return (primaryFocus!.context! as StatefulElement).state
-        as TextEditingActionTarget;
+    return (primaryFocus!.context! as StatefulElement).state as TextEditingActionTarget;
   }
 
   @override

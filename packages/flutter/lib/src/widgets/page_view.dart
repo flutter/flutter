@@ -193,11 +193,6 @@ class PageController extends ScrollController {
     required Curve curve,
   }) {
     final _PagePosition position = this.position as _PagePosition;
-    if (position._cachedPage != null) {
-      position._cachedPage = page.toDouble();
-      return Future<void>.value();
-    }
-
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
       duration: duration,
@@ -211,11 +206,6 @@ class PageController extends ScrollController {
   /// without animation, and without checking if the new value is in range.
   void jumpToPage(int page) {
     final _PagePosition position = this.position as _PagePosition;
-    if (position._cachedPage != null) {
-      position._cachedPage = page.toDouble();
-      return;
-    }
-
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
   }
 
@@ -335,10 +325,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   final int initialPage;
   double _pageToUseOnStartup;
-  // When the viewport has a zero-size, the `page` can not
-  // be retrieved by `getPageFromPixels`, so we need to cache the page
-  // for use when resizing the viewport to non-zero next time.
-  double? _cachedPage;
 
   @override
   Future<void> ensureVisible(
@@ -384,8 +370,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    assert(viewportDimension > 0.0);
-    final double actual = math.max(0.0, pixels - _initialPageOffset) / (viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -405,12 +390,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     );
     return !hasPixels || !hasContentDimensions
       ? null
-      : _cachedPage ?? getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+      : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
+    PageStorage.of(context.storageContext)?.writeState(context.storageContext, getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -424,7 +409,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   void saveOffset() {
-    context.saveOffset(_cachedPage ?? getPageFromPixels(pixels, viewportDimension));
+    context.saveOffset(getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
@@ -446,20 +431,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     }
     final bool result = super.applyViewportDimension(viewportDimension);
     final double? oldPixels = hasPixels ? pixels : null;
-    double page;
-    if (oldPixels == null) {
-      page = _pageToUseOnStartup;
-    } else if (oldViewportDimensions == 0.0) {
-      // If resize from zero, we should use the _cachedPage to recover the state.
-      page = _cachedPage!;
-    } else {
-      page = getPageFromPixels(oldPixels, oldViewportDimensions!);
-    }
+    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions!);
     final double newPixels = getPixelsFromPage(page);
-
-    // If the viewportDimension is zero, cache the page
-    // in case the viewport is resized to be non-zero.
-    _cachedPage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
@@ -597,10 +570,32 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
+///
 /// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
 /// which scroll horizontally.
 ///
-/// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final PageController controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: const <Widget>[
+///        Center(
+///          child: Text('First Page'),
+///        ),
+///        Center(
+///          child: Text('Second Page'),
+///        ),
+///        Center(
+///          child: Text('Third Page'),
+///        )
+///      ],
+///    );
+///  }
+/// ```
 /// {@end-tool}
 ///
 /// See also:

@@ -755,7 +755,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
     _listenable = Listenable.merge(animations);
-    if (widget.route.isCurrent && _shouldRequestFocus) {
+    if (widget.route.isCurrent) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -764,7 +764,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void didUpdateWidget(_ModalScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
-    if (widget.route.isCurrent && _shouldRequestFocus) {
+    if (widget.route.isCurrent) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -792,14 +792,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       (widget.route.navigator?.userGestureInProgress ?? false);
   }
 
-  bool get _shouldRequestFocus {
-    return widget.route.navigator!.widget.requestFocus;
-  }
-
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
+    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -1147,7 +1143,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   TickerFuture didPush() {
-    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
+    if (_scopeKey.currentState != null) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     return super.didPush();
@@ -1155,7 +1151,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didAdd() {
-    if (_scopeKey.currentState != null && navigator!.widget.requestFocus) {
+    if (_scopeKey.currentState != null) {
       navigator!.focusScopeNode.setFirstFocus(_scopeKey.currentState!.focusScopeNode);
     }
     super.didAdd();
@@ -1986,6 +1982,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// For more information about state restoration, see [RestorationManager].
 ///
 /// {@tool sample --template=stateless_widget_restoration_material}
+///
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1993,7 +1990,33 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ** See code in examples/api/lib/widgets/routes/show_general_dialog.0.dart **
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: OutlinedButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: const Text('Open Dialog'),
+///       ),
+///     ),
+///   );
+/// }
+///
+/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///   return RawDialogRoute<void>(
+///     pageBuilder: (
+///       BuildContext context,
+///       Animation<double> animation,
+///       Animation<double> secondaryAnimation,
+///     ) {
+///       return const AlertDialog(title: Text('Alert!'));
+///     },
+///   );
+/// }
+/// ```
+///
 /// {@end-tool}
 ///
 /// See also:

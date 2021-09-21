@@ -106,8 +106,10 @@ class AndroidPlugin extends PluginPlatform {
     };
   }
 
+  Set<String>? _cachedEmbeddingVersion;
+
   /// Returns the version of the Android embedding.
-  late final Set<String> _supportedEmbeddings = _getSupportedEmbeddings();
+  Set<String> get _supportedEmbeddings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);

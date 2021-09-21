@@ -26,7 +26,7 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = false;
     });
 
-    testWithoutContext('does not support non-macOS platforms', () async {
+    testWithoutContext('does not support non-macOS plaforms', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'windows'),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,8 +16,8 @@ import '../../src/fakes.dart';
 
 void main() {
   group('process exceptions', () {
-    late FakeProcessManager fakeProcessManager;
-    late ProcessUtils processUtils;
+    FakeProcessManager fakeProcessManager;
+    ProcessUtils processUtils;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -40,7 +42,7 @@ void main() {
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
       int i = 1;
-      int? cleanup;
+      int cleanup;
 
       final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
 
@@ -55,9 +57,9 @@ void main() {
   });
 
   group('output formatting', () {
-    late FakeProcessManager processManager;
-    late ProcessUtils processUtils;
-    late BufferLogger logger;
+    FakeProcessManager processManager;
+    ProcessUtils processUtils;
+    BufferLogger logger;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -102,8 +104,8 @@ void main() {
   });
 
   group('run', () {
-    late FakeProcessManager fakeProcessManager;
-    late ProcessUtils processUtils;
+    FakeProcessManager fakeProcessManager;
+    ProcessUtils processUtils;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -178,9 +180,9 @@ void main() {
   });
 
   group('runSync', () {
-    late FakeProcessManager fakeProcessManager;
-    late ProcessUtils processUtils;
-    late BufferLogger testLogger;
+    FakeProcessManager fakeProcessManager;
+    ProcessUtils processUtils;
+    BufferLogger testLogger;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -329,8 +331,8 @@ void main() {
   });
 
   group('exitsHappySync', () {
-    late FakeProcessManager processManager;
-    late ProcessUtils processUtils;
+    FakeProcessManager processManager;
+    ProcessUtils processUtils;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -386,8 +388,8 @@ void main() {
   });
 
   group('exitsHappy', () {
-    late FakeProcessManager processManager;
-    late ProcessUtils processUtils;
+    FakeProcessManager processManager;
+    ProcessUtils processUtils;
 
     setUp(() {
       processManager = FakeProcessManager.empty();

@@ -12,12 +12,6 @@ void main() {
       layoutDirection: TextDirection.ltr,
   );
   int viewId = surfaceController.id;
-  final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
-    error: '',
-  );
-  final TextureAndroidViewController textureController = TextureAndroidViewController(
-    error: '',
-  );
   final TextureAndroidViewController textureController = TextureAndroidViewController(
     viewId: 10,
     viewType: 'FixTester',
@@ -30,5 +24,4 @@ void main() {
   await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.bottom]);
   await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
   await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
-  await SystemChrome.setEnabledSystemUIOverlays(error: '');
 }

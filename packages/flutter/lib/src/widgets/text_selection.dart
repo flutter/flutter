@@ -239,7 +239,6 @@ abstract class TextSelectionControls {
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 
@@ -872,27 +871,27 @@ class _TextSelectionHandleOverlayState
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by text field implementations wrapping
+/// The interface is usually implemented by textfield implementations wrapping
 /// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
 /// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the text field.
+/// the builder with information about the current state of the textfield.
 /// Based on these information, the builder adds the correct gesture handlers
 /// to the gesture detector.
 ///
 /// See also:
 ///
-///  * [TextField], which implements this delegate for the Material text field.
+///  * [TextField], which implements this delegate for the Material textfield.
 ///  * [CupertinoTextField], which implements this delegate for the Cupertino
-///    text field.
+///    textfield.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
   GlobalKey<EditableTextState> get editableTextKey;
 
-  /// Whether the text field should respond to force presses.
+  /// Whether the textfield should respond to force presses.
   bool get forcePressEnabled;
 
-  /// Whether the user may select text in the text field.
+  /// Whether the user may select text in the textfield.
   bool get selectionEnabled;
 }
 
@@ -925,7 +924,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
   /// The delegate provides the builder with information about what actions can
-  /// currently be performed on the text field. Based on this, the builder adds
+  /// currently be performed on the textfield. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
@@ -1580,13 +1579,28 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
-    if (_disposed) {
-      return;
+    // iOS 14 added a notification that appears when an app accesses the
+    // clipboard. To avoid the notification, don't access the clipboard on iOS,
+    // and instead always show the paste button, even when the clipboard is
+    // empty.
+    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
+    // won't trigger the notification.
+    // https://github.com/flutter/flutter/issues/60145
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        value = ClipboardStatus.pasteable;
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
     }
 
-    final bool hasStrings;
+    ClipboardData? data;
     try {
-      hasStrings = await Clipboard.hasStrings();
+      data = await Clipboard.getData(Clipboard.kTextPlain);
     } catch (stacktrace) {
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
@@ -1597,14 +1611,13 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
-    final ClipboardStatus nextStatus = hasStrings
+    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text!.isNotEmpty
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
-
-    if (_disposed || nextStatus == value) {
+    if (_disposed || clipboardStatus == value) {
       return;
     }
-    value = nextStatus;
+    value = clipboardStatus;
   }
 
   @override

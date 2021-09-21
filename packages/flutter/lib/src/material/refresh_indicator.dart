@@ -120,7 +120,7 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
+    this.strokeWidth = 2.0,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
   }) : assert(child != null),
        assert(onRefresh != null),

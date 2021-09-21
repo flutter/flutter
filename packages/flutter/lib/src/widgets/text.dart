@@ -494,7 +494,6 @@ class Text extends StatelessWidget {
   /// widget directly to entirely override the [DefaultTextStyle].
   final int? maxLines;
 
-  /// {@template flutter.widgets.Text.semanticsLabel}
   /// An alternative semantics label for this text.
   ///
   /// If present, the semantics of this widget will contain this value instead
@@ -507,7 +506,6 @@ class Text extends StatelessWidget {
   /// ```dart
   /// Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
-  /// {@endtemplate}
   final String? semanticsLabel;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}

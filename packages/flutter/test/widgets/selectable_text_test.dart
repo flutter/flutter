@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is run as part of a reduced test set in CI on Mac and Windows
-// machines.
-@Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
@@ -17,9 +13,24 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
+
+class MockClipboard {
+  dynamic _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -115,6 +126,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   const String kThreeLines =
       'First line of text is\n'
@@ -153,20 +165,9 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      mockClipboard.handleMethodCall,
-    );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-  });
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      null,
-    );
   });
 
   Widget selectableTextBuilder({
@@ -240,7 +241,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -1923,8 +1924,9 @@ void main() {
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
   }, variant: KeySimulatorTransitModeVariant.all());
+
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -2233,32 +2235,6 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
-  });
-
-  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final Key key = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: SelectableText(
-          'Guten Tag',
-          semanticsLabel: 'German greeting for good day',
-          key: key,
-        ),
-      ),
-    );
-
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          actions: <SemanticsAction>[SemanticsAction.longPress],
-          label: 'German greeting for good day',
-          textDirection: TextDirection.ltr,
-        )
-      ],
-    ), ignoreTransform: true, ignoreRect: true));
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
@@ -3876,7 +3852,6 @@ void main() {
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
-      semanticsLabel: 'something else',
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -3886,7 +3861,6 @@ void main() {
 
     expect(description, <String>[
       'data: something',
-      'semanticsLabel: something else',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'showCursor: true',

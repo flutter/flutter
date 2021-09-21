@@ -26,7 +26,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/dart');
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
 
     fileSystem.file('pubspec.yaml').createSync();
 
@@ -51,8 +51,7 @@ void main() {
     testWithoutContext('does not skip pub get the parameter is false', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -100,8 +99,7 @@ void main() {
     testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -149,8 +147,7 @@ void main() {
     testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -265,11 +262,10 @@ void main() {
     'but the current framework version is not the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -305,11 +301,10 @@ void main() {
     'but the current framework version does not exist yet', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-           'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -344,11 +339,10 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ], onRun: () {
         fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
       })
@@ -383,11 +377,10 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -420,11 +413,10 @@ void main() {
   testWithoutContext('checkUpToDate does not skip pub get if the package config is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -460,11 +452,10 @@ void main() {
   testWithoutContext('checkUpToDate does not skip pub get if the pubspec.lock is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -504,11 +495,10 @@ void main() {
 
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
-          '--verbosity=warning',
-          'get',
-          '--no-precompile',
+        'bin/cache/dart-sdk/bin/pub',
+        '--verbosity=warning',
+        'get',
+        '--no-precompile',
       ],
       exitCode: 69,
       environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
@@ -601,8 +591,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -647,8 +636,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -689,8 +677,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -812,8 +799,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -854,8 +840,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -897,8 +882,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -910,8 +894,7 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -919,8 +902,7 @@ void main() {
       ),
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -932,8 +914,7 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          '__deprecated_pub',
+          'bin/cache/dart-sdk/bin/pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
