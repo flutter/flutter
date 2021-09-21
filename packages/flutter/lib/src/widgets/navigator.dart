@@ -3852,8 +3852,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             navigator: this,
             previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
           );
-          if (entry.currentState == _RouteLifecycle.dispose) {
-            // This can happen if pop finishes synchronously.
+          if (entry.currentState == _RouteLifecycle.dispose ||
+              entry.currentState == _RouteLifecycle.idle) {
+            // This can happen if the pop finishes synchronously or the route
+            // rejects the pop.
             continue;
           }
           assert(entry.currentState == _RouteLifecycle.popping);
@@ -4889,7 +4891,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       assert (entry.currentState == _RouteLifecycle.pop);
     }
     _flushHistoryUpdates(rearrangeOverlay: false);
-    assert(entry.route._popCompleter.isCompleted);
+    assert(() {
+      if (entry.currentState != _RouteLifecycle.idle)
+        assert(entry.route._popCompleter.isCompleted);
+      return true;
+    }());
     assert(() {
       _debugLocked = false;
       return true;
