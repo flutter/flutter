@@ -65,29 +65,26 @@ class PlatformView : public flutter::PlatformView,
  public:
   PlatformView(
       flutter::PlatformView::Delegate& delegate,
-      std::string debug_label,
-      fuchsia::ui::views::ViewRef view_ref,
       flutter::TaskRunners task_runners,
-      std::shared_ptr<sys::ServiceDirectory> runner_services,
-      fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-          parent_environment_service_provider,
-      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
-      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fuchsia::ui::views::ViewRef view_ref,
+      std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
+      fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
+      fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
       fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-      fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
-          keyboard_listener,
+      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
+          view_ref_focused,
       OnEnableWireframe wireframe_enabled_callback,
       OnUpdateView on_update_view_callback,
       OnCreateSurface on_create_surface_callback,
       OnSemanticsNodeUpdate on_semantics_node_update_callback,
       OnRequestAnnounce on_request_announce_callback,
       OnShaderWarmup on_shader_warmup,
-      std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
       AwaitVsyncCallback await_vsync_callback,
       AwaitVsyncForSecondaryCallbackCallback
           await_vsync_for_secondary_callback_callback);
 
-  virtual ~PlatformView();
+  ~PlatformView() override;
 
   // |flutter::PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
@@ -174,13 +171,6 @@ class PlatformView : public flutter::PlatformView,
   // Utility function for coordinate massaging.
   std::array<float, 2> ClampToViewSpace(const float x, const float y) const;
 
-  const std::string debug_label_;
-  // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
-  // alive there
-  const fuchsia::ui::views::ViewRef view_ref_;
-  std::shared_ptr<FocusDelegate> focus_delegate_;
-  std::shared_ptr<PointerDelegate> pointer_delegate_;
-
   // Logical size and origin, and logical->physical ratio.  These are optional
   // to provide an "unset" state during program startup, before Scenic has sent
   // any metrics-related events to provide initial values for these.
@@ -192,23 +182,20 @@ class PlatformView : public flutter::PlatformView,
   std::optional<std::array<float, 2>> view_logical_origin_;
   std::optional<float> view_pixel_ratio_;
 
-  OnEnableWireframe wireframe_enabled_callback_;
-  OnUpdateView on_update_view_callback_;
-  OnCreateSurface on_create_surface_callback_;
-
-  // Accessibility handlers:
-  OnSemanticsNodeUpdate on_semantics_node_update_callback_;
-  OnRequestAnnounce on_request_announce_callback_;
-
-  OnShaderWarmup on_shader_warmup_;
   std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder_;
 
-  int current_text_input_client_ = 0;
+  std::shared_ptr<FocusDelegate> focus_delegate_;
+  std::shared_ptr<PointerDelegate> pointer_delegate_;
+
   fidl::Binding<fuchsia::ui::input::InputMethodEditorClient> ime_client_;
   fuchsia::ui::input::InputMethodEditorPtr ime_;
   fuchsia::ui::input::ImeServicePtr text_sync_service_;
+  int current_text_input_client_ = 0;
 
-  fuchsia::sys::ServiceProviderPtr parent_environment_service_provider_;
+  fidl::Binding<fuchsia::ui::input3::KeyboardListener>
+      keyboard_listener_binding_;
+  fuchsia::ui::input3::KeyboardPtr keyboard_;
+  Keyboard keyboard_translator_;
 
   // last_text_state_ is the last state of the text input as reported by the IME
   // or initialized by Flutter. We set it to null if Flutter doesn't want any
@@ -226,13 +213,12 @@ class PlatformView : public flutter::PlatformView,
   // https://github.com/flutter/flutter/issues/55966
   std::set<std::string /* channel */> unregistered_channels_;
 
-  // The registered binding for serving the keyboard listener server endpoint.
-  fidl::Binding<fuchsia::ui::input3::KeyboardListener>
-      keyboard_listener_binding_;
-
-  // The keyboard translation for fuchsia.ui.input3.KeyEvent.
-  Keyboard keyboard_;
-
+  OnEnableWireframe wireframe_enabled_callback_;
+  OnUpdateView on_update_view_callback_;
+  OnCreateSurface on_create_surface_callback_;
+  OnSemanticsNodeUpdate on_semantics_node_update_callback_;
+  OnRequestAnnounce on_request_announce_callback_;
+  OnShaderWarmup on_shader_warmup_;
   AwaitVsyncCallback await_vsync_callback_;
   AwaitVsyncForSecondaryCallbackCallback
       await_vsync_for_secondary_callback_callback_;

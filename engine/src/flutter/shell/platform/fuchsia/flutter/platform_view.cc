@@ -40,46 +40,46 @@ template <class T>
 void SetInterfaceErrorHandler(fidl::InterfacePtr<T>& interface,
                               std::string name) {
   interface.set_error_handler([name](zx_status_t status) {
-    FML_LOG(ERROR) << "Interface error on: " << name << "status: " << status;
+    FML_LOG(ERROR) << "Interface error on: " << name << ", status: " << status;
   });
 }
 template <class T>
 void SetInterfaceErrorHandler(fidl::Binding<T>& binding, std::string name) {
   binding.set_error_handler([name](zx_status_t status) {
-    FML_LOG(ERROR) << "Interface error on: " << name << ", status: " << status;
+    FML_LOG(ERROR) << "Binding error on: " << name << ", status: " << status;
   });
 }
 
 PlatformView::PlatformView(
     flutter::PlatformView::Delegate& delegate,
-    std::string debug_label,
-    fuchsia::ui::views::ViewRef view_ref,
     flutter::TaskRunners task_runners,
-    std::shared_ptr<sys::ServiceDirectory> runner_services,
-    fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-        parent_environment_service_provider_handle,
-    fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
-    fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fuchsia::ui::views::ViewRef view_ref,
+    std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
+    fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
+    fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
     fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-    fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
-        keyboard_listener_request,
+    fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused,
     OnEnableWireframe wireframe_enabled_callback,
     OnUpdateView on_update_view_callback,
     OnCreateSurface on_create_surface_callback,
     OnSemanticsNodeUpdate on_semantics_node_update_callback,
     OnRequestAnnounce on_request_announce_callback,
     OnShaderWarmup on_shader_warmup,
-    std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
         await_vsync_for_secondary_callback_callback)
     : flutter::PlatformView(delegate, std::move(task_runners)),
-      debug_label_(std::move(debug_label)),
-      view_ref_(std::move(view_ref)),
+      external_view_embedder_(external_view_embedder),
       focus_delegate_(
-          std::make_shared<FocusDelegate>(std::move(vrf), std::move(focuser))),
+          std::make_shared<FocusDelegate>(std::move(view_ref_focused),
+                                          std::move(focuser))),
       pointer_delegate_(
           std::make_shared<PointerDelegate>(std::move(touch_source))),
+      ime_client_(this),
+      text_sync_service_(ime_service.Bind()),
+      keyboard_listener_binding_(this),
+      keyboard_(keyboard.Bind()),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_update_view_callback_(std::move(on_update_view_callback)),
       on_create_surface_callback_(std::move(on_create_surface_callback)),
@@ -87,28 +87,22 @@ PlatformView::PlatformView(
           std::move(on_semantics_node_update_callback)),
       on_request_announce_callback_(std::move(on_request_announce_callback)),
       on_shader_warmup_(std::move(on_shader_warmup)),
-      external_view_embedder_(external_view_embedder),
-      ime_client_(this),
-      keyboard_listener_binding_(this, std::move(keyboard_listener_request)),
       await_vsync_callback_(await_vsync_callback),
       await_vsync_for_secondary_callback_callback_(
           await_vsync_for_secondary_callback_callback),
       weak_factory_(this) {
   // Register all error handlers.
   SetInterfaceErrorHandler(ime_, "Input Method Editor");
+  SetInterfaceErrorHandler(ime_client_, "IME Client");
   SetInterfaceErrorHandler(text_sync_service_, "Text Sync Service");
-  SetInterfaceErrorHandler(parent_environment_service_provider_,
-                           "Parent Environment Service Provider");
-  SetInterfaceErrorHandler(keyboard_listener_binding_,
-                           "KeyboardListener Service");
-  // Access the IME service.
-  parent_environment_service_provider_ =
-      parent_environment_service_provider_handle.Bind();
+  SetInterfaceErrorHandler(keyboard_listener_binding_, "Keyboard Listener");
+  SetInterfaceErrorHandler(keyboard_, "Keyboard");
 
-  parent_environment_service_provider_.get()->ConnectToService(
-      fuchsia::ui::input::ImeService::Name_,
-      text_sync_service_.NewRequest().TakeChannel());
+  // Configure keyboard listener.
+  keyboard_->AddListener(std::move(view_ref),
+                         keyboard_listener_binding_.NewBinding(), [] {});
 
+  // Begin watching for focus changes.
   focus_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](bool focused) {
     if (!weak) {
       FML_LOG(WARNING) << "PlatformView use-after-free attempted. Ignoring.";
@@ -124,6 +118,7 @@ PlatformView::PlatformView(
     }
   });
 
+  // Begin watching for pointer events.
   pointer_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](
                                    std::vector<flutter::PointerData> events) {
     if (!weak) {
@@ -413,16 +408,18 @@ void PlatformView::OnKeyEvent(
     callback(fuchsia::ui::input3::KeyEventStatus::NOT_HANDLED);
     return;
   }
-  keyboard_.ConsumeEvent(std::move(key_event));
+  keyboard_translator_.ConsumeEvent(std::move(key_event));
 
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
   document.SetObject();
   document.AddMember("type", rapidjson::Value(type, strlen(type)), allocator);
   document.AddMember("keymap", rapidjson::Value("fuchsia"), allocator);
-  document.AddMember("hidUsage", keyboard_.LastHIDUsage(), allocator);
-  document.AddMember("codePoint", keyboard_.LastCodePoint(), allocator);
-  document.AddMember("modifiers", keyboard_.Modifiers(), allocator);
+  document.AddMember("hidUsage", keyboard_translator_.LastHIDUsage(),
+                     allocator);
+  document.AddMember("codePoint", keyboard_translator_.LastCodePoint(),
+                     allocator);
+  document.AddMember("modifiers", keyboard_translator_.Modifiers(), allocator);
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);

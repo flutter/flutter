@@ -11,9 +11,7 @@
             "vulkan"
         ],
         "services": [
-            "fuchsia.accessibility.SettingsManager",
             "fuchsia.accessibility.semantics.SemanticsManager",
-            "fuchsia.deprecatedtimezone.Timezone",
             "fuchsia.device.NameProvider",
             "fuchsia.feedback.CrashReporter",
             "fuchsia.fonts.Provider",
@@ -23,10 +21,12 @@
             "fuchsia.net.name.Lookup",
             "fuchsia.posix.socket.Provider",
             "fuchsia.sysmem.Allocator",
-            "fuchsia.timezone.Timezone",
             "fuchsia.tracing.provider.Registry",
             "fuchsia.ui.composition.Allocator",
             "fuchsia.ui.composition.Flatland",
+            "fuchsia.ui.input.ImeService",
+            "fuchsia.ui.input3.Keyboard",
+            "fuchsia.ui.scenic.Scenic",
             "fuchsia.vulkan.loader.Loader"
         ]
     }
