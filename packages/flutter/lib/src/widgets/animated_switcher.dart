@@ -93,43 +93,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 /// This sample shows a counter that animates the scale of a text widget
 /// whenever the value changes.
 ///
-/// ```dart
-/// int _count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Container(
-///     color: Colors.white,
-///     child: Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: <Widget>[
-///         AnimatedSwitcher(
-///           duration: const Duration(milliseconds: 500),
-///           transitionBuilder: (Widget child, Animation<double> animation) {
-///             return ScaleTransition(child: child, scale: animation);
-///           },
-///           child: Text(
-///             '$_count',
-///             // This key causes the AnimatedSwitcher to interpret this as a "new"
-///             // child each time the count changes, so that it will begin its animation
-///             // when the count changes.
-///             key: ValueKey<int>(_count),
-///             style: Theme.of(context).textTheme.headline4,
-///           ),
-///         ),
-///         ElevatedButton(
-///           child: const Text('Increment'),
-///           onPressed: () {
-///             setState(() {
-///               _count += 1;
-///             });
-///           },
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/animated_switcher/animated_switcher.0.dart **
 /// {@end-tool}
 ///
 /// See also:

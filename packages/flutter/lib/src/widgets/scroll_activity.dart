@@ -563,7 +563,7 @@ class BallisticScrollActivity extends ScrollActivity {
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
-    return delegate.setPixels(value) == 0.0;
+    return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 
   void _end() {

@@ -190,83 +190,65 @@ Future<void> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
-  // We run the "pass" and "fail" smoke tests first, and alone, because those
-  // are particularly critical and sensitive. If one of these fails, there's no
-  // point even trying the others.
+
+  // We want to run the smoketests in parallel, because they each take some time
+  // to run (e.g. compiling), so we don't want to run them in series, especially
+  // on 20-core machines. However, we have a race condition, so for now...
+  // Race condition issue: https://github.com/flutter/flutter/issues/90026
   final List<ShardRunner> tests = <ShardRunner>[
     () => _runFlutterTest(
-          automatedTests,
-          script: path.join('test_smoke_test', 'pass_test.dart'),
-          printOutput: false,
-        ),
+      automatedTests,
+      script: path.join('test_smoke_test', 'pass_test.dart'),
+      printOutput: false,
+    ),
     () => _runFlutterTest(
-          automatedTests,
-          script: path.join('test_smoke_test', 'fail_test.dart'),
-          expectFailure: true,
-          printOutput: false,
-        ),
-    // We run the timeout tests individually because they are timing-sensitive.
+      automatedTests,
+      script: path.join('test_smoke_test', 'fail_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
     () => _runFlutterTest(
-          automatedTests,
-          script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
-          expectFailure: false,
-          printOutput: false,
-        ),
+      automatedTests,
+      script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+      outputChecker: (CommandResult result) {
+        return result.flattenedStdout!.contains('failingPendingTimerTest')
+          ? null
+          : 'Failed to find the stack trace for the pending Timer.\n\n'
+            'stdout:\n${result.flattenedStdout}\n\n'
+            'stderr:\n${result.flattenedStderr}';
+    }),
     () => _runFlutterTest(
-          automatedTests,
-          script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
-          expectFailure: true,
-          printOutput: false,
-        ),
-    () => _runFlutterTest(automatedTests,
-            script:
-                path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
-            expectFailure: true,
-            printOutput: false, outputChecker: (CommandResult result) {
-          return result.flattenedStdout!.contains('failingPendingTimerTest')
-              ? null
-              : 'Failed to find the stack trace for the pending Timer.';
-        }),
-    // We run the remaining smoketests in parallel, because they each take some
-    // time to run (e.g. compiling), so we don't want to run them in series,
-    // especially on 20-core machines...
-    () => Future.wait<void>(
-          <Future<void>>[
-            _runFlutterTest(
-              automatedTests,
-              script: path.join('test_smoke_test', 'crash1_test.dart'),
-              expectFailure: true,
-              printOutput: false,
-            ),
-            _runFlutterTest(
-              automatedTests,
-              script: path.join('test_smoke_test', 'crash2_test.dart'),
-              expectFailure: true,
-              printOutput: false,
-            ),
-            _runFlutterTest(
-              automatedTests,
-              script:
-                  path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-              expectFailure: true,
-              printOutput: false,
-            ),
-            _runFlutterTest(
-              automatedTests,
-              script: path.join(
-                  'test_smoke_test', 'missing_import_test.broken_dart'),
-              expectFailure: true,
-              printOutput: false,
-            ),
-            _runFlutterTest(
-              automatedTests,
-              script: path.join('test_smoke_test',
-                  'disallow_error_reporter_modification_test.dart'),
-              expectFailure: true,
-              printOutput: false,
-            ),
-          ],
-        ),
+      automatedTests,
+      script: path.join('test_smoke_test', 'crash1_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
+    () => _runFlutterTest(
+      automatedTests,
+      script: path.join('test_smoke_test', 'crash2_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
+    () => _runFlutterTest(
+      automatedTests,
+      script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
+    () => _runFlutterTest(
+      automatedTests,
+      script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
+    () => _runFlutterTest(
+      automatedTests,
+      script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+    ),
   ];
 
   List<ShardRunner> testsToRun;
@@ -408,15 +390,17 @@ Future<void> runForbiddenFromReleaseTests() async {
   );
 }
 
-/// Verifies that APK, and IPA (if on macOS) builds the examples apps
-/// without crashing. It does not actually launch the apps. That happens later
-/// in the devicelab. This is just a smoke-test. In particular, this will verify
-/// we can build when there are spaces in the path name for the Flutter SDK and
-/// target app.
+/// Verifies that APK, and IPA (if on macOS), and native desktop builds the
+/// examples apps without crashing. It does not actually launch the apps. That
+/// happens later in the devicelab. This is just a smoke-test. In particular,
+/// this will verify we can build when there are spaces in the path name for the
+/// Flutter SDK and target app.
 ///
 /// Also does some checking about types included in hello_world.
 Future<void> _runBuildTests() async {
-  final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+  final List<Directory> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    // API example builds will be tested in a separate shard.
+    .where((FileSystemEntity entity) => entity is Directory && path.basename(entity.path) != 'api').cast<Directory>().toList()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
@@ -430,7 +414,7 @@ Future<void> _runBuildTests() async {
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
-    for (final FileSystemEntity exampleDirectory in exampleDirectories)
+    for (final Directory exampleDirectory in exampleDirectories)
       () => _runExampleProjectBuildTests(exampleDirectory),
     ...<ShardRunner>[
       // Web compilation tests.
@@ -450,17 +434,15 @@ Future<void> _runBuildTests() async {
   await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
-Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
+Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  if (exampleDirectory is! Directory) {
-    return;
-  }
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
-  final List<String> additionalArgs = hasNullSafety
-    ? <String>['--no-sound-null-safety']
-    : <String>[];
+  final List<String> additionalArgs = <String>[
+    if (hasNullSafety) '--no-sound-null-safety',
+    if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
+  ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -785,8 +767,9 @@ Future<void> _runFrameworkTests() async {
       outputChecker: (CommandResult result) {
         final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
         if (matches == null || matches.isEmpty || matches.length > 1) {
-          return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
-                 'stdout:\n${result.flattenedStdout}';
+          return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n\n'
+                 'stdout:\n${result.flattenedStdout}\n\n'
+                 'stderr:\n${result.flattenedStderr}';
         }
         return null;
       },
@@ -1140,16 +1123,30 @@ Future<void> _runFlutterPluginsTests() async {
       ],
       workingDirectory: checkout.path,
     );
+    // Prep the repository tooling.
+    // This test does not use tool_runner.sh because in this context the test
+    // should always run on the entire plugins repo, while tool_runner.sh
+    // is designed for flutter/plugins CI and only analyzes changed repository
+    // files when run for anything but master.
+    final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(
-      './script/tool_runner.sh',
+      'dart',
       <String>[
+        'pub',
+        'get',
+      ],
+      workingDirectory: toolDir,
+    );
+    final String toolScript = path.join(toolDir, 'bin', 'flutter_plugin_tools.dart');
+    await runCommand(
+      'dart',
+      <String>[
+        'run',
+        toolScript,
         'analyze',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
-      environment: <String, String>{
-        'BRANCH_NAME': 'master',
-      },
     );
   }
   await selectSubshard(<String, ShardRunner>{
@@ -1562,10 +1559,18 @@ Future<void> _runFlutterTest(String workingDirectory, {
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
+  final List<String> tags = <String>[];
+  // Recipe configured reduced test shards will only execute tests with the
+  // appropriate tag.
+  if ((Platform.environment['REDUCED_TEST_SET'] ?? 'False') == 'True') {
+    tags.addAll(<String>['-t', 'reduced-test-set']);
+  }
+
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     ...options,
+    ...tags,
     ...flutterTestArgs,
   ];
 
@@ -1751,9 +1756,9 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
     exit(1);
   }
 
-  final int testsPerShard = tests.length ~/ total;
+  final int testsPerShard = (tests.length / total).ceil();
   final int start = (index - 1) * testsPerShard;
-  final int end = index * testsPerShard;
+  final int end = math.min(index * testsPerShard, tests.length);
 
   print('Selecting subshard $index of $total (range ${start + 1}-$end of ${tests.length})');
   return tests.sublist(start, end);

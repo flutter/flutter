@@ -39,32 +39,13 @@ enum _SliderType { material, adaptive }
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
-///
 /// ![A slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
 /// The Sliders value is part of the Stateful widget subclass to change the value
 /// setState was called.
 ///
-/// ```dart
-/// double _currentSliderValue = 20;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Slider(
-///     value: _currentSliderValue,
-///     min: 0,
-///     max: 100,
-///     divisions: 5,
-///     label: _currentSliderValue.round().toString(),
-///     onChanged: (double value) {
-///       setState(() {
-///         _currentSliderValue = value;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/slider/slider.0.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
