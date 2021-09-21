@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 
 import '../matchers.dart';
 import 'common.dart';
@@ -76,6 +77,40 @@ void testMain() {
       expect(factory.isLive(surface), isFalse);
     });
 
+    test('hot restart', () {
+      void expectDisposed(Surface surface) {
+        expect(surface.htmlCanvas!.isConnected, isFalse);
+      }
+
+      final SurfaceFactory originalFactory = SurfaceFactory.instance;
+      expect(SurfaceFactory.debugUninitializedInstance, isNotNull);
+
+      // Cause the surface and its canvas to be attached to the page
+      originalFactory.baseSurface.acquireFrame(const ui.Size(10, 10));
+      originalFactory.baseSurface.addToScene();
+      expect(originalFactory.baseSurface.htmlCanvas!.isConnected, isTrue);
+
+      // Create a few overlay surfaces
+      final List<Surface> overlays = <Surface>[];
+      for (int i = 0; i < 3; i++) {
+        overlays.add(originalFactory.getSurface()
+          ..acquireFrame(const ui.Size(10, 10))
+          ..addToScene());
+      }
+      expect(originalFactory.debugSurfaceCount, 5);
+
+      originalFactory.backupSurface.acquireFrame(const ui.Size(10, 10));
+      originalFactory.backupSurface.addToScene();
+      expect(originalFactory.backupSurface.htmlCanvas!.isConnected, isTrue);
+
+      // Trigger hot restart clean-up logic and check that we indeed clean up.
+      debugEmulateHotRestart();
+      expect(SurfaceFactory.debugUninitializedInstance, isNull);
+      expectDisposed(originalFactory.baseSurface);
+      expectDisposed(originalFactory.backupSurface);
+      overlays.forEach(expectDisposed);
+      expect(originalFactory.debugSurfaceCount, 2);
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
