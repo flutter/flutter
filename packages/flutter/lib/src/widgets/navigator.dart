@@ -3137,7 +3137,6 @@ class _NavigatorPopObservation extends _NavigatorObservation {
 
   @override
   void notify(NavigatorObserver observer) {
-    print('did pop primaryRoute ${(primaryRoute.settings as Page).key} secondaryRoute ${(secondaryRoute?.settings as Page).key}');
     observer.didPop(primaryRoute, secondaryRoute);
   }
 }
@@ -3863,7 +3862,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         case _RouteLifecycle.popping:
           if (!seenTopActiveRoute) {
             // It is possible that the route enters this state directly and skips
-            // _RouteLifecycle.pop. This can happen when page was popped using
+            // _RouteLifecycle.pop. This can happen when page is popped using
             // the imperative API.
             if (poppedRoute != null)
               entry.handleDidPopNext(poppedRoute);
@@ -5006,10 +5005,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { wasDebugLocked = _debugLocked; _debugLocked = true; return true; }());
     assert(_history.where(_RouteEntry.isRoutePredicate(route)).length == 1);
     final _RouteEntry entry =  _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    assert(entry.currentState != _RouteLifecycle.pop);
+    assert(entry.currentState == _RouteLifecycle.popping);
     entry.finalize();
+    // finalizeRoute can be called during _flushHistoryUpdates if a pop
+    // finishes synchronously.
     if (!_flushingHistory)
       _flushHistoryUpdates(rearrangeOverlay: false);
+
     assert(() { _debugLocked = wasDebugLocked!; return true; }());
   }
 
