@@ -1,4 +1,4 @@
-Signature: d1042838c33d0800294fcea560f8370c
+Signature: 86d14d25398dbc2ec55f6a912e577013
 
 UNUSED LICENSES:
 
@@ -1942,7 +1942,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLMain.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryLayout.h
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.h
@@ -2935,16 +2934,18 @@ ORIGIN: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp + ../../../th
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
+FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
+FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
+FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lowp_experiments.cpp
-FILE: ../../../third_party/skia/experimental/sktbd/include/Context.h
-FILE: ../../../third_party/skia/experimental/sktbd/include/SkStuff.h
-FILE: ../../../third_party/skia/experimental/sktbd/src/Context.cpp
-FILE: ../../../third_party/skia/experimental/sktbd/src/Device.cpp
-FILE: ../../../third_party/skia/experimental/sktbd/src/Device.h
-FILE: ../../../third_party/skia/experimental/sktbd/src/SkStuff.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/bindings.h
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/extension.cpp
