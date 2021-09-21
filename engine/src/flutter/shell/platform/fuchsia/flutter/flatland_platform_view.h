@@ -24,19 +24,17 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
  public:
   FlatlandPlatformView(
       flutter::PlatformView::Delegate& delegate,
-      std::string debug_label,
-      fuchsia::ui::views::ViewRef view_ref,
       flutter::TaskRunners task_runners,
-      std::shared_ptr<sys::ServiceDirectory> runner_services,
-      fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-          parent_environment_service_provider,
-      fuchsia::ui::composition::ParentViewportWatcherPtr
-          parent_viewport_watcher,
-      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
-      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fuchsia::ui::views::ViewRef view_ref,
+      std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
+      fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
+      fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
       fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-      fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
-          keyboard_listener,
+      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
+          view_ref_focused,
+      fidl::InterfaceHandle<fuchsia::ui::composition::ParentViewportWatcher>
+          parent_viewport_watcher,
       OnEnableWireframe wireframe_enabled_callback,
       OnCreateFlatlandView on_create_view_callback,
       OnUpdateView on_update_view_callback,
@@ -45,11 +43,10 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
       OnSemanticsNodeUpdate on_semantics_node_update_callback,
       OnRequestAnnounce on_request_announce_callback,
       OnShaderWarmup on_shader_warmup,
-      std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
       AwaitVsyncCallback await_vsync_callback,
       AwaitVsyncForSecondaryCallbackCallback
           await_vsync_for_secondary_callback_callback);
-  ~FlatlandPlatformView();
+  ~FlatlandPlatformView() override;
 
   void OnGetLayout(fuchsia::ui::composition::LayoutInfo info);
   void OnParentViewportStatus(

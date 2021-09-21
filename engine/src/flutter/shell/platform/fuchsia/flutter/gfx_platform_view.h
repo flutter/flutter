@@ -27,19 +27,17 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
  public:
   GfxPlatformView(
       flutter::PlatformView::Delegate& delegate,
-      std::string debug_label,
-      fuchsia::ui::views::ViewRef view_ref,
       flutter::TaskRunners task_runners,
-      std::shared_ptr<sys::ServiceDirectory> runner_services,
-      fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-          parent_environment_service_provider,
+      fuchsia::ui::views::ViewRef view_ref,
+      std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
+      fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
+      fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
+      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
+          view_ref_focused,
       fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
           session_listener_request,
-      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
-      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
-      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-      fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
-          keyboard_listener,
       fit::closure on_session_listener_error_callback,
       OnEnableWireframe wireframe_enabled_callback,
       OnCreateGfxView on_create_view_callback,
@@ -49,11 +47,11 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
       OnSemanticsNodeUpdate on_semantics_node_update_callback,
       OnRequestAnnounce on_request_announce_callback,
       OnShaderWarmup on_shader_warmup,
-      std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
       AwaitVsyncCallback await_vsync_callback,
       AwaitVsyncForSecondaryCallbackCallback
           await_vsync_for_secondary_callback_callback);
-  ~GfxPlatformView();
+
+  ~GfxPlatformView() override;
 
  private:
   // |fuchsia::ui::scenic::SessionListener|

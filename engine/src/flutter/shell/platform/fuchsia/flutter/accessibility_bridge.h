@@ -13,7 +13,6 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <lib/fidl/cpp/binding_set.h>
-#include <lib/sys/cpp/service_directory.h>
 #include <lib/sys/inspect/cpp/component.h>
 #include <zircon/types.h>
 
@@ -67,15 +66,10 @@ class AccessibilityBridge
   AccessibilityBridge(
       SetSemanticsEnabledCallback set_semantics_enabled_callback,
       DispatchSemanticsActionCallback dispatch_semantics_action_callback,
-      const std::shared_ptr<sys::ServiceDirectory> services,
-      fuchsia::ui::views::ViewRef view_ref);
-
-  AccessibilityBridge(
-      SetSemanticsEnabledCallback set_semantics_enabled_callback,
-      DispatchSemanticsActionCallback dispatch_semantics_action_callback,
-      const std::shared_ptr<sys::ServiceDirectory> services,
-      inspect::Node inspect_node,
-      fuchsia::ui::views::ViewRef view_ref);
+      fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
+          semantics_manager,
+      fuchsia::ui::views::ViewRef view_ref,
+      inspect::Node inspect_node);
 
   // Returns true if accessible navigation is enabled.
   bool GetSemanticsEnabled() const;
@@ -120,10 +114,6 @@ class AccessibilityBridge
     flutter::SemanticsNode data;
     SkRect screen_rect;
   };
-
-  // This is the cache of all nodes we've sent to Fuchsia's SemanticsManager.
-  // Assists with pruning unreachable nodes and hit testing.
-  std::unordered_map<int32_t, SemanticsNode> nodes_;
 
   fuchsia::accessibility::semantics::Node GetRootNodeUpdate(size_t& node_size);
 
@@ -220,10 +210,15 @@ class AccessibilityBridge
   DispatchSemanticsActionCallback dispatch_semantics_action_callback_;
   flutter::SemanticsNode root_flutter_semantics_node_;
   float last_seen_view_pixel_ratio_ = 1.f;
+
   fidl::Binding<fuchsia::accessibility::semantics::SemanticListener> binding_;
   fuchsia::accessibility::semantics::SemanticsManagerPtr
       fuchsia_semantics_manager_;
   fuchsia::accessibility::semantics::SemanticTreePtr tree_ptr_;
+
+  // This is the cache of all nodes we've sent to Fuchsia's SemanticsManager.
+  // Assists with pruning unreachable nodes and hit testing.
+  std::unordered_map<int32_t, SemanticsNode> nodes_;
   bool semantics_enabled_;
 
   // Node to publish inspect data.

@@ -18,12 +18,13 @@
         {
             protocol: [
                 "fuchsia.component.runner.ComponentRunner",
-                "fuchsia.deprecatedtimezone.Timezone",
+                "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
-                "fuchsia.intl.PropertyProvider",
-                "fuchsia.logger.LogSink",
-                "fuchsia.posix.socket.Provider",
-                "fuchsia.tracing.provider.Registry",
+                "fuchsia.intl.PropertyProvider",  // For dartVM timezone support
+                "fuchsia.logger.LogSink",  // For syslog
+                "fuchsia.net.name.Lookup",  // For fdio sockets
+                "fuchsia.posix.socket.Provider",  // For fdio sockets
+                "fuchsia.tracing.provider.Registry",  // For trace-provider
             ],
             from: "parent",
         },
