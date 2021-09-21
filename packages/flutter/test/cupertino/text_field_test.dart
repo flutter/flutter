@@ -164,11 +164,11 @@ class OverflowWidgetTextEditingController extends TextEditingController {
     return TextSpan(
       style: style,
       children: <InlineSpan>[
-        TextSpan(text: 'Hi'),
+        const TextSpan(text: 'Hi'),
         WidgetSpan(
           alignment: PlaceholderAlignment.bottom,
           child: Container(
-            color: Color(0xffff3333),
+            color: const Color(0xffff3333),
             height: 100,
           ),
         ),
@@ -4846,20 +4846,20 @@ void main() {
 
   testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const CupertinoTextField(
+        const CupertinoApp(
+          home: CupertinoTextField(
           ),
         ),
     );
 
-    final TextField textField = tester.firstWidget(find.byType(CupertinoTextField));
+    final CupertinoTextField textField = tester.firstWidget(find.byType(CupertinoTextField));
     expect(textField.clipBehavior, Clip.hardEdge);
   });
 
   testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
-    final Widget widget = const CupertinoApp(
-      home: const RepaintBoundary(
-        key: ValueKey<int>(1),
+    final Widget widget = CupertinoApp(
+      home: RepaintBoundary(
+        key: const ValueKey<int>(1),
         child: CupertinoTextField(
           controller: OverflowWidgetTextEditingController(),
           clipBehavior: Clip.none,
@@ -4868,7 +4868,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
 
-    final TextField textField = tester.firstWidget(find.byType(CupertinoTextField));
+    final CupertinoTextField textField = tester.firstWidget(find.byType(CupertinoTextField));
     expect(textField.clipBehavior, Clip.none);
 
     await expectLater(

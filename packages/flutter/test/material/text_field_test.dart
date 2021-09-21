@@ -69,7 +69,7 @@ class OverflowWidgetTextEditingController extends TextEditingController {
     return TextSpan(
       style: style,
       children: <InlineSpan>[
-        TextSpan(text: 'Hi'),
+        const TextSpan(text: 'Hi'),
         WidgetSpan(
           alignment: PlaceholderAlignment.bottom,
           child: Container(
@@ -590,10 +590,10 @@ void main() {
 
   testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
     final Widget widget = overlay(
-      child: const RepaintBoundary(
-        key: ValueKey<int>(1),
+      child: RepaintBoundary(
+        key: const ValueKey<int>(1),
         child: TextField(
-          controller: OverflowWidgetTextEditingController()
+          controller: OverflowWidgetTextEditingController(),
           clipBehavior: Clip.none,
         ),
       ),
