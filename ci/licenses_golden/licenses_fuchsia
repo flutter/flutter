@@ -1,4 +1,4 @@
-Signature: 30f67d138a1195960aa4882b7eaf379d
+Signature: 664f49beb0cc34b541be31a4ae18e772
 
 UNUSED LICENSES:
 
@@ -2287,7 +2287,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/memory_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/intl.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/ldsvc.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/logger.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/gain_control.fidl
