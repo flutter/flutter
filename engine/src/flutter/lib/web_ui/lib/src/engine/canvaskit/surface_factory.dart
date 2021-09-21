@@ -4,19 +4,33 @@
 
 import 'package:meta/meta.dart';
 
+import '../../engine.dart';
 import '../util.dart';
 import 'embedded_views.dart';
 import 'surface.dart';
 
 /// Caches surfaces used to overlay platform views.
 class SurfaceFactory {
-  /// The cache singleton.
-  static final SurfaceFactory instance =
-      SurfaceFactory(HtmlViewEmbedder.maximumSurfaces);
+  /// The lazy-initialized singleton surface factory.
+  ///
+  /// [debugClear] causes this singleton to be reinitialized.
+  static SurfaceFactory get instance =>
+      _instance ??= SurfaceFactory(HtmlViewEmbedder.maximumSurfaces);
+
+  /// Returns the raw (potentially uninitialized) value of the singleton.
+  ///
+  /// Useful in tests for checking the lifecycle of this class.
+  static SurfaceFactory? get debugUninitializedInstance => _instance;
+
+  static SurfaceFactory? _instance;
 
   SurfaceFactory(this.maximumSurfaces)
       : assert(maximumSurfaces >= 1,
-            'The maximum number of surfaces must be at least 1');
+            'The maximum number of surfaces must be at least 1') {
+    if (assertionsEnabled) {
+      registerHotRestartListener(debugClear);
+    }
+  }
 
   /// The base surface to paint on. This is the default surface which will be
   /// painted to. If there are no platform views, then this surface will receive
@@ -168,7 +182,10 @@ class SurfaceFactory {
     for (final Surface surface in _liveSurfaces) {
       surface.dispose();
     }
+    baseSurface.dispose();
+    backupSurface.dispose();
     _liveSurfaces.clear();
     _cache.clear();
+    _instance = null;
   }
 }
