@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
@@ -174,6 +175,7 @@ source_set("txt") {
     sources += [ "src/txt/platform_linux.cc" ]
   } else if (is_fuchsia) {
     sources += [ "src/txt/platform_fuchsia.cc" ]
+    deps += [ "$fuchsia_sdk_root/fidl:fuchsia.fonts" ]
   } else if (is_win) {
     sources += [ "src/txt/platform_windows.cc" ]
   } else {
@@ -348,5 +350,13 @@ if (enable_unittests) {
              "//flutter/testing:testing_lib",
              ":txt_fixtures",
            ] + txt_common_executable_deps
+
+    if (is_fuchsia) {
+      sources += [ "tests/platform_fuchsia_unittests.cc" ]
+      deps += [
+        "$fuchsia_sdk_root/fidl:fuchsia.fonts",
+        "$fuchsia_sdk_root/pkg:async-testing",
+      ]
+    }
   }
 }

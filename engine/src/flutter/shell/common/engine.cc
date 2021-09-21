@@ -144,7 +144,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
 
 void Engine::SetupDefaultFontManager() {
   TRACE_EVENT0("flutter", "Engine::SetupDefaultFontManager");
-  font_collection_->SetupDefaultFontManager();
+  font_collection_->SetupDefaultFontManager(settings_.font_initialization_data);
 }
 
 std::shared_ptr<AssetManager> Engine::GetAssetManager() {

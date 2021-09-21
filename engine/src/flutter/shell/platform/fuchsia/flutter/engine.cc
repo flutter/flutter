@@ -458,6 +458,12 @@ void Engine::Initialize(
         });
       });
 
+  // Connect and set up the system font provider.
+  fuchsia::fonts::ProviderSyncPtr sync_font_provider;
+  runner_services->Connect(sync_font_provider.NewRequest());
+  settings.font_initialization_data =
+      sync_font_provider.Unbind().TakeChannel().release();
+
   {
     TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
@@ -548,23 +554,14 @@ void Engine::Initialize(
     }
   };
 
-  // Connect to the system font provider.
-  fuchsia::fonts::ProviderSyncPtr sync_font_provider;
-  svc->Connect(sync_font_provider.NewRequest());
-
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = shell_->GetEngine(),                        //
-                         run_configuration = std::move(run_configuration),    //
-                         sync_font_provider = std::move(sync_font_provider),  //
-                         on_run_failure                                       //
+      fml::MakeCopyable([engine = shell_->GetEngine(),                      //
+                         run_configuration = std::move(run_configuration),  //
+                         on_run_failure                                     //
   ]() mutable {
         if (!engine) {
           return;
         }
-
-        // Set default font manager.
-        engine->GetFontCollection().GetFontCollection()->SetDefaultFontManager(
-            SkFontMgr_New_Fuchsia(std::move(sync_font_provider)));
 
         if (engine->Run(std::move(run_configuration)) ==
             flutter::Engine::RunStatus::Failure) {

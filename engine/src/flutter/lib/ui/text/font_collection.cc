@@ -68,8 +68,9 @@ std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
   return collection_;
 }
 
-void FontCollection::SetupDefaultFontManager() {
-  collection_->SetupDefaultFontManager();
+void FontCollection::SetupDefaultFontManager(
+    uint32_t font_initialization_data) {
+  collection_->SetupDefaultFontManager(font_initialization_data);
 }
 
 void FontCollection::RegisterFonts(

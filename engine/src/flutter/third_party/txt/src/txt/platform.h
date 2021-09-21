@@ -15,7 +15,7 @@ namespace txt {
 
 std::vector<std::string> GetDefaultFontFamilies();
 
-sk_sp<SkFontMgr> GetDefaultFontManager();
+sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data);
 
 }  // namespace txt
 

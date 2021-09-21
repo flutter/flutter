@@ -29,7 +29,7 @@ class FontCollection {
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
-  void SetupDefaultFontManager();
+  void SetupDefaultFontManager(uint32_t font_initialization_data);
 
   void RegisterFonts(std::shared_ptr<AssetManager> asset_manager);
 
