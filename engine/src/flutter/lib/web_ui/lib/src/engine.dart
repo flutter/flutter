@@ -361,6 +361,17 @@ void registerHotRestartListener(ui.VoidCallback listener) {
   _hotRestartListeners.add(listener);
 }
 
+/// Pretends that hot restart is about to happen.
+///
+/// Useful in tests to check that the engine performs appropriate clean-ups,
+/// such as removing static DOM listeners, prior to allowing the Dart runtime
+/// to re-initialize the program.
+void debugEmulateHotRestart() {
+  for (final ui.VoidCallback listener in _hotRestartListeners) {
+    listener();
+  }
+}
+
 /// This method performs one-time initialization of the Web environment that
 /// supports the Flutter framework.
 ///
