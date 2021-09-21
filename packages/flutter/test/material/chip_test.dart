@@ -198,7 +198,8 @@ Widget _chipWithOptionalDeleteButton({
   Key? labelKey,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
-  bool hasDeleteButtonTooltip = true,
+  bool useDeleteButtonTooltip = true,
+  String? chipTooltip,
   VoidCallback? onPressed = _doNothing,
 }) {
   return _wrapForChip(
@@ -206,10 +207,11 @@ Widget _chipWithOptionalDeleteButton({
     child: Wrap(
       children: <Widget>[
         RawChip(
+          tooltip: chipTooltip,
           onPressed: onPressed,
           onDeleted: deletable ? _doNothing : null,
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-          useDeleteButtonTooltip: hasDeleteButtonTooltip,
+          useDeleteButtonTooltip: useDeleteButtonTooltip,
           label: Text(
             deletable
               ? 'Chip with Delete Button'
@@ -3324,7 +3326,7 @@ void main() {
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
         deletable: true,
-        hasDeleteButtonTooltip: false,
+        useDeleteButtonTooltip: false,
       ),
     );
 
@@ -3344,6 +3346,65 @@ void main() {
 
     await tapGesture.up();
   });
+
+  testWidgets('useDeleteButtonTooltip only applies to tooltip', (WidgetTester tester) async {
+    final UniqueKey deleteButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+        useDeleteButtonTooltip: false,
+        chipTooltip: 'Chip Tooltip',
+      ),
+    );
+
+    // Tap at the delete icon of the chip, which is at the right
+    // side of the chip
+    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+
+    await tester.pump();
+
+    // Wait for some more time while pressing and holding the delete button
+    await tester.pumpAndSettle();
+
+    // There should be no delete tooltip
+    expect(findTooltipContainer('Delete'), findsNothing);
+    // There should be a chip tooltip, however.
+    expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
+  });
+
+  testWidgets('Setting useDeleteButtonTooltip also allows Chip tooltip', (WidgetTester tester) async {
+    final UniqueKey deleteButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+        useDeleteButtonTooltip: true,
+        chipTooltip: 'Chip Tooltip',
+      ),
+    );
+
+    // Tap at the delete icon of the chip, which is at the right
+    // side of the chip
+    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+
+    await tester.pump();
+
+    // Wait for some more time while pressing and holding the delete button
+    await tester.pumpAndSettle();
+
+    // There should also be a chip tooltip
+    expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
+    // There should be a delete tooltip
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+  });
+
 
   testWidgets('intrinsicHeight implementation meets constraints', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/49478.
