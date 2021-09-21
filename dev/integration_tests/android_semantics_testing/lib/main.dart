@@ -24,7 +24,7 @@ void main() {
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
 Future<String> dataHandler(String? message) async {
-  if (message!.contains('getSemanticsNode')) {
+  if (message != null && message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
     Future<void> completeSemantics([Object? _]) async {
