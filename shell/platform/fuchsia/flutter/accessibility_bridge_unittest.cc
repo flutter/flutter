@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
+#include "accessibility_bridge.h"
 
-#include <gtest/gtest.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/async/cpp/executor.h>
@@ -14,12 +13,16 @@
 #include <lib/inspect/cpp/inspector.h>
 #include <lib/inspect/cpp/reader.h>
 #include <lib/sys/cpp/testing/service_directory_provider.h>
+#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <zircon/status.h>
 #include <zircon/types.h>
 
 #include <memory>
 
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h"
+#include "gtest/gtest.h"
+
+#include "flutter_runner_fakes.h"
 
 namespace flutter_runner_test {
 
@@ -85,9 +88,19 @@ class AccessibilityBridgeTest : public testing::Test {
 
  protected:
   void SetUp() override {
-    zx_status_t status = zx::eventpair::create(
-        /*flags*/ 0u, &view_ref_control_.reference, &view_ref_.reference);
-    EXPECT_EQ(status, ZX_OK);
+    // Connect to SemanticsManager service.
+    fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
+        semantics_manager;
+    zx_status_t semantics_status =
+        services_provider_.service_directory()
+            ->Connect<fuchsia::accessibility::semantics::SemanticsManager>(
+                semantics_manager.NewRequest());
+    if (semantics_status != ZX_OK) {
+      FML_LOG(WARNING)
+          << "fuchsia::accessibility::semantics::SemanticsManager connection "
+             "failed: "
+          << zx_status_get_string(semantics_status);
+    }
 
     accessibility_delegate_.actions.clear();
     inspector_ = std::make_unique<inspect::Inspector>();
@@ -100,20 +113,19 @@ class AccessibilityBridgeTest : public testing::Test {
             [this](int32_t node_id, flutter::SemanticsAction action) {
               accessibility_delegate_.DispatchSemanticsAction(node_id, action);
             };
+    auto [view_ref_control, view_ref] = scenic::ViewRefPair::New();
     accessibility_bridge_ =
         std::make_unique<flutter_runner::AccessibilityBridge>(
             std::move(set_semantics_enabled_callback),
             std::move(dispatch_semantics_action_callback),
-            services_provider_.service_directory(),
-            inspector_->GetRoot().CreateChild("test_node"),
-            std::move(view_ref_));
+            std::move(semantics_manager), std::move(view_ref),
+            inspector_->GetRoot().CreateChild("test_node"));
+
     RunLoopUntilIdle();
   }
 
   void TearDown() override { semantics_manager_.ResetTree(); }
 
-  fuchsia::ui::views::ViewRefControl view_ref_control_;
-  fuchsia::ui::views::ViewRef view_ref_;
   MockSemanticsManager semantics_manager_;
   AccessibilityBridgeTestDelegate accessibility_delegate_;
   std::unique_ptr<flutter_runner::AccessibilityBridge> accessibility_bridge_;

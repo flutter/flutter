@@ -4,8 +4,11 @@
 
 #include "engine.h"
 
+#include <fuchsia/accessibility/semantics/cpp/fidl.h>
+#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
 #include <zircon/status.h>
+#include <zircon/types.h>
 #include <memory>
 
 #include "flutter/common/graphics/persistent_cache.h"
@@ -33,6 +36,14 @@
 
 namespace flutter_runner {
 namespace {
+
+zx_koid_t GetKoid(const fuchsia::ui::views::ViewRef& view_ref) {
+  zx_handle_t handle = view_ref.reference.get();
+  zx_info_handle_basic_t info;
+  zx_status_t status = zx_object_get_info(handle, ZX_INFO_HANDLE_BASIC, &info,
+                                          sizeof(info), nullptr, nullptr);
+  return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
+}
 
 std::unique_ptr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
     const fuchsia::intl::Profile& intl_profile) {
@@ -64,12 +75,11 @@ Engine::Engine(Delegate& delegate,
       thread_label_(std::move(thread_label)),
       thread_host_(CreateThreadHost(thread_label_)),
       view_token_(std::move(view_token)),
-      view_ref_pair_(std::move(view_ref_pair)),
       memory_pressure_watcher_binding_(this),
       latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
       intercept_all_input_(product_config.get_intercept_all_input()),
       weak_factory_(this) {
-  Initialize(/*=use_flatland*/ false, std::move(svc),
+  Initialize(/*=use_flatland*/ false, std::move(view_ref_pair), std::move(svc),
              std::move(runner_services), std::move(settings),
              std::move(fdio_ns), std::move(directory_request),
              std::move(product_config));
@@ -89,18 +99,19 @@ Engine::Engine(Delegate& delegate,
       thread_label_(std::move(thread_label)),
       thread_host_(CreateThreadHost(thread_label_)),
       view_creation_token_(std::move(view_creation_token)),
-      view_ref_pair_(std::move(view_ref_pair)),
       memory_pressure_watcher_binding_(this),
       latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
       intercept_all_input_(product_config.get_intercept_all_input()),
       weak_factory_(this) {
-  Initialize(/*=use_flatland*/ true, std::move(svc), std::move(runner_services),
-             std::move(settings), std::move(fdio_ns),
-             std::move(directory_request), std::move(product_config));
+  Initialize(/*=use_flatland*/ true, std::move(view_ref_pair), std::move(svc),
+             std::move(runner_services), std::move(settings),
+             std::move(fdio_ns), std::move(directory_request),
+             std::move(product_config));
 }
 
 void Engine::Initialize(
     bool use_flatland,
+    scenic::ViewRefPair view_ref_pair,
     std::shared_ptr<sys::ServiceDirectory> svc,
     std::shared_ptr<sys::ServiceDirectory> runner_services,
     flutter::Settings settings,
@@ -125,7 +136,7 @@ void Engine::Initialize(
   );
 
   // Connect to Scenic.
-  auto scenic = svc->Connect<fuchsia::ui::scenic::Scenic>();
+  auto scenic = runner_services->Connect<fuchsia::ui::scenic::Scenic>();
   fuchsia::ui::scenic::SessionEndpoints endpoints;
   fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session;
   endpoints.set_session(session.NewRequest());
@@ -141,18 +152,46 @@ void Engine::Initialize(
   // endpoints.set_touch_source(touch_source.NewRequest());
   scenic->CreateSessionT(std::move(endpoints), [] {});
 
-  // Make clones of the `ViewRef` before sending it down to Scenic, since the
-  // refs are not copyable, and multiple consumers need view refs.
+  // Connect to SemanticsManager service.
+  fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
+      semantics_manager;
+  zx_status_t semantics_status =
+      runner_services
+          ->Connect<fuchsia::accessibility::semantics::SemanticsManager>(
+              semantics_manager.NewRequest());
+  if (semantics_status != ZX_OK) {
+    FML_LOG(WARNING)
+        << "fuchsia::accessibility::semantics::SemanticsManager connection "
+           "failed: "
+        << zx_status_get_string(semantics_status);
+  }
+
+  // Connect to ImeService service.
+  fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service;
+  zx_status_t ime_status =
+      runner_services->Connect<fuchsia::ui::input::ImeService>(
+          ime_service.NewRequest());
+  if (ime_status != ZX_OK) {
+    FML_LOG(WARNING) << "fuchsia::ui::input::ImeService connection failed: "
+                     << zx_status_get_string(ime_status);
+  }
+
+  // Connect to Keyboard service.
+  fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard;
+  zx_status_t keyboard_status =
+      runner_services->Connect<fuchsia::ui::input3::Keyboard>(
+          keyboard.NewRequest());
+  FML_DCHECK(keyboard_status == ZX_OK)
+      << "fuchsia::ui::input3::Keyboard connection failed: "
+      << zx_status_get_string(keyboard_status);
+
+  // Make clones of the `ViewRef` before sending it to various places.
   fuchsia::ui::views::ViewRef platform_view_ref;
-  view_ref_pair_.view_ref.Clone(&platform_view_ref);
-  fuchsia::ui::views::ViewRef accessibility_bridge_view_ref;
-  view_ref_pair_.view_ref.Clone(&accessibility_bridge_view_ref);
+  view_ref_pair.view_ref.Clone(&platform_view_ref);
+  fuchsia::ui::views::ViewRef accessibility_view_ref;
+  view_ref_pair.view_ref.Clone(&accessibility_view_ref);
   fuchsia::ui::views::ViewRef isolate_view_ref;
-  view_ref_pair_.view_ref.Clone(&isolate_view_ref);
-  // Input3 keyboard listener registration requires a ViewRef as an event
-  // filter. So we clone it here, as ViewRefs can not be reused, only cloned.
-  fuchsia::ui::views::ViewRef keyboard_view_ref;
-  view_ref_pair_.view_ref.Clone(&keyboard_view_ref);
+  view_ref_pair.view_ref.Clone(&isolate_view_ref);
 
   // Session is terminated on the raster thread, but we must terminate ourselves
   // on the platform thread.
@@ -169,11 +208,10 @@ void Engine::Initialize(
     });
   };
 
-  fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher;
-
   // Set up the session connection and other Scenic helpers on the raster
   // thread. We also need to wait for the external view embedder to be set up
   // before creating the shell.
+  fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher;
   fml::AutoResetWaitableEvent view_embedder_latch;
   auto session_inspect_node =
       dart_utils::RootInspectNode::CreateRootChild("vsync_stats");
@@ -185,7 +223,7 @@ void Engine::Initialize(
        view_token = std::move(view_token_),
        view_creation_token = std::move(view_creation_token_),
        request = parent_viewport_watcher.NewRequest(),
-       view_ref_pair = std::move(view_ref_pair_),
+       view_ref_pair = std::move(view_ref_pair),
        max_frames_in_flight = product_config.get_max_frames_in_flight(),
        vsync_offset = product_config.get_vsync_offset()]() mutable {
         if (use_flatland) {
@@ -215,15 +253,6 @@ void Engine::Initialize(
       }));
   view_embedder_latch.Wait();
 
-  // Grab the parent environment services. The platform view may want to
-  // access some of these services.
-  fuchsia::sys::EnvironmentPtr environment;
-  svc->Connect(environment.NewRequest());
-  fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-      parent_environment_service_provider;
-  environment->GetServices(parent_environment_service_provider.NewRequest());
-  environment.Unbind();
-
   AccessibilityBridge::SetSemanticsEnabledCallback
       set_semantics_enabled_callback = [this](bool enabled) {
         auto platform_view = shell_->GetPlatformView();
@@ -243,10 +272,14 @@ void Engine::Initialize(
             }
           };
 
+  const std::string accessibility_inspect_name =
+      std::to_string(GetKoid(accessibility_view_ref));
   accessibility_bridge_ = std::make_unique<AccessibilityBridge>(
       std::move(set_semantics_enabled_callback),
-      std::move(dispatch_semantics_action_callback), svc,
-      std::move(accessibility_bridge_view_ref));
+      std::move(dispatch_semantics_action_callback),
+      std::move(semantics_manager), std::move(accessibility_view_ref),
+      dart_utils::RootInspectNode::CreateRootChild(
+          std::move(accessibility_inspect_name)));
 
   OnEnableWireframe on_enable_wireframe_callback = std::bind(
       &Engine::DebugWireframeSettingsChanged, this, std::placeholders::_1);
@@ -295,26 +328,6 @@ void Engine::Initialize(
   auto run_configuration = flutter::RunConfiguration::InferFromSettings(
       settings, task_runners.GetIOTaskRunner());
 
-  // Connect to fuchsia.ui.input3.Keyboard to hand out a listener.
-  using fuchsia::ui::input3::Keyboard;
-  using fuchsia::ui::input3::KeyboardListener;
-
-  // Keyboard client-side stub.
-  keyboard_svc_ = svc->Connect<Keyboard>();
-  ZX_ASSERT(keyboard_svc_.is_bound());
-  // KeyboardListener handle pair is not initialized until NewRequest() is
-  // called.
-  fidl::InterfaceHandle<KeyboardListener> keyboard_listener;
-
-  // Server side of KeyboardListener.  Initializes the keyboard_listener
-  // handle.
-  fidl::InterfaceRequest<KeyboardListener> keyboard_listener_request =
-      keyboard_listener.NewRequest();
-  ZX_ASSERT(keyboard_listener_request.is_valid());
-
-  keyboard_svc_->AddListener(std::move(keyboard_view_ref),
-                             keyboard_listener.Bind(), [] {});
-
   OnSemanticsNodeUpdate on_semantics_node_update_callback =
       [this](flutter::SemanticsNodeUpdates updates, float pixel_ratio) {
         accessibility_bridge_->AddSemanticsNodeUpdate(updates, pixel_ratio);
@@ -328,12 +341,10 @@ void Engine::Initialize(
   // Setup the callback that will instantiate the platform view.
   flutter::Shell::CreateCallback<flutter::PlatformView>
       on_create_platform_view = fml::MakeCopyable(
-          [this, use_flatland, debug_label = thread_label_,
-           view_ref = std::move(platform_view_ref), runner_services,
-           parent_environment_service_provider =
-               std::move(parent_environment_service_provider),
+          [this, use_flatland, view_ref = std::move(platform_view_ref),
            session_listener_request = std::move(session_listener_request),
            parent_viewport_watcher = std::move(parent_viewport_watcher),
+           ime_service = std::move(ime_service), keyboard = std::move(keyboard),
            focuser = std::move(focuser),
            view_ref_focused = std::move(view_ref_focused),
            touch_source = std::move(touch_source),
@@ -355,7 +366,6 @@ void Engine::Initialize(
            on_request_announce_callback =
                std::move(on_request_announce_callback),
            external_view_embedder = GetExternalViewEmbedder(),
-           keyboard_listener_request = std::move(keyboard_listener_request),
            await_vsync_callback =
                [this, use_flatland](FireCallbackCallback cb) {
                  if (use_flatland) {
@@ -410,19 +420,11 @@ void Engine::Initialize(
             if (use_flatland) {
               platform_view =
                   std::make_unique<flutter_runner::FlatlandPlatformView>(
-                      shell,                   // delegate
-                      debug_label,             // debug label
-                      std::move(view_ref),     // view ref
-                      shell.GetTaskRunners(),  // task runners
-                      std::move(runner_services),
-                      std::move(
-                          parent_environment_service_provider),  // services
+                      shell, shell.GetTaskRunners(), std::move(view_ref),
+                      std::move(external_view_embedder), std::move(ime_service),
+                      std::move(keyboard), std::move(touch_source),
+                      std::move(focuser), std::move(view_ref_focused),
                       std::move(parent_viewport_watcher),
-                      std::move(view_ref_focused), std::move(focuser),
-                      std::move(touch_source),
-                      // Server-side part of the
-                      // fuchsia.ui.input3.KeyboardListener connection.
-                      std::move(keyboard_listener_request),
                       std::move(on_enable_wireframe_callback),
                       std::move(on_create_flatland_view_callback),
                       std::move(on_update_view_callback),
@@ -430,25 +432,16 @@ void Engine::Initialize(
                       std::move(on_create_surface_callback),
                       std::move(on_semantics_node_update_callback),
                       std::move(on_request_announce_callback),
-                      std::move(on_shader_warmup), external_view_embedder,
-                      // Callbacks for VsyncWaiter to call into
-                      // FlatlandConnection.
-                      await_vsync_callback,
-                      await_vsync_for_secondary_callback_callback);
+                      std::move(on_shader_warmup),
+                      std::move(await_vsync_callback),
+                      std::move(await_vsync_for_secondary_callback_callback));
             } else {
               platform_view = std::make_unique<flutter_runner::GfxPlatformView>(
-                  shell,                   // delegate
-                  debug_label,             // debug label
-                  std::move(view_ref),     // view ref
-                  shell.GetTaskRunners(),  // task runners
-                  std::move(runner_services),
-                  std::move(parent_environment_service_provider),  // services
-                  std::move(session_listener_request),  // session listener
-                  std::move(view_ref_focused), std::move(focuser),
-                  std::move(touch_source),
-                  // Server-side part of the fuchsia.ui.input3.KeyboardListener
-                  // connection.
-                  std::move(keyboard_listener_request),
+                  shell, shell.GetTaskRunners(), std::move(view_ref),
+                  std::move(external_view_embedder), std::move(ime_service),
+                  std::move(keyboard), std::move(touch_source),
+                  std::move(focuser), std::move(view_ref_focused),
+                  std::move(session_listener_request),
                   std::move(on_session_listener_error_callback),
                   std::move(on_enable_wireframe_callback),
                   std::move(on_create_gfx_view_callback),
@@ -457,11 +450,8 @@ void Engine::Initialize(
                   std::move(on_create_surface_callback),
                   std::move(on_semantics_node_update_callback),
                   std::move(on_request_announce_callback),
-                  std::move(on_shader_warmup), external_view_embedder,
-                  // Callbacks for VsyncWaiter to call into
-                  // GfxSessionConnection.
-                  await_vsync_callback,
-                  await_vsync_for_secondary_callback_callback);
+                  std::move(on_shader_warmup), std::move(await_vsync_callback),
+                  std::move(await_vsync_for_secondary_callback_callback));
             }
             return platform_view;
           });
