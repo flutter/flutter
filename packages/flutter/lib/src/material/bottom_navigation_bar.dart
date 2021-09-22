@@ -691,7 +691,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: Text(item.label!),
+        child: Text(item.label!, textAlign: TextAlign.center),
       ),
     );
 
@@ -1016,9 +1016,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   removeBottom: true,
                   child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
-                    child:  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: _createTiles(layout),
+                    child: SizedBox.shrink(
+                      child: Center(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: _createTiles(layout),
+                        ),
+                      ),
                     ),
                   ),
                 ),
