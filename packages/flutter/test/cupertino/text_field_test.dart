@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
+import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -150,30 +151,6 @@ class PathPointsMatcher extends Matcher {
       desc.add('$notExcluded is not excluded. ');
     }
     return desc;
-  }
-}
-
-// Simple controller that builds a WidgetSpan with 100 height.
-class OverflowWidgetTextEditingController extends TextEditingController {
-  @override
-  TextSpan buildTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool withComposing,
-  }) {
-    return TextSpan(
-      style: style,
-      children: <InlineSpan>[
-        const TextSpan(text: 'Hi'),
-        WidgetSpan(
-          alignment: PlaceholderAlignment.bottom,
-          child: Container(
-            color: const Color(0xffff3333),
-            height: 100,
-          ),
-        ),
-      ],
-    );
   }
 }
 
@@ -4846,10 +4823,10 @@ void main() {
 
   testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const CupertinoApp(
-          home: CupertinoTextField(
-          ),
+      const CupertinoApp(
+        home: CupertinoTextField(
         ),
+      ),
     );
 
     final CupertinoTextField textField = tester.firstWidget(find.byType(CupertinoTextField));
@@ -4860,9 +4837,15 @@ void main() {
     final Widget widget = CupertinoApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: CupertinoTextField(
-          controller: OverflowWidgetTextEditingController(),
-          clipBehavior: Clip.none,
+        child: Container(
+          height: 200.0,
+          width: 200.0
+          child: Center(
+            child: CupertinoTextField(
+              controller: OverflowWidgetTextEditingController(),
+              clipBehavior: Clip.none,
+            ),
+          ),
         ),
       ),
     );
@@ -4870,6 +4853,9 @@ void main() {
 
     final CupertinoTextField textField = tester.firstWidget(find.byType(CupertinoTextField));
     expect(textField.clipBehavior, Clip.none);
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.clipBehavior, Clip.none);
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),

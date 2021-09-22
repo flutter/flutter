@@ -24,7 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition, OverflowWidgetTextEditingController;
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -56,30 +56,6 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
 
   @override
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
-}
-
-// Simple controller that builds a WidgetSpan with 100 height.
-class OverflowWidgetTextEditingController extends TextEditingController {
-  @override
-  TextSpan buildTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool withComposing,
-  }) {
-    return TextSpan(
-      style: style,
-      children: <InlineSpan>[
-        const TextSpan(text: 'Hi'),
-        WidgetSpan(
-          alignment: PlaceholderAlignment.bottom,
-          child: Container(
-            color: Colors.redAccent,
-            height: 100,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 Widget overlay({ required Widget child }) {
@@ -578,10 +554,10 @@ void main() {
 
   testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const TextField(
-          ),
+      overlay(
+        child: const TextField(
         ),
+      ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -592,9 +568,15 @@ void main() {
     final Widget widget = overlay(
       child: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: TextField(
-          controller: OverflowWidgetTextEditingController(),
-          clipBehavior: Clip.none,
+        child: Container(
+          height: 200,
+          width: 200
+          child: Center(
+            child: TextField(
+              controller: OverflowWidgetTextEditingController(),
+              clipBehavior: Clip.none,
+            ),
+          ),
         ),
       ),
     );
@@ -602,6 +584,9 @@ void main() {
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.clipBehavior, Clip.none);
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.clipBehavior, Clip.none);
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
