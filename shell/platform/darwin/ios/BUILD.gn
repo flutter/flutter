@@ -323,10 +323,16 @@ action("copy_framework_info_plist") {
   sources = [ "framework/Info.plist" ]
   outputs = [ "$_flutter_framework_dir/Info.plist" ]
   args = [
+    "--source",
     rebase_path(sources[0]),
+    "--destination",
     rebase_path(outputs[0]),
-    "--bitcode=$enable_bitcode",
+    "--minversion",
+    ios_deployment_target,
   ]
+  if (enable_bitcode) {
+    args += [ "--bitcode" ]
+  }
 }
 
 copy("copy_framework_module_map") {
