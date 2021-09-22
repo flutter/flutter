@@ -636,8 +636,13 @@ keep this 3
 
       testWithoutContext('skipped if nothing to upgrade', () {
         const String xcodeProjectInfoFileContents = '''
+	classes = {
+	};
 	objectVersion = 50;
+	objects = {
+			attributes = {
 				LastUpgradeCheck = 1300;
+				ORGANIZATIONNAME = "";
       ''';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
