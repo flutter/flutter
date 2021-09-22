@@ -412,14 +412,14 @@ class _DefaultPub implements Pub {
 
   /// The command used for running pub.
   List<String> _pubCommand(List<String> arguments) {
-    // TODO(jonahwilliams): refactor to use artifacts.
+    // TODO(zanderso): refactor to use artifacts.
     final String sdkPath = _fileSystem.path.joinAll(<String>[
       Cache.flutterRoot!,
       'bin',
       'cache',
       'dart-sdk',
       'bin',
-      'pub',
+      'dart',
     ]);
     if (!_processManager.canRun(sdkPath)) {
       throwToolExit(
@@ -428,7 +428,7 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
-    return <String>[sdkPath, ...arguments];
+    return <String>[sdkPath, '__deprecated_pub', ...arguments];
   }
 
   // Returns the environment value that should be used when running pub.

@@ -89,8 +89,9 @@ void main() {
 ## Scheduled Cherrypicks
 
 - Roll dart revision: dart-lang/sdk@${dartRevision.substring(0, 9)}
-- commit: ${engineCherrypick1.substring(0, 9)}
-- commit: ${engineCherrypick2.substring(0, 9)}''';
+- commit: flutter/engine@${engineCherrypick1.substring(0, 9)}
+- commit: flutter/engine@${engineCherrypick2.substring(0, 9)}
+''';
       expect(
         Uri.decodeQueryComponent(bodyPattern.firstMatch(link)?.group(1) ?? ''),
         expectedBody,
@@ -120,7 +121,8 @@ void main() {
 
 ## Scheduled Cherrypicks
 
-- commit: ${frameworkCherrypick.substring(0, 9)}''';
+- commit: ${frameworkCherrypick.substring(0, 9)}
+''';
       expect(
         Uri.decodeQueryComponent(bodyPattern.firstMatch(link)?.group(1) ?? ''),
         expectedBody,

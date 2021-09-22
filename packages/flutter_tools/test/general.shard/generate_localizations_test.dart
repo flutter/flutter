@@ -1356,13 +1356,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMd"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "yMd"
       }
+    }
   }
 }''';
         fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
@@ -1391,13 +1391,13 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "asdf"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1429,17 +1429,91 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
 
+      testWithoutContext('use standard date format whenever possible', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "yMd",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('DateFormat.yMd(localeName)'));
+      });
+
+      testWithoutContext('handle arbitrary formatted date', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains(r"DateFormat('asdf o\'clock', localeName)"));
+      });
+
       testWithoutContext('throws an exception when no format attribute is passed in', () {
         const String singleDateMessageArbFileString = '''
 {
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime"
-          }
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime"
       }
+    }
   }
 }''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1831,6 +1905,46 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             allOf(
               contains('is not properly formatted'),
               contains('Ensure that it is a map with string valued keys'),
+            ),
+          )),
+        );
+      });
+
+      testWithoutContext('should throw attempting to generate a select message with an incorrect message', () {
+        const String selectMessageWithoutPlaceholdersAttribute = '''
+{
+  "genderSelect": "{gender, select,}",
+  "@genderSelect": {
+    "placeholders": {
+      "gender": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('Incorrect select message format for'),
+              contains('Check to see if the select message is in the proper ICU syntax format.'),
             ),
           )),
         );
