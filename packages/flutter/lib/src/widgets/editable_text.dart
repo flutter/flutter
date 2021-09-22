@@ -1796,15 +1796,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get currentTextEditingValue => _value;
 
   @override
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-    TextEditingValue value = _value;
-    for (final TextEditingDelta delta in textEditingDeltas) {
-      value = delta.apply(value);
-    }
-    updateEditingValue(value);
-  }
-
-  @override
   void updateEditingValue(TextEditingValue value) {
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input

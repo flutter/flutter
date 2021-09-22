@@ -100,6 +100,9 @@
     NSPredicate *hittable = [NSPredicate predicateWithFormat:@"exists == YES AND hittable == YES"];
     [self expectationForPredicate:hittable evaluatedWithObject:element handler:nil];
     [self waitForExpectationsWithTimeout:30.0 handler:nil];
+    // Sometimes, the element doesn't respond to the tap, it seems an XCUITest bug. Trying tap
+    // the app first to fix it.
+    [self.app tap];
     [element tap];
 }
 

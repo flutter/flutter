@@ -35,10 +35,10 @@ String _replace(String originalText, String replacementText, int start, int end)
 ///  * [TextEditingDeltaDeletion], a delta representing a deletion.
 ///  * [TextEditingDeltaReplacement], a delta representing a replacement.
 ///  * [TextEditingDeltaNonTextUpdate], a delta representing an update to the
-///  selection and/or composing region.
-///  * [TextInputConfiguration], to opt-in your [TextInputClient] to receive
-///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
-///  to true.
+///    selection and/or composing region.
+///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
+///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
 abstract class TextEditingDelta {
   /// Creates a delta for a given change to the editing state.
   ///
@@ -234,9 +234,9 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   /// {@template flutter.services.TextEditingDelta.optIn}
   /// See also:
   ///
-  ///  * [TextInputConfiguration], to opt-in your [TextInputClient] to receive
-  ///  [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
-  ///  to true.
+  ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
+  ///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
+  ///    to true.
   /// {@endtemplate}
   const TextEditingDeltaInsertion({
     required String oldText,

@@ -760,10 +760,12 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             _lastOverscrollNotification?.overscroll ?? 0.0
           );
 
-          return Transform(
-            alignment: alignment,
-            transform: Matrix4.diagonal3Values(x, y, 1.0),
-            child: widget.child,
+          return ClipRect(
+            child: Transform(
+              alignment: alignment,
+              transform: Matrix4.diagonal3Values(x, y, 1.0),
+              child: widget.child,
+            ),
           );
         },
       ),
