@@ -3843,29 +3843,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           canRemoveOrAdd = true;
           break;
         case _RouteLifecycle.pop:
-          if (!seenTopActiveRoute) {
-            if (poppedRoute != null)
-              entry.handleDidPopNext(poppedRoute);
-            poppedRoute = entry.route;
-          }
           entry.handlePop(
             navigator: this,
             previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
           );
-          if (entry.currentState == _RouteLifecycle.dispose ||
-              entry.currentState == _RouteLifecycle.idle) {
-            // This can happen if the pop finishes synchronously or the route
-            // rejects the pop.
+          if (entry.currentState == _RouteLifecycle.dispose) {
+            // The pop is processed synchronously. This can happen if transition
+            // duration is zero.
+            if (!seenTopActiveRoute) {
+              if (poppedRoute != null)
+                entry.handleDidPopNext(poppedRoute);
+              poppedRoute = entry.route;
+            }
+            continue;
+          }
+          if (entry.currentState == _RouteLifecycle.idle) {
+            // The route rejects the pop.
             continue;
           }
           assert(entry.currentState == _RouteLifecycle.popping);
           canRemoveOrAdd = true;
-          break;
+          continue;
         case _RouteLifecycle.popping:
           if (!seenTopActiveRoute) {
-            // It is possible that the route enters this state directly and skips
-            // _RouteLifecycle.pop. This can happen when page is popped using
-            // the imperative API.
             if (poppedRoute != null)
               entry.handleDidPopNext(poppedRoute);
             poppedRoute = entry.route;
