@@ -176,7 +176,11 @@ Future<void> smokeGallery(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Flutter Gallery app smoke test', smokeGallery);
+  testWidgets(
+    'Flutter Gallery app smoke test',
+    smokeGallery,
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
+  );
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance!.setSemanticsEnabled(true);

@@ -94,6 +94,7 @@ class DataRow {
     this.key,
     this.selected = false,
     this.onSelectChanged,
+    this.onLongPress,
     this.color,
     required this.cells,
   }) : assert(cells != null);
@@ -106,6 +107,7 @@ class DataRow {
     int? index,
     this.selected = false,
     this.onSelectChanged,
+    this.onLongPress,
     this.color,
     required this.cells,
   }) : assert(cells != null),
@@ -137,6 +139,14 @@ class DataRow {
   /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final ValueChanged<bool?>? onSelectChanged;
+
+  /// Called if the row is long-pressed.
+  ///
+  /// If a [DataCell] in the row has its [DataCell.onTap], [DataCell.onDoubleTap],
+  /// [DataCell.onLongPress], [DataCell.onTapCancel] or [DataCell.onTapDown] callback defined,
+  /// that callback behavior overrides the gesture behavior of the row for
+  /// that particular cell.
+  final GestureLongPressCallback? onLongPress;
 
   /// Whether the row is selected.
   ///
@@ -786,6 +796,7 @@ class DataTable extends StatelessWidget {
     required GestureTapDownCallback? onTapDown,
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
+    required GestureLongPressCallback? onRowLongPress,
   }) {
     final ThemeData themeData = Theme.of(context);
     if (showEditIcon) {
@@ -828,9 +839,10 @@ class DataTable extends StatelessWidget {
         overlayColor: overlayColor,
         child: label,
       );
-    } else if (onSelectChanged != null) {
+    } else if (onSelectChanged != null || onRowLongPress != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
+        onLongPress: onRowLongPress,
         overlayColor: overlayColor,
         child: label,
       );
@@ -996,6 +1008,7 @@ class DataTable extends StatelessWidget {
           onTapDown: cell.onTapDown,
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
+          onRowLongPress: row.onLongPress,
         );
         rowIndex += 1;
       }
