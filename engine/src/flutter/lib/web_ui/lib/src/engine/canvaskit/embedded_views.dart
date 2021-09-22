@@ -38,7 +38,13 @@ class HtmlViewEmbedder {
   /// This causes all drawing to go to a single canvas, with all of the platform
   /// views rendered over top. This may result in incorrect rendering with
   /// platform views.
-  static const bool disableOverlays = maximumSurfaces <= 1;
+  static bool get disableOverlays =>
+      debugDisableOverlays || maximumSurfaces <= 1;
+
+  /// Force the view embedder to disable overlays.
+  ///
+  /// This should never be used outside of tests.
+  static bool debugDisableOverlays = false;
 
   /// The set of platform views using the backup surface.
   final Set<int> _viewsUsingBackupSurface = <int>{};
@@ -170,12 +176,14 @@ class HtmlViewEmbedder {
   CkCanvas? compositeEmbeddedView(int viewId) {
     final int compositedViewCount = _compositionOrder.length;
     _compositionOrder.add(viewId);
-    if (compositedViewCount < _pictureRecordersCreatedDuringPreroll.length) {
-      _pictureRecorders[viewId] =
-          _pictureRecordersCreatedDuringPreroll[compositedViewCount];
-    } else {
-      _viewsUsingBackupSurface.add(viewId);
-      _pictureRecorders[viewId] = _backupPictureRecorder!;
+    if (!disableOverlays) {
+      if (compositedViewCount < _pictureRecordersCreatedDuringPreroll.length) {
+        _pictureRecorders[viewId] =
+            _pictureRecordersCreatedDuringPreroll[compositedViewCount];
+      } else {
+        _viewsUsingBackupSurface.add(viewId);
+        _pictureRecorders[viewId] = _backupPictureRecorder!;
+      }
     }
 
     // Do nothing if this view doesn't need to be composited.
