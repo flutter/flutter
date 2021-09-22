@@ -3182,6 +3182,25 @@ targets:
       task_name: native_ui_tests_ios
     scheduler: luci
 
+  - name: Mac native_ui_tests_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: native_ui_tests_macos
+    scheduler: luci
+    runIf:
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
