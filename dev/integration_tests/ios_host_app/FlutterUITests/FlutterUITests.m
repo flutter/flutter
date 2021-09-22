@@ -36,7 +36,12 @@
     XCUIApplication *app = self.app;
 
     [self waitForAndTapElement:app.buttons[@"Full Screen (Warm)"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
+    BOOL newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0];
+    if (!newPageAppeared) {
+        [self waitForAndTapElement:app.buttons[@"Full Screen (Warm))"]];
+        newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0];
+    }
+    XCTAssertTrue(newPageAppeared);
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
     XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
@@ -50,7 +55,12 @@
     XCUIApplication *app = self.app;
 
     [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
-    XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0]);
+    BOOL newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0];
+    if (!newPageAppeared) {
+        [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
+        newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:60.0];
+    }
+    XCTAssertTrue(newPageAppeared);
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
     XCTAssertTrue([app.staticTexts[@"Button tapped 1 time."] waitForExistenceWithTimeout:60.0]);
@@ -102,7 +112,6 @@
     [self waitForExpectationsWithTimeout:30.0 handler:nil];
     // Sometimes, the element doesn't respond to the tap, it seems an XCUITest bug. Trying tap
     // the app first to fix it.
-    [self.app tap];
     [element tap];
 }
 
