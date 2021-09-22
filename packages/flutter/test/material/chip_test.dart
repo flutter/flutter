@@ -526,6 +526,59 @@ void main() {
     },
   );
 
+  testWidgets('delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
+    final UniqueKey deleteKey = UniqueKey();
+    bool calledDelete = false;
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const Text('Really Long Label'),
+              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              onDeleted: () {
+                calledDelete = true;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(24.0, 0.0));
+    await tester.pump();
+    expect(calledDelete, isTrue);
+    calledDelete = false;
+
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(25.0, 0.0));
+    await tester.pump();
+    expect(calledDelete, isFalse);
+    calledDelete = false;
+
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const SizedBox(), // Short label
+              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              onDeleted: () {
+                calledDelete = true;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(12.0, 0.0));
+    await tester.pump();
+    expect(calledDelete, isTrue);
+    calledDelete = false;
+
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(13.0, 0.0));
+    await tester.pump();
+    expect(calledDelete, isFalse);
+  });
+
   testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
@@ -1045,10 +1098,6 @@ void main() {
     // Waits for 100 ms.
     await tester.pump(const Duration(milliseconds: 100));
 
-    // There should be exactly one ink-creating widget.
-    expect(find.byType(InkWell), findsOneWidget);
-    expect(find.byType(InkResponse), findsNothing);
-
     // There should be one unique, centered ink ripple.
     expect(box, ripplePattern(const Offset(163.0, 6.0), 20.9));
     expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 20.9));
@@ -1100,13 +1149,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
 
-    // There should be exactly one ink-creating widget.
-    expect(find.byType(InkWell), findsOneWidget);
-    expect(find.byType(InkResponse), findsNothing);
-
     // There should be one unique ink ripple.
-    expect(box, ripplePattern(const Offset(3.0, 3.0), 3.5));
-    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 3.5));
+    expect(box, ripplePattern(const Offset(3.0, 3.0), 1.44));
+    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 1.44));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -1117,8 +1162,8 @@ void main() {
 
     // The ripple should grow, but the center should move,
     // Towards the center of the delete icon.
-    expect(box, ripplePattern(const Offset(5.0, 5.0), 10.5));
-    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 10.5));
+    expect(box, ripplePattern(const Offset(5.0, 5.0), 4.32));
+    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 4.32));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -1149,7 +1194,7 @@ void main() {
 
     // Taps at a location close to the center of the delete icon,
     // Which is on the left side of the chip.
-    final Offset topLeftOfInkWell = tester.getTopLeft(find.byType(InkWell));
+    final Offset topLeftOfInkWell = tester.getTopLeft(find.byType(InkWell).first);
     final Offset tapLocation = topLeftOfInkWell + const Offset(8, 8);
     final TestGesture gesture = await tester.startGesture(tapLocation);
     await tester.pump();
@@ -1236,7 +1281,7 @@ void main() {
                       }
                     : null,
                   selected: selected,
-                  label: Text('Chip', key: labelKey),
+                  label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
                   showCheckmark: true,
                   tapEnabled: true,
@@ -1254,7 +1299,7 @@ void main() {
     await pushChip(
       avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
     );
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(258.0, 48.0)));
 
     // Turn on selection.
     await pushChip(
@@ -1318,7 +1363,7 @@ void main() {
                       }
                     : null,
                   selected: selected,
-                  label: Text('Chip', key: labelKey),
+                  label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
                   showCheckmark: true,
                   tapEnabled: true,
@@ -1333,7 +1378,7 @@ void main() {
 
     // Without avatar, but not selectable.
     await pushChip();
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(234.0, 48.0)));
 
     // Turn on selection.
     await pushChip(selectable: true);
@@ -1395,7 +1440,7 @@ void main() {
                       }
                     : null,
                   selected: selected,
-                  label: Text('Chip', key: labelKey),
+                  label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
                   showCheckmark: false,
                   tapEnabled: true,
@@ -1737,6 +1782,7 @@ void main() {
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isButton,
+                                  SemanticsFlag.isFocusable,
                                 ],
                               ),
                             ],
@@ -3196,7 +3242,7 @@ void main() {
 
     // Tap at the delete icon of the chip, which is at the right
     // side of the chip
-    final Offset topRightOfInkwell = tester.getTopLeft(find.byType(InkWell));
+    final Offset topRightOfInkwell = tester.getTopLeft(find.byType(InkWell).first);
     final Offset tapLocationOfDeleteButton = topRightOfInkwell + const Offset(8, 8);
     final TestGesture tapGesture = await tester.startGesture(tapLocationOfDeleteButton);
 
@@ -3212,7 +3258,7 @@ void main() {
   });
 
   testWidgets('intrinsicHeight implementation meets constraints', (WidgetTester tester) async {
-    // Regression text for https://github.com/flutter/flutter/issues/49478.
+    // Regression test for https://github.com/flutter/flutter/issues/49478.
     await tester.pumpWidget(_wrapForChip(
       child: const Chip(
         label: Text('text'),
