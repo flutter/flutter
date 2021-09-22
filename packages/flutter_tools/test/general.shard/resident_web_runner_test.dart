@@ -279,6 +279,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
