@@ -457,7 +457,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
-        _androidSdk.sdkManagerPath!,
+        _androidSdk.sdkManagerPath ?? '',
         e.toString(),
         _platform,
       ));
