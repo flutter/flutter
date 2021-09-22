@@ -135,7 +135,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
   bool opaque(BuildContext context) {
-    final Color backgroundColor = this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
+    final Color backgroundColor =
+        this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
     return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
   }
 
@@ -159,11 +160,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final Border? resolvedBorder = border == null || border.runtimeType != Border
       ? border
       : Border(
-          top: resolveBorderSide(border!.top),
-          left: resolveBorderSide(border!.left),
-          bottom: resolveBorderSide(border!.bottom),
-          right: resolveBorderSide(border!.right),
-        );
+        top: resolveBorderSide(border!.top),
+        left: resolveBorderSide(border!.left),
+        bottom: resolveBorderSide(border!.bottom),
+        right: resolveBorderSide(border!.right),
+      );
 
     final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(

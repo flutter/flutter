@@ -117,7 +117,8 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
-          activeColor: CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+          activeColor:
+              CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
           progress: widget.progress,
         ),
@@ -179,7 +180,8 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     for (int i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;
-      paint.color = activeColor.withAlpha(progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t]);
+      paint.color = activeColor
+          .withAlpha(progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(_kTwoPI / tickCount);
     }
