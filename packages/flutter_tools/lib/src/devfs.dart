@@ -287,7 +287,7 @@ class _DevFSHttpWriter implements DevFSWriter {
     required Logger logger,
     Duration? uploadRetryThrottle,
   })
-    : httpAddress = serviceProtocol.httpAddress!,
+    : httpAddress = serviceProtocol.httpAddress,
       _client = httpClient,
       _osUtils = osUtils,
       _uploadRetryThrottle = uploadRetryThrottle,
@@ -299,7 +299,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   final Duration? _uploadRetryThrottle;
 
   final String fsName;
-  final Uri httpAddress;
+  final Uri? httpAddress;
 
   // 3 was chosen to try to limit the variance in the time it takes to execute
   // `await request.close()` since there is a known bug in Dart where it doesn't
@@ -347,7 +347,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   }) async {
     while(true) {
       try {
-        final HttpClientRequest request = await _client.putUrl(httpAddress);
+        final HttpClientRequest request = await _client.putUrl(httpAddress!);
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
