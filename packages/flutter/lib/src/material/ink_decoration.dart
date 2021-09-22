@@ -251,9 +251,27 @@ class _InkState extends State<Ink> {
 
   @override
   void deactivate() {
+    _ink?.visible = false;
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    final MaterialInkController? validInkController = _ink?.controller;
+    if (validInkController != null && !identical(validInkController, Material.of(context))) {
+      _ink?.dispose();
+      assert(_ink == null);
+    } else {
+      _ink?.visible = true;
+    }
+    super.activate();
+  }
+
+  @override
+  void dispose() {
     _ink?.dispose();
     assert(_ink == null);
-    super.deactivate();
+    super.dispose();
   }
 
   Widget _build(BuildContext context) {
