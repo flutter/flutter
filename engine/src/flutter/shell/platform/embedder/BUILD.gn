@@ -320,10 +320,14 @@ if (is_mac && !embedder_for_target) {
     outputs =
         [ "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist" ]
     args = [
+      "--source",
       rebase_path(sources[0]),
+      "--destination",
       rebase_path(outputs[0]),
-      "--bitcode=$enable_bitcode",
     ]
+    if (enable_bitcode) {
+      args += [ "--bitcode" ]
+    }
   }
 
   copy("copy_module_map") {
