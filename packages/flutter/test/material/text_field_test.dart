@@ -568,9 +568,9 @@ void main() {
     final Widget widget = overlay(
       child: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: Container(
+        child: SizedBox(
           height: 200,
-          width: 200
+          width: 200,
           child: Center(
             child: TextField(
               controller: OverflowWidgetTextEditingController(),
