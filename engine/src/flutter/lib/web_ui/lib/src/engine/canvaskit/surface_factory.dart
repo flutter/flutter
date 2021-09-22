@@ -5,9 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../../engine.dart';
-import '../util.dart';
-import 'embedded_views.dart';
-import 'surface.dart';
 
 /// Caches surfaces used to overlay platform views.
 class SurfaceFactory {
