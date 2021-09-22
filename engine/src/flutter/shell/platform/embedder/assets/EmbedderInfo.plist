@@ -25,8 +25,8 @@
   <key>NSHumanReadableCopyright</key>
   <string>Copyright 2013 The Flutter Authors. All rights reserved.</string>
   <key>FlutterEngine</key>
-  <string>{0}</string>
+  <string>{revision}</string>
   <key>ClangVersion</key>
-  <string>{1}</string>
+  <string>{clang_version}</string>
 </dict>
 </plist>

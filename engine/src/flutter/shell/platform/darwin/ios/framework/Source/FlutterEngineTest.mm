@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
@@ -28,6 +29,62 @@ FLUTTER_ASSERT_ARC
   id project = OCMClassMock([FlutterDartProject class]);
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   XCTAssertNotNil(engine);
+}
+
+- (void)testInfoPlist {
+  // Check the embedded Flutter.framework Info.plist, not the linked dylib.
+  NSURL* flutterFrameworkURL =
+      [NSBundle.mainBundle.privateFrameworksURL URLByAppendingPathComponent:@"Flutter.framework"];
+  NSBundle* flutterBundle = [NSBundle bundleWithURL:flutterFrameworkURL];
+  XCTAssertEqualObjects(flutterBundle.bundleIdentifier, @"io.flutter.flutter");
+
+  NSDictionary<NSString*, id>* infoDictionary = flutterBundle.infoDictionary;
+
+  // OS version can have one, two, or three digits: "8", "8.0", "8.0.0"
+  NSError* regexError = NULL;
+  NSRegularExpression* osVersionRegex =
+      [NSRegularExpression regularExpressionWithPattern:@"((0|[1-9]\\d*)\\.)*(0|[1-9]\\d*)"
+                                                options:NSRegularExpressionCaseInsensitive
+                                                  error:&regexError];
+  XCTAssertNil(regexError);
+
+  // Smoke test the test regex.
+  NSString* testString = @"9";
+  NSUInteger versionMatches =
+      [osVersionRegex numberOfMatchesInString:testString
+                                      options:NSMatchingAnchored
+                                        range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @"9.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @"9.0.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @".0.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 0UL);
+
+  // Test Info.plist values.
+  NSString* minimumOSVersion = infoDictionary[@"MinimumOSVersion"];
+  versionMatches = [osVersionRegex numberOfMatchesInString:minimumOSVersion
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, minimumOSVersion.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+
+  // SHA length is 40.
+  XCTAssertEqual(((NSString*)infoDictionary[@"FlutterEngine"]).length, 40UL);
+
+  // {clang_version} placeholder is 15 characters. The clang string version
+  // is longer than that, so check if the placeholder has been replaced, without
+  // actually checking a literal string, which could be different on various machines.
+  XCTAssertTrue(((NSString*)infoDictionary[@"ClangVersion"]).length > 15UL);
 }
 
 - (void)testDeallocated {

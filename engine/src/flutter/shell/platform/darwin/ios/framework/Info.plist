@@ -21,10 +21,10 @@
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>MinimumOSVersion</key>
-  <string>9.0</string>
+  <string>{min_version}</string>
   <key>FlutterEngine</key>
-  <string>{0}</string>
+  <string>{revision}</string>
   <key>ClangVersion</key>
-  <string>{1}</string>
+  <string>{clang_version}</string>
 </dict>
 </plist>

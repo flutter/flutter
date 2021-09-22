@@ -14,9 +14,9 @@
 		0D6AB6BE22BB05E200EEE540 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BD22BB05E200EEE540 /* Assets.xcassets */; };
 		0D6AB6C122BB05E200EEE540 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BF22BB05E200EEE540 /* LaunchScreen.storyboard */; };
 		0D6AB6C422BB05E200EEE540 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6C322BB05E200EEE540 /* main.m */; };
-		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
 		F7521D7826BB68BC005F15C5 /* libios_test_flutter.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F7521D7926BB68BC005F15C5 /* libocmock_shared.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F77E081926FA9CE6003E6E4C /* Flutter.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F77E081726FA9CE6003E6E4C /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +37,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				F7521D7826BB68BC005F15C5 /* libios_test_flutter.dylib in Embed Libraries */,
+				F77E081926FA9CE6003E6E4C /* Flutter.framework in Embed Libraries */,
 				F7521D7926BB68BC005F15C5 /* libocmock_shared.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
@@ -70,6 +71,7 @@
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
 		F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libocmock_shared.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libocmock_shared.dylib"; sourceTree = "<group>"; };
+		F77E081726FA9CE6003E6E4C /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = "../../../../out/$(FLUTTER_ENGINE)/Flutter.framework"; sourceTree = "<group>"; };
 		F7A3FDE026B9E0A300EADD61 /* FlutterAppDelegateTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterAppDelegateTest.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,6 +169,7 @@
 		0D6AB6FC22BC1BC300EEE540 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F77E081726FA9CE6003E6E4C /* Flutter.framework */,
 				F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */,
 				F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */,
 			);
@@ -264,7 +267,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
