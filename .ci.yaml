@@ -1618,7 +1618,7 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
-    presubmit: false
+    presubmit: true
     properties:
       dependencies: >-
         [
@@ -3174,7 +3174,6 @@ targets:
 
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

@@ -6,7 +6,6 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -305,6 +304,60 @@ void main() {
     expect(box1.localToGlobal(Offset.zero), Offset.zero);
     expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Stretch does not overflow bounds of container', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/90197
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ScrollConfiguration(
+        behavior: const ScrollBehavior().copyWith(overscroll: false),
+        child: Column(
+          children: <Widget>[
+            StretchingOverscrollIndicator(
+              axisDirection: AxisDirection.down,
+              child: SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: 20,
+                  itemBuilder: (BuildContext context, int index){
+                    return Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text('Index $index'),
+                    );
+                  },
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: 0.5,
+              child: Container(
+                color: const Color(0xD0FF0000),
+                height: 100,
+              ),
+            )
+          ],
+        )
+      )
+    ));
+
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+    // Overscroll the start.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+    // Image should not show the text overlapping the red area below the list.
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('overscroll_stretch.no_overflow.png'),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();

@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -288,7 +289,7 @@ class SkiaGoldClient {
     final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
+        'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
       );
       late String rawResponse;
       try {
@@ -410,20 +411,19 @@ class SkiaGoldClient {
   }
 
   /// Returns a trace id based on the current testing environment to lookup
-  /// the latest positive digest on Flutter Gold.
-  ///
-  /// Trace IDs are case sensitive and should be in alphabetical order for the
-  /// keys, followed by the rest of the paramset, also in alphabetical order.
-  /// There should also be leading and trailing commas.
-  ///
-  /// Example TraceID for Flutter Gold:
-  ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
+  /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
+  /// the image keys.
   String getTraceID(String testName) {
-    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
-      'CI=luci,'
-      'Platform=${platform.operatingSystem},'
-      'name=$testName,'
-      'source_type=flutter,';
+    final Map<String, dynamic> keys = <String, dynamic>{
+      if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
+      'CI' : 'luci',
+      'Platform' : platform.operatingSystem,
+      'name' : testName,
+      'source_type' : 'flutter',
+    };
+    final String jsonTrace = json.encode(keys);
+    final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
+    return md5Sum;
   }
 }
 

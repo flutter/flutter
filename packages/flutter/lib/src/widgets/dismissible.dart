@@ -128,6 +128,8 @@ class Dismissible extends StatefulWidget {
 
   /// Gives the app an opportunity to confirm or veto a pending dismissal.
   ///
+  /// The widget cannot be dragged again until the returned future resolves.
+  ///
   /// If the returned Future<bool> completes true, then this widget will be
   /// dismissed, otherwise it will be moved back to its original location.
   ///
@@ -263,6 +265,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   Animation<double>? _resizeAnimation;
 
   double _dragExtent = 0.0;
+  bool _confirming = false;
   bool _dragUnderway = false;
   Size? _sizePriorToCollapse;
 
@@ -308,6 +311,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDragStart(DragStartDetails details) {
+    if (_confirming)
+      return;
     _dragUnderway = true;
     if (_moveController!.isAnimating) {
       _dragExtent = _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
@@ -426,12 +431,12 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     return _FlingGestureKind.reverse;
   }
 
-  Future<void> _handleDragEnd(DragEndDetails details) async {
+  void _handleDragEnd(DragEndDetails details) {
     if (!_isActive || _moveController!.isAnimating)
       return;
     _dragUnderway = false;
-    if (_moveController!.isCompleted && await _confirmStartResizeAnimation() == true) {
-      _startResizeAnimation();
+    if (_moveController!.isCompleted) {
+      _handleMoveCompleted();
       return;
     }
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
@@ -466,24 +471,41 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
     if (status == AnimationStatus.completed && !_dragUnderway) {
-      if (await _confirmStartResizeAnimation() == true)
+      await _handleMoveCompleted();
+    }
+    if (mounted) {
+      updateKeepAlive();
+    }
+  }
+
+  Future<void> _handleMoveCompleted() async {
+    if ((widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold) >= 1.0) {
+      _moveController!.reverse();
+      return;
+    }
+    final bool result = await _confirmStartResizeAnimation();
+    if (mounted) {
+      if (result)
         _startResizeAnimation();
       else
         _moveController!.reverse();
     }
-    updateKeepAlive();
   }
 
-  Future<bool?> _confirmStartResizeAnimation() async {
+  Future<bool> _confirmStartResizeAnimation() async {
     if (widget.confirmDismiss != null) {
+      _confirming = true;
       final DismissDirection direction = _dismissDirection;
-      return widget.confirmDismiss!(direction);
+      try {
+        return await widget.confirmDismiss!(direction) ?? false;
+      } finally {
+        _confirming = false;
+      }
     }
     return true;
   }
 
   void _startResizeAnimation() {
-    assert(_moveController != null);
     assert(_moveController!.isCompleted);
     assert(_resizeController == null);
     assert(_sizePriorToCollapse == null);

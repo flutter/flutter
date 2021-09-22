@@ -146,7 +146,7 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation elements rendered over the
   /// application.
   ///
-  /// Available starting at SDK 16 or Android J. Earlier versions of Android
+  /// Available starting at SDK 29 or Android 10. Earlier versions of Android
   /// will not be affected by this setting.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
@@ -157,8 +157,8 @@ enum SystemUiMode {
   ///
   /// See also:
   ///
-  ///   * [SystemUiOverlayStyle], can be used to set transparent status and
-  ///     navigation bars for an enhanced effect.
+  ///   * [SystemUiOverlayStyle], can be used to configure transparent status and
+  ///     navigation bars with or without a contrast scrim.
   edgeToEdge,
 
   /// Declares manually configured [SystemUiOverlay]s.
