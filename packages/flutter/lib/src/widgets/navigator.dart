@@ -2879,11 +2879,14 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(navigator._debugLocked);
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
-    if (route.didPop(pendingResult)) {
-      navigator._observedRouteDeletions.add(
-        _NavigatorPopObservation(route, previousPresent),
-      );
-    } else {
+    if (route._popCompleter.isCompleted) {
+      // This is a page-based route popped through the Navigator.pop. The
+      // didPop should have been called. No further action is needed.
+      assert(hasPage);
+      assert(pendingResult == null);
+      return;
+    }
+    if (!route.didPop(pendingResult)) {
       currentState = _RouteLifecycle.idle;
     }
     pendingResult = null;
@@ -3847,29 +3850,27 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             navigator: this,
             previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
           );
-          if (entry.currentState == _RouteLifecycle.dispose) {
-            // The pop is processed synchronously. This can happen if transition
-            // duration is zero.
-            if (!seenTopActiveRoute) {
-              if (poppedRoute != null)
-                entry.handleDidPopNext(poppedRoute);
-              poppedRoute = entry.route;
-            }
-            continue;
-          }
           if (entry.currentState == _RouteLifecycle.idle) {
             // The route rejects the pop.
             continue;
           }
-          assert(entry.currentState == _RouteLifecycle.popping);
-          canRemoveOrAdd = true;
-          continue;
-        case _RouteLifecycle.popping:
           if (!seenTopActiveRoute) {
             if (poppedRoute != null)
               entry.handleDidPopNext(poppedRoute);
             poppedRoute = entry.route;
           }
+          _observedRouteDeletions.add(
+            _NavigatorPopObservation(entry.route, _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route),
+          );
+          if (entry.currentState == _RouteLifecycle.dispose) {
+            // The pop finishes synchronously. This can happen if transition
+            // duration is zero.
+            continue;
+          }
+          assert(entry.currentState == _RouteLifecycle.popping);
+          canRemoveOrAdd = true;
+          break;
+        case _RouteLifecycle.popping:
           // Will exit this state when animation completes.
           break;
         case _RouteLifecycle.complete:
@@ -4879,18 +4880,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final int index = _history.lastIndexWhere(_RouteEntry.isPresentPredicate);
     final _RouteEntry entry = _history[index];
-    if (entry.hasPage) {
-      if (widget.onPopPage!(entry.route, result)) {
-        _observedRouteDeletions.add(
-          _NavigatorPopObservation(entry.route, _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route),
-        );
-        entry.currentState = _RouteLifecycle.popping;
+    if (entry.hasPage && widget.onPopPage!(entry.route, result)) {
+      // The entry may have been disposed if the pop finishes synchronously.
+      if (entry.currentState == _RouteLifecycle.idle) {
+        entry.currentState = _RouteLifecycle.pop;
       }
     } else {
       entry.pop<T>(result);
       assert (entry.currentState == _RouteLifecycle.pop);
     }
-    _flushHistoryUpdates(rearrangeOverlay: false);
+    if (entry.currentState == _RouteLifecycle.pop)
+      _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       if (entry.currentState != _RouteLifecycle.idle)
         assert(entry.route._popCompleter.isCompleted);

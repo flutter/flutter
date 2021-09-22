@@ -3925,6 +3925,9 @@ class NavigatorObservation {
   final String? previous;
   final String? current;
   final String operation;
+
+  @override
+  String toString() => 'NavigatorObservation($operation, $current, $previous)';
 }
 
 class BuilderPage extends Page<void> {
