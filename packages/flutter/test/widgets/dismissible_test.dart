@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 const DismissDirection defaultDismissDirection = DismissDirection.horizontal;
 const double crossAxisEndOffset = 0.5;
 bool reportedDismissUpdateReached = false;
+bool reportedDismissUpdatePreviousReached = false;
 late DismissDirection reportedDismissUpdateReachedDirection;
 
 DismissDirection reportedDismissDirection = DismissDirection.horizontal;
@@ -48,9 +49,10 @@ Widget buildTest({
             onResize: () {
               expect(dismissedItems.contains(item), isFalse);
             },
-            onDismissUpdate: (DismissDirection direction, DismissUpdate dismissUpdate) {
-              reportedDismissUpdateReachedDirection = direction;
-              reportedDismissUpdateReached = dismissUpdate.reached;
+            onUpdate: (DismissUpdateDetails details) {
+              reportedDismissUpdateReachedDirection = details.direction;
+              reportedDismissUpdateReached = details.reached;
+              reportedDismissUpdatePreviousReached = details.previousReached;
             },
             background: background,
             dismissThresholds: startToEndThreshold == null
@@ -1060,11 +1062,11 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('onDismissUpdate', (WidgetTester tester) async {
-    scrollDirection = Axis.horizontal;
-    dismissDirection = DismissDirection.horizontal;
-
-    await tester.pumpWidget(buildTest());
+  testWidgets('onUpdate', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest(
+      scrollDirection: Axis.horizontal,
+      dismissDirection: DismissDirection.horizontal,
+    ));
     expect(dismissedItems, isEmpty);
 
     // Successful dismiss therefore threshold has been reached
@@ -1073,6 +1075,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissUpdateReachedDirection, DismissDirection.endToStart);
     expect(reportedDismissUpdateReached, true);
+    expect(reportedDismissUpdatePreviousReached, true);
 
     // Unsuccessful dismiss, threshold has not been reached
     await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right, mechanism: rollbackElement);
@@ -1080,6 +1083,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissUpdateReachedDirection, DismissDirection.startToEnd);
     expect(reportedDismissUpdateReached, false);
+    expect(reportedDismissUpdatePreviousReached, false);
 
     // Another successful dismiss from another direction
     await dismissItem(tester, 1, mechanism: flingElement, gestureDirection: AxisDirection.right);
@@ -1087,5 +1091,22 @@ void main() {
     expect(dismissedItems, equals(<int>[0, 1]));
     expect(reportedDismissUpdateReachedDirection, DismissDirection.startToEnd);
     expect(reportedDismissUpdateReached, true);
+    expect(reportedDismissUpdatePreviousReached, true);
+
+    await tester.pumpWidget(buildTest(
+      scrollDirection: Axis.horizontal,
+      dismissDirection: DismissDirection.horizontal,
+      confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
+        return Future<bool>.value(false);
+      },
+    ));
+
+    // Threshold has been reached but dismiss was not confirmed
+    await dismissItem(tester, 2, mechanism: flingElement, gestureDirection: AxisDirection.right);
+    expect(find.text('2'), findsOneWidget);
+    expect(dismissedItems, equals(<int>[0, 1]));
+    expect(reportedDismissUpdateReachedDirection, DismissDirection.startToEnd);
+    expect(reportedDismissUpdateReached, false);
+    expect(reportedDismissUpdatePreviousReached, false);
   });
 }
