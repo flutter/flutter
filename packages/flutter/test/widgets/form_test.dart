@@ -733,38 +733,6 @@ void main() {
     expect(find.text(errorText('')!), findsOneWidget);
   });
 
-  testWidgets('autovalidate parameter is still used if true', (WidgetTester tester) async {
-    late FormFieldState<String> formFieldState;
-    String? errorText(String? value) => '$value/error';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: FormField<String>(
-                  initialValue: 'foo',
-                  autovalidate: true,
-                  builder: (FormFieldState<String> state) {
-                    formFieldState = state;
-                    return Container();
-                  },
-                  validator: errorText,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-    expect(formFieldState.hasError, isTrue);
-  });
-
   testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
@@ -807,46 +775,6 @@ void main() {
     formState.currentState!.reset();
     await tester.pump();
     expect(find.text(errorText('bar')!), findsNothing);
-  });
-
-  testWidgets('Form.autovalidateMode and Form.autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Form(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.disabled,
-              child: Container(),
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
-  });
-
-  testWidgets('FormField.autovalidateMode and FormField.autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: FormField<String>(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.disabled,
-              builder: (_) {
-                return Container();
-              },
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/63753.
