@@ -693,7 +693,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: Text(item.label),
+        child: Text(item.label!),
       ),
     );
 
