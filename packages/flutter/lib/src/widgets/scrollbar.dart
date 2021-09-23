@@ -428,9 +428,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     final double x, y;
     final Size thumbSize, trackSize;
-    final Offset trackOffset;
+    final Offset trackOffset, borderStart, borderEnd;
 
     _debugAssertIsValidOrientation(resolvedOrientation);
+
     switch(resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, thumbExtent);
@@ -438,6 +439,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        borderStart = trackOffset + Offset(trackSize.width, 0.0);
+        borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, thumbExtent);
@@ -445,6 +448,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        borderStart = trackOffset;
+        borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.top:
         thumbSize = Size(thumbExtent, thickness);
@@ -452,6 +457,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
         trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
+        borderStart = trackOffset + Offset(0.0, trackSize.height);
+        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
         break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(thumbExtent, thickness);
@@ -459,31 +466,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
         trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
-        break;
-    }
-
-    _trackRect = trackOffset & trackSize;
-    Offset borderStart;
-    Offset borderEnd;
-    switch(resolvedOrientation) {
-      case ScrollbarOrientation.left:
-        borderStart = trackOffset + Offset(trackSize.width, 0.0);
-        borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
-        break;
-      case ScrollbarOrientation.right:
-        borderStart = trackOffset;
-        borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
-        break;
-      case ScrollbarOrientation.top:
-        borderStart = trackOffset + Offset(0.0, trackSize.height);
-        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
-        break;
-      case ScrollbarOrientation.bottom:
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
         break;
     }
 
+    _trackRect = trackOffset & trackSize;
     canvas.drawRect(_trackRect!, _paintTrack());
     canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
 
