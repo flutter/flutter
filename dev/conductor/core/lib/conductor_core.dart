@@ -12,5 +12,6 @@ export 'src/next.dart' hide kStateOption, kYesFlag;
 export 'src/repository.dart';
 export 'src/roll_dev.dart';
 export 'src/start.dart' hide kStateOption;
+export 'src/state.dart';
 export 'src/status.dart' hide kStateOption;
 export 'src/stdio.dart';

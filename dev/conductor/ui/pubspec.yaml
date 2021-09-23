@@ -1,5 +1,5 @@
-name: conductor
-description: Flutter Automated Release Tool
+name: conductor_ui
+description: Flutter Release GUI
 
 publish_to: none
 
@@ -8,12 +8,12 @@ environment:
 
 dependencies:
   archive: 3.1.2
-  args: 2.3.0
+  conductor_core:
+    path: ../core
   flutter:
     sdk: flutter
   http: 0.13.3
   intl: 0.17.0
-  meta: 1.7.0
   path: 1.8.0
   process: 4.2.3
   protobuf: 2.0.0
