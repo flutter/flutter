@@ -20,13 +20,19 @@ Future<void> testMain() async {
     await webOnlyFontCollection.ensureFontsLoaded();
   });
 
-  test('Picture.toImage().toByteData()', () async {
+  Future<Image> createTestImageByColor(Color color) async {
     final EnginePictureRecorder recorder = EnginePictureRecorder();
     final RecordingCanvas canvas =
         recorder.beginRecording(const Rect.fromLTRB(0, 0, 2, 2));
-    canvas.drawColor(const Color(0xFFCCDD00), BlendMode.srcOver);
+    canvas.drawColor(color, BlendMode.srcOver);
     final Picture testPicture = recorder.endRecording();
     final Image testImage = await testPicture.toImage(2, 2);
+    return testImage;
+  }
+
+  test('Picture.toImage().toByteData()', () async {
+    final Image testImage = await createTestImageByColor(const Color(0xFFCCDD00));
+
     final ByteData bytes =
         (await testImage.toByteData(format: ImageByteFormat.rawRgba))!;
     expect(
@@ -43,6 +49,17 @@ Future<void> testMain() async {
     expect(
       pngBytes.buffer.asUint8List().sublist(0, pngHeader.length),
       pngHeader,
+    );
+  });
+
+  test('Image.toByteData(format: ImageByteFormat.rawStraightRgba)', () async {
+    final Image testImage = await createTestImageByColor(const Color(0xAAFFFF00));
+
+    final ByteData bytes =
+        (await testImage.toByteData(format: ImageByteFormat.rawStraightRgba))!;
+    expect(
+      bytes.buffer.asUint32List(),
+      <int>[0xAA00FFFF, 0xAA00FFFF, 0xAA00FFFF, 0xAA00FFFF],
     );
   });
 }
