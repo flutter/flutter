@@ -19,9 +19,7 @@ class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance.
   const ColorScheme({
     required this.primary,
-    required this.primaryVariant,
     required this.secondary,
-    required this.secondaryVariant,
     required this.surface,
     required this.background,
     required this.error,
@@ -31,10 +29,18 @@ class ColorScheme with Diagnosticable {
     required this.onBackground,
     required this.onError,
     required this.brightness,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant,
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant,
   }) : assert(primary != null),
-       assert(primaryVariant != null),
        assert(secondary != null),
-       assert(secondaryVariant != null),
        assert(surface != null),
        assert(background != null),
        assert(error != null),
@@ -43,15 +49,15 @@ class ColorScheme with Diagnosticable {
        assert(onSurface != null),
        assert(onBackground != null),
        assert(onError != null),
-       assert(brightness != null);
+       assert(brightness != null),
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant;
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.light({
     this.primary = const Color(0xff6200ee),
-    this.primaryVariant = const Color(0xff3700b3),
     this.secondary = const Color(0xff03dac6),
-    this.secondaryVariant = const Color(0xff018786),
     this.surface = Colors.white,
     this.background = Colors.white,
     this.error = const Color(0xffb00020),
@@ -61,10 +67,18 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.black,
     this.onError = Colors.white,
     this.brightness = Brightness.light,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff3700b3),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff018786),
   }) : assert(primary != null),
-       assert(primaryVariant != null),
        assert(secondary != null),
-       assert(secondaryVariant != null),
        assert(surface != null),
        assert(background != null),
        assert(error != null),
@@ -73,15 +87,15 @@ class ColorScheme with Diagnosticable {
        assert(onSurface != null),
        assert(onBackground != null),
        assert(onError != null),
-       assert(brightness != null);
+       assert(brightness != null),
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant;
 
   /// Create the recommended dark color scheme that matches the
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
   const ColorScheme.dark({
     this.primary = const Color(0xffbb86fc),
-    this.primaryVariant = const Color(0xff3700B3),
     this.secondary = const Color(0xff03dac6),
-    this.secondaryVariant = const Color(0xff03dac6),
     this.surface = const Color(0xff121212),
     this.background = const Color(0xff121212),
     this.error = const Color(0xffcf6679),
@@ -91,10 +105,18 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.white,
     this.onError = Colors.black,
     this.brightness = Brightness.dark,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff3700B3),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff03dac6),
   }) : assert(primary != null),
-       assert(primaryVariant != null),
        assert(secondary != null),
-       assert(secondaryVariant != null),
        assert(surface != null),
        assert(background != null),
        assert(error != null),
@@ -103,16 +125,15 @@ class ColorScheme with Diagnosticable {
        assert(onSurface != null),
        assert(onBackground != null),
        assert(onError != null),
-       assert(brightness != null);
-
+       assert(brightness != null),
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
   /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.highContrastLight({
     this.primary = const Color(0xff0000ba),
-    this.primaryVariant = const Color(0xff000088),
     this.secondary = const Color(0xff66fff9),
-    this.secondaryVariant = const Color(0xff018786),
     this.surface = Colors.white,
     this.background = Colors.white,
     this.error = const Color(0xff790000),
@@ -122,27 +143,35 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.black,
     this.onError = Colors.white,
     this.brightness = Brightness.light,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xff000088),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff018786),
   }) : assert(primary != null),
-        assert(primaryVariant != null),
-        assert(secondary != null),
-        assert(secondaryVariant != null),
-        assert(surface != null),
-        assert(background != null),
-        assert(error != null),
-        assert(onPrimary != null),
-        assert(onSecondary != null),
-        assert(onSurface != null),
-        assert(onBackground != null),
-        assert(onError != null),
-        assert(brightness != null);
+       assert(secondary != null),
+       assert(surface != null),
+       assert(background != null),
+       assert(error != null),
+       assert(onPrimary != null),
+       assert(onSecondary != null),
+       assert(onSurface != null),
+       assert(onBackground != null),
+       assert(onError != null),
+       assert(brightness != null),
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant;
 
   /// Create a high contrast ColorScheme based on the dark
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
   const ColorScheme.highContrastDark({
     this.primary = const Color(0xffefb7ff),
-    this.primaryVariant = const Color(0xffbe9eff),
     this.secondary = const Color(0xff66fff9),
-    this.secondaryVariant = const Color(0xff66fff9),
     this.surface = const Color(0xff121212),
     this.background = const Color(0xff121212),
     this.error = const Color(0xff9b374d),
@@ -152,19 +181,29 @@ class ColorScheme with Diagnosticable {
     this.onBackground = Colors.white,
     this.onError = Colors.black,
     this.brightness = Brightness.dark,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant = const Color(0xffbe9eff),
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant = const Color(0xff66fff9),
   }) : assert(primary != null),
-        assert(primaryVariant != null),
-        assert(secondary != null),
-        assert(secondaryVariant != null),
-        assert(surface != null),
-        assert(background != null),
-        assert(error != null),
-        assert(onPrimary != null),
-        assert(onSecondary != null),
-        assert(onSurface != null),
-        assert(onBackground != null),
-        assert(onError != null),
-        assert(brightness != null);
+       assert(secondary != null),
+       assert(surface != null),
+       assert(background != null),
+       assert(error != null),
+       assert(onPrimary != null),
+       assert(onSecondary != null),
+       assert(onSurface != null),
+       assert(onBackground != null),
+       assert(onError != null),
+       assert(brightness != null),
+       _primaryVariant = primaryVariant,
+       _secondaryVariant = secondaryVariant;
 
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
@@ -209,15 +248,9 @@ class ColorScheme with Diagnosticable {
   /// The color displayed most frequently across your app’s screens and components.
   final Color primary;
 
-  /// A darker version of the primary color.
-  final Color primaryVariant;
-
   /// An accent color that, when used sparingly, calls attention to parts
   /// of your app.
   final Color secondary;
-
-  /// A darker version of the secondary color.
-  final Color secondaryVariant;
 
   /// The background color for widgets like [Card].
   final Color surface;
@@ -267,13 +300,27 @@ class ColorScheme with Diagnosticable {
   /// The overall brightness of this color scheme.
   final Brightness brightness;
 
+  final Color? _primaryVariant;
+  /// A darker version of the primary color.
+  @Deprecated(
+    'Use primary or primaryContainer instead. '
+    'This feature was deprecated after v2.6.0-0.0.pre.'
+  )
+  Color get primaryVariant => _primaryVariant ?? primary;
+
+  final Color? _secondaryVariant;
+  /// A darker version of the secondary color.
+  @Deprecated(
+    'Use secondary or secondaryContainer instead. '
+    'This feature was deprecated after v2.6.0-0.0.pre.'
+  )
+  Color get secondaryVariant => _secondaryVariant ?? secondary;
+
   /// Creates a copy of this color scheme with the given fields
   /// replaced by the non-null parameter values.
   ColorScheme copyWith({
     Color? primary,
-    Color? primaryVariant,
     Color? secondary,
-    Color? secondaryVariant,
     Color? surface,
     Color? background,
     Color? error,
@@ -283,12 +330,20 @@ class ColorScheme with Diagnosticable {
     Color? onBackground,
     Color? onError,
     Brightness? brightness,
+    @Deprecated(
+      'Use primary or primaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? primaryVariant,
+    @Deprecated(
+      'Use secondary or secondaryContainer instead. '
+      'This feature was deprecated after v2.6.0-0.0.pre.'
+    )
+    Color? secondaryVariant,
   }) {
     return ColorScheme(
       primary: primary ?? this.primary,
-      primaryVariant: primaryVariant ?? this.primaryVariant,
       secondary: secondary ?? this.secondary,
-      secondaryVariant: secondaryVariant ?? this.secondaryVariant,
       surface: surface ?? this.surface,
       background: background ?? this.background,
       error: error ?? this.error,
@@ -298,6 +353,8 @@ class ColorScheme with Diagnosticable {
       onBackground: onBackground ?? this.onBackground,
       onError: onError ?? this.onError,
       brightness: brightness ?? this.brightness,
+      primaryVariant: primaryVariant ?? this.primaryVariant,
+      secondaryVariant: secondaryVariant ?? this.secondaryVariant,
     );
   }
 
@@ -307,9 +364,7 @@ class ColorScheme with Diagnosticable {
   static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
     return ColorScheme(
       primary: Color.lerp(a.primary, b.primary, t)!,
-      primaryVariant: Color.lerp(a.primaryVariant, b.primaryVariant, t)!,
       secondary: Color.lerp(a.secondary, b.secondary, t)!,
-      secondaryVariant: Color.lerp(a.secondaryVariant, b.secondaryVariant, t)!,
       surface: Color.lerp(a.surface, b.surface, t)!,
       background: Color.lerp(a.background, b.background, t)!,
       error: Color.lerp(a.error, b.error, t)!,
@@ -319,6 +374,8 @@ class ColorScheme with Diagnosticable {
       onBackground: Color.lerp(a.onBackground, b.onBackground, t)!,
       onError: Color.lerp(a.onError, b.onError, t)!,
       brightness: t < 0.5 ? a.brightness : b.brightness,
+      primaryVariant: Color.lerp(a.primaryVariant, b.primaryVariant, t),
+      secondaryVariant: Color.lerp(a.secondaryVariant, b.secondaryVariant, t),
     );
   }
 
@@ -330,9 +387,7 @@ class ColorScheme with Diagnosticable {
       return false;
     return other is ColorScheme
         && other.primary == primary
-        && other.primaryVariant == primaryVariant
         && other.secondary == secondary
-        && other.secondaryVariant == secondaryVariant
         && other.surface == surface
         && other.background == background
         && other.error == error
@@ -341,16 +396,16 @@ class ColorScheme with Diagnosticable {
         && other.onSurface == onSurface
         && other.onBackground == onBackground
         && other.onError == onError
-        && other.brightness == brightness;
+        && other.brightness == brightness
+        && other.primaryVariant == primaryVariant
+        && other.secondaryVariant == secondaryVariant;
   }
 
   @override
   int get hashCode {
     return hashValues(
       primary,
-      primaryVariant,
       secondary,
-      secondaryVariant,
       surface,
       background,
       error,
@@ -360,6 +415,8 @@ class ColorScheme with Diagnosticable {
       onBackground,
       onError,
       brightness,
+      primaryVariant,
+      secondaryVariant,
     );
   }
 
@@ -368,9 +425,7 @@ class ColorScheme with Diagnosticable {
     super.debugFillProperties(properties);
     const ColorScheme defaultScheme = ColorScheme.light();
     properties.add(ColorProperty('primary', primary, defaultValue: defaultScheme.primary));
-    properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
     properties.add(ColorProperty('secondary', secondary, defaultValue: defaultScheme.secondary));
-    properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
     properties.add(ColorProperty('surface', surface, defaultValue: defaultScheme.surface));
     properties.add(ColorProperty('background', background, defaultValue: defaultScheme.background));
     properties.add(ColorProperty('error', error, defaultValue: defaultScheme.error));
@@ -380,5 +435,7 @@ class ColorScheme with Diagnosticable {
     properties.add(ColorProperty('onBackground', onBackground, defaultValue: defaultScheme.onBackground));
     properties.add(ColorProperty('onError', onError, defaultValue: defaultScheme.onError));
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: defaultScheme.brightness));
+    properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
+    properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
   }
 }
