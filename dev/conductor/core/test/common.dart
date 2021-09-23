@@ -8,6 +8,7 @@ import 'package:conductor_core/src/stdio.dart';
 import 'package:test/test.dart';
 
 export 'package:test/test.dart' hide isInstanceOf;
+export '../../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 Matcher throwsAssertionWith(String messageSubString) {
   return throwsA(
