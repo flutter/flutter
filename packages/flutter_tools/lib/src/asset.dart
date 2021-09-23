@@ -342,7 +342,8 @@ class ManifestAssetBundle implements AssetBundle {
     // asset in entries.
     for (final _Asset asset in assetVariants.keys) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
-      if (!assetFile.existsSync() && assetVariants[asset]!.isEmpty) {
+      final List<_Asset> variants = assetVariants[asset]!;
+      if (!assetFile.existsSync() && variants.isEmpty) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('No file or variants found for $asset.\n');
         if (asset.package != null) {
@@ -357,10 +358,10 @@ class ManifestAssetBundle implements AssetBundle {
       // "1x" resolution variant and if both exist then the explicit 1x
       // variant is preferred.
       if (assetFile.existsSync()) {
-        assert(!assetVariants[asset]!.contains(asset));
-        assetVariants[asset]!.insert(0, asset);
+        assert(!variants.contains(asset));
+        variants.insert(0, asset);
       }
-      for (final _Asset variant in assetVariants[asset]!) {
+      for (final _Asset variant in variants) {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
         inputFiles.add(variantFile);
         assert(variantFile.existsSync());
@@ -372,9 +373,10 @@ class ManifestAssetBundle implements AssetBundle {
     if (deferredComponentsAssetVariants != null) {
       for (final String componentName in deferredComponentsAssetVariants.keys) {
         deferredComponentsEntries[componentName] = <String, DevFSContent>{};
-        for (final _Asset asset in deferredComponentsAssetVariants[componentName]!.keys) {
+        final Map<_Asset, List<_Asset>> assetsMap = deferredComponentsAssetVariants[componentName]!;
+        for (final _Asset asset in assetsMap.keys) {
           final File assetFile = asset.lookupAssetFile(_fileSystem);
-          if (!assetFile.existsSync() && deferredComponentsAssetVariants[componentName]![asset]!.isEmpty) {
+          if (!assetFile.existsSync() && assetsMap[asset]!.isEmpty) {
             _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
             _logger.printError('No file or variants found for $asset.\n');
             if (asset.package != null) {
@@ -389,10 +391,10 @@ class ManifestAssetBundle implements AssetBundle {
           // "1x" resolution variant and if both exist then the explicit 1x
           // variant is preferred.
           if (assetFile.existsSync()) {
-            assert(!deferredComponentsAssetVariants[componentName]![asset]!.contains(asset));
-            deferredComponentsAssetVariants[componentName]![asset]!.insert(0, asset);
+            assert(!assetsMap[asset]!.contains(asset));
+            assetsMap[asset]!.toList().insert(0, asset);
           }
-          for (final _Asset variant in deferredComponentsAssetVariants[componentName]![asset]!) {
+          for (final _Asset variant in assetsMap[asset]!) {
             final File variantFile = variant.lookupAssetFile(_fileSystem);
             assert(variantFile.existsSync());
             deferredComponentsEntries[componentName]![variant.entryUri.path] ??= DevFSFileContent(variantFile);
