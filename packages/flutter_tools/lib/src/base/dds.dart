@@ -17,6 +17,7 @@ Future<dds.DartDevelopmentService> Function(
   bool enableAuthCodes,
   bool ipv6,
   Uri? serviceUri,
+  List<String> cachedUserTags,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -52,6 +53,8 @@ class DartDevelopmentService {
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 == true,
+          // Enables caching of CPU samples collected during application startup.
+          cachedUserTags: const <String>['AppStartUp'],
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {
