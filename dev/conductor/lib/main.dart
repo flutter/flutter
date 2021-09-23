@@ -10,22 +10,27 @@ import 'package:platform/platform.dart';
 import 'src/core/proto/conductor_state.pb.dart' as pb;
 import 'src/core/state.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-const LocalFileSystem _fs = LocalFileSystem();
-const LocalPlatform _platform = LocalPlatform();
-final File _stateFile = _fs.file(defaultStateFilePath(_platform));
-String get _status {
-  final pb.ConductorState _state = readStateFromFile(_stateFile);
-  return presentState(_state);
-}
-
 const String _title = 'Flutter Conductor';
 
+void main() {
+  const LocalFileSystem _fs = LocalFileSystem();
+  const LocalPlatform _platform = LocalPlatform();
+  final File _stateFile = _fs.file(defaultStateFilePath(_platform));
+
+  runApp(
+      MyApp(
+          readStateFromFile(_stateFile),
+      ),
+  );
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp(
+    this.state, {
+    Key? key,
+  }) : super(key: key);
+
+  final pb.ConductorState state;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +47,9 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SelectableText(_status),
+              Expanded(
+                  child: SelectableText(presentState(state)),
+              ),
             ],
           ),
         ),
