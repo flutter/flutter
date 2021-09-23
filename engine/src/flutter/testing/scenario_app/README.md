@@ -21,9 +21,16 @@ platform channel.
 
 ## Running for iOS
 
+Build the `ios_debug_sim_unopt` engine variant, and run
+
 ```sh
-./build_and_run_ios_tests.sh
+./run_ios_tests.sh
 ```
+
+in your shell.
+
+To run or debug in Xcode, open the xcodeproj file located in
+`<engine_out_dir>/scenario_app/Scenarios/Scenaios.xoceproj`.
 
 ### iOS Platform View Tests
 
@@ -49,40 +56,13 @@ compared against golden reside.
 
 ## Running for Android
 
-The test is run on a x86 emulator. To run the test locally, you must create an emulator running API level 28, using an x86_64 ABI, and set the following screen settings in the avd's `config.ini` file:
+The only test that is currently run is the Firebase TestLab test, which is a
+smoke test to make sure an application can be built and run on a real Android
+device.
 
-```
-hw.lcd.density = 480
-hw.lcd.height = 1680
-hw.lcd.width = 1080
-lcd.depth = 16
-```
-
-This file is typically located in your `$HOME/.android/avd/<avd>` folder.
-
-Once the emulator is up, you can run the test by running:
-
-```bash
-./build_and_run_android_tests.sh
-```
-
-### Generating Golden Images on Android
-
-In the `android` directory, run:
-
-```bash
-../../../../gradle/bin/gradle app:recordDebugAndroidTestScreenshotTest
-```
-
-The screenshots are recorded into `android/reports/screenshots`.
-
-### Verifying Golden Images on Android
-
-In the `android` directory, run:
-
-```bash
-../../../../gradle/bin/gradle app:verifyDebugAndroidTestScreenshotTest
-```
+To run it, build the `android_profile_arm64` variant of the engine, and run
+`./flutter/ci/firebase_testlab.py`. If you wish to test a different variant, e.g.
+debug arm64, pass `--variant android_debug_arm64`.
 
 ### Updating Gradle dependencies
 
@@ -94,8 +74,3 @@ To generate new lockfiles, run:
 cd android
 ../../../../gradle/bin/gradle generateLockfiles
 ```
-
-## Changing dart:ui code
-
-If you change the dart:ui interface, remember to point the sky_engine
-clauses to your local engine's output path before compiling.
