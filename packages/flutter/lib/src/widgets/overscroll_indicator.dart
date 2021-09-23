@@ -700,8 +700,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           }
         }
       }
-    } else if (notification is ScrollEndNotification && notification.dragDetails != null
-        || notification is ScrollUpdateNotification && notification.dragDetails != null) {
+    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
       _stretchController.scrollEnd();
     }
     _lastNotification = notification;
