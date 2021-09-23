@@ -2309,7 +2309,7 @@ targets:
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
-			caches: >-
+      caches: >-
         [
           {"name": "openjdk", "path": "java11"}
         ]
@@ -2338,7 +2338,7 @@ targets:
           {"dependency": "gems"},
           {"dependency": "goldctl"}
         ]
-			caches: >-
+      caches: >-
         [
           {"name": "openjdk", "path": "java11"}
         ]
