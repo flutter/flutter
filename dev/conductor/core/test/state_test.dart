@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor/src/core/proto/conductor_state.pb.dart' as pb;
-import 'package:conductor/src/core/state.dart';
+import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
+import 'package:conductor_core/src/state.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor/src/core/globals.dart';
-import 'package:conductor/src/core/repository.dart';
-import 'package:conductor/src/core/roll_dev.dart';
+import 'package:conductor_core/src/globals.dart';
+import 'package:conductor_core/src/repository.dart';
+import 'package:conductor_core/src/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
 import './common.dart';
-import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
+import '../../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
 void main() {
   group('rollDev()', () {

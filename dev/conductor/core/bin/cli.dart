@@ -7,21 +7,11 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:conductor_core/conductor_core.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-
-import 'src/core/candidates.dart';
-import 'src/core/clean.dart';
-import 'src/core/codesign.dart';
-import 'src/core/globals.dart';
-import 'src/core/next.dart';
-import 'src/core/repository.dart';
-import 'src/core/roll_dev.dart';
-import 'src/core/start.dart';
-import 'src/core/status.dart';
-import 'src/core/stdio.dart';
 
 const String readmeUrl = 'https://github.com/flutter/flutter/tree/master/dev/conductor/README.md';
 
