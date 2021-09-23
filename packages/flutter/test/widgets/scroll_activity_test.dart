@@ -19,7 +19,7 @@ void main() {
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
     await tester.pump();
-    controller.jumpTo(thirty + 100.0); // past the end
+    controller.jumpTo(thirty + 200.0); // past the end
     await tester.pump();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
     expect(controller.position.pixels, thirty + 200.0); // same distance past the end
