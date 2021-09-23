@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:conductor/next.dart';
-import 'package:conductor/proto/conductor_state.pb.dart' as pb;
-import 'package:conductor/proto/conductor_state.pbenum.dart' show ReleasePhase;
-import 'package:conductor/repository.dart';
-import 'package:conductor/state.dart';
+import 'package:conductor/src/core/next.dart';
+import 'package:conductor/src/core/proto/conductor_state.pb.dart' as pb;
+import 'package:conductor/src/core/proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'package:conductor/src/core/repository.dart';
+import 'package:conductor/src/core/state.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:conductor/codesign.dart';
-import 'package:conductor/repository.dart';
+import 'package:conductor/src/core/codesign.dart';
+import 'package:conductor/src/core/repository.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';

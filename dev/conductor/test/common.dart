@@ -4,7 +4,7 @@
 
 
 import 'package:args/args.dart';
-import 'package:conductor/stdio.dart';
+import 'package:conductor/src/core/stdio.dart';
 import 'package:test/test.dart';
 
 export 'package:test/test.dart' hide isInstanceOf;
