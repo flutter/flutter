@@ -9,10 +9,13 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.view.Display;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -106,7 +109,6 @@ public class FlutterLoader {
   private FlutterApplicationInfo flutterApplicationInfo;
   private FlutterJNI flutterJNI;
   private ExecutorService executorService;
-  private WindowManager windowManager;
 
   private static class InitResult {
     final String appStoragePath;
@@ -158,8 +160,19 @@ public class FlutterLoader {
 
     initStartTimestampMillis = SystemClock.uptimeMillis();
     flutterApplicationInfo = ApplicationInfoLoader.load(appContext);
-    VsyncWaiter.getInstance((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
-        .init();
+
+    float fps;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      final DisplayManager dm = appContext.getSystemService(DisplayManager.class);
+      final Display primaryDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+      fps = primaryDisplay.getRefreshRate();
+    } else {
+      fps =
+          ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
+              .getDefaultDisplay()
+              .getRefreshRate();
+    }
+    VsyncWaiter.getInstance(fps).init();
 
     // Use a background thread for initialization tasks that require disk access.
     Callable<InitResult> initTask =
