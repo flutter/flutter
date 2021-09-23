@@ -25,7 +25,7 @@ void main() {
       );
     });
 
-    test('canCherryPick returns true if git cherry-pick returns 0', () {
+    test('canCherryPick returns true if git cherry-pick returns 0', () async {
       const String commit = 'abc123';
 
       final TestStdio stdio = TestStdio();
@@ -73,10 +73,10 @@ void main() {
         stdio: stdio,
       );
       final Repository repository = FrameworkRepository(checkouts);
-      expect(repository.canCherryPick(commit), true);
+      expect(await repository.canCherryPick(commit), true);
     });
 
-    test('canCherryPick returns false if git cherry-pick returns non-zero', () {
+    test('canCherryPick returns false if git cherry-pick returns non-zero', () async {
       const String commit = 'abc123';
 
       final TestStdio stdio = TestStdio();
@@ -128,10 +128,10 @@ void main() {
         stdio: stdio,
       );
       final Repository repository = FrameworkRepository(checkouts);
-      expect(repository.canCherryPick(commit), false);
+      expect(await repository.canCherryPick(commit), false);
     });
 
-    test('cherryPick() applies the commit', () {
+    test('cherryPick() applies the commit', () async {
       const String commit = 'abc123';
 
       final TestStdio stdio = TestStdio();
@@ -172,11 +172,11 @@ void main() {
         stdio: stdio,
       );
       final Repository repository = FrameworkRepository(checkouts);
-      repository.cherryPick(commit);
+      await repository.cherryPick(commit);
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    test('updateDartRevision() updates the DEPS file', () {
+    test('updateDartRevision() updates the DEPS file', () async {
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       final TestStdio stdio = TestStdio();
@@ -194,7 +194,7 @@ void main() {
       final EngineRepository repo = EngineRepository(checkouts);
       final File depsFile = fileSystem.file('/DEPS');
       depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-      repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
+      await repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
       final String updatedDepsFileContent = depsFile.readAsStringSync();
       expect(updatedDepsFileContent, generateMockDeps(nextDartRevision));
     });
@@ -219,7 +219,7 @@ void main() {
 vars = {
 }''');
       expect(
-        () => repo.updateDartRevision(nextDartRevision, depsFile: depsFile),
+        () async => repo.updateDartRevision(nextDartRevision, depsFile: depsFile),
         throwsExceptionWith('Unexpected content in the DEPS file at'),
       );
     });
@@ -278,7 +278,7 @@ vars = {
 
       final EngineRepository repo = EngineRepository(checkouts);
       expect(
-        () => repo.commit(message),
+        () async => repo.commit(message),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
       );
     });
@@ -338,7 +338,7 @@ vars = {
       repo.commit(message);
     });
 
-    test('updateEngineRevision() returns false if newCommit is the same as version file', () {
+    test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       final TestStdio stdio = TestStdio();
@@ -371,7 +371,7 @@ vars = {
       );
 
       final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final bool didUpdate = repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
+      final bool didUpdate = await repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
       expect(didUpdate, false);
     });
 
@@ -385,7 +385,7 @@ vars = {
       );
     });
 
-    test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () {
+    test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () async {
       const String commit1 = 'abc123';
       final TestStdio stdio = TestStdio();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -430,18 +430,18 @@ enabled_branches:
 
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
-        framework.ciYaml.enabledBranches,
+        (await framework.ciYaml).enabledBranches,
         <String>['master', 'dev', 'beta', 'stable'],
       );
 
-      framework.ciYaml.enableBranch('foo');
+      (await framework.ciYaml).enableBranch('foo');
       expect(
-        framework.ciYaml.enabledBranches,
+        (await framework.ciYaml).enabledBranches,
         <String>['foo', 'master', 'dev', 'beta', 'stable'],
       );
 
       expect(
-        framework.ciYaml.stringContents,
+        (await framework.ciYaml).stringContents,
         '''
 # Friendly note
 
@@ -498,7 +498,7 @@ enabled_branches:
 
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
-        () => framework.ciYaml.enableBranch('master'),
+        () async => (await framework.ciYaml).enableBranch('master'),
         throwsExceptionWith('.ci.yaml already contains the branch master'),
       );
     });

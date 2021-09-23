@@ -38,9 +38,9 @@ class CandidatesCommand extends Command<void> {
   String get description => 'List release candidates.';
 
   @override
-  void run() {
+  Future<void> run() async {
     final ArgResults results = argResults!;
-    git.run(
+    await git.run(
       <String>['fetch', results[kRemote] as String],
       'Fetch from remote ${results[kRemote]}',
       workingDirectory: flutterRoot.path,
@@ -52,10 +52,10 @@ class CandidatesCommand extends Command<void> {
       upstreamPath: flutterRoot.path,
     );
 
-    final Version currentVersion = framework.flutterVersion();
+    final Version currentVersion = await framework.flutterVersion();
     stdio.printStatus('currentVersion = $currentVersion');
 
-    final List<String> branches = git.getOutput(
+    final List<String> branches = (await git.getOutput(
       <String>[
         'branch',
         '--no-color',
@@ -65,7 +65,7 @@ class CandidatesCommand extends Command<void> {
       ],
       'List all remote branches',
       workingDirectory: flutterRoot.path,
-    ).split('\n');
+    )).split('\n');
 
     // Pattern for extracting only the branch name via sub-group 1
     final RegExp remotePattern = RegExp('${results[kRemote]}\\/(.*)');
