@@ -693,7 +693,7 @@ targets:
 
   - name: Linux plugin_test
     recipe: devicelab/devicelab_drone
-    plugin_test
+    bringup: true
     timeout: 60
     properties:
       caches: >-
