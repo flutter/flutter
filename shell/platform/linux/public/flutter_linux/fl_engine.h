@@ -13,6 +13,7 @@
 
 #include "fl_binary_messenger.h"
 #include "fl_dart_project.h"
+#include "fl_texture_registrar.h"
 
 G_BEGIN_DECLS
 
@@ -43,6 +44,16 @@ FlEngine* fl_engine_new_headless(FlDartProject* project);
  * Returns: an #FlBinaryMessenger.
  */
 FlBinaryMessenger* fl_engine_get_binary_messenger(FlEngine* engine);
+
+/**
+ * fl_engine_get_texture_registrar:
+ * @engine: an #FlEngine.
+ *
+ * Gets the texture registrar for registering textures.
+ *
+ * Returns: an #FlTextureRegistrar.
+ */
+FlTextureRegistrar* fl_engine_get_texture_registrar(FlEngine* engine);
 
 G_END_DECLS
 

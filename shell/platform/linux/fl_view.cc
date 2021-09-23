@@ -153,7 +153,8 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
   FlView* self = FL_VIEW(registry);
 
   return fl_plugin_registrar_new(self,
-                                 fl_engine_get_binary_messenger(self->engine));
+                                 fl_engine_get_binary_messenger(self->engine),
+                                 fl_engine_get_texture_registrar(self->engine));
 }
 
 static void fl_view_plugin_registry_iface_init(
