@@ -15,6 +15,9 @@ struct _FlPluginRegistrar {
 
   // Messenger to communicate on.
   FlBinaryMessenger* messenger;
+
+  // Texture registrar in use.
+  FlTextureRegistrar* texture_registrar;
 };
 
 // Added here to stop the compiler from optimizing this function away.
@@ -31,6 +34,7 @@ static void fl_plugin_registrar_dispose(GObject* object) {
     self->view = nullptr;
   }
   g_clear_object(&self->messenger);
+  g_clear_object(&self->texture_registrar);
 
   G_OBJECT_CLASS(fl_plugin_registrar_parent_class)->dispose(object);
 }
@@ -41,10 +45,13 @@ static void fl_plugin_registrar_class_init(FlPluginRegistrarClass* klass) {
 
 static void fl_plugin_registrar_init(FlPluginRegistrar* self) {}
 
-FlPluginRegistrar* fl_plugin_registrar_new(FlView* view,
-                                           FlBinaryMessenger* messenger) {
+FlPluginRegistrar* fl_plugin_registrar_new(
+    FlView* view,
+    FlBinaryMessenger* messenger,
+    FlTextureRegistrar* texture_registrar) {
   g_return_val_if_fail(view == nullptr || FL_IS_VIEW(view), nullptr);
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(texture_registrar), nullptr);
 
   FlPluginRegistrar* self = FL_PLUGIN_REGISTRAR(
       g_object_new(fl_plugin_registrar_get_type(), nullptr));
@@ -55,6 +62,8 @@ FlPluginRegistrar* fl_plugin_registrar_new(FlView* view,
                               reinterpret_cast<gpointer*>(&(self->view)));
   }
   self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
+  self->texture_registrar =
+      FL_TEXTURE_REGISTRAR(g_object_ref(texture_registrar));
 
   return self;
 }
@@ -64,6 +73,13 @@ G_MODULE_EXPORT FlBinaryMessenger* fl_plugin_registrar_get_messenger(
   g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), nullptr);
 
   return self->messenger;
+}
+
+G_MODULE_EXPORT FlTextureRegistrar* fl_plugin_registrar_get_texture_registrar(
+    FlPluginRegistrar* self) {
+  g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), nullptr);
+
+  return self->texture_registrar;
 }
 
 G_MODULE_EXPORT FlView* fl_plugin_registrar_get_view(FlPluginRegistrar* self) {
