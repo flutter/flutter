@@ -253,6 +253,44 @@ FlTaskRunner* fl_engine_get_task_runner(FlEngine* engine);
  */
 void fl_engine_execute_task(FlEngine* engine, FlutterTask* task);
 
+/**
+ * fl_engine_mark_texture_frame_available:
+ * @engine: an #FlEngine.
+ * @texture_id: the identifier of the texture whose frame has been updated.
+ *
+ * Tells the Flutter engine that a new texture frame is available for the given
+ * texture.
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_mark_texture_frame_available(FlEngine* engine,
+                                                int64_t texture_id);
+
+/**
+ * fl_engine_register_external_texture:
+ * @engine: an #FlEngine.
+ * @texture_id: the identifier of the texture that is available.
+ *
+ * Tells the Flutter engine that a new external texture is available.
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_register_external_texture(FlEngine* engine,
+                                             int64_t texture_id);
+
+/**
+ * fl_engine_unregister_external_texture:
+ * @engine: an #FlEngine.
+ * @texture_id: the identifier of the texture that is not available anymore.
+ *
+ * Tells the Flutter engine that an existing external texture is not available
+ * anymore.
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_unregister_external_texture(FlEngine* engine,
+                                               int64_t texture_id);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_ENGINE_PRIVATE_H_

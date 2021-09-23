@@ -10,6 +10,7 @@
 // Over time existing tests should be migrated and this file should be removed.
 
 #include <cstring>
+#include <unordered_map>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
@@ -20,11 +21,16 @@
 
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
+struct _FlutterEngineTexture {
+  bool has_new_frame;
+};
+
 struct _FlutterEngine {
   bool running;
   FlutterPlatformMessageCallback platform_message_callback;
   FlutterTaskRunnerPostTaskCallback platform_post_task_callback;
   void* user_data;
+  std::unordered_map<int64_t, _FlutterEngineTexture> textures;
 
   _FlutterEngine(FlutterPlatformMessageCallback platform_message_callback,
                  FlutterTaskRunnerPostTaskCallback platform_post_task_callback,
@@ -469,6 +475,33 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineRegisterExternalTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_identifier) {
+  _FlutterEngineTexture texture;
+  texture.has_new_frame = false;
+  engine->textures[texture_identifier] = texture;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_identifier) {
+  auto val = engine->textures.find(texture_identifier);
+  if (val == std::end(engine->textures)) {
+    return kInvalidArguments;
+  }
+  val->second.has_new_frame = true;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineUnregisterExternalTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_identifier) {
+  engine->textures.erase(texture_identifier);
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -502,6 +535,9 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->UpdateSemanticsEnabled = &FlutterEngineUpdateSemanticsEnabled;
   table->DispatchSemanticsAction = &FlutterEngineDispatchSemanticsAction;
   table->RunsAOTCompiledDartCode = &FlutterEngineRunsAOTCompiledDartCode;
-
+  table->RegisterExternalTexture = &FlutterEngineRegisterExternalTexture;
+  table->MarkExternalTextureFrameAvailable =
+      &FlutterEngineMarkExternalTextureFrameAvailable;
+  table->UnregisterExternalTexture = &FlutterEngineUnregisterExternalTexture;
   return kSuccess;
 }
