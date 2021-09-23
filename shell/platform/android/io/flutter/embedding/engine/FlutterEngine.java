@@ -357,8 +357,7 @@ public class FlutterEngine {
 
   private void attachToJni() {
     Log.v(TAG, "Attaching to JNI.");
-    // TODO(mattcarroll): update native call to not take in "isBackgroundView"
-    flutterJNI.attachToNative(false);
+    flutterJNI.attachToNative();
 
     if (!isAttachedToJni()) {
       throw new RuntimeException("FlutterEngine failed to attach to its native Object reference.");
