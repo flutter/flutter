@@ -9,6 +9,22 @@ import("//build/module_args/dart.gni")
 import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
+frontend_server_files =
+    exec_script("//third_party/dart/tools/list_dart_files.py",
+                [
+                  "absolute",
+                  rebase_path("."),
+                ],
+                "list lines")
+
+frontend_server_files +=
+    exec_script("//third_party/dart/tools/list_dart_files.py",
+                [
+                  "absolute",
+                  rebase_path("../../third_party/dart/pkg"),
+                ],
+                "list lines")
+
 # Creates a dart kernel (dill) file suitable for use with gen_snapshot, as well
 # as the app-jit, aot-elf, or aot-assembly snapshot for targeting Flutter on
 # Android or iOS.
@@ -38,22 +54,18 @@ template("flutter_snapshot") {
     deps = [ "//flutter/lib/snapshot:strong_platform" ]
 
     inputs = [
-      main_dart,
-      package_config,
-    ]
+               main_dart,
+               package_config,
+             ] + frontend_server_files
 
     outputs = [ kernel_output ]
 
     depfile = "$kernel_output.d"
     abs_depfile = rebase_path(depfile)
-    rebased_output = rebase_path(kernel_output, root_build_dir)
-    vm_args = [
-      "--depfile=$abs_depfile",
-      "--depfile_output_filename=$rebased_output",
-      "--disable-dart-dev",
-    ]
+    vm_args = [ "--disable-dart-dev" ]
 
     args = [
+      "--depfile=$abs_depfile",
       "--packages=" + rebase_path(package_config),
       "--target=flutter",
       "--sdk-root=" + flutter_patched_sdk,
