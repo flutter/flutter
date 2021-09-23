@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+ // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -329,7 +329,7 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: 7.0.2, fileExtension: .aab',
         }),
       ),
     ));
