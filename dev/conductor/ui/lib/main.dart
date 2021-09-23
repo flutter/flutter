@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:conductor_core/conductor_core.dart';
+import 'package:conductor_core/proto.dart' as pb;
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/material.dart';
 import 'package:platform/platform.dart';
-
-import 'package:conductor_core/conductor_core.dart';
-import 'package:conductor_core/proto.dart' as pb;
 
 const String _title = 'Flutter Conductor';
 
