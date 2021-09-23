@@ -226,7 +226,7 @@ public class DartExecutor implements BinaryMessenger {
   }
 
   /** Callback interface invoked when the isolate identifier becomes available. */
-  interface IsolateServiceIdListener {
+  public interface IsolateServiceIdListener {
     void onIsolateServiceIdAvailable(@NonNull String isolateServiceId);
   }
 
