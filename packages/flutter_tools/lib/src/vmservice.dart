@@ -835,7 +835,7 @@ class FlutterVmService {
         // with cleaning up.
         return <FlutterView>[];
       }
-      final List<Object>? rawViews = response.json!['views'] as List<Object>?;
+      final List<Object>? rawViews = response.json?['views'] as List<Object>?;
       final List<FlutterView> views = <FlutterView>[
         if (rawViews != null)
           for (final Object rawView in rawViews)
