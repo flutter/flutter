@@ -2970,8 +2970,7 @@ bool _hitIsOnDeleteIcon({
   // width of the tappable region within the chip, not outside of the chip, which is
   // handled elsewhere. Also because delete buttons aren't specified to be used on
   // touch devices, only desktop devices.
-  final double accessibleDeleteButtonWidth =
-  math.max(
+  final double accessibleDeleteButtonWidth = math.max(
     deleteButtonSize.width,
     math.min(
       deflatedSize.width * 0.5,
