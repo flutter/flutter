@@ -53,13 +53,16 @@ public class FlutterNativeView implements BinaryMessenger {
   }
 
   public FlutterNativeView(@NonNull Context context, boolean isBackgroundView) {
+    if (isBackgroundView) {
+      Log.w(TAG, "'isBackgroundView' is no longer supported and will be ignored");
+    }
     mContext = context;
     mPluginRegistry = new FlutterPluginRegistry(this, context);
     mFlutterJNI = new FlutterJNI();
     mFlutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
     this.dartExecutor = new DartExecutor(mFlutterJNI, context.getAssets());
     mFlutterJNI.addEngineLifecycleListener(new EngineLifecycleListenerImpl());
-    attach(this, isBackgroundView);
+    attach(this);
     assertAttached();
   }
 
@@ -148,8 +151,8 @@ public class FlutterNativeView implements BinaryMessenger {
     return mFlutterJNI;
   }
 
-  private void attach(FlutterNativeView view, boolean isBackgroundView) {
-    mFlutterJNI.attachToNative(isBackgroundView);
+  private void attach(FlutterNativeView view) {
+    mFlutterJNI.attachToNative();
     dartExecutor.onAttachedToJNI();
   }
 

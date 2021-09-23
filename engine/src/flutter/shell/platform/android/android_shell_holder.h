@@ -40,8 +40,7 @@ namespace flutter {
 class AndroidShellHolder {
  public:
   AndroidShellHolder(flutter::Settings settings,
-                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                     bool is_background_view);
+                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidShellHolder();
 

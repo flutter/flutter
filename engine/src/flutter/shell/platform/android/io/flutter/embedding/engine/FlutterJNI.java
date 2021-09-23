@@ -62,10 +62,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * <p>Despite the fact that individual JNI calls are inherently static, there is state that exists
  * within {@code FlutterJNI}. Most calls within {@code FlutterJNI} correspond to a specific
  * "platform view", of which there may be many. Therefore, each {@code FlutterJNI} instance holds
- * onto a "native platform view ID" after {@link #attachToNative(boolean)}, which is shared with the
- * native C/C++ engine code. That ID is passed to every platform-view-specific native method. ID
- * management is handled within {@code FlutterJNI} so that developers don't have to hold onto that
- * ID.
+ * onto a "native platform view ID" after {@link #attachToNative()}, which is shared with the native
+ * C/C++ engine code. That ID is passed to every platform-view-specific native method. ID management
+ * is handled within {@code FlutterJNI} so that developers don't have to hold onto that ID.
  *
  * <p>To connect part of an Android app to Flutter's C/C++ engine, instantiate a {@code FlutterJNI}
  * and then attach it to the native side:
@@ -306,18 +305,18 @@ public class FlutterJNI {
    * <p>This method must not be invoked if {@code FlutterJNI} is already attached to native.
    */
   @UiThread
-  public void attachToNative(boolean isBackgroundView) {
+  public void attachToNative() {
     ensureRunningOnMainThread();
     ensureNotAttachedToNative();
-    nativeShellHolderId = performNativeAttach(this, isBackgroundView);
+    nativeShellHolderId = performNativeAttach(this);
   }
 
   @VisibleForTesting
-  public long performNativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView) {
-    return nativeAttach(flutterJNI, isBackgroundView);
+  public long performNativeAttach(@NonNull FlutterJNI flutterJNI) {
+    return nativeAttach(flutterJNI);
   }
 
-  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView);
+  private native long nativeAttach(@NonNull FlutterJNI flutterJNI);
 
   /**
    * Spawns a new FlutterJNI instance from the current instance.
@@ -327,7 +326,7 @@ public class FlutterJNI {
    * FlutterJNI by calling its standard constructor.
    *
    * <p>This can only be called once the current FlutterJNI instance is attached by calling {@link
-   * #attachToNative(boolean)}.
+   * #attachToNative()}.
    *
    * <p>Static methods that should be only called once such as {@link #init(Context, String[],
    * String, String, String, long)} or {@link #setRefreshRateFPS(float)} shouldn't be called again
@@ -360,7 +359,7 @@ public class FlutterJNI {
    * <p>This method must not be invoked if {@code FlutterJNI} is not already attached to native.
    *
    * <p>Invoking this method will result in the release of all native-side resources that were set
-   * up during {@link #attachToNative(boolean)} or {@link #spawn(String, String)}, or accumulated
+   * up during {@link #attachToNative()} or {@link #spawn(String, String)}, or accumulated
    * thereafter.
    *
    * <p>It is permissible to re-attach this instance to native after detaching it from native.

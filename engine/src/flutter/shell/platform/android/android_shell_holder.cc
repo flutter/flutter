@@ -39,32 +39,26 @@ static PlatformData GetDefaultPlatformData() {
 
 AndroidShellHolder::AndroidShellHolder(
     flutter::Settings settings,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool is_background_view)
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : settings_(std::move(settings)), jni_facade_(jni_facade) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 
   thread_host_ = std::make_shared<ThreadHost>();
-  if (is_background_view) {
-    *thread_host_ = {thread_label, ThreadHost::Type::UI};
-  } else {
-    *thread_host_ = {thread_label, ThreadHost::Type::UI |
-                                       ThreadHost::Type::RASTER |
-                                       ThreadHost::Type::IO};
-  }
+  *thread_host_ = {thread_label, ThreadHost::Type::UI |
+                                     ThreadHost::Type::RASTER |
+                                     ThreadHost::Type::IO};
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [is_background_view, &jni_facade, &weak_platform_view](Shell& shell) {
+      [&jni_facade, &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
             jni_facade,              // JNI interop
             shell.GetSettings()
-                .enable_software_rendering,  // use software rendering
-            !is_background_view              // create onscreen surface
+                .enable_software_rendering  // use software rendering
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         auto display = Display(jni_facade->GetDisplayRefreshRate());
@@ -84,16 +78,9 @@ AndroidShellHolder::AndroidShellHolder(
   fml::RefPtr<fml::TaskRunner> io_runner;
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
-  if (is_background_view) {
-    auto single_task_runner = thread_host_->ui_thread->GetTaskRunner();
-    raster_runner = single_task_runner;
-    ui_runner = single_task_runner;
-    io_runner = single_task_runner;
-  } else {
-    raster_runner = thread_host_->raster_thread->GetTaskRunner();
-    ui_runner = thread_host_->ui_thread->GetTaskRunner();
-    io_runner = thread_host_->io_thread->GetTaskRunner();
-  }
+  raster_runner = thread_host_->raster_thread->GetTaskRunner();
+  ui_runner = thread_host_->ui_thread->GetTaskRunner();
+  io_runner = thread_host_->io_thread->GetTaskRunner();
 
   flutter::TaskRunners task_runners(thread_label,     // label
                                     platform_runner,  // platform

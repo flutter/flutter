@@ -32,7 +32,7 @@ public class PluginComponentTest {
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     jniAttached = false;
     when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
-    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative(false);
+    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative();
 
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 

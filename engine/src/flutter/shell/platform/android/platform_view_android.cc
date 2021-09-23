@@ -46,11 +46,7 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
 }
 
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
-    bool use_software_rendering,
-    bool create_onscreen_surface) {
-  if (!create_onscreen_surface) {
-    return nullptr;
-  }
+    bool use_software_rendering) {
   if (use_software_rendering) {
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
@@ -63,13 +59,11 @@ PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     flutter::TaskRunners task_runners,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool use_software_rendering,
-    bool create_onscreen_surface)
+    bool use_software_rendering)
     : PlatformViewAndroid(delegate,
                           std::move(task_runners),
                           std::move(jni_facade),
-                          CreateAndroidContext(use_software_rendering,
-                                               create_onscreen_surface)) {}
+                          CreateAndroidContext(use_software_rendering)) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
