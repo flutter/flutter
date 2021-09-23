@@ -126,7 +126,7 @@ class _PluginRegistrant {
 
 
 @pragma('vm:entry-point')
-void mainForPluginRegistrantTest() { // ignore: unused_element
+void mainForPluginRegistrantTest() {
   if (didCallRegistrantBeforeEntrypoint) {
     passMessage('_PluginRegistrant.register() was called');
   } else {
