@@ -2,40 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.ios;
-
   await task(() async {
     final String projectDirectory = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
 
     await inDirectory(projectDirectory, () async {
-      section('Build clean');
-
-      await flutter('clean');
-
       section('Build gallery app');
 
       await flutter(
         'build',
         options: <String>[
-          'ios',
+          'macos',
           '-v',
-          '--release',
-          '--config-only',
+          '--debug',
         ],
       );
     });
 
     section('Run platform unit tests');
 
-    final Device device = await devices.workingDevice;
-    if (!await runXcodeTests(projectDirectory, device.deviceId, 'native_ui_tests_ios')) {
+    if (!await runXcodeTests(projectDirectory, 'platform=macOS', 'native_ui_tests_macos')) {
       return TaskResult.failure('Platform unit tests failed');
     }
 
