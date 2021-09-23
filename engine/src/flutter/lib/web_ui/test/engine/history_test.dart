@@ -8,6 +8,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' show window;
@@ -120,6 +121,68 @@ void testMain() {
     },
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50836
         skip: browserEngine == BrowserEngine.edge);
+
+    test('disposes of its listener without touching history', () async {
+      const String unwrappedOriginState = 'initial state';
+      final Map<String, dynamic> wrappedOriginState = _wrapOriginState(unwrappedOriginState);
+
+      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+        const TestHistoryEntry(unwrappedOriginState, null, '/initial'),
+      );
+      expect(strategy.listeners, isEmpty);
+
+      await window.debugInitializeHistory(strategy, useSingle: true);
+
+
+      // There should be one `popstate` listener and two history entries.
+      expect(strategy.listeners, hasLength(1));
+      expect(strategy.history, hasLength(2));
+      expect(strategy.history[0].state, wrappedOriginState);
+      expect(strategy.history[0].url, '/initial');
+      expect(strategy.history[1].state, flutterState);
+      expect(strategy.history[1].url, '/initial');
+
+      FakeAsync().run((FakeAsync fakeAsync) {
+        window.browserHistory.dispose();
+        // The `TestUrlStrategy` implementation uses microtasks to schedule the
+        // removal of event listeners.
+        fakeAsync.flushMicrotasks();
+      });
+
+      // After disposing, there should no listeners, and the history entries
+      // remain unaffected.
+      expect(strategy.listeners, isEmpty);
+      expect(strategy.history, hasLength(2));
+      expect(strategy.history[0].state, wrappedOriginState);
+      expect(strategy.history[0].url, '/initial');
+      expect(strategy.history[1].state, flutterState);
+      expect(strategy.history[1].url, '/initial');
+
+      // An extra call to dispose should be safe.
+      FakeAsync().run((FakeAsync fakeAsync) {
+        expect(() => window.browserHistory.dispose(), returnsNormally);
+        fakeAsync.flushMicrotasks();
+      });
+
+      // Same expectations should remain true after the second dispose.
+      expect(strategy.listeners, isEmpty);
+      expect(strategy.history, hasLength(2));
+      expect(strategy.history[0].state, wrappedOriginState);
+      expect(strategy.history[0].url, '/initial');
+      expect(strategy.history[1].state, flutterState);
+      expect(strategy.history[1].url, '/initial');
+
+      // Can still teardown after being disposed.
+      await window.browserHistory.tearDown();
+      expect(strategy.history, hasLength(2));
+      expect(strategy.currentEntry.state, unwrappedOriginState);
+      expect(strategy.currentEntry.url, '/initial');
+    });
+
+    test('disposes gracefully when url strategy is null', () async {
+      await window.debugInitializeHistory(null, useSingle: true);
+      expect(() => window.browserHistory.dispose(), returnsNormally);
+    });
 
     test('browser back button pops routes correctly', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
@@ -325,6 +388,62 @@ void testMain() {
     },
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50836
         skip: browserEngine == BrowserEngine.edge);
+
+    test('disposes of its listener without touching history', () async {
+      const String untaggedState = 'initial state';
+      final Map<String, dynamic> taggedState = _tagStateWithSerialCount(untaggedState, 0);
+
+      final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
+        const TestHistoryEntry(untaggedState, null, '/initial'),
+      );
+      expect(strategy.listeners, isEmpty);
+
+      await window.debugInitializeHistory(strategy, useSingle: false);
+
+
+      // There should be one `popstate` listener and one history entry.
+      expect(strategy.listeners, hasLength(1));
+      expect(strategy.history, hasLength(1));
+      expect(strategy.history.single.state, taggedState);
+      expect(strategy.history.single.url, '/initial');
+
+      FakeAsync().run((FakeAsync fakeAsync) {
+        window.browserHistory.dispose();
+        // The `TestUrlStrategy` implementation uses microtasks to schedule the
+        // removal of event listeners.
+        fakeAsync.flushMicrotasks();
+      });
+
+      // After disposing, there should no listeners, and the history entries
+      // remain unaffected.
+      expect(strategy.listeners, isEmpty);
+      expect(strategy.history, hasLength(1));
+      expect(strategy.history.single.state, taggedState);
+      expect(strategy.history.single.url, '/initial');
+
+      // An extra call to dispose should be safe.
+      FakeAsync().run((FakeAsync fakeAsync) {
+        expect(() => window.browserHistory.dispose(), returnsNormally);
+        fakeAsync.flushMicrotasks();
+      });
+
+      // Same expectations should remain true after the second dispose.
+      expect(strategy.listeners, isEmpty);
+      expect(strategy.history, hasLength(1));
+      expect(strategy.history.single.state, taggedState);
+      expect(strategy.history.single.url, '/initial');
+
+      // Can still teardown after being disposed.
+      await window.browserHistory.tearDown();
+      expect(strategy.history, hasLength(1));
+      expect(strategy.history.single.state, untaggedState);
+      expect(strategy.history.single.url, '/initial');
+    });
+
+    test('disposes gracefully when url strategy is null', () async {
+      await window.debugInitializeHistory(null, useSingle: false);
+      expect(() => window.browserHistory.dispose(), returnsNormally);
+    });
 
     test('browser back button push route information correctly', () async {
       final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(

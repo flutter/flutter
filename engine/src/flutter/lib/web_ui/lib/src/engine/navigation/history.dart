@@ -4,6 +4,7 @@
 
 import 'dart:html' as html;
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../platform_dispatcher.dart';
@@ -47,12 +48,27 @@ abstract class BrowserHistory {
   /// The strategy to interact with html browser history.
   UrlStrategy? get urlStrategy;
 
+  bool _isTornDown = false;
   bool _isDisposed = false;
 
   void _setupStrategy(UrlStrategy strategy) {
     _unsubscribe = strategy.addPopStateListener(
       onPopState as html.EventListener,
     );
+  }
+
+  /// Release any resources held by this [BrowserHistory] instance.
+  ///
+  /// This method has no effect on the browser history entries. Use [tearDown]
+  /// instead to revert this instance's modifications to browser history
+  /// entries.
+  @mustCallSuper
+  void dispose() {
+    if (_isDisposed || urlStrategy == null) {
+      return;
+    }
+    _isDisposed = true;
+    _unsubscribe();
   }
 
   /// Exit this application and return to the previous page.
@@ -196,11 +212,12 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
 
   @override
   Future<void> tearDown() async {
-    if (_isDisposed || urlStrategy == null) {
+    dispose();
+
+    if (_isTornDown || urlStrategy == null) {
       return;
     }
-    _isDisposed = true;
-    _unsubscribe();
+    _isTornDown = true;
 
     // Restores the html browser history.
     assert(_hasSerialCount(currentState));
@@ -367,11 +384,12 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   @override
   Future<void> tearDown() async {
-    if (_isDisposed || urlStrategy == null) {
+    dispose();
+
+    if (_isTornDown || urlStrategy == null) {
       return;
     }
-    _isDisposed = true;
-    _unsubscribe();
+    _isTornDown = true;
 
     // We need to remove the flutter entry that we pushed in setup.
     await urlStrategy!.go(-1);

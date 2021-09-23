@@ -13,6 +13,7 @@ import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../engine.dart' show registerHotRestartListener;
 import 'browser_detection.dart';
 import 'navigation/history.dart';
 import 'navigation/js_url_strategy.dart';
@@ -51,6 +52,9 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     if (_isUrlStrategySet) {
       _browserHistory = createHistoryForExistingState(_customUrlStrategy);
     }
+    registerHotRestartListener(() {
+      _browserHistory?.dispose();
+    });
   }
 
   final Object _windowId;
