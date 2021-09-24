@@ -47,8 +47,8 @@ class NextCommand extends Command<void> {
   String get description => 'Proceed to the next release phase.';
 
   @override
-  void run() {
-    runNext(
+  Future<void> run() async {
+    await runNext(
       autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
       force: argResults![kForceFlag] as bool,
@@ -74,12 +74,12 @@ bool prompt(String message, Stdio stdio) {
 }
 
 @visibleForTesting
-void runNext({
+Future<void> runNext({
   required bool autoAccept,
   required bool force,
   required Checkouts checkouts,
   required File stateFile,
-}) {
+}) async {
   final Stdio stdio = checkouts.stdio;
   const List<CherrypickState> finishedStates = <CherrypickState>[
     CherrypickState.COMPLETED,
@@ -106,10 +106,11 @@ void runNext({
         previousCheckoutLocation: state.engine.checkoutPath,
       );
       // check if the candidate branch is enabled in .ci.yaml
-      if (!engine.ciYaml.enabledBranches.contains(state.engine.candidateBranch)) {
-        engine.ciYaml.enableBranch(state.engine.candidateBranch);
+      final CiYaml engineCiYaml = await engine.ciYaml;
+      if (!engineCiYaml.enabledBranches.contains(state.engine.candidateBranch)) {
+        engineCiYaml.enableBranch(state.engine.candidateBranch);
         // commit
-        final String revision = engine.commit(
+        final String revision = await engine.commit(
           'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
           addFirst: true,
         );
@@ -137,7 +138,11 @@ void runNext({
       if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
       } else {
-        stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        if (unappliedCherrypicks.length == 1) {
+          stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.');
+        } else {
+          stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.');
+        }
         stdio.printStatus('These must be applied manually in the directory '
             '${state.engine.checkoutPath} before proceeding.\n');
       }
@@ -154,7 +159,7 @@ void runNext({
         }
       }
 
-      engine.pushRef(
+      await engine.pushRef(
         fromRef: 'HEAD',
         // Explicitly create new branch
         toRef: 'refs/heads/${state.engine.workingBranch}',
@@ -207,7 +212,7 @@ void runNext({
         previousCheckoutLocation: state.engine.checkoutPath,
       );
 
-      final String engineRevision = engine.reverseParse('HEAD');
+      final String engineRevision = await engine.reverseParse('HEAD');
 
       final Remote upstream = Remote(
         name: RemoteName.upstream,
@@ -221,10 +226,10 @@ void runNext({
       );
 
       // Check if the current candidate branch is enabled
-      if (!framework.ciYaml.enabledBranches.contains(state.framework.candidateBranch)) {
-        framework.ciYaml.enableBranch(state.framework.candidateBranch);
+      if (!(await framework.ciYaml).enabledBranches.contains(state.framework.candidateBranch)) {
+        (await framework.ciYaml).enableBranch(state.framework.candidateBranch);
         // commit
-        final String revision = framework.commit(
+        final String revision = await framework.commit(
           'add branch ${state.framework.candidateBranch} to enabled_branches in .ci.yaml',
           addFirst: true,
         );
@@ -236,9 +241,9 @@ void runNext({
       }
 
       stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-      final bool needsCommit = framework.updateEngineRevision(engineRevision);
+      final bool needsCommit = await framework.updateEngineRevision(engineRevision);
       if (needsCommit) {
-        final String revision = framework.commit(
+        final String revision = await framework.commit(
           'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',
           addFirst: true,
         );
@@ -264,9 +269,12 @@ void runNext({
       } else if (unappliedCherrypicks.isEmpty) {
         stdio.printStatus('All framework cherrypicks were auto-applied by the conductor.');
       } else {
-        stdio.printStatus(
-          'There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',
-        );
+        if (unappliedCherrypicks.length == 1) {
+          stdio.printStatus('There was ${unappliedCherrypicks.length} cherrypick that was not auto-applied.',);
+        }
+        else {
+          stdio.printStatus('There were ${unappliedCherrypicks.length} cherrypicks that were not auto-applied.',);
+        }
         stdio.printStatus(
           'These must be applied manually in the directory '
           '${state.framework.checkoutPath} before proceeding.\n',
@@ -286,7 +294,7 @@ void runNext({
         }
       }
 
-      framework.pushRef(
+      await framework.pushRef(
         fromRef: 'HEAD',
         // Explicitly create new branch
         toRef: 'refs/heads/${state.framework.workingBranch}',
@@ -307,7 +315,7 @@ void runNext({
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
-      final String headRevision = framework.reverseParse('HEAD');
+      final String headRevision = await framework.reverseParse('HEAD');
       if (autoAccept == false) {
         final bool response = prompt(
           'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
@@ -320,7 +328,7 @@ void runNext({
           return;
         }
       }
-      framework.tag(headRevision, state.releaseVersion, upstream.name);
+      await framework.tag(headRevision, state.releaseVersion, upstream.name);
       break;
     case pb.ReleasePhase.PUBLISH_CHANNEL:
       final Remote upstream = Remote(
@@ -334,10 +342,10 @@ void runNext({
         upstreamRemote: upstream,
         previousCheckoutLocation: state.framework.checkoutPath,
       );
-      final String headRevision = framework.reverseParse('HEAD');
+      final String headRevision = await framework.reverseParse('HEAD');
       if (autoAccept == false) {
         // dryRun: true means print out git command
-        framework.pushRef(
+        await framework.pushRef(
           fromRef: headRevision,
           toRef: state.releaseChannel,
           remote: state.framework.upstream.url,
@@ -355,7 +363,7 @@ void runNext({
           return;
         }
       }
-      framework.pushRef(
+      await framework.pushRef(
         fromRef: headRevision,
         toRef: state.releaseChannel,
         remote: state.framework.upstream.url,

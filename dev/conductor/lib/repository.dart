@@ -58,34 +58,11 @@ abstract class Repository {
     required this.parentDirectory,
     this.initialRef,
     this.localUpstream = false,
-    String? previousCheckoutLocation,
+    this.previousCheckoutLocation,
     this.mirrorRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(upstreamRemote.url.isNotEmpty) {
-    if (previousCheckoutLocation != null) {
-      _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
-      if (!_checkoutDirectory!.existsSync()) {
-        throw ConductorException(
-            'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
-      }
-      if (initialRef != null) {
-        assert(initialRef != '');
-        git.run(
-          <String>['fetch', upstreamRemote.name],
-          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
-          workingDirectory: _checkoutDirectory!.path,
-        );
-        // Note: if [initialRef] is a remote ref the checkout will be left in a
-        // detached HEAD state.
-        git.run(
-          <String>['checkout', initialRef!],
-          'Checking out initialRef $initialRef',
-          workingDirectory: _checkoutDirectory!.path,
-        );
-      }
-    }
-  }
+        assert(upstreamRemote.url.isNotEmpty);
 
   final String name;
   final Remote upstreamRemote;
@@ -109,22 +86,47 @@ abstract class Repository {
   final bool localUpstream;
 
   Directory? _checkoutDirectory;
+  String? previousCheckoutLocation;
 
   /// Directory for the repository checkout.
   ///
   /// Since cloning a repository takes a long time, we do not ensure it is
   /// cloned on the filesystem until this getter is accessed.
-  Directory get checkoutDirectory {
+  Future<Directory> get checkoutDirectory async {
     if (_checkoutDirectory != null) {
       return _checkoutDirectory!;
     }
+    if (previousCheckoutLocation != null) {
+      _checkoutDirectory = fileSystem.directory(previousCheckoutLocation);
+      if (!_checkoutDirectory!.existsSync()) {
+        throw ConductorException(
+            'Provided previousCheckoutLocation $previousCheckoutLocation does not exist on disk!');
+      }
+      if (initialRef != null) {
+        assert(initialRef != '');
+        await git.run(
+          <String>['fetch', upstreamRemote.name],
+          'Fetch ${upstreamRemote.name} to ensure we have latest refs',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+        // Note: if [initialRef] is a remote ref the checkout will be left in a
+        // detached HEAD state.
+        await git.run(
+          <String>['checkout', initialRef!],
+          'Checking out initialRef $initialRef',
+          workingDirectory: _checkoutDirectory!.path,
+        );
+      }
+      return _checkoutDirectory!;
+    }
+
     _checkoutDirectory = parentDirectory.childDirectory(name);
-    lazilyInitialize(_checkoutDirectory!);
+    await lazilyInitialize(_checkoutDirectory!);
     return _checkoutDirectory!;
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
-  void lazilyInitialize(Directory checkoutDirectory) {
+  Future<void> lazilyInitialize(Directory checkoutDirectory) async {
     if (checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
       checkoutDirectory.deleteSync(recursive: true);
@@ -133,7 +135,7 @@ abstract class Repository {
     stdio.printTrace(
       'Cloning $name from ${upstreamRemote.url} to ${checkoutDirectory.path}...',
     );
-    git.run(
+    await git.run(
       <String>[
         'clone',
         '--origin',
@@ -146,12 +148,12 @@ abstract class Repository {
       workingDirectory: parentDirectory.path,
     );
     if (mirrorRemote != null) {
-      git.run(
+      await git.run(
         <String>['remote', 'add', mirrorRemote!.name, mirrorRemote!.url],
         'Adding remote ${mirrorRemote!.url} as ${mirrorRemote!.name}',
         workingDirectory: checkoutDirectory.path,
       );
-      git.run(
+      await git.run(
         <String>['fetch', mirrorRemote!.name],
         'Fetching git remote ${mirrorRemote!.name}',
         workingDirectory: checkoutDirectory.path,
@@ -161,7 +163,7 @@ abstract class Repository {
       // These branches must exist locally for the repo that depends on it
       // to fetch and push to.
       for (final String channel in kReleaseChannels) {
-        git.run(
+        await git.run(
           <String>['checkout', channel, '--'],
           'check out branch $channel locally',
           workingDirectory: checkoutDirectory.path,
@@ -170,82 +172,82 @@ abstract class Repository {
     }
 
     if (initialRef != null) {
-      git.run(
+      await git.run(
         <String>['checkout', '${upstreamRemote.name}/$initialRef'],
         'Checking out initialRef $initialRef',
         workingDirectory: checkoutDirectory.path,
       );
     }
-    final String revision = reverseParse('HEAD');
+    final String revision = await reverseParse('HEAD');
     stdio.printTrace(
       'Repository $name is checked out at revision "$revision".',
     );
   }
 
   /// The URL of the remote named [remoteName].
-  String remoteUrl(String remoteName) {
+  Future<String> remoteUrl(String remoteName) async {
     assert(remoteName != null);
     return git.getOutput(
       <String>['remote', 'get-url', remoteName],
       'verify the URL of the $remoteName remote',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Verify the repository's git checkout is clean.
-  bool gitCheckoutClean() {
-    final String output = git.getOutput(
+  Future<bool> gitCheckoutClean() async {
+    final String output = await git.getOutput(
       <String>['status', '--porcelain'],
       'check that the git checkout is clean',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     return output == '';
   }
 
   /// Return the revision for the branch point between two refs.
-  String branchPoint(String firstRef, String secondRef) {
-    return git.getOutput(
+  Future<String> branchPoint(String firstRef, String secondRef) async {
+    return (await git.getOutput(
       <String>['merge-base', firstRef, secondRef],
       'determine the merge base between $firstRef and $secondRef',
-      workingDirectory: checkoutDirectory.path,
-    ).trim();
+      workingDirectory: (await checkoutDirectory).path,
+    )).trim();
   }
 
   /// Fetch all branches and associated commits and tags from [remoteName].
-  void fetch(String remoteName) {
-    git.run(
+  Future<void> fetch(String remoteName) async {
+    await git.run(
       <String>['fetch', remoteName, '--tags'],
       'fetch $remoteName --tags',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Create (and checkout) a new branch based on the current HEAD.
   ///
   /// Runs `git checkout -b $branchName`.
-  void newBranch(String branchName) {
-    git.run(
+  Future<void> newBranch(String branchName) async {
+    await git.run(
       <String>['checkout', '-b', branchName],
       'create & checkout new branch $branchName',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Check out the given ref.
-  void checkout(String ref) {
-    git.run(
+  Future<void> checkout(String ref) async {
+    await git.run(
       <String>['checkout', ref],
       'checkout ref',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Obtain the version tag at the tip of a release branch.
-  String getFullTag(
+  Future<String> getFullTag(
     String remoteName,
     String branchName, {
     bool exact = true,
-  }) {
+  }) async {
     // includes both stable (e.g. 1.2.3) and dev tags (e.g. 1.2.3-4.5.pre)
     const String glob = '*.*.*';
     // describe the latest dev release
@@ -260,34 +262,33 @@ abstract class Repository {
         ref,
       ],
       'obtain last released version number',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// List commits in reverse chronological order.
-  List<String> revList(List<String> args) {
-    return git
-        .getOutput(<String>['rev-list', ...args],
+  Future<List<String>> revList(List<String> args) async {
+    return (await git.getOutput(<String>['rev-list', ...args],
             'rev-list with args ${args.join(' ')}',
-            workingDirectory: checkoutDirectory.path)
+            workingDirectory: (await checkoutDirectory).path))
         .trim()
         .split('\n');
   }
 
   /// Look up the commit for [ref].
-  String reverseParse(String ref) {
-    final String revisionHash = git.getOutput(
+  Future<String> reverseParse(String ref) async {
+    final String revisionHash = await git.getOutput(
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     assert(revisionHash.isNotEmpty);
     return revisionHash;
   }
 
   /// Determines if one ref is an ancestor for another.
-  bool isAncestor(String possibleAncestor, String possibleDescendant) {
-    final int exitcode = git.run(
+  Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
+    final int exitcode = await git.run(
       <String>[
         'merge-base',
         '--is-ancestor',
@@ -296,83 +297,83 @@ abstract class Repository {
       ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     return exitcode == 0;
   }
 
   /// Determines if a given commit has a tag.
-  bool isCommitTagged(String commit) {
-    final int exitcode = git.run(
+  Future<bool> isCommitTagged(String commit) async {
+    final int exitcode = await git.run(
       <String>['describe', '--exact-match', '--tags', commit],
       'verify $commit is already tagged',
       allowNonZeroExitCode: true,
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     return exitcode == 0;
   }
 
   /// Determines if a commit will cherry-pick to current HEAD without conflict.
-  bool canCherryPick(String commit) {
+  Future<bool> canCherryPick(String commit) async {
     assert(
-      gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+      await gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
     );
 
-    final int exitcode = git.run(
+    final int exitcode = await git.run(
       <String>['cherry-pick', '--no-commit', commit],
       'attempt to cherry-pick $commit without committing',
       allowNonZeroExitCode: true,
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
 
     final bool result = exitcode == 0;
 
     if (result == false) {
-      stdio.printError(git.getOutput(
+      stdio.printError(await git.getOutput(
         <String>['diff'],
         'get diff of failed cherry-pick',
-        workingDirectory: checkoutDirectory.path,
+        workingDirectory: (await checkoutDirectory).path,
       ));
     }
 
-    reset('HEAD');
+    await reset('HEAD');
     return result;
   }
 
   /// Cherry-pick a [commit] to the current HEAD.
   ///
   /// This method will throw a [GitException] if the command fails.
-  void cherryPick(String commit) {
+  Future<void> cherryPick(String commit) async {
     assert(
-      gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${checkoutDirectory.path} is not clean',
+      await gitCheckoutClean(),
+      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
     );
 
-    git.run(
+    await git.run(
       <String>['cherry-pick', commit],
       'cherry-pick $commit',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Resets repository HEAD to [ref].
-  void reset(String ref) {
-    git.run(
+  Future<void> reset(String ref) async {
+    await git.run(
       <String>['reset', ref, '--hard'],
       'reset to $ref',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
   }
 
   /// Push [commit] to the release channel [branch].
-  void pushRef({
+  Future<void> pushRef({
     required String fromRef,
     required String remote,
     required String toRef,
     bool force = false,
     bool dryRun = false,
-  }) {
+  }) async {
     final List<String> args = <String>[
       'push',
       if (force) '--force',
@@ -386,47 +387,48 @@ abstract class Repository {
     if (dryRun) {
       stdio.printStatus('About to execute command: `$command`');
     } else {
-      git.run(
+      await git.run(
         args,
         'update the release branch with the commit',
-        workingDirectory: checkoutDirectory.path,
+        workingDirectory: (await checkoutDirectory).path,
       );
       stdio.printStatus('Executed command: `$command`');
     }
   }
 
-  String commit(
+  Future<String> commit(
     String message, {
     bool addFirst = false,
-  }) {
+  }) async {
     assert(!message.contains("'"));
-    final bool hasChanges = git.getOutput(
+    final bool hasChanges = (await git.getOutput(
       <String>['status', '--porcelain'],
       'check for uncommitted changes',
-      workingDirectory: checkoutDirectory.path,
-    ).trim().isNotEmpty;
+      workingDirectory: (await checkoutDirectory).path,
+    )).trim().isNotEmpty;
     if (!hasChanges) {
-      throw ConductorException('Tried to commit with message $message but no changes were present');
+      throw ConductorException(
+          'Tried to commit with message $message but no changes were present');
     }
     if (addFirst) {
-      git.run(
+      await git.run(
         <String>['add', '--all'],
         'add all changes to the index',
-        workingDirectory: checkoutDirectory.path,
+        workingDirectory: (await checkoutDirectory).path,
       );
     }
-    git.run(
+    await git.run(
       <String>['commit', "--message='$message'"],
       'commit changes',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     return reverseParse('HEAD');
   }
 
   /// Create an empty commit and return the revision.
   @visibleForTesting
-  String authorEmptyCommit([String message = 'An empty commit']) {
-    git.run(
+  Future<String> authorEmptyCommit([String message = 'An empty commit']) async {
+    await git.run(
       <String>[
         '-c',
         'user.name=Conductor',
@@ -438,7 +440,7 @@ abstract class Repository {
         "'$message'",
       ],
       'create an empty commit',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     return reverseParse('HEAD');
   }
@@ -450,7 +452,7 @@ abstract class Repository {
   ///
   /// This method is for testing purposes.
   @visibleForTesting
-  Repository cloneRepository(String cloneName);
+  Future<Repository> cloneRepository(String cloneName);
 }
 
 class FrameworkRepository extends Repository {
@@ -500,57 +502,66 @@ class FrameworkRepository extends Repository {
   }
 
   final Checkouts checkouts;
-  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
 
   static const String defaultBranch = 'master';
 
-  String get cacheDirectory => fileSystem.path.join(
-        checkoutDirectory.path,
-        'bin',
-        'cache',
-      );
+  Future<CiYaml> get ciYaml async {
+    final CiYaml ciYaml =
+        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
+    return ciYaml;
+  }
+
+  Future<String> get cacheDirectory async {
+    return fileSystem.path.join(
+      (await checkoutDirectory).path,
+      'bin',
+      'cache',
+    );
+  }
 
   /// Tag [commit] and push the tag to the remote.
-  void tag(String commit, String tagName, String remote) {
+  Future<void> tag(String commit, String tagName, String remote) async {
     assert(commit.isNotEmpty);
     assert(tagName.isNotEmpty);
     assert(remote.isNotEmpty);
     stdio.printStatus('About to tag commit $commit as $tagName...');
-    git.run(
+    await git.run(
       <String>['tag', tagName, commit],
       'tag the commit with the version label',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     stdio.printStatus('Tagging successful.');
     stdio.printStatus('About to push $tagName to remote $remote...');
-    git.run(
+    await git.run(
       <String>['push', remote, tagName],
       'publish the tag to the repo',
-      workingDirectory: checkoutDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
     stdio.printStatus('Tag push successful.');
   }
 
   @override
-  Repository cloneRepository(String? cloneName) {
+  Future<Repository> cloneRepository(String? cloneName) async {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return FrameworkRepository(
       checkouts,
       name: cloneName,
       upstreamRemote: Remote(
-          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
+          name: RemoteName.upstream,
+          url: 'file://${(await checkoutDirectory).path}/'),
     );
   }
 
-  void _ensureToolReady() {
-    final File toolsStamp =
-        fileSystem.directory(cacheDirectory).childFile('flutter_tools.stamp');
+  Future<void> _ensureToolReady() async {
+    final File toolsStamp = fileSystem
+        .directory(await cacheDirectory)
+        .childFile('flutter_tools.stamp');
     if (toolsStamp.existsSync()) {
       final String toolsStampHash = toolsStamp.readAsStringSync().trim();
-      final String repoHeadHash = reverseParse('HEAD');
+      final String repoHeadHash = await reverseParse('HEAD');
       if (toolsStampHash == repoHeadHash) {
         return;
       }
@@ -558,39 +569,38 @@ class FrameworkRepository extends Repository {
 
     stdio.printTrace('Building tool...');
     // Build tool
-    processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+    await processManager.run(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
       'help',
     ]);
   }
 
-  io.ProcessResult runFlutter(List<String> args) {
-    _ensureToolReady();
-
-    return processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+  Future<io.ProcessResult> runFlutter(List<String> args) async {
+    await _ensureToolReady();
+    return processManager.run(<String>[
+      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
       ...args,
     ]);
   }
 
   @override
-  void checkout(String ref) {
-    super.checkout(ref);
+  Future<void> checkout(String ref) async {
+    await super.checkout(ref);
     // The tool will overwrite old cached artifacts, but not delete unused
     // artifacts from a previous version. Thus, delete the entire cache and
     // re-populate.
-    final Directory cache = fileSystem.directory(cacheDirectory);
+    final Directory cache = fileSystem.directory(await cacheDirectory);
     if (cache.existsSync()) {
       stdio.printTrace('Deleting cache...');
       cache.deleteSync(recursive: true);
     }
-    _ensureToolReady();
+    await _ensureToolReady();
   }
 
-  Version flutterVersion() {
+  Future<Version> flutterVersion() async {
     // Check version
     final io.ProcessResult result =
-        runFlutter(<String>['--version', '--machine']);
+        await runFlutter(<String>['--version', '--machine']);
     final Map<String, dynamic> versionJson = jsonDecode(
       stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
@@ -600,12 +610,12 @@ class FrameworkRepository extends Repository {
   /// Update this framework's engine version file.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
-  bool updateEngineRevision(
+  Future<bool> updateEngineRevision(
     String newEngine, {
     @visibleForTesting File? engineVersionFile,
-  }) {
+  }) async {
     assert(newEngine.isNotEmpty);
-    engineVersionFile ??= checkoutDirectory
+    engineVersionFile ??= (await checkoutDirectory)
         .childDirectory('bin')
         .childDirectory('internal')
         .childFile('engine.version');
@@ -649,33 +659,33 @@ class HostFrameworkRepository extends FrameworkRepository {
   }
 
   @override
-  Directory get checkoutDirectory => _checkoutDirectory!;
+  Future<Directory> get checkoutDirectory async => _checkoutDirectory!;
 
   @override
-  void newBranch(String branchName) {
+  Future<void> newBranch(String branchName) async {
     throw ConductorException(
         'newBranch not implemented for the host repository');
   }
 
   @override
-  void checkout(String ref) {
+  Future<void> checkout(String ref) async {
     throw ConductorException(
         'checkout not implemented for the host repository');
   }
 
   @override
-  String cherryPick(String commit) {
+  Future<String> cherryPick(String commit) async {
     throw ConductorException(
         'cherryPick not implemented for the host repository');
   }
 
   @override
-  String reset(String ref) {
+  Future<String> reset(String ref) async {
     throw ConductorException('reset not implemented for the host repository');
   }
 
   @override
-  void tag(String commit, String tagName, String remote) {
+  Future<void> tag(String commit, String tagName, String remote) async {
     throw ConductorException('tag not implemented for the host repository');
   }
 
@@ -691,7 +701,7 @@ class HostFrameworkRepository extends FrameworkRepository {
   }
 
   @override
-  String authorEmptyCommit([String message = 'An empty commit']) {
+  Future<String> authorEmptyCommit([String message = 'An empty commit']) async {
     throw ConductorException(
       'authorEmptyCommit not implemented for the host repository',
     );
@@ -724,18 +734,21 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
-  late final CiYaml ciYaml = CiYaml(checkoutDirectory.childFile('.ci.yaml'));
+  Future<CiYaml> get ciYaml async {
+    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
+    return ciYaml;
+  }
 
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
   static const String defaultBranch = 'master';
 
   /// Update the `dart_revision` entry in the DEPS file.
-  void updateDartRevision(
+  Future<void> updateDartRevision(
     String newRevision, {
     @visibleForTesting File? depsFile,
-  }) {
+  }) async {
     assert(newRevision.length == 40);
-    depsFile ??= checkoutDirectory.childFile('DEPS');
+    depsFile ??= (await checkoutDirectory).childFile('DEPS');
     final String fileContent = depsFile.readAsStringSync();
     final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
     final Iterable<RegExpMatch> allMatches =
@@ -755,14 +768,15 @@ class EngineRepository extends Repository {
   }
 
   @override
-  Repository cloneRepository(String? cloneName) {
+  Future<Repository> cloneRepository(String? cloneName) async {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return EngineRepository(
       checkouts,
       name: cloneName,
       upstreamRemote: Remote(
-          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
+          name: RemoteName.upstream,
+          url: 'file://${(await checkoutDirectory).path}/'),
     );
   }
 }

@@ -734,6 +734,12 @@ linter:
   rules:
     # Samples want to print things pretty often.
     avoid_print: false
+
+analyzer:
+  errors:
+    # TODO(https://github.com/flutter/flutter/issues/74381):
+    # Clean up existing unnecessary imports, and remove line to ignore.
+    unnecessary_import: ignore
 ''');
     }
   }

@@ -56,8 +56,8 @@ void main() {
       );
       final FakeCodesignCommand command = FakeCodesignCommand(
         checkouts: checkouts,
-        binariesWithEntitlements: binariesWithEntitlements,
-        binariesWithoutEntitlements: binariesWithoutEntitlements,
+        binariesWithEntitlements: Future<List<String>>.value(binariesWithEntitlements),
+        binariesWithoutEntitlements: Future<List<String>>.value(binariesWithoutEntitlements),
         flutterRoot: fileSystem.directory(flutterRoot),
       );
       runner = CommandRunner<void>('codesign-test', '')
@@ -326,8 +326,8 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      expect(
-        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+      await expectLater(
+        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -413,8 +413,8 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      expect(
-        () async => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+      await expectLater(
+        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because files found with the wrong entitlements'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -495,8 +495,8 @@ class FakeCodesignCommand extends CodesignCommand {
   }) : super(checkouts: checkouts, flutterRoot: flutterRoot);
 
   @override
-  final List<String> binariesWithEntitlements;
+  final Future<List<String>> binariesWithEntitlements;
 
   @override
-  final List<String> binariesWithoutEntitlements;
+  final Future<List<String>> binariesWithoutEntitlements;
 }

@@ -44,6 +44,9 @@ void main() {
             onSelectChanged: (bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
+            onLongPress: () {
+              log.add('onLongPress: ${dessert.name}');
+            },
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -85,6 +88,11 @@ void main() {
     await tester.tap(find.text('Cupcake'));
 
     expect(log, <String>['row-selected: Cupcake']);
+    log.clear();
+
+    await tester.longPress(find.text('Cupcake'));
+
+    expect(log, <String>['onLongPress: Cupcake']);
     log.clear();
 
     await tester.tap(find.text('Calories'));
