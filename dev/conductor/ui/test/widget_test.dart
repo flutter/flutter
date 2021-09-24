@@ -10,9 +10,8 @@ import 'package:conductor_ui/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group(
-    'group',
-    () {
+  group('group', () {
+    if (Platform.isMacOS || Platform.isLinux) {
       testWidgets('Handles null state', (WidgetTester tester) async {
         await tester.pumpWidget(const MyApp(null));
 
@@ -21,11 +20,10 @@ void main() {
             findsOneWidget);
       });
 
-      testWidgets('App prints release channel from state file',
-          (WidgetTester tester) async {
+      testWidgets('App prints release channel from state file', (WidgetTester tester) async {
         const String channelName = 'dev';
         final pb.ConductorState state = pb.ConductorState(
-          releaseChannel: channelName,
+            releaseChannel: channelName,
         );
         await tester.pumpWidget(MyApp(state));
 
@@ -33,7 +31,6 @@ void main() {
         expect(find.textContaining(channelName), findsOneWidget);
         expect(find.text('1'), findsNothing);
       });
-    },
-    skip: Platform.isWindows, // The conductor does not support Windows
-  );
+    }
+  });
 }

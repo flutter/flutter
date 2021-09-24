@@ -18,8 +18,7 @@ final String _stateFilePath = defaultStateFilePath(_platform);
 
 void main() {
   final File _stateFile = _fs.file(_stateFilePath);
-  final pb.ConductorState? state =
-      _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+  final pb.ConductorState? state = _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
   runApp(MyApp(state));
 }
 
@@ -48,9 +47,7 @@ class MyApp extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: SelectableText(
-                  state != null
-                      ? presentState(state!)
-                      : 'No persistent state file found at $_stateFilePath',
+                  state != null ? presentState(state!) : 'No persistent state file found at $_stateFilePath',
                 ),
               ),
             ],
