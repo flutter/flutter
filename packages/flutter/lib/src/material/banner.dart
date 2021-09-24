@@ -292,43 +292,40 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
 
-    Widget materialBanner = SafeArea(
-      top: true,
-      child: Container(
-        margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: padding,
-                child: Row(
-                  children: <Widget>[
-                    if (widget.leading != null)
-                      Padding(
-                        padding: leadingPadding,
-                        child: widget.leading,
-                      ),
-                    Expanded(
-                      child: DefaultTextStyle(
-                        style: textStyle!,
-                        child: widget.content,
-                      ),
+    Widget materialBanner = Container(
+      margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+      child: Material(
+        elevation: elevation,
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: padding,
+              child: Row(
+                children: <Widget>[
+                  if (widget.leading != null)
+                    Padding(
+                      padding: leadingPadding,
+                      child: widget.leading,
                     ),
-                    if (isSingleRow)
-                      buttonBar,
-                  ],
-                ),
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: textStyle!,
+                      child: widget.content,
+                    ),
+                  ),
+                  if (isSingleRow)
+                    buttonBar,
+                ],
               ),
-              if (!isSingleRow)
-                buttonBar,
+            ),
+            if (!isSingleRow)
+              buttonBar,
 
-              if (elevation == 0)
-                const Divider(height: 0),
-            ],
-          ),
+            if (elevation == 0)
+              const Divider(height: 0),
+          ],
         ),
       ),
     );
@@ -336,6 +333,11 @@ class _MaterialBannerState extends State<MaterialBanner> {
     // This provides a static banner for backwards compatibility.
     if (widget.animation == null)
       return materialBanner;
+
+    materialBanner = SafeArea(
+      top: true,
+      child: materialBanner,
+    );
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
     final Animation<Offset> slideOutAnimation = Tween<Offset>(
