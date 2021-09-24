@@ -9,6 +9,7 @@
 
 #include <fuchsia/intl/cpp/fidl.h>
 #include <fuchsia/io/cpp/fidl.h>
+#include <fuchsia/memorypressure/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
@@ -41,7 +42,7 @@ class EngineTest;
 
 // Represents an instance of running Flutter engine along with the threads
 // that host the same.
-class Engine final {
+class Engine final : public fuchsia::memorypressure::Watcher {
  public:
   class Delegate {
    public:
@@ -107,6 +108,12 @@ class Engine final {
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
 
   fuchsia::intl::PropertyProviderPtr intl_property_provider_;
+  fuchsia::memorypressure::ProviderPtr memory_pressure_provider_;
+  fidl::Binding<fuchsia::memorypressure::Watcher>
+      memory_pressure_watcher_binding_;
+  // We need to track the latest memory pressure level to determine
+  // the direction of change when a new level is provided.
+  fuchsia::memorypressure::Level latest_memory_pressure_level_;
 
   zx::event vsync_event_;
 
@@ -150,6 +157,11 @@ class Engine final {
                   bool hit_testable,
                   bool focusable);
   void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
+
+  // |fuchsia::memorypressure::Watcher|
+  void OnLevelChanged(fuchsia::memorypressure::Level level,
+                      fuchsia::memorypressure::Watcher::OnLevelChangedCallback
+                          callback) override;
 
   std::shared_ptr<flutter::ExternalViewEmbedder> GetExternalViewEmbedder();
 
