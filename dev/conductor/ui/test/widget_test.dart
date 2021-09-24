@@ -34,6 +34,6 @@ void main() {
         expect(find.text('1'), findsNothing);
       });
     },
-    skip: Platform.isWindows,
+    skip: Platform.isWindows, // The conductor does not support Windows
   );
 }
