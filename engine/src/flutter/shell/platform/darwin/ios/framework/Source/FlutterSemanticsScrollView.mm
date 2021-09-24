@@ -106,33 +106,4 @@
   return [[_semanticsObject children] count];
 }
 
-- (id)accessibilityElementAtIndex:(NSInteger)index {
-  SemanticsObject* child = [_semanticsObject children][index];
-
-  // Swap the original `SemanticsObject` to a `PlatformViewSemanticsContainer`
-  if (child.node.IsPlatformViewNode()) {
-    child.platformViewSemanticsContainer.index = index;
-    return child.platformViewSemanticsContainer;
-  }
-
-  if ([child hasChildren])
-    return [child accessibilityContainer];
-  return [child nativeAccessibility];
-}
-
-- (NSInteger)indexOfAccessibilityElement:(id)element {
-  if ([element isKindOfClass:[FlutterPlatformViewSemanticsContainer class]]) {
-    return ((FlutterPlatformViewSemanticsContainer*)element).index;
-  }
-
-  NSArray<SemanticsObject*>* children = [_semanticsObject children];
-  for (size_t i = 0; i < [children count]; i++) {
-    SemanticsObject* child = children[i];
-    if ((![child hasChildren] && child == element) ||
-        ([child hasChildren] && [child accessibilityContainer] == element))
-      return i;
-  }
-  return NSNotFound;
-}
-
 @end
