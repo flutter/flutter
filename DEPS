@@ -60,6 +60,7 @@ vars = {
   'dart_watcher_rev': '3924194385fb215cef483193ed2879a618a3d69c',
   'dart_webdev_rev': '832b096c0c24798d3df46faa7b7661fe930573c2',
   'dart_webkit_inspection_protocol_rev': 'dd6fb5d8b536e19cedb384d0bbf1f5631923f1e8',
+  'dart_yaml_edit_rev': 'ffcbbc22884f590663ec451f48fd8388ba7c49f4',
 
   'ocmock_tag': 'v3.7.1',
 
@@ -348,6 +349,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/yaml':
    Var('dart_git') + '/yaml.git@2af44871f684c89e973a96e39026b8b88dda1987',
+
+  'src/third_party/dart/third_party/pkg/yaml_edit':
+   Var('dart_git') + '/yaml_edit.git' + '@' + Var('dart_yaml_edit_rev'),
 
   'src/third_party/dart/third_party/pkg_tested/dart_style':
    Var('dart_git') + '/dart_style.git@14d9b6fd58cc4744676c12be3cc5eee2a779db82',
