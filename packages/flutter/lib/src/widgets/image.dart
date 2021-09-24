@@ -338,6 +338,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
+    this.scrollAwareEnable = true,
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
@@ -345,6 +346,7 @@ class Image extends StatefulWidget {
        assert(filterQuality != null),
        assert(matchTextDirection != null),
        assert(isAntiAlias != null),
+       assert(scrollAwareEnable != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -399,6 +401,7 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     this.isAntiAlias = false,
+    this.scrollAwareEnable = true,
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
@@ -409,6 +412,7 @@ class Image extends StatefulWidget {
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
        assert(isAntiAlias != null),
+       assert(scrollAwareEnable != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -461,6 +465,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
+    this.scrollAwareEnable = true,
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
@@ -473,6 +478,7 @@ class Image extends StatefulWidget {
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
        assert(isAntiAlias != null),
+       assert(scrollAwareEnable != null),
        super(key: key);
 
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
@@ -623,6 +629,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
+    this.scrollAwareEnable = true,
     String? package,
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
@@ -641,6 +648,7 @@ class Image extends StatefulWidget {
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
        assert(isAntiAlias != null),
+       assert(scrollAwareEnable != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -693,6 +701,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
+    this.scrollAwareEnable = true,
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
@@ -704,6 +713,7 @@ class Image extends StatefulWidget {
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
        assert(isAntiAlias != null),
+       assert(scrollAwareEnable != null),
        super(key: key);
 
   /// The image to display.
@@ -1002,6 +1012,11 @@ class Image extends StatefulWidget {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   final bool isAntiAlias;
 
+  /// Whether to avoid loading images when rapidly scrolling.
+  ///
+  /// If scrollAwareEnable, [ScrollAwareImageProvider] will be used when resolve Image.
+  final bool scrollAwareEnable;
+
   @override
   State<Image> createState() => _ImageState();
 
@@ -1104,10 +1119,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
-    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<Object>(
-      context: _scrollAwareContext,
-      imageProvider: widget.image,
-    );
+    ImageProvider provider = widget.image;
+    if (widget.scrollAwareEnable) {
+      provider = ScrollAwareImageProvider<Object>(
+        context: _scrollAwareContext,
+        imageProvider: widget.image,
+      );
+    }
+
     final ImageStream newStream =
       provider.resolve(createLocalImageConfiguration(
         context,
