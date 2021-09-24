@@ -1526,7 +1526,7 @@ class _RenderDecoration extends RenderBox {
       final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double dx;
-      if(decoration.centerFloatingLabel) {
+      if (decoration.centerFloatingLabel) {
         final double centeredFloatingX = _boxParentData(container!).offset.dx +
             _boxSize(container).width / 2.0 - (labelWidth * _kFinalLabelScale) / 2.0;
         dx = lerpDouble(labelOffset.dx, centeredFloatingX, t)!;
