@@ -69,7 +69,7 @@ template("flutter_snapshot") {
       "--packages=" + rebase_path(package_config),
       "--target=flutter",
       "--sdk-root=" + flutter_patched_sdk,
-      "--output-dill=" + rebase_path(kernel_output),
+      "--output-dill=" + rebase_path(kernel_output, root_build_dir),
     ]
 
     if (is_aot) {
