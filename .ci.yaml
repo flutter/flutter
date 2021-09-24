@@ -3551,8 +3551,8 @@ targets:
 
   - name: Windows gradle_plugin_fat_apk_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     bringup: true
+    presubmit: false
     timeout: 60
     properties:
       caches: >-
