@@ -196,9 +196,9 @@ class Tooltip extends StatefulWidget {
 
   static final List<_TooltipState> _openedTooltips = <_TooltipState>[];
 
-  // Causes any current tooltips to be "covered". Only called for mouse hover enter
-  // detections. Won't cover the supplied tooltip.
-  static void _coverOtherTooltips(_TooltipState current) {
+  // Causes any current tooltips to be concealed. Only called for mouse hover enter
+  // detections. Won't conceal the supplied tooltip.
+  static void _concealOtherTooltips(_TooltipState current) {
     if (_openedTooltips.isNotEmpty) {
       // Avoid concurrent modification.
       final List<_TooltipState> openedTooltips = _openedTooltips.toList();
@@ -206,16 +206,16 @@ class Tooltip extends StatefulWidget {
         if (state == current) {
           continue;
         }
-        state._coverTooltip();
+        state._concealTooltip();
       }
     }
   }
 
-  // Causes the most recently "covered" tooltip to be restored. Only called for mouse
+  // Causes the most recently concealed tooltip to be revealed. Only called for mouse
   // hover exit detections.
-  static void _uncoverLastTooltip() {
+  static void _revealLastTooltip() {
     if (_openedTooltips.isNotEmpty) {
-      _openedTooltips.last._uncoverTooltip();
+      _openedTooltips.last._revealTooltip();
     }
   }
 
@@ -228,7 +228,7 @@ class Tooltip extends StatefulWidget {
       // Avoid concurrent modification.
       final List<_TooltipState> openedTooltips = _openedTooltips.toList();
       for (final _TooltipState state in openedTooltips) {
-        state._hideTooltip(immediately: true);
+        state._dismissTooltip(immediately: true);
       }
       return true;
     }
@@ -278,7 +278,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool excludeFromSemantics;
   late AnimationController _controller;
   OverlayEntry? _entry;
-  Timer? _hideTimer;
+  Timer? _dismissTimer;
   Timer? _showTimer;
   late Duration showDuration;
   late Duration hoverShowDuration;
@@ -287,13 +287,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   bool _pressActivated = false;
   late TooltipTriggerMode triggerMode;
   late bool enableFeedback;
-  late bool _isCovered;
+  late bool _isConcealed;
   late bool _forceRemoval;
 
   @override
   void initState() {
     super.initState();
-    _isCovered = false;
+    _isConcealed = false;
     _forceRemoval = false;
     _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     _controller = AnimationController(
@@ -360,14 +360,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    // If this tip is covered, don't remove it, even if it is dismissed, so that we can
-    // uncover it later, unless it has explicitly been hidden with _hideTooltip.
-    if (status == AnimationStatus.dismissed && (_forceRemoval || !_isCovered)) {
+    // If this tip is concealed, don't remove it, even if it is dismissed, so that we can
+    // reveal it later, unless it has explicitly been hidden with _dismissTooltip.
+    if (status == AnimationStatus.dismissed && (_forceRemoval || !_isConcealed)) {
       _removeEntry();
     }
   }
 
-  void _hideTooltip({ bool immediately = false }) {
+  void _dismissTooltip({ bool immediately = false }) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -375,19 +375,19 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;
     }
     // So it will be removed when it's done reversing, regardless of whether it is
-    // still covered or not.
+    // still concealed or not.
     _forceRemoval = true;
     if (_pressActivated) {
-      _hideTimer ??= Timer(showDuration, _controller.reverse);
+      _dismissTimer ??= Timer(showDuration, _controller.reverse);
     } else {
-      _hideTimer ??= Timer(hoverShowDuration, _controller.reverse);
+      _dismissTimer ??= Timer(hoverShowDuration, _controller.reverse);
     }
     _pressActivated = false;
   }
 
   void _showTooltip({ bool immediately = false }) {
-    _hideTimer?.cancel();
-    _hideTimer = null;
+    _dismissTimer?.cancel();
+    _dismissTimer = null;
     if (immediately) {
       ensureTooltipVisible();
       return;
@@ -395,14 +395,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _showTimer ??= Timer(waitDuration, ensureTooltipVisible);
   }
 
-  void _coverTooltip() {
-    if (_isCovered || _forceRemoval) {
-      // Already covered, or it's being removed.
+  void _concealTooltip() {
+    if (_isConcealed || _forceRemoval) {
+      // Already concealed, or it's being removed.
       return;
     }
-    _isCovered = true;
-    _hideTimer?.cancel();
-    _hideTimer = null;
+    _isConcealed = true;
+    _dismissTimer?.cancel();
+    _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
     if (_entry!= null) {
@@ -411,14 +411,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _controller.reverse();
   }
 
-  void _uncoverTooltip() {
-    if (!_isCovered) {
+  void _revealTooltip() {
+    if (!_isConcealed) {
       // Already uncovered.
       return;
     }
-    _isCovered = false;
-    _hideTimer?.cancel();
-    _hideTimer = null;
+    _isConcealed = false;
+    _dismissTimer?.cancel();
+    _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
     if (!_entry!.mounted) {
@@ -439,17 +439,17 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
-    if (_isCovered) {
+    if (_isConcealed) {
       if (_mouseIsConnected) {
-        Tooltip._coverOtherTooltips(this);
+        Tooltip._concealOtherTooltips(this);
       }
-      _uncoverTooltip();
+      _revealTooltip();
       return true;
     }
     if (_entry != null) {
       // Stop trying to hide, if we were.
-      _hideTimer?.cancel();
-      _hideTimer = null;
+      _dismissTimer?.cancel();
+      _dismissTimer = null;
       _controller.forward();
       return false; // Already visible.
     }
@@ -466,7 +466,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handleMouseExit({bool immediately = false}) {
     // If the tip is currently covered, we can just remove it without waiting.
-    _hideTooltip(immediately: _isCovered || immediately);
+    _dismissTooltip(immediately: _isConcealed || immediately);
   }
 
   void _createNewEntry() {
@@ -505,14 +505,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       ),
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
-    _isCovered = false;
+    _isConcealed = false;
     overlayState.insert(_entry!);
     SemanticsService.tooltip(widget.message);
     if (_mouseIsConnected) {
       // Hovered tooltips shouldn't show more than one at once. For example, a chip with
       // a delete icon shouldn't show both the delete icon tooltip and the chip tooltip
       // at the same time.
-      Tooltip._coverOtherTooltips(this);
+      Tooltip._concealOtherTooltips(this);
     }
     assert(!Tooltip._openedTooltips.contains(this));
     Tooltip._openedTooltips.add(this);
@@ -521,17 +521,17 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _removeEntry() {
     Tooltip._openedTooltips.remove(this);
     _mouseIn.remove(this);
-    _hideTimer?.cancel();
-    _hideTimer = null;
+    _dismissTimer?.cancel();
+    _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
-    if (!_isCovered) {
+    if (!_isConcealed) {
       _entry?.remove();
     }
-    _isCovered = false;
+    _isConcealed = false;
     _entry = null;
     if (_mouseIsConnected) {
-      Tooltip._uncoverLastTooltip();
+      Tooltip._revealLastTooltip();
     }
   }
 
@@ -549,7 +549,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void deactivate() {
     if (_entry != null) {
-      _hideTooltip(immediately: true);
+      _dismissTooltip(immediately: true);
     }
     _showTimer?.cancel();
     super.deactivate();
