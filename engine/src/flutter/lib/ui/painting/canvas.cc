@@ -392,7 +392,7 @@ void Canvas::drawImageNine(const CanvasImage* image,
     // simpler DrawImageNineOp record directly.
     display_list_recorder_->RecordPaintAttributes(
         paint.paint(), DisplayListCanvasRecorder::DrawType::kImageOpType);
-    builder()->drawImageNine(image->image(), icenter, dst, filter);
+    builder()->drawImageNine(image->image(), icenter, dst, filter, true);
   } else {
     canvas_->drawImageNine(image->image().get(), icenter, dst, filter,
                            paint.paint());

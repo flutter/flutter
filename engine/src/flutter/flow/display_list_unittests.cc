@@ -251,8 +251,8 @@ struct DisplayListInvocationGroup {
 
 std::vector<DisplayListInvocationGroup> allGroups = {
   { "SetAA", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAA(false);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAA(true);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(false);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(true);}},
     }
   },
   { "SetDither", {
@@ -266,20 +266,20 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetStrokeCap", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setCaps(SkPaint::kButt_Cap);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setCaps(SkPaint::kRound_Cap);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setCaps(SkPaint::kSquare_Cap);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kButt_Cap);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kRound_Cap);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kSquare_Cap);}},
     }
   },
   { "SetStrokeJoin", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setJoins(SkPaint::kBevel_Join);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setJoins(SkPaint::kRound_Join);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setJoins(SkPaint::kMiter_Join);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kBevel_Join);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kRound_Join);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kMiter_Join);}},
     }
   },
   { "SetDrawStyle", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setDrawStyle(SkPaint::kFill_Style);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setDrawStyle(SkPaint::kStroke_Style);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kFill_Style);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStroke_Style);}},
     }
   },
   { "SetStrokeWidth", {
@@ -288,8 +288,8 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "SetMiterLimit", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMiterLimit(0.0);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMiterLimit(5.0);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(0.0);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(5.0);}},
     }
   },
   { "SetColor", {
@@ -397,34 +397,34 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "ClipRect", {
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, true, SkClipOp::kIntersect);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, SkClipOp::kIntersect, true);}},
       {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds.makeOffset(1, 1),
-                                                           true, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, false, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, true, SkClipOp::kDifference);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, false, SkClipOp::kDifference);}},
+                                                           SkClipOp::kIntersect, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, SkClipOp::kIntersect, false);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, SkClipOp::kDifference, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipRect(TestBounds, SkClipOp::kDifference, false);}},
     }
   },
   { "ClipRRect", {
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, true, SkClipOp::kIntersect);}},
+      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, SkClipOp::kIntersect, true);}},
       {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect.makeOffset(1, 1),
-                                                            true, SkClipOp::kIntersect);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, false, SkClipOp::kIntersect);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, true, SkClipOp::kDifference);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, false, SkClipOp::kDifference);}},
+                                                            SkClipOp::kIntersect, true);}},
+      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, SkClipOp::kIntersect, false);}},
+      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, SkClipOp::kDifference, true);}},
+      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipRRect(TestRRect, SkClipOp::kDifference, false);}},
     }
   },
   { "ClipPath", {
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, true, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath2, true, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath3, true, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, false, SkClipOp::kIntersect);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, true, SkClipOp::kDifference);}},
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, false, SkClipOp::kDifference);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, SkClipOp::kIntersect, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath2, SkClipOp::kIntersect, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath3, SkClipOp::kIntersect, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, SkClipOp::kIntersect, false);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, SkClipOp::kDifference, true);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPath1, SkClipOp::kDifference, false);}},
       // clipPath(rect) becomes clipRect
-      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPathRect, true, SkClipOp::kIntersect);}},
+      {1, 24, 1, 24, [](DisplayListBuilder& b) {b.clipPath(TestPathRect, SkClipOp::kIntersect, true);}},
       // clipPath(oval) becomes clipRRect
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipPath(TestPathOval, true, SkClipOp::kIntersect);}},
+      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.clipPath(TestPathOval, SkClipOp::kIntersect, true);}},
     }
   },
   { "DrawPaint", {
@@ -520,41 +520,46 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "DrawImage", {
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, DisplayList::NearestSampling);}},
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {20, 10}, DisplayList::NearestSampling);}},
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 20}, DisplayList::NearestSampling);}},
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, DisplayList::LinearSampling);}},
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage2, {10, 10}, DisplayList::NearestSampling);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, DisplayList::NearestSampling, false);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, DisplayList::NearestSampling, true);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {20, 10}, DisplayList::NearestSampling, false);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 20}, DisplayList::NearestSampling, false);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage1, {10, 10}, DisplayList::LinearSampling, false);}},
+      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.drawImage(TestImage2, {10, 10}, DisplayList::NearestSampling, false);}},
     }
   },
   { "DrawImageRect", {
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                DisplayList::NearestSampling);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                DisplayList::NearestSampling,
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+                                                                DisplayList::NearestSampling, false);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+                                                                DisplayList::NearestSampling, true);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+                                                                DisplayList::NearestSampling, false,
                                                                 SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
-                                                                DisplayList::NearestSampling);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
-                                                                DisplayList::NearestSampling);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                DisplayList::LinearSampling);}},
-      {1, 64, 1, 64, [](DisplayListBuilder& b) {b.drawImageRect(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
-                                                                DisplayList::NearestSampling);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
+                                                                DisplayList::NearestSampling, false);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
+                                                                DisplayList::NearestSampling, false);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+                                                                DisplayList::LinearSampling, false);}},
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.drawImageRect(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
+                                                                DisplayList::NearestSampling, false);}},
     }
   },
   { "DrawImageNine", {
       // SkVanvas::drawImageNine is immediately converted to drawImageLattice
       {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest);}},
-      {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest);}},
-      {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
-                                                                SkFilterMode::kNearest);}},
+                                                                SkFilterMode::kNearest, false);}},
       {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
-                                                                SkFilterMode::kLinear);}},
+                                                                SkFilterMode::kNearest, true);}},
+      {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 25, 20}, {10, 10, 80, 80},
+                                                                SkFilterMode::kNearest, false);}},
+      {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 85, 80},
+                                                                SkFilterMode::kNearest, false);}},
+      {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage1, {10, 10, 20, 20}, {10, 10, 80, 80},
+                                                                SkFilterMode::kLinear, false);}},
       {1, 48, 1, 80, [](DisplayListBuilder& b) {b.drawImageNine(TestImage2, {10, 10, 15, 15}, {10, 10, 80, 80},
-                                                                SkFilterMode::kNearest);}},
+                                                                SkFilterMode::kNearest, false);}},
     }
   },
   { "DrawImageLattice", {
@@ -605,46 +610,51 @@ std::vector<DisplayListInvocationGroup> allGroups = {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, nullptr);}},
+                    DisplayList::NearestSampling, nullptr, false);}},
+      {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
+        static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
+        static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
+        b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
+                    DisplayList::NearestSampling, nullptr, true);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {0, 1, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, nullptr);}},
+                    DisplayList::NearestSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 25, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, nullptr);}},
+                    DisplayList::NearestSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
-                    DisplayList::LinearSampling, nullptr);}},
+                    DisplayList::LinearSampling, nullptr, false);}},
       {1, 40 + 32 + 32, 1, 40 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         b.drawAtlas(TestImage1, xforms, texs, nullptr, 2, SkBlendMode::kDstIn,
-                    DisplayList::NearestSampling, nullptr);}},
+                    DisplayList::NearestSampling, nullptr, false);}},
       {1, 56 + 32 + 32, 1, 56 + 32 + 32, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkRect cullRect = { 0, 0, 200, 200 };
         b.drawAtlas(TestImage2, xforms, texs, nullptr, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, &cullRect);}},
+                    DisplayList::NearestSampling, &cullRect, false);}},
       {1, 40 + 32 + 32 + 8, 1, 40 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
         b.drawAtlas(TestImage1, xforms, texs, colors, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, nullptr);}},
+                    DisplayList::NearestSampling, nullptr, false);}},
       {1, 56 + 32 + 32 + 8, 1, 56 + 32 + 32 + 8, [](DisplayListBuilder& b) {
         static SkRSXform xforms[] = { {1, 0, 0, 0}, {0, 1, 0, 0} };
         static SkRect texs[] = { { 10, 10, 20, 20 }, {20, 20, 30, 30} };
         static SkColor colors[] = { SK_ColorBLUE, SK_ColorGREEN };
         static SkRect cullRect = { 0, 0, 200, 200 };
         b.drawAtlas(TestImage1, xforms, texs, colors, 2, SkBlendMode::kSrcIn,
-                    DisplayList::NearestSampling, &cullRect);}},
+                    DisplayList::NearestSampling, &cullRect, false);}},
     }
   },
   { "DrawPicture", {
