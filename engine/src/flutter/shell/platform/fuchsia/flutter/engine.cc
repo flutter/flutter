@@ -65,6 +65,8 @@ Engine::Engine(Delegate& delegate,
       thread_host_(CreateThreadHost(thread_label_)),
       view_token_(std::move(view_token)),
       view_ref_pair_(std::move(view_ref_pair)),
+      memory_pressure_watcher_binding_(this),
+      latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
       intercept_all_input_(product_config.get_intercept_all_input()),
       weak_factory_(this) {
   Initialize(/*=use_flatland*/ false, std::move(svc),
@@ -88,6 +90,8 @@ Engine::Engine(Delegate& delegate,
       thread_host_(CreateThreadHost(thread_label_)),
       view_creation_token_(std::move(view_creation_token)),
       view_ref_pair_(std::move(view_ref_pair)),
+      memory_pressure_watcher_binding_(this),
+      latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
       intercept_all_input_(product_config.get_intercept_all_input()),
       weak_factory_(this) {
   Initialize(/*=use_flatland*/ true, std::move(svc), std::move(runner_services),
@@ -498,6 +502,34 @@ void Engine::Initialize(
   //  notification. Fire one eagerly.
   shell_->GetPlatformView()->NotifyCreated();
 
+  // Connect to the memory pressure provider.  If the connection fails, the
+  // initialization of the engine will simply proceed, printing a warning
+  // message.  The engine will be fully functional, except that the Flutter
+  // shell will not be notified when memory is low.
+  {
+    memory_pressure_provider_.set_error_handler([](zx_status_t status) {
+      FML_LOG(WARNING)
+          << "Failed to connect to " << fuchsia::memorypressure::Provider::Name_
+          << ": " << zx_status_get_string(status)
+          << " This is not a fatal error, but the heap will not be "
+          << " compacted when memory is low.";
+    });
+
+    // Note that we're using the runner's services, not the component's.
+    // The Flutter Shell should be notified when memory is low regardless of
+    // whether the component has direct access to the
+    // fuchsia.memorypressure.Provider service.
+    ZX_ASSERT(runner_services->Connect(
+                  memory_pressure_provider_.NewRequest()) == ZX_OK);
+
+    FML_VLOG(-1) << "Registering memorypressure watcher";
+
+    // Register for changes, which will make the request for the initial
+    // memory level.
+    memory_pressure_provider_->RegisterWatcher(
+        memory_pressure_watcher_binding_.NewBinding());
+  }
+
   // Connect to the intl property provider.  If the connection fails, the
   // initialization of the engine will simply proceed, printing a warning
   // message.  The engine will be fully functional, except that the user's
@@ -517,10 +549,9 @@ void Engine::Initialize(
     ZX_ASSERT(runner_services->Connect(intl_property_provider_.NewRequest()) ==
               ZX_OK);
 
-    auto get_profile_callback = [flutter_runner_engine =
-                                     weak_factory_.GetWeakPtr()](
+    auto get_profile_callback = [weak = weak_factory_.GetWeakPtr()](
                                     const fuchsia::intl::Profile& profile) {
-      if (!flutter_runner_engine) {
+      if (!weak) {
         return;
       }
       if (!profile.has_locales()) {
@@ -528,7 +559,7 @@ void Engine::Initialize(
       }
       auto message = MakeLocalizationPlatformMessage(profile);
       FML_VLOG(-1) << "Sending LocalizationPlatformMessage";
-      flutter_runner_engine->shell_->GetPlatformView()->DispatchPlatformMessage(
+      weak->shell_->GetPlatformView()->DispatchPlatformMessage(
           std::move(message));
     };
 
@@ -820,6 +851,28 @@ void Engine::WarmupSkps(
       i++;
     }
   });
+}
+
+void Engine::OnLevelChanged(
+    fuchsia::memorypressure::Level level,
+    fuchsia::memorypressure::Watcher::OnLevelChangedCallback callback) {
+  // The callback must be invoked immediately to acknowledge the message.
+  // This is the "Throttle push using acknowledgements" pattern:
+  // https://fuchsia.dev/fuchsia-src/concepts/api/fidl#throttle_push_using_acknowledgements
+  callback();
+
+  FML_LOG(WARNING) << "memorypressure watcher: OnLevelChanged from "
+                   << static_cast<int>(latest_memory_pressure_level_) << " to "
+                   << static_cast<int>(level);
+
+  if (latest_memory_pressure_level_ == fuchsia::memorypressure::Level::NORMAL &&
+      (level == fuchsia::memorypressure::Level::WARNING ||
+       level == fuchsia::memorypressure::Level::CRITICAL)) {
+    FML_LOG(WARNING)
+        << "memorypressure watcher: notifying Flutter that memory is low";
+    shell_->NotifyLowMemoryWarning();
+  }
+  latest_memory_pressure_level_ = level;
 }
 
 }  // namespace flutter_runner

@@ -138,6 +138,7 @@ template("runner_sources") {
              "$fuchsia_sdk_root/fidl:fuchsia.images",
              "$fuchsia_sdk_root/fidl:fuchsia.intl",
              "$fuchsia_sdk_root/fidl:fuchsia.io",
+             "$fuchsia_sdk_root/fidl:fuchsia.memorypressure",
              "$fuchsia_sdk_root/fidl:fuchsia.sys",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
