@@ -1,4 +1,4 @@
-Signature: 9ff8964c060abfed7263526597da9d8b
+Signature: 2dd314efd9864ca214ce508e33562829
 
 UNUSED LICENSES:
 
@@ -812,7 +812,9 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Chromebook_GLES_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Chromebook_GLES_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Graphite.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-iOS.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Release-Graphite.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-Metal.json
@@ -2936,12 +2938,26 @@ FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
 FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
 FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
+FILE: ../../../third_party/skia/experimental/graphite/src/BoundsManager.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawCommandList.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/SDCTask.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/SDCTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/SurfaceDrawContext.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/SurfaceDrawContext.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Task.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Task.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
