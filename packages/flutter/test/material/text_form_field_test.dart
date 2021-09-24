@@ -74,14 +74,14 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);

@@ -81,7 +81,17 @@ class TextSelection extends TextRange {
   /// The position at which the selection originates.
   ///
   /// Might be larger than, smaller than, or equal to extent.
-  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity);
+  TextPosition get base {
+    final TextAffinity affinity;
+    if (!isValid || baseOffset == extentOffset) {
+      affinity = this.affinity;
+    } else if (baseOffset < extentOffset) {
+      affinity = TextAffinity.downstream;
+    } else {
+      affinity = TextAffinity.upstream;
+    }
+    return TextPosition(offset: baseOffset, affinity: affinity);
+  }
 
   /// The position at which the selection terminates.
   ///
@@ -90,7 +100,17 @@ class TextSelection extends TextRange {
   /// side of the selection, this is the location at which to paint the caret.
   ///
   /// Might be larger than, smaller than, or equal to base.
-  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity);
+  TextPosition get extent {
+    final TextAffinity affinity;
+    if (!isValid || baseOffset == extentOffset) {
+      affinity = this.affinity;
+    } else if (baseOffset < extentOffset) {
+      affinity = TextAffinity.upstream;
+    } else {
+      affinity = TextAffinity.downstream;
+    }
+    return TextPosition(offset: extentOffset, affinity: affinity);
+  }
 
   @override
   String toString() {

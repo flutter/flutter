@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -74,6 +74,147 @@ class TextSelectionPoint {
       case null:
         return '$point';
     }
+  }
+}
+
+/// The consecutive sequence of [TextPosition]s that the caret should move to
+/// when the user navigates the paragraph using the upward arrow key or the
+/// downward arrow key.
+///
+/// When the user presses the upward arrow key or the downward arrow key, the
+/// caret will move to the previous line or the next line, while maintaining the
+/// horizontal location. When it encounters a shorter line, the caret moves to
+/// the closest horizontal location in that line, and restores the original
+/// horizontal location when a long enough line is encountered.
+///
+/// Additionally, the caret moves to the beginning of the document if the upward
+/// arrow key is pressed and the caret is already on the first line. If the
+/// downward arrow key is pressed next, the caret will restore its original
+/// horizontal location and move to the second line. Similarly the caret moves
+/// to the end of the document if the downward array key is pressed when it's
+/// already on the last line.
+///
+/// For instance, consider a left-aligned paragraph
+///   aa|
+///   a
+///   aaa
+/// where the caret was initially placed at the end of the first line. Pressing
+/// the downward arrow key once will move the caret will to the end of the second
+/// line, and twice the arrow key moves to the third line after the second "a"
+/// on that line. Pressing the downward arrow key again, the caret will move to
+/// the end of the third line (the end of the document). Pressing the upward
+/// arrow key in this state will result in the caret moving to the end of the
+/// second line.
+///
+/// The [movePrevious] method moves the caret to the previous line (if
+/// applicable), and the [moveNext] method moves the caret to the next line.
+///
+/// If the underlying paragraph's layout changes, [isValid] becomes false and
+/// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
+/// be checked before calling [movePrevious] and [moveNext], or accessing
+/// [current].
+///
+/// If the selection of the underlying text field is changed by other means, the
+/// current [VerticalCaretMovementRun] should no longer be used and a new
+/// [VerticalCaretMovementRun] should be created when the user presses the
+/// upward/downward arrow keys again.
+class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
+  VerticalCaretMovementRun._(
+    this._editable,
+    this._lineMetrics,
+    this._currentTextPosition,
+    this._currentLine,
+    this._currentOffset,
+  );
+
+  Offset _currentOffset;
+  int _currentLine;
+  TextPosition _currentTextPosition;
+
+  final List<ui.LineMetrics> _lineMetrics;
+  final RenderEditable _editable;
+
+  bool _isValid = true;
+  /// Whether this [VerticalCaretMovementRun] can still continue.
+  ///
+  /// A [VerticalCaretMovementRun] run is valid if the underlying text layout
+  /// hasn't changed.
+  ///
+  /// The [current] value and the [movePrevious] and [moveNext] methods must not
+  /// be accessed when [isValid] is false.
+  bool get isValid {
+    if (!_isValid) {
+      return false;
+    }
+    final List<ui.LineMetrics> newLineMetrics = _editable._textPainter.computeLineMetrics();
+    // Use the implementation detail of the computeLineMetrics method to figure
+    // out if the current text layout has been invalidated.
+    if (!identical(newLineMetrics, _lineMetrics)) {
+      _isValid = false;
+    }
+    return _isValid;
+  }
+
+
+  double _lineDistance(int from, int to) {
+    double lineHeight = 0;
+    for (int index = from + 1; index < to; index += 1) {
+      lineHeight += _lineMetrics[index].height;
+    }
+    return lineHeight;
+  }
+
+  final Map<int, MapEntry<Offset, TextPosition>> _positionCache = <int, MapEntry<Offset, TextPosition>>{};
+
+  MapEntry<Offset, TextPosition> _getTextPositionForLine(int lineNumber) {
+    assert(isValid);
+    assert(lineNumber >= 0);
+    final MapEntry<Offset, TextPosition>? cachedPosition = _positionCache[lineNumber];
+    if (cachedPosition != null) {
+      return cachedPosition;
+    }
+    assert(lineNumber != _currentLine);
+    final double distanceY = lineNumber > _currentLine
+      ? _lineMetrics[_currentLine].descent + _lineMetrics[lineNumber].ascent + _lineDistance(_currentLine, lineNumber)
+      : - _lineMetrics[_currentLine].ascent - _lineMetrics[lineNumber].descent - _lineDistance(lineNumber, _currentLine);
+
+    final Offset newOffset = _currentOffset.translate(0, distanceY);
+    final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
+    final MapEntry<Offset, TextPosition> position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
+    _positionCache[lineNumber] = position;
+    return position;
+  }
+
+  @override
+  TextPosition get current {
+    assert(isValid);
+    return _currentTextPosition;
+  }
+
+  @override
+  bool moveNext() {
+    assert(isValid);
+    if (_currentLine + 1 >= _lineMetrics.length) {
+      return false;
+    }
+    final MapEntry<Offset, TextPosition> position = _getTextPositionForLine(_currentLine + 1);
+    _currentLine += 1;
+    _currentOffset = position.key;
+    _currentTextPosition = position.value;
+    return true;
+  }
+
+  @override
+  bool movePrevious() {
+    assert(isValid);
+    if (_currentLine <= 0) {
+      return false;
+    }
+    final MapEntry<Offset, TextPosition> position = _getTextPositionForLine(_currentLine - 1);
+    _currentLine -= 1;
+    _currentOffset = position.key;
+    _currentTextPosition = position.value;
+    return true;
   }
 }
 
@@ -2259,6 +2400,55 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _caretPainter.floatingCursorRect = null;
     }
     _caretPainter.showRegularCaret = _resetFloatingCursorAnimationValue == null;
+  }
+
+  MapEntry<int, Offset> _lineNumberFor(TextPosition startPosition, List<ui.LineMetrics> metrics) {
+    // ui.LineMetrics should include the line boundaries so we don't have to
+    // do this.
+    final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
+    int line = 0;
+    double accumulatedHeight = 0;
+    for (final ui.LineMetrics lineMetrics in metrics) {
+      if (accumulatedHeight + lineMetrics.height > offset.dy) {
+        return MapEntry<int, Offset>(line, Offset(offset.dx, lineMetrics.baseline));
+      }
+      line += 1;
+      accumulatedHeight += lineMetrics.height;
+    }
+    assert(false);
+    return MapEntry<int, Offset>(math.max(0, metrics.length - 1), Offset(offset.dx, accumulatedHeight));
+  }
+
+  /// {@template flutter.painting.textPainter.startVerticalCaretMovement}
+  /// Starts a [VerticalCaretMovementRun] at the given location in the text, for
+  /// handling consecutive vertical caret movements.
+  ///
+  /// This is typically used to handle consecutive upward/downward arrow key
+  /// movements in an input field.
+  ///
+  /// A [VerticalCaretMovementRun] should typically end either of the 2 happens:
+  ///  - when the underlying text needs relayout (for instance, the text
+  ///    changed, or the font size changes),
+  ///  - when the selection of the input field changes by a different source (
+  ///    for instance, the user pressed the left arrow key and the caret moves
+  ///    to the left).
+  ///
+  /// The [VerticalCaretMovementRun.isValid] property will remain true the
+  /// underlying text needs relayout, or a relayout has already happened.
+  ///
+  /// The caller should also monitor the current selection of the input field
+  /// for selection changes that interrupt the run. For example,
+  /// {@endtemplate}
+  VerticalCaretMovementRun startVerticalCaretMovement(TextPosition startPosition) {
+    final List<ui.LineMetrics> metrics = _textPainter.computeLineMetrics();
+    final MapEntry<int, Offset> currentLine = _lineNumberFor(startPosition, metrics);
+    return VerticalCaretMovementRun._(
+      this,
+      metrics,
+      startPosition,
+      currentLine.key,
+      currentLine.value,
+    );
   }
 
   void _paintContents(PaintingContext context, Offset offset) {

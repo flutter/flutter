@@ -12,7 +12,6 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'default_text_editing_actions.dart';
 import 'default_text_editing_shortcuts.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -1053,9 +1052,6 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
-  ///
-  /// Passing this will not replace [DefaultTextEditingActions]. These can be
-  /// overridden by placing an [Actions] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1676,11 +1672,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         child: DefaultTextEditingShortcuts(
           child: Actions(
             actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: DefaultTextEditingActions(
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: child,
-              ),
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: child,
             ),
           ),
         ),
