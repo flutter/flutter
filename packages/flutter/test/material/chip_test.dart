@@ -1857,16 +1857,17 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isButton,
+                              SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                             label: 'test',
                             textDirection: TextDirection.ltr,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isButton,
-                            ],
                             children: <TestSemantics>[
                               TestSemantics(
-                                label: 'Delete',
+                                flags: <SemanticsFlag>[SemanticsFlag.isButton,
+                                  SemanticsFlag.isFocusable],
                                 actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'Delete',
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isButton,
