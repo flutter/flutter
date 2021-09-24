@@ -348,60 +348,60 @@ class ToolbarOptions {
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
 ///
-/// ## Default Text Editing [Intent]s and [Action]s
+/// ## Text Editing [Intent]s and Their Default [Action]s
 ///
 /// This widget provides default [Action]s for handling common text editing
 /// [Intent]s such as deleting, copying and pasting in the text field. These
-/// [Action]s can be invoked using [Actions.invoke] or the [Actions.maybeInvoke]
-/// method. The default text editing keyboard [Shortcuts] also uses these
-/// [Intent]s and [Action]s to perform the text editing operations they are
-/// bound to.
-///
-/// ### Intents for Deleting Text and Their Default Behavior
-///
-/// | **Intent Class*                      | **Default Behavior when there's selected text**      | **Default Behavior when there is a [caret](https://en.wikipedia.org/wiki/Caret_navigation) (The selection is [TextSelection.collapsed])**  |
-/// | :----------------------------------: | :--------------------------------------------------- | :----------------------------------------------------------------------- |
-/// | **[DeleteCharacterIntent]**          | Deletes the selected text                            | Deletes the user-perceived character before or after the caret location. |
-/// | **[DeleteToNextWordBoundaryIntent]** | Deletes the selected text and the word before/after the selection's [TextSelection.extent] position | Deletes from the caret location to the previous or the next word boundary |
-/// | **[DeleteToLineBreakIntent]**        | Deletes the selected text, and deletes to the start/end of the line from the selection's [TextSelection.extent] position | Deletes from the caret location to the logical start or end of the current line |
-///
-/// ### Intents for Moving the [Caret](https://en.wikipedia.org/wiki/Caret_navigation)
-///
-/// | **Intent Class*                                                                              | **Default Behavior when there's selected text**                  | **Default Behavior when there is a caret ([TextSelection.collapsed])**  |
-/// | :------------------------------------------------------------------------------------------: | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
-/// | **[ExtendSelectionByCharacterIntent]** with `collapseSelection = true`                       | Collapses the selection to the logical start/end of the selection | Moves the caret past the user-perceived character before or after the current caret location.  |
-/// | **[ExtendSelectionToNextWordBoundaryIntent]**  with `collapseSelection = true`               | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position | Moves the caret to the previous/next word boundary.  |
-/// | **[ExtendSelectionToNextWordBoundaryOrCaretLocationIntent]** with `collapseSelection = true` | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary.  |
-/// | **[ExtendSelectionToLineBreakIntent]** with `collapseSelection = true`                       | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
-/// | **[ExtendSelectionVerticallyToAdjecentLineIntent]** with `collapseSelection = true`          | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
-/// | **[ExtendSelectionToDocumentBoundaryIntent]** with `collapseSelection = true`                | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
-///
-/// #### Intents for Extending the Selection
-///
-/// | **Intent Class*                                                                               | **Default Behavior when there's selected text**                  | **Default Behavior when there is a caret ([TextSelection.collapsed])**  |
-/// | :-------------------------------------------------------------------------------------------: | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
-/// | **[ExtendSelectionByCharacterIntent]** with `collapseSelection = false`                       | Moves the selection's [TextSelection.extent] past the user-perceived character before/after it |
-/// | **[ExtendSelectionToNextWordBoundaryIntent]**  with `collapseSelection = false`               | Moves the selection's [TextSelection.extent] to the previous/next word boundary |
-/// | **[ExtendSelectionToNextWordBoundaryOrCaretLocationIntent]** with `collapseSelection = false` | Moves the selection's [TextSelection.extent] to the previous/next word boundary, or [TextSelection.base] whichever is closest in the given direction | Moves the selection's [TextSelection.extent] to the previous/next word boundary. |
-/// | **[ExtendSelectionToLineBreakIntent]** with `collapseSelection = false`                       | Moves the selection's [TextSelection.extent] to the start/end of the line |
-/// | **[ExtendSelectionVerticallyToAdjecentLineIntent]** with `collapseSelection = false`          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent line |
-/// | **[ExtendSelectionToDocumentBoundaryIntent]** with `collapseSelection = false`                | Moves the selection's [TextSelection.extent] to the start/end of the document |
-/// | **[SelectAllTextIntent]**                                                                     | Selects the entire document |
-///
-/// ### Other Intents
-///
-/// | **Intent Class*                         | **Default Behavior**                                 |
-/// | :-------------------------------------: | :--------------------------------------------------- |
-/// | **[DoNothingAndStopPropagationIntent]** | Does nothing in the input field, and prevents the [Intent] from further propagating in the widget tree. |
-/// | **[ReplaceTextIntent]**                 | Replaces the current [TextEditingValue] in the input field's [TextEditingController], and triggers all related user callbacks and [TextInputFormatter]s. |
-/// | **[UpdateSelectionIntent]**             | Updates the current selection in the input field's [TextEditingController], and triggers the [onSelectionChanged] callback. |
-/// | **[CopySelectionTextIntent]**           | Copies or cuts the selected text into the clipboard |
-/// | **[PasteTextIntent]**                   | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
+/// [Action]s can be directly invoked using [Actions.invoke] or the
+/// [Actions.maybeInvoke] method. The default text editing keyboard [Shortcuts]
+/// also use these [Intent]s and [Action]s to perform the text editing
+/// operations they are bound to.
 ///
 /// The default handling of a specific [Intent] can be overridden by placing an
 /// [Actions] widget above this widget. See the [Action] class and the
 /// [Action.overridable] constructor for more information on how a pre-defined
 /// overridable [Action] can be overridden.
+///
+/// ### Intents for Deleting Text and Their Default Behavior
+///
+/// | **Intent Class**                 | **Default Behavior when there's selected text**      | **Default Behavior when there is a [caret](https://en.wikipedia.org/wiki/Caret_navigation) (The selection is [TextSelection.collapsed])**  |
+/// | :------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------- |
+/// | [DeleteCharacterIntent]          | Deletes the selected text                            | Deletes the user-perceived character before or after the caret location. |
+/// | [DeleteToNextWordBoundaryIntent] | Deletes the selected text and the word before/after the selection's [TextSelection.extent] position | Deletes from the caret location to the previous or the next word boundary |
+/// | [DeleteToLineBreakIntent]        | Deletes the selected text, and deletes to the start/end of the line from the selection's [TextSelection.extent] position | Deletes from the caret location to the logical start or end of the current line |
+///
+/// ### Intents for Moving the [Caret](https://en.wikipedia.org/wiki/Caret_navigation)
+///
+/// | **Intent Class**                                                                     | **Default Behavior when there's selected text**                  | **Default Behavior when there is a caret ([TextSelection.collapsed])**  |
+/// | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
+/// | [ExtendSelectionByCharacterIntent](`collapseSelection: true`)                       | Collapses the selection to the logical start/end of the selection | Moves the caret past the user-perceived character before or after the current caret location.  |
+/// | [ExtendSelectionToNextWordBoundaryIntent](`collapseSelection: true`)                | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position | Moves the caret to the previous/next word boundary.  |
+/// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: true`) | Collapses the selection to the word boundary before/after the selection's [TextSelection.extent] position, or [TextSelection.base], whichever is closest in the given direction | Moves the caret to the previous/next word boundary.  |
+/// | [ExtendSelectionToLineBreakIntent](`collapseSelection: true`)                       | Collapses the selection to the start/end of the line at the selection's [TextSelection.extent] position | Moves the caret to the start/end of the current line .|
+/// | [ExtendSelectionVerticallyToAdjecentLineIntent](`collapseSelection: true`)          | Collapses the selection to the position closest to the selection's [TextSelection.extent], on the previous/next adjacent line | Moves the caret to the closest position on the previous/next adjacent line. |
+/// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: true`)                | Collapses the selection to the start/end of the document | Moves the caret to the start/end of the document. |
+///
+/// #### Intents for Extending the Selection
+///
+/// | **Intent Class**                                                                     | **Default Behavior when there's selected text**                  | **Default Behavior when there is a caret ([TextSelection.collapsed])**  |
+/// | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
+/// | [ExtendSelectionByCharacterIntent](`collapseSelection: false`)                       | Moves the selection's [TextSelection.extent] past the user-perceived character before/after it |
+/// | [ExtendSelectionToNextWordBoundaryIntent](`collapseSelection: false`)                | Moves the selection's [TextSelection.extent] to the previous/next word boundary |
+/// | [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent](`collapseSelection: false`) | Moves the selection's [TextSelection.extent] to the previous/next word boundary, or [TextSelection.base] whichever is closest in the given direction | Moves the selection's [TextSelection.extent] to the previous/next word boundary. |
+/// | [ExtendSelectionToLineBreakIntent](`collapseSelection: false`)                       | Moves the selection's [TextSelection.extent] to the start/end of the line |
+/// | [ExtendSelectionVerticallyToAdjecentLineIntent](`collapseSelection: false`)          | Moves the selection's [TextSelection.extent] to the closest position on the previous/next adjacent line |
+/// | [ExtendSelectionToDocumentBoundaryIntent](`collapseSelection: false`)                | Moves the selection's [TextSelection.extent] to the start/end of the document |
+/// | [SelectAllTextIntent]  | Selects the entire document |
+///
+/// ### Other Intents
+///
+/// | **Intent Class**                    | **Default Behavior**                                 |
+/// | :---------------------------------- | :--------------------------------------------------- |
+/// | [DoNothingAndStopPropagationIntent] | Does nothing in the input field, and prevents the [Intent] from further propagating in the widget tree. |
+/// | [ReplaceTextIntent]                 | Replaces the current [TextEditingValue] in the input field's [TextEditingController], and triggers all related user callbacks and [TextInputFormatter]s. |
+/// | [UpdateSelectionIntent]             | Updates the current selection in the input field's [TextEditingController], and triggers the [onSelectionChanged] callback. |
+/// | [CopySelectionTextIntent]           | Copies or cuts the selected text into the clipboard |
+/// | [PasteTextIntent]                   | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
 ///
 /// ## Gesture Events Handling
 ///
@@ -1599,9 +1599,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return editableWidget.value;
   }
 
-  // Start TextEditingActionTarget.
-
-  /// {@macro flutter.widgets.TextEditingActionTarget.copySelection}
+  /// Copy current selection to [Clipboard].
   @override
   void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
@@ -1636,7 +1634,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// {@macro flutter.widgets.TextEditingActionTarget.cutSelection}
+  /// Cut current selection to [Clipboard].
   @override
   void cutSelection(SelectionChangedCause cause) {
     if (widget.readOnly) {
@@ -1656,7 +1654,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// {@macro flutter.widgets.TextEditingActionTarget.pasteText}
+  /// Paste text from [Clipboard].
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
     if (widget.readOnly) {
