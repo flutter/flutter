@@ -43,14 +43,14 @@ namespace flutter {
 // to the setting of attributes.
 class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
  public:
-  void setAA(bool aa) override {}
+  void setAntiAlias(bool aa) override {}
   void setDither(bool dither) override {}
   void setInvertColors(bool invert) override {}
-  void setCaps(SkPaint::Cap cap) override {}
-  void setJoins(SkPaint::Join join) override {}
-  void setDrawStyle(SkPaint::Style style) override {}
+  void setStrokeCap(SkPaint::Cap cap) override {}
+  void setStrokeJoin(SkPaint::Join join) override {}
+  void setStyle(SkPaint::Style style) override {}
   void setStrokeWidth(SkScalar width) override {}
-  void setMiterLimit(SkScalar limit) override {}
+  void setStrokeMiter(SkScalar limit) override {}
   void setColor(SkColor color) override {}
   void setBlendMode(SkBlendMode mode) override {}
   void setBlender(sk_sp<SkBlender> blender) override {}
@@ -65,9 +65,9 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
 // A utility class that will ignore all Dispatcher methods relating
 // to setting a clip.
 class IgnoreClipDispatchHelper : public virtual Dispatcher {
-  void clipRect(const SkRect& rect, bool isAA, SkClipOp clip_op) override {}
-  void clipRRect(const SkRRect& rrect, bool isAA, SkClipOp clip_op) override {}
-  void clipPath(const SkPath& path, bool isAA, SkClipOp clip_op) override {}
+  void clipRect(const SkRect& rect, SkClipOp clip_op, bool isAA) override {}
+  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool isAA) override {}
+  void clipPath(const SkPath& path, SkClipOp clip_op, bool isAA) override {}
 };
 
 // A utility class that will ignore all Dispatcher methods relating
@@ -100,23 +100,23 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
 // which can be accessed at any time via paint().
 class SkPaintDispatchHelper : public virtual Dispatcher {
  public:
-  void setAA(bool aa) override;
+  void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
-  void setInvertColors(bool invert) override;
-  void setCaps(SkPaint::Cap cap) override;
-  void setJoins(SkPaint::Join join) override;
-  void setDrawStyle(SkPaint::Style style) override;
-  void setStrokeWidth(SkScalar width) override;
-  void setMiterLimit(SkScalar limit) override;
+  void setStyle(SkPaint::Style style) override;
   void setColor(SkColor color) override;
+  void setStrokeWidth(SkScalar width) override;
+  void setStrokeMiter(SkScalar limit) override;
+  void setStrokeCap(SkPaint::Cap cap) override;
+  void setStrokeJoin(SkPaint::Join join) override;
+  void setShader(sk_sp<SkShader> shader) override;
+  void setColorFilter(sk_sp<SkColorFilter> filter) override;
+  void setInvertColors(bool invert) override;
   void setBlendMode(SkBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
-  void setShader(sk_sp<SkShader> shader) override;
-  void setImageFilter(sk_sp<SkImageFilter> filter) override;
-  void setColorFilter(sk_sp<SkColorFilter> filter) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
   void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
+  void setImageFilter(sk_sp<SkImageFilter> filter) override;
 
   const SkPaint& paint() { return paint_; }
 
@@ -135,7 +135,7 @@ class SkMatrixSource {
 
 // A utility class that will monitor the Dispatcher methods relating
 // to the transform and accumulate them into an SkMatrix which can
-// be accessed at any time via getMatrix().
+// be accessed at any time via matrix().
 //
 // This class also implements an appropriate stack of transforms via
 // its save() and restore() methods so those methods will need to be
@@ -197,15 +197,15 @@ class ClipBoundsDispatchHelper : public virtual Dispatcher,
         bounds_(cull_rect && !cull_rect->isEmpty() ? *cull_rect
                                                    : SkRect::MakeEmpty()) {}
 
-  void clipRect(const SkRect& rect, bool is_aa, SkClipOp clip_op) override;
-  void clipRRect(const SkRRect& rrect, bool is_aa, SkClipOp clip_op) override;
-  void clipPath(const SkPath& path, bool is_aa, SkClipOp clip_op) override;
+  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   void save() override;
   void restore() override;
 
   bool has_clip() const { return has_clip_; }
-  const SkRect& getClipBounds() const { return bounds_; }
+  const SkRect& clip_bounds() const { return bounds_; }
 
  protected:
   void reset(const SkRect* cull_rect);
@@ -238,10 +238,10 @@ class BoundsAccumulator {
     }
   }
 
-  bool isEmpty() const { return min_x_ >= max_x_ || min_y_ >= max_y_; }
-  bool isNotEmpty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
+  bool is_empty() const { return min_x_ >= max_x_ || min_y_ >= max_y_; }
+  bool is_not_empty() const { return min_x_ < max_x_ && min_y_ < max_y_; }
 
-  SkRect getBounds() const {
+  SkRect bounds() const {
     return (max_x_ > min_x_ && max_y_ > min_y_)
                ? SkRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)
                : SkRect::MakeEmpty();
@@ -273,11 +273,11 @@ class DisplayListBoundsCalculator final
   // The flag should never be set if a cull_rect is provided.
   DisplayListBoundsCalculator(const SkRect* cull_rect = nullptr);
 
-  void setCaps(SkPaint::Cap cap) override;
-  void setJoins(SkPaint::Join join) override;
-  void setDrawStyle(SkPaint::Style style) override;
+  void setStrokeCap(SkPaint::Cap cap) override;
+  void setStrokeJoin(SkPaint::Join join) override;
+  void setStyle(SkPaint::Style style) override;
   void setStrokeWidth(SkScalar width) override;
-  void setMiterLimit(SkScalar limit) override;
+  void setStrokeMiter(SkScalar limit) override;
   void setBlendMode(SkBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
@@ -310,21 +310,24 @@ class DisplayListBoundsCalculator final
                     SkBlendMode mode) override;
   void drawImage(const sk_sp<SkImage> image,
                  const SkPoint point,
-                 const SkSamplingOptions& sampling) override;
+                 const SkSamplingOptions& sampling,
+                 bool render_with_attributes) override;
   void drawImageRect(const sk_sp<SkImage> image,
                      const SkRect& src,
                      const SkRect& dst,
                      const SkSamplingOptions& sampling,
+                     bool render_with_attributes,
                      SkCanvas::SrcRectConstraint constraint) override;
   void drawImageNine(const sk_sp<SkImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
-                     SkFilterMode filter) override;
+                     SkFilterMode filter,
+                     bool render_with_attributes) override;
   void drawImageLattice(const sk_sp<SkImage> image,
                         const SkCanvas::Lattice& lattice,
                         const SkRect& dst,
                         SkFilterMode filter,
-                        bool with_paint) override;
+                        bool render_with_attributes) override;
   void drawAtlas(const sk_sp<SkImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
@@ -332,7 +335,8 @@ class DisplayListBoundsCalculator final
                  int count,
                  SkBlendMode mode,
                  const SkSamplingOptions& sampling,
-                 const SkRect* cullRect) override;
+                 const SkRect* cullRect,
+                 bool render_with_attributes) override;
   void drawPicture(const sk_sp<SkPicture> picture,
                    const SkMatrix* matrix,
                    bool with_save_layer) override;
@@ -343,7 +347,7 @@ class DisplayListBoundsCalculator final
   void drawShadow(const SkPath& path,
                   const SkColor color,
                   const SkScalar elevation,
-                  bool transparentOccluder,
+                  bool transparent_occluder,
                   SkScalar dpr) override;
 
   // The DisplayList had an unbounded call with no cull rect or clip
@@ -355,17 +359,17 @@ class DisplayListBoundsCalculator final
   // In those cases the bounds will represent only the accumulation
   // of the bounded calls and this flag will be set to indicate that
   // condition.
-  bool isUnbounded() const {
+  bool is_unbounded() const {
     FML_DCHECK(layer_infos_.size() == 1);
     return layer_infos_.front()->is_unbounded();
   }
 
-  SkRect getBounds() const {
+  SkRect bounds() const {
     FML_DCHECK(layer_infos_.size() == 1);
-    if (isUnbounded()) {
+    if (is_unbounded()) {
       FML_LOG(INFO) << "returning partial bounds for unbounded DisplayList";
     }
-    return accumulator_->getBounds();
+    return accumulator_->bounds();
   }
 
  private:
@@ -396,16 +400,16 @@ class DisplayListBoundsCalculator final
 
     // The accumulator to use while this layer is put in play by
     // a |save| or |saveLayer|
-    virtual BoundsAccumulator* accumulatorForLayer() { return outer_; }
+    virtual BoundsAccumulator* layer_accumulator() { return outer_; }
 
     // The accumulator to use after this layer is removed from play
     // via |restore|
-    virtual BoundsAccumulator* accumulatorForRestore() { return outer_; }
+    virtual BoundsAccumulator* restore_accumulator() { return outer_; }
 
     // The bounds of this layer. May be empty for cases like
     // a non-layer |save| call which uses the |outer_| accumulator
     // to accumulate draw calls inside of it
-    virtual SkRect getLayerBounds() = 0;
+    virtual SkRect layer_bounds() = 0;
 
     // is_unbounded should be set to true if we ever encounter an operation
     // on a layer that either is unrestricted (|drawColor| or |drawPaint|)
@@ -449,16 +453,16 @@ class DisplayListBoundsCalculator final
   // and |SaveLayerData|.
   class AccumulatorLayerData : public LayerData {
    public:
-    BoundsAccumulator* accumulatorForLayer() override {
+    BoundsAccumulator* layer_accumulator() override {
       return &layer_accumulator_;
     }
 
-    SkRect getLayerBounds() override {
+    SkRect layer_bounds() override {
       // Even though this layer might be unbounded, we still
       // accumulate what bounds we have as the unbounded condition
       // may be contained at a higher level and we at least want to
       // account for the bounds that we do have.
-      return layer_accumulator_.getBounds();
+      return layer_accumulator_.bounds();
     }
 
    protected:
@@ -485,7 +489,7 @@ class DisplayListBoundsCalculator final
     using LayerData::LayerData;
     ~SaveData() = default;
 
-    SkRect getLayerBounds() override { return SkRect::MakeEmpty(); }
+    SkRect layer_bounds() override { return SkRect::MakeEmpty(); }
 
    private:
     FML_DISALLOW_COPY_AND_ASSIGN(SaveData);
@@ -504,9 +508,9 @@ class DisplayListBoundsCalculator final
     }
     ~SaveLayerData() = default;
 
-    SkRect getLayerBounds() override {
-      SkRect bounds = AccumulatorLayerData::getLayerBounds();
-      if (!getFilteredBounds(bounds, layer_filter_.get())) {
+    SkRect layer_bounds() override {
+      SkRect bounds = AccumulatorLayerData::layer_bounds();
+      if (!ComputeFilteredBounds(bounds, layer_filter_.get())) {
         set_unbounded();
       }
       return bounds;
@@ -590,17 +594,17 @@ class DisplayListBoundsCalculator final
   sk_sp<SkMaskFilter> mask_filter_;
   SkScalar mask_sigma_pad_ = 0.0;
 
-  bool paintNopsOnTransparenBlack();
+  bool paint_nops_on_transparency();
 
-  static bool getFilteredBounds(SkRect& rect, SkImageFilter* filter);
-  bool adjustBoundsForPaint(SkRect& bounds, int flags);
+  static bool ComputeFilteredBounds(SkRect& rect, SkImageFilter* filter);
+  bool AdjustBoundsForPaint(SkRect& bounds, int flags);
 
-  void accumulateUnbounded();
-  void accumulateRect(const SkRect& rect, int flags) {
+  void AccumulateUnbounded();
+  void AccumulateRect(const SkRect& rect, int flags) {
     SkRect bounds = rect;
-    accumulateRect(bounds, flags);
+    AccumulateRect(bounds, flags);
   }
-  void accumulateRect(SkRect& rect, int flags);
+  void AccumulateRect(SkRect& rect, int flags);
 };
 
 }  // namespace flutter
