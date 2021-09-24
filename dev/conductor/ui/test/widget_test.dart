@@ -31,5 +31,5 @@ void main() {
       expect(find.textContaining(channelName), findsOneWidget);
       expect(find.text('1'), findsNothing);
     });
-  }, skip: Platform.isWindows); // This app does not support Windows
+  }, skip: Platform.isWindows); // This app does not support Windows [intended]
 }
