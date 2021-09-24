@@ -392,7 +392,7 @@ class ManifestAssetBundle implements AssetBundle {
           // variant is preferred.
           if (assetFile.existsSync()) {
             assert(!assetsMap[asset]!.contains(asset));
-            assetsMap[asset]!.toList().insert(0, asset);
+            assetsMap[asset]!.insert(0, asset);
           }
           for (final _Asset variant in assetsMap[asset]!) {
             final File variantFile = variant.lookupAssetFile(_fileSystem);
