@@ -351,7 +351,7 @@ class ToolbarOptions {
 /// ## Default Text Editing [Intent]s and [Action]s
 ///
 /// This widget provides default [Action]s for handling common text editing
-/// [Intent]s such as deleting, copy and paste in the text field. These
+/// [Intent]s such as deleting, copying and pasting in the text field. These
 /// [Action]s can be invoked using [Actions.invoke] or the [Actions.maybeInvoke]
 /// method. The default text editing keyboard [Shortcuts] also uses these
 /// [Intent]s and [Action]s to perform the text editing operations they are
