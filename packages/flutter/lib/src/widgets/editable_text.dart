@@ -351,7 +351,7 @@ class ToolbarOptions {
 /// ## Default Text Editing [Intent]s and [Action]s
 ///
 /// This widget provides default [Action]s for handling common text editing
-/// [Intent]s such as deleting, copy and paste in the text field. These
+/// [Intent]s such as deleting, copying and pasting in the text field. These
 /// [Action]s can be invoked using [Actions.invoke] or the [Actions.maybeInvoke]
 /// method. The default text editing keyboard [Shortcuts] also uses these
 /// [Intent]s and [Action]s to perform the text editing operations they are
@@ -2782,8 +2782,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
   }
 
-  // The linebreak movement semantic is a bit different: it never moves to the
-  // next or the previous line even if there're more lines.
   _TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
     final _TextBoundary atomicTextBoundary;
     final _TextBoundary boundary;
@@ -2797,15 +2795,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       boundary = _LineBreak(renderEditable, textEditingValue);
     }
 
-    // Use a _MixedBoundary to make sure we don't leave invalid characters in
-    // the field after deletion.
+    // Use a _MixedBoundary to make sure we don't leave invalid code units
+    // behind after deletion.
+    // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
+    // since the document boundary is unique and the linebreak boundary is
+    // already caret-location based.
     return intent.forward
       ? _MixedBoundary(_CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
       : _MixedBoundary(boundary, _CollapsedSelectionBoundary(atomicTextBoundary, false));
   }
 
-  // This method is not used by any of the delete methods, and the document
-  // boundary is unique, so just return _DocumentBoundary.
   _TextBoundary _documentBoundary(DirectionalTextEditingIntent intent) => _DocumentBoundary(_value);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -2830,7 +2829,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjecentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjecentLineIntent>(this);
 
-  late final Map<Type, Action<Intent>> _keyboardEditingActions = <Type, Action<Intent>>{
+  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
+    ReplaceTextIntent: _replaceTextAction,
+    UpdateSelectionIntent: _updateSelectionAction,
+    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+
     // Delete
     DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary)),
     DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(this, _nextWordBoundary)),
@@ -2859,13 +2863,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
-        actions: <Type, Action<Intent>>{
-          DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
-          ReplaceTextIntent: _replaceTextAction,
-          UpdateSelectionIntent: _updateSelectionAction,
-          DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
-          ..._keyboardEditingActions,
-        },
+        actions: _actions,
         child: Focus(
           focusNode: widget.focusNode,
           includeSemantics: false,
@@ -3170,21 +3168,21 @@ class _Editable extends MultiChildRenderObjectWidget {
 /// An interface for retriving the logical text boundary (left-closed-right-open)
 /// at a given location in a document.
 ///
-/// Depending on the implementation of the TextBoundary, the input [TextPosition]
-/// can either point to a code unit, or a position between 2 code units (which
-/// can be visually represented by the caret if the selection were to collapse
-/// to that position).
+/// Depending on the implementation of the [_TextBoundary], the input
+/// [TextPosition] can either point to a code unit, or a position between 2 code
+/// units (which can be visually represented by the caret if the selection were
+/// to collapse to that position).
 ///
 /// For example, [_LineBreak] interprets the input [TextPosition] as a caret
 /// location, since in Flutter the caret is generally painted between the
 /// character the [TextPosition] points to and its previous character, and
 /// [_LineBreak] cares about the affinity of the input [TextPosition]. Most
-/// other text boundaries however, interpret the input [TextPosition] as a code
-/// unit, since it's easier to reason about the text boundary given a code unit
-/// in the text.
+/// other text boundaries however, interpret the input [TextPosition] as the
+/// location of a code unit in the document, since it's easier to reason about
+/// the text boundary given a code unit in the text.
 ///
-/// To convert a [_TextBoundary] from "code unit" interpretation to "caret
-/// interpretation", use the [_CollapsedSelectionBoundary] combinator.
+/// To convert a "code-unit-based" [_TextBoundary] to "caret-location-based",
+/// use the [_CollapsedSelectionBoundary] combinator.
 abstract class _TextBoundary {
   const _TextBoundary();
 
@@ -3219,7 +3217,8 @@ class _CodeUnitBoundary extends _TextBoundary {
 }
 
 // The word modifier generally removes the word boundaries around white spaces
-// (and newlines).
+// (and newlines), IOW white spaces and some other punctuations are considered
+// a part of the next word in the search direction.
 class _WhitespaceBoundary extends _TextBoundary {
   const _WhitespaceBoundary(this.textEditingValue);
 

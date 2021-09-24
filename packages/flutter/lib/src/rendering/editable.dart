@@ -81,11 +81,13 @@ class TextSelectionPoint {
 /// when the user navigates the paragraph using the upward arrow key or the
 /// downward arrow key.
 ///
-/// When the user presses the upward arrow key or the downward arrow key, the
-/// caret will move to the previous line or the next line, while maintaining the
-/// horizontal location. When it encounters a shorter line, the caret moves to
-/// the closest horizontal location in that line, and restores the original
-/// horizontal location when a long enough line is encountered.
+/// {@template flutter.rendering.RenderEditable.verticalArrowKeyMovement}
+/// When the user presses the upward arrow key or the downward arrow key, on
+/// many platforms (macOS for instance), the caret will move to the previous
+/// line or the next line, while maintaining its original horizontal location.
+/// When it encounters a shorter line, the caret moves to the closest horizontal
+/// location in that line, and restores the original horizontal location when a
+/// long enough line is encountered.
 ///
 /// Additionally, the caret moves to the beginning of the document if the upward
 /// arrow key is pressed and the caret is already on the first line. If the
@@ -106,18 +108,22 @@ class TextSelectionPoint {
 /// arrow key in this state will result in the caret moving to the end of the
 /// second line.
 ///
-/// The [movePrevious] method moves the caret to the previous line (if
-/// applicable), and the [moveNext] method moves the caret to the next line.
+/// Vertical runs are typically interrupted when the layout of the text changes
+/// (including when the text itself changes), or when the selection is changed
+/// by other input events or programmatically (for example, when the user
+/// pressed the left arrow key).
+/// {@endtemplate}
+///
+/// The [movePrevious] method moves the caret location (which is
+/// [VerticalCaretMovementRun.current]) to the previous line, and in case
+/// the caret is already on the first line, the method does nothing and returns
+/// false. Similarly the [moveNext] method moves the caret to the next line, and
+/// returns false if the caret is already on the last line.
 ///
 /// If the underlying paragraph's layout changes, [isValid] becomes false and
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
 /// be checked before calling [movePrevious] and [moveNext], or accessing
 /// [current].
-///
-/// If the selection of the underlying text field is changed by other means, the
-/// current [VerticalCaretMovementRun] should no longer be used and a new
-/// [VerticalCaretMovementRun] should be created when the user presses the
-/// upward/downward arrow keys again.
 class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
@@ -2419,26 +2425,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return MapEntry<int, Offset>(math.max(0, metrics.length - 1), Offset(offset.dx, accumulatedHeight));
   }
 
-  /// {@template flutter.painting.textPainter.startVerticalCaretMovement}
   /// Starts a [VerticalCaretMovementRun] at the given location in the text, for
   /// handling consecutive vertical caret movements.
   ///
-  /// This is typically used to handle consecutive upward/downward arrow key
-  /// movements in an input field.
+  /// This can be used to handle consecutive upward/downward arrow key movements
+  /// in an input field.
   ///
-  /// A [VerticalCaretMovementRun] should typically end either of the 2 happens:
-  ///  - when the underlying text needs relayout (for instance, the text
-  ///    changed, or the font size changes),
-  ///  - when the selection of the input field changes by a different source (
-  ///    for instance, the user pressed the left arrow key and the caret moves
-  ///    to the left).
+  /// {@macro flutter.rendering.RenderEditable.verticalArrowKeyMovement}
   ///
   /// The [VerticalCaretMovementRun.isValid] property will remain true the
   /// underlying text needs relayout, or a relayout has already happened.
   ///
-  /// The caller should also monitor the current selection of the input field
-  /// for selection changes that interrupt the run. For example,
-  /// {@endtemplate}
+  /// The caller is responsible for discarding a [VerticalCaretMovementRun] when
+  /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
+  /// occasions where the vertical caret run should be interrupted, and create
+  /// a new [VerticalCaretMovementRun] using the current caret location when the
+  /// user presses the arrow up/down key again.
   VerticalCaretMovementRun startVerticalCaretMovement(TextPosition startPosition) {
     final List<ui.LineMetrics> metrics = _textPainter.computeLineMetrics();
     final MapEntry<int, Offset> currentLine = _lineNumberFor(startPosition, metrics);
