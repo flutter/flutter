@@ -93,10 +93,10 @@ class TextSelectionPoint {
 /// arrow key is pressed and the caret is already on the first line. If the
 /// downward arrow key is pressed next, the caret will restore its original
 /// horizontal location and move to the second line. Similarly the caret moves
-/// to the end of the document if the downward array key is pressed when it's
+/// to the end of the document if the downward arrow key is pressed when it's
 /// already on the last line.
 ///
-/// For instance, consider a left-aligned paragraph
+/// Consider a left-aligned paragraph:
 ///   aa|
 ///   a
 ///   aaa
