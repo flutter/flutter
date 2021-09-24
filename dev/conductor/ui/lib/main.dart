@@ -47,9 +47,11 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                child: state != null
-                    ? SelectableText(presentState(state!))
-                    : Text('No persistent state file found at $_stateFilePath'),
+                child: SelectableText(
+                  state != null
+                      ? presentState(state!)
+                      : 'No persistent state file found at $_stateFilePath',
+                ),
               ),
             ],
           ),
