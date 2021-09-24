@@ -12,16 +12,15 @@ import 'package:platform/platform.dart';
 
 const String _title = 'Flutter Conductor';
 
-void main() {
-  const LocalFileSystem _fs = LocalFileSystem();
-  const LocalPlatform _platform = LocalPlatform();
-  final File _stateFile = _fs.file(defaultStateFilePath(_platform));
+const LocalFileSystem _fs = LocalFileSystem();
+const LocalPlatform _platform = LocalPlatform();
+final String _stateFilePath = defaultStateFilePath(_platform);
 
-  runApp(
-      MyApp(
-          readStateFromFile(_stateFile),
-      ),
-  );
+void main() {
+  final File _stateFile = _fs.file(_stateFilePath);
+  final pb.ConductorState? state =
+      _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+  runApp(MyApp(state));
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +29,7 @@ class MyApp extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  final pb.ConductorState state;
+  final pb.ConductorState? state;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +47,9 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                  child: SelectableText(presentState(state)),
+                child: state != null
+                    ? SelectableText(presentState(state!))
+                    : Text('No persistent state file found at $_stateFilePath'),
               ),
             ],
           ),

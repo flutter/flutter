@@ -8,7 +8,14 @@ import 'package:conductor_ui/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('App prints release channel', (WidgetTester tester) async {
+  testWidgets('Handles null state', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp(null));
+
+    expect(find.text('Flutter Conductor'), findsOneWidget);
+    expect(find.textContaining('No persistent state file found at'), findsOneWidget);
+  });
+
+  testWidgets('App prints release channel from state file', (WidgetTester tester) async {
     const String channelName = 'dev';
     final pb.ConductorState state = pb.ConductorState(
       releaseChannel: channelName,
