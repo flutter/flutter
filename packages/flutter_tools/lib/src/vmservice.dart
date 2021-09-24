@@ -187,14 +187,14 @@ Future<vm_service.VmService> setUpVmService(
   // all at the end of this method.
   final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
   if (reloadSources != null) {
-    vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
+    vmService.registerServiceCallback('reloadSources', (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
       final bool force = _validateRpcBoolParam('reloadSources', params, 'force');
       final bool pause = _validateRpcBoolParam('reloadSources', params, 'pause');
 
       await reloadSources(isolateId, force: force, pause: pause);
 
-      return <String, dynamic>{
+      return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
         }
@@ -204,10 +204,10 @@ Future<vm_service.VmService> setUpVmService(
   }
 
   if (restart != null) {
-    vmService.registerServiceCallback('hotRestart', (Map<String, dynamic> params) async {
+    vmService.registerServiceCallback('hotRestart', (Map<String, Object?> params) async {
       final bool pause = _validateRpcBoolParam('compileExpression', params, 'pause');
       await restart(pause: pause);
-      return <String, dynamic>{
+      return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
         }
@@ -216,12 +216,12 @@ Future<vm_service.VmService> setUpVmService(
     registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
   }
 
-  vmService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) async {
+  vmService.registerServiceCallback('flutterVersion', (Map<String, Object?> params) async {
     final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
-    return <String, dynamic>{
+    return <String, Object>{
       'result': <String, Object>{
         'type': 'Success',
         ...versionJson,
@@ -546,30 +546,24 @@ class FlutterVmService {
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
-    if (response != null) {
-      return response['data']?.toString() ?? '';
-    }
-    return '';
+    return response?['data']?.toString() ?? '';
   }
 
   Future<String> flutterDebugDumpRenderTree({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpRenderTree',
       isolateId: isolateId,
       args: <String, Object>{}
     );
-    if (response != null) {
-      return response['data']?.toString() ?? '';
-    }
-    return '';
+    return response?['data']?.toString() ?? '';
   }
 
   Future<String> flutterDebugDumpLayerTree({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
@@ -582,20 +576,17 @@ class FlutterVmService {
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
       isolateId: isolateId,
     );
-    if (response != null) {
-      return response['data']?.toString() ?? '';
-    }
-    return '';
+    return response?['data']?.toString() ?? '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
@@ -605,10 +596,10 @@ class FlutterVmService {
     return '';
   }
 
-  Future<Map<String, dynamic>?> _flutterToggle(String name, {
+  Future<Map<String, Object?>?> _flutterToggle(String name, {
     required String isolateId,
   }) async {
-    Map<String, dynamic>? state = await invokeFlutterExtensionRpcRaw(
+    Map<String, Object?>? state = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.$name',
       isolateId: isolateId,
     );
@@ -616,7 +607,7 @@ class FlutterVmService {
       state = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.$name',
         isolateId: isolateId,
-        args: <String, dynamic>{
+        args: <String, Object>{
           'enabled': state['enabled'] == 'true' ? 'false' : 'true',
         },
       );
@@ -625,37 +616,37 @@ class FlutterVmService {
     return state;
   }
 
-  Future<Map<String, dynamic>?> flutterToggleDebugPaintSizeEnabled({
+  Future<Map<String, Object?>?> flutterToggleDebugPaintSizeEnabled({
     required String isolateId,
   }) => _flutterToggle('debugPaint', isolateId: isolateId);
 
-  Future<Map<String, dynamic>?> flutterTogglePerformanceOverlayOverride({
+  Future<Map<String, Object?>?> flutterTogglePerformanceOverlayOverride({
     required String isolateId,
   }) => _flutterToggle('showPerformanceOverlay', isolateId: isolateId);
 
-  Future<Map<String, dynamic>?> flutterToggleWidgetInspector({
+  Future<Map<String, Object?>?> flutterToggleWidgetInspector({
     required String isolateId,
   }) => _flutterToggle('inspector.show', isolateId: isolateId);
 
-  Future<Map<String,dynamic>?> flutterToggleInvertOversizedImages({
+  Future<Map<String, Object?>?> flutterToggleInvertOversizedImages({
     required String isolateId,
   }) => _flutterToggle('invertOversizedImages', isolateId: isolateId);
 
-  Future<Map<String, dynamic>?> flutterToggleProfileWidgetBuilds({
+  Future<Map<String, Object?>?> flutterToggleProfileWidgetBuilds({
     required String isolateId,
   }) => _flutterToggle('profileWidgetBuilds', isolateId: isolateId);
 
-  Future<Map<String, dynamic>?> flutterDebugAllowBanner(bool show, {
+  Future<Map<String, Object?>?> flutterDebugAllowBanner(bool show, {
     required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugAllowBanner',
       isolateId: isolateId,
-      args: <String, dynamic>{'enabled': show ? 'true' : 'false'},
+      args: <String, Object>{'enabled': show ? 'true' : 'false'},
     );
   }
 
-  Future<Map<String, dynamic>?> flutterReassemble({
+  Future<Map<String, Object?>?> flutterReassemble({
     required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
@@ -664,7 +655,7 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, dynamic>?> flutterFastReassemble({
+  Future<Map<String, Object?>?> flutterFastReassemble({
    required String isolateId,
    required String className,
   }) {
@@ -680,12 +671,12 @@ class FlutterVmService {
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.didSendFirstFrameRasterizedEvent',
       isolateId: isolateId,
     );
     // result might be null when the service extension is not initialized
-    return result != null && result['enabled'] == 'true';
+    return result?['enabled'] == 'true';
   }
 
   Future<Map<String, dynamic>?> uiWindowScheduleFrame({
@@ -783,7 +774,7 @@ class FlutterVmService {
 
   Future<vm_service.Response?> _checkedCallServiceExtension(
     String method, {
-    Map<String, dynamic>? args,
+    Map<String, Object?>? args,
   }) async {
     try {
       return await service.callServiceExtension(method, args: args);
@@ -803,11 +794,11 @@ class FlutterVmService {
   Future<Map<String, Object?>?> invokeFlutterExtensionRpcRaw(
     String method, {
     required String isolateId,
-    Map<String, dynamic>? args,
+    Map<String, Object?>? args,
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, dynamic>{
+      args: <String, Object?>{
         'isolateId': isolateId,
         ...?args,
       },
@@ -930,7 +921,7 @@ class FlutterVmService {
     // has custom handling of certain RPCErrors.
     return service.callServiceExtension(
       '_createDevFS',
-      args: <String, dynamic>{'fsName': fsName},
+      args: <String, Object?>{'fsName': fsName},
     );
   }
 
@@ -938,7 +929,7 @@ class FlutterVmService {
   Future<void> deleteDevFS(String fsName) async {
     await _checkedCallServiceExtension(
       '_deleteDevFS',
-      args: <String, dynamic>{'fsName': fsName},
+      args: <String, Object?>{'fsName': fsName},
     );
   }
 
@@ -955,7 +946,7 @@ class FlutterVmService {
     assert(recordedStreams != null);
     await _checkedCallServiceExtension(
       'setVMTimelineFlags',
-      args: <String, dynamic>{
+      args: <String, Object?>{
         'recordedStreams': recordedStreams,
       },
     );
