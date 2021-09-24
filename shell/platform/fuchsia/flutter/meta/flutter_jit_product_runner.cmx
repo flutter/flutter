@@ -19,6 +19,7 @@
             "fuchsia.fonts.Provider",
             "fuchsia.intl.PropertyProvider",
             "fuchsia.logger.LogSink",
+            "fuchsia.memorypressure.Provider",
             "fuchsia.net.name.Lookup",
             "fuchsia.posix.socket.Provider",
             "fuchsia.sysmem.Allocator",
