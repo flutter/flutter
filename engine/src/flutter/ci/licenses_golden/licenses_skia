@@ -1,4 +1,4 @@
-Signature: 9221c1946db2a0bfc56ff436f3a99993
+Signature: 641c78f34c550748b17c6715471393e2
 
 UNUSED LICENSES:
 
@@ -2941,6 +2941,8 @@ FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
 FILE: ../../../third_party/skia/experimental/graphite/src/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
+FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
@@ -2949,6 +2951,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SDCTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/SDCTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
@@ -2970,6 +2974,7 @@ FILE: ../../../third_party/skia/gm/crbug_1167277.cpp
 FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
 FILE: ../../../third_party/skia/gm/crbug_1174354.cpp
 FILE: ../../../third_party/skia/gm/crbug_1177833.cpp
+FILE: ../../../third_party/skia/gm/crop_imagefilter.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
@@ -2990,6 +2995,8 @@ FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/effects/SkBlenders.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkCropImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkCropImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkRuntimeImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/BaseDevice.cpp
