@@ -238,6 +238,9 @@ abstract class DeletableChipAttributes {
   /// The message to be used for the chip's delete button tooltip.
   ///
   /// This will be shown only if [useDeleteButtonTooltip] is true.
+  ///
+  /// If not specified, the default [MaterialLocalizations.deleteButtonTooltip] will
+  /// be used.
   String? get deleteButtonTooltipMessage;
 }
 
@@ -1775,11 +1778,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     }
   }
 
-  Widget? _wrapWithTooltip(String? tooltip, VoidCallback? callback, Widget? child) {
-    if(!widget.useDeleteButtonTooltip) {
-      return child;
-    }
-    if (child == null || callback == null || tooltip == null) {
+  Widget? _wrapWithTooltip({String? tooltip, bool enabled = true, Widget? child}) {
+    if (child == null || !enabled || tooltip == null) {
       return child;
     }
     return Tooltip(
@@ -1800,9 +1800,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       container: true,
       button: true,
       child: _wrapWithTooltip(
-        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip,
-        widget.onDeleted,
-        InkWell(
+        tooltip: widget.useDeleteButtonTooltip ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip : null,
+        enabled: widget.onDeleted != null,
+        child: InkWell(
           // Radius should be slightly less than the full size of the chip.
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
           // Keeps the splash from being constrained to the icon alone.
@@ -1884,9 +1884,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
             );
           },
           child: _wrapWithTooltip(
-            widget.tooltip,
-            widget.onPressed,
-            _ChipRenderWidget(
+            tooltip: widget.tooltip,
+            enabled: widget.onPressed != null || widget.onSelected != null,
+            child: _ChipRenderWidget(
               theme: _ChipRenderTheme(
                 label: DefaultTextStyle(
                   overflow: TextOverflow.fade,
