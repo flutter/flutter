@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -94,7 +95,7 @@ void main() {
       } finally {
         Cache.flutterRoot = oldRoot;
       }
-      // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
@@ -104,7 +105,7 @@ void main() {
         .createSync(recursive: true);
 
       expect(() async => cache.lock(), throwsToolExit());
-      // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
@@ -862,6 +863,15 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+  });
+
+  // Check that the build number matches the format documented here:
+  // https://dart.dev/get-dart#release-channels
+  testUsingContext('Check current Dart SDK build number', () async {
+    final String currentDartSdkVersion = globals.cache.dartSdkBuild;
+    final RegExp dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+
+    expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1,);
   });
 
   group('AndroidMavenArtifacts', () {

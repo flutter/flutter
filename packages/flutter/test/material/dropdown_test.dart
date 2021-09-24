@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1408669812"
-@Tags(<String>['no-shuffle'])
+// no-shuffle:
+//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
+//   dependencies have been fixed.
+//   https://github.com/flutter/flutter/issues/85160
+//   Fails with "flutter test --test-randomize-ordering-seed=456"
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set', 'no-shuffle'])
 
 import 'dart:math' as math;
 import 'dart:ui' show window;
@@ -3123,6 +3127,29 @@ void main() {
     expect(menuHeight, defaultMenuHeight);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/89029
+  testWidgets('menu position test with `menuMaxHeight`', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '6',
+      items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
+      onChanged: onChanged,
+      menuMaxHeight: 2 * kMinInteractiveDimension,
+    ));
+
+    await tester.tap(find.text('6'));
+    await tester.pumpAndSettle();
+
+    final RenderBox menuBox = tester.renderObject(find.byType(ListView));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    // The menu's bottom should align with the drop-button's bottom.
+    expect(
+      menuBox.localToGlobal(menuBox.paintBounds.bottomCenter).dy,
+      buttonBox.localToGlobal(buttonBox.paintBounds.bottomCenter).dy,
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/76614
   testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
     // The default item height is 48.0 pixels and needs two items padding since
@@ -3554,5 +3581,46 @@ void main() {
     final InkWell menuItem = tester.widget(find.widgetWithText(InkWell, 'One'));
 
     expect(menuItem.borderRadius, borderRadius);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/88574
+  testWidgets("specifying itemHeight affects popup menu items' height", (WidgetTester tester) async {
+    const String value = 'One';
+    const double itemHeight = 80;
+    final List<DropdownMenuItem<String>> menuItems = <String>[
+      value,
+      'Two',
+      'Free',
+      'Four'
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              itemHeight: itemHeight,
+              onChanged: (_) {},
+              items: menuItems,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    for (final DropdownMenuItem<String> item in menuItems) {
+      final Iterable<Element> elements = tester.elementList(find.byWidget(item));
+      for (final Element element in elements){
+        expect(element.size!.height, itemHeight);
+      }
+    }
   });
 }

@@ -367,7 +367,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   static const String _kCheck = 'check';
   static const String _kSsh = 'ssh';
 
-  // A hostname consists of one or more "names", seperated by a dot.
+  // A hostname consists of one or more "names", separated by a dot.
   // A name may consist of alpha-numeric characters. Hyphens are also allowed,
   // but not as the first or last character of the name.
   static final RegExp _hostnameRegex = RegExp(r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$');

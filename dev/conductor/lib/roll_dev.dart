@@ -90,8 +90,8 @@ class RollDevCommand extends Command<void> {
       'For publishing a dev release without cherry picks.';
 
   @override
-  void run() {
-    rollDev(
+  Future<void> run() async {
+    await rollDev(
       argResults: argResults!,
       repository: FrameworkRepository(checkouts),
       stdio: stdio,
@@ -104,12 +104,12 @@ class RollDevCommand extends Command<void> {
 ///
 /// Returns true if publishing was successful, else false.
 @visibleForTesting
-bool rollDev({
+Future<bool> rollDev({
   required String usage,
   required ArgResults argResults,
   required Stdio stdio,
   required FrameworkRepository repository,
-}) {
+}) async {
   final String remoteName = argResults[kRemoteName] as String;
   final String? level = argResults[kIncrement] as String?;
   final String candidateBranch = argResults[kCandidateBranch] as String;
@@ -124,30 +124,30 @@ bool rollDev({
         'and roll a new dev build.\n$usage');
   }
 
-  final String remoteUrl = repository.remoteUrl(remoteName);
+  final String remoteUrl = await repository.remoteUrl(remoteName);
 
-  if (!repository.gitCheckoutClean()) {
+  if (!(await repository.gitCheckoutClean())) {
     throw Exception(
         'Your git repository is not clean. Try running "git clean -fd". Warning, '
         'this will delete files! Run with -n to find out which ones.');
   }
 
-  repository.fetch(remoteName);
+  await repository.fetch(remoteName);
 
   // Verify [commit] is valid
-  final String commit = repository.reverseParse(candidateBranch);
+  final String commit = await repository.reverseParse(candidateBranch);
 
   stdio.printStatus('remoteName is $remoteName');
   // Get the name of the last dev release
   final Version lastVersion = Version.fromString(
-    repository.getFullTag(remoteName, 'dev'),
+    await repository.getFullTag(remoteName, 'dev'),
   );
 
   final Version version =
       skipTagging ? lastVersion : Version.fromCandidateBranch(candidateBranch);
   final String tagName = version.toString();
 
-  if (repository.reverseParse(lastVersion.toString()).contains(commit.trim())) {
+  if ((await repository.reverseParse(lastVersion.toString())).contains(commit.trim())) {
     throw Exception(
         'Commit $commit is already on the dev branch as $lastVersion.');
   }
@@ -157,18 +157,18 @@ bool rollDev({
     return false;
   }
 
-  if (skipTagging && !repository.isCommitTagged(commit)) {
+  if (skipTagging && !(await repository.isCommitTagged(commit))) {
     throw Exception(
         'The $kSkipTagging flag is only supported for tagged commits.');
   }
 
-  if (!force && !repository.isAncestor(commit, lastVersion.toString())) {
+  if (!force && !(await repository.isAncestor(commit, lastVersion.toString()))) {
     throw Exception(
         'The previous dev tag $lastVersion is not a direct ancestor of $commit.\n'
         'The flag "$kForce" is required to force push a new release past a cherry-pick.');
   }
 
-  final String hash = repository.reverseParse(commit);
+  final String hash = await repository.reverseParse(commit);
 
   // [commit] can be a prefix for [hash].
   assert(hash.startsWith(commit));
@@ -188,10 +188,10 @@ bool rollDev({
   }
 
   if (!skipTagging) {
-    repository.tag(commit, version.toString(), remoteName);
+    await repository.tag(commit, version.toString(), remoteName);
   }
 
-  repository.pushRef(
+  await repository.pushRef(
     fromRef: commit,
     remote: remoteName,
     toRef: 'dev',

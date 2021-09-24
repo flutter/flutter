@@ -173,7 +173,7 @@ void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst)
   dst.writeAsStringSync(json.encode(cmx));
 }
 
-// TODO(zra): Allow supplying a signing key.
+// TODO(zanderso): Allow supplying a signing key.
 Future<void> _buildPackage(
   FuchsiaProject fuchsiaProject,
   String target, // lib/main.dart

@@ -824,7 +824,7 @@ class WebDevFS implements DevFS {
           nativeNullAssertions: nativeNullAssertions,
         ),
       );
-      // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
+      // TODO(zanderso): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
         await writeBundle(

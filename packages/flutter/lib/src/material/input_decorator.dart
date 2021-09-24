@@ -971,11 +971,17 @@ class _RenderDecoration extends RenderBox {
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
 
     // Layout all the widgets used by InputDecorator
-    boxToBaseline[prefix] = _layoutLineBox(prefix, boxConstraints);
-    boxToBaseline[suffix] = _layoutLineBox(suffix, boxConstraints);
     boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
-    boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
-    boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
+    final BoxConstraints containerConstraints = boxConstraints.copyWith(
+      maxWidth: boxConstraints.maxWidth - _boxSize(icon).width,
+    );
+    boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
+    boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
+    final BoxConstraints contentConstraints = containerConstraints.copyWith(
+      maxWidth: containerConstraints.maxWidth - contentPadding.horizontal,
+    );
+    boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
+    boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
 
     final double inputWidth = math.max(
       0.0,
@@ -1011,18 +1017,14 @@ class _RenderDecoration extends RenderBox {
       hint,
       boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
     );
-    boxToBaseline[counter] = _layoutLineBox(counter, boxConstraints);
+    boxToBaseline[counter] = _layoutLineBox(counter, contentConstraints);
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
     boxToBaseline[helperError] = _layoutLineBox(
       helperError,
-      boxConstraints.copyWith(
-        maxWidth: math.max(0.0, boxConstraints.maxWidth
-          - _boxSize(icon).width
-          - _boxSize(counter).width
-          - contentPadding.horizontal,
-        ),
+      contentConstraints.copyWith(
+        maxWidth: math.max(0.0, contentConstraints.maxWidth - _boxSize(counter).width),
       ),
     );
 
@@ -1267,15 +1269,45 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double subtextHeight = _lineHeight(width, <RenderBox?>[helperError, counter]);
+    final double iconHeight = _minHeight(icon, width);
+    final double iconWidth = _minWidth(icon, iconHeight);
+
+    width = math.max(width - iconWidth, 0.0);
+
+    final double prefixIconHeight = _minHeight(prefixIcon, width);
+    final double prefixIconWidth = _minWidth(prefixIcon, prefixIconHeight);
+
+    final double suffixIconHeight = _minHeight(suffixIcon, width);
+    final double suffixIconWidth = _minWidth(suffixIcon, suffixIconHeight);
+
+    width = math.max(width - contentPadding.horizontal, 0.0);
+
+    final double counterHeight = _minHeight(counter, width);
+    final double counterWidth = _minWidth(counter, counterHeight);
+
+    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
+    final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
+    double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0)
       subtextHeight += subtextGap;
+
+    final double prefixHeight = _minHeight(prefix, width);
+    final double prefixWidth = _minWidth(prefix, prefixHeight);
+
+    final double suffixHeight = _minHeight(suffix, width);
+    final double suffixWidth = _minWidth(suffix, suffixHeight);
+
+    final double availableInputWidth = math.max(width - prefixWidth - suffixWidth - prefixIconWidth - suffixIconWidth, 0.0);
+    final double inputHeight = _lineHeight(availableInputWidth, <RenderBox?>[input, hint]);
+    final double inputMaxHeight = <double>[inputHeight, prefixHeight, suffixHeight].reduce(math.max);
+
     final Offset densityOffset = decoration.visualDensity!.baseSizeAdjustment;
-    final double containerHeight = contentPadding.top
+    final double contentHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
-      + _lineHeight(width, <RenderBox?>[prefix, input, suffix])
+      + inputMaxHeight
       + contentPadding.bottom
       + densityOffset.dy;
+    final double containerHeight = <double>[iconHeight, contentHeight, prefixIconHeight, suffixIconHeight].reduce(math.max);
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
@@ -2409,7 +2441,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
 /// which is surrounded by a border an all sides. It displays the `hintText`
@@ -2418,82 +2449,37 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       icon: Icon(Icons.send),
-///       hintText: 'Hint Text',
-///       helperText: 'Helper Text',
-///       counterText: '0 characters',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
 /// input area with a border, but does not add padding around them.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration.collapsed(
-///       hintText: 'Hint Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
 /// message, provide `errorText` to the `InputDecoration` constructor.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return const TextField(
-///     decoration: InputDecoration(
-///       hintText: 'Hint Text',
-///       errorText: 'Error Text',
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.2.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
 /// the input area, and "Suffix" after the input area.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_prefix_suffix.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return TextFormField(
-///     initialValue: 'abc',
-///     decoration: const InputDecoration(
-///       prefix: Text('Prefix'),
-///       suffix: Text('Suffix'),
-///       border: OutlineInputBorder(),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -2656,37 +2642,10 @@ class InputDecoration {
   /// otherwise be specified using [labelText], which only takes one [TextStyle].
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example shows a `TextField` with a [Text.rich] widget as the [label].
   /// The widget contains multiple [Text] widgets with different [TextStyle]'s.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return const Center(
-  ///     child: TextField(
-  ///       decoration: InputDecoration(
-  ///         label: Text.rich(
-  ///           TextSpan(
-  ///             children: <InlineSpan>[
-  ///               WidgetSpan(
-  ///                 child: Text(
-  ///                   'Username',
-  ///                 ),
-  ///               ),
-  ///               WidgetSpan(
-  ///                 child: Text(
-  ///                   '*',
-  ///                   style: TextStyle(color: Colors.red),
-  ///                 ),
-  ///               ),
-  ///             ],
-  ///           ),
-  ///         ),
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label.0.dart **
   /// {@end-tool}
   ///
   /// Only one of [label] and [labelText] can be specified.
@@ -2899,7 +2858,6 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -2909,36 +2867,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             prefixIcon: Icon(Icons.search),
-  ///             prefixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? prefixIconConstraints;
 
@@ -3077,36 +3006,7 @@ class InputDecoration {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Padding(
-  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  ///     child: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: const <Widget>[
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             hintText: 'Normal Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///           ),
-  ///         ),
-  ///         SizedBox(height: 10),
-  ///         TextField(
-  ///           decoration: InputDecoration(
-  ///             isDense: true,
-  ///             hintText:'Smaller Icon Constraints',
-  ///             suffixIcon: Icon(Icons.search),
-  ///             suffixIconConstraints: BoxConstraints(
-  ///               minHeight: 32,
-  ///               minWidth: 32,
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon_constraints.0.dart **
   /// {@end-tool}
   final BoxConstraints? suffixIconConstraints;
 

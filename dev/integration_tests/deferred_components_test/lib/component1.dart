@@ -5,7 +5,6 @@
 library component1;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 
 class LogoScreen extends StatelessWidget {
