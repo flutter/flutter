@@ -29,7 +29,7 @@ const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, Logger? logger});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression, required Logger logger});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -102,14 +102,14 @@ typedef GetSkSLMethod = Future<String> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-  Logger? logger,
+  required Logger logger,
 }) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket? socket;
 
   Future<void> handleError(dynamic e) async {
-    void Function(String) printVisibleTrace = logger!.printTrace;
+    void Function(String) printVisibleTrace = logger.printTrace;
     if (attempts == 10) {
       logger.printStatus('Connecting to the VM Service is taking longer than expected...');
     } else if (attempts == 20) {
