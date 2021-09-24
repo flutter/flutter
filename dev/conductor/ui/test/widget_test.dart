@@ -2,28 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:conductor_ui/main.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Handles null state', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(null));
+  group(
+    'group',
+    () {
+      testWidgets('Handles null state', (WidgetTester tester) async {
+        await tester.pumpWidget(const MyApp(null));
 
-    expect(find.text('Flutter Conductor'), findsOneWidget);
-    expect(find.textContaining('No persistent state file found at'), findsOneWidget);
-  });
+        expect(find.text('Flutter Conductor'), findsOneWidget);
+        expect(find.textContaining('No persistent state file found at'),
+            findsOneWidget);
+      });
 
-  testWidgets('App prints release channel from state file', (WidgetTester tester) async {
-    const String channelName = 'dev';
-    final pb.ConductorState state = pb.ConductorState(
-      releaseChannel: channelName,
-    );
-    await tester.pumpWidget(MyApp(state));
+      testWidgets('App prints release channel from state file',
+          (WidgetTester tester) async {
+        const String channelName = 'dev';
+        final pb.ConductorState state = pb.ConductorState(
+          releaseChannel: channelName,
+        );
+        await tester.pumpWidget(MyApp(state));
 
-    expect(find.text('Flutter Conductor'), findsOneWidget);
-    expect(find.textContaining(channelName), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-  });
+        expect(find.text('Flutter Conductor'), findsOneWidget);
+        expect(find.textContaining(channelName), findsOneWidget);
+        expect(find.text('1'), findsNothing);
+      });
+    },
+    skip: Platform.isWindows,
+  );
 }
