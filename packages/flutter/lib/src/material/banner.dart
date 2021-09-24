@@ -123,11 +123,13 @@ class MaterialBanner extends StatefulWidget {
   /// Typically this is a list of [TextButton] widgets.
   final List<Widget> actions;
 
-  /// The z-coordinate at which to place the material banner. This controls the size of the shadow below the material banner.
+  /// The z-coordinate at which to place the material banner.
+  /// This controls the size of the shadow below the material banner.
   ///
   /// Defines the banner's [Material.elevation].
   ///
-  /// If this property is null, then [MaterialBannerThemeData.elevation] of [ThemeData.bannerTheme] is used, if that is also null, the default value is 0.
+  /// If this property is null, then [MaterialBannerThemeData.elevation] of
+  /// [ThemeData.bannerTheme] is used, if that is also null, the default value is 0.
   /// If the elevation is 0, the Scaffold's body will be pushed down by the MaterialBanner.
   final double? elevation;
 
@@ -322,7 +324,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
               ),
               if (!isSingleRow)
                 buttonBar,
-              const Divider(height: 0),
+
+              if (elevation == 0)
+                const Divider(height: 0),
             ],
           ),
         ),

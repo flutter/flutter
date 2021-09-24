@@ -873,7 +873,7 @@ class _BodyBuilder extends StatelessWidget {
 
         final double top = extendBodyBehindAppBar
           ? math.max(metrics.padding.top,
-            bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight)
+              bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight)
           : metrics.padding.top;
 
         return MediaQuery(
@@ -2938,7 +2938,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_messengerMaterialBanner != null) {
       final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
       final double elevation = _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
-      extendBodyBehindMaterialBanner = elevation != 0;
+      extendBodyBehindMaterialBanner = elevation != 0.0;
 
       _addIfNonNull(
         children,
