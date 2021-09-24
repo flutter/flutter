@@ -447,7 +447,7 @@ class FlutterVmService {
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
     String? isolateId,
-    Map<String, dynamic>? args
+    Map<String, Object?>? args
   }) async {
     try {
       return await service.callMethod(method, isolateId: isolateId, args: args);
@@ -471,7 +471,7 @@ class FlutterVmService {
   }) async {
     await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
-      args: <String, dynamic>{
+      args: <String, Object?>{
         'viewId': viewId,
         'assetDirectory': assetsDirectory.toFilePath(windows: false),
       });
@@ -493,7 +493,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json!['SkSLs'] as Map<String, Object>;
+    return response.json?['SkSLs'] as Map<String, Object>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -542,7 +542,7 @@ class FlutterVmService {
   Future<String> flutterDebugDumpApp({
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
@@ -800,7 +800,7 @@ class FlutterVmService {
 
   /// Invoke a flutter extension method, if the flutter extension is not
   /// available, returns null.
-  Future<Map<String, dynamic>?> invokeFlutterExtensionRpcRaw(
+  Future<Map<String, Object?>?> invokeFlutterExtensionRpcRaw(
     String method, {
     required String isolateId,
     Map<String, dynamic>? args,
