@@ -6,7 +6,10 @@ import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
 config("accessibility_config") {
-  visibility = [ ":*" ]
+  visibility = [
+    ":*",
+    "//flutter/shell/platform/common:common_cpp_accessibility",
+  ]
   if (is_win) {
     # TODO: std::iterator class template is deprecated in C++17
     defines = [ "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING" ]
