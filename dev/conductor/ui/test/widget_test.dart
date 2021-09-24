@@ -11,26 +11,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('group', () {
-    if (Platform.isMacOS || Platform.isLinux) {
-      testWidgets('Handles null state', (WidgetTester tester) async {
-        await tester.pumpWidget(const MyApp(null));
+    testWidgets('Handles null state', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp(null));
 
-        expect(find.text('Flutter Conductor'), findsOneWidget);
-        expect(find.textContaining('No persistent state file found at'),
-            findsOneWidget);
-      });
+      expect(find.text('Flutter Conductor'), findsOneWidget);
+      expect(find.textContaining('No persistent state file found at'),
+          findsOneWidget);
+    });
 
-      testWidgets('App prints release channel from state file', (WidgetTester tester) async {
-        const String channelName = 'dev';
-        final pb.ConductorState state = pb.ConductorState(
-            releaseChannel: channelName,
-        );
-        await tester.pumpWidget(MyApp(state));
+    testWidgets('App prints release channel from state file',
+        (WidgetTester tester) async {
+      const String channelName = 'dev';
+      final pb.ConductorState state = pb.ConductorState(
+        releaseChannel: channelName,
+      );
+      await tester.pumpWidget(MyApp(state));
 
-        expect(find.text('Flutter Conductor'), findsOneWidget);
-        expect(find.textContaining(channelName), findsOneWidget);
-        expect(find.text('1'), findsNothing);
-      });
-    }
-  });
+      expect(find.text('Flutter Conductor'), findsOneWidget);
+      expect(find.textContaining(channelName), findsOneWidget);
+      expect(find.text('1'), findsNothing);
+    });
+  }, skip: Platform.isWindows); // This app does not support Windows
 }
