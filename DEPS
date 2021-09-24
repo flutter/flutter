@@ -150,7 +150,7 @@ deps = {
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'a38aef9142ace942a8bf166020c569f4cda0f8d3',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2b50fa94b07b601293d7c1f791e853bba8ffbb84',
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
@@ -588,7 +588,7 @@ deps = {
     'packages': [
       {
         'package': 'gn/gn/${{platform}}',
-        'version': 'git_revision:24e2f7df92641de0351a96096fb2c490b2436bb8'
+        'version': 'git_revision:0153d369bbccc908f4da4993b1ba82728055926a'
       },
     ],
     'dep_type': 'cipd',
