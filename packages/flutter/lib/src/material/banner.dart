@@ -131,7 +131,8 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// If this property is null, then [MaterialBannerThemeData.elevation] of
   /// [ThemeData.bannerTheme] is used, if that is also null, the default value is 0.
-  /// If the elevation is 0, the [Scaffold]'s body will be pushed down by the MaterialBanner when used with [ScaffoldMessenger].
+  /// If the elevation is 0, the [Scaffold]'s body will be pushed down by the
+  /// MaterialBanner when used with [ScaffoldMessenger].
   final double? elevation;
 
   /// The (optional) leading widget of the [MaterialBanner].
