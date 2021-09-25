@@ -157,7 +157,7 @@ environment:
 
     expect(generatedMain, exists);
     expect(
-      generatedMain.readAsStringSync(),
+      generatedMain.readAsLinesSync(),
       contains("import 'test/foo.dart' as entrypoint;")
     );
   }, overrides: <Type, Generator>{
