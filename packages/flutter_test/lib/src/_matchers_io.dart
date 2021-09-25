@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use

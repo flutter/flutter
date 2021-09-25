@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
@@ -783,7 +782,7 @@ void main() {
     expect(updatedSelection!.baseOffset, 3);
     expect(updatedSelection!.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
+  });
 
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
@@ -962,7 +961,7 @@ void main() {
       // Since the range covers an entire line, the Rect should also be almost
       // as wide as the entire paragraph (give or take 1 character).
       expect(composingRect.width, greaterThan(200 - 10));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
+    });
   });
 
   group('custom painters', () {

@@ -12,7 +12,7 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[!0e63b52bd7e4fda1cd7b7bf2b4fe515a27fadbeaced01f5ad8b699b81d3611ed64c5d3271bcd8426dd914ef41cba48a0!]
+gcp_credentials: ENCRYPTED[!48cff44dd32e9cc412d4d381c7fe68d373ca04cf2639f8192d21cb1a9ab5e21129651423a1cf88f3fd7fe2125c1cabd9!]
 
 # LINUX SHARDS
 task:

@@ -300,6 +300,11 @@ String _generateSelectMethod(Message message, String translationForMessage) {
         );
       }
     }
+  } else {
+    throw L10nException(
+      'Incorrect select message format for: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format.'
+    );
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {

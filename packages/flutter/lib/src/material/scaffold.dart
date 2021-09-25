@@ -59,19 +59,21 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Manages [SnackBar]s for descendant [Scaffold]s.
+/// Manages [SnackBar]s and [MaterialBanner]s for descendant [Scaffold]s.
 ///
-/// This class provides APIs for showing snack bars.
+/// This class provides APIs for showing snack bars and material banners at the
+/// bottom and top of the screen, respectively.
 ///
-/// To display a snack bar, obtain the [ScaffoldMessengerState] for the current
-/// [BuildContext] via [ScaffoldMessenger.of] and use the
-/// [ScaffoldMessengerState.showSnackBar] function.
+/// To display one of these notifications, obtain the [ScaffoldMessengerState]
+/// for the current [BuildContext] via [ScaffoldMessenger.of] and use the
+/// [ScaffoldMessengerState.showSnackBar] or the
+/// [ScaffoldMessengerState.showMaterialBanner] functions.
 ///
 /// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
-/// ScaffoldMessenger will only present a [SnackBar] to the root Scaffold of
-/// the subtree of Scaffolds. In order to show SnackBars in the inner, nested
-/// Scaffolds, set a new scope for your SnackBars by instantiating a new
-/// ScaffoldMessenger in between the levels of nesting.
+/// ScaffoldMessenger will only present the notification to the root Scaffold of
+/// the subtree of Scaffolds. In order to show notifications for the inner, nested
+/// Scaffolds, set a new scope by instantiating a new ScaffoldMessenger in
+/// between the levels of nesting.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 /// Here is an example of showing a [SnackBar] when the user presses a button.
@@ -83,6 +85,8 @@ enum _ScaffoldSlot {
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
 ///    bottom of the app using the [ScaffoldMessengerState.showSnackBar] method.
+///  * [MaterialBanner], which is a temporary notification typically shown at the
+///    top of the app using the [ScaffoldMessengerState.showMaterialBanner] method.
 ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
 ///    has a [ScaffoldMessenger] ancestor.
 ///  * Cookbook: [Display a SnackBar](https://flutter.dev/docs/cookbook/design/snackbars)
@@ -165,10 +169,11 @@ class ScaffoldMessenger extends StatefulWidget {
 
 /// State for a [ScaffoldMessenger].
 ///
-/// A [ScaffoldMessengerState] object can be used to [showSnackBar] for every
-/// registered [Scaffold] that is a descendant of the associated
-/// [ScaffoldMessenger]. Scaffolds will register to receive [SnackBar]s from
-/// their closest ScaffoldMessenger ancestor.
+/// A [ScaffoldMessengerState] object can be used to [showSnackBar] or
+/// [showMaterialBanner] for every registered [Scaffold] that is a descendant of
+/// the associated [ScaffoldMessenger]. Scaffolds will register to receive
+/// [SnackBar]s and [MaterialBanner]s from their closest ScaffoldMessenger
+/// ancestor.
 ///
 /// Typically obtained via [ScaffoldMessenger.of].
 class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProviderStateMixin {
