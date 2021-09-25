@@ -6,6 +6,16 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 
+/// An [Intent] to send the event straight to the engine.
+///
+/// See also:
+///
+///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
+class DoNothingAndStopPropagationTextIntent extends Intent {
+  /// Creates an instance of [DoNothingAndStopPropagationTextIntent].
+  const DoNothingAndStopPropagationTextIntent();
+}
+
 /// A text editing related [Intent] that performs an operation towards a given
 /// direction of the current caret location.
 abstract class DirectionalTextEditingIntent extends Intent {

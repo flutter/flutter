@@ -395,13 +395,13 @@ class ToolbarOptions {
 ///
 /// ### Other Intents
 ///
-/// | **Intent Class**                    | **Default Behavior**                                 |
-/// | :---------------------------------- | :--------------------------------------------------- |
-/// | [DoNothingAndStopPropagationIntent] | Does nothing in the input field, and prevents the [Intent] from further propagating in the widget tree. |
-/// | [ReplaceTextIntent]                 | Replaces the current [TextEditingValue] in the input field's [TextEditingController], and triggers all related user callbacks and [TextInputFormatter]s. |
-/// | [UpdateSelectionIntent]             | Updates the current selection in the input field's [TextEditingController], and triggers the [onSelectionChanged] callback. |
-/// | [CopySelectionTextIntent]           | Copies or cuts the selected text into the clipboard |
-/// | [PasteTextIntent]                   | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
+/// | **Intent Class**                        | **Default Behavior**                                 |
+/// | :-------------------------------------- | :--------------------------------------------------- |
+/// | [DoNothingAndStopPropagationTextIntent] | Does nothing in the input field, and prevents the key event from further propagating in the widget tree. |
+/// | [ReplaceTextIntent]                     | Replaces the current [TextEditingValue] in the input field's [TextEditingController], and triggers all related user callbacks and [TextInputFormatter]s. |
+/// | [UpdateSelectionIntent]                 | Updates the current selection in the input field's [TextEditingController], and triggers the [onSelectionChanged] callback. |
+/// | [CopySelectionTextIntent]               | Copies or cuts the selected text into the clipboard |
+/// | [PasteTextIntent]                       | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
 ///
 /// ## Gesture Events Handling
 ///
@@ -2793,8 +2793,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       boundary = _LineBreak(renderEditable, textEditingValue);
     }
 
-    // Use a _MixedBoundary to make sure we don't leave invalid code units
-    // behind after deletion.
+    // The _MixedBoundary is to make sure we don't leave invalid code units in
+    // the field after deletion.
     // `boundary` doesn't need to be wrapped in a _CollapsedSelectionBoundary,
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
@@ -2828,7 +2828,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjecentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjecentLineIntent>(this);
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
+    DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
