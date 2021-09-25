@@ -2160,6 +2160,26 @@ void main() {
     expect(secondItem.padding, secondItemPadding);
     expect(thirdItem.padding, thirdItemPadding);
   });
+
+  testWidgets('Navigation Rail should be scrollable to last Item', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.none,
+        selectedIndex: 0,
+        destinations: List<NavigationRailDestination>.generate(100, (int index) => NavigationRailDestination(
+            icon: const Icon(Icons.favorite_border),
+            selectedIcon: const Icon(Icons.favorite),
+            label: Text('Destination $index'),
+          )).toList()
+      ),
+      size: const Size(500, 500)
+    );
+
+    await tester.drag(find.byType(NavigationRail), const Offset(0.0, -1000.0));
+    await tester.dragUntilVisible(find.byType(NavigationRail), find.text('Destiination 99'), const Offset(0,-200));
+    expect(find.text('Destination 99'), findsOneWidget);
+  });
 }
 
 TestSemantics _expectedSemantics() {
@@ -2167,49 +2187,53 @@ TestSemantics _expectedSemantics() {
     children: <TestSemantics>[
       TestSemantics(
         textDirection: TextDirection.ltr,
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isSelected,
-                      SemanticsFlag.isFocusable,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Abc\nTab 1 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Def\nTab 2 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Ghi\nTab 3 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Jkl\nTab 4 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'body',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+        children:<TestSemantics>[ 
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isSelected,
+                        SemanticsFlag.isFocusable,
+                      ],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      label: 'Abc\nTab 1 of 4',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      label: 'Def\nTab 2 of 4',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      label: 'Ghi\nTab 3 of 4',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      label: 'Jkl\nTab 4 of 4',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'body',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ])
     ],
   );
 }
@@ -2242,14 +2266,16 @@ List<NavigationRailDestination> _destinations() {
 Future<void> _pumpNavigationRail(
   WidgetTester tester, {
   double textScaleFactor = 1.0,
+  Size? size,
   required NavigationRail navigationRail,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Builder(
         builder: (BuildContext context) {
+          size ??= MediaQuery.of(context).size;
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor, size:size),
             child: Scaffold(
               body: Row(
                 children: <Widget>[
