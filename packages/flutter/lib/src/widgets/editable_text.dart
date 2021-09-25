@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
-import 'package:characters/src/grapheme_clusters/breaks.dart' as characters show previousBreak, nextBreak;
+import 'package:characters/characters.dart' show CharacterRange;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
@@ -3255,15 +3255,27 @@ class _CharacterBoundary extends _TextBoundary {
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
     return TextPosition(
-      offset: characters.previousBreak(textEditingValue.text, 0, textEditingValue.text.length, position.offset),
+      offset: CharacterRange.at(textEditingValue.text, position.offset, endOffset).stringBeforeLength,
     );
   }
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    final int trailingOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
     return TextPosition(
-      offset: characters.nextBreak(textEditingValue.text, 0, textEditingValue.text.length, trailingOffset),
+      offset: textEditingValue.text.length - range.stringAfterLength,
+    );
+  }
+
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
+    return TextRange(
+      start: range.stringBeforeLength,
+      end: textEditingValue.text.length - range.stringAfterLength,
     );
   }
 }
