@@ -19,6 +19,7 @@ FlatlandPlatformView::FlatlandPlatformView(
     fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher,
     fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
     fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
         keyboard_listener,
     OnEnableWireframe wireframe_enabled_callback,
@@ -41,6 +42,7 @@ FlatlandPlatformView::FlatlandPlatformView(
                    std::move(parent_environment_service_provider),
                    std::move(vrf),
                    std::move(focuser),
+                   std::move(touch_source),
                    std::move(keyboard_listener),
                    std::move(wireframe_enabled_callback),
                    std::move(on_create_view_callback),

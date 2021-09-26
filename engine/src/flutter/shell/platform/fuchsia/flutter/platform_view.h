@@ -8,6 +8,7 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/ui/input/cpp/fidl.h>
 #include <fuchsia/ui/input3/cpp/fidl.h>
+#include <fuchsia/ui/pointer/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <lib/fidl/cpp/binding.h>
 #include <lib/fit/function.h>
@@ -15,9 +16,13 @@
 #include <lib/ui/scenic/cpp/id.h>
 
 #include <array>
+#include <functional>
 #include <map>
+#include <memory>
 #include <set>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "flow/embedded_views.h"
 #include "flutter/fml/macros.h"
@@ -28,6 +33,7 @@
 #include "flutter/shell/platform/fuchsia/flutter/keyboard.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 #include "focus_delegate.h"
+#include "pointer_delegate.h"
 
 namespace flutter_runner {
 
@@ -60,29 +66,31 @@ class PlatformView : public flutter::PlatformView,
                      private fuchsia::ui::input3::KeyboardListener,
                      private fuchsia::ui::input::InputMethodEditorClient {
  public:
-  PlatformView(flutter::PlatformView::Delegate& delegate,
-               std::string debug_label,
-               fuchsia::ui::views::ViewRef view_ref,
-               flutter::TaskRunners task_runners,
-               std::shared_ptr<sys::ServiceDirectory> runner_services,
-               fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
-                   parent_environment_service_provider,
-               fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
-               fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
-               fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
-                   keyboard_listener,
-               OnEnableWireframe wireframe_enabled_callback,
-               OnCreateView on_create_view_callback,
-               OnUpdateView on_update_view_callback,
-               OnDestroyView on_destroy_view_callback,
-               OnCreateSurface on_create_surface_callback,
-               OnSemanticsNodeUpdate on_semantics_node_update_callback,
-               OnRequestAnnounce on_request_announce_callback,
-               OnShaderWarmup on_shader_warmup,
-               std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
-               AwaitVsyncCallback await_vsync_callback,
-               AwaitVsyncForSecondaryCallbackCallback
-                   await_vsync_for_secondary_callback_callback);
+  PlatformView(
+      flutter::PlatformView::Delegate& delegate,
+      std::string debug_label,
+      fuchsia::ui::views::ViewRef view_ref,
+      flutter::TaskRunners task_runners,
+      std::shared_ptr<sys::ServiceDirectory> runner_services,
+      fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
+          parent_environment_service_provider,
+      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
+      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+      fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
+          keyboard_listener,
+      OnEnableWireframe wireframe_enabled_callback,
+      OnCreateView on_create_view_callback,
+      OnUpdateView on_update_view_callback,
+      OnDestroyView on_destroy_view_callback,
+      OnCreateSurface on_create_surface_callback,
+      OnSemanticsNodeUpdate on_semantics_node_update_callback,
+      OnRequestAnnounce on_request_announce_callback,
+      OnShaderWarmup on_shader_warmup,
+      std::shared_ptr<flutter::ExternalViewEmbedder> view_embedder,
+      AwaitVsyncCallback await_vsync_callback,
+      AwaitVsyncForSecondaryCallbackCallback
+          await_vsync_for_secondary_callback_callback);
 
   virtual ~PlatformView();
 
@@ -178,6 +186,7 @@ class PlatformView : public flutter::PlatformView,
   // alive there
   const fuchsia::ui::views::ViewRef view_ref_;
   std::shared_ptr<FocusDelegate> focus_delegate_;
+  std::shared_ptr<PointerDelegate> pointer_delegate_;
 
   // Logical size and origin, and logical->physical ratio.  These are optional
   // to provide an "unset" state during program startup, before Scenic has sent

@@ -1457,6 +1457,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc

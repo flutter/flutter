@@ -136,6 +136,9 @@ void Engine::Initialize(
   endpoints.set_view_focuser(focuser.NewRequest());
   fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused;
   endpoints.set_view_ref_focused(view_ref_focused.NewRequest());
+  fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source;
+  // TODO(fxbug.dev/85125): Enable TouchSource for GFX.
+  // endpoints.set_touch_source(touch_source.NewRequest());
   scenic->CreateSessionT(std::move(endpoints), [] {});
 
   // Make clones of the `ViewRef` before sending it down to Scenic, since the
@@ -322,6 +325,7 @@ void Engine::Initialize(
            parent_viewport_watcher = std::move(parent_viewport_watcher),
            focuser = std::move(focuser),
            view_ref_focused = std::move(view_ref_focused),
+           touch_source = std::move(touch_source),
            on_session_listener_error_callback =
                std::move(on_session_listener_error_callback),
            on_enable_wireframe_callback =
@@ -399,6 +403,7 @@ void Engine::Initialize(
                           parent_environment_service_provider),  // services
                       std::move(parent_viewport_watcher),
                       std::move(view_ref_focused), std::move(focuser),
+                      std::move(touch_source),
                       // Server-side part of the
                       // fuchsia.ui.input3.KeyboardListener connection.
                       std::move(keyboard_listener_request),
@@ -424,6 +429,7 @@ void Engine::Initialize(
                   std::move(parent_environment_service_provider),  // services
                   std::move(session_listener_request),  // session listener
                   std::move(view_ref_focused), std::move(focuser),
+                  std::move(touch_source),
                   // Server-side part of the fuchsia.ui.input3.KeyboardListener
                   // connection.
                   std::move(keyboard_listener_request),

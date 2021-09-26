@@ -28,22 +28,17 @@ rapidjson::Value ParsePlatformMessage(std::string json) {
 namespace flutter_runner::testing {
 
 class FocusDelegateTest : public ::testing::Test {
- public:
-  std::unique_ptr<FakeViewRefFocused> vrf;
-  std::unique_ptr<FakeFocuser> focuser;
-  std::unique_ptr<FocusDelegate> focus_delegate;
-
-  void RunLoopUntilIdle() { loop_.RunUntilIdle(); }
-
  protected:
   FocusDelegateTest() : loop_(&kAsyncLoopConfigAttachToCurrentThread) {}
 
+  void RunLoopUntilIdle() { loop_.RunUntilIdle(); }
+
   void SetUp() override {
-    vrf = std::make_unique<FakeViewRefFocused>();
-    focuser = std::make_unique<FakeFocuser>();
-    focus_delegate = std::make_unique<FocusDelegate>(
-        vrf_bindings.AddBinding(vrf.get()),
-        focuser_bindings.AddBinding(focuser.get()));
+    vrf_ = std::make_unique<FakeViewRefFocused>();
+    focuser_ = std::make_unique<FakeFocuser>();
+    focus_delegate_ = std::make_unique<FocusDelegate>(
+        vrf_bindings.AddBinding(vrf_.get()),
+        focuser_bindings.AddBinding(focuser_.get()));
   }
 
   void TearDown() override {
@@ -52,6 +47,10 @@ class FocusDelegateTest : public ::testing::Test {
     loop_.Quit();
     loop_.ResetQuit();
   }
+
+  std::unique_ptr<FakeViewRefFocused> vrf_;
+  std::unique_ptr<FakeFocuser> focuser_;
+  std::unique_ptr<FocusDelegate> focus_delegate_;
 
  private:
   async::Loop loop_;
@@ -68,7 +67,7 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
                                true,  false, true, true};
   std::size_t vrf_index = 0;
   std::size_t callback_index = 0;
-  focus_delegate->WatchLoop([&](bool focus_state) {
+  focus_delegate_->WatchLoop([&](bool focus_state) {
     // Make sure the focus state that FocusDelegate gives us is consistent with
     // what was fired from the vrf.
     EXPECT_EQ(vrf_states[callback_index], focus_state);
@@ -76,39 +75,39 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
     // View.focus.getCurrent should complete with the current (up to date) focus
     // state.
     auto response = FakePlatformMessageResponse::Create();
-    EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+    EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
         ParsePlatformMessage("{\"method\":\"View.focus.getCurrent\"}"),
         response));
     response->ExpectCompleted(focus_state ? "[true]" : "[false]");
 
     // Ensure this callback always happens in lockstep with
-    // vrf->ScheduleCallback.
+    // vrf_->ScheduleCallback.
     EXPECT_EQ(vrf_index, callback_index++);
   });
 
   // Subsequent WatchLoop calls should not be respected.
-  focus_delegate->WatchLoop([](bool _) {
+  focus_delegate_->WatchLoop([](bool _) {
     ADD_FAILURE() << "Subsequent WatchLoops should not be respected!";
   });
 
   do {
     // Ensure the next focus state is handled correctly.
     auto response1 = FakePlatformMessageResponse::Create();
-    EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+    EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
         ParsePlatformMessage("{\"method\":\"View.focus.getNext\"}"),
         response1));
 
     // Since there's already an outstanding PlatformMessageResponse, this one
     // should be completed null.
     auto response2 = FakePlatformMessageResponse::Create();
-    EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+    EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
         ParsePlatformMessage("{\"method\":\"View.focus.getNext\"}"),
         response2));
     response2->ExpectCompleted("[null]");
 
     // Post watch events and trigger the next vrf event.
     RunLoopUntilIdle();
-    vrf->ScheduleCallback(vrf_states[vrf_index]);
+    vrf_->ScheduleCallback(vrf_states[vrf_index]);
     RunLoopUntilIdle();
 
     // Next focus state should be completed by now.
@@ -117,14 +116,14 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
     // Check View.focus.getCurrent again, and increment vrf_index since we move
     // on to the next focus state.
     auto response3 = FakePlatformMessageResponse::Create();
-    EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+    EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
         ParsePlatformMessage("{\"method\":\"View.focus.getCurrent\"}"),
         response3));
     response3->ExpectCompleted(vrf_states[vrf_index++] ? "[true]" : "[false]");
 
-    // vrf->times_watched should always be 1 more than the amount of vrf events
+    // vrf_->times_watched should always be 1 more than the amount of vrf events
     // emitted.
-    EXPECT_EQ(vrf_index + 1, vrf->times_watched);
+    EXPECT_EQ(vrf_index + 1, vrf_->times_watched);
   } while (vrf_index < vrf_states.size());
 }
 
@@ -144,12 +143,12 @@ TEST_F(FocusDelegateTest, RequestFocusTest) {
 
   // Dispatch the plaform message request with an expected completion response.
   auto response = FakePlatformMessageResponse::Create();
-  EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+  EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
       ParsePlatformMessage(message.str()), response));
   RunLoopUntilIdle();
 
   response->ExpectCompleted("[0]");
-  EXPECT_TRUE(focuser->request_focus_called());
+  EXPECT_TRUE(focuser_->request_focus_called());
 }
 
 // Tests that HandlePlatformMessage() completes a "View.focus.request" response
@@ -158,7 +157,7 @@ TEST_F(FocusDelegateTest, RequestFocusFailTest) {
   // This "Mock" ViewRef serves as the target for the RequestFocus operation.
   auto mock_view_ref_pair = scenic::ViewRefPair::New();
   // We're testing the focus failure case.
-  focuser->fail_request_focus();
+  focuser_->fail_request_focus();
   // Create the platform message request.
   std::ostringstream message;
   message << "{"
@@ -170,7 +169,7 @@ TEST_F(FocusDelegateTest, RequestFocusFailTest) {
 
   // Dispatch the plaform message request with an expected completion response.
   auto response = FakePlatformMessageResponse::Create();
-  EXPECT_TRUE(focus_delegate->HandlePlatformMessage(
+  EXPECT_TRUE(focus_delegate_->HandlePlatformMessage(
       ParsePlatformMessage(message.str()), response));
   RunLoopUntilIdle();
 
@@ -180,7 +179,7 @@ TEST_F(FocusDelegateTest, RequestFocusFailTest) {
           static_cast<std::underlying_type_t<fuchsia::ui::views::Error>>(
               fuchsia::ui::views::Error::DENIED)) +
       "]");
-  EXPECT_TRUE(focuser->request_focus_called());
+  EXPECT_TRUE(focuser_->request_focus_called());
 }
 
 }  // namespace flutter_runner::testing

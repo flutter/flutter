@@ -19,6 +19,7 @@ source_set("focus") {
   sources = [
     "focuser.h",
     "platform_message.h",
+    "touch_source.h",
     "view_ref_focused.h",
   ]
 

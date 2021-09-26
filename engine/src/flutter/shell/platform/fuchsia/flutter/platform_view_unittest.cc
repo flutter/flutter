@@ -29,7 +29,9 @@
 #include "task_runner_adapter.h"
 #include "tests/fakes/focuser.h"
 #include "tests/fakes/platform_message.h"
+#include "tests/fakes/touch_source.h"
 #include "tests/fakes/view_ref_focused.h"
+#include "tests/pointer_event_utility.h"
 
 namespace flutter_runner::testing {
 namespace {
@@ -207,6 +209,12 @@ class PlatformViewBuilder {
     return *this;
   }
 
+  PlatformViewBuilder& SetTouchSource(
+      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source) {
+    touch_source_ = std::move(touch_source);
+    return *this;
+  }
+
   PlatformViewBuilder& SetDestroyViewCallback(OnDestroyView callback) {
     on_destroy_view_callback_ = std::move(callback);
     return *this;
@@ -263,7 +271,8 @@ class PlatformViewBuilder {
         delegate_, debug_label_, std::move(view_ref_), task_runners_,
         runner_services_, std::move(parent_environment_service_provider_),
         std::move(session_listener_request_), std::move(vrf_),
-        std::move(focuser_), std::move(keyboard_listener_),
+        std::move(focuser_), std::move(touch_source_),
+        std::move(keyboard_listener_),
         std::move(on_session_listener_error_callback_),
         std::move(wireframe_enabled_callback_),
         std::move(on_create_view_callback_),
@@ -295,6 +304,8 @@ class PlatformViewBuilder {
       session_listener_request_{nullptr};
   fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf_{nullptr};
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser_{nullptr};
+  fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source_{
+      nullptr};
   fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
       keyboard_listener_{nullptr};
   fit::closure on_session_listener_error_callback_{nullptr};
@@ -1372,6 +1383,112 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   expected_result_ostream << "[" << shaders.size() << "]";
   std::string expected_result_string = expected_result_ostream.str();
   EXPECT_EQ(expected_result_string, response->result_string);
+}
+
+TEST_F(PlatformViewTests, TouchSource_LogicalToPhysicalConversion) {
+  // Names and constants
+  using fup_EventPhase = fuchsia::ui::pointer::EventPhase;
+  using fup_TouchEvent = fuchsia::ui::pointer::TouchEvent;
+  using fup_TouchIxnId = fuchsia::ui::pointer::TouchInteractionId;
+  using fup_TouchIxnStatus = fuchsia::ui::pointer::TouchInteractionStatus;
+
+  constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {20, 20}}};
+  constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr fup_TouchIxnId kIxnOne = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
+  constexpr float valid_pixel_ratio = 2.f;
+
+  // Setup
+  sys::testing::ServiceDirectoryProvider services_provider(dispatcher());
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
+                                    nullptr);
+
+  FakeTouchSource touch_server;
+  fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_bindings;
+  auto touch_handle = touch_bindings.AddBinding(&touch_server);
+
+  fuchsia::ui::scenic::SessionListenerPtr session_listener;
+
+  flutter_runner::GfxPlatformView platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners),
+                          services_provider.service_directory())
+          .SetSessionListenerRequest(session_listener.NewRequest())
+          .SetTouchSource(std::move(touch_handle))
+          .Build();
+  RunLoopUntilIdle();
+  EXPECT_EQ(delegate.pointer_packets().size(), 0u);
+
+  // Set logical-to-physical metrics and logical view size
+  std::vector<fuchsia::ui::scenic::Event> scenic_events;
+  scenic_events.emplace_back(fuchsia::ui::scenic::Event::WithGfx(
+      fuchsia::ui::gfx::Event::WithMetrics(fuchsia::ui::gfx::MetricsEvent{
+          .node_id = 0,
+          .metrics =
+              fuchsia::ui::gfx::Metrics{
+                  .scale_x = valid_pixel_ratio,
+                  .scale_y = valid_pixel_ratio,
+                  .scale_z = valid_pixel_ratio,
+              },
+      })));
+  scenic_events.emplace_back(
+      fuchsia::ui::scenic::Event::WithGfx(
+          fuchsia::ui::gfx::Event::WithViewPropertiesChanged(
+              fuchsia::ui::gfx::ViewPropertiesChangedEvent{
+                  .view_id = 0,
+                  .properties =
+                      fuchsia::ui::gfx::ViewProperties{
+                          .bounding_box =
+                              fuchsia::ui::gfx::BoundingBox{
+                                  .min =
+                                      fuchsia::ui::gfx::vec3{
+                                          .x = 0.f,
+                                          .y = 0.f,
+                                          .z = 0.f,
+                                      },
+                                  .max =
+                                      fuchsia::ui::gfx::vec3{
+                                          .x = 20.f,
+                                          .y = 20.f,
+                                          .z = 20.f,
+                                      },
+                              },
+                      },
+              })));
+  session_listener->OnScenicEvent(std::move(scenic_events));
+  RunLoopUntilIdle();
+  EXPECT_EQ(delegate.metrics(), flutter::ViewportMetrics(2.f, 40.f, 40.f, -1));
+
+  // Inject
+  std::vector<fup_TouchEvent> events =
+      TouchEventBuilder::New()
+          .AddTime(/* in nanoseconds */ 1111789u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxnOne, fup_EventPhase::ADD, {10.f, 10.f})
+          .AddResult(
+              {.interaction = kIxnOne, .status = fup_TouchIxnStatus::GRANTED})
+          .BuildAsVector();
+  touch_server.ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  // Unpack
+  std::vector<std::unique_ptr<flutter::PointerDataPacket>> packets =
+      delegate.TakePointerDataPackets();
+  ASSERT_EQ(packets.size(), 1u);
+  std::vector<flutter::PointerData> flutter_events;
+  UnpackPointerPacket(flutter_events, std::move(packets[0]));
+
+  // Examine phases
+  ASSERT_EQ(flutter_events.size(), 2u);
+  EXPECT_EQ(flutter_events[0].change, flutter::PointerData::Change::kAdd);
+  EXPECT_EQ(flutter_events[1].change, flutter::PointerData::Change::kDown);
+
+  // Examine coordinates
+  // With metrics defined, observe metrics ratio applied.
+  EXPECT_EQ(flutter_events[0].physical_x, 20.f);
+  EXPECT_EQ(flutter_events[0].physical_y, 20.f);
+  EXPECT_EQ(flutter_events[1].physical_x, 20.f);
+  EXPECT_EQ(flutter_events[1].physical_y, 20.f);
 }
 
 TEST_F(PlatformViewTests, DownPointerNumericNudge) {

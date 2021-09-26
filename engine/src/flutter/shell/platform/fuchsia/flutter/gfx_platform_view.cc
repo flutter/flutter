@@ -20,6 +20,7 @@ GfxPlatformView::GfxPlatformView(
         session_listener_request,
     fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
     fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
         keyboard_listener,
     fit::closure on_session_listener_error_callback,
@@ -43,6 +44,7 @@ GfxPlatformView::GfxPlatformView(
                    std::move(parent_environment_service_provider),
                    std::move(vrf),
                    std::move(focuser),
+                   std::move(touch_source),
                    std::move(keyboard_listener),
                    std::move(wireframe_enabled_callback),
                    std::move(on_create_view_callback),
@@ -165,8 +167,9 @@ void GfxPlatformView::OnScenicEvent(
       case fuchsia::ui::scenic::Event::Tag::kInput:
         switch (event.input().Which()) {
           case fuchsia::ui::input::InputEvent::Tag::kFocus:
-            break;
+            break;  // Focus handled elsewhere.
           case fuchsia::ui::input::InputEvent::Tag::kPointer: {
+            // Only received when TouchSource not plugged in.
             OnHandlePointerEvent(event.input().pointer());
             break;
           }
