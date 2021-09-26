@@ -272,7 +272,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
-    final List<Map<String, dynamic>> fonts = _parseFonts(
+    final List<Map<String, Object?>> fonts = _parseFonts(
       flutterManifest,
       packageConfig,
       primary: true,
@@ -515,13 +515,13 @@ class ManifestAssetBundle implements AssetBundle {
     return result;
   }
 
-  List<Map<String, dynamic>> _parseFonts(
+  List<Map<String, Object?>> _parseFonts(
     FlutterManifest manifest,
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
   }) {
-    return <Map<String, dynamic>>[
+    return <Map<String, Object?>>[
       if (primary && manifest.usesMaterialDesign)
         ...kMaterialFonts,
       if (packageName == null)
