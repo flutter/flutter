@@ -108,7 +108,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   int attempts = 0;
   io.WebSocket? socket;
 
-  Future<void> handleError(dynamic e) async {
+  Future<void> handleError(Object? e) async {
     void Function(String) printVisibleTrace = logger.printTrace;
     if (attempts == 10) {
       logger.printStatus('Connecting to the VM Service is taking longer than expected...');
@@ -907,9 +907,9 @@ class FlutterVmService {
     return service.getIsolate(isolateId)
       // The .then() call is required to cast from Future<Isolate> to Future<Isolate?>
       .then<vm_service.Isolate?>((vm_service.Isolate isolate) => isolate)
-      .catchError((dynamic error, StackTrace stackTrace) {
+      .catchError((Object? error, StackTrace stackTrace) {
         return null;
-      }, test: (dynamic error) {
+      }, test: (Object? error) {
         return (error is vm_service.SentinelException) ||
           (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared);
       });
