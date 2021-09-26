@@ -231,29 +231,29 @@ Future<vm_service.VmService> setUpVmService(
   registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
 
   if (compileExpression != null) {
-    vmService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
+    vmService.registerServiceCallback('compileExpression', (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
       final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
-      final List<String> definitions = List<String>.from(params['definitions'] as List<dynamic>);
-      final List<String> typeDefinitions = List<String>.from(params['typeDefinitions'] as List<dynamic>);
-      final String libraryUri = params['libraryUri'] as String;
-      final String klass = params['klass'] as String;
+      final List<String> definitions = List<String>.from(params['definitions']! as List<Object?>);
+      final List<String> typeDefinitions = List<String>.from(params['typeDefinitions']! as List<Object?>);
+      final String libraryUri = params['libraryUri']! as String;
+      final String klass = params['klass']! as String;
       final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
 
       final String kernelBytesBase64 = await compileExpression(isolateId,
           expression, definitions, typeDefinitions, libraryUri, klass,
           isStatic);
-      return <String, dynamic>{
+      return <String, Object>{
         'type': 'Success',
-        'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
+        'result': <String, String>{'kernelBytes': kernelBytesBase64},
       };
     });
     registrationRequests.add(vmService.registerService('compileExpression', 'Flutter Tools'));
   }
   if (device != null) {
-    vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
+    vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, Object?> params) async {
       final MemoryInfo result = await device.queryMemoryInfo();
-      return <String, dynamic>{
+      return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
           ...result.toJson(),
@@ -263,9 +263,9 @@ Future<vm_service.VmService> setUpVmService(
     registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
   }
   if (skSLMethod != null) {
-    vmService.registerServiceCallback('flutterGetSkSL', (Map<String, dynamic> params) async {
+    vmService.registerServiceCallback('flutterGetSkSL', (Map<String, Object?> params) async {
       final String filename = await skSLMethod();
-      return <String, dynamic>{
+      return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
           'filename': filename,
@@ -280,7 +280,7 @@ Future<vm_service.VmService> setUpVmService(
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      .catchError((dynamic error) {}, test: (dynamic error) => error is vm_service.RPCError)
+      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
     );
   }
 
@@ -372,8 +372,8 @@ Future<FlutterVmService> _connect(
   return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
 }
 
-String _validateRpcStringParam(String methodName, Map<String, dynamic> params, String paramName) {
-  final dynamic value = params[paramName];
+String _validateRpcStringParam(String methodName, Map<String, Object?> params, String paramName) {
+  final Object? value = params[paramName];
   if (value is! String || value.isEmpty) {
     throw vm_service.RPCError(
       methodName,
@@ -384,8 +384,8 @@ String _validateRpcStringParam(String methodName, Map<String, dynamic> params, S
   return value;
 }
 
-bool _validateRpcBoolParam(String methodName, Map<String, dynamic> params, String paramName) {
-  final dynamic value = params[paramName];
+bool _validateRpcBoolParam(String methodName, Map<String, Object?> params, String paramName) {
+  final Object? value = params[paramName];
   if (value != null && value is! bool) {
     throw vm_service.RPCError(
       methodName,
@@ -679,7 +679,7 @@ class FlutterVmService {
     return result?['enabled'] == 'true';
   }
 
-  Future<Map<String, dynamic>?> uiWindowScheduleFrame({
+  Future<Map<String, Object?>?> uiWindowScheduleFrame({
     required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
@@ -688,13 +688,13 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, dynamic>?> flutterEvictAsset(String assetPath, {
+  Future<Map<String, Object?>?> flutterEvictAsset(String assetPath, {
    required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.evict',
       isolateId: isolateId,
-      args: <String, dynamic>{
+      args: <String, Object?>{
         'value': assetPath,
       },
     );
@@ -708,7 +708,7 @@ class FlutterVmService {
     required String isolateId,
   }) async {
     try {
-      final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
+      final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.exit',
         isolateId: isolateId,
       );
@@ -735,15 +735,15 @@ class FlutterVmService {
     String? platform,
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       isolateId: isolateId,
       args: platform != null
-        ? <String, dynamic>{'value': platform}
+        ? <String, Object>{'value': platform}
         : <String, String>{},
     );
     if (result != null && result['value'] is String) {
-      return result['value'] as String;
+      return result['value']! as String;
     }
     return 'unknown';
   }
@@ -757,11 +757,11 @@ class FlutterVmService {
     Brightness? brightness,
     required String isolateId,
   }) async {
-    final Map<String, dynamic>? result = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object?>? result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.brightnessOverride',
       isolateId: isolateId,
       args: brightness != null
-        ? <String, dynamic>{'value': brightness.toString()}
+        ? <String, String>{'value': brightness.toString()}
         : <String, String>{},
     );
     if (result != null && result['value'] is String) {
