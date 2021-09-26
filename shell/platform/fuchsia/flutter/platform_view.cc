@@ -60,6 +60,7 @@ PlatformView::PlatformView(
         parent_environment_service_provider_handle,
     fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
     fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
         keyboard_listener_request,
     OnEnableWireframe wireframe_enabled_callback,
@@ -79,6 +80,8 @@ PlatformView::PlatformView(
       view_ref_(std::move(view_ref)),
       focus_delegate_(
           std::make_shared<FocusDelegate>(std::move(vrf), std::move(focuser))),
+      pointer_delegate_(
+          std::make_shared<PointerDelegate>(std::move(touch_source))),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_create_view_callback_(std::move(on_create_view_callback)),
       on_update_view_callback_(std::move(on_update_view_callback)),
@@ -110,14 +113,44 @@ PlatformView::PlatformView(
       fuchsia::ui::input::ImeService::Name_,
       text_sync_service_.NewRequest().TakeChannel());
 
-  focus_delegate_->WatchLoop([&](bool focused) {
+  focus_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](bool focused) {
+    if (!weak) {
+      FML_LOG(WARNING) << "PlatformView use-after-free attempted. Ignoring.";
+      return;
+    }
+
     // Ensure last_text_state_ is set to make sure Flutter actually wants
     // an IME.
-    if (focused && last_text_state_ != nullptr) {
-      ActivateIme();
+    if (focused && weak->last_text_state_) {
+      weak->ActivateIme();
     } else if (!focused) {
-      DeactivateIme();
+      weak->DeactivateIme();
     }
+  });
+
+  pointer_delegate_->WatchLoop([weak = weak_factory_.GetWeakPtr()](
+                                   std::vector<flutter::PointerData> events) {
+    if (!weak) {
+      FML_LOG(WARNING) << "PlatformView use-after-free attempted. Ignoring.";
+      return;
+    }
+
+    if (events.size() == 0) {
+      return;  // No work, bounce out.
+    }
+
+    // If pixel ratio hasn't been set, use a default value of 1.
+    const float pixel_ratio = weak->view_pixel_ratio_.value_or(1.f);
+    auto packet = std::make_unique<flutter::PointerDataPacket>(events.size());
+    for (size_t i = 0; i < events.size(); ++i) {
+      auto& event = events[i];
+      // Translate logical to physical coordinates, as per flutter::PointerData
+      // contract. Done here because pixel ratio comes from the graphics API.
+      event.physical_x = event.physical_x * pixel_ratio;
+      event.physical_y = event.physical_y * pixel_ratio;
+      packet->SetPointerData(i, event);
+    }
+    weak->DispatchPointerDataPacket(std::move(packet));
   });
 
   // Finally! Register the native platform message handlers.
@@ -484,7 +517,7 @@ void PlatformView::OnKeyEvent(
 }
 
 void PlatformView::ActivateIme() {
-  DEBUG_CHECK(last_text_state_ != nullptr, LOG_TAG, "");
+  DEBUG_CHECK(last_text_state_, LOG_TAG, "");
 
   text_sync_service_->GetInputMethodEditor(
       fuchsia::ui::input::KeyboardType::TEXT,       // keyboard type
@@ -769,8 +802,7 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
 
     const int64_t view_id_raw = view_id->value.GetUint64();
     auto on_view_created = fml::MakeCopyable(
-        [weak = weak_factory_.GetWeakPtr(),
-         platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+        [platform_task_runner = task_runners_.GetPlatformTaskRunner(),
          message = std::move(message)]() {
           // The client is waiting for view creation. Send an empty response
           // back to signal the view was created.
