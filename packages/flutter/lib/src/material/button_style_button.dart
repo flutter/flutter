@@ -280,10 +280,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     }
 
     // Per the Material Design team: don't allow the VisualDensity
-    // adjustment to reduce the width of the left/right padding. If we
+    // adjustment to reduce the width and height of the padding. If we
     // did, VisualDensity.compact, the default for desktop/web, would
-    // reduce the horizontal padding to zero.
-    final double dy = densityAdjustment.dy;
+    // reduce the padding to zero.
+    final double dy = math.max(0, densityAdjustment.dy);
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry padding = resolvedPadding!
       .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
