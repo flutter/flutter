@@ -2187,7 +2187,7 @@ TestSemantics _expectedSemantics() {
     children: <TestSemantics>[
       TestSemantics(
         textDirection: TextDirection.ltr,
-        children:<TestSemantics>[ 
+        children:<TestSemantics>[
           TestSemantics(
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
