@@ -23,7 +23,6 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_vm_services.dart';
 
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {

@@ -37,6 +37,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   /// The 'project.pbxproj' file of [xcodeProject].
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
+  /// The 'Runner.xcscheme' file of [xcodeProject].
+  File get xcodeProjectSchemeFile =>
+      xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('Runner.xcscheme');
+
   File get xcodeProjectWorkspaceData =>
       xcodeProject
           .childDirectory('project.xcworkspace')
@@ -328,8 +332,8 @@ class IosProject extends XcodeBasedProject {
         if (fromPlist != null && fromPlist.contains(r'$')) {
           final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
           if (allBuildSettings != null) {
-            final String substituedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
-            if (substituedVariable == bundleIdentifier) {
+            final String substitutedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
+            if (substitutedVariable == bundleIdentifier) {
               return true;
             }
           }

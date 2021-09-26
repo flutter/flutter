@@ -134,7 +134,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration != null);
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -155,9 +155,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// Removes an [AutofillClient] with the given `autofillId` from this
   /// [AutofillGroup].
   ///
-  /// Typically, this should be called by autofillable [TextInputClient]s in
-  /// [State.dispose] and [State.didChangeDependencies], when the input field
-  /// needs to be removed from the [AutofillGroup] it is currently registered to.
+  /// Typically, this should be called by a text field when it's being disposed,
+  /// or before it's registered with a different [AutofillGroup].
   ///
   /// See also:
   ///

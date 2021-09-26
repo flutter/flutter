@@ -240,7 +240,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -1923,9 +1923,8 @@ void main() {
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   }, variant: KeySimulatorTransitModeVariant.all());
-
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -2234,6 +2233,32 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: SelectableText(
+          'Guten Tag',
+          semanticsLabel: 'German greeting for good day',
+          key: key,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+          label: 'German greeting for good day',
+          textDirection: TextDirection.ltr,
+        )
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
@@ -3851,6 +3876,7 @@ void main() {
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
+      semanticsLabel: 'something else',
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -3860,6 +3886,7 @@ void main() {
 
     expect(description, <String>[
       'data: something',
+      'semanticsLabel: something else',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'showCursor: true',

@@ -314,9 +314,9 @@ void main() {
     expect(ce.title, 'IntelliJ IDEA Community Edition');
     expect(ce.installPath, ceRandomLocation);
 
-    final IntelliJValidatorOnMac utlimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
-    expect(utlimate.title, 'IntelliJ IDEA Ultimate Edition');
-    expect(utlimate.installPath, ultimateRandomLocation);
+    final IntelliJValidatorOnMac ultimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
+    expect(ultimate.title, 'IntelliJ IDEA Ultimate Edition');
+    expect(ultimate.installPath, ultimateRandomLocation);
   });
 
   testWithoutContext('Intellij plugins path checking on mac', () async {
