@@ -471,25 +471,32 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         break;
     }
 
+    // Whether we paint or not, calculating these rects allows us to hit test
+    // when the scrollbar is transparent.
     _trackRect = trackOffset & trackSize;
-    canvas.drawRect(_trackRect!, _paintTrack());
-    canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
-
     _thumbRect = Offset(x, y) & thumbSize;
 
-    if (radius != null) {
-      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
-      return;
+    // Paint if the opacity dictates visibility
+    if (fadeoutOpacityAnimation.value != 0.0) {
+      // Track
+      canvas.drawRect(_trackRect!, _paintTrack());
+      // Track Border
+      canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
+      if (radius != null) {
+        // Rounded rect thumb
+        canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+        return;
+      }
+      if (shape == null) {
+        // Square thumb
+        canvas.drawRect(_thumbRect!, _paintThumb);
+        return;
+      }
+      // Custom-shaped thumb
+      final Path outerPath = shape!.getOuterPath(_thumbRect!);
+      canvas.drawPath(outerPath, _paintThumb);
+      shape!.paint(canvas, _thumbRect!);
     }
-
-    if (shape == null) {
-      canvas.drawRect(_thumbRect!, _paintThumb);
-      return;
-    }
-
-    final Path outerPath = shape!.getOuterPath(_thumbRect!);
-    canvas.drawPath(outerPath, _paintThumb);
-    shape!.paint(canvas, _thumbRect!);
   }
 
   double _thumbExtent() {
@@ -578,7 +585,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null
         || _lastMetrics == null
-        || fadeoutOpacityAnimation.value == 0.0
         || _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent)
       return;
 
@@ -611,7 +617,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// be used.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
     if (_thumbRect == null) {
-      // We have never painted the scrollbar, so we do not know where it will be.
+      // We have not computed the scrollbar position yet.
       return false;
     }
 
