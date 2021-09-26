@@ -86,12 +86,12 @@ class TextSelectionPoint {
 /// many platforms (macOS for instance), the caret will move to the previous
 /// line or the next line, while maintaining its original horizontal location.
 /// When it encounters a shorter line, the caret moves to the closest horizontal
-/// location in that line, and restores the original horizontal location when a
-/// long enough line is encountered.
+/// location within that line, and restores the original horizontal location
+/// when a long enough line is encountered.
 ///
-/// Additionally, the caret moves to the beginning of the document if the upward
-/// arrow key is pressed and the caret is already on the first line. If the
-/// downward arrow key is pressed next, the caret will restore its original
+/// Additionally, the caret will move to the beginning of the document if the
+/// upward arrow key is pressed and the caret is already on the first line. If
+/// the downward arrow key is pressed next, the caret will restore its original
 /// horizontal location and move to the second line. Similarly the caret moves
 /// to the end of the document if the downward arrow key is pressed when it's
 /// already on the last line.
@@ -101,17 +101,17 @@ class TextSelectionPoint {
 ///   a
 ///   aaa
 /// where the caret was initially placed at the end of the first line. Pressing
-/// the downward arrow key once will move the caret will to the end of the second
+/// the downward arrow key once will move the caret to the end of the second
 /// line, and twice the arrow key moves to the third line after the second "a"
 /// on that line. Pressing the downward arrow key again, the caret will move to
 /// the end of the third line (the end of the document). Pressing the upward
 /// arrow key in this state will result in the caret moving to the end of the
 /// second line.
 ///
-/// Vertical runs are typically interrupted when the layout of the text changes
-/// (including when the text itself changes), or when the selection is changed
-/// by other input events or programmatically (for example, when the user
-/// pressed the left arrow key).
+/// Vertical caret runs are typically interrupted when the layout of the text
+/// changes (including when the text itself changes), or when the selection is
+/// changed by other input events or programmatically (for example, when the
+/// user pressed the left arrow key).
 /// {@endtemplate}
 ///
 /// The [movePrevious] method moves the caret location (which is
@@ -2433,8 +2433,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.verticalArrowKeyMovement}
   ///
-  /// The [VerticalCaretMovementRun.isValid] property will remain true the
-  /// underlying text needs relayout, or a relayout has already happened.
+  /// The [VerticalCaretMovementRun.isValid] property indicates whether the text
+  /// layout has changed and the the vertical caret run is invalidated.
   ///
   /// The caller is responsible for discarding a [VerticalCaretMovementRun] when
   /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
