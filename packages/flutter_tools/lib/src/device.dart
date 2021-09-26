@@ -141,7 +141,7 @@ abstract class DeviceManager {
     ];
 
     // Wait for an exact match, or for all discoverers to return results.
-    await Future.any<dynamic>(<Future<dynamic>>[
+    await Future.any<Object>(<Future<Object>>[
       exactMatchCompleter.future,
       Future.wait<List<Device>?>(futureDevices),
     ]);
@@ -575,7 +575,7 @@ abstract class Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
