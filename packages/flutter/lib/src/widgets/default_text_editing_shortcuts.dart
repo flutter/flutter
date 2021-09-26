@@ -169,14 +169,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     // Arrow: Move Selection.
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjecentLineIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjecentLineIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
     // Shift + Arrow: Extend Selection.
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjecentLineIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjecentLineIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -281,14 +281,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjecentLineIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjecentLineIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
     // Shift + Arrow: Extend Selection.
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjecentLineIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjecentLineIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),

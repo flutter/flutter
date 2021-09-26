@@ -132,9 +132,9 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
 /// Expands, or moves the current selection from the current
 /// [TextSelection.extent] position to the closest position on the adjacent
 /// line.
-class ExtendSelectionVerticallyToAdjecentLineIntent extends DirectionalCaretMovementIntent {
-  /// Creates an [ExtendSelectionVerticallyToAdjecentLineIntent].
-  const ExtendSelectionVerticallyToAdjecentLineIntent({
+class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionVerticallyToAdjacentLineIntent].
+  const ExtendSelectionVerticallyToAdjacentLineIntent({
     required bool forward,
     required bool collapseSelection,
   }) : super(forward, collapseSelection);
