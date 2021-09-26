@@ -24,6 +24,7 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
           parent_viewport_watcher,
       fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> vrf,
       fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
       fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
           keyboard_listener,
       OnEnableWireframe wireframe_enabled_callback,
