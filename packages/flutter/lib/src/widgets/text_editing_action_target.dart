@@ -784,13 +784,15 @@ abstract class TextEditingActionTarget {
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
+  /// {@macro flutter.widgets.TextEditingActionTarget.stopAtReversal}
+  ///
   /// See also:
   ///
   ///   * [extendSelectionRightByLine], which is same but in the opposite
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
-  void extendSelectionLeftByLine(SelectionChangedCause cause) {
+  void extendSelectionLeftByLine(SelectionChangedCause cause, [bool stopAtReversal = false]) {
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -806,9 +808,8 @@ abstract class TextEditingActionTarget {
     );
 
     late final TextSelection nextSelection;
-    // If the extent and base offsets would reverse order, then instead the
-    // selection collapses.
-    if (textEditingValue.selection.extentOffset > textEditingValue.selection.baseOffset) {
+    if (stopAtReversal
+        && textEditingValue.selection.extentOffset > textEditingValue.selection.baseOffset) {
       nextSelection = textEditingValue.selection.copyWith(
         extentOffset: textEditingValue.selection.baseOffset,
       );
@@ -860,6 +861,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
   ///
+  /// {@macro flutter.widgets.TextEditingActionTarget.stopAtReversal}
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -868,7 +871,7 @@ abstract class TextEditingActionTarget {
   ///     direction.
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
-  void extendSelectionRightByLine(SelectionChangedCause cause) {
+  void extendSelectionRightByLine(SelectionChangedCause cause, [bool stopAtReversal = false]) {
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
@@ -879,10 +882,9 @@ abstract class TextEditingActionTarget {
       TextPosition(offset: startPoint),
     );
 
-    // If the extent and base offsets would reverse order, then instead the
-    // selection collapses.
     late final TextSelection nextSelection;
-    if (textEditingValue.selection.extentOffset < textEditingValue.selection.baseOffset) {
+    if (stopAtReversal
+        && textEditingValue.selection.extentOffset < textEditingValue.selection.baseOffset) {
       nextSelection = textEditingValue.selection.copyWith(
         extentOffset: textEditingValue.selection.baseOffset,
       );
