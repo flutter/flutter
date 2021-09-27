@@ -1712,6 +1712,134 @@ void main() {
     });
   });
 
+  test("When a selection is needed but it's invalid, nothing is changed", () async {
+    const String text = 'one two three\n\nfour five six';
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+      textSpan: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      textEditingValue: const TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: -1),
+      ),
+    );
+    final RenderEditable editable = editableTextState.renderEditable;
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editableTextState.delete(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteForward(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteForwardByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteForwardByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteToEnd(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.deleteToStart(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+
+    editableTextState.expandSelectionToEnd(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.expandSelectionToStart(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionDown(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionLeft(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionLeft(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionRight(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.extendSelectionUp(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionDown(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionLeft(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionRight(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.moveSelectionUp(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+
+    editableTextState.copySelection(SelectionChangedCause.keyboard);
+    ClipboardData? clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    expect(clipboardData, null);
+
+    editableTextState.cutSelection(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    expect(clipboardData, null);
+
+    editableTextState.pasteText(SelectionChangedCause.keyboard);
+    expect(editableTextState.textEditingValue.selection.isValid, false);
+    expect(editableTextState.textEditingValue.text, text);
+  });
+
   group('nextCharacter', () {
     test('handles normal strings correctly', () {
       expect(TextEditingActionTarget.nextCharacter(0, '01234567'), 1);
