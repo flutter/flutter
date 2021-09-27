@@ -1705,6 +1705,11 @@ targets:
         [
           {"dependency": "android_sdk"},
           {"dependency": "android_virtual_device", "version": "31"}
+          {"dependency": "open_jdk", "version": "11"},
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
         ]
       tags: >
         ["framework","hostonly"]
