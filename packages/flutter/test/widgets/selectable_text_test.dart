@@ -2251,20 +2251,12 @@ void main() {
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        TestSemantics.rootChild(
+        TestSemantics(
           id: 1,
-          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
-          value: 'Guten Tag',
-          actions: <SemanticsAction>[
-            SemanticsAction.longPress,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isTextField,
-            SemanticsFlag.isReadOnly,
-            SemanticsFlag.isMultiline,
-          ],
-        ),
+          textDirection: TextDirection.ltr,
+        )
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
