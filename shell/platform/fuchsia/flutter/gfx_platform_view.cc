@@ -25,9 +25,9 @@ GfxPlatformView::GfxPlatformView(
         keyboard_listener,
     fit::closure on_session_listener_error_callback,
     OnEnableWireframe wireframe_enabled_callback,
-    OnCreateView on_create_view_callback,
+    OnCreateGfxView on_create_view_callback,
     OnUpdateView on_update_view_callback,
-    OnDestroyView on_destroy_view_callback,
+    OnDestroyGfxView on_destroy_view_callback,
     OnCreateSurface on_create_surface_callback,
     OnSemanticsNodeUpdate on_semantics_node_update_callback,
     OnRequestAnnounce on_request_announce_callback,
@@ -47,9 +47,7 @@ GfxPlatformView::GfxPlatformView(
                    std::move(touch_source),
                    std::move(keyboard_listener),
                    std::move(wireframe_enabled_callback),
-                   std::move(on_create_view_callback),
                    std::move(on_update_view_callback),
-                   std::move(on_destroy_view_callback),
                    std::move(on_create_surface_callback),
                    std::move(on_semantics_node_update_callback),
                    std::move(on_request_announce_callback),
@@ -60,6 +58,8 @@ GfxPlatformView::GfxPlatformView(
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(on_session_listener_error_callback)),
+      on_create_view_callback_(std::move(on_create_view_callback)),
+      on_destroy_view_callback_(std::move(on_destroy_view_callback)),
       weak_factory_(this) {
   session_listener_binding_.set_error_handler([](zx_status_t status) {
     FML_LOG(ERROR) << "Interface error on: SessionListener, status: " << status;
@@ -259,6 +259,127 @@ void GfxPlatformView::OnScenicEvent(
         -1.0,  // p_physical_touch_slop,
     });
   }
+}
+
+bool GfxPlatformView::OnChildViewConnected(scenic::ResourceId view_holder_id) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewConnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+
+  return true;
+}
+
+bool GfxPlatformView::OnChildViewDisconnected(
+    scenic::ResourceId view_holder_id) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewDisconnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second  // ViewHolderToken handle
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+
+  return true;
+}
+
+bool GfxPlatformView::OnChildViewStateChanged(scenic::ResourceId view_holder_id,
+                                              bool is_rendering) {
+  auto view_id_mapping = child_view_ids_.find(view_holder_id);
+  if (view_id_mapping == child_view_ids_.end()) {
+    return false;
+  }
+
+  const std::string is_rendering_str = is_rendering ? "true" : "false";
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewStateChanged\","
+      << "\"args\":{"
+      << "  \"viewId\":" << view_id_mapping->second << ","  // ViewHolderToken
+      << "  \"is_rendering\":" << is_rendering_str << ","   // IsViewRendering
+      << "  \"state\":" << is_rendering_str                 // IsViewRendering
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+
+  return true;
+}
+
+void GfxPlatformView::OnCreateView(ViewCallback on_view_created,
+                                   int64_t view_id_raw,
+                                   bool hit_testable,
+                                   bool focusable) {
+  auto on_view_bound =
+      [weak = weak_factory_.GetWeakPtr(),
+       platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+       view_id = view_id_raw](scenic::ResourceId resource_id) {
+        platform_task_runner->PostTask([weak, view_id, resource_id]() {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "ViewHolder bound to PlatformView after PlatformView was "
+                   "destroyed; ignoring.";
+            return;
+          }
+
+          FML_DCHECK(weak->child_view_ids_.count(resource_id) == 0);
+          weak->child_view_ids_[resource_id] = view_id;
+        });
+      };
+  on_create_view_callback_(view_id_raw, std::move(on_view_created),
+                           std::move(on_view_bound), hit_testable, focusable);
+}
+
+void GfxPlatformView::OnDisposeView(int64_t view_id_raw) {
+  auto on_view_unbound =
+      [weak = weak_factory_.GetWeakPtr(),
+       platform_task_runner = task_runners_.GetPlatformTaskRunner()](
+          scenic::ResourceId resource_id) {
+        platform_task_runner->PostTask([weak, resource_id]() {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "ViewHolder unbound from PlatformView after PlatformView"
+                   "was destroyed; ignoring.";
+            return;
+          }
+
+          FML_DCHECK(weak->child_view_ids_.count(resource_id) == 1);
+          weak->child_view_ids_.erase(resource_id);
+        });
+      };
+  on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
 }
 
 }  // namespace flutter_runner
