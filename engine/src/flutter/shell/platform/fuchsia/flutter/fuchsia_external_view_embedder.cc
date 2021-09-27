@@ -578,7 +578,7 @@ void FuchsiaExternalViewEmbedder::EnableWireframe(bool enable) {
 
 void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
                                              ViewCallback on_view_created,
-                                             ViewIdCallback on_view_bound) {
+                                             GfxViewIdCallback on_view_bound) {
   FML_CHECK(scenic_views_.find(view_id) == scenic_views_.end());
 
   ScenicView new_view = {
@@ -602,8 +602,9 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
   scenic_views_.emplace(std::make_pair(view_id, std::move(new_view)));
 }
 
-void FuchsiaExternalViewEmbedder::DestroyView(int64_t view_id,
-                                              ViewIdCallback on_view_unbound) {
+void FuchsiaExternalViewEmbedder::DestroyView(
+    int64_t view_id,
+    GfxViewIdCallback on_view_unbound) {
   auto scenic_view = scenic_views_.find(view_id);
   FML_CHECK(scenic_view != scenic_views_.end());
   scenic::ResourceId resource_id = scenic_view->second.view_holder.id();

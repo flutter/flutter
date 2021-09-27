@@ -215,7 +215,7 @@ class PlatformViewBuilder {
     return *this;
   }
 
-  PlatformViewBuilder& SetDestroyViewCallback(OnDestroyView callback) {
+  PlatformViewBuilder& SetDestroyViewCallback(OnDestroyGfxView callback) {
     on_destroy_view_callback_ = std::move(callback);
     return *this;
   }
@@ -230,7 +230,7 @@ class PlatformViewBuilder {
     return *this;
   }
 
-  PlatformViewBuilder& SetCreateViewCallback(OnCreateView callback) {
+  PlatformViewBuilder& SetCreateViewCallback(OnCreateGfxView callback) {
     on_create_view_callback_ = std::move(callback);
     return *this;
   }
@@ -310,9 +310,9 @@ class PlatformViewBuilder {
       keyboard_listener_{nullptr};
   fit::closure on_session_listener_error_callback_{nullptr};
   OnEnableWireframe wireframe_enabled_callback_{nullptr};
-  OnCreateView on_create_view_callback_{nullptr};
+  OnCreateGfxView on_create_view_callback_{nullptr};
   OnUpdateView on_update_view_callback_{nullptr};
-  OnDestroyView on_destroy_view_callback_{nullptr};
+  OnDestroyGfxView on_destroy_view_callback_{nullptr};
   OnCreateSurface on_create_surface_callback_{nullptr};
   OnSemanticsNodeUpdate on_semantics_node_update_callback_{nullptr};
   OnRequestAnnounce on_request_announce_callback_{nullptr};
@@ -706,7 +706,7 @@ TEST_F(PlatformViewTests, CreateViewTest) {
   auto CreateViewCallback = [&create_view_called](
                                 int64_t view_id,
                                 flutter_runner::ViewCallback on_view_created,
-                                flutter_runner::ViewIdCallback on_view_bound,
+                                flutter_runner::GfxViewIdCallback on_view_bound,
                                 bool hit_testable, bool focusable) {
     create_view_called = true;
     on_view_created();
@@ -883,8 +883,8 @@ TEST_F(PlatformViewTests, DestroyViewTest) {
   // setting |wireframe_enabled| to true.
   bool destroy_view_called = false;
   auto DestroyViewCallback =
-      [&destroy_view_called](int64_t view_id,
-                             flutter_runner::ViewIdCallback on_view_unbound) {
+      [&destroy_view_called](
+          int64_t view_id, flutter_runner::GfxViewIdCallback on_view_unbound) {
         destroy_view_called = true;
         on_view_unbound(0);
       };
@@ -942,14 +942,14 @@ TEST_F(PlatformViewTests, ViewEventsTest) {
                            nullptr                               // io
       );
 
-  auto on_create_view = [kViewId](int64_t view_id,
-                                  flutter_runner::ViewCallback on_view_created,
-                                  flutter_runner::ViewIdCallback on_view_bound,
-                                  bool hit_testable, bool focusable) {
-    ASSERT_EQ(view_id, kViewId);
-    on_view_created();
-    on_view_bound(kViewHolderId);
-  };
+  auto on_create_view =
+      [kViewId](int64_t view_id, flutter_runner::ViewCallback on_view_created,
+                flutter_runner::GfxViewIdCallback on_view_bound,
+                bool hit_testable, bool focusable) {
+        ASSERT_EQ(view_id, kViewId);
+        on_view_created();
+        on_view_bound(kViewHolderId);
+      };
 
   flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners),

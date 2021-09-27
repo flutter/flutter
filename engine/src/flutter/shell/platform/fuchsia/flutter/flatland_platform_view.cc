@@ -23,9 +23,9 @@ FlatlandPlatformView::FlatlandPlatformView(
     fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
         keyboard_listener,
     OnEnableWireframe wireframe_enabled_callback,
-    OnCreateView on_create_view_callback,
+    OnCreateFlatlandView on_create_view_callback,
     OnUpdateView on_update_view_callback,
-    OnDestroyView on_destroy_view_callback,
+    OnDestroyFlatlandView on_destroy_view_callback,
     OnCreateSurface on_create_surface_callback,
     OnSemanticsNodeUpdate on_semantics_node_update_callback,
     OnRequestAnnounce on_request_announce_callback,
@@ -45,9 +45,7 @@ FlatlandPlatformView::FlatlandPlatformView(
                    std::move(touch_source),
                    std::move(keyboard_listener),
                    std::move(wireframe_enabled_callback),
-                   std::move(on_create_view_callback),
                    std::move(on_update_view_callback),
-                   std::move(on_destroy_view_callback),
                    std::move(on_create_surface_callback),
                    std::move(on_semantics_node_update_callback),
                    std::move(on_request_announce_callback),
@@ -55,7 +53,10 @@ FlatlandPlatformView::FlatlandPlatformView(
                    std::move(view_embedder),
                    std::move(await_vsync_callback),
                    std::move(await_vsync_for_secondary_callback_callback)),
-      parent_viewport_watcher_(std::move(parent_viewport_watcher)) {
+      parent_viewport_watcher_(std::move(parent_viewport_watcher)),
+      on_create_view_callback_(std::move(on_create_view_callback)),
+      on_destroy_view_callback_(std::move(on_destroy_view_callback)),
+      weak_factory_(this) {
   parent_viewport_watcher_.set_error_handler([](zx_status_t status) {
     FML_LOG(ERROR) << "Interface error on: ParentViewportWatcher status: "
                    << status;
@@ -63,6 +64,8 @@ FlatlandPlatformView::FlatlandPlatformView(
 
   parent_viewport_watcher_->GetLayout(
       fit::bind_member(this, &FlatlandPlatformView::OnGetLayout));
+  parent_viewport_watcher_->GetStatus(
+      fit::bind_member(this, &FlatlandPlatformView::OnParentViewportStatus));
 }
 
 FlatlandPlatformView::~FlatlandPlatformView() = default;
@@ -95,6 +98,108 @@ void FlatlandPlatformView::OnGetLayout(
 
   parent_viewport_watcher_->GetLayout(
       fit::bind_member(this, &FlatlandPlatformView::OnGetLayout));
+}
+
+void FlatlandPlatformView::OnParentViewportStatus(
+    fuchsia::ui::composition::ParentViewportStatus status) {
+  // TODO(fxbug.dev/64201): Investigate if it is useful to send hidden/shown
+  // signals.
+  parent_viewport_status_ = status;
+  parent_viewport_watcher_->GetStatus(
+      fit::bind_member(this, &FlatlandPlatformView::OnParentViewportStatus));
+}
+
+void FlatlandPlatformView::OnChildViewStatus(
+    uint64_t content_id,
+    fuchsia::ui::composition::ChildViewStatus status) {
+  FML_DCHECK(child_view_info_.count(content_id) == 1);
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewStateChanged\","
+      << "\"args\":{"
+      << "  \"viewId\":" << child_view_info_.at(content_id).view_id
+      << ","                         // ViewId
+      << "  \"is_rendering\":true,"  // IsViewRendering
+      << "  \"state\":true"          // IsViewRendering
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+
+  child_view_info_.at(content_id)
+      .child_view_watcher->GetStatus(
+          [this, content_id](fuchsia::ui::composition::ChildViewStatus status) {
+            OnChildViewStatus(content_id, status);
+          });
+}
+
+void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
+                                        int64_t view_id_raw,
+                                        bool hit_testable,
+                                        bool focusable) {
+  auto on_view_bound = [weak = weak_factory_.GetWeakPtr(),
+                        platform_task_runner =
+                            task_runners_.GetPlatformTaskRunner(),
+                        view_id = view_id_raw](
+                           fuchsia::ui::composition::ContentId content_id,
+                           fuchsia::ui::composition::ChildViewWatcherPtr
+                               child_view_watcher) {
+    child_view_watcher.set_error_handler([](zx_status_t status) {
+      FML_LOG(ERROR) << "Interface error on: ChildViewWatcher status: "
+                     << status;
+    });
+    platform_task_runner->PostTask(
+        fml::MakeCopyable([weak, view_id, content_id,
+                           watcher = std::move(child_view_watcher)]() mutable {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "Flatland View bound to PlatformView after PlatformView was "
+                   "destroyed; ignoring.";
+            return;
+          }
+
+          FML_DCHECK(weak->child_view_info_.count(content_id.value) == 0);
+          FML_DCHECK(watcher);
+          weak->child_view_info_.emplace(
+              std::piecewise_construct, std::forward_as_tuple(content_id.value),
+              std::forward_as_tuple(view_id, std::move(watcher)));
+
+          weak->child_view_info_.at(content_id.value)
+              .child_view_watcher->GetStatus(
+                  [weak, id = content_id.value](
+                      fuchsia::ui::composition::ChildViewStatus status) {
+                    weak->OnChildViewStatus(id, status);
+                  });
+        }));
+  };
+  on_create_view_callback_(view_id_raw, std::move(on_view_created),
+                           std::move(on_view_bound), hit_testable, focusable);
+}
+
+void FlatlandPlatformView::OnDisposeView(int64_t view_id_raw) {
+  auto on_view_unbound =
+      [weak = weak_factory_.GetWeakPtr(),
+       platform_task_runner = task_runners_.GetPlatformTaskRunner()](
+          fuchsia::ui::composition::ContentId content_id) {
+        platform_task_runner->PostTask([weak, content_id]() {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "Flatland View unbound from PlatformView after PlatformView"
+                   "was destroyed; ignoring.";
+            return;
+          }
+
+          FML_DCHECK(weak->child_view_info_.count(content_id.value) == 1);
+          weak->child_view_info_.erase(content_id.value);
+        });
+      };
+  on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
 }
 
 }  // namespace flutter_runner

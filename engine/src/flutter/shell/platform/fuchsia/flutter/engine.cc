@@ -251,16 +251,27 @@ void Engine::Initialize(
   OnEnableWireframe on_enable_wireframe_callback = std::bind(
       &Engine::DebugWireframeSettingsChanged, this, std::placeholders::_1);
 
-  OnCreateView on_create_view_callback = std::bind(
-      &Engine::CreateView, this, std::placeholders::_1, std::placeholders::_2,
-      std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+  OnCreateGfxView on_create_gfx_view_callback =
+      std::bind(&Engine::CreateGfxView, this, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3,
+                std::placeholders::_4, std::placeholders::_5);
+
+  OnCreateFlatlandView on_create_flatland_view_callback =
+      std::bind(&Engine::CreateFlatlandView, this, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3,
+                std::placeholders::_4, std::placeholders::_5);
 
   OnUpdateView on_update_view_callback = std::bind(
       &Engine::UpdateView, this, std::placeholders::_1, std::placeholders::_2,
-      std::placeholders::_3, std::placeholders::_4);
+      std::placeholders::_3, std::placeholders::_4, use_flatland);
 
-  OnDestroyView on_destroy_view_callback = std::bind(
-      &Engine::DestroyView, this, std::placeholders::_1, std::placeholders::_2);
+  OnDestroyGfxView on_destroy_gfx_view_callback =
+      std::bind(&Engine::DestroyGfxView, this, std::placeholders::_1,
+                std::placeholders::_2);
+
+  OnDestroyFlatlandView on_destroy_flatland_view_callback =
+      std::bind(&Engine::DestroyFlatlandView, this, std::placeholders::_1,
+                std::placeholders::_2);
 
   OnCreateSurface on_create_surface_callback =
       std::bind(&Engine::CreateSurface, this);
@@ -330,9 +341,14 @@ void Engine::Initialize(
                std::move(on_session_listener_error_callback),
            on_enable_wireframe_callback =
                std::move(on_enable_wireframe_callback),
-           on_create_view_callback = std::move(on_create_view_callback),
+           on_create_gfx_view_callback = std::move(on_create_gfx_view_callback),
+           on_create_flatland_view_callback =
+               std::move(on_create_flatland_view_callback),
            on_update_view_callback = std::move(on_update_view_callback),
-           on_destroy_view_callback = std::move(on_destroy_view_callback),
+           on_destroy_gfx_view_callback =
+               std::move(on_destroy_gfx_view_callback),
+           on_destroy_flatland_view_callback =
+               std::move(on_destroy_flatland_view_callback),
            on_create_surface_callback = std::move(on_create_surface_callback),
            on_semantics_node_update_callback =
                std::move(on_semantics_node_update_callback),
@@ -408,9 +424,9 @@ void Engine::Initialize(
                       // fuchsia.ui.input3.KeyboardListener connection.
                       std::move(keyboard_listener_request),
                       std::move(on_enable_wireframe_callback),
-                      std::move(on_create_view_callback),
+                      std::move(on_create_flatland_view_callback),
                       std::move(on_update_view_callback),
-                      std::move(on_destroy_view_callback),
+                      std::move(on_destroy_flatland_view_callback),
                       std::move(on_create_surface_callback),
                       std::move(on_semantics_node_update_callback),
                       std::move(on_request_announce_callback),
@@ -435,9 +451,9 @@ void Engine::Initialize(
                   std::move(keyboard_listener_request),
                   std::move(on_session_listener_error_callback),
                   std::move(on_enable_wireframe_callback),
-                  std::move(on_create_view_callback),
+                  std::move(on_create_gfx_view_callback),
                   std::move(on_update_view_callback),
-                  std::move(on_destroy_view_callback),
+                  std::move(on_destroy_gfx_view_callback),
                   std::move(on_create_surface_callback),
                   std::move(on_semantics_node_update_callback),
                   std::move(on_request_announce_callback),
@@ -677,15 +693,12 @@ void Engine::DebugWireframeSettingsChanged(bool enabled) {
   });
 }
 
-void Engine::CreateView(int64_t view_id,
-                        ViewCallback on_view_created,
-                        ViewIdCallback on_view_bound,
-                        bool hit_testable,
-                        bool focusable) {
+void Engine::CreateGfxView(int64_t view_id,
+                           ViewCallback on_view_created,
+                           GfxViewIdCallback on_view_bound,
+                           bool hit_testable,
+                           bool focusable) {
   FML_CHECK(shell_);
-
-  // TODO(fxbug.dev/64201): Add flatland hookup. |view_id| may be interpreted
-  // based on use_flatland from the initializer.
   shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
       [this, view_id, hit_testable, focusable,
        on_view_created = std::move(on_view_created),
@@ -698,23 +711,46 @@ void Engine::CreateView(int64_t view_id,
       });
 }
 
-void Engine::UpdateView(int64_t view_id,
-                        SkRect occlusion_hint,
-                        bool hit_testable,
-                        bool focusable) {
+void Engine::CreateFlatlandView(int64_t view_id,
+                                ViewCallback on_view_created,
+                                FlatlandViewCreatedCallback on_view_bound,
+                                bool hit_testable,
+                                bool focusable) {
   FML_CHECK(shell_);
-
-  // TODO(fxbug.dev/64201): Add flatland hookup. |view_id| may be interpreted
-  // based on use_flatland from the initializer.
   shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
-      [this, view_id, occlusion_hint, hit_testable, focusable]() {
-        FML_CHECK(external_view_embedder_);
-        external_view_embedder_->SetViewProperties(view_id, occlusion_hint,
+      [this, view_id, hit_testable, focusable,
+       on_view_created = std::move(on_view_created),
+       on_view_bound = std::move(on_view_bound)]() {
+        FML_CHECK(flatland_view_embedder_);
+        flatland_view_embedder_->CreateView(view_id, std::move(on_view_created),
+                                            std::move(on_view_bound));
+        flatland_view_embedder_->SetViewProperties(view_id, SkRect::MakeEmpty(),
                                                    hit_testable, focusable);
       });
 }
 
-void Engine::DestroyView(int64_t view_id, ViewIdCallback on_view_unbound) {
+void Engine::UpdateView(int64_t view_id,
+                        SkRect occlusion_hint,
+                        bool hit_testable,
+                        bool focusable,
+                        bool use_flatland) {
+  FML_CHECK(shell_);
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
+      [this, use_flatland, view_id, occlusion_hint, hit_testable, focusable]() {
+        if (use_flatland) {
+          FML_CHECK(flatland_view_embedder_);
+          flatland_view_embedder_->SetViewProperties(view_id, occlusion_hint,
+                                                     hit_testable, focusable);
+        } else {
+          FML_CHECK(external_view_embedder_);
+          external_view_embedder_->SetViewProperties(view_id, occlusion_hint,
+                                                     hit_testable, focusable);
+        }
+      });
+}
+
+void Engine::DestroyGfxView(int64_t view_id,
+                            GfxViewIdCallback on_view_unbound) {
   FML_CHECK(shell_);
 
   // TODO(fxbug.dev/64201): Add flatland hookup. |view_id| may be interpreted
@@ -723,6 +759,20 @@ void Engine::DestroyView(int64_t view_id, ViewIdCallback on_view_unbound) {
       [this, view_id, on_view_unbound = std::move(on_view_unbound)]() {
         FML_CHECK(external_view_embedder_);
         external_view_embedder_->DestroyView(view_id,
+                                             std::move(on_view_unbound));
+      });
+}
+
+void Engine::DestroyFlatlandView(int64_t view_id,
+                                 FlatlandViewIdCallback on_view_unbound) {
+  FML_CHECK(shell_);
+
+  // TODO(fxbug.dev/64201): Add flatland hookup. |view_id| may be interpreted
+  // based on use_flatland from the initializer.
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
+      [this, view_id, on_view_unbound = std::move(on_view_unbound)]() {
+        FML_CHECK(flatland_view_embedder_);
+        flatland_view_embedder_->DestroyView(view_id,
                                              std::move(on_view_unbound));
       });
 }

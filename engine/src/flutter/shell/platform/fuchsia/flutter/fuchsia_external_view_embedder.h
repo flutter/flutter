@@ -33,7 +33,7 @@
 namespace flutter_runner {
 
 using ViewCallback = std::function<void()>;
-using ViewIdCallback = std::function<void(scenic::ResourceId)>;
+using GfxViewIdCallback = std::function<void(scenic::ResourceId)>;
 
 // This struct represents a transformed clip rect.
 struct TransformedClip {
@@ -126,8 +126,8 @@ class FuchsiaExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   void EnableWireframe(bool enable);
   void CreateView(int64_t view_id,
                   ViewCallback on_view_created,
-                  ViewIdCallback on_view_bound);
-  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
+                  GfxViewIdCallback on_view_bound);
+  void DestroyView(int64_t view_id, GfxViewIdCallback on_view_unbound);
   void SetViewProperties(int64_t view_id,
                          const SkRect& occlusion_hint,
                          bool hit_testable,
