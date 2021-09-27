@@ -81,11 +81,14 @@ Future<void> integrationDriver({
 
   await driver.close();
 
+//Below mentioned code to get the response data has been moved out of the if block for pass teste so that
+//json report gets created irrespective of test fail or test pass status.
+  if (responseDataCallback != null) {
+    await responseDataCallback(response.data);
+  }
+
   if (response.allTestsPassed) {
     print('All tests passed.');
-    if (responseDataCallback != null) {
-      await responseDataCallback(response.data);
-    }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
