@@ -176,7 +176,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   // Returns the top of the BottomAppBar in global coordinates.
   //
   // If the Scaffold's bottomNavigationBar was specified, then we can use its
-  // geometry value, otherwise we compute the location base on the AppBar's
+  // geometry value, otherwise we compute the location based on the AppBar's
   // Material widget.
   double get bottomNavigationBarTop {
     final double? bottomNavigationBarTop = geometry.value.bottomNavigationBarTop;
