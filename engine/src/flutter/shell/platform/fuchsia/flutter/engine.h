@@ -147,16 +147,24 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   void Terminate();
 
   void DebugWireframeSettingsChanged(bool enabled);
-  void CreateView(int64_t view_id,
-                  ViewCallback on_view_created,
-                  ViewIdCallback on_view_bound,
-                  bool hit_testable,
-                  bool focusable);
+  void CreateGfxView(int64_t view_id,
+                     ViewCallback on_view_created,
+                     GfxViewIdCallback on_view_bound,
+                     bool hit_testable,
+                     bool focusable);
+  void CreateFlatlandView(int64_t view_id,
+                          ViewCallback on_view_created,
+                          FlatlandViewCreatedCallback on_view_bound,
+                          bool hit_testable,
+                          bool focusable);
   void UpdateView(int64_t view_id,
                   SkRect occlusion_hint,
                   bool hit_testable,
-                  bool focusable);
-  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
+                  bool focusable,
+                  bool use_flatland);
+  void DestroyGfxView(int64_t view_id, GfxViewIdCallback on_view_unbound);
+  void DestroyFlatlandView(int64_t view_id,
+                           FlatlandViewIdCallback on_view_unbound);
 
   // |fuchsia::memorypressure::Watcher|
   void OnLevelChanged(fuchsia::memorypressure::Level level,

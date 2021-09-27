@@ -5,12 +5,19 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_GFX_PLATFORM_VIEW_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_GFX_PLATFORM_VIEW_H_
 
-#include "platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
 
 #include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <fuchsia/ui/pointer/cpp/fidl.h>
 
+#include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
+
 namespace flutter_runner {
+
+using OnCreateGfxView =
+    fit::function<void(int64_t, ViewCallback, GfxViewIdCallback, bool, bool)>;
+using OnDestroyGfxView = fit::function<void(int64_t, GfxViewIdCallback)>;
 
 // The GfxPlatformView implements SessionListener and gets Session events but it
 // does *not* actually own the Session itself; that is owned by the
@@ -35,9 +42,9 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
           keyboard_listener,
       fit::closure on_session_listener_error_callback,
       OnEnableWireframe wireframe_enabled_callback,
-      OnCreateView on_create_view_callback,
+      OnCreateGfxView on_create_view_callback,
       OnUpdateView on_update_view_callback,
-      OnDestroyView on_destroy_view_callback,
+      OnDestroyGfxView on_destroy_view_callback,
       OnCreateSurface on_create_surface_callback,
       OnSemanticsNodeUpdate on_semantics_node_update_callback,
       OnRequestAnnounce on_request_announce_callback,
@@ -53,8 +60,29 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
   void OnScenicError(std::string error) override;
   void OnScenicEvent(std::vector<fuchsia::ui::scenic::Event> events) override;
 
+  // ViewHolder event handlers.  These return false if the ViewHolder
+  // corresponding to `view_holder_id` could not be found and the evnt was
+  // unhandled.
+  bool OnChildViewConnected(scenic::ResourceId view_holder_id);
+  bool OnChildViewDisconnected(scenic::ResourceId view_holder_id);
+  bool OnChildViewStateChanged(scenic::ResourceId view_holder_id,
+                               bool is_rendering);
+
+  void OnCreateView(ViewCallback on_view_created,
+                    int64_t view_id_raw,
+                    bool hit_testable,
+                    bool focusable) override;
+  void OnDisposeView(int64_t view_id_raw) override;
+
   fidl::Binding<fuchsia::ui::scenic::SessionListener> session_listener_binding_;
   fit::closure session_listener_error_callback_;
+
+  // child_view_ids_ maintains a persistent mapping from Scenic ResourceId's to
+  // flutter view ids, which are really zx_handle_t of ViewHolderToken.
+  std::unordered_map<scenic::ResourceId, zx_handle_t> child_view_ids_;
+
+  OnCreateGfxView on_create_view_callback_;
+  OnDestroyGfxView on_destroy_view_callback_;
 
   fml::WeakPtrFactory<GfxPlatformView>
       weak_factory_;  // Must be the last member.
