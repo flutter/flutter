@@ -62,7 +62,10 @@ void BackdropFilterLayer::Paint(PaintContext& context) const {
   paint.setBlendMode(blend_mode_);
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
       context,
-      SkCanvas::SaveLayerRec{&paint_bounds(), &paint, filter_.get(), 0});
+      SkCanvas::SaveLayerRec{&paint_bounds(), &paint, filter_.get(), 0},
+      // BackdropFilter should only happen on the leaf nodes canvas.
+      // See https:://flutter.dev/go/backdrop-filter-with-overlay-canvas
+      AutoSaveLayer::SaveMode::kLeafNodesCanvas);
   PaintChildren(context);
 }
 

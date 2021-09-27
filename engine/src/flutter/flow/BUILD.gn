@@ -165,6 +165,7 @@ if (enable_unittests) {
       "raster_cache_unittests.cc",
       "rtree_unittests.cc",
       "skia_gpu_object_unittests.cc",
+      "testing/auto_save_layer_unittests.cc",
       "testing/mock_layer_unittests.cc",
       "testing/mock_texture_unittests.cc",
       "texture_unittests.cc",
