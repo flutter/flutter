@@ -825,6 +825,16 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+- (void)testFloatingCursorDoesNotThrow {
+  // The keyboard implementation may send unbalanced calls to the input view.
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView beginFloatingCursorAtPoint:CGPointMake(123, 321)];
+  [inputView beginFloatingCursorAtPoint:CGPointMake(123, 321)];
+  [inputView endFloatingCursor];
+  [inputView beginFloatingCursorAtPoint:CGPointMake(123, 321)];
+  [inputView endFloatingCursor];
+}
+
 - (void)testBoundsForFloatingCursor {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
 
