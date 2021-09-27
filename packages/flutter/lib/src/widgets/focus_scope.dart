@@ -121,7 +121,7 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     FocusOnKeyCallback? onKey,
     FocusOnKeyEventCallback? onKeyEvent,
-    this.debugLabel,
+    String? debugLabel,
     bool? canRequestFocus,
     bool descendantsAreFocusable = true,
     bool? skipTraversal,
@@ -132,6 +132,7 @@ class Focus extends StatefulWidget {
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
         _descendantsAreFocusable = descendantsAreFocusable,
+        _debugLabel = debugLabel,
         assert(child != null),
         assert(autofocus != null),
         assert(descendantsAreFocusable != null),
@@ -146,7 +147,6 @@ class Focus extends StatefulWidget {
     required FocusNode this.focusNode,
     this.autofocus = false,
     this.onFocusChange,
-    this.debugLabel,
     this.includeSemantics = true,
   })  : _usingExternalFocus = true,
         _onKeyEvent = null,
@@ -154,6 +154,7 @@ class Focus extends StatefulWidget {
         _skipTraversal = null,
         _canRequestFocus = null,
         _descendantsAreFocusable = true,
+        _debugLabel = null,
         assert(child != null),
         assert(autofocus != null),
         assert(includeSemantics != null),
@@ -166,14 +167,14 @@ class Focus extends StatefulWidget {
   /// A debug label for this widget.
   ///
   /// Not used for anything except to be printed in the diagnostic output from
-  /// [toString] or [toStringDeep]. Also unused if a [focusNode] is provided,
-  /// since that node can have its own [FocusNode.debugLabel].
+  /// [toString] or [toStringDeep].
   ///
   /// To get a string with the entire tree, call [debugDescribeFocusTree]. To
   /// print it to the console call [debugDumpFocusTree].
   ///
   /// Defaults to null.
-  final String? debugLabel;
+  String? get debugLabel => _usingExternalFocus ? focusNode!.debugLabel : _debugLabel ?? focusNode?.debugLabel;
+  final String? _debugLabel;
 
   /// The child widget of this [Focus].
   ///
@@ -193,7 +194,7 @@ class Focus extends StatefulWidget {
   /// keyboards in general. For text input, consider [TextField],
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
-  FocusOnKeyEventCallback? get onKeyEvent => _usingExternalFocus ? focusNode!.onKeyEvent : _onKeyEvent;
+  FocusOnKeyEventCallback? get onKeyEvent => _usingExternalFocus ? focusNode!.onKeyEvent : _onKeyEvent ?? focusNode?.onKeyEvent;
   final FocusOnKeyEventCallback? _onKeyEvent;
 
   /// A handler for keys that are pressed when this object or one of its
@@ -212,7 +213,7 @@ class Focus extends StatefulWidget {
   /// keyboards in general. For text input, consider [TextField],
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
-  FocusOnKeyCallback? get onKey => _usingExternalFocus ? focusNode!.onKey : _onKey;
+  FocusOnKeyCallback? get onKey => _usingExternalFocus ? focusNode!.onKey : _onKey ?? focusNode?.onKey;
   final FocusOnKeyCallback? _onKey;
 
   /// Handler called when the focus changes.
@@ -262,7 +263,7 @@ class Focus extends StatefulWidget {
   /// This is different from [FocusNode.canRequestFocus] because it only implies
   /// that the widget can't be reached via traversal, not that it can't be
   /// focused. It may still be focused explicitly.
-  bool? get skipTraversal => _usingExternalFocus ? focusNode!.skipTraversal : _skipTraversal;
+  bool? get skipTraversal => _usingExternalFocus ? focusNode!.skipTraversal : _skipTraversal ?? focusNode?.skipTraversal;
   final bool? _skipTraversal;
 
   /// {@template flutter.widgets.Focus.includeSemantics}
@@ -300,7 +301,7 @@ class Focus extends StatefulWidget {
   /// * [FocusTraversalPolicy], a class that can be extended to describe a
   ///   traversal policy.
   /// {@endtemplate}
-  bool? get canRequestFocus => _usingExternalFocus ? focusNode!.canRequestFocus : _canRequestFocus;
+  bool? get canRequestFocus => _usingExternalFocus ? focusNode!.canRequestFocus : _canRequestFocus ?? focusNode?.canRequestFocus;
   final bool? _canRequestFocus;
 
   /// {@template flutter.widgets.Focus.descendantsAreFocusable}
@@ -531,10 +532,11 @@ class _FocusState extends State<Focus> {
   void didUpdateWidget(Focus oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(() {
-      // Only update the debug label in debug builds, and only if we own the
-      // node.
-      if (oldWidget.debugLabel != widget.debugLabel && _internalNode != null) {
-        _internalNode!.debugLabel = widget.debugLabel;
+      // Only update the debug label in debug builds.
+      if (oldWidget.focusNode == widget.focusNode &&
+          !widget._usingExternalFocus &&
+          oldWidget.debugLabel != widget.debugLabel) {
+        focusNode.debugLabel = widget.debugLabel;
       }
       return true;
     }());
@@ -558,7 +560,6 @@ class _FocusState extends State<Focus> {
     } else {
       _focusAttachment!.detach();
       oldWidget.focusNode?.removeListener(_handleFocusChanged);
-      _internalNode?.removeListener(_handleAutofocus);
       _initNode();
     }
 
@@ -699,6 +700,24 @@ class FocusScope extends Focus {
           onKeyEvent: onKeyEvent,
           onKey: onKey,
           debugLabel: debugLabel,
+        );
+
+  /// Creates a FocusScope widget that uses the given [focusScopeNode] as the
+  /// source of truth for attributes on the node, rather than the attributes of
+  /// this widget.
+  const FocusScope.withExternalFocusNode({
+    Key? key,
+    required Widget child,
+    required FocusScopeNode focusScopeNode,
+    bool autofocus = false,
+    ValueChanged<bool>? onFocusChange,
+    bool includeSemantics = true,
+  })  : super.withExternalFocusNode(key: key,
+          child: child,
+          focusNode: focusScopeNode,
+          autofocus: autofocus,
+          onFocusChange: onFocusChange,
+          includeSemantics: includeSemantics,
         );
 
   /// Returns the [FocusScopeNode] of the [FocusScope] that most tightly
