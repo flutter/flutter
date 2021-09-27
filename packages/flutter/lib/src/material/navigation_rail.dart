@@ -284,13 +284,13 @@ class NavigationRail extends StatefulWidget {
   /// This can be used to synchronize animations in the [leading] or [trailing]
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  /// This example shows how to use this animation to create a
-  /// [FloatingActionButton] that animates itself between the normal and
-  /// extended states of the [NavigationRail].
+  /// {@tool dartpad --template=freeform}
+  /// This example shows how to use this animation to create a [FloatingActionButton]
+  /// that animates itself between the normal and extended states of the
+  /// [NavigationRail].
   ///
-  /// An instance of `ExtendableFab` would be created for
-  /// [NavigationRail.leading].
+  /// An instance of `MyNavigationRailFab` is created for [NavigationRail.leading].
+  /// Pressing the FAB button toggles the "extended" state of the [NavigationRail].
   ///
   /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.extended_animation.0.dart **
   /// {@end-tool}
