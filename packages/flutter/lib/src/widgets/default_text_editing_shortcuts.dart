@@ -209,6 +209,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Control + end
+    //   * Control + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -262,6 +264,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Control + end
+    //   * Control + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -315,6 +319,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow up
     //   * Shift + end
     //   * Shift + home
+    //   * Control + end
+    //   * Control + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -356,6 +362,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Control + end
+    //   * Control + home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
@@ -421,6 +429,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Control + shift + arrow right
     //   * End
     //   * Home
+    //   * Control + end
+    //   * Control + home
     //   * Control + delete
     //   * Control + backspace
   };
@@ -449,7 +459,9 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): ExtendSelectionLeftByWordTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): ExtendSelectionRightByWordTextIntent(),
     SingleActivator(LogicalKeyboardKey.end): MoveSelectionRightByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, control: true): MoveSelectionToEndTextIntent(),
     SingleActivator(LogicalKeyboardKey.home): MoveSelectionLeftByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, control: true): MoveSelectionToStartTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionDownTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
@@ -521,6 +533,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, meta: true): DoNothingAndStopPropagationTextIntent(),
