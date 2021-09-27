@@ -157,26 +157,60 @@ class Layer {
   // draws a checkerboard over the layer if that is enabled in the PaintContext.
   class AutoSaveLayer {
    public:
-    [[nodiscard]] static AutoSaveLayer Create(const PaintContext& paint_context,
-                                              const SkRect& bounds,
-                                              const SkPaint* paint);
+    // Indicates which canvas the layer should be saved on.
+    //
+    // Usually layers are saved on the internal_nodes_canvas, so that all
+    // the canvas keep track of the current state of the layer tree.
+    // In some special cases, layers should only save on the leaf_nodes_canvas,
+    // See https:://flutter.dev/go/backdrop-filter-with-overlay-canvas for why
+    // it is the case for Backdrop filter layer.
+    enum SaveMode {
+      // The layer is saved on the internal_nodes_canvas.
+      kInternalNodesCanvas,
+      // The layer is saved on the leaf_nodes_canvas.
+      kLeafNodesCanvas
+    };
 
+    // Create a layer and save it on the canvas.
+    //
+    // The layer is restored from the canvas in destructor.
+    //
+    // By default, the layer is saved on and restored from
+    // `internal_nodes_canvas`. The `save_mode` parameter can be modified to
+    // save the layer on other canvases.
     [[nodiscard]] static AutoSaveLayer Create(
         const PaintContext& paint_context,
-        const SkCanvas::SaveLayerRec& layer_rec);
+        const SkRect& bounds,
+        const SkPaint* paint,
+        SaveMode save_mode = SaveMode::kInternalNodesCanvas);
+    // Create a layer and save it on the canvas.
+    //
+    // The layer is restored from the canvas in destructor.
+    //
+    // By default, the layer is saved on and restored from
+    // `internal_nodes_canvas`. The `save_mode` parameter can be modified to
+    // save the layer on other canvases.
+    [[nodiscard]] static AutoSaveLayer Create(
+        const PaintContext& paint_context,
+        const SkCanvas::SaveLayerRec& layer_rec,
+        SaveMode save_mode = SaveMode::kInternalNodesCanvas);
 
     ~AutoSaveLayer();
 
    private:
     AutoSaveLayer(const PaintContext& paint_context,
                   const SkRect& bounds,
-                  const SkPaint* paint);
+                  const SkPaint* paint,
+                  SaveMode save_mode = SaveMode::kInternalNodesCanvas);
 
     AutoSaveLayer(const PaintContext& paint_context,
-                  const SkCanvas::SaveLayerRec& layer_rec);
+                  const SkCanvas::SaveLayerRec& layer_rec,
+                  SaveMode save_mode = SaveMode::kInternalNodesCanvas);
 
     const PaintContext& paint_context_;
     const SkRect bounds_;
+    // The canvas that this layer is saved on and popped from.
+    SkCanvas& canvas_;
   };
 
   virtual void Paint(PaintContext& context) const = 0;

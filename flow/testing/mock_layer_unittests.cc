@@ -69,5 +69,14 @@ TEST_F(MockLayerTest, FakePlatformView) {
   EXPECT_EQ(preroll_context()->has_platform_view, true);
 }
 
+TEST_F(MockLayerTest, SaveLayerOnLeafNodesCanvas) {
+  auto layer = std::make_shared<MockLayer>(SkPath(), SkPaint(),
+                                           true /* fake_has_platform_view */);
+  EXPECT_EQ(preroll_context()->has_platform_view, false);
+
+  layer->Preroll(preroll_context(), SkMatrix());
+  EXPECT_EQ(preroll_context()->has_platform_view, true);
+}
+
 }  // namespace testing
 }  // namespace flutter

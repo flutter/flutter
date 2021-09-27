@@ -58,35 +58,47 @@ Layer::AutoPrerollSaveLayerState::~AutoPrerollSaveLayerState() {
 
 Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
                                     const SkRect& bounds,
-                                    const SkPaint* paint)
-    : paint_context_(paint_context), bounds_(bounds) {
-  paint_context_.internal_nodes_canvas->saveLayer(bounds_, paint);
+                                    const SkPaint* paint,
+                                    SaveMode save_mode)
+    : paint_context_(paint_context),
+      bounds_(bounds),
+      canvas_(save_mode == SaveMode::kInternalNodesCanvas
+                  ? *(paint_context.internal_nodes_canvas)
+                  : *(paint_context.leaf_nodes_canvas)) {
+  canvas_.saveLayer(bounds_, paint);
 }
 
 Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
-                                    const SkCanvas::SaveLayerRec& layer_rec)
-    : paint_context_(paint_context), bounds_(*layer_rec.fBounds) {
-  paint_context_.internal_nodes_canvas->saveLayer(layer_rec);
+                                    const SkCanvas::SaveLayerRec& layer_rec,
+                                    SaveMode save_mode)
+    : paint_context_(paint_context),
+      bounds_(*layer_rec.fBounds),
+      canvas_(save_mode == SaveMode::kInternalNodesCanvas
+                  ? *(paint_context.internal_nodes_canvas)
+                  : *(paint_context.leaf_nodes_canvas)) {
+  canvas_.saveLayer(layer_rec);
 }
 
 Layer::AutoSaveLayer Layer::AutoSaveLayer::Create(
     const PaintContext& paint_context,
     const SkRect& bounds,
-    const SkPaint* paint) {
-  return Layer::AutoSaveLayer(paint_context, bounds, paint);
+    const SkPaint* paint,
+    SaveMode save_mode) {
+  return Layer::AutoSaveLayer(paint_context, bounds, paint, save_mode);
 }
 
 Layer::AutoSaveLayer Layer::AutoSaveLayer::Create(
     const PaintContext& paint_context,
-    const SkCanvas::SaveLayerRec& layer_rec) {
-  return Layer::AutoSaveLayer(paint_context, layer_rec);
+    const SkCanvas::SaveLayerRec& layer_rec,
+    SaveMode save_mode) {
+  return Layer::AutoSaveLayer(paint_context, layer_rec, save_mode);
 }
 
 Layer::AutoSaveLayer::~AutoSaveLayer() {
   if (paint_context_.checkerboard_offscreen_layers) {
-    DrawCheckerboard(paint_context_.internal_nodes_canvas, bounds_);
+    DrawCheckerboard(&canvas_, bounds_);
   }
-  paint_context_.internal_nodes_canvas->restore();
+  canvas_.restore();
 }
 
 }  // namespace flutter
