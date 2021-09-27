@@ -567,10 +567,7 @@ class FlutterVmService {
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
-    if (response != null) {
-      return response['data']?.toString() ?? '';
-    }
-    return '';
+    return response?['data']?.toString() ?? '';
   }
 
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
