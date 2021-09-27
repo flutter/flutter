@@ -696,8 +696,9 @@ class LocalDevFSWriter implements DevFSWriter {
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter? parent]) async {
     try {
-      for (final Uri uri in entries.keys) {
-        final DevFSContent devFSContent = entries[uri]!;
+      for (final MapEntry<Uri, DevFSContent> entry in entries.entries) {
+        final Uri uri = entry.key;
+        final DevFSContent devFSContent = entry.value;
         final File destination = _fileSystem.file(baseUri.resolveUri(uri));
         if (!destination.parent.existsSync()) {
           destination.parent.createSync(recursive: true);
