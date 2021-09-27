@@ -2023,16 +2023,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ));
     }
 
-    // If `shouldUnfocus` is true but in case the developer cancelled the focus
-    // change in onSubmitted by focusing this input field again, reset the
-    // soft keyboard. See https://github.com/flutter/flutter/issues/84240.
+    // If `shouldUnfocus` is true, the text field should no longer be focused
+    // after the microtask queue is drained. But in case the developer cancelled
+    // the focus change in the `onSubmitted` callback by focusing this input
+    // field again, reset the soft keyboard.
+    // See https://github.com/flutter/flutter/issues/84240.
     //
     // `_restartConnectionIfNeeded` creates a new TextInputConnection to replace
     // the current one. This on iOS switches to a new input view and on Android
     // restarts the input method, and in both cases the soft keyboard will be
     // reset.
     if (shouldUnfocus) {
-      scheduleMicrotask(_restartConnectionIfNeeded);
+      _scheduleRestartConnection();
     }
   }
 
@@ -2199,11 +2201,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  bool _restartConnectionScheduled = false;
+  void _scheduleRestartConnection() {
+    if (_restartConnectionScheduled) {
+      return;
+    }
+    _restartConnectionScheduled = true;
+    scheduleMicrotask(_restartConnectionIfNeeded);
+  }
   // Discards the current [TextInputConnection] and establishes a new one.
   //
   // This method is rarely needed. This is currently used to reset the input
-  // type when the "submit" text input action is triggered.
+  // type when the "submit" text input action is triggered and the developer
+  // puts the focus back to this input field..
   void _restartConnectionIfNeeded() {
+    _restartConnectionScheduled = false;
     if (!_hasInputConnection || !_shouldCreateInputConnection) {
       return;
     }
