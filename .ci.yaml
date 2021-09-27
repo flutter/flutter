@@ -1699,13 +1699,14 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
+    bringup: true
     presubmit: true
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "android_virtual_device", "version": "31"}
           {"dependency": "open_jdk", "version": "11"},
+          {"dependency": "android_virtual_device", "version": "31"}
         ]
       caches: >-
         [
