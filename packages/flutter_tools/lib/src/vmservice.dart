@@ -386,14 +386,14 @@ String _validateRpcStringParam(String methodName, Map<String, Object?> params, S
 
 bool _validateRpcBoolParam(String methodName, Map<String, Object?> params, String paramName) {
   final Object? value = params[paramName];
-  if (value != null && value is! bool) {
+  if (value is! bool) {
     throw vm_service.RPCError(
       methodName,
       RPCErrorCodes.kInvalidParams,
       "Invalid '$paramName': $value",
     );
   }
-  return value as bool;
+  return value;
 }
 
 /// Peered to an Android/iOS FlutterView widget on a device.
