@@ -1934,15 +1934,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ));
     }
 
-    // Create a new TextInputConnection to replace the current one. This
-    // on iOS switches to a new input view and on Android restarts the
-    // input method. In both cases this call resets the IME.
+    // If `shouldUnfocus` is true but in case the developer cancelled the focus
+    // change in onSubmitted by focusing this input field again, reset the
+    // soft keyboard. See https://github.com/flutter/flutter/issues/84240.
     //
-    // We do this for fidelity reasons, in case the developer calls
-    // requestFocus in the onSubmitted callback to undo the focus change.
-    // See https://github.com/flutter/flutter/issues/84240.
+    // `_restartConnectionIfNeeded` creates a new TextInputConnection to replace
+    // the current one. This on iOS switches to a new input view and on Android
+    // restarts the input method, and in both cases the soft keyboard will be
+    // reset.
     if (shouldUnfocus) {
-      _restartConnectionIfNeeded();
+      scheduleMicrotask(_restartConnectionIfNeeded);
     }
   }
 
@@ -2108,6 +2109,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  // Discards the current [TextInputConnection] and establishes a new one.
+  //
+  // This method is rarely needed. This is currently used to reset the input
+  // type when the "submit" text input action is triggered.
   void _restartConnectionIfNeeded() {
     if (!_hasInputConnection || !_shouldCreateInputConnection) {
       return;
@@ -2118,7 +2123,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
     final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
-      ?? TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
+      ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
     final TextStyle style = widget.style;
