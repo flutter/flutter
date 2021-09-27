@@ -49,6 +49,8 @@ class DefaultTextEditingActions extends Actions {
     ExtendSelectionRightByWordTextIntent: _ExtendSelectionRightByWordTextAction(),
     ExtendSelectionRightByLineTextIntent: _ExtendSelectionRightByLineTextAction(),
     ExtendSelectionRightTextIntent: _ExtendSelectionRightTextAction(),
+    ExtendSelectionToEndTextIntent: _ExtendSelectionToEndTextAction(),
+    ExtendSelectionToStartTextIntent: _ExtendSelectionToStartTextAction(),
     ExtendSelectionUpTextIntent: _ExtendSelectionUpTextAction(),
     ExpandSelectionLeftByLineTextIntent: _ExpandSelectionLeftByLineTextAction(),
     ExpandSelectionRightByLineTextIntent: _ExpandSelectionRightByLineTextAction(),
@@ -200,6 +202,20 @@ class _ExtendSelectionRightTextAction extends TextEditingAction<ExtendSelectionR
   @override
   Object? invoke(ExtendSelectionRightTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.extendSelectionRight(SelectionChangedCause.keyboard);
+  }
+}
+
+class _ExtendSelectionToEndTextAction extends TextEditingAction<ExtendSelectionToEndTextIntent> {
+  @override
+  Object? invoke(ExtendSelectionToEndTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.extendSelectionToEnd(SelectionChangedCause.keyboard);
+  }
+}
+
+class _ExtendSelectionToStartTextAction extends TextEditingAction<ExtendSelectionToStartTextIntent> {
+  @override
+  Object? invoke(ExtendSelectionToStartTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.extendSelectionToStart(SelectionChangedCause.keyboard);
   }
 }
 

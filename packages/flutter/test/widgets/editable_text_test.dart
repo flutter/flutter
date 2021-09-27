@@ -5575,6 +5575,94 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
+  testWidgets('control + shift + home/end keys (Windows only)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shortcutModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: 0,
+        extentOffset: testText.length,
+      )),
+    );
+
+    // Collapse the selection at the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection.collapsed(
+        offset: testText.length,
+        affinity: TextAffinity.downstream,
+      )),
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shortcutModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: testText.length,
+        extentOffset: 0,
+      )),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.

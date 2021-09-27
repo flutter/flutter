@@ -179,6 +179,22 @@ class ExtendSelectionRightTextIntent extends Intent {
   const ExtendSelectionRightTextIntent();
 }
 
+/// An [Intent] to extend the selection to the end of all the text.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class ExtendSelectionToEndTextIntent extends Intent {
+  /// Creates an instance of ExtendSelectionToEndTextIntent.
+  const ExtendSelectionToEndTextIntent();
+}
+
+/// An [Intent] to extend the selection to the start of all the text.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class ExtendSelectionToStartTextIntent extends Intent {
+  /// Creates an instance of ExtendSelectionToStartTextIntent.
+  const ExtendSelectionToStartTextIntent();
+}
+
 /// An [Intent] to extend the selection up by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}

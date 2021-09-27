@@ -211,6 +211,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + home
     //   * Control + end
     //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -266,6 +268,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + home
     //   * Control + end
     //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -321,6 +325,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Shift + home
     //   * Control + end
     //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -364,6 +370,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     // platform:
     //   * Control + end
     //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
@@ -431,6 +439,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Home
     //   * Control + end
     //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Control + delete
     //   * Control + backspace
   };
@@ -460,8 +470,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): ExtendSelectionRightByWordTextIntent(),
     SingleActivator(LogicalKeyboardKey.end): MoveSelectionRightByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, control: true): MoveSelectionToEndTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): ExtendSelectionToEndTextIntent(),
     SingleActivator(LogicalKeyboardKey.home): MoveSelectionLeftByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, control: true): MoveSelectionToStartTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): ExtendSelectionToStartTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionDownTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),

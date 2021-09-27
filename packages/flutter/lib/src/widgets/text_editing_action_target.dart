@@ -153,47 +153,6 @@ abstract class TextEditingActionTarget {
   /// {@endtemplate}
   void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause);
 
-  // Extend the current selection to the end of the field.
-  //
-  // If selectionEnabled is false, keeps the selection collapsed and moves it to
-  // the end.
-  //
-  // See also:
-  //
-  //   * _extendSelectionToStart
-  void _extendSelectionToEnd(SelectionChangedCause cause) {
-    if (textEditingValue.selection.extentOffset == textEditingValue.text.length) {
-      return;
-    }
-
-    final TextSelection nextSelection = textEditingValue.selection.copyWith(
-      extentOffset: textEditingValue.text.length,
-    );
-    return setSelection(nextSelection, cause);
-  }
-
-  // Extend the current selection to the start of the field.
-  //
-  // If selectionEnabled is false, keeps the selection collapsed and moves it to
-  // the start.
-  //
-  // The given [SelectionChangedCause] indicates the cause of this change and
-  // will be passed to [setSelection].
-  //
-  // See also:
-  //
-  //   * _extendSelectionToEnd
-  void _extendSelectionToStart(SelectionChangedCause cause) {
-    if (!selectionEnabled) {
-      return moveSelectionToStart(cause);
-    }
-
-    setSelection(textEditingValue.selection.extendTo(const TextPosition(
-      offset: 0,
-      affinity: TextAffinity.upstream,
-    )), cause);
-  }
-
   // Return the offset at the start of the nearest word to the left of the
   // given offset.
   int _getLeftByWord(int offset, [bool includeWhitespace = true]) {
@@ -919,7 +878,7 @@ abstract class TextEditingActionTarget {
       [bool includeWhitespace = true, bool stopAtReversal = false]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return _extendSelectionToStart(cause);
+      return extendSelectionToStart(cause);
     }
 
     debugAssertLayoutUpToDate();
@@ -963,7 +922,7 @@ abstract class TextEditingActionTarget {
     debugAssertLayoutUpToDate();
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return _extendSelectionToEnd(cause);
+      return extendSelectionToEnd(cause);
     }
 
     // If the selection is already all the way right, there is nothing to do.
@@ -990,6 +949,47 @@ abstract class TextEditingActionTarget {
       return;
     }
     setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current selection to the end of the field.
+  ///
+  /// If selectionEnabled is false, keeps the selection collapsed and moves it
+  /// to the end.
+  ///
+  /// See also:
+  ///
+  ///   * extendSelectionToStart
+  void extendSelectionToEnd(SelectionChangedCause cause) {
+    if (textEditingValue.selection.extentOffset == textEditingValue.text.length) {
+      return;
+    }
+
+    final TextSelection nextSelection = textEditingValue.selection.copyWith(
+      extentOffset: textEditingValue.text.length,
+    );
+    return setSelection(nextSelection, cause);
+  }
+
+  /// Extend the current selection to the start of the field.
+  ///
+  /// If selectionEnabled is false, keeps the selection collapsed and moves it
+  /// to the start.
+  ///
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [setSelection].
+  ///
+  /// See also:
+  ///
+  ///   * extendSelectionToEnd
+  void extendSelectionToStart(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionToStart(cause);
+    }
+
+    setSelection(textEditingValue.selection.extendTo(const TextPosition(
+      offset: 0,
+      affinity: TextAffinity.upstream,
+    )), cause);
   }
 
   /// Keeping selection's [TextSelection.baseOffset] fixed, move the
