@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -387,6 +393,36 @@ void main() {
 
     // Expect the action sheet to take all available height.
     expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
+  });
+
+  testWidgets('CupertinoActionSheet scrollbars controllers should be different', (WidgetTester tester) async {
+    // https://github.com/flutter/flutter/pull/81278
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            message: Text('Very long content' * 200),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+            ],
+          )
+        ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final List<CupertinoScrollbar> scrollbars =
+      find.descendant(
+        of: find.byType(CupertinoActionSheet),
+        matching: find.byType(CupertinoScrollbar),
+      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
+
+    expect(scrollbars.length, 2);
+    expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {

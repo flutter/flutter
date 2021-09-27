@@ -26,6 +26,8 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
+import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
@@ -35,7 +37,11 @@ import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
 import 'version.dart';
+
+/// The flutter GitHub repository.
+String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem? get buildSystem => context.get<BuildSystem>();
@@ -49,10 +55,12 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
+FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
+LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
@@ -213,3 +221,5 @@ FlutterProjectFactory get projectFactory {
     fileSystem: fs,
   );
 }
+
+CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;

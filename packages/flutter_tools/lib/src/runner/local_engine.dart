@@ -105,7 +105,7 @@ class LocalEngineLocator {
   Future<String?> _findEngineSourceByPackageConfig(String? packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file(
-        // TODO(jonahwilliams): update to package_config
+        // TODO(zanderso): update to package_config
         packagePath ?? _fileSystem.path.join('.packages'),
       ),
       logger: _logger,

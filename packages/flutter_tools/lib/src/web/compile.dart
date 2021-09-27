@@ -28,9 +28,6 @@ Future<void> buildWeb(
   bool nativeNullAssertions,
   String baseHref,
 ) async {
-  if (!flutterProject.web.existsSync()) {
-    throwToolExit('Missing index.html.');
-  }
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());

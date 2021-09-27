@@ -443,3 +443,19 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
   return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
 }
+
+/// Returns the first line-based match for [regExp] in [file].
+///
+/// Assumes UTF8 encoding.
+Match? firstMatchInFile(File file, RegExp regExp) {
+  if (!file.existsSync()) {
+    return null;
+  }
+  for (final String line in file.readAsLinesSync()) {
+    final Match? match = regExp.firstMatch(line);
+    if (match != null) {
+      return match;
+    }
+  }
+  return null;
+}

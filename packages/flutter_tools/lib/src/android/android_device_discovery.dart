@@ -195,4 +195,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
       }
     }
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }

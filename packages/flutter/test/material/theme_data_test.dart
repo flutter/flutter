@@ -105,7 +105,6 @@ void main() {
 
     expect(themeData.textTheme.bodyText1!.fontFamily, equals('Ahem'));
     expect(themeData.primaryTextTheme.headline3!.fontFamily, equals('Ahem'));
-    expect(themeData.accentTextTheme.headline1!.fontFamily, equals('Ahem'));
 
     // Shouldn't override the specified style's family
     expect(themeData.textTheme.headline6!.fontFamily, equals('Roboto'));
@@ -203,6 +202,49 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Ensure Visual Density effective constraints are clamped', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
+    BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(35));
+    expect(expanded.minHeight, equals(35));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(19));
+    expect(contracted.minHeight, equals(19));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    const BoxConstraints small = BoxConstraints.tightFor(width: 4, height: 4);
+    expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(small);
+    expect(expanded.minWidth, equals(4));
+    expect(expanded.minHeight, equals(4));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+
+    contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(small);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+  });
+
+  testWidgets('Ensure Visual Density effective constraints expand and contract', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints();
+    final BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(16));
+    expect(expanded.minHeight, equals(16));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+
+    final BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+  });
+
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
 
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
@@ -282,6 +324,7 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
+      navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
       typography: Typography.material2018(platform: TargetPlatform.android),
       cupertinoOverrideTheme: null,
@@ -302,8 +345,10 @@ void main() {
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
+      drawerTheme: const DrawerThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
+      androidOverscrollIndicator: null,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -376,6 +421,7 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
+      navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
@@ -396,8 +442,10 @@ void main() {
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
+      drawerTheme: const DrawerThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
+      androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -405,8 +453,6 @@ void main() {
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       primaryColorLight: otherTheme.primaryColorLight,
       primaryColorDark: otherTheme.primaryColorDark,
-      accentColor: otherTheme.accentColor,
-      accentColorBrightness: otherTheme.accentColorBrightness,
       canvasColor: otherTheme.canvasColor,
       shadowColor: otherTheme.shadowColor,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
@@ -436,11 +482,9 @@ void main() {
       toggleableActiveColor: otherTheme.toggleableActiveColor,
       textTheme: otherTheme.textTheme,
       primaryTextTheme: otherTheme.primaryTextTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
       inputDecorationTheme: otherTheme.inputDecorationTheme,
       iconTheme: otherTheme.iconTheme,
       primaryIconTheme: otherTheme.primaryIconTheme,
-      accentIconTheme: otherTheme.accentIconTheme,
       sliderTheme: otherTheme.sliderTheme,
       tabBarTheme: otherTheme.tabBarTheme,
       tooltipTheme: otherTheme.tooltipTheme,
@@ -455,6 +499,7 @@ void main() {
       colorScheme: otherTheme.colorScheme,
       dialogTheme: otherTheme.dialogTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
+      navigationBarTheme: otherTheme.navigationBarTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       typography: otherTheme.typography,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
@@ -470,6 +515,12 @@ void main() {
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       textSelectionTheme: otherTheme.textSelectionTheme,
+      dataTableTheme: otherTheme.dataTableTheme,
+      checkboxTheme: otherTheme.checkboxTheme,
+      radioTheme: otherTheme.radioTheme,
+      switchTheme: otherTheme.switchTheme,
+      progressIndicatorTheme: otherTheme.progressIndicatorTheme,
+      drawerTheme: otherTheme.drawerTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -478,8 +529,6 @@ void main() {
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
     expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
-    expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
-    expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
@@ -509,10 +558,8 @@ void main() {
     expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
     expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
-    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.accentColor));
     expect(themeDataCopy.textTheme, equals(otherTheme.textTheme));
     expect(themeDataCopy.primaryTextTheme, equals(otherTheme.primaryTextTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
@@ -527,6 +574,7 @@ void main() {
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
+    expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.typography, equals(otherTheme.typography));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
@@ -542,6 +590,12 @@ void main() {
     expect(themeDataCopy.elevatedButtonTheme, equals(otherTheme.elevatedButtonTheme));
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
     expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
+    expect(themeDataCopy.dataTableTheme, equals(otherTheme.dataTableTheme));
+    expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
+    expect(themeDataCopy.radioTheme, equals(otherTheme.radioTheme));
+    expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
+    expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
+    expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 

@@ -497,7 +497,7 @@ class BoxConstraints extends Constraints {
   ///
   /// Most of the APIs on BoxConstraints expect the constraints to be
   /// normalized and have undefined behavior when they are not. In
-  /// checked mode, many of these APIs will assert if the constraints
+  /// debug mode, many of these APIs will assert if the constraints
   /// are not normalized.
   @override
   bool get isNormalized {
@@ -1951,7 +1951,7 @@ abstract class RenderBox extends RenderObject {
     return _size!;
   }
   Size? _size;
-  /// Setting the size, in checked mode, triggers some analysis of the render box,
+  /// Setting the size, in debug mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
   @protected
@@ -2208,7 +2208,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
         ]);
-     }
+      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size!)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[

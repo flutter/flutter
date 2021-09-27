@@ -142,10 +142,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }
 
   @override
+  bool get supported => _platform.isMacOS;
+
+  @override
   Future<void> validateCommand() async {
     await super.validateCommand();
     _project = FlutterProject.current();
-    if (!_platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
@@ -272,21 +275,21 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 Pod::Spec.new do |s|
   s.name                  = 'Flutter'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${_flutterVersion.frameworkVersion}
-  s.summary               = 'Flutter Engine Framework'
+  s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
-Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
+Flutter is Google's UI toolkit for building beautiful, fast apps for mobile, web, desktop, and embedded devices from a single codebase.
 This pod vends the iOS Flutter engine framework. It is compatible with application frameworks created with this version of the engine and tools.
 The pod version matches Flutter version major.minor.(patch * 100) + hotfix.
 DESC
   s.homepage              = 'https://flutter.dev'
-  s.license               = { :type => 'MIT', :text => <<-LICENSE
+  s.license               = { :type => 'BSD', :text => <<-LICENSE
 $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.platform              = :ios, '8.0'
+  s.platform              = :ios, '9.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -454,7 +457,6 @@ end
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
         'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-        'ARCHS=x86_64',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];

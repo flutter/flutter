@@ -236,8 +236,8 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 }
 
 class FakeThrowingFlutterVersion extends FakeFlutterVersion {
-   @override
-   String get frameworkCommitDate {
-     throw VersionCheckError('version error');
-   }
+  @override
+  String get frameworkCommitDate {
+    throw VersionCheckError('version error');
+  }
 }

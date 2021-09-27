@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
@@ -204,7 +210,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () {
+    test('Creates traceID correctly', () async {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -226,10 +232,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
       );
 
       // Browser
@@ -254,10 +259,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('e9d5c296c48e7126808520e9cc191243'),
       );
 
       // Locally - should defer to luci traceID
@@ -277,10 +281,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 

@@ -106,7 +106,7 @@ class ImageCache {
       return;
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
-       timelineTask = TimelineTask()..start(
+      timelineTask = TimelineTask()..start(
         'ImageCache.setMaximumSize',
         arguments: <String, dynamic>{'value': value},
       );
@@ -411,7 +411,7 @@ class ImageCache {
     void listener(ImageInfo? info, bool syncCall) {
       int? sizeBytes;
       if (info != null) {
-        sizeBytes = info.image.height * info.image.width * 4;
+        sizeBytes = info.sizeBytes;
         info.dispose();
       }
       final _CachedImage image = _CachedImage(
@@ -517,7 +517,7 @@ class ImageCache {
       image.dispose();
       _cache.remove(key);
       if (!kReleaseMode) {
-        finishArgs['evictedKeys'].add(key.toString());
+        (finishArgs['evictedKeys'] as List<String>).add(key.toString());
       }
     }
     if (!kReleaseMode) {

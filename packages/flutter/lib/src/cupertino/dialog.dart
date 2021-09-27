@@ -278,6 +278,9 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when there are many actions.
   final ScrollController? scrollController;
 
+  ScrollController get _effectiveScrollController =>
+    scrollController ?? ScrollController();
+
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
@@ -288,6 +291,9 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///  * [scrollController], which can be used for controlling the [content]
   ///    section when it is long.
   final ScrollController? actionScrollController;
+
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
 
   /// {@macro flutter.material.dialog.insetAnimationDuration}
   final Duration insetAnimationDuration;
@@ -305,7 +311,7 @@ class CupertinoAlertDialog extends StatelessWidget {
           child: _CupertinoAlertContentSection(
             title: title,
             message: content,
-            scrollController: scrollController,
+            scrollController: _effectiveScrollController,
             titlePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
@@ -344,7 +350,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     );
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
-        scrollController: actionScrollController,
+        scrollController: _effectiveActionScrollController,
         isActionSheet: false,
         children: actions,
       );
@@ -591,11 +597,17 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
+  ScrollController get _effectiveMessageScrollController =>
+    messageScrollController ?? ScrollController();
+
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
+
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -609,7 +621,7 @@ class CupertinoActionSheet extends StatelessWidget {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: title,
         message: message,
-        scrollController: messageScrollController,
+        scrollController: _effectiveMessageScrollController,
         titlePadding: const EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
@@ -650,7 +662,7 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return _CupertinoAlertActionSection(
-      scrollController: actionScrollController,
+      scrollController: _effectiveActionScrollController,
       hasCancelButton: cancelButton != null,
       isActionSheet: true,
       children: actions!,
@@ -1501,6 +1513,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     }
 
     return CupertinoScrollbar(
+      controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
@@ -1565,6 +1578,7 @@ class _CupertinoAlertActionSectionState
     }
 
     return CupertinoScrollbar(
+      controller: widget.scrollController,
       child: SingleChildScrollView(
         controller: widget.scrollController,
         child: _CupertinoDialogActionsRenderWidget(

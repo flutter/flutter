@@ -163,9 +163,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -195,9 +196,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -205,5 +207,31 @@ void main() {
     }
     expect(error, isNull);
     debugPaintSizeEnabled = false;
+  });
+
+  test('debugDisableOpacity keeps things in the right spot', () {
+    debugDisableOpacityLayers = true;
+
+    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xff000000)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
+      ),
+    );
+    final RenderOpacity root = RenderOpacity(
+      opacity: .5,
+      child: blackBox,
+    );
+    layout(root, phase: EnginePhase.compositingBits);
+
+    final OffsetLayer rootLayer = OffsetLayer(offset: Offset.zero);
+    final PaintingContext context = PaintingContext(
+      rootLayer,
+      const Rect.fromLTWH(0, 0, 500, 500),
+    );
+    root.paint(context, const Offset(40, 40));
+    final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
+    expect(opacityLayer.offset, const Offset(40, 40));
+    debugDisableOpacityLayers = false;
   });
 }

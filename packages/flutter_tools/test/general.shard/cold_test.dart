@@ -231,7 +231,7 @@ class TestFlutterDevice extends FlutterDevice {
   }
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler {}
+class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {
   @override

@@ -48,7 +48,6 @@ void main([List<String> args = const <String>[]]) {
           ..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), tester);
       },
-      timeout: const Timeout(Duration(minutes: 5)),
       semanticsEnabled: withSemantics,
     );
   });

@@ -21,6 +21,12 @@ For announcements about new releases and breaking changes, follow the
 mailing list or see the
 [breaking changes](https://flutter.dev/docs/release/breaking-changes) page.
 
+## Terms of service
+
+The Flutter tool may occasionally download resources from Google servers. By downloading or using the Flutter SDK you agree to the Google Terms of Service: https://policies.google.com/terms
+
+For example, when installed from GitHub (as opposed to from a prepackaged archive), the Flutter tool will download the Dart SDK from Google servers immediately when first run, as it is used to execute the "flutter" tool itself. This will also occur when Flutter is upgraded (e.g. by running the "flutter upgrade" command).
+
 ## About Flutter
 
 We think Flutter will help you create beautiful, fast apps, with a productive,
@@ -36,7 +42,7 @@ graphics, video, text, and controls without limitation. Flutter includes a full
 [set of widgets][widget catalog] that deliver pixel-perfect experiences on both
 iOS and Android.
 
-![Reflectly hero image][Reflectly hero image]
+<p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
 
 ### Fast results
 
@@ -47,7 +53,7 @@ Flutter code is powered by the world-class [Dart platform], which enables
 compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
 as JavaScript for the web and Intel x64 for desktop devices.
 
-![Dart platform diagram][]
+<p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
 ### Productive development
 
@@ -65,10 +71,10 @@ regardless of your target platform. And accessing other native code is easy,
 with support for both [FFI] and [platform-specific APIs][platform channels].
 
 Flutter is a fully open-source project, and we welcome contributions.
-Information on how to get started can be found at our
+Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
-[Flutter logo]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/flutter-lockup-bg.jpg
+[Flutter logo]: https://github.com/flutter/website/blob/archived-master/src/_assets/image/flutter-lockup-bg.jpg?raw=true
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
@@ -78,11 +84,9 @@ Information on how to get started can be found at our
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
-[Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
-[Dart platform diagram]: https://github.com/flutter/website/blob/master/src/images/homepage/dart-diagram-small.png
-[Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
+[Hot reload animation]: https://github.com/flutter/website/blob/main/src/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter

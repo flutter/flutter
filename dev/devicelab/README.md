@@ -27,7 +27,9 @@ When a device in the lab is free, it will pickup tasks that need to be completed
 
 1. If the task succeeds, the test runner reports the success and uploads its performance metrics to Flutter's infrastructure. Not
 all tasks record performance metrics.
-2. If the task fails, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
+2. If task fails, an auto rerun happens. Whenever the last run succeeds, the task will be reported as a success. For this case,
+a flake will be flagged and populated to the test result.
+3. If the task fails in all reruns, the test runner reports the failure to Flutter's infrastructure and no performance metrics are collected
 
 ## Running tests locally
 
