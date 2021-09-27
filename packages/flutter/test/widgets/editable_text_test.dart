@@ -8048,17 +8048,18 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
-    testWidgets('input formatters can thorw errors', (WidgetTester tester) async {
+    testWidgets('input formatters can throw errors', (WidgetTester tester) async {
       final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
         (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
+      );
+      final TextEditingController controller = TextEditingController(
+        text: 'flutter is the best!',
       );
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
           maxLines: 2,
-          controller: TextEditingController(
-            text: 'flutter is the best!',
-          ),
+          controller: controller,
           inputFormatters: <TextInputFormatter>[badFormatter],
           focusNode: FocusNode(),
           cursorColor: Colors.red,
@@ -8077,6 +8078,7 @@ void main() {
       final dynamic error = tester.takeException();
       expect(error, isFlutterError);
       expect(error.toString(), contains(errorText));
+      expect(controller.text, 'text');
     });
   });
 

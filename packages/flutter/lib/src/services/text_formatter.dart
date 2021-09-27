@@ -388,13 +388,11 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     }
 
     int adjustIndex(int originalIndex) {
-      // Add to the index the length of the replacement if needed.
-      // The condition of the ternary operator is chosen such that the index
-      // will be placed **after** the replacement text, if the index was
-      // strictly inside the banned pattern.
-      final int replacedLength = regionStart >= originalIndex ? 0 : replacementString.length;
-      // Subtract from the index the length of the banned pattern before the index.
-      return replacedLength - (originalIndex.clamp(regionStart, regionEnd) - regionStart);
+      // The length added by adding the replacementString.
+      final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
+      // The length removed by removing the replacementRange.
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
+      return replacedLength - removedLength;
     }
 
     state.selection?.base += adjustIndex(state.inputValue.selection.baseOffset);
