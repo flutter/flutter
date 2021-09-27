@@ -171,7 +171,7 @@ class _ExtendSelectionLeftByLineTextAction extends TextEditingAction<ExtendSelec
 class _ExtendSelectionLeftByWordTextAction extends TextEditingAction<ExtendSelectionLeftByWordTextIntent> {
   @override
   Object? invoke(ExtendSelectionLeftByWordTextIntent intent, [BuildContext? context]) {
-    textEditingActionTarget!.extendSelectionLeftByWord(SelectionChangedCause.keyboard, intent.stopAtReversal);
+    textEditingActionTarget!.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, intent.stopAtReversal);
   }
 }
 
@@ -192,7 +192,7 @@ class _ExtendSelectionRightByLineTextAction extends TextEditingAction<ExtendSele
 class _ExtendSelectionRightByWordTextAction extends TextEditingAction<ExtendSelectionRightByWordTextIntent> {
   @override
   Object? invoke(ExtendSelectionRightByWordTextIntent intent, [BuildContext? context]) {
-    textEditingActionTarget!.extendSelectionRightByWord(SelectionChangedCause.keyboard, intent.stopAtReversal);
+    textEditingActionTarget!.extendSelectionRightByWord(SelectionChangedCause.keyboard, false, intent.stopAtReversal);
   }
 }
 
