@@ -64,4 +64,6 @@ bool ExternalViewEmbedder::SupportsDynamicThreadMerging() {
   return false;
 }
 
+void ExternalViewEmbedder::Teardown() {}
+
 }  // namespace flutter
