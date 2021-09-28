@@ -680,6 +680,10 @@ class _TooltipOverlay extends StatelessWidget {
                 heightFactor: 1.0,
                 child: RichText(
                   text: richMessage,
+                  textScaleFactor: (context.widget is MediaQuery ||
+                      context.getElementForInheritedWidgetOfExactType<MediaQuery>() != null)
+                          ? MediaQuery.of(context).textScaleFactor
+                          : 1.0,
                 ),
               ),
             ),

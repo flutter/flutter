@@ -759,9 +759,7 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
   }) : super(key: key);
 
   /// The text that is rendered in the tooltip when it appears.
-  ///
-  /// If [message] is null, no tooltip will be used.
-  final String? message;
+  final String message;
 
   /// The widget that, when pressed, will show a tooltip.
   final Widget child;
@@ -772,7 +770,7 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
       return child;
     }
     return Tooltip(
-      message: message!,
+      message: message,
       // TODO(johnsonmh): Make this value configurable/themable.
       verticalOffset: 42,
       excludeFromSemantics: true,
