@@ -1,4 +1,4 @@
-Signature: bee14e1020fed5ad6b32a94937c2237e
+Signature: 458aeb414e8f8529e3d64c578598410b
 
 UNUSED LICENSES:
 
@@ -1942,8 +1942,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMain.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryLayout.h
-FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.h
@@ -2893,8 +2891,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleWebGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockTypes.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLASTFile.h
-FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunction.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionCall.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalFunctionReference.h
