@@ -1997,7 +1997,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(offset),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == offset);
         return child!.hitTest(result, position: offset);
       },
@@ -2535,7 +2535,7 @@ class _RenderChip extends RenderBox {
       return result.addWithRawTransform(
         transform: MatrixUtils.forceToPoint(center),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? position) {
+        hitTest: (BoxHitTestResult result, Offset position) {
           assert(position == center);
           return hitTestChild.hitTest(result, position: center);
         },
