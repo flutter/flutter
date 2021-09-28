@@ -27,21 +27,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // The app currently only supports macOS and Linux.
   if (!kIsWeb && (io.Platform.isMacOS || io.Platform.isLinux)) {
-    runApp(MyApp(state));    
-  }
-  else {
-    runApp(const ErrorWidget());
-  }
-}
-
-class ErrorWidget extends StatelessWidget {
-  const ErrorWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Text('This app only supports MacOS and Linux.'),
-    );
+    runApp(MyApp(state));
+  } else {
+    throw Exception('The conductor only supports MacOS and Linux desktop');
   }
 }
 
@@ -63,7 +51,6 @@ class MyApp extends StatelessWidget {
         backgroundColor: Colors.black,
         primaryColor: Colors.black,
         iconTheme: const IconThemeData().copyWith(color: Colors.white),
-        fontFamily: 'Montserrat',
         textTheme: TextTheme(
           headline1: const TextStyle(
             color: Colors.white,
