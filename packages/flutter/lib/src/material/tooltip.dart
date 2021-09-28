@@ -99,6 +99,12 @@ class Tooltip extends StatefulWidget {
     this.triggerMode,
     this.enableFeedback,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
+        assert(
+          richMessage == null || textStyle == null,
+          'If `richMessage` is specified, `textStyle` will have no effect. '
+          'If you wish to provide a `textStyle` for a rich tooltip, add the '
+          '`textStyle` directly to the `richMessage` InlineSpan.',
+        ),
         super(key: key);
 
   /// The text to display in the tooltip.
@@ -110,11 +116,6 @@ class Tooltip extends StatefulWidget {
   ///
   /// Only one of [message] and [richMessage] may be non-null.
   final InlineSpan? richMessage;
-
-  /// The plain text message for this tooltip.
-  ///
-  /// This value will either come from [message] or [richMessage].
-  String get tooltipMessage => message ?? richMessage!.toPlainText();
 
   /// The height of the tooltip's [child].
   ///
@@ -297,6 +298,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late TooltipTriggerMode triggerMode;
   late bool enableFeedback;
 
+  /// The plain text message for this tooltip.
+  ///
+  /// This value will either come from [widget.message] or [widget.richMessage].
+  String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
+
   @override
   void initState() {
     super.initState();
@@ -432,15 +438,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget.message,
-        richMessage: widget.richMessage,
+        richMessage: widget.richMessage ?? TextSpan(text: widget.message, style: textStyle),
         height: height,
         padding: padding,
         margin: margin,
         onEnter: _mouseIsConnected ? (PointerEnterEvent event) => _showTooltip() : null,
         onExit: _mouseIsConnected ? (PointerExitEvent event) => _hideTooltip() : null,
         decoration: decoration,
-        textStyle: textStyle,
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
@@ -452,7 +456,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     overlayState.insert(_entry!);
-    SemanticsService.tooltip(widget.tooltipMessage);
+    SemanticsService.tooltip(_tooltipMessage);
     Tooltip._openedToolTips.add(this);
   }
 
@@ -511,7 +515,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (widget.tooltipMessage.isEmpty) {
+    if (_tooltipMessage.isEmpty) {
       return widget.child ?? const SizedBox();
     }
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
@@ -562,7 +566,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: Semantics(
         label: excludeFromSemantics
             ? null
-            : widget.tooltipMessage,
+            : _tooltipMessage,
         child: widget.child,
       ),
     );
@@ -634,28 +638,23 @@ class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
     required this.height,
-    this.message,
-    this.richMessage,
+    required this.richMessage,
     this.padding,
     this.margin,
     this.decoration,
-    this.textStyle,
     required this.animation,
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
     this.onEnter,
     this.onExit,
-  }) : assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
-       super(key: key);
+  }) : super(key: key);
 
-  final String? message;
-  final InlineSpan? richMessage;
+  final InlineSpan richMessage;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
-  final TextStyle? textStyle;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -679,14 +678,9 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: message != null
-                    ? Text(
-                        message!,
-                        style: textStyle,
-                      )
-                    : RichText(
-                        text: richMessage!,
-                      ),
+                child: RichText(
+                  text: richMessage,
+                ),
               ),
             ),
           ),

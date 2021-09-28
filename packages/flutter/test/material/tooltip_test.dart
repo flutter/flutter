@@ -35,9 +35,13 @@ const String tooltipText = 'TIP';
 
 Finder _findTooltipContainer(String tooltipText) {
   return find.ancestor(
-    of: find.text(tooltipText),
+    of: _findTooltipText(tooltipText),
     matching: find.byType(Container),
   );
+}
+
+Finder _findTooltipText(String tooltipText) {
+  return find.text(tooltipText, findRichText: true);
 }
 
 void main() {
@@ -538,28 +542,28 @@ void main() {
     final Offset topLeftTipInGlobal = tester.getTopLeft(
       _findTooltipContainer(tooltipText),
     );
-    final Offset topLeftTooltipContentInGlobal = tester.getTopLeft(find.text(tooltipText));
+    final Offset topLeftTooltipContentInGlobal = tester.getTopLeft(_findTooltipText(tooltipText));
     expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customMarginValue);
     expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customMarginValue);
 
     final Offset topRightTipInGlobal = tester.getTopRight(
       _findTooltipContainer(tooltipText),
     );
-    final Offset topRightTooltipContentInGlobal = tester.getTopRight(find.text(tooltipText));
+    final Offset topRightTooltipContentInGlobal = tester.getTopRight(_findTooltipText(tooltipText));
     expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customMarginValue);
     expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customMarginValue);
 
     final Offset bottomLeftTipInGlobal = tester.getBottomLeft(
       _findTooltipContainer(tooltipText),
     );
-    final Offset bottomLeftTooltipContentInGlobal = tester.getBottomLeft(find.text(tooltipText));
+    final Offset bottomLeftTooltipContentInGlobal = tester.getBottomLeft(_findTooltipText(tooltipText));
     expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customMarginValue);
     expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customMarginValue);
 
     final Offset bottomRightTipInGlobal = tester.getBottomRight(
       _findTooltipContainer(tooltipText),
     );
-    final Offset bottomRightTooltipContentInGlobal = tester.getBottomRight(find.text(tooltipText));
+    final Offset bottomRightTooltipContentInGlobal = tester.getBottomRight(_findTooltipText(tooltipText));
     expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customMarginValue);
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customMarginValue);
   });
@@ -580,7 +584,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -606,7 +610,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -633,7 +637,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
@@ -661,14 +665,14 @@ void main() {
 
     await tester.pumpWidget(buildApp(tooltipText, TextDirection.rtl));
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(_findTooltipText(tooltipText), findsOneWidget);
+    RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(_findTooltipText(tooltipText));
     expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
 
     await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(_findTooltipText(tooltipText), findsOneWidget);
+    tooltipRenderParagraph = tester.renderObject<RenderParagraph>(_findTooltipText(tooltipText));
     expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
   });
 
@@ -693,7 +697,7 @@ void main() {
 
     final TextStyle textStyle = tester.widget<DefaultTextStyle>(
       find.ancestor(
-        of: find.text(tooltipText),
+        of: _findTooltipText(tooltipText),
         matching: find.byType(DefaultTextStyle),
       ).first,
     ).style;
@@ -761,7 +765,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    final RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(_findTooltipText(tooltipText));
     expect(tooltipRenderParagraph.textSize.height, equals(10.0));
 
     final RenderBox tip = tester.renderObject(
@@ -838,28 +842,28 @@ void main() {
     // long press reveals tooltip
     await tester.pump(kLongPressTimeout);
     await tester.pump(const Duration(milliseconds: 10));
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await gesture.up();
 
     // tap (down, up) gesture hides tooltip, since its not
     // a long press
     await tester.tap(tooltip);
     await tester.pump(const Duration(milliseconds: 10));
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     // long press once more
     gesture = await tester.startGesture(tester.getCenter(tooltip));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await tester.pump(kLongPressTimeout);
     await tester.pump(const Duration(milliseconds: 10));
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     // keep holding the long press, should still show tooltip
     await tester.pump(kLongPressTimeout);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await gesture.up();
   });
 
@@ -897,13 +901,13 @@ void main() {
     await tester.pump();
     // Wait for it to appear.
     await tester.pump(waitDuration);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     // Wait a looong time to make sure that it doesn't go away if the mouse is
     // still over the widget.
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
@@ -912,7 +916,7 @@ void main() {
     await tester.pumpAndSettle();
     await gesture.removePointer();
     gesture = null;
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
@@ -946,19 +950,19 @@ void main() {
     await tester.pump();
     // Wait for it to appear.
     await tester.pump(waitDuration);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     // Wait a looong time to make sure that it doesn't go away if the mouse is
     // still over the widget.
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     // Hover to the tool tip text and verify the tooltip doesn't go away.
-    await gesture.moveTo(tester.getTopLeft(find.text(tooltipText)));
+    await gesture.moveTo(tester.getTopLeft(_findTooltipText(tooltipText)));
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
@@ -967,7 +971,7 @@ void main() {
     await tester.pumpAndSettle();
     await gesture.removePointer();
     gesture = null;
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
@@ -1001,12 +1005,12 @@ void main() {
     await tester.pump();
     // Wait for it to appear.
     await tester.pump(waitDuration);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
 
     // Try to dismiss the tooltip with the shortcut key
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
@@ -1050,29 +1054,29 @@ void main() {
       ),
     );
 
-    final Finder tooltip = find.text('tooltip1');
+    final Finder tooltip = _findTooltipText('tooltip1');
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     await tester.pump(waitDuration);
-    expect(find.text('message1'), findsOneWidget);
+    expect(_findTooltipText('message1'), findsOneWidget);
 
-    final Finder secondTooltip = find.text('tooltip2');
+    final Finder secondTooltip = _findTooltipText('tooltip2');
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(secondTooltip));
     await tester.pump();
     await tester.pump(waitDuration);
     // Make sure both messages are on the screen.
-    expect(find.text('message1'), findsOneWidget);
-    expect(find.text('message2'), findsOneWidget);
+    expect(_findTooltipText('message1'), findsOneWidget);
+    expect(_findTooltipText('message2'), findsOneWidget);
 
     // Try to dismiss the tooltip with the shortcut key
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
-    expect(find.text('message1'), findsNothing);
-    expect(find.text('message2'), findsNothing);
+    expect(_findTooltipText('message1'), findsNothing);
+    expect(_findTooltipText('message2'), findsNothing);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
@@ -1198,15 +1202,15 @@ void main() {
 
     await tester.pumpWidget(buildApp(tooltipText));
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.pumpWidget(buildApp('NEW'));
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.tapAt(const Offset(5.0, 5.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
@@ -1239,8 +1243,8 @@ void main() {
 
     await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
+    expect(_findTooltipText(tooltipText), findsOneWidget);
+    expect(tester.getSize(_findTooltipText(tooltipText)), equals(const Size(42.0, 14.0)));
     RenderBox tip = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
@@ -1248,8 +1252,8 @@ void main() {
 
     await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
     await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
+    expect(_findTooltipText(tooltipText), findsOneWidget);
+    expect(tester.getSize(_findTooltipText(tooltipText)), equals(const Size(168.0, 56.0)));
     tip = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
@@ -1535,46 +1539,46 @@ void main() {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
 
     final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
   });
 
   testWidgets('Tooltip triggers on long press when mode is long press', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
 
     final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureLongPress(tester, tooltip);
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
   });
 
   testWidgets('Tooltip does not trigger on tap when trigger mode is longPress', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
 
     final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip does not trigger when trigger mode is manual', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.manual);
 
     final Finder tooltip = find.byType(Tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureTap(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
 
     await testGestureLongPress(tester, tooltip);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
@@ -1586,7 +1590,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
   });
 
   testWidgets('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
@@ -1597,7 +1601,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
     if (tooltipText.isEmpty) {
       expect(find.byType(SizedBox), findsOneWidget);
     }
