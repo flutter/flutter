@@ -204,14 +204,18 @@ AndroidContextGL::~AndroidContextGL() {
 
 std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreateOnscreenSurface(
     fml::RefPtr<AndroidNativeWindow> window) const {
-  EGLDisplay display = environment_->Display();
+  if (window->IsFakeWindow()) {
+    return CreatePbufferSurface();
+  } else {
+    EGLDisplay display = environment_->Display();
 
-  const EGLint attribs[] = {EGL_NONE};
+    const EGLint attribs[] = {EGL_NONE};
 
-  EGLSurface surface = eglCreateWindowSurface(
-      display, config_, reinterpret_cast<EGLNativeWindowType>(window->handle()),
-      attribs);
-  return std::make_unique<AndroidEGLSurface>(surface, display, context_);
+    EGLSurface surface = eglCreateWindowSurface(
+        display, config_,
+        reinterpret_cast<EGLNativeWindowType>(window->handle()), attribs);
+    return std::make_unique<AndroidEGLSurface>(surface, display, context_);
+  }
 }
 
 std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreateOffscreenSurface()
