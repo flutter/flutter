@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -244,14 +245,18 @@ class Tooltip extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (message != null) {
-      properties.add(StringProperty('message', message, showName: false));
-      properties.add(StringProperty('richMessage', richMessage?.toPlainText(), defaultValue: null));
-    }
-    if (richMessage != null) {
-      properties.add(StringProperty('message', message, defaultValue: null));
-      properties.add(StringProperty('richMessage', richMessage?.toPlainText(), showName: false));
-    }
+    properties.add(StringProperty(
+      'message',
+      message,
+      showName: message == null,
+      defaultValue: message == null ? null : kNoDefaultValue,
+    ));
+    properties.add(StringProperty(
+      'richMessage',
+      richMessage?.toPlainText(),
+      showName: richMessage == null,
+      defaultValue: richMessage == null ? null : kNoDefaultValue,
+    ));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
