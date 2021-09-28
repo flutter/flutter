@@ -1,4 +1,4 @@
-Signature: b8b82944c90a11675825eacd4d1994eb
+Signature: d26f78dff4277abff012da54ed6825a5
 
 UNUSED LICENSES:
 
@@ -2943,6 +2943,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawList.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
@@ -2962,8 +2964,16 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.mm
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
