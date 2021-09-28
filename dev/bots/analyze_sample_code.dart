@@ -434,7 +434,7 @@ class SampleChecker {
   // The cached JSON Flutter version information from 'flutter --version --machine'.
   String? _flutterVersion;
 
-  Future<ProcessResult> _runSnippetsScript(List<String> args) async {
+  Future<Process> _runSnippetsScript(List<String> args) async {
     final String workingDirectory = path.join(_flutterRoot, 'dev', 'docs');
     if (_flutterVersion == null) {
       // Capture the flutter version information once so that the snippets tool doesn't
@@ -459,7 +459,7 @@ class SampleChecker {
         ...args,
       ].join(' '));
     }
-    return Process.run(
+    return Process.start(
       Platform.resolvedExecutable,
       <String>[
         'pub',
@@ -505,15 +505,15 @@ class SampleChecker {
     if (verbose) {
       print('Generating sample for ${sample.start.filename}:${sample.start.line}');
     }
-    final ProcessResult process = await _runSnippetsScript(args);
+    final Process process = await _runSnippetsScript(args);
     if (verbose) {
-      stdout.write('${process.stdout}');
-      stderr.write('${process.stderr}');
+      process.stdout.transform(utf8.decoder).forEach(stdout.write);
     }
-    if (process.exitCode != 0) {
+    process.stderr.transform(utf8.decoder).forEach(stderr.write);
+    if (await process.exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
-            '(using input from ${inputFile.path}):\n${process.stdout}\n${process.stderr}',
+        '(using input from ${inputFile.path}).',
         file: sample.start.filename,
         line: sample.start.line,
       );
