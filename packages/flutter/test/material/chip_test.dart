@@ -565,7 +565,7 @@ void main() {
           children: <Widget>[
             Chip(
               label: const SizedBox(), // Short label
-              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              deleteIcon: Icon(Icons.cancel, key: deleteKey),
               onDeleted: () {
                 calledDelete = true;
               },
@@ -574,12 +574,18 @@ void main() {
         ),
       ),
     );
-    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(12.0, 0.0));
+
+    // Chip width is 48 with padding, 40 without padding, so halfway is at 20. Cancel
+    // icon is 24x24, so since 24 > 20 the split location should be halfway across the
+    // chip, which is at 12 + 8 = 20 from the right side. Since the split is just
+    // slightly less than 50%, 8 from the center of the delete button should hit the
+    // chip, not the delete button.
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(7.0, 0.0));
     await tester.pump();
     expect(calledDelete, isTrue);
     calledDelete = false;
 
-    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(13.0, 0.0));
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(8.0, 0.0));
     await tester.pump();
     expect(calledDelete, isFalse);
   });
@@ -1077,6 +1083,42 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
+  });
+
+  testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {
+    final UniqueKey chipKey = UniqueKey();
+    bool chipPressed = false;
+    bool deletePressed = false;
+
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Wrap(
+          children: <Widget>[
+            RawChip(
+              key: chipKey,
+              onPressed: () {
+                chipPressed = true;
+              },
+              onDeleted: () {
+                deletePressed = true;
+              },
+              label: const Text(''),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tapAt(tester.getCenter(find.byKey(chipKey)));
+    await tester.pump();
+    expect(chipPressed, isTrue);
+    expect(deletePressed, isFalse);
+    chipPressed = false;
+
+    await tester.tapAt(tester.getCenter(find.byKey(chipKey)) + const Offset(1.0, 0.0));
+    await tester.pump();
+    expect(chipPressed, isFalse);
+    expect(deletePressed, isTrue);
   });
 
   testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
