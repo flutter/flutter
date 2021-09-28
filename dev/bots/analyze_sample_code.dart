@@ -439,8 +439,25 @@ class SampleChecker {
     if (_flutterVersion == null) {
       // Capture the flutter version information once so that the snippets tool doesn't
       // have to run it for every snippet.
+      if (verbose) {
+        print(<String>[_flutter, '--version', '--machine'].join(' '));
+      }
       final ProcessResult versionResult = Process.runSync(_flutter, <String>['--version', '--machine']);
+      if (verbose) {
+        stdout.write(versionResult.stdout);
+        stderr.write(versionResult.stderr);
+      }
       _flutterVersion = versionResult.stdout as String? ?? '';
+    }
+    if (verbose) {
+      print(<String>[
+        Platform.resolvedExecutable,
+        'pub',
+        'global',
+        'run',
+        'snippets',
+        ...args,
+      ].join(' '));
     }
     return Process.run(
       Platform.resolvedExecutable,
@@ -467,7 +484,14 @@ class SampleChecker {
     final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
-    final File inputFile = File(path.join(_tempDirectory.path, inputName))..createSync(recursive: true);
+    final String inputFilePath = path.join(_tempDirectory.path, inputName);
+    if (verbose) {
+      stdout.writeln('Creating $inputFilePath.');
+    }
+    final File inputFile = File(inputFilePath)..createSync(recursive: true);
+    if (verbose) {
+      stdout.writeln('Writing $inputFilePath.');
+    }
     inputFile.writeAsStringSync(sample.input.join('\n'));
     final File outputFile = File(path.join(_tempDirectory.path, '$sampleId.dart'));
     final List<String> args = <String>[
@@ -478,11 +502,14 @@ class SampleChecker {
       '--no-format-output',
       ...sample.args,
     ];
-    if (verbose)
+    if (verbose) {
       print('Generating sample for ${sample.start.filename}:${sample.start.line}');
+    }
     final ProcessResult process = await _runSnippetsScript(args);
-    if (verbose)
+    if (verbose) {
+      stdout.write('${process.stdout}');
       stderr.write('${process.stderr}');
+    }
     if (process.exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
