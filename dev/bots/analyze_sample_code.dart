@@ -510,7 +510,11 @@ class SampleChecker {
       process.stdout.transform(utf8.decoder).forEach(stdout.write);
     }
     process.stderr.transform(utf8.decoder).forEach(stderr.write);
-    if (await process.exitCode != 0) {
+    final int exitCode = await process.exitCode.timeout(const Duration(seconds: 30), onTimeout: () {
+      stderr.writeln('Snippet script timed out.');
+      return -1;
+    });
+    if (exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
         '(using input from ${inputFile.path}).',
