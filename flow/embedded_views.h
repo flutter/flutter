@@ -337,6 +337,11 @@ class ExternalViewEmbedder {
   // |RasterThreadMerger| instance.
   virtual bool SupportsDynamicThreadMerging();
 
+  // Called when the rasterizer is being torn down.
+  // This method provides a way to release resources associated with the current
+  // embedder.
+  virtual void Teardown();
+
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 
 };  // ExternalViewEmbedder
