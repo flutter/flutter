@@ -351,6 +351,14 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   RunCmd(command, cwd=test_runner_dir, env=env)
 
 
+def RunAndroidTests(android_variant='android_debug_unopt'):
+  test_runner_name = 'flutter_shell_native_unittests'
+  tests_path = os.path.join(out_dir, android_variant, test_runner_name)
+  remote_path = '/data/local/tmp'
+  remote_tests_path = os.path.join(remote_path, test_runner_name)
+  RunCmd(['adb', 'push', tests_path, remote_path], cwd=buildroot_dir)
+  RunCmd(['adb', 'shell', remote_tests_path])
+
 def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   AssertExpectedXcodeVersion()
@@ -591,6 +599,10 @@ def main():
       print('Can only filter JUnit4 tests by single entire class name, eg "io.flutter.SmokeTest". Ignoring filter=' + java_filter)
       java_filter = None
     RunJavaTests(java_filter, args.android_variant)
+
+  if 'android' in types:
+    assert not IsWindows(), "Android engine files can't be compiled on Windows."
+    RunAndroidTests(args.android_variant)
 
   if 'objc' in types:
     assert IsMac(), "iOS embedding tests can only be run on macOS."

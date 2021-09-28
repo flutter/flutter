@@ -35,10 +35,30 @@ source_set("image_generator") {
   ]
 }
 
-shared_library("flutter_shell_native") {
-  visibility = [ ":*" ]
+executable("flutter_shell_native_unittests") {
+  visibility = [ "*" ]
+  testonly = true
+  sources = [
+    "android_context_gl_unittests.cc",
+    "android_shell_holder_unittests.cc",
+    "flutter_shell_native_unittests.cc",
+  ]
+  public_configs = [ "//flutter:config" ]
+  deps = [
+    ":flutter_shell_native_src",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest",
+  ]
+}
 
+shared_library("flutter_shell_native") {
   output_name = "flutter"
+  deps = [ ":flutter_shell_native_src" ]
+  ldflags = [ "-Wl,--version-script=" + rebase_path("android_exports.lst") ]
+}
+
+source_set("flutter_shell_native_src") {
+  visibility = [ ":*" ]
 
   sources = [
     "$root_build_dir/flutter_icu/icudtl.o",
@@ -69,7 +89,7 @@ shared_library("flutter_shell_native") {
     "vsync_waiter_android.h",
   ]
 
-  deps = [
+  public_deps = [
     ":android_gpu_configuration",
     ":icudtl_object",
     ":image_generator",
@@ -100,8 +120,6 @@ shared_library("flutter_shell_native") {
     "EGL",
     "GLESv2",
   ]
-
-  ldflags = [ "-Wl,--version-script=" + rebase_path("android_exports.lst") ]
 }
 
 action("gen_android_build_config_java") {
