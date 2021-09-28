@@ -6,6 +6,7 @@ import 'dart:io' show Platform;
 
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:conductor_ui/main.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,5 +31,5 @@ void main() {
       expect(find.textContaining('Conductor version'), findsOneWidget);
       expect(find.text('1'), findsNothing);
     });
-  }, skip: Platform.isWindows); // This app does not support Windows [intended]
+  }, skip: kIsWeb || (!kIsWeb && Platform.isWindows)); // This app does not support web or Windows [intended]
 }

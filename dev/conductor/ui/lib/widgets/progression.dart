@@ -23,17 +23,19 @@ class MainProgression extends StatefulWidget {
 class _MainProgressionState extends State<MainProgression> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SelectableText(
-            widget.releaseState != null
-                ? presentState(widget.releaseState!)
-                : 'No persistent state file found at ${widget.stateFilePath}',
-          ),
+    return Expanded(
+      child: Scrollbar(
+        isAlwaysShown: true,
+        child: ListView(
+          children: <Widget>[
+            SelectableText(
+              widget.releaseState != null
+                  ? presentState(widget.releaseState!)
+                  : 'No persistent state file found at ${widget.stateFilePath}',
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

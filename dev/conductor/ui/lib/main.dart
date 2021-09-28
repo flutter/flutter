@@ -22,11 +22,8 @@ final String _stateFilePath = defaultStateFilePath(_platform);
 
 Future<void> main() async {
   final File _stateFile = _fs.file(_stateFilePath);
-  pb.ConductorState? state =
+  final pb.ConductorState? state =
       _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
-  state = pb.ConductorState(
-        releaseChannel: 'dev',
-      );
 
   WidgetsFlutterBinding.ensureInitialized();
   // app currently only supports macOS and Linux, and a minimum app size is added to prevent overflow
@@ -83,6 +80,7 @@ class MyApp extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               const SelectableText(
                 'Desktop app for managing a release of the Flutter SDK, currently in development',
