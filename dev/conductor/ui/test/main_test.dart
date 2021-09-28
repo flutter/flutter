@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('General Testing', () {
+  group('Main app', () {
     testWidgets('Handles null state', (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp(null));
 
@@ -31,5 +31,5 @@ void main() {
       expect(find.textContaining('Conductor version'), findsOneWidget);
       expect(find.text('1'), findsNothing);
     });
-  }, skip: kIsWeb || (!kIsWeb && Platform.isWindows)); // This app does not support web or Windows [intended]
+  }, skip: Platform.isWindows); // This app does not support web or Windows [intended]
 }

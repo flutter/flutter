@@ -20,6 +20,7 @@ class MainProgression extends StatefulWidget {
   _MainProgressionState createState() => _MainProgressionState();
 }
 
+/// Shows the progression and each step of the release.
 class _MainProgressionState extends State<MainProgression> {
   @override
   Widget build(BuildContext context) {
