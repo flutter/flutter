@@ -2434,7 +2434,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.rendering.RenderEditable.verticalArrowKeyMovement}
   ///
   /// The [VerticalCaretMovementRun.isValid] property indicates whether the text
-  /// layout has changed and the the vertical caret run is invalidated.
+  /// layout has changed and the vertical caret run is invalidated.
   ///
   /// The caller is responsible for discarding a [VerticalCaretMovementRun] when
   /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
