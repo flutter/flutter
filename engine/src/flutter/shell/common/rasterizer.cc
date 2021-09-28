@@ -97,6 +97,10 @@ void Rasterizer::Teardown() {
     raster_thread_merger_->UnMergeNowIfLastOne();
     raster_thread_merger_->SetMergeUnmergeCallback(nullptr);
   }
+
+  if (external_view_embedder_) {
+    external_view_embedder_->Teardown();
+  }
 }
 
 void Rasterizer::EnableThreadMergerIfNeeded() {
