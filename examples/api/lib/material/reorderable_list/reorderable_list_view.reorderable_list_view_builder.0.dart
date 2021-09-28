@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateful_widget_material.tmpl
+// Template: dev/snippets/config/templates/stateful_widget_scaffold_center.tmpl
 //
 // Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
 // of samples, and may be ignored if you are just exploring the sample.
@@ -29,9 +29,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text(_title)),
+        body: const Center(
+          child: MyStatefulWidget(),
+        ),
+      ),
     );
   }
 }

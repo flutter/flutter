@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Rect;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -172,6 +173,52 @@ void main() {
     await tester.pump();
     actualAlignment = actualPositionedBox.alignment as Alignment;
     expect(actualAlignment, const Alignment(0.0, 0.5));
+  });
+
+  testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<Rect?> rectTween = RectTween(
+      begin: const Rect.fromLTWH(0, 0, 30, 40),
+      end: const Rect.fromLTWH(100, 200, 100, 200),
+    ).animate(controller);
+    final Widget widget = Directionality(
+      textDirection: TextDirection.rtl,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: <Widget>[
+          RelativePositionedTransition(
+            size: const Size(200, 300),
+            rect: rectTween,
+            child: const Placeholder(),
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final Positioned actualPositioned = tester.widget(find.byType(Positioned));
+    final RenderBox renderBox = tester.renderObject(find.byType(Placeholder));
+
+    Rect actualRect = Rect.fromLTRB(
+      actualPositioned.left!,
+      actualPositioned.top!,
+      actualPositioned.right ?? 0.0,
+      actualPositioned.bottom ?? 0.0,
+    );
+    expect(actualRect, equals(const Rect.fromLTRB(0, 0, 170, 260)));
+    expect(renderBox.size, equals(const Size(630, 340)));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualRect = Rect.fromLTRB(
+      actualPositioned.left!,
+      actualPositioned.top!,
+      actualPositioned.right ?? 0.0,
+      actualPositioned.bottom ?? 0.0,
+    );
+    expect(actualRect, equals(const Rect.fromLTWH(0, 0, 170, 260)));
+    expect(renderBox.size, equals(const Size(665, 420)));
   });
 
   testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
