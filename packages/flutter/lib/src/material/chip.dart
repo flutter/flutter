@@ -2960,22 +2960,22 @@ bool _hitIsOnDeleteIcon({
   final EdgeInsets resolvedPadding = padding.resolve(textDirection);
   final Size deflatedSize = resolvedPadding.deflateSize(chipSize);
   final Offset adjustedPosition = tapPosition - Offset(resolvedPadding.left, resolvedPadding.top);
-  // The delete button hit area should be at least the width of the delete button,
-  // but, if there's room, up to 24 pixels from the center of the delete icon
-  // (corresponding to part of a 48x48 square that Material would prefer for touch
-  // targets), but no more than half of the overall size of the chip when the chip is
-  // small.
+  // The delete button hit area should be at least the width of the delete
+  // button, but, if there's room, up to 24 pixels from the center of the delete
+  // icon (corresponding to part of a 48x48 square that Material would prefer
+  // for touch targets), but no more than approximately half of the overall size
+  // of the chip when the chip is small.
   //
   // This isn't affected by materialTapTargetSize because it only applies to the
-  // width of the tappable region within the chip, not outside of the chip, which is
-  // handled elsewhere. Also because delete buttons aren't specified to be used on
-  // touch devices, only desktop devices.
-  final double accessibleDeleteButtonWidth = math.max(
-    deleteButtonSize.width,
-    math.min(
-      deflatedSize.width * 0.5,
-      24.0 + deleteButtonSize.width / 2.0,
-    ),
+  // width of the tappable region within the chip, not outside of the chip,
+  // which is handled elsewhere. Also because delete buttons aren't specified to
+  // be used on touch devices, only desktop devices.
+
+  // Max out at not quite half, so that tests that tap on the center of a small
+  // chip will still hit the chip, not the delete button.
+  final double accessibleDeleteButtonWidth = math.min(
+    deflatedSize.width * 0.499,
+    math.max(deleteButtonSize.width, 24.0 + deleteButtonSize.width / 2.0),
   );
   switch (textDirection) {
     case TextDirection.ltr:
