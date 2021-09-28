@@ -53,18 +53,18 @@ class MyStatelessWidget extends StatelessWidget {
 //* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
   Widget build(BuildContext context) {
-    return Tooltip(
+    return const Tooltip(
       richMessage: TextSpan(
         text: 'I am a rich tooltip. ',
         style: TextStyle(color: Colors.red),
         children: [
           TextSpan(
-            text: 'I am another span of this rich tooltip'
+            text: 'I am another span of this rich tooltip',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),
-      child: const Text('Tap this text and hold down to show a tooltip.'),
+      child: Text('Tap this text and hold down to show a tooltip.'),
     );
   }
 
