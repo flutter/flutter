@@ -101,7 +101,7 @@ enum HeroFlightDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 /// This sample shows a [Hero] used within a [ListTile].
 ///
 /// Tapping on the Hero-wrapped rectangle triggers a hero

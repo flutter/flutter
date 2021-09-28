@@ -414,6 +414,182 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
+  testWidgets("ElevatedButton response doesn't hover when disabled", (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'ElevatedButton Focus');
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ElevatedButton(
+              autofocus: true,
+              onPressed: () {},
+              onLongPress: () {},
+              onHover: (bool value) { hovering = value; },
+              focusNode: focusNode,
+              child: SizedBox(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    await tester.pumpAndSettle();
+    expect(hovering, isTrue);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ElevatedButton(
+              focusNode: focusNode,
+              onHover: (bool value) { hovering = value; },
+              onPressed: null,
+              child: SizedBox(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('disabled and hovered ElevatedButton responds to mouse-exit', (WidgetTester tester) async {
+    int onHoverCount = 0;
+    late bool hover;
+
+    Widget buildFrame({ required bool enabled }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: ElevatedButton(
+                onPressed: enabled ? () { } : null,
+                onHover: (bool value) {
+                  onHoverCount += 1;
+                  hover = value;
+                },
+                child: const Text('ElevatedButton'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(tester.getCenter(find.byType(ElevatedButton)));
+    await tester.pumpAndSettle();
+    expect(onHoverCount, 1);
+    expect(hover, true);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(Offset.zero);
+    // Even though the ElevatedButton has been disabled, the mouse-exit still
+    // causes onHover(false) to be called.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byType(ElevatedButton)));
+    await tester.pumpAndSettle();
+    // We no longer see hover events because the ElevatedButton is disabled
+    // and it's no longer in the "hovering" state.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    await tester.pumpAndSettle();
+    // The ElevatedButton was enabled while it contained the mouse, however
+    // we do not call onHover() because it may call setState().
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byType(ElevatedButton)) - const Offset(1, 1));
+    await tester.pumpAndSettle();
+    // Moving the mouse a little within the ElevatedButton doesn't change anything.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+  });
+
+  testWidgets('Can set ElevatedButton focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: ElevatedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: () {  },
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('When ElevatedButton disable, Can not set ElevatedButton focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: ElevatedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: null,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('Does ElevatedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 

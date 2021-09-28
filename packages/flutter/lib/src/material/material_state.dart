@@ -284,7 +284,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// property values. [MaterialStateBorderSide] should only be used with widgets that document
 /// their support, like [ActionChip.side].
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example defines a subclass of [MaterialStateBorderSide], that resolves
 /// to a red border side when its widget is selected.
 ///

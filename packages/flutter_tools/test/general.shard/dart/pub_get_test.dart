@@ -594,6 +594,54 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get offline does not retry', () async {
+    String? error;
+
+    const FakeCommand pubGetCommand = FakeCommand(
+      command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+          '--offline',
+      ],
+      exitCode: 69,
+      environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      pubGetCommand,
+    ]);
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    FakeAsync().run((FakeAsync time) {
+      expect(logger.statusText, '');
+      pub.get(context: PubContext.flutterTests, offline: true).then((void value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(logger.statusText,
+        'Running "flutter pub get" in /...\n'
+      );
+    });
+    expect(logger.errorText, isEmpty);
+    expect(error, 'test failed unexpectedly: Exception: pub get failed (69; no message)');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub get 66 shows message from pub', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
