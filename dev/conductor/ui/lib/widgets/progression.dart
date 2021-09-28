@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
@@ -21,10 +25,13 @@ class _MainProgressionState extends State<MainProgression> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SelectableText(
-          widget.releaseState != null
-              ? presentState(widget.releaseState!)
-              : 'No persistent state file found at ${widget.stateFilePath}',
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SelectableText(
+            widget.releaseState != null
+                ? presentState(widget.releaseState!)
+                : 'No persistent state file found at ${widget.stateFilePath}',
+          ),
         ),
       ],
     );

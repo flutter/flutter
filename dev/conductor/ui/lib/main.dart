@@ -1,8 +1,8 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:io' as io;
 
+import 'dart:io' as io;
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:desktop_window/desktop_window.dart';
@@ -13,9 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:platform/platform.dart';
 
 import 'widgets/progression.dart';
-import 'widgets/welcome_section.dart';
 
-const String _title = 'Flutter Desktop Conductor (In dev, do not use)';
+const String _title = 'Flutter Desktop Conductor (Not ready, do not use)';
 
 const LocalFileSystem _fs = LocalFileSystem();
 const LocalPlatform _platform = LocalPlatform();
@@ -23,8 +22,11 @@ final String _stateFilePath = defaultStateFilePath(_platform);
 
 Future<void> main() async {
   final File _stateFile = _fs.file(_stateFilePath);
-  final pb.ConductorState? state =
+  pb.ConductorState? state =
       _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+  state = pb.ConductorState(
+        releaseChannel: 'dev',
+      );
 
   WidgetsFlutterBinding.ensureInitialized();
   // app currently only supports macOS and Linux, and a minimum app size is added to prevent overflow
@@ -82,7 +84,9 @@ class MyApp extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const WelcomeSection(),
+              const SelectableText(
+                'Desktop app for managing a release of the Flutter SDK, currently in development',
+              ),
               const SizedBox(height: 20.0),
               MainProgression(
                 releaseState: state,
