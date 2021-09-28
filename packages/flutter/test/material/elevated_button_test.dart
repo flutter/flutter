@@ -534,6 +534,62 @@ void main() {
     expect(hover, false);
   });
 
+  testWidgets('Can set ElevatedButton focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: ElevatedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: () {  },
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('When ElevatedButton disable, Can not set ElevatedButton focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ElevatedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: ElevatedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: null,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('Does ElevatedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 

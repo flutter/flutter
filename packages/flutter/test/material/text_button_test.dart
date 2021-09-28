@@ -817,6 +817,62 @@ void main() {
     expect(hover, false);
   });
 
+  testWidgets('Can set TextButton focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TextButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: () {  },
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('When TextButton disable, Can not set TextButton focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TextButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: null,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('TextButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');

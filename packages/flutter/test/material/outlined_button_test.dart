@@ -733,6 +733,62 @@ void main() {
     expect(hover, false);
   });
 
+  testWidgets('Can set OutlinedButton focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: OutlinedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: () {  },
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('When OutlinedButton disable, Can not set OutlinedButton focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: OutlinedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: null,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
     Widget buildFrame(VoidCallback? onPressed) {
       return Directionality(
