@@ -1301,9 +1301,10 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
         });
     RunLoopUntilIdle();
 
+    FAIL();
     ASSERT_NOTNULL(delegate.message());
-    // EXPECT_EQ(event.expected_platform_message,
-    //           ToString(delegate.message()->data()));
+    EXPECT_EQ(event.expected_platform_message,
+              ToString(delegate.message()->data()));
     EXPECT_EQ(event.expected_key_event_status, key_event_status);
   }
 }
@@ -1376,16 +1377,10 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   EXPECT_EQ(expected_result_string, response->result_string);
 }
 
-TEST_F(PlatformViewTests, TouchSource_LogicalToPhysicalConversion) {
-  // Names and constants
-  using fup_EventPhase = fuchsia::ui::pointer::EventPhase;
-  using fup_TouchEvent = fuchsia::ui::pointer::TouchEvent;
-  using fup_TouchIxnId = fuchsia::ui::pointer::TouchInteractionId;
-  using fup_TouchIxnStatus = fuchsia::ui::pointer::TouchInteractionStatus;
-
+TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
   constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {20, 20}}};
   constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  constexpr fup_TouchIxnId kIxnOne = {
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxnOne = {
       .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
   constexpr float valid_pixel_ratio = 2.f;
 
@@ -1446,13 +1441,15 @@ TEST_F(PlatformViewTests, TouchSource_LogicalToPhysicalConversion) {
   EXPECT_EQ(delegate.metrics(), flutter::ViewportMetrics(2.f, 40.f, 40.f, -1));
 
   // Inject
-  std::vector<fup_TouchEvent> events =
+  std::vector<fuchsia::ui::pointer::TouchEvent> events =
       TouchEventBuilder::New()
           .AddTime(/* in nanoseconds */ 1111789u)
           .AddViewParameters(kRect, kRect, kIdentity)
-          .AddSample(kIxnOne, fup_EventPhase::ADD, {10.f, 10.f})
+          .AddSample(kIxnOne, fuchsia::ui::pointer::EventPhase::ADD,
+                     {10.f, 10.f})
           .AddResult(
-              {.interaction = kIxnOne, .status = fup_TouchIxnStatus::GRANTED})
+              {.interaction = kIxnOne,
+               .status = fuchsia::ui::pointer::TouchInteractionStatus::GRANTED})
           .BuildAsVector();
   touch_server.ScheduleCallback(std::move(events));
   RunLoopUntilIdle();
