@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'banner.dart';
+import 'banner_theme.dart';
 import 'bottom_sheet.dart';
 import 'colors.dart';
 import 'curves.dart';
@@ -802,14 +803,18 @@ class _BodyBoxConstraints extends BoxConstraints {
     double maxHeight = double.infinity,
     required this.bottomWidgetsHeight,
     required this.appBarHeight,
+    required this.materialBannerHeight,
   }) : assert(bottomWidgetsHeight != null),
        assert(bottomWidgetsHeight >= 0),
        assert(appBarHeight != null),
        assert(appBarHeight >= 0),
+       assert(materialBannerHeight != null),
+       assert(materialBannerHeight >= 0),
        super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
 
   final double bottomWidgetsHeight;
   final double appBarHeight;
+  final double materialBannerHeight;
 
   // RenderObject.layout() will only short-circuit its call to its performLayout
   // method if the new layout constraints are not == to the current constraints.
@@ -820,13 +825,14 @@ class _BodyBoxConstraints extends BoxConstraints {
     if (super != other)
       return false;
     return other is _BodyBoxConstraints
+        && other.materialBannerHeight == materialBannerHeight
         && other.bottomWidgetsHeight == bottomWidgetsHeight
         && other.appBarHeight == appBarHeight;
   }
 
   @override
   int get hashCode {
-    return hashValues(super.hashCode, bottomWidgetsHeight, appBarHeight);
+    return hashValues(super.hashCode, materialBannerHeight, bottomWidgetsHeight, appBarHeight);
   }
 }
 
@@ -866,7 +872,8 @@ class _BodyBuilder extends StatelessWidget {
           : metrics.padding.bottom;
 
         final double top = extendBodyBehindAppBar
-          ? math.max(metrics.padding.top, bodyConstraints.appBarHeight)
+          ? math.max(metrics.padding.top,
+              bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight)
           : metrics.padding.top;
 
         return MediaQuery(
@@ -898,6 +905,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.snackBarWidth,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
+    required this.extendBodyBehindMaterialBanner,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
@@ -920,6 +928,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final bool isSnackBarFloating;
   final double? snackBarWidth;
+
+  final bool extendBodyBehindMaterialBanner;
 
   @override
   void performLayout(Size size) {
@@ -960,6 +970,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.persistentFooter, Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
     }
 
+    Size materialBannerSize = Size.zero;
+    if (hasChild(_ScaffoldSlot.materialBanner)) {
+      materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
+
+      // Push content down only if elevation is 0.
+      if (!extendBodyBehindMaterialBanner) {
+        contentTop += materialBannerSize.height;
+      }
+    }
+
     // Set the content bottom to account for the greater of the height of any
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
@@ -977,6 +998,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
+        materialBannerHeight: materialBannerSize.height,
         bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
         appBarHeight: appBarHeight,
       );
@@ -1011,11 +1033,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // the FAB can be positioned correctly.
     if (hasChild(_ScaffoldSlot.snackBar) && !isSnackBarFloating) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
-    }
-
-    Size materialBannerSize = Size.zero;
-    if (hasChild(_ScaffoldSlot.materialBanner)) {
-      materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
     }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
@@ -1084,17 +1101,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
-    }
-
-    if (hasChild(_ScaffoldSlot.materialBanner)) {
-      if (materialBannerSize == Size.zero) {
-        materialBannerSize = layoutChild(
-          _ScaffoldSlot.materialBanner,
-          fullWidthConstraints,
-        );
-      }
-
-      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -2927,8 +2933,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
+    bool extendBodyBehindMaterialBanner = false;
     // MaterialBanner set by ScaffoldMessenger
     if (_messengerMaterialBanner != null) {
+      final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+      final double elevation = _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
+      extendBodyBehindMaterialBanner = elevation != 0.0;
+
       _addIfNonNull(
         children,
         _messengerMaterialBanner?._widget,
@@ -3070,6 +3081,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                 snackBarWidth: snackBarWidth,
               ),
               children: children,
