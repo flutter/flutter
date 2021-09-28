@@ -167,7 +167,10 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
   if (!canvas_) {
     return;
   }
-  canvas_->concat(ToSkMatrix(matrix4));
+  canvas_->concat(SkM44(matrix4[0], matrix4[4], matrix4[8], matrix4[12],
+                        matrix4[1], matrix4[5], matrix4[9], matrix4[13],
+                        matrix4[2], matrix4[6], matrix4[10], matrix4[14],
+                        matrix4[3], matrix4[7], matrix4[11], matrix4[15]));
 }
 
 void Canvas::clipRect(double left,

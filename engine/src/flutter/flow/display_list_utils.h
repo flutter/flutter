@@ -78,21 +78,17 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
   void scale(SkScalar sx, SkScalar sy) override {}
   void rotate(SkScalar degrees) override {}
   void skew(SkScalar sx, SkScalar sy) override {}
-  void transform2x3(SkScalar mxx,
-                    SkScalar mxy,
-                    SkScalar mxt,
-                    SkScalar myx,
-                    SkScalar myy,
-                    SkScalar myt) override {}
-  void transform3x3(SkScalar mxx,
-                    SkScalar mxy,
-                    SkScalar mxt,
-                    SkScalar myx,
-                    SkScalar myy,
-                    SkScalar myt,
-                    SkScalar px,
-                    SkScalar py,
-                    SkScalar pt) override {}
+  // clang-format off
+  // 2x3 2D affine subset of a 4x4 transform in row major order
+  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
+                         SkScalar myx, SkScalar myy, SkScalar myt) override {}
+  // full 4x4 transform in row major order
+  void transformFullPerspective(
+      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override {}
+  // clang-format on
 };
 
 // A utility class that will monitor the Dispatcher methods relating
@@ -130,6 +126,16 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
 
 class SkMatrixSource {
  public:
+  // The current full 4x4 transform matrix. Not generally needed
+  // for 2D operations. See |matrix|.
+  virtual const SkM44& m44() const = 0;
+
+  // The current matrix expressed as an SkMatrix. The data held
+  // in an SkMatrix is enough to perform point and rect transforms
+  // assuming input coordinates have only an X and Y and an assumed
+  // Z of 0 and an assumed W of 1.
+  // See the block comment on the transform methods in |Dispatcher|
+  // for a detailed explanation.
   virtual const SkMatrix& matrix() const = 0;
 };
 
@@ -147,33 +153,34 @@ class SkMatrixDispatchHelper : public virtual Dispatcher,
   void scale(SkScalar sx, SkScalar sy) override;
   void rotate(SkScalar degrees) override;
   void skew(SkScalar sx, SkScalar sy) override;
-  void transform2x3(SkScalar mxx,
-                    SkScalar mxy,
-                    SkScalar mxt,
-                    SkScalar myx,
-                    SkScalar myy,
-                    SkScalar myt) override;
-  void transform3x3(SkScalar mxx,
-                    SkScalar mxy,
-                    SkScalar mxt,
-                    SkScalar myx,
-                    SkScalar myy,
-                    SkScalar myt,
-                    SkScalar px,
-                    SkScalar py,
-                    SkScalar pt) override;
+
+  // clang-format off
+
+  // 2x3 2D affine subset of a 4x4 transform in row major order
+  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
+                         SkScalar myx, SkScalar myy, SkScalar myt) override;
+  // full 4x4 transform in row major order
+  void transformFullPerspective(
+      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
+
+  // clang-format on
 
   void save() override;
   void restore() override;
 
-  const SkMatrix& matrix() const override { return matrix_; }
+  const SkM44& m44() const override { return matrix_; }
+  const SkMatrix& matrix() const override { return matrix33_; }
 
  protected:
   void reset();
 
  private:
-  SkMatrix matrix_;
-  std::vector<SkMatrix> saved_;
+  SkM44 matrix_;
+  SkMatrix matrix33_;
+  std::vector<SkM44> saved_;
 };
 
 // A utility class that will monitor the Dispatcher methods relating

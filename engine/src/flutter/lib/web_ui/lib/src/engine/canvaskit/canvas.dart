@@ -305,7 +305,7 @@ class CkCanvas {
   }
 
   void transform(Float32List matrix4) {
-    skCanvas.concat(toSkMatrixFromFloat32(matrix4));
+    skCanvas.concat(toSkM44FromFloat32(matrix4));
   }
 
   void translate(double dx, double dy) {
@@ -680,7 +680,7 @@ class CkTransformCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    canvas.concat(toSkMatrixFromFloat32(matrix4));
+    canvas.concat(toSkM44FromFloat32(matrix4));
   }
 }
 

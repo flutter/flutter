@@ -250,7 +250,7 @@ struct DisplayListInvocationGroup {
 };
 
 std::vector<DisplayListInvocationGroup> allGroups = {
-  { "SetAA", {
+  { "SetAntiAlias", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(false);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(true);}},
     }
@@ -277,7 +277,7 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kMiter_Join);}},
     }
   },
-  { "SetDrawStyle", {
+  { "SetStyle", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kFill_Style);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStroke_Style);}},
     }
@@ -287,7 +287,7 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeWidth(5.0);}},
     }
   },
-  { "SetMiterLimit", {
+  { "SetStrokeMiter", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(0.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(5.0);}},
     }
@@ -384,16 +384,27 @@ std::vector<DisplayListInvocationGroup> allGroups = {
       {1, 16, 1, 32, [](DisplayListBuilder& b) {b.skew(0.2, 0.1);}},
     }
   },
-  { "Transform2x3", {
-      // cv.transform(identity) is ignored
-      {1, 32, 0, 0, [](DisplayListBuilder& b) {b.transform2x3(1, 0, 0, 0, 1, 0);}},
-      {1, 32, 1, 32, [](DisplayListBuilder& b) {b.transform2x3(0, 1, 12, 1, 0, 33);}},
+  { "Transform2DAffine", {
+      {1, 32, 1, 32, [](DisplayListBuilder& b) {b.transform2DAffine(0, 1, 12, 1, 0, 33);}},
+      // b.transform(identity) is ignored
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.transform2DAffine(1, 0, 0, 0, 1, 0);}},
     }
   },
-  { "Transform3x3", {
-      // cv.transform(identity) is ignored
-      {1, 40, 0, 0, [](DisplayListBuilder& b) {b.transform3x3(1, 0, 0, 0, 1, 0, 0, 0, 1);}},
-      {1, 40, 1, 40, [](DisplayListBuilder& b) {b.transform3x3(0, 1, 12, 1, 0, 33, 0, 0, 12);}},
+  { "TransformFullPerspective", {
+      {1, 72, 1, 72, [](DisplayListBuilder& b) {b.transformFullPerspective(0, 1, 0, 12,
+                                                                           1, 0, 0, 33,
+                                                                           3, 2, 5, 29,
+                                                                           0, 0, 0, 12);}},
+      // b.transform(2D affine) is reduced to 2x3
+      {1, 32, 1, 32, [](DisplayListBuilder& b) {b.transformFullPerspective(2, 1, 0, 4,
+                                                                           1, 3, 0, 5,
+                                                                           0, 0, 1, 0,
+                                                                           0, 0, 0, 1);}},
+      // b.transform(identity) is ignored
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.transformFullPerspective(1, 0, 0, 0,
+                                                                         0, 1, 0, 0,
+                                                                         0, 0, 1, 0,
+                                                                         0, 0, 0, 1);}},
     }
   },
   { "ClipRect", {
@@ -716,8 +727,13 @@ TEST(DisplayList, SingleOpDisplayListsNotEqualEmpty) {
       sk_sp<DisplayList> dl = group.variants[i].Build();
       auto desc =
           group.op_name + "(variant " + std::to_string(i + 1) + " != empty)";
-      ASSERT_FALSE(dl->Equals(*empty)) << desc;
-      ASSERT_FALSE(empty->Equals(*dl)) << desc;
+      if (group.variants[i].byte_count != 0) {
+        ASSERT_FALSE(dl->Equals(*empty)) << desc;
+        ASSERT_FALSE(empty->Equals(*dl)) << desc;
+      } else {
+        ASSERT_TRUE(dl->Equals(*empty)) << desc;
+        ASSERT_TRUE(empty->Equals(*dl)) << desc;
+      }
     }
   }
 }
@@ -867,8 +883,13 @@ TEST(DisplayList, DisplayListsWithVaryingOpComparisons) {
         ASSERT_FALSE(variant_dl->Equals(*default_dl)) << desc << " != Default";
         ASSERT_FALSE(default_dl->Equals(*variant_dl)) << "Default != " << desc;
       }
-      ASSERT_FALSE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
-      ASSERT_FALSE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
+      if (group.variants[vi].byte_count != 0) {
+        ASSERT_FALSE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
+        ASSERT_FALSE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
+      } else {
+        ASSERT_TRUE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
+        ASSERT_TRUE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
+      }
     }
   }
 }

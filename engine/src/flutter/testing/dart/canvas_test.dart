@@ -4,11 +4,13 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
+import 'package:vector_math/vector_math_64.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);
 
@@ -34,6 +36,14 @@ void testCanvas(CanvasCallback callback) {
   try {
     callback(Canvas(PictureRecorder(), const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
   } catch (error) { } // ignore: empty_catches
+}
+
+Future<Image> toImage(CanvasCallback callback, int width, int height) {
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder, Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
+  callback(canvas);
+  final Picture picture = recorder.endRecording();
+  return picture.toImage(width, height);
 }
 
 void testNoCrashes() {
@@ -100,7 +110,7 @@ void testNoCrashes() {
   });
 }
 
-/// @returns true When the images are resonably similar.
+/// @returns true When the images are reasonably similar.
 /// @todo Make the search actually fuzzy to a certain degree.
 Future<bool> fuzzyCompareImages(Image golden, Image img) async {
   if (golden.width != img.width || golden.height != img.height) {
@@ -119,7 +129,15 @@ Future<bool> fuzzyCompareImages(Image golden, Image img) async {
   return true;
 }
 
-/// @returns true When the images are resonably similar.
+Future<void> saveTestImage(Image image, String filename) async {
+  final String imagesPath = path.join('flutter', 'testing', 'resources');
+  final ByteData pngData = (await image.toByteData(format: ImageByteFormat.png))!;
+  final String outPath = path.join(imagesPath, filename);
+  File(outPath).writeAsBytesSync(pngData.buffer.asUint8List());
+  print('wrote: ' + outPath);
+}
+
+/// @returns true When the images are reasonably similar.
 Future<bool> fuzzyGoldenImageCompare(
     Image image, String goldenImageName) async {
   final String imagesPath = path.join('flutter', 'testing', 'resources');
@@ -139,10 +157,7 @@ Future<bool> fuzzyGoldenImageCompare(
   }
 
   if (!areEqual) {
-    final ByteData pngData = (await image.toByteData(format: ImageByteFormat.png))!;
-    final String outPath = path.join(imagesPath, 'found_' + goldenImageName);
-    File(outPath).writeAsBytesSync(pngData.buffer.asUint8List());
-    print('wrote: ' + outPath);
+    saveTestImage(image, 'found_' + goldenImageName);
   }
   return areEqual;
 }
@@ -151,17 +166,15 @@ void main() {
   testNoCrashes();
 
   test('Simple .toImage', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Path circlePath = Path()
-      ..addOval(
-          Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
-    final Paint paint = Paint()
-      ..isAntiAlias = false
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(circlePath, paint);
-    final Picture picture = recorder.endRecording();
-    final Image image = await picture.toImage(100, 100);
+    final Image image = await toImage((Canvas canvas) {
+      final Path circlePath = Path()
+        ..addOval(
+            Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
+      final Paint paint = Paint()
+        ..isAntiAlias = false
+        ..style = PaintingStyle.fill;
+      canvas.drawPath(circlePath, paint);
+    }, 100, 100);
     expect(image.width, equals(100));
     expect(image.height, equals(100));
 
@@ -180,12 +193,10 @@ void main() {
 
   test('Simple gradient', () async {
     Paint.enableDithering = false;
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()..shader = makeGradient();
-    canvas.drawPaint(paint);
-    final Picture picture = recorder.endRecording();
-    final Image image = await picture.toImage(100, 100);
+    final Image image = await toImage((Canvas canvas) {
+      final Paint paint = Paint()..shader = makeGradient();
+      canvas.drawPaint(paint);
+    }, 100, 100);
     expect(image.width, equals(100));
     expect(image.height, equals(100));
 
@@ -196,12 +207,10 @@ void main() {
 
   test('Simple dithered gradient', () async {
     Paint.enableDithering = true;
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    final Paint paint = Paint()..shader = makeGradient();
-    canvas.drawPaint(paint);
-    final Picture picture = recorder.endRecording();
-    final Image image = await picture.toImage(100, 100);
+    final Image image = await toImage((Canvas canvas) {
+      final Paint paint = Paint()..shader = makeGradient();
+      canvas.drawPaint(paint);
+    }, 100, 100);
     expect(image.width, equals(100));
     expect(image.height, equals(100));
 
@@ -254,5 +263,53 @@ void main() {
     expectArgumentError(() => canvas.drawRawAtlas(image, Float32List(4), Float32List(0), null, null, rect, paint));
     expectArgumentError(() => canvas.drawRawAtlas(image, Float32List(0), Float32List(4), null, null, rect, paint));
     expectArgumentError(() => canvas.drawRawAtlas(image, Float32List(4), Float32List(4), Int32List(2), BlendMode.src, rect, paint));
+  });
+
+  test('Canvas preserves perspective data in Matrix4', () async {
+    final double rotateAroundX = pi / 6;  // 30 degrees
+    final double rotateAroundY = pi / 9;  // 20 degrees
+    const int width = 150;
+    const int height = 150;
+    const Color black = Color.fromARGB(255, 0, 0, 0);
+    const Color green = Color.fromARGB(255, 0, 255, 0);
+    void paint(Canvas canvas, CanvasCallback rotate) {
+      canvas.translate(width * 0.5, height * 0.5);
+      rotate(canvas);
+      const double width3 = width / 3.0;
+      const double width5 = width / 5.0;
+      const double width10 = width / 10.0;
+      canvas.drawRect(const Rect.fromLTRB(-width3, -width3, width3, width3), Paint()..color = green);
+      canvas.drawRect(const Rect.fromLTRB(-width5, -width5, -width10, width5), Paint()..color = black);
+      canvas.drawRect(const Rect.fromLTRB(-width5, -width5, width5, -width10), Paint()..color = black);
+    }
+
+    final Image incrementalMatrixImage = await toImage((Canvas canvas) {
+      paint(canvas, (Canvas canvas) {
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(3, 2, 0.001);
+        canvas.transform(matrix.storage);
+        matrix.setRotationX(rotateAroundX);
+        canvas.transform(matrix.storage);
+        matrix.setRotationY(rotateAroundY);
+        canvas.transform(matrix.storage);
+      });
+    }, width, height);
+    final Image combinedMatrixImage = await toImage((Canvas canvas) {
+      paint(canvas, (Canvas canvas) {
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(3, 2, 0.001);
+        matrix.rotateX(rotateAroundX);
+        matrix.rotateY(rotateAroundY);
+        canvas.transform(matrix.storage);
+      });
+    }, width, height);
+
+    final bool areEqual = await fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
+
+    if (!areEqual) {
+      saveTestImage(incrementalMatrixImage, 'incremental_3D_transform_test_image.png');
+      saveTestImage(combinedMatrixImage, 'combined_3D_transform_test_image.png');
+    }
+    expect(areEqual, true);
   });
 }

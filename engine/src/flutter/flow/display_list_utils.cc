@@ -95,45 +95,65 @@ sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() {
 
 void SkMatrixDispatchHelper::translate(SkScalar tx, SkScalar ty) {
   matrix_.preTranslate(tx, ty);
+  matrix33_ = matrix_.asM33();
 }
 void SkMatrixDispatchHelper::scale(SkScalar sx, SkScalar sy) {
   matrix_.preScale(sx, sy);
+  matrix33_ = matrix_.asM33();
 }
 void SkMatrixDispatchHelper::rotate(SkScalar degrees) {
-  matrix_.preRotate(degrees);
+  matrix33_.setRotate(degrees);
+  matrix_.preConcat(matrix33_);
+  matrix33_ = matrix_.asM33();
 }
 void SkMatrixDispatchHelper::skew(SkScalar sx, SkScalar sy) {
-  matrix_.preSkew(sx, sy);
+  matrix33_.setSkew(sx, sy);
+  matrix_.preConcat(matrix33_);
+  matrix33_ = matrix_.asM33();
 }
-void SkMatrixDispatchHelper::transform2x3(SkScalar mxx,
-                                          SkScalar mxy,
-                                          SkScalar mxt,
-                                          SkScalar myx,
-                                          SkScalar myy,
-                                          SkScalar myt) {
-  matrix_.preConcat(SkMatrix::MakeAll(mxx, mxy, mxt, myx, myy, myt, 0, 0, 1));
+
+// clang-format off
+
+// 2x3 2D affine subset of a 4x4 transform in row major order
+void SkMatrixDispatchHelper::transform2DAffine(
+    SkScalar mxx, SkScalar mxy, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myt) {
+  matrix_.preConcat({
+      mxx, mxy,  0 , mxt,
+      myx, myy,  0 , myt,
+       0 ,  0 ,  1 ,  0 ,
+       0 ,  0 ,  0 ,  1 ,
+  });
+  matrix33_ = matrix_.asM33();
 }
-void SkMatrixDispatchHelper::transform3x3(SkScalar mxx,
-                                          SkScalar mxy,
-                                          SkScalar mxt,
-                                          SkScalar myx,
-                                          SkScalar myy,
-                                          SkScalar myt,
-                                          SkScalar px,
-                                          SkScalar py,
-                                          SkScalar pt) {
-  matrix_.preConcat(
-      SkMatrix::MakeAll(mxx, mxy, mxt, myx, myy, myt, px, py, pt));
+// full 4x4 transform in row major order
+void SkMatrixDispatchHelper::transformFullPerspective(
+    SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+    SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+    SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) {
+  matrix_.preConcat({
+      mxx, mxy, mxz, mxt,
+      myx, myy, myz, myt,
+      mzx, mzy, mzz, mzt,
+      mwx, mwy, mwz, mwt,
+  });
+  matrix33_ = matrix_.asM33();
 }
+
+// clang-format on
+
 void SkMatrixDispatchHelper::save() {
   saved_.push_back(matrix_);
 }
 void SkMatrixDispatchHelper::restore() {
   matrix_ = saved_.back();
+  matrix33_ = matrix_.asM33();
   saved_.pop_back();
 }
 void SkMatrixDispatchHelper::reset() {
-  matrix_.reset();
+  matrix_.setIdentity();
+  matrix33_ = matrix_.asM33();
 }
 
 void ClipBoundsDispatchHelper::clipRect(const SkRect& rect,
