@@ -34,25 +34,30 @@ void DisplayListCanvasDispatcher::rotate(SkScalar degrees) {
 void DisplayListCanvasDispatcher::skew(SkScalar sx, SkScalar sy) {
   canvas_->skew(sx, sy);
 }
-void DisplayListCanvasDispatcher::transform2x3(SkScalar mxx,
-                                               SkScalar mxy,
-                                               SkScalar mxt,
-                                               SkScalar myx,
-                                               SkScalar myy,
-                                               SkScalar myt) {
-  canvas_->concat(SkMatrix::MakeAll(mxx, mxy, mxt, myx, myy, myt, 0, 0, 1));
+// clang-format off
+// 2x3 2D affine subset of a 4x4 transform in row major order
+void DisplayListCanvasDispatcher::transform2DAffine(
+    SkScalar mxx, SkScalar mxy, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myt) {
+  // Internally concat(SkMatrix) gets redirected to concat(SkM44)
+  // so we just jump directly to the SkM44 version
+  canvas_->concat(SkM44(mxx, mxy, 0, mxt,
+                        myx, myy, 0, myt,
+                         0,   0,  1,  0,
+                         0,   0,  0,  1));
 }
-void DisplayListCanvasDispatcher::transform3x3(SkScalar mxx,
-                                               SkScalar mxy,
-                                               SkScalar mxt,
-                                               SkScalar myx,
-                                               SkScalar myy,
-                                               SkScalar myt,
-                                               SkScalar px,
-                                               SkScalar py,
-                                               SkScalar pt) {
-  canvas_->concat(SkMatrix::MakeAll(mxx, mxy, mxt, myx, myy, myt, px, py, pt));
+// full 4x4 transform in row major order
+void DisplayListCanvasDispatcher::transformFullPerspective(
+    SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+    SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+    SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) {
+  canvas_->concat(SkM44(mxx, mxy, mxz, mxt,
+                        myx, myy, myz, myt,
+                        mzx, mzy, mzz, mzt,
+                        mwx, mwy, mwz, mwt));
 }
+// clang-format on
 
 void DisplayListCanvasDispatcher::clipRect(const SkRect& rect,
                                            SkClipOp clip_op,
@@ -201,15 +206,16 @@ sk_sp<DisplayList> DisplayListCanvasRecorder::Build() {
   return display_list;
 }
 
+// clang-format off
 void DisplayListCanvasRecorder::didConcat44(const SkM44& m44) {
-  SkMatrix m = m44.asM33();
-  if (m.hasPerspective()) {
-    builder_->transform3x3(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7],
-                           m[8]);
-  } else {
-    builder_->transform2x3(m[0], m[1], m[2], m[3], m[4], m[5]);
-  }
+  // transform4x4 takes a full 4x4 transform in row major order
+  builder_->transformFullPerspective(
+      m44.rc(0, 0), m44.rc(0, 1), m44.rc(0, 2), m44.rc(0, 3),
+      m44.rc(1, 0), m44.rc(1, 1), m44.rc(1, 2), m44.rc(1, 3),
+      m44.rc(2, 0), m44.rc(2, 1), m44.rc(2, 2), m44.rc(2, 3),
+      m44.rc(3, 0), m44.rc(3, 1), m44.rc(3, 2), m44.rc(3, 3));
 }
+// clang-format on
 void DisplayListCanvasRecorder::didTranslate(SkScalar tx, SkScalar ty) {
   builder_->translate(tx, ty);
 }

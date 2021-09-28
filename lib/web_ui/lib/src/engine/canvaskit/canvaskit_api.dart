@@ -966,6 +966,19 @@ class SkPathNamespace {
   external SkPath MakeFromOp(SkPath path1, SkPath path2, SkPathOp pathOp);
 }
 
+/// Converts a 4x4 Flutter matrix (represented as a [Float32List] in
+/// column major order) to an SkM44 which is a 4x4 matrix represented
+/// as a [Float32List] in row major order.
+Float32List toSkM44FromFloat32(Float32List matrix4) {
+  final Float32List skM44 = Float32List(16);
+  for (int r = 0; r < 4; r++) {
+    for (int c = 0; c < 4; c++) {
+      skM44[c * 4 + r] = matrix4[r * 4 + c];
+    }
+  }
+  return skM44;
+}
+
 // Mappings from SkMatrix-index to input-index.
 const List<int> _skMatrixIndexToMatrix4Index = <int>[
   0, 4, 12, // Row 1

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -45,6 +46,8 @@ void testMain() {
     _toSkPointTests();
     _toSkColorStopsTests();
     _toSkMatrixFromFloat32Tests();
+    _toSkM44FromFloat32Tests();
+    _matrix4x4CompositionTests();
     _toSkRectTests();
     _skVerticesTests();
     _paragraphTests();
@@ -589,6 +592,108 @@ void _toSkMatrixFromFloat32Tests() {
           0,
           1,
         ]));
+  });
+}
+
+void _toSkM44FromFloat32Tests() {
+  test('toSkM44FromFloat32', () {
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
+    expect(
+        toSkM44FromFloat32(matrix.storage),
+        Float32List.fromList(<double>[
+          -0.6536436080932617,
+          0.756802499294281,
+          0,
+          1,
+          -0.756802499294281,
+          -0.6536436080932617,
+          0,
+          2,
+          0,
+          0,
+          1,
+          3,
+          0,
+          0,
+          0,
+          1,
+        ]));
+  });
+}
+
+typedef CanvasCallback = void Function(ui.Canvas canvas);
+
+Future<ui.Image> toImage(CanvasCallback callback, int width, int height) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
+  callback(canvas);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(width, height);
+}
+
+/// @returns true When the images are reasonably similar.
+/// @todo Make the search actually fuzzy to a certain degree.
+Future<bool> fuzzyCompareImages(ui.Image golden, ui.Image img) async {
+  if (golden.width != img.width || golden.height != img.height) {
+    return false;
+  }
+  int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
+  final ByteData goldenData = (await golden.toByteData())!;
+  final ByteData imgData = (await img.toByteData())!;
+  for (int y = 0; y < golden.height; y++) {
+    for (int x = 0; x < golden.width; x++) {
+      if (getPixel(goldenData, x, y) != getPixel(imgData, x, y)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void _matrix4x4CompositionTests() {
+  test('compose4x4MatrixInCanvas', () async {
+    const double rotateAroundX = pi / 6;  // 30 degrees
+    const double rotateAroundY = pi / 9;  // 20 degrees
+    const int width = 150;
+    const int height = 150;
+    const ui.Color black = ui.Color.fromARGB(255, 0, 0, 0);
+    const ui.Color green = ui.Color.fromARGB(255, 0, 255, 0);
+    void paint(ui.Canvas canvas, CanvasCallback rotate) {
+      canvas.translate(width * 0.5, height * 0.5);
+      rotate(canvas);
+      const double width3 = width / 3.0;
+      const double width5 = width / 5.0;
+      const double width10 = width / 10.0;
+      canvas.drawRect(const ui.Rect.fromLTRB(-width3, -width3, width3, width3), ui.Paint()..color = green);
+      canvas.drawRect(const ui.Rect.fromLTRB(-width5, -width5, -width10, width5), ui.Paint()..color = black);
+      canvas.drawRect(const ui.Rect.fromLTRB(-width5, -width5, width5, -width10), ui.Paint()..color = black);
+    }
+
+    final ui.Image incrementalMatrixImage = await toImage((ui.Canvas canvas) {
+      paint(canvas, (ui.Canvas canvas) {
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(3, 2, 0.001);
+        canvas.transform(matrix.toFloat64());
+        matrix.setRotationX(rotateAroundX);
+        canvas.transform(matrix.toFloat64());
+        matrix.setRotationY(rotateAroundY);
+        canvas.transform(matrix.toFloat64());
+      });
+    }, width, height);
+    final ui.Image combinedMatrixImage = await toImage((ui.Canvas canvas) {
+      paint(canvas, (ui.Canvas canvas) {
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(3, 2, 0.001);
+        matrix.rotate(Vector3(1, 0, 0), rotateAroundX);
+        matrix.rotate(Vector3(0, 1, 0), rotateAroundY);
+        canvas.transform(matrix.toFloat64());
+      });
+    }, width, height);
+
+    final bool areEqual = await fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
+    expect(areEqual, true);
   });
 }
 
