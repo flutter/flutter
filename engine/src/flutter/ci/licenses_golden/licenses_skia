@@ -1,4 +1,4 @@
-Signature: 1f3bfdc738399db2526473b4d21f3369
+Signature: 14503d653a642ccf280dfb7b57a32fac
 
 UNUSED LICENSES:
 
@@ -2979,7 +2979,6 @@ FILE: ../../../third_party/skia/gm/crbug_1177833.cpp
 FILE: ../../../third_party/skia/gm/crop_imagefilter.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
-FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
 FILE: ../../../third_party/skia/include/effects/SkBlenders.h
 FILE: ../../../third_party/skia/include/gpu/GrSurfaceInfo.h
