@@ -1,4 +1,4 @@
-Signature: f65a23d01fbc51cf667dd9906a1d1e74
+Signature: bee14e1020fed5ad6b32a94937c2237e
 
 UNUSED LICENSES:
 
@@ -2951,6 +2951,10 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Pipeline.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Pipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDesc.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
