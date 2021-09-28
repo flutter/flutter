@@ -85,12 +85,10 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+        expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
         break;
     }
   }, variant: TargetPlatformVariant.all());

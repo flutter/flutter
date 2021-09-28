@@ -415,15 +415,13 @@ class ThemeData with Diagnosticable {
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     switch (platform) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         materialTapTargetSize ??= MaterialTapTargetSize.padded;
-        break;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-         materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
         break;
     }
     applyElevationOverlayColor ??= false;

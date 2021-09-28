@@ -366,8 +366,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
     switch (resolvedTapTargetSize!) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
-          kMinInteractiveDimension + densityAdjustment.dx,
-          kMinInteractiveDimension + densityAdjustment.dy,
+          kMinInteractiveDimension + dx,
+          kMinInteractiveDimension + dy,
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);

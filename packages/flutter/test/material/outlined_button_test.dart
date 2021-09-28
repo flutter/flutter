@@ -974,7 +974,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(88, 36)));
+    expect(box.size, equals(const Size(88, 48)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 

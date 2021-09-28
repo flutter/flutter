@@ -321,14 +321,14 @@ void main() {
           const Size(100.0, 100.0),
         );
         final VisualDensity density = VisualDensity.adaptivePlatformDensity;
-        expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
+        expect(tester.getCenter(logo), Offset(400.0, 351.0 - math.max(0.0, density.vertical) * 2.0));
 
         // Also check that the button alignment is true to expectations
         // Buttons do not decrease their horizontal padding per the VisualDensity.
         final Finder button = find.byType(ElevatedButton);
         expect(
           tester.renderObject<RenderBox>(button).size,
-          Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + density.vertical * 4.0),
+          Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + math.max(0, density.vertical) * 4.0),
         );
         expect(tester.getBottomLeft(button).dy, equals(600.0));
         expect(tester.getCenter(button).dx, equals(400.0));
@@ -348,7 +348,7 @@ void main() {
         expect(
           tester.renderObject<RenderBox>(button).size,
           // Buttons do not decrease their horizontal padding per the VisualDensity.
-          Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + density.vertical * 4.0),
+          Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + math.max(0.0, density.vertical) * 4.0),
         );
         expect(tester.getBottomLeft(button).dy, lessThan(600.0));
         expect(tester.getCenter(button).dx, equals(400.0));
@@ -465,10 +465,6 @@ void main() {
           // Scroll to the end
           controller.jumpTo(controller.position.maxScrollExtent);
           await tester.pump();
-          expect(
-            tester.renderObject<RenderBox>(find.byKey(key)).size.height,
-            equals(148.0 + VisualDensity.adaptivePlatformDensity.vertical * 4.0),
-          );
           // Check that the button alignment is true to expectations
           final Finder button = find.byType(ElevatedButton);
           expect(tester.getBottomLeft(button).dy, equals(550.0));
@@ -488,10 +484,6 @@ void main() {
 
           // Ensure overscroll retracts to original size after releasing gesture
           await tester.pumpAndSettle();
-          expect(
-            tester.renderObject<RenderBox>(find.byKey(key)).size.height,
-            equals(148.0 + VisualDensity.adaptivePlatformDensity.vertical * 4.0),
-          );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
         testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
@@ -593,14 +585,14 @@ void main() {
             const Size(100.0, 100.0),
           );
           final VisualDensity density = VisualDensity.adaptivePlatformDensity;
-          expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
+          expect(tester.getCenter(logo), Offset(400.0, 351.0 - math.max(0.0, density.vertical) * 2.0));
 
           // Also check that the button alignment is true to expectations.
           // Buttons do not decrease their horizontal padding per the VisualDensity.
           final Finder button = find.byType(ElevatedButton);
           expect(
             tester.renderObject<RenderBox>(button).size,
-            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + density.vertical * 4.0),
+            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + math.max(0.0, density.vertical) * 4.0),
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
@@ -622,7 +614,7 @@ void main() {
           expect(
             tester.renderObject<RenderBox>(button).size,
             // Buttons do not decrease their horizontal padding per the VisualDensity.
-            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + density.vertical * 4.0),
+            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + math.max(0.0, density.vertical) * 4.0),
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
@@ -638,11 +630,11 @@ void main() {
             tester.renderObject<RenderBox>(logo).size,
             const Size(100.0, 100.0),
           );
-          expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
+          expect(tester.getCenter(logo), Offset(400.0, 351.0 - math.max(0.0, density.vertical) * 2.0));
           expect(
             tester.renderObject<RenderBox>(button).size,
             // Buttons do not decrease their horizontal padding per the VisualDensity.
-            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + density.vertical * 4.0),
+            Size(116.0 + math.max(0, density.horizontal) * 8.0, 48.0 + math.max(0.0, density.vertical) * 4.0),
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
