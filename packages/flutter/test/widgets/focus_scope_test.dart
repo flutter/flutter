@@ -1084,20 +1084,16 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusScopeNode focusScopeNode = FocusScopeNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback handleCallback = (FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback handleEventCallback = (FocusNode node, KeyEvent event) {
+      }
+      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback ignoreCallback = (FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback ignoreEventCallback = (FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
       focusScopeNode.onKey = ignoreCallback;
       focusScopeNode.onKeyEvent = ignoreEventCallback;
       focusScopeNode.descendantsAreFocusable = false;
