@@ -465,13 +465,13 @@ class RenderParagraph extends RenderBox
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
