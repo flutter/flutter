@@ -95,6 +95,9 @@ class WindowBindingHandlerDelegate {
                         int scroll_offset_multiplier,
                         FlutterPointerDeviceKind device_kind,
                         int32_t device_id) = 0;
+
+  // Notifies delegate that backing window has received brightness change event.
+  virtual void OnPlatformBrightnessChanged() = 0;
 };
 
 }  // namespace flutter
