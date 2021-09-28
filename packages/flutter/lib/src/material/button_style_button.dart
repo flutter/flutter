@@ -257,10 +257,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
-        minWidth: resolvedMinimumSize!.width,
-        minHeight: resolvedMinimumSize.height,
-        maxWidth: resolvedMaximumSize!.width,
-        maxHeight: resolvedMaximumSize.height,
+        minWidth: resolvedMinimumSize?.width ?? 0.0,
+        minHeight: resolvedMinimumSize?.height ?? 0.0,
+        maxWidth: resolvedMaximumSize?.width ?? double.infinity,
+        maxHeight: resolvedMaximumSize?.height ?? double.infinity,
       ),
     );
     if (resolvedFixedSize != null) {
