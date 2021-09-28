@@ -58,6 +58,11 @@ class FlutterEngine : public PluginRegistry {
   // Win32 application).
   void ReloadSystemFonts();
 
+  // Tells the engine that the platform brightness value has changed. Should be
+  // called by clients when OS-level theme changes happen (e.g.,
+  // WM_DWMCOLORIZATIONCOLORCHANGED in a Win32 application).
+  void ReloadPlatformBrightness();
+
   // flutter::PluginRegistry:
   FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
       const std::string& plugin_name) override;

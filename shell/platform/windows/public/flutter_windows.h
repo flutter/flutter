@@ -174,6 +174,9 @@ FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine);
 FLUTTER_EXPORT void FlutterDesktopEngineReloadSystemFonts(
     FlutterDesktopEngineRef engine);
 
+FLUTTER_EXPORT void FlutterDesktopEngineReloadPlatformBrightness(
+    FlutterDesktopEngineRef engine);
+
 // Returns the plugin registrar handle for the plugin with the given name.
 //
 // The name must be unique across the application.
