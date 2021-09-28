@@ -471,7 +471,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       )!;
       overlayState.insert(_entry!);
     }
-    SemanticsService.tooltip(widget.message);
+    SemanticsService.tooltip(_tooltipMessage);
     _controller.forward();
   }
 
