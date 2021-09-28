@@ -57,7 +57,7 @@ class MyStatelessWidget extends StatelessWidget {
       richMessage: TextSpan(
         text: 'I am a rich tooltip. ',
         style: TextStyle(color: Colors.red),
-        children: <Widget>[
+        children: <InlineSpan>[
           TextSpan(
             text: 'I am another span of this rich tooltip',
             style: TextStyle(fontWeight: FontWeight.bold),
