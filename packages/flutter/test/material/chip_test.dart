@@ -559,13 +559,11 @@ void main() {
     expect(calledDelete, isFalse);
     calledDelete = false;
 
-    final UniqueKey chipKey = UniqueKey();
     await tester.pumpWidget(
       _wrapForChip(
         child: Column(
           children: <Widget>[
             Chip(
-              key: chipKey,
               label: const SizedBox(), // Short label
               deleteIcon: Icon(Icons.cancel, key: deleteKey),
               onDeleted: () {
