@@ -222,6 +222,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
                     int,
                     FlutterPointerDeviceKind,
                     int32_t));
+  MOCK_METHOD0(OnPlatformBrightnessChanged, void());
 };
 
 // A FlutterWindowsView that overrides the RegisterKeyboardHandlers function

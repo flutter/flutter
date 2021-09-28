@@ -249,6 +249,10 @@ void FlutterWindowsView::OnScroll(double x,
              device_id);
 }
 
+void FlutterWindowsView::OnPlatformBrightnessChanged() {
+  SendPlatformBrightnessChanged();
+}
+
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
   binding_handler_->OnCursorRectUpdated(rect);
 }
@@ -464,6 +468,11 @@ void FlutterWindowsView::SendPointerEventWithData(
     }
   }
 }
+
+void FlutterWindowsView::SendPlatformBrightnessChanged() {
+  engine_->task_runner()->RunNowOrPostTask(
+      [this]() { engine_->ReloadPlatformBrightness(); });
+};
 
 bool FlutterWindowsView::MakeCurrent() {
   return engine_->surface_manager()->MakeCurrent();

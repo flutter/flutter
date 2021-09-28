@@ -49,6 +49,11 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   // |flutter::testing::StubFlutterWindowsApi|
   void EngineReloadSystemFonts() override { reload_fonts_called_ = true; }
 
+  // |flutter::testing::StubFlutterWindowsApi|
+  void EngineReloadPlatformBrightness() override {
+    reload_brightness_called_ = true;
+  }
+
   bool create_called() { return create_called_; }
 
   bool run_called() { return run_called_; }
@@ -56,6 +61,8 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   bool destroy_called() { return destroy_called_; }
 
   bool reload_fonts_called() { return reload_fonts_called_; }
+
+  bool reload_brightness_called() { return reload_brightness_called_; }
 
   const std::vector<std::string>& dart_entrypoint_arguments() {
     return dart_entrypoint_arguments_;
@@ -66,6 +73,7 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   bool run_called_ = false;
   bool destroy_called_ = false;
   bool reload_fonts_called_ = false;
+  bool reload_brightness_called_ = false;
   std::vector<std::string> dart_entrypoint_arguments_;
 };
 
@@ -122,6 +130,18 @@ TEST(FlutterEngineTest, ReloadFonts) {
 
   engine.ReloadSystemFonts();
   EXPECT_TRUE(test_api->reload_fonts_called());
+}
+
+TEST(FlutterEngineTest, ReloadBrightness) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+  engine.Run();
+
+  engine.ReloadPlatformBrightness();
+  EXPECT_TRUE(test_api->reload_brightness_called());
 }
 
 TEST(FlutterEngineTest, GetMessenger) {

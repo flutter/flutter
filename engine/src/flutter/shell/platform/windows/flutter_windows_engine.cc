@@ -391,6 +391,12 @@ void FlutterWindowsEngine::ReloadSystemFonts() {
   embedder_api_.ReloadSystemFonts(engine_);
 }
 
+void FlutterWindowsEngine::ReloadPlatformBrightness() {
+  if (engine_) {
+    SendSystemSettings();
+  }
+}
+
 void FlutterWindowsEngine::SendSystemSettings() {
   std::vector<LanguageInfo> languages = GetPreferredLanguageInfo();
   std::vector<FlutterLocale> flutter_locales;
@@ -413,9 +419,8 @@ void FlutterWindowsEngine::SendSystemSettings() {
   settings.AddMember("alwaysUse24HourFormat",
                      Prefer24HourTime(GetUserTimeFormat()), allocator);
   settings.AddMember("textScaleFactor", 1.0, allocator);
-  // TODO: Implement dark mode support.
-  // https://github.com/flutter/flutter/issues/54612
-  settings.AddMember("platformBrightness", "light", allocator);
+  settings.AddMember("platformBrightness",
+                     Utf8FromUtf16(GetPreferredBrightness()), allocator);
   settings_channel_->Send(settings);
 }
 
