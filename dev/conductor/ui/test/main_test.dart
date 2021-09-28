@@ -31,5 +31,5 @@ void main() {
       expect(find.textContaining('Conductor version'), findsOneWidget);
       expect(find.text('1'), findsNothing);
     });
-  }, skip: Platform.isWindows); // This app does not support web or Windows [intended]
+  }, skip: Platform.isWindows); // This app does not support Windows [intended]
 }

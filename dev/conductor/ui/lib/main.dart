@@ -5,7 +5,6 @@
 import 'dart:io' as io;
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
-import 'package:desktop_window/desktop_window.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
@@ -26,10 +25,23 @@ Future<void> main() async {
       _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
 
   WidgetsFlutterBinding.ensureInitialized();
-  // app currently only supports macOS and Linux, and a minimum app size is added to prevent overflow
+  // The app currently only supports macOS and Linux.
   if (!kIsWeb && (io.Platform.isMacOS || io.Platform.isLinux)) {
-    await DesktopWindow.setMinWindowSize(const Size(600, 600));
-    runApp(MyApp(state));
+    runApp(MyApp(state));    
+  }
+  else {
+    runApp(const ErrorWidget());
+  }
+}
+
+class ErrorWidget extends StatelessWidget {
+  const ErrorWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Text('This app only supports MacOS and Linux.'),
+    );
   }
 }
 
