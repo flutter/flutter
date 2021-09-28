@@ -1301,7 +1301,6 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
         });
     RunLoopUntilIdle();
 
-    FAIL();
     ASSERT_NOTNULL(delegate.message());
     EXPECT_EQ(event.expected_platform_message,
               ToString(delegate.message()->data()));
