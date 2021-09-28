@@ -1173,14 +1173,14 @@ void main() {
     await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(find.text(label), findsNWidgets(2));
+    expect(find.text(label, findRichText: true), findsNWidgets(2));
     expect(tester.getSize(find.text(label).last), equals(const Size(42.0, 14.0)));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
+    expect(tester.getSize(find.text(label, findRichText: true).last), equals(const Size(168.0, 56.0)));
   });
 
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
