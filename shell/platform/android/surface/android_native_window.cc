@@ -6,7 +6,11 @@
 
 namespace flutter {
 
-AndroidNativeWindow::AndroidNativeWindow(Handle window) : window_(window) {}
+AndroidNativeWindow::AndroidNativeWindow(Handle window, bool is_fake_window)
+    : window_(window), is_fake_window_(is_fake_window) {}
+
+AndroidNativeWindow::AndroidNativeWindow(Handle window)
+    : AndroidNativeWindow(window, /*is_fake_window=*/false) {}
 
 AndroidNativeWindow::~AndroidNativeWindow() {
   if (window_ != nullptr) {
