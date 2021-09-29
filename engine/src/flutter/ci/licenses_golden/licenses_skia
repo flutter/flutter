@@ -1,4 +1,4 @@
-Signature: d26f78dff4277abff012da54ed6825a5
+Signature: 51944301267640c3600449147dbb8b52
 
 UNUSED LICENSES:
 
@@ -2933,7 +2933,11 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
 FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
+FILE: ../../../third_party/skia/experimental/graphite/include/GraphiteTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
+FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
+FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
+FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/src/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
@@ -2974,6 +2978,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTypesPriv.mm
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
@@ -4068,6 +4073,7 @@ ORIGIN: ../../../third_party/skia/bench/MSKPBench.cpp + ../../../third_party/ski
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/MSKPBench.cpp
 FILE: ../../../third_party/skia/bench/MSKPBench.h
+FILE: ../../../third_party/skia/experimental/graphite/include/private/MtlTypesPriv.h
 FILE: ../../../third_party/skia/fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
