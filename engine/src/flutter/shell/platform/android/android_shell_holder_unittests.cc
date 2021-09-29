@@ -57,13 +57,12 @@ TEST(AndroidShellHolder, Create) {
   Settings settings;
   settings.enable_software_rendering = false;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
-  auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, /*is_background_view=*/false);
+  auto holder = std::make_unique<AndroidShellHolder>(settings, jni);
   EXPECT_NE(holder.get(), nullptr);
   EXPECT_TRUE(holder->IsValid());
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);
-  auto window =
-      fml::MakeRefCounted<AndroidNativeWindow>(nullptr, /*is_offscreen=*/true);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
   holder->GetPlatformView()->NotifyCreated(window);
 }
 }  // namespace testing
