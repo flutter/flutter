@@ -4,7 +4,9 @@
 
 // @dart = 2.8
 
+import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 
@@ -429,17 +431,36 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Stopwatch timer = Stopwatch()..start();
     int count = 0;
 
-    for (final Directory dir in packages) {
-      await pub.get(
-        context: PubContext.updatePackages,
-        directory: dir.path,
-        offline: offline,
-        generateSyntheticPackage: false,
-      );
-      count += 1;
+    final Status status = globals.logger.startProgress(
+      'Running "flutter pub get" in affected directories...',
+    );
+    try {
+      final TaskQueue<void> queue = TaskQueue<void>();
+      for (final Directory dir in packages) {
+        unawaited(queue.add(() async {
+          final Stopwatch stopwatch = Stopwatch();
+          stopwatch.start();
+          await pub.get(
+            context: PubContext.updatePackages,
+            directory: dir.path,
+            offline: offline,
+            generateSyntheticPackage: false,
+            printProgress: false,
+          );
+          stopwatch.stop();
+          final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
+          globals.printStatus('Completed pub get in ${dir.path} in ${seconds.toStringAsFixed(1)}s...');
+        }));
+        count += 1;
+      }
+      await queue.tasksComplete;
+      await _downloadCoverageData();
+      status?.stop();
+      // The exception is rethrown, so don't catch only Exceptions.
+    } catch (exception) { // ignore: avoid_catches_without_on_clauses
+      status?.cancel();
+      rethrow;
     }
-
-    await _downloadCoverageData();
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     globals.printStatus("\nRan 'pub' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
@@ -1519,4 +1540,93 @@ environment:
 ''');
 
   return directory;
+}
+
+typedef TaskQueueClosure<T> = Future<T> Function();
+
+class _TaskQueueItem<T> {
+  _TaskQueueItem(this._closure, this._completer, {this.onComplete});
+
+  final TaskQueueClosure<T> _closure;
+  final Completer<T> _completer;
+  void Function() onComplete;
+
+  Future<void> run() async {
+    try {
+      _completer.complete(await _closure());
+    } catch (e) { // ignore: avoid_catches_without_on_clauses
+      _completer.completeError(e);
+    } finally {
+      onComplete?.call();
+    }
+  }
+}
+
+/// A task queue of Futures to be completed in parallel, throttling
+/// the number of simultaneous tasks.
+///
+/// The tasks return results of type T.
+class TaskQueue<T> {
+  /// Creates a task queue with a maximum number of simultaneous jobs.
+  /// The [maxJobs] parameter defaults to the number of CPU cores on the
+  /// system.
+  TaskQueue({int maxJobs})
+      : maxJobs = maxJobs ?? Platform.numberOfProcessors;
+
+  /// The maximum number of jobs that this queue will run simultaneously.
+  final int maxJobs;
+
+  final Queue<_TaskQueueItem<T>> _pendingTasks = Queue<_TaskQueueItem<T>>();
+  final Set<_TaskQueueItem<T>> _activeTasks = <_TaskQueueItem<T>>{};
+  final Set<Completer<void>> _completeListeners = <Completer<void>>{};
+
+  /// Returns a future that completes when all tasks in the [TaskQueue] are
+  /// complete.
+  Future<void> get tasksComplete {
+    // In case this is called when there are no tasks, we want it to
+    // signal complete immediately.
+    if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
+      return Future<void>.value();
+    }
+    final Completer<void> completer = Completer<void>();
+    _completeListeners.add(completer);
+    return completer.future;
+  }
+
+  /// Adds a single closure to the task queue, returning a future that
+  /// completes when the task completes.
+  Future<T> add(TaskQueueClosure<T> task) {
+    final Completer<T> completer = Completer<T>();
+    _pendingTasks.add(_TaskQueueItem<T>(task, completer));
+    if (_activeTasks.length < maxJobs) {
+      _processTask();
+    }
+    return completer.future;
+  }
+
+  // Process a single task.
+  void _processTask() {
+    if (_pendingTasks.isNotEmpty && _activeTasks.length <= maxJobs) {
+      final _TaskQueueItem<T> item = _pendingTasks.removeFirst();
+      _activeTasks.add(item);
+      item.onComplete = () {
+        _activeTasks.remove(item);
+        _processTask();
+      };
+      item.run();
+    } else {
+      _checkForCompletion();
+    }
+  }
+
+  void _checkForCompletion() {
+    if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
+      for (final Completer<void> completer in _completeListeners) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }
+      _completeListeners.clear();
+    }
+  }
 }
