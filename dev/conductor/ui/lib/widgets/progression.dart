@@ -17,11 +17,11 @@ class MainProgression extends StatefulWidget {
   final String stateFilePath;
 
   @override
-  _MainProgressionState createState() => _MainProgressionState();
+  MainProgressionState createState() => MainProgressionState();
 }
 
 /// Shows the progression and each step of the release.
-class _MainProgressionState extends State<MainProgression> {
+class MainProgressionState extends State<MainProgression> {
   @override
   Widget build(BuildContext context) {
     return Expanded(

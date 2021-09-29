@@ -6,7 +6,6 @@ import 'dart:io' show Platform;
 
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:conductor_ui/main.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
