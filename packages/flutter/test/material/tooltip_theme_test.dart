@@ -622,7 +622,7 @@ void main() {
 
     final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.orange);
-    expect(textStyle.fontFamily, null);
+    expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
@@ -651,7 +651,7 @@ void main() {
 
     final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.orange);
-    expect(textStyle.fontFamily, null);
+    expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.underline);
   });
 

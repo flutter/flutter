@@ -530,13 +530,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        richMessage: widget.richMessage ?? TextSpan(text: widget.message, style: textStyle),
+        richMessage: widget.richMessage ?? TextSpan(text: widget.message),
         height: height,
         padding: padding,
         margin: margin,
         onEnter: _mouseIsConnected ? (_) => _handleMouseEnter() : null,
         onExit: _mouseIsConnected ? (_) => _handleMouseExit() : null,
         decoration: decoration,
+        textStyle: textStyle,
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
@@ -749,6 +750,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.padding,
     this.margin,
     this.decoration,
+    this.textStyle,
     required this.animation,
     required this.target,
     required this.verticalOffset,
@@ -762,6 +764,7 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
+  final TextStyle? textStyle;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -785,12 +788,9 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: RichText(
-                  text: richMessage,
-                  textScaleFactor: (context.widget is MediaQuery ||
-                      context.getElementForInheritedWidgetOfExactType<MediaQuery>() != null)
-                          ? MediaQuery.of(context).textScaleFactor
-                          : 1.0,
+                child: Text.rich(
+                  richMessage,
+                  style: textStyle,
                 ),
               ),
             ),
