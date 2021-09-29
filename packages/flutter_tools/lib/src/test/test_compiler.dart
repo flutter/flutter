@@ -145,16 +145,18 @@ class TestCompiler {
         firstCompile = true;
       }
 
-      // Update the generated registrant to use the test target's main.
-      final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
-        ?? request.mainUri.toString();
-      await generateMainDartWithPluginRegistrant(
-        flutterProject,
-        buildInfo.packageConfig,
-        mainUriString,
-        globals.fs.file(request.mainUri),
-        throwOnPluginPubspecError: false,
-      );
+      if (flutterProject != null) {
+        // Update the generated registrant to use the test target's main.
+        final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
+          ?? request.mainUri.toString();
+        await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          buildInfo.packageConfig,
+          mainUriString,
+          globals.fs.file(request.mainUri),
+          throwOnPluginPubspecError: false,
+        );
+      }
 
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.mainUri,
