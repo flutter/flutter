@@ -53,7 +53,7 @@ class DartDevelopmentService {
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 == true,
-          // Enables caching of CPU samples collected during application startup
+          // Enables caching of CPU samples collected during application startup.
           cachedUserTags: const <String>['AppStartUp'],
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
