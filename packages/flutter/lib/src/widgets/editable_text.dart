@@ -1796,15 +1796,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get currentTextEditingValue => _value;
 
   @override
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-    TextEditingValue value = _value;
-    for (final TextEditingDelta delta in textEditingDeltas) {
-      value = delta.apply(value);
-    }
-    updateEditingValue(value);
-  }
-
-  @override
   void updateEditingValue(TextEditingValue value) {
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
@@ -2384,10 +2375,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool selectionChanged = _value.selection != value.selection;
 
     if (textChanged) {
-      value = widget.inputFormatters?.fold<TextEditingValue>(
-        value,
-        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-      ) ?? value;
+      try {
+        value = widget.inputFormatters?.fold<TextEditingValue>(
+          value,
+          (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+        ) ?? value;
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while applying input formatters'),
+        ));
+      }
     }
 
     // Put all optional user callback invocations in a batch edit to prevent

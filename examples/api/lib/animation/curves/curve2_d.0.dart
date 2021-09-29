@@ -98,9 +98,9 @@ class _FollowCurve2DState extends State<FollowCurve2D>
 
   @override
   void dispose() {
-    super.dispose();
     // Always have to dispose of animation controllers when done.
     controller.dispose();
+    super.dispose();
   }
 
   @override

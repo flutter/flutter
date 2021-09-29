@@ -722,7 +722,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// [size]. Both [rect] and [size] must not be null.
   const RelativePositionedTransition({
     Key? key,
-    required Animation<Rect> rect,
+    required Animation<Rect?> rect,
     required this.size,
     required this.child,
   }) : assert(rect != null),
@@ -732,11 +732,13 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   /// The animation that controls the child's size and position.
   ///
+  /// If the animation returns a null [Rect], the rect is assumed to be [Rect.zero].
+  ///
   /// See also:
   ///
   ///  * [size], which gets the size of the box that the [Positioned] widget's
   ///    offsets are relative to.
-  Animation<Rect> get rect => listenable as Animation<Rect>;
+  Animation<Rect?> get rect => listenable as Animation<Rect?>;
 
   /// The [Positioned] widget's offsets are relative to a box of this
   /// size whose origin is 0,0.
@@ -749,7 +751,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RelativeRect offsets = RelativeRect.fromSize(rect.value, size);
+    final RelativeRect offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
     return Positioned(
       top: offsets.top,
       right: offsets.right,

@@ -64,32 +64,39 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-        home: CupertinoPageScaffold(
-            child: CustomScrollView(
-      physics:
-          const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-      slivers: <Widget>[
-        const CupertinoSliverNavigationBar(largeTitle: Text('Scroll down')),
-        CupertinoSliverRefreshControl(
-          refreshTriggerPullDistance: 100.0,
-          refreshIndicatorExtent: 60.0,
-          onRefresh: () async {
-            await Future<void>.delayed(const Duration(milliseconds: 1000));
-            setState(() {
-              items.insert(
-                  0, Container(color: colors[items.length % 3], height: 100.0));
-            });
-          },
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
         ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => items[index],
-            childCount: items.length,
+        slivers: <Widget>[
+          const CupertinoSliverNavigationBar(
+            largeTitle: Text('Scroll down'),
           ),
-        ),
-      ],
-    )));
+          CupertinoSliverRefreshControl(
+            refreshTriggerPullDistance: 100.0,
+            refreshIndicatorExtent: 60.0,
+            onRefresh: () async {
+              await Future<void>.delayed(
+                const Duration(milliseconds: 1000),
+              );
+              setState(() {
+                items.insert(
+                  0,
+                  Container(color: colors[items.length % 3], height: 100.0),
+                );
+              });
+            },
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) => items[index],
+              childCount: items.length,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
 //* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
