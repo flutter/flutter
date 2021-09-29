@@ -284,7 +284,7 @@ void main() {
         FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
 
-      const String expectedMessage = 'The file device was not found.';
+      const String expectedMessage = 'The device was not found.';
       expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
