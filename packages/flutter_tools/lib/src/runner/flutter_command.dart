@@ -821,7 +821,7 @@ abstract class FlutterCommand extends Command<void> {
   void addMultiDexOption({ bool hide = false }) {
     argParser.addFlag('multi-dex',
       negatable: true,
-      defaultsTo: false,
+      defaultsTo: true,
       help: 'When enabled, indicates that the app should be built with multi dex support. This'
             ' flag adds the dependencies for multi dex when the minimum android sdk is 20 or '
             'below. For android sdk versions 21 and above, multi dex support is native.',
@@ -1314,6 +1314,7 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
+
   Future<List<Device>> findAllTargetDevices({
     bool includeUnsupportedDevices = false,
   }) async {

@@ -11,6 +11,7 @@ import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';
+import 'multi_dex.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -71,7 +72,33 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
+  multiDexErrorHandler
 ];
+
+// MultiDex error message.
+@visibleForTesting
+final GradleHandledError multiDexErrorHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:',
+    'The number of method references in a .dex file cannot exceed 64K.',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printStatus('${globals.logger.terminal.warningMark} App requires MultiDex support', emphasis: true);
+    globals.printStatus(
+      'MultiDex support is being automatically added to your android project. You may pass the'
+      ' --no-multi-dex flag to skip Flutter\'s multi dex support to use a custom solution.',
+      indent: 4
+    );
+    ensureMultiDexKeepFileExists(project.directory);
+    ensureMultiDexUtilsExists(project.directory);
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'multi-dex-error',
+);
 
 // Permission defined error message.
 @visibleForTesting
