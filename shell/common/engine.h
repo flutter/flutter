@@ -375,7 +375,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
       Delegate& delegate,
       const PointerDataDispatcherMaker& dispatcher_maker,
       Settings settings,
-      std::unique_ptr<Animator> animator) const;
+      std::unique_ptr<Animator> animator,
+      const std::string& initial_route) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task

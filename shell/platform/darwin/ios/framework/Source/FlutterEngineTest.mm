@@ -194,7 +194,7 @@ FLUTTER_ASSERT_ARC
 - (void)testSpawn {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
-  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil libraryURI:nil];
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil libraryURI:nil initialRoute:nil];
   XCTAssertNotNil(spawn);
 }
 
