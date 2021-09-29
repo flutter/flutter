@@ -837,7 +837,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     child: FocusScope(
                       node: focusScopeNode, // immutable
                       child: GestureDetector(
-                        onTap: () {
+                        onTapDown: (TapDownDetails details) {
                           routeFocusNode.requestFocus();
                         },
                         // TODO(justinmc): Only remove focus when clicking out
