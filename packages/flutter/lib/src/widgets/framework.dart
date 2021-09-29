@@ -4371,8 +4371,11 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad --template=freeform}
+/// This example shows how to override the standard error widget builder in release
+/// mode, but use the standard one in debug mode.
 ///
+/// The error occurs when you click the "Error Prone" button.
 ///
 /// ** See code in examples/api/lib/widgets/framework/error_widget.0.dart **
 /// {@end-tool}

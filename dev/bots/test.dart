@@ -679,6 +679,24 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runExampleTests() async {
+    // TODO(gspencergoog): Currently Linux LUCI bots can't run desktop Flutter applications, https://github.com/flutter/flutter/issues/90676
+    if (!Platform.isLinux || ciProvider != CiProviders.luci) {
+      await runCommand(
+        flutter,
+        <String>['config', '--enable-${Platform.operatingSystem}-desktop'],
+        workingDirectory: flutterRoot,
+      );
+      await runCommand(
+        dart,
+        <String>[path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart')],
+        workingDirectory: path.join(flutterRoot, 'examples', 'api'),
+      );
+    }
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
+  }
+
   Future<void> runFixTests() async {
     final List<String> args = <String>[
       'fix',
@@ -726,16 +744,15 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
+    await runExampleTests();
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
-    // TODO(fujino): Move this to its own test shard
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor'), forceSingleCore: true);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'conductor', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
