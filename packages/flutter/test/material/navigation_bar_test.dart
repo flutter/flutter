@@ -157,20 +157,18 @@ void main() {
     await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(find.text(label, findRichText: true), findsNWidgets(2));
-
-    final Finder tooltipFinder = find.text(label, findRichText: true).last;
+    expect(find.text(label), findsNWidgets(2));
 
     // The default size of a tooltip with the text A.
     const Size defaultTooltipSize = Size(14.0, 14.0);
-    expect(tester.getSize(tooltipFinder), defaultTooltipSize);
+    expect(tester.getSize(find.text(label).last), defaultTooltipSize);
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(tester.getSize(tooltipFinder), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
+    expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
   });
 
   testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {

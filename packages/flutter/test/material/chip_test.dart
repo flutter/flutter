@@ -264,7 +264,7 @@ PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
 // Finds any container of a tooltip.
 Finder findTooltipContainer(String tooltipText) {
   return find.ancestor(
-    of: find.text(tooltipText, findRichText: true),
+    of: find.text(tooltipText),
     matching: find.byType(Container),
   );
 }

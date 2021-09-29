@@ -70,11 +70,11 @@ void main() {
       ),
     );
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPressAt(_rightEdgeOfFab(tester));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   // Regression test for: https://github.com/flutter/flutter/pull/21084
@@ -90,11 +90,11 @@ void main() {
       ),
     );
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPressAt(_rightEdgeOfFab(tester));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
@@ -109,7 +109,7 @@ void main() {
       ),
     );
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -118,18 +118,18 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
 
     // Test long press for tooltip.
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
@@ -144,7 +144,7 @@ void main() {
       ),
     );
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -154,18 +154,18 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsNothing);
+    expect(find.text('Add'), findsNothing);
 
     // Test long press for tooltip.
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    expect(_findTooltipText('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
@@ -1168,8 +1168,4 @@ void main() {
 Offset _rightEdgeOfFab(WidgetTester tester) {
   final Finder fab = find.byType(FloatingActionButton);
   return tester.getRect(fab).centerRight - const Offset(1.0, 0.0);
-}
-
-Finder _findTooltipText(String tooltipText) {
-  return find.text(tooltipText, findRichText: true);
 }
