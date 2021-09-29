@@ -31,6 +31,10 @@ void _ensureTooltipVisible(GlobalKey key) {
   (key.currentState as dynamic).ensureTooltipVisible();
 }
 
+Finder _findTooltipText(String tooltipText) {
+  return find.text(tooltipText, findRichText: true);
+}
+
 void main() {
   test('TooltipThemeData copyWith, ==, hashCode basics', () {
     expect(const TooltipThemeData(), const TooltipThemeData().copyWith());
@@ -158,7 +162,7 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(100.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
@@ -216,7 +220,7 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(100.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
@@ -287,7 +291,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
@@ -356,7 +360,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
@@ -415,7 +419,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
@@ -472,7 +476,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent! as RenderBox;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
@@ -512,8 +516,8 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
-    final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tooltipContent = tester.renderObject(_findTooltipText(tooltipText));
 
     final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
     final Offset topLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topLeft(Offset.zero));
@@ -568,8 +572,8 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
-    final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tooltipContent = tester.renderObject(_findTooltipText(tooltipText));
 
     final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
     final Offset topLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topLeft(Offset.zero));
@@ -616,7 +620,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
@@ -645,7 +649,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final TextStyle textStyle = tester.widget<RichText>(_findTooltipText(tooltipText)).text.style!;
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
@@ -688,7 +692,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
@@ -730,7 +734,7 @@ void main() {
     _ensureTooltipVisible(key);
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
+    final RenderBox tip = tester.renderObject(_findTooltipText(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
@@ -773,11 +777,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
+      of: _findTooltipText(tooltipText),
       matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
+      of: _findTooltipText(tooltipText),
       matching: find.byType(Center),
     ));
 
@@ -818,11 +822,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
+      of: _findTooltipText(tooltipText),
       matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
+      of: _findTooltipText(tooltipText),
       matching: find.byType(Center),
     ));
 
@@ -867,16 +871,16 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.text(tooltipText), findsNothing); // Should not appear yet
+    expect(_findTooltipText(tooltipText), findsNothing); // Should not appear yet
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.text(tooltipText), findsOneWidget); // Should appear after customWaitDuration
+    expect(_findTooltipText(tooltipText), findsOneWidget); // Should appear after customWaitDuration
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
 
     // Wait for it to disappear.
     await tester.pump(customWaitDuration);
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
@@ -911,16 +915,16 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.text(tooltipText), findsNothing); // Should not appear yet
+    expect(_findTooltipText(tooltipText), findsNothing); // Should not appear yet
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.text(tooltipText), findsOneWidget); // Should appear after customWaitDuration
+    expect(_findTooltipText(tooltipText), findsOneWidget); // Should appear after customWaitDuration
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
 
     // Wait for it to disappear.
     await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
@@ -951,13 +955,13 @@ void main() {
     await tester.pump();
     await tester.pump(kLongPressTimeout);
     await gesture.up();
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 2000)); // Tooltip should remain
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle(); // Tooltip should fade out after
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
@@ -984,13 +988,13 @@ void main() {
     await tester.pump();
     await tester.pump(kLongPressTimeout);
     await gesture.up();
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 2000)); // Tooltip should remain
-    expect(find.text(tooltipText), findsOneWidget);
+    expect(_findTooltipText(tooltipText), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle(); // Tooltip should fade out after
-    expect(find.text(tooltipText), findsNothing);
+    expect(_findTooltipText(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
@@ -1015,7 +1019,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
     await gesture.up();
     await tester.pump();
-    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
+    expect(_findTooltipText(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
   testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
@@ -1038,7 +1042,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
     await gesture.up();
     await tester.pump();
-    expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
+    expect(_findTooltipText(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
   testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
