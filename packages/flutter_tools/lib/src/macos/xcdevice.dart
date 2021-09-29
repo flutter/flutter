@@ -112,16 +112,16 @@ class XCDevice {
         throwOnError: true,
       );
       if (result.exitCode == 0) {
-        List<dynamic> listResults = <dynamic>[];
         final String listOutput = result.stdout;
         try {
-          listResults = json.decode(listOutput) as List<dynamic>;
+          final List<dynamic> listResults = json.decode(listOutput) as List<dynamic>;
           _cachedListResults = listResults;
+          return listResults;
         } on FormatException {
           // xcdevice logs errors and crashes to stdout.
           _logger.printError('xcdevice returned non-JSON response: $listOutput');
+          return null;
         }
-        return listResults;
       }
       _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
     } on ProcessException catch (exception) {
