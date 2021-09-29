@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -836,26 +837,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
-                      child: GestureDetector(
-                        onTapDown: (TapDownDetails details) {
-                          routeFocusNode.requestFocus();
-                        },
-                        // TODO(justinmc): Only remove focus when clicking out
-                        // for web.
-                        child: Focus(
-                          focusNode: routeFocusNode,
-                          skipTraversal: true,
-                          onKeyEvent: (FocusNode focusNode, KeyEvent event) {
-                            if (focusNode.hasPrimaryFocus
-                                && event is KeyDownEvent
-                                && event.logicalKey == LogicalKeyboardKey.tab) {
-                              focusNode.unfocus();
-                              focusScopeNode.nextFocus();
-                              return KeyEventResult.handled;
-                            }
-                            return KeyEventResult.ignored;
-                          },
-                          child: RepaintBoundary(
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          // TODO(justinmc): Does this pass tests? If so, clean it up.
+                          Widget child = RepaintBoundary(
                             child: AnimatedBuilder(
                               animation: _listenable, // immutable
                               builder: (BuildContext context, Widget? child) {
@@ -894,8 +879,34 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                          final bool isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+                          if (kIsWeb && isDesktop) {
+                            child = GestureDetector(
+                              onTapDown: (TapDownDetails details) {
+                                routeFocusNode.requestFocus();
+                              },
+                              // TODO(justinmc): Only remove focus when clicking out
+                              // for web.
+                              child: Focus(
+                                focusNode: routeFocusNode,
+                                skipTraversal: true,
+                                onKeyEvent: (FocusNode focusNode, KeyEvent event) {
+                                  if (focusNode.hasPrimaryFocus
+                                      && event is KeyDownEvent
+                                      && event.logicalKey == LogicalKeyboardKey.tab) {
+                                    focusNode.unfocus();
+                                    focusScopeNode.nextFocus();
+                                    return KeyEventResult.handled;
+                                  }
+                                  return KeyEventResult.ignored;
+                                },
+                                child: child,
+                              ),
+                            );
+                          }
+                          return child;
+                        },
                       ),
                     ),
                   ),
