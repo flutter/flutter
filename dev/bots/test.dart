@@ -308,25 +308,6 @@ Future<void> _runIntegrationToolTests() async {
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
-  // Make sure devtools is ready first, because that might take a while and we don't
-  // want any of the tests to time out while they themselves try to activate devtools.
-  final Map<String, String> pubEnvironment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
-  await runCommand(
-    pub,
-    <String>[
-      'global',
-      'activate',
-      'devtools',
-      File(path.join(flutterRoot, 'bin', 'internal', 'devtools.version')).readAsStringSync(),
-    ],
-    environment: pubEnvironment,
-  );
-
   await _pubRunTest(
     toolsPath,
     forceSingleCore: true,
