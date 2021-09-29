@@ -538,7 +538,7 @@ def main():
       help='A single Java test class to run.')
   parser.add_argument('--android-variant', dest='android_variant', action='store',
       default='android_debug_unopt',
-      help='The engine build variant to run java tests for')
+      help='The engine build variant to run java or android tests for')
   parser.add_argument('--ios-variant', dest='ios_variant', action='store',
       default='ios_debug_sim_unopt',
       help='The engine build variant to run objective-c tests for')
@@ -561,7 +561,7 @@ def main():
     types = args.type.split(',')
 
   build_dir = os.path.join(out_dir, args.variant)
-  if args.type != 'java':
+  if args.type != 'java' and args.type != 'android':
     assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
 
   if args.sanitizer_suppressions:
