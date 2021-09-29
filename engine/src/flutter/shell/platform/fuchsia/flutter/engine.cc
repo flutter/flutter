@@ -137,20 +137,28 @@ void Engine::Initialize(
 
   // Connect to Scenic.
   auto scenic = runner_services->Connect<fuchsia::ui::scenic::Scenic>();
-  fuchsia::ui::scenic::SessionEndpoints endpoints;
+  fuchsia::ui::scenic::SessionEndpoints gfx_protocols;
   fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session;
-  endpoints.set_session(session.NewRequest());
+  gfx_protocols.set_session(session.NewRequest());
   fidl::InterfaceHandle<fuchsia::ui::scenic::SessionListener> session_listener;
   auto session_listener_request = session_listener.NewRequest();
-  endpoints.set_session_listener(session_listener.Bind());
+  gfx_protocols.set_session_listener(session_listener.Bind());
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
-  endpoints.set_view_focuser(focuser.NewRequest());
   fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused;
-  endpoints.set_view_ref_focused(view_ref_focused.NewRequest());
   fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source;
-  // TODO(fxbug.dev/85125): Enable TouchSource for GFX.
-  // endpoints.set_touch_source(touch_source.NewRequest());
-  scenic->CreateSessionT(std::move(endpoints), [] {});
+
+  fuchsia::ui::composition::ViewBoundProtocols flatland_view_protocols;
+  if (use_flatland) {
+    flatland_view_protocols.set_view_focuser(focuser.NewRequest());
+    flatland_view_protocols.set_view_ref_focused(view_ref_focused.NewRequest());
+    flatland_view_protocols.set_touch_source(touch_source.NewRequest());
+  } else {
+    gfx_protocols.set_view_focuser(focuser.NewRequest());
+    gfx_protocols.set_view_ref_focused(view_ref_focused.NewRequest());
+    // TODO(fxbug.dev/85125): Enable TouchSource for GFX.
+    // gfx_protocols.set_touch_source(touch_source.NewRequest());
+  }
+  scenic->CreateSessionT(std::move(gfx_protocols), [] {});
 
   // Connect to SemanticsManager service.
   fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
@@ -222,6 +230,7 @@ void Engine::Initialize(
        session_error_callback = std::move(session_error_callback), use_flatland,
        view_token = std::move(view_token_),
        view_creation_token = std::move(view_creation_token_),
+       flatland_view_protocols = std::move(flatland_view_protocols),
        request = parent_viewport_watcher.NewRequest(),
        view_ref_pair = std::move(view_ref_pair),
        max_frames_in_flight = product_config.get_max_frames_in_flight(),
@@ -231,12 +240,15 @@ void Engine::Initialize(
               thread_label_, std::move(session_error_callback), [](auto) {},
               max_frames_in_flight, vsync_offset);
           surface_producer_.emplace(/*scenic_session=*/nullptr);
+          fuchsia::ui::views::ViewIdentityOnCreation view_identity = {
+              .view_ref = std::move(view_ref_pair.view_ref),
+              .view_ref_control = std::move(view_ref_pair.control_ref)};
           flatland_view_embedder_ =
               std::make_shared<FlatlandExternalViewEmbedder>(
                   thread_label_, std::move(view_creation_token),
-                  std::move(view_ref_pair), std::move(request),
-                  *flatland_connection_.get(), surface_producer_.value(),
-                  intercept_all_input_);
+                  std::move(view_identity), std::move(flatland_view_protocols),
+                  std::move(request), *flatland_connection_.get(),
+                  surface_producer_.value(), intercept_all_input_);
         } else {
           session_connection_ = std::make_shared<GfxSessionConnection>(
               thread_label_, std::move(session_inspect_node),

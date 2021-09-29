@@ -16,15 +16,17 @@ constexpr uint32_t kFlatlandDefaultViewportSize = 32;
 FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
     std::string debug_label,
     fuchsia::ui::views::ViewCreationToken view_creation_token,
-    scenic::ViewRefPair view_ref_pair,
+    fuchsia::ui::views::ViewIdentityOnCreation view_identity,
+    fuchsia::ui::composition::ViewBoundProtocols view_protocols,
     fidl::InterfaceRequest<fuchsia::ui::composition::ParentViewportWatcher>
         parent_viewport_watcher_request,
     FlatlandConnection& flatland,
     SurfaceProducer& surface_producer,
     bool intercept_all_input)
     : flatland_(flatland), surface_producer_(surface_producer) {
-  flatland_.flatland()->CreateView(std::move(view_creation_token),
-                                   std::move(parent_viewport_watcher_request));
+  flatland_.flatland()->CreateView2(
+      std::move(view_creation_token), std::move(view_identity),
+      std::move(view_protocols), std::move(parent_viewport_watcher_request));
 
   root_transform_id_ = flatland_.NextTransformId();
   flatland_.flatland()->CreateTransform(root_transform_id_);
