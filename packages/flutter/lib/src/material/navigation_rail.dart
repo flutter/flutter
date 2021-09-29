@@ -573,6 +573,7 @@ class _RailDestination extends StatelessWidget {
             ),
           );
         } else {
+          final Animation<double> labelFadeAnimation = extendedTransitionAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
@@ -587,9 +588,9 @@ class _RailDestination extends StatelessWidget {
                       heightFactor: 1.0,
                       widthFactor: extendedTransitionAnimation.value,
                       alignment: AlignmentDirectional.centerStart,
-                      child: Opacity(
+                      child: FadeTransition(
                         alwaysIncludeSemantics: true,
-                        opacity: _extendedLabelFadeValue(),
+                        opacity: labelFadeAnimation,
                         child: styledLabel,
                       ),
                     ),
@@ -604,6 +605,8 @@ class _RailDestination extends StatelessWidget {
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
+        final Interval interval = selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
+        final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: interval));
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -621,9 +624,9 @@ class _RailDestination extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   heightFactor: appearingAnimationValue,
                   widthFactor: 1.0,
-                  child: Opacity(
+                  child: FadeTransition(
                     alwaysIncludeSemantics: true,
-                    opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
+                    opacity: labelFadeAnimation,
                     child: styledLabel,
                   ),
                 ),
@@ -678,28 +681,6 @@ class _RailDestination extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  double _normalLabelFadeInValue() {
-    if (destinationAnimation.value < 0.25) {
-      return 0;
-    } else if (destinationAnimation.value < 0.75) {
-      return (destinationAnimation.value - 0.25) * 2;
-    } else {
-      return 1;
-    }
-  }
-
-  double _normalLabelFadeOutValue() {
-    if (destinationAnimation.value > 0.75) {
-      return (destinationAnimation.value - 0.75) * 4.0;
-    } else {
-      return 0;
-    }
-  }
-
-  double _extendedLabelFadeValue() {
-    return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4.0 : 1.0;
   }
 }
 

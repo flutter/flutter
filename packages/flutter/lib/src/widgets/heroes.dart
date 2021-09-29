@@ -547,8 +547,8 @@ class _HeroFlight {
           left: offsets.left,
           child: IgnorePointer(
             child: RepaintBoundary(
-              child: Opacity(
-                opacity: _heroOpacity.value,
+              child: FadeTransition(
+                opacity: _heroOpacity,
                 child: child,
               ),
             ),
