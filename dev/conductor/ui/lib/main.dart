@@ -20,15 +20,15 @@ const LocalPlatform _platform = LocalPlatform();
 final String _stateFilePath = defaultStateFilePath(_platform);
 
 Future<void> main() async {
+  // The app currently only supports macOS and Linux.
+  if (kIsWeb || io.Platform.isWindows) {
+    throw Exception('The conductor only supports MacOS and Linux desktop');
+  }
   final File _stateFile = _fs.file(_stateFilePath);
   final pb.ConductorState? state =
       _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
 
   WidgetsFlutterBinding.ensureInitialized();
-  // The app currently only supports macOS and Linux.
-  if (kIsWeb || io.Platform.isWindows) {
-    throw Exception('The conductor only supports MacOS and Linux desktop');
-  }
   runApp(MyApp(state));
 }
 
@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
+// TODO(Yugue): Add theming, https://github.com/flutter/flutter/issues/90982.
       home: Scaffold(
         appBar: AppBar(
           title: const Text(_title),

@@ -6,10 +6,14 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
+/// Displays the progression and each step of the release from the conductor.
+///
+// TODO(Yugue): Add documentation to explain
+// each step of the release, https://github.com/flutter/flutter/issues/90981.
 class MainProgression extends StatefulWidget {
   const MainProgression({
     Key? key,
-    required this.releaseState,
+    this.releaseState,
     required this.stateFilePath,
   }) : super(key: key);
 
@@ -20,11 +24,6 @@ class MainProgression extends StatefulWidget {
   MainProgressionState createState() => MainProgressionState();
 }
 
-/// Shows the progression and each step of the release.
-///
-/// 1. ...
-/// 2. ...
-/// 3. ...
 class MainProgressionState extends State<MainProgression> {
   @override
   Widget build(BuildContext context) {
