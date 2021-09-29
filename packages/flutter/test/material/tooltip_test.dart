@@ -919,8 +919,7 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
+      gesture?.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -968,6 +967,70 @@ void main() {
     await gesture.removePointer();
     gesture = null;
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip should not show more than one tooltip when hovered', (WidgetTester tester) async {
+    const Duration waitDuration = Duration(milliseconds: 500);
+    final UniqueKey innerKey = UniqueKey();
+    final UniqueKey outerKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: 'Outer',
+            child: Container(
+              key: outerKey,
+              width: 100,
+              height: 100,
+              alignment: Alignment.centerRight,
+              child: Tooltip(
+                message: 'Inner',
+                child: SizedBox(
+                  key: innerKey,
+                  width: 25,
+                  height: 100,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async { gesture?.removePointer(); });
+
+    // Both the inner and outer containers have tooltips associated with them, but only
+    // the currently hovered one should appear, even though the pointer is inside both.
+    final Finder outer = find.byKey(outerKey);
+    final Finder inner = find.byKey(innerKey);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(outer));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(inner));
+    await tester.pump();
+
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+
+    expect(find.text('Outer'), findsNothing);
+    expect(find.text('Inner'), findsOneWidget);
+    await gesture.moveTo(tester.getCenter(outer));
+    await tester.pump();
+    // Wait for it to switch.
+    await tester.pump(waitDuration);
+    expect(find.text('Outer'), findsOneWidget);
+    expect(find.text('Inner'), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+
+    // Wait for all tooltips to disappear.
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+    expect(find.text('Outer'), findsNothing);
+    expect(find.text('Inner'), findsNothing);
   });
 
   testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
