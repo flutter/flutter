@@ -45,24 +45,28 @@ void main() {
 
 
   testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
-    late BuildContext savedContext;
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
       ),
     ));
 
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    showBottomSheet<void>(
-      context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    );
+    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0,
+            child: const Text('BottomSheet'),
+          );
+        },
+      );
+    });
 
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
@@ -74,25 +78,28 @@ void main() {
   });
 
   testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
-    late BuildContext savedContext;
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
       ),
     ));
 
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    showBottomSheet<void>(
-      context: savedContext,
-      enableDrag: false,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    );
+    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0,
+            child: const Text('BottomSheet'),
+          );
+        },
+      );
+    });
 
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
@@ -104,25 +111,27 @@ void main() {
   });
 
   testWidgets('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
-    late BuildContext savedContext;
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
       ),
     ));
 
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    showBottomSheet<void>(
-      context: savedContext,
-      enableDrag: true,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    );
+    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0,
+            child: const Text('BottomSheet'),
+          );
+        },
+      );
+    });
 
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
