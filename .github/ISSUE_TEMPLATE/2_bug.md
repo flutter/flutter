@@ -23,15 +23,35 @@ assignees: ''
 
 ## Steps to Reproduce
 
-<!-- You must include full steps to reproduce so that we can reproduce the problem. -->
+<!-- Please include full steps to reproduce so that we can reproduce the problem. -->
 
-1. Run `flutter create bug`.
-2. Update the files as follows: ... <!-- include every file that is different from the template app! -->
-3. ... <!-- describe how to reproduce the problem -->
+1. ...
+2. ...
+3. ...
 
 **Expected results:** <!-- what did you want to see? -->
 
 **Actual results:** <!-- what did you see? -->
+
+<details>
+<summary>Code sample</summary>
+
+<!--
+      Please create a minimal reproducible sample that shows the problem
+      and attach it below between the lines with the backticks.
+
+      Without this we will unlikely be able to progress on the issue, and because of that
+      we regretfully will have to close it.
+
+      If your problem goes out of what can be placed in a single file, for example
+      you have a problem with native channels, you can upload the full code of
+      the reproduction into a separate repository and link it.
+-->
+
+```dart
+```
+
+</details>
 
 <details>
   <summary>Logs</summary>
@@ -60,3 +80,12 @@ assignees: ''
 ```
 
 </details>
+
+
+<!--
+      Consider also attaching screenshots and/or videos to better
+      illustrate the issue.
+
+      You can upload them directly on GitHub.
+      Beware that video file size is limited to 10MB.
+-->
