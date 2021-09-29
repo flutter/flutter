@@ -759,6 +759,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   ShapeBorder? shape,
   Clip? clipBehavior,
   BoxConstraints? constraints,
+  bool? enableDrag,
   AnimationController? transitionAnimationController,
 }) {
   assert(context != null);
@@ -772,6 +773,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     constraints: constraints,
+    enableDrag: enableDrag,
     transitionAnimationController: transitionAnimationController,
   );
 }
