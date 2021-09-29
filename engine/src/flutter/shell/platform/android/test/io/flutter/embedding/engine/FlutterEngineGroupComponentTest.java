@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import android.content.res.AssetManager;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import org.junit.After;
 import org.junit.Before;
@@ -119,7 +121,7 @@ public class FlutterEngineGroupComponentTest {
 
     doReturn(mock(FlutterEngine.class))
         .when(firstEngine)
-        .spawn(any(Context.class), any(DartEntrypoint.class));
+        .spawn(any(Context.class), any(DartEntrypoint.class), nullable(String.class));
 
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(
@@ -131,7 +133,7 @@ public class FlutterEngineGroupComponentTest {
 
     // Now the second spawned engine is the only one left and it will be called to spawn the next
     // engine in the chain.
-    when(secondEngine.spawn(any(Context.class), any(DartEntrypoint.class)))
+    when(secondEngine.spawn(any(Context.class), any(DartEntrypoint.class), nullable(String.class)))
         .thenReturn(mock(FlutterEngine.class));
 
     FlutterEngine thirdEngine =
@@ -155,5 +157,33 @@ public class FlutterEngineGroupComponentTest {
             eq("other entrypoint"),
             isNull(String.class),
             any(AssetManager.class));
+  }
+
+  @Test
+  public void canCreateAndRunWithCustomInitialRoute() {
+    when(firstEngineUnderTest.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
+
+    FlutterEngine firstEngine =
+        engineGroupUnderTest.createAndRunEngine(
+            RuntimeEnvironment.application, mock(DartEntrypoint.class), "/foo");
+    assertEquals(1, engineGroupUnderTest.activeEngines.size());
+    verify(firstEngine.getNavigationChannel(), times(1)).setInitialRoute("/foo");
+
+    when(mockflutterJNI.isAttached()).thenReturn(true);
+    jniAttached = false;
+    FlutterJNI secondMockflutterJNI = mock(FlutterJNI.class);
+    when(secondMockflutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(secondMockflutterJNI).attachToNative();
+    doReturn(secondMockflutterJNI)
+        .when(mockflutterJNI)
+        .spawn(nullable(String.class), nullable(String.class), nullable(String.class));
+
+    FlutterEngine secondEngine =
+        engineGroupUnderTest.createAndRunEngine(
+            RuntimeEnvironment.application, mock(DartEntrypoint.class), "/bar");
+
+    assertEquals(2, engineGroupUnderTest.activeEngines.size());
+    verify(mockflutterJNI, times(1))
+        .spawn(nullable(String.class), nullable(String.class), eq("/bar"));
   }
 }

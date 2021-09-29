@@ -174,7 +174,8 @@ const flutter::Settings& AndroidShellHolder::GetSettings() const {
 std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const std::string& entrypoint,
-    const std::string& libraryUrl) const {
+    const std::string& libraryUrl,
+    const std::string& initial_route) const {
   FML_DCHECK(shell_ && shell_->IsSetup())
       << "A new Shell can only be spawned "
          "if the current Shell is properly constructed";
@@ -226,8 +227,9 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     return nullptr;
   }
 
-  std::unique_ptr<flutter::Shell> shell = shell_->Spawn(
-      std::move(config.value()), on_create_platform_view, on_create_rasterizer);
+  std::unique_ptr<flutter::Shell> shell =
+      shell_->Spawn(std::move(config.value()), initial_route,
+                    on_create_platform_view, on_create_rasterizer);
 
   return std::unique_ptr<AndroidShellHolder>(
       new AndroidShellHolder(GetSettings(), jni_facade, thread_host_,

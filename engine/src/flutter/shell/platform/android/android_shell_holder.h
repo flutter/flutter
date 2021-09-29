@@ -78,7 +78,8 @@ class AndroidShellHolder {
   std::unique_ptr<AndroidShellHolder> Spawn(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       const std::string& entrypoint,
-      const std::string& libraryUrl) const;
+      const std::string& libraryUrl,
+      const std::string& initial_route) const;
 
   void Launch(std::shared_ptr<AssetManager> asset_manager,
               const std::string& entrypoint,

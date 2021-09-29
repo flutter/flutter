@@ -480,6 +480,7 @@ Shell::~Shell() {
 
 std::unique_ptr<Shell> Shell::Spawn(
     RunConfiguration run_configuration,
+    const std::string& initial_route,
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
@@ -488,7 +489,7 @@ std::unique_ptr<Shell> Shell::Spawn(
         PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
         GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
         on_create_platform_view, on_create_rasterizer,
-        [engine = this->engine_.get()](
+        [engine = this->engine_.get(), initial_route](
             Engine::Delegate& delegate,
             const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
             fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -501,7 +502,8 @@ std::unique_ptr<Shell> Shell::Spawn(
           return engine->Spawn(/*delegate=*/delegate,
                                /*dispatcher_maker=*/dispatcher_maker,
                                /*settings=*/settings,
-                               /*animator=*/std::move(animator));
+                               /*animator=*/std::move(animator),
+                               /*initial_route=*/initial_route);
         },
         is_gpu_disabled));
     return result;

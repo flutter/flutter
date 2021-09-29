@@ -67,7 +67,8 @@ extern NSString* _Nonnull const FlutterEngineWillDealloc;
  * This should only be called on a FlutterEngine that is running.
  */
 - (nonnull FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
-                                   libraryURI:(nullable NSString*)libraryURI;
+                                   libraryURI:(nullable NSString*)libraryURI
+                                 initialRoute:(nullable NSString*)initialRoute;
 
 /**
  * Dispatches the given key event data to the framework through the engine.

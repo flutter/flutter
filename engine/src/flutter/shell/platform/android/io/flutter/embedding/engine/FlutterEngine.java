@@ -384,7 +384,9 @@ public class FlutterEngine {
    */
   @NonNull
   /*package*/ FlutterEngine spawn(
-      @NonNull Context context, @NonNull DartEntrypoint dartEntrypoint) {
+      @NonNull Context context,
+      @NonNull DartEntrypoint dartEntrypoint,
+      @Nullable String initialRoute) {
     if (!isAttachedToJni()) {
       throw new IllegalStateException(
           "Spawn can only be called on a fully constructed FlutterEngine");
@@ -392,7 +394,9 @@ public class FlutterEngine {
 
     FlutterJNI newFlutterJNI =
         flutterJNI.spawn(
-            dartEntrypoint.dartEntrypointFunctionName, dartEntrypoint.dartEntrypointLibrary);
+            dartEntrypoint.dartEntrypointFunctionName,
+            dartEntrypoint.dartEntrypointLibrary,
+            initialRoute);
     return new FlutterEngine(
         context, // Context.
         null, // FlutterLoader. A null value passed here causes the constructor to get it from the
