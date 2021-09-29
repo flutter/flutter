@@ -255,11 +255,10 @@ void Engine::Initialize(
               std::move(session), std::move(session_error_callback),
               [](auto) {}, max_frames_in_flight, vsync_offset);
           surface_producer_.emplace(session_connection_->get());
-          external_view_embedder_ =
-              std::make_shared<FuchsiaExternalViewEmbedder>(
-                  thread_label_, std::move(view_token),
-                  std::move(view_ref_pair), *session_connection_.get(),
-                  surface_producer_.value(), intercept_all_input_);
+          external_view_embedder_ = std::make_shared<GfxExternalViewEmbedder>(
+              thread_label_, std::move(view_token), std::move(view_ref_pair),
+              *session_connection_.get(), surface_producer_.value(),
+              intercept_all_input_);
         }
         view_embedder_latch.Signal();
       }));

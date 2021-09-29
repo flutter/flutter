@@ -11,7 +11,7 @@
 #include <fuchsia/ui/pointer/cpp/fidl.h>
 
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
+#include "flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.h"
 
 namespace flutter_runner {
 
@@ -21,7 +21,7 @@ using OnDestroyGfxView = fit::function<void(int64_t, GfxViewIdCallback)>;
 
 // The GfxPlatformView implements SessionListener and gets Session events but it
 // does *not* actually own the Session itself; that is owned by the
-// FuchsiaExternalViewEmbedder on the raster thread.
+// GfxExternalViewEmbedder on the raster thread.
 class GfxPlatformView final : public flutter_runner::PlatformView,
                               private fuchsia::ui::scenic::SessionListener {
  public:
