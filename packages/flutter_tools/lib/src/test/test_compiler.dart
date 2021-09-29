@@ -145,6 +145,7 @@ class TestCompiler {
         firstCompile = true;
       }
 
+      final List<Uri> invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
         final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
@@ -156,11 +157,12 @@ class TestCompiler {
           globals.fs.file(request.mainUri),
           throwOnPluginPubspecError: false,
         );
+        invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
       }
 
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.mainUri,
-        <Uri>[request.mainUri, flutterProject.dartPluginRegistrant.absolute.uri],
+        <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory?.absolute?.path,
