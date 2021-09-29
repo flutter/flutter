@@ -7,8 +7,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
-import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
