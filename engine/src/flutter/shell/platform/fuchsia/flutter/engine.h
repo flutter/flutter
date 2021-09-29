@@ -28,7 +28,7 @@
 #include "flatland_connection.h"
 #include "flatland_external_view_embedder.h"
 #include "flutter_runner_product_configuration.h"
-#include "fuchsia_external_view_embedder.h"
+#include "gfx_external_view_embedder.h"
 #include "gfx_session_connection.h"
 #include "isolate_configurator.h"
 #include "vulkan_surface_producer.h"
@@ -152,7 +152,7 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   std::shared_ptr<FlatlandConnection>
       flatland_connection_;  // Must come before surface_producer_
   std::optional<VulkanSurfaceProducer> surface_producer_;
-  std::shared_ptr<FuchsiaExternalViewEmbedder> external_view_embedder_;
+  std::shared_ptr<GfxExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<FlatlandExternalViewEmbedder> flatland_view_embedder_;
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;

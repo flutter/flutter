@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fuchsia_external_view_embedder.h"
+#include "gfx_external_view_embedder.h"
 
 #include <lib/ui/scenic/cpp/commands.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
@@ -99,7 +99,7 @@ std::vector<fuchsia::ui::gfx::Plane3> ClipPlanesFromRect(SkRect rect) {
 
 }  // namespace
 
-FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
+GfxExternalViewEmbedder::GfxExternalViewEmbedder(
     std::string debug_label,
     fuchsia::ui::views::ViewToken view_token,
     scenic::ViewRefPair view_ref_pair,
@@ -137,9 +137,9 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
   session_.Present();
 }
 
-FuchsiaExternalViewEmbedder::~FuchsiaExternalViewEmbedder() = default;
+GfxExternalViewEmbedder::~GfxExternalViewEmbedder() = default;
 
-SkCanvas* FuchsiaExternalViewEmbedder::GetRootCanvas() {
+SkCanvas* GfxExternalViewEmbedder::GetRootCanvas() {
   auto found = frame_layers_.find(kRootLayerId);
   if (found == frame_layers_.end()) {
     FML_DLOG(WARNING)
@@ -152,7 +152,7 @@ SkCanvas* FuchsiaExternalViewEmbedder::GetRootCanvas() {
   return found->second.canvas_spy->GetSpyingCanvas();
 }
 
-std::vector<SkCanvas*> FuchsiaExternalViewEmbedder::GetCurrentCanvases() {
+std::vector<SkCanvas*> GfxExternalViewEmbedder::GetCurrentCanvases() {
   std::vector<SkCanvas*> canvases;
   for (const auto& layer : frame_layers_) {
     // This method (for legacy reasons) expects non-root current canvases.
@@ -163,7 +163,7 @@ std::vector<SkCanvas*> FuchsiaExternalViewEmbedder::GetCurrentCanvases() {
   return canvases;
 }
 
-void FuchsiaExternalViewEmbedder::PrerollCompositeEmbeddedView(
+void GfxExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<flutter::EmbeddedViewParams> params) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
@@ -174,7 +174,7 @@ void FuchsiaExternalViewEmbedder::PrerollCompositeEmbeddedView(
   frame_composition_order_.push_back(handle);
 }
 
-SkCanvas* FuchsiaExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
+SkCanvas* GfxExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   auto found = frame_layers_.find(handle);
   FML_CHECK(found != frame_layers_.end());
@@ -182,17 +182,17 @@ SkCanvas* FuchsiaExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
   return found->second.canvas_spy->GetSpyingCanvas();
 }
 
-flutter::PostPrerollResult FuchsiaExternalViewEmbedder::PostPrerollAction(
+flutter::PostPrerollResult GfxExternalViewEmbedder::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   return flutter::PostPrerollResult::kSuccess;
 }
 
-void FuchsiaExternalViewEmbedder::BeginFrame(
+void GfxExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "FuchsiaExternalViewEmbedder::BeginFrame");
+  TRACE_EVENT0("flutter", "GfxExternalViewEmbedder::BeginFrame");
 
   // Reset for new frame.
   Reset();
@@ -230,16 +230,16 @@ void FuchsiaExternalViewEmbedder::BeginFrame(
   }
 }
 
-void FuchsiaExternalViewEmbedder::EndFrame(
+void GfxExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "FuchsiaExternalViewEmbedder::EndFrame");
+  TRACE_EVENT0("flutter", "GfxExternalViewEmbedder::EndFrame");
 }
 
-void FuchsiaExternalViewEmbedder::SubmitFrame(
+void GfxExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
     std::unique_ptr<flutter::SurfaceFrame> frame) {
-  TRACE_EVENT0("flutter", "FuchsiaExternalViewEmbedder::SubmitFrame");
+  TRACE_EVENT0("flutter", "GfxExternalViewEmbedder::SubmitFrame");
   std::vector<std::unique_ptr<SurfaceProducerSurface>> frame_surfaces;
   std::unordered_map<EmbedderLayerId, size_t> frame_surface_indices;
 
@@ -570,15 +570,15 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
   frame->Submit();
 }
 
-void FuchsiaExternalViewEmbedder::EnableWireframe(bool enable) {
+void GfxExternalViewEmbedder::EnableWireframe(bool enable) {
   session_.get()->Enqueue(
       scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
   session_.Present();
 }
 
-void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
-                                             ViewCallback on_view_created,
-                                             GfxViewIdCallback on_view_bound) {
+void GfxExternalViewEmbedder::CreateView(int64_t view_id,
+                                         ViewCallback on_view_created,
+                                         GfxViewIdCallback on_view_bound) {
   FML_CHECK(scenic_views_.find(view_id) == scenic_views_.end());
 
   ScenicView new_view = {
@@ -602,9 +602,8 @@ void FuchsiaExternalViewEmbedder::CreateView(int64_t view_id,
   scenic_views_.emplace(std::make_pair(view_id, std::move(new_view)));
 }
 
-void FuchsiaExternalViewEmbedder::DestroyView(
-    int64_t view_id,
-    GfxViewIdCallback on_view_unbound) {
+void GfxExternalViewEmbedder::DestroyView(int64_t view_id,
+                                          GfxViewIdCallback on_view_unbound) {
   auto scenic_view = scenic_views_.find(view_id);
   FML_CHECK(scenic_view != scenic_views_.end());
   scenic::ResourceId resource_id = scenic_view->second.view_holder.id();
@@ -613,11 +612,10 @@ void FuchsiaExternalViewEmbedder::DestroyView(
   on_view_unbound(resource_id);
 }
 
-void FuchsiaExternalViewEmbedder::SetViewProperties(
-    int64_t view_id,
-    const SkRect& occlusion_hint,
-    bool hit_testable,
-    bool focusable) {
+void GfxExternalViewEmbedder::SetViewProperties(int64_t view_id,
+                                                const SkRect& occlusion_hint,
+                                                bool hit_testable,
+                                                bool focusable) {
   auto found = scenic_views_.find(view_id);
   FML_CHECK(found != scenic_views_.end());
   auto& view_holder = found->second;
@@ -627,7 +625,7 @@ void FuchsiaExternalViewEmbedder::SetViewProperties(
   view_holder.pending_focusable = focusable;
 }
 
-void FuchsiaExternalViewEmbedder::Reset() {
+void GfxExternalViewEmbedder::Reset() {
   frame_layers_.clear();
   frame_composition_order_.clear();
   frame_size_ = SkISize::Make(0, 0);

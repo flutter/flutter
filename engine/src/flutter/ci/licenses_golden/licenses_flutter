@@ -1429,11 +1429,11 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_con
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate_unittests.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.cc

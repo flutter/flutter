@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/flutter/fuchsia_external_view_embedder.h"
+#include "flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.h"
 
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/ui/gfx/cpp/fidl.h>
@@ -249,18 +249,18 @@ void ExpectImageCompositorLayer(const FakeCompositorLayer& layer,
       (layer.layer_index + 1) / 2;  // Integer division
   const float views_under_layer_depth =
       flutter_layer_index *
-      FuchsiaExternalViewEmbedder::kScenicZElevationForPlatformView;
+      GfxExternalViewEmbedder::kScenicZElevationForPlatformView;
   const float layer_depth =
       flutter_layer_index *
-          FuchsiaExternalViewEmbedder::kScenicZElevationBetweenLayers +
+          GfxExternalViewEmbedder::kScenicZElevationBetweenLayers +
       views_under_layer_depth;
   const bool layer_hit_testable = (flutter_layer_index == 0)
                                       ? FakeNode::kIsHitTestable
                                       : FakeNode::kIsNotHitTestable;
   const float layer_opacity =
       (flutter_layer_index == 0)
-          ? FuchsiaExternalViewEmbedder::kBackgroundLayerOpacity / 255.f
-          : FuchsiaExternalViewEmbedder::kOverlayLayerOpacity / 255.f;
+          ? GfxExternalViewEmbedder::kBackgroundLayerOpacity / 255.f
+          : GfxExternalViewEmbedder::kOverlayLayerOpacity / 255.f;
   EXPECT_EQ(layer.layer_type, FakeCompositorLayer::LayerType::Image);
   EXPECT_EQ(layer.layer_index % 2, 0u);
   EXPECT_THAT(
@@ -303,11 +303,11 @@ void ExpectViewCompositorLayer(const FakeCompositorLayer& layer,
   const float views_under_layer_depth =
       flutter_layer_index > 0
           ? (flutter_layer_index - 1) *
-                FuchsiaExternalViewEmbedder::kScenicZElevationForPlatformView
+                GfxExternalViewEmbedder::kScenicZElevationForPlatformView
           : 0.f;
   const float layer_depth =
       flutter_layer_index *
-          FuchsiaExternalViewEmbedder::kScenicZElevationBetweenLayers +
+          GfxExternalViewEmbedder::kScenicZElevationBetweenLayers +
       views_under_layer_depth;
   EXPECT_EQ(layer.layer_type, FakeCompositorLayer::LayerType::View);
   EXPECT_EQ(layer.layer_index % 2, 1u);
@@ -391,7 +391,7 @@ std::vector<FakeCompositorLayer> ExtractLayersFromSceneGraph(
   return layers;
 }
 
-void DrawSimpleFrame(FuchsiaExternalViewEmbedder& external_view_embedder,
+void DrawSimpleFrame(GfxExternalViewEmbedder& external_view_embedder,
                      SkISize frame_size,
                      float frame_dpr,
                      std::function<void(SkCanvas*)> draw_callback) {
@@ -409,7 +409,7 @@ void DrawSimpleFrame(FuchsiaExternalViewEmbedder& external_view_embedder,
                       SkCanvas* canvas) { return true; }));
 }
 
-void DrawFrameWithView(FuchsiaExternalViewEmbedder& external_view_embedder,
+void DrawFrameWithView(GfxExternalViewEmbedder& external_view_embedder,
                        SkISize frame_size,
                        float frame_dpr,
                        int view_id,
@@ -451,16 +451,16 @@ FramePresentedInfo MakeFramePresentedInfoForOnePresent(
 
 };  // namespace
 
-class FuchsiaExternalViewEmbedderTest
+class GfxExternalViewEmbedderTest
     : public ::testing::Test,
       public fuchsia::ui::scenic::SessionListener {
  protected:
-  FuchsiaExternalViewEmbedderTest()
+  GfxExternalViewEmbedderTest()
       : session_listener_(this),
         session_subloop_(loop_.StartNewLoop()),
         session_connection_(CreateSessionConnection()),
         fake_surface_producer_(*session_connection_.get()) {}
-  ~FuchsiaExternalViewEmbedderTest() override = default;
+  ~GfxExternalViewEmbedderTest() override = default;
 
   async::TestLoop& loop() { return loop_; }
 
@@ -486,7 +486,7 @@ class FuchsiaExternalViewEmbedderTest
     FML_CHECK(!session_listener_.is_bound());
 
     inspect::Node inspect_node =
-        inspector_.GetRoot().CreateChild("FuchsiaExternalViewEmbedderTest");
+        inspector_.GetRoot().CreateChild("GfxExternalViewEmbedderTest");
 
     auto [session, session_listener] =
         fake_session_.Bind(session_subloop_->dispatcher());
@@ -510,14 +510,14 @@ class FuchsiaExternalViewEmbedderTest
   FakeSurfaceProducer fake_surface_producer_;
 };
 
-TEST_F(FuchsiaExternalViewEmbedderTest, RootScene) {
+TEST_F(GfxExternalViewEmbedderTest, RootScene) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
   auto view_ref_pair = scenic::ViewRefPair::New();
   fuchsia::ui::views::ViewRef view_ref;
   view_ref_pair.view_ref.Clone(&view_ref);
 
-  FuchsiaExternalViewEmbedder external_view_embedder(
+  GfxExternalViewEmbedder external_view_embedder(
       debug_name, std::move(view_token), std::move(view_ref_pair),
       session_connection(), fake_surface_producer());
   EXPECT_EQ(fake_session().debug_name(), "");
@@ -540,16 +540,16 @@ TEST_F(FuchsiaExternalViewEmbedderTest, RootScene) {
                        view_holder_token, view_ref);
 }
 
-TEST_F(FuchsiaExternalViewEmbedderTest, SimpleScene) {
+TEST_F(GfxExternalViewEmbedderTest, SimpleScene) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
   auto view_ref_pair = scenic::ViewRefPair::New();
   fuchsia::ui::views::ViewRef view_ref;
   view_ref_pair.view_ref.Clone(&view_ref);
 
-  // Create the `FuchsiaExternalViewEmbedder` and pump the message loop until
+  // Create the `GfxExternalViewEmbedder` and pump the message loop until
   // the initial scene graph is setup.
-  FuchsiaExternalViewEmbedder external_view_embedder(
+  GfxExternalViewEmbedder external_view_embedder(
       debug_name, std::move(view_token), std::move(view_ref_pair),
       session_connection(), fake_surface_producer());
   loop().RunUntilIdle();
@@ -584,16 +584,16 @@ TEST_F(FuchsiaExternalViewEmbedderTest, SimpleScene) {
   ExpectImageCompositorLayer(compositor_layers[0], frame_size);
 }
 
-TEST_F(FuchsiaExternalViewEmbedderTest, SceneWithOneView) {
+TEST_F(GfxExternalViewEmbedderTest, SceneWithOneView) {
   const std::string debug_name = GetCurrentTestName();
   auto [view_token, view_holder_token] = scenic::ViewTokenPair::New();
   auto view_ref_pair = scenic::ViewRefPair::New();
   fuchsia::ui::views::ViewRef view_ref;
   view_ref_pair.view_ref.Clone(&view_ref);
 
-  // Create the `FuchsiaExternalViewEmbedder` and pump the message loop until
+  // Create the `GfxExternalViewEmbedder` and pump the message loop until
   // the initial scene graph is setup.
-  FuchsiaExternalViewEmbedder external_view_embedder(
+  GfxExternalViewEmbedder external_view_embedder(
       debug_name, std::move(view_token), std::move(view_ref_pair),
       session_connection(), fake_surface_producer());
   loop().RunUntilIdle();
