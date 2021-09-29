@@ -281,7 +281,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// {@template flutter.widgets.TextEditingActionTarget.cause}
   /// The given [SelectionChangedCause] indicates the cause of this change and
@@ -293,6 +293,9 @@ abstract class TextEditingActionTarget {
   ///   * [deleteForward], which is same but in the opposite direction.
   void delete(SelectionChangedCause cause) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -315,7 +318,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as a single
   /// word.
@@ -334,6 +337,9 @@ abstract class TextEditingActionTarget {
   void deleteByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -359,7 +365,7 @@ abstract class TextEditingActionTarget {
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
@@ -368,6 +374,9 @@ abstract class TextEditingActionTarget {
   ///   * [deleteForwardByLine], which is same but in the opposite direction.
   void deleteByLine(SelectionChangedCause cause) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -398,7 +407,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
@@ -407,6 +416,9 @@ abstract class TextEditingActionTarget {
   ///   * [delete], which is the same but in the opposite direction.
   void deleteForward(SelectionChangedCause cause) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -421,7 +433,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
@@ -436,6 +448,9 @@ abstract class TextEditingActionTarget {
   void deleteForwardByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -457,7 +472,7 @@ abstract class TextEditingActionTarget {
   ///
   /// If the selection is not collapsed, deletes the selection.
   ///
-  /// If [readOnly] is true, does nothing.
+  /// If [readOnly] is true or the selection is invalid, does nothing.
   ///
   /// If [obscureText] is true, it treats the whole text content as
   /// a single word.
@@ -469,6 +484,9 @@ abstract class TextEditingActionTarget {
   ///   * [deleteByLine], which is same but in the opposite direction.
   void deleteForwardByLine(SelectionChangedCause cause) {
     if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
       return;
     }
 
@@ -498,10 +516,18 @@ abstract class TextEditingActionTarget {
   /// The given SelectionChangedCause indicates the cause of this change and
   /// will be passed to setSelection.
   ///
+  /// If [readOnly] is true or the selection is invalid, does nothing.
+  ///
   /// See also:
   ///   * [deleteToStart]
   void deleteToEnd(SelectionChangedCause cause) {
     assert(textEditingValue.selection.isCollapsed);
+    if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
 
     setTextEditingValue(_deleteTo(TextPosition(offset: textEditingValue.text.length)), cause);
   }
@@ -511,10 +537,18 @@ abstract class TextEditingActionTarget {
   /// The given SelectionChangedCause indicates the cause of this change and
   /// will be passed to setSelection.
   ///
+  /// If [readOnly] is true or the selection is invalid, does nothing.
+  ///
   /// See also:
   ///   * [deleteToEnd]
   void deleteToStart(SelectionChangedCause cause) {
     assert(textEditingValue.selection.isCollapsed);
+    if (readOnly) {
+      return;
+    }
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
 
     setTextEditingValue(_deleteTo(const TextPosition(offset: 0)), cause);
   }
@@ -528,12 +562,17 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the end.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [expandSelectionToStart], which is same but in the opposite direction.
   void expandSelectionToEnd(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionToEnd(cause);
     }
@@ -554,6 +593,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// to the start.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -561,6 +602,9 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionToEnd], which is the same but in the opposite
   ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionToStart(cause);
     }
@@ -582,6 +626,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -589,6 +635,9 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -625,6 +674,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right by line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -632,6 +683,9 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
@@ -666,12 +720,17 @@ abstract class TextEditingActionTarget {
   /// If selectionEnabled is false, keeps the selection collapsed and just
   /// moves it down.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [extendSelectionUp], which is same but in the opposite direction.
   void extendSelectionDown(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionDown(cause);
     }
@@ -706,12 +765,17 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
@@ -741,6 +805,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// left by line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.stopAtReversal}
@@ -752,6 +818,9 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionLeftByLine(SelectionChangedCause cause, [bool stopAtReversal = false]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -788,12 +857,17 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// right.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRight(cause);
     }
@@ -822,6 +896,8 @@ abstract class TextEditingActionTarget {
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.stopAtReversal}
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -831,6 +907,9 @@ abstract class TextEditingActionTarget {
   ///   * [expandSelectionRightByLine], which strictly grows the selection
   ///     regardless of the order.
   void extendSelectionRightByLine(SelectionChangedCause cause, [bool stopAtReversal = false]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
@@ -859,6 +938,8 @@ abstract class TextEditingActionTarget {
 
   /// Extend the current selection to the previous start of a word.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
@@ -876,6 +957,9 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void extendSelectionLeftByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true, bool stopAtReversal = false]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return extendSelectionToStart(cause);
@@ -907,6 +991,8 @@ abstract class TextEditingActionTarget {
 
   /// Extend the current selection to the next end of a word.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
@@ -919,6 +1005,9 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true, bool stopAtReversal = false]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     debugAssertLayoutUpToDate();
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -999,6 +1088,8 @@ abstract class TextEditingActionTarget {
   /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
   /// up.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -1006,6 +1097,9 @@ abstract class TextEditingActionTarget {
   ///   * [extendSelectionDown], which is the same but in the opposite
   ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     if (!selectionEnabled) {
       return moveSelectionUp(cause);
     }
@@ -1045,6 +1139,8 @@ abstract class TextEditingActionTarget {
 
   /// Move the current selection to the leftmost point of the current line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -1052,6 +1148,9 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionRightByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // If already at the left edge of the line, do nothing.
     final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       textEditingValue.selection.extent,
@@ -1081,12 +1180,17 @@ abstract class TextEditingActionTarget {
   ///
   /// Move the current selection to the next line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
     if (textEditingValue.selection.isCollapsed &&
@@ -1120,12 +1224,17 @@ abstract class TextEditingActionTarget {
   ///
   /// If it can't be moved left, do nothing.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // If the selection is already all the way left, there is nothing to do.
     if (textEditingValue.selection.isCollapsed && textEditingValue.selection.extentOffset <= 0) {
       return;
@@ -1158,6 +1267,8 @@ abstract class TextEditingActionTarget {
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
@@ -1168,6 +1279,9 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionLeftByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToStart(cause);
@@ -1191,7 +1305,7 @@ abstract class TextEditingActionTarget {
 
   /// Move the current selection to the right by one character.
   ///
-  /// If it can't be moved right, do nothing.
+  /// If the selection is invalid or it can't be moved right, do nothing.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
@@ -1199,6 +1313,9 @@ abstract class TextEditingActionTarget {
   ///
   ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // If the selection is already all the way right, there is nothing to do.
     if (textEditingValue.selection.isCollapsed &&
         textEditingValue.selection.extentOffset >= textEditingValue.text.length) {
@@ -1226,6 +1343,8 @@ abstract class TextEditingActionTarget {
   ///
   /// Move the current selection to the rightmost point of the current line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
@@ -1233,6 +1352,9 @@ abstract class TextEditingActionTarget {
   ///   * [moveSelectionLeftByLine], which is the same but in the opposite
   ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // If already at the right edge of the line, do nothing.
     final TextSelection currentLine = textLayoutMetrics.getLineAtOffset(
       textEditingValue.selection.extent,
@@ -1265,6 +1387,8 @@ abstract class TextEditingActionTarget {
   /// A TextSelection that isn't collapsed will be collapsed and moved from the
   /// extentOffset.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.whiteSpace}
@@ -1275,6 +1399,9 @@ abstract class TextEditingActionTarget {
   ///     direction.
   void moveSelectionRightByWord(SelectionChangedCause cause,
       [bool includeWhitespace = true]) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToEnd(cause);
@@ -1330,12 +1457,17 @@ abstract class TextEditingActionTarget {
 
   /// Move the current selection up by one line.
   ///
+  /// If the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   ///
   /// See also:
   ///
   ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
+    if (!textEditingValue.selection.isValid) {
+      return;
+    }
     final int nextIndex =
         textLayoutMetrics.getTextPositionAbove(textEditingValue.selection.extent).offset;
 
@@ -1365,12 +1497,14 @@ abstract class TextEditingActionTarget {
   /// Copy current selection to [Clipboard].
   /// {@endtemplate}
   ///
+  /// If the selection is collapsed or invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
-    if (selection.isCollapsed) {
+    if (selection.isCollapsed || !selection.isValid) {
       return;
     }
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
@@ -1380,12 +1514,14 @@ abstract class TextEditingActionTarget {
   /// Cut current selection to Clipboard.
   /// {@endtemplate}
   ///
+  /// If [readOnly] is true or the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   void cutSelection(SelectionChangedCause cause) {
-    if (readOnly) {
+    final TextSelection selection = textEditingValue.selection;
+    if (readOnly || !selection.isValid) {
       return;
     }
-    final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
     if (selection.isCollapsed) {
@@ -1410,12 +1546,14 @@ abstract class TextEditingActionTarget {
   ///
   /// If there is currently a selection, it will be replaced.
   ///
+  /// If [readOnly] is true or the selection is invalid, does nothing.
+  ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
   Future<void> pasteText(SelectionChangedCause cause) async {
-    if (readOnly) {
+    final TextSelection selection = textEditingValue.selection;
+    if (readOnly || !selection.isValid) {
       return;
     }
-    final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
     assert(selection != null);
     if (!selection.isValid) {

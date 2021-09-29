@@ -174,7 +174,14 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   final double notchMargin;
 
   // Returns the top of the BottomAppBar in global coordinates.
+  //
+  // If the Scaffold's bottomNavigationBar was specified, then we can use its
+  // geometry value, otherwise we compute the location based on the AppBar's
+  // Material widget.
   double get bottomNavigationBarTop {
+    final double? bottomNavigationBarTop = geometry.value.bottomNavigationBarTop;
+    if (bottomNavigationBarTop != null)
+      return bottomNavigationBarTop;
     final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
     return box?.localToGlobal(Offset.zero).dy ?? 0;
   }

@@ -2,23 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:platform/platform.dart';
 
-const String _title = 'Flutter Conductor';
+import 'widgets/progression.dart';
+
+const String _title = 'Flutter Desktop Conductor (Not ready, do not use)';
 
 const LocalFileSystem _fs = LocalFileSystem();
 const LocalPlatform _platform = LocalPlatform();
 final String _stateFilePath = defaultStateFilePath(_platform);
 
-void main() {
+Future<void> main() async {
+  // The app currently only supports macOS and Linux.
+  if (kIsWeb || io.Platform.isWindows) {
+    throw Exception('The conductor only supports MacOS and Linux desktop');
+  }
   final File _stateFile = _fs.file(_stateFilePath);
-  final pb.ConductorState? state = _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+  final pb.ConductorState? state =
+      _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp(state));
 }
 
@@ -34,21 +44,24 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+// TODO(Yugue): Add theming, https://github.com/flutter/flutter/issues/90982.
       home: Scaffold(
         appBar: AppBar(
           title: const Text(_title),
         ),
-        body: Center(
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Expanded(
-                child: SelectableText(
-                  state != null ? presentState(state!) : 'No persistent state file found at $_stateFilePath',
-                ),
+              const SelectableText(
+                'Desktop app for managing a release of the Flutter SDK, currently in development',
+              ),
+              const SizedBox(height: 20.0),
+              MainProgression(
+                releaseState: state,
+                stateFilePath: _stateFilePath,
               ),
             ],
           ),

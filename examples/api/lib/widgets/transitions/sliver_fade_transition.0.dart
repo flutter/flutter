@@ -79,6 +79,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomScrollView(slivers: <Widget>[
       SliverFadeTransition(

@@ -82,7 +82,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
               ).animate(CurvedAnimation(
                 parent: _controller,
                 curve: Curves.elasticInOut,
-              )) as Animation<Rect>,
+              )),
               child: const Padding(
                   padding: EdgeInsets.all(8), child: FlutterLogo()),
             ),
