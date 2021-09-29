@@ -1,4 +1,4 @@
-Signature: 117535519faf58b902bfb11db29cce4e
+Signature: cf8640b5cf4a2c7de32733101a9d1d55
 
 UNUSED LICENSES:
 
@@ -473,6 +473,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
@@ -1204,6 +1205,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
@@ -1832,6 +1834,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/meta.json
@@ -3433,11 +3436,18 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/binder.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/decls/child_decl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/decls/collection_decl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/decls/offer_decl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/decls/relative_refs.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/events.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/radar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/time_zones.fidl
