@@ -154,7 +154,8 @@ static jobject SpawnJNI(JNIEnv* env,
                         jobject jcaller,
                         jlong shell_holder,
                         jstring jEntrypoint,
-                        jstring jLibraryUrl) {
+                        jstring jLibraryUrl,
+                        jstring jInitialRoute) {
   jobject jni = env->NewObject(g_flutter_jni_class->obj(), g_jni_constructor);
   if (jni == nullptr) {
     FML_LOG(ERROR) << "Could not create a FlutterJNI instance";
@@ -167,9 +168,10 @@ static jobject SpawnJNI(JNIEnv* env,
 
   auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
   auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
+  auto initial_route = fml::jni::JavaStringToString(env, jInitialRoute);
 
-  auto spawned_shell_holder =
-      ANDROID_SHELL_HOLDER->Spawn(jni_facade, entrypoint, libraryUrl);
+  auto spawned_shell_holder = ANDROID_SHELL_HOLDER->Spawn(
+      jni_facade, entrypoint, libraryUrl, initial_route);
 
   if (spawned_shell_holder == nullptr || !spawned_shell_holder->IsValid()) {
     FML_LOG(ERROR) << "Could not spawn Shell";
@@ -620,7 +622,8 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSpawn",
-          .signature = "(JLjava/lang/String;Ljava/lang/String;)Lio/flutter/"
+          .signature = "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/"
+                       "String;)Lio/flutter/"
                        "embedding/engine/FlutterJNI;",
           .fnPtr = reinterpret_cast<void*>(&SpawnJNI),
       },

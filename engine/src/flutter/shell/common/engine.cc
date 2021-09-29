@@ -112,7 +112,8 @@ std::unique_ptr<Engine> Engine::Spawn(
     Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
     Settings settings,
-    std::unique_ptr<Animator> animator) const {
+    std::unique_ptr<Animator> animator,
+    const std::string& initial_route) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
       /*dispatcher_maker=*/dispatcher_maker,
@@ -133,6 +134,7 @@ std::unique_ptr<Engine> Engine::Spawn(
       settings_.isolate_shutdown_callback,   // isolate shutdown callback
       settings_.persistent_isolate_data      // persistent isolate data
   );
+  result->initial_route_ = initial_route;
   return result;
 }
 
