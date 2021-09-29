@@ -26,11 +26,10 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   // The app currently only supports macOS and Linux.
-  if (!kIsWeb && (io.Platform.isMacOS || io.Platform.isLinux)) {
-    runApp(MyApp(state));
-  } else {
+  if (kIsWeb || io.Platform.isWindows) {
     throw Exception('The conductor only supports MacOS and Linux desktop');
   }
+  runApp(MyApp(state));
 }
 
 class MyApp extends StatelessWidget {
@@ -45,32 +44,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[800],
-        backgroundColor: Colors.black,
-        primaryColor: Colors.black,
-        iconTheme: const IconThemeData().copyWith(color: Colors.white),
-        textTheme: TextTheme(
-          headline1: const TextStyle(
-            color: Colors.white,
-            fontSize: 32.0,
-            fontWeight: FontWeight.bold,
-          ),
-          headline2: TextStyle(
-            fontSize: 20.0,
-            color: Colors.grey[300],
-            fontWeight: FontWeight.bold,
-          ),
-          bodyText1: TextStyle(
-            color: Colors.grey[300],
-            fontSize: 14.0,
-          ),
-          bodyText2: TextStyle(
-            color: Colors.grey[300],
-          ),
-        ),
-      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text(_title),
