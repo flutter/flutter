@@ -8,8 +8,6 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 

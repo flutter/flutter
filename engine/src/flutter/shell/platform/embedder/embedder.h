@@ -313,6 +313,7 @@ typedef bool (*TextureFrameCallback)(void* /* user data */,
                                      size_t /* height */,
                                      FlutterOpenGLTexture* /* texture out */);
 typedef void (*VsyncCallback)(void* /* user data */, intptr_t /* baton */);
+typedef void (*OnPreEngineRestartCallback)(void* /* user data */);
 
 /// A structure to represent the width and height.
 typedef struct {
@@ -1577,6 +1578,16 @@ typedef struct {
   // or component name to embedder's logger. This string will be passed to to
   // callbacks on `log_message_callback`. Defaults to "flutter" if unspecified.
   const char* log_tag;
+
+  // A callback that is invoked when the engine is restarted.
+  //
+  // This optional callback is typically used to reset states to as if the
+  // engine has just been started, and usually indicates the user has requested
+  // a hot restart (Shift-R in the Flutter CLI.) It is not called the first time
+  // the engine starts.
+  //
+  // The first argument is the `user_data` from `FlutterEngineInitialize`.
+  OnPreEngineRestartCallback on_pre_engine_restart_callback;
 } FlutterProjectArgs;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES

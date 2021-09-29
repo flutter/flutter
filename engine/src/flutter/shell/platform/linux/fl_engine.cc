@@ -47,6 +47,11 @@ struct _FlEngine {
   FlEngineUpdateSemanticsNodeHandler update_semantics_node_handler;
   gpointer update_semantics_node_handler_data;
   GDestroyNotify update_semantics_node_handler_destroy_notify;
+
+  // Function to call when the engine is restarted.
+  FlEngineOnPreEngineRestartHandler on_pre_engine_restart_handler;
+  gpointer on_pre_engine_restart_handler_data;
+  GDestroyNotify on_pre_engine_restart_handler_destroy_notify;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
@@ -283,6 +288,20 @@ static void fl_engine_update_semantics_node_cb(const FlutterSemanticsNode* node,
   }
 }
 
+// Called when the engine is restarted.
+//
+// This method should reset states to as if the engine has just been started,
+// which usually indicates the user has requested a hot restart (Shift-R in the
+// Flutter CLI.)
+static void fl_engine_on_pre_engine_restart_cb(void* user_data) {
+  FlEngine* self = FL_ENGINE(user_data);
+
+  if (self->on_pre_engine_restart_handler != nullptr) {
+    self->on_pre_engine_restart_handler(
+        self, self->on_pre_engine_restart_handler_data);
+  }
+}
+
 // Called when a response to a sent platform message is received from the
 // engine.
 static void fl_engine_platform_message_response_cb(const uint8_t* data,
@@ -341,6 +360,13 @@ static void fl_engine_dispose(GObject* object) {
   }
   self->update_semantics_node_handler_data = nullptr;
   self->update_semantics_node_handler_destroy_notify = nullptr;
+
+  if (self->on_pre_engine_restart_handler_destroy_notify) {
+    self->on_pre_engine_restart_handler_destroy_notify(
+        self->on_pre_engine_restart_handler_data);
+  }
+  self->on_pre_engine_restart_handler_data = nullptr;
+  self->on_pre_engine_restart_handler_destroy_notify = nullptr;
 
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
@@ -425,6 +451,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.update_semantics_node_callback = fl_engine_update_semantics_node_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;
+  args.on_pre_engine_restart_callback = fl_engine_on_pre_engine_restart_cb;
   args.dart_entrypoint_argc =
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
@@ -517,6 +544,23 @@ void fl_engine_set_update_semantics_node_handler(
   self->update_semantics_node_handler = handler;
   self->update_semantics_node_handler_data = user_data;
   self->update_semantics_node_handler_destroy_notify = destroy_notify;
+}
+
+void fl_engine_set_on_pre_engine_restart_handler(
+    FlEngine* self,
+    FlEngineOnPreEngineRestartHandler handler,
+    gpointer user_data,
+    GDestroyNotify destroy_notify) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->on_pre_engine_restart_handler_destroy_notify) {
+    self->on_pre_engine_restart_handler_destroy_notify(
+        self->on_pre_engine_restart_handler_data);
+  }
+
+  self->on_pre_engine_restart_handler = handler;
+  self->on_pre_engine_restart_handler_data = user_data;
+  self->on_pre_engine_restart_handler_destroy_notify = destroy_notify;
 }
 
 gboolean fl_engine_send_platform_message_response(
