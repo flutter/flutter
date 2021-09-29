@@ -123,7 +123,7 @@ class FlutterOptions {
 }
 
 /// flutter command categories for usage.
-class FlutterCommandCategories {
+class FlutterCommandCategory {
   static const String installation = 'Flutter installation';
   static const String project = 'Project';
   static const String tools = 'Tools & devices';

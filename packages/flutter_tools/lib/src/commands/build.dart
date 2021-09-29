@@ -58,7 +58,7 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Build an executable app or install bundle.';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;

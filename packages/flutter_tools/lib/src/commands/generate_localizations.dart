@@ -195,7 +195,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   String get name => 'gen-l10n';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -79,7 +79,7 @@ class CreateCommand extends CreateBase {
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   String get invocation => '${runner.executableName} $name <output directory>';

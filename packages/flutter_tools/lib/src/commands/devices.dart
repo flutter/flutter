@@ -34,7 +34,7 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
-  final String category = FlutterCommandCategories.tools;
+  final String category = FlutterCommandCategory.tools;
 
   @override
   Duration get deviceDiscoveryTimeout {

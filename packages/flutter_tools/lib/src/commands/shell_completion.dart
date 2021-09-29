@@ -32,7 +32,7 @@ class ShellCompletionCommand extends FlutterCommand {
       'complete flutter commands and options.';
 
   @override
-  final String category = FlutterCommandCategories.installation;
+  final String category = FlutterCommandCategory.installation;
 
   @override
   final List<String> aliases = <String>['zsh-completion'];

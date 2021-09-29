@@ -106,7 +106,7 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   bool get shouldRunPub {

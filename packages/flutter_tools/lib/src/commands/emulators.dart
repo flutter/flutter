@@ -32,7 +32,7 @@ class EmulatorsCommand extends FlutterCommand {
   final String description = 'List, launch and create emulators.';
 
   @override
-  final String category = FlutterCommandCategories.tools;
+  final String category = FlutterCommandCategory.tools;
 
   @override
   final List<String> aliases = <String>['emulator'];

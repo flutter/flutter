@@ -145,7 +145,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
 
   @override
-  final String category = FlutterCommandCategories.tools;
+  final String category = FlutterCommandCategory.tools;
 
   int get debugPort {
     if (argResults['debug-port'] == null) {

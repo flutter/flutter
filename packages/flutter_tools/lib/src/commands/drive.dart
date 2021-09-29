@@ -22,7 +22,7 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../resident_runner.dart';
-import '../runner/flutter_command.dart' show FlutterCommandCategories, FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -173,7 +173,7 @@ class DriveCommand extends RunCommandBase {
   final String description = 'Run integration tests for the project on an attached device or emulator.';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   final List<String> aliases = <String>['driver'];

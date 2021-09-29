@@ -250,7 +250,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {

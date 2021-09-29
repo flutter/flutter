@@ -62,7 +62,7 @@ class ScreenshotCommand extends FlutterCommand {
   String get description => 'Take a screenshot from a connected device.';
 
   @override
-  final String category = FlutterCommandCategories.tools;
+  final String category = FlutterCommandCategory.tools;
 
   @override
   final List<String> aliases = <String>['pic'];

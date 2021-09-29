@@ -60,7 +60,7 @@ class SymbolizeCommand extends FlutterCommand {
   String get name => 'symbolize';
 
   @override
-  final String category = FlutterCommandCategories.tools;
+  final String category = FlutterCommandCategory.tools;
 
   @override
   bool get shouldUpdateCache => false;

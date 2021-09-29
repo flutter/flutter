@@ -140,7 +140,7 @@ class AssembleCommand extends FlutterCommand {
   String get name => 'assemble';
 
   @override
-  String get category => FlutterCommandCategories.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<CustomDimensions> get usageValues async {
