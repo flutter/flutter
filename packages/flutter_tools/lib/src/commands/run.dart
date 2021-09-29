@@ -37,6 +37,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesWebRendererOption();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
+    addMultiDexOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,

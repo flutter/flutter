@@ -35,6 +35,7 @@ class BuildApkCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    addMultiDexOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,

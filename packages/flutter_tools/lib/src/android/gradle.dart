@@ -293,6 +293,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
+    if (androidBuildInfo.multiDexEnabled) {
+      command.add('-Pmulti-dex-enabled=true');
+    }
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null) {
       if (deferredComponentsEnabled) {

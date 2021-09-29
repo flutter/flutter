@@ -149,6 +149,22 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
+        if (project.hasProperty("multi-dex-enabled") && project.property("multi-dex-enabled").toBoolean() && project.android.defaultConfig.minSdkVersion < 20) {
+            project.android {
+                defaultConfig {
+                    multiDexEnabled true
+                }
+            }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
+            }
+            project.buildTypes {
+                release {
+                    multiDexKeepFile file('multidex-flutter.txt')
+                }
+            }
+        }
+
         if (project.hasProperty('deferred-component-names')) {
             String[] componentNames = project.property('deferred-component-names').split(',').collect {":${it}"}
             project.android {
