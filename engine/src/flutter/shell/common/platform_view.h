@@ -29,8 +29,6 @@
 
 namespace flutter {
 
-class Shell;
-
 //------------------------------------------------------------------------------
 /// @brief      Platform views are created by the shell on the platform task
 ///             runner. Unless explicitly specified, all platform view methods

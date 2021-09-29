@@ -59,6 +59,16 @@ typedef void (*FlEngineUpdateSemanticsNodeHandler)(
     gpointer user_data);
 
 /**
+ * FlEngineOnPreEngineRestartHandler:
+ * @engine: an #FlEngine.
+ * @user_data: semantic node information.
+ *
+ * @user_data: (closure): data provided when registering this handler.
+ */
+typedef void (*FlEngineOnPreEngineRestartHandler)(FlEngine* engine,
+                                                  gpointer user_data);
+
+/**
  * fl_engine_new:
  * @project: an #FlDartProject.
  * @renderer: an #FlRenderer.
@@ -112,6 +122,22 @@ void fl_engine_set_platform_message_handler(
 void fl_engine_set_update_semantics_node_handler(
     FlEngine* engine,
     FlEngineUpdateSemanticsNodeHandler handler,
+    gpointer user_data,
+    GDestroyNotify destroy_notify);
+
+/**
+ * fl_engine_set_on_pre_engine_restart_handler:
+ * @engine: an #FlEngine.
+ * @handler: function to call when the engine is restarted.
+ * @user_data: (closure): user data to pass to @handler.
+ * @destroy_notify: (allow-none): a function which gets called to free
+ * @user_data, or %NULL.
+ *
+ * Registers the function called when the engine is restarted.
+ */
+void fl_engine_set_on_pre_engine_restart_handler(
+    FlEngine* engine,
+    FlEngineOnPreEngineRestartHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify);
 

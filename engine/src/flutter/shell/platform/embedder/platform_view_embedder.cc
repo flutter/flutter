@@ -130,4 +130,11 @@ PlatformViewEmbedder::ComputePlatformResolvedLocales(
   return out;
 }
 
+// |PlatformView|
+void PlatformViewEmbedder::OnPreEngineRestart() const {
+  if (platform_dispatch_table_.on_pre_engine_restart_callback != nullptr) {
+    platform_dispatch_table_.on_pre_engine_restart_callback();
+  }
+}
+
 }  // namespace flutter
