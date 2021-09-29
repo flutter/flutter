@@ -43,7 +43,7 @@ void verifyCommand(Command<Object> runner) {
         FlutterCommandCategory.project,
         FlutterCommandCategory.tools,
       ),
-      reason: 'command ${runner.name} has a category matching FlutterCommandCategory'
+      reason: "top-level command ${runner.name} doesn't have a valid category",
     );
   }
   
