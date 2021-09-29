@@ -799,7 +799,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       break;
     case kDeviceDoesNotExist:
       errorMessage =
-        '$message. The file device was not found.'
+        '$message. The device was not found.'
         '\n$e\n'
         'Verify the device is mounted and try again.';
       break;
