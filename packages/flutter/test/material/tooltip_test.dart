@@ -1018,14 +1018,14 @@ void main() {
     // Wait for it to appear.
     await tester.pump(waitDuration);
 
-    expect(find.text('Outer'), findsNothing);
-    expect(find.text('Inner'), findsOneWidget);
+    expect(_findTooltipText('Outer'), findsNothing);
+    expect(_findTooltipText('Inner'), findsOneWidget);
     await gesture.moveTo(tester.getCenter(outer));
     await tester.pump();
     // Wait for it to switch.
     await tester.pump(waitDuration);
-    expect(find.text('Outer'), findsOneWidget);
-    expect(find.text('Inner'), findsNothing);
+    expect(_findTooltipText('Outer'), findsOneWidget);
+    expect(_findTooltipText('Inner'), findsNothing);
 
     await gesture.moveTo(Offset.zero);
 
