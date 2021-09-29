@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +56,15 @@ import 'tooltip_theme.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// This example shows a rich [Tooltip] that specifies the [richMessage]
+/// parameter instead of the [message] parameter (only one of these may be
+/// non-null. Any [InlineSpan] can be specified for the [richMessage] attribute,
+/// including [WidgetSpan].
+///
+/// ** See code in examples/api/lib/material/tooltip/tooltip.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
@@ -70,9 +80,12 @@ class Tooltip extends StatefulWidget {
   ///
   /// All parameters that are defined in the constructor will
   /// override the default values _and_ the values in [TooltipTheme.of].
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
   const Tooltip({
     Key? key,
-    required this.message,
+    this.message,
+    this.richMessage,
     this.height,
     this.padding,
     this.margin,
@@ -86,11 +99,24 @@ class Tooltip extends StatefulWidget {
     this.child,
     this.triggerMode,
     this.enableFeedback,
-  }) : assert(message != null),
-       super(key: key);
+  }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
+        assert(
+          richMessage == null || textStyle == null,
+          'If `richMessage` is specified, `textStyle` will have no effect. '
+          'If you wish to provide a `textStyle` for a rich tooltip, add the '
+          '`textStyle` directly to the `richMessage` InlineSpan.',
+        ),
+        super(key: key);
 
   /// The text to display in the tooltip.
-  final String message;
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
+  final String? message;
+
+  /// The rich text to display in the tooltip.
+  ///
+  /// Only one of [message] and [richMessage] may be non-null.
+  final InlineSpan? richMessage;
 
   /// The height of the tooltip's [child].
   ///
@@ -131,12 +157,13 @@ class Tooltip extends StatefulWidget {
   /// direction.
   final bool? preferBelow;
 
-  /// Whether the tooltip's [message] should be excluded from the semantics
-  /// tree.
+  /// Whether the tooltip's [message] or [richMessage] should be excluded from
+  /// the semantics tree.
   ///
   /// Defaults to false. A tooltip will add a [Semantics] label that is set to
-  /// [Tooltip.message]. Set this property to true if the app is going to
-  /// provide its own custom semantics label.
+  /// [Tooltip.message] if non-null, or the plain text value of
+  /// [Tooltip.richMessage] otherwise. Set this property to true if the app is
+  /// going to provide its own custom semantics label.
   final bool? excludeFromSemantics;
 
   /// The widget below this widget in the tree.
@@ -241,7 +268,18 @@ class Tooltip extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', message, showName: false));
+    properties.add(StringProperty(
+      'message',
+      message,
+      showName: message == null,
+      defaultValue: message == null ? null : kNoDefaultValue,
+    ));
+    properties.add(StringProperty(
+      'richMessage',
+      richMessage?.toPlainText(),
+      showName: richMessage == null,
+      defaultValue: richMessage == null ? null : kNoDefaultValue,
+    ));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
@@ -289,6 +327,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool enableFeedback;
   late bool _isConcealed;
   late bool _forceRemoval;
+
+  /// The plain text message for this tooltip.
+  ///
+  /// This value will either come from [widget.message] or [widget.richMessage].
+  String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
   @override
   void initState() {
@@ -428,7 +471,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       )!;
       overlayState.insert(_entry!);
     }
-    SemanticsService.tooltip(widget.message);
+    SemanticsService.tooltip(_tooltipMessage);
     _controller.forward();
   }
 
@@ -487,7 +530,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget.message,
+        richMessage: widget.richMessage ?? TextSpan(text: widget.message),
         height: height,
         padding: padding,
         margin: margin,
@@ -507,7 +550,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     _isConcealed = false;
     overlayState.insert(_entry!);
-    SemanticsService.tooltip(widget.message);
+    SemanticsService.tooltip(_tooltipMessage);
     if (_mouseIsConnected) {
       // Hovered tooltips shouldn't show more than one at once. For example, a chip with
       // a delete icon shouldn't show both the delete icon tooltip and the chip tooltip
@@ -580,7 +623,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (widget.message.isEmpty) {
+    if (_tooltipMessage.isEmpty) {
       return widget.child ?? const SizedBox();
     }
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
@@ -629,7 +672,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
       excludeFromSemantics: true,
       child: Semantics(
-        label: excludeFromSemantics ? null : widget.message,
+        label: excludeFromSemantics
+            ? null
+            : _tooltipMessage,
         child: widget.child,
       ),
     );
@@ -700,8 +745,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
     Key? key,
-    required this.message,
     required this.height,
+    required this.richMessage,
     this.padding,
     this.margin,
     this.decoration,
@@ -714,7 +759,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.onExit,
   }) : super(key: key);
 
-  final String message;
+  final InlineSpan richMessage;
   final double height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -743,8 +788,8 @@ class _TooltipOverlay extends StatelessWidget {
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
-                child: Text(
-                  message,
+                child: Text.rich(
+                  richMessage,
                   style: textStyle,
                 ),
               ),
