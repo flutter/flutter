@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
+import 'clipboard_utils.dart';
 
 class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget {
   _FakeEditableTextState({
@@ -93,8 +94,23 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
 }
 
 void main() {
+  final MockClipboard mockClipboard = MockClipboard();
   // Ensure that all TestRenderingFlutterBinding bindings are initialized.
   renderer;
+
+  setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  });
 
   test('moveSelectionLeft/RightByLine stays on the current line', () async {
     const String text = 'one two three\n\nfour five six';
@@ -1828,12 +1844,12 @@ void main() {
 
     editableTextState.copySelection(SelectionChangedCause.keyboard);
     ClipboardData? clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    expect(clipboardData, null);
+    expect(clipboardData?.text, null);
 
     editableTextState.cutSelection(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.selection.isValid, false);
     clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    expect(clipboardData, null);
+    expect(clipboardData?.text, null);
 
     editableTextState.pasteText(SelectionChangedCause.keyboard);
     expect(editableTextState.textEditingValue.selection.isValid, false);
