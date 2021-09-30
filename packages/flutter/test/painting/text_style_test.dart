@@ -495,4 +495,17 @@ void main() {
       TextLeadingDistribution.proportional,
     );
   });
+
+  test('TextStyle fontFamily and package', () {
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo') != const TextStyle(fontFamily: 'fontFamily', package: 'bar'), true);
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').hashCode != const TextStyle(package: 'bar', fontFamily: 'fontFamily').hashCode, true);
+    expect(const TextStyle(fontFamily: 'fontFamily').fontFamily, 'fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily').fontFamily, 'fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily').copyWith(package: 'bar').fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').copyWith(package: 'bar').fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle().merge(const TextStyle(fontFamily: 'fontFamily', package: 'bar')).fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle().apply(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
+  });
 }
