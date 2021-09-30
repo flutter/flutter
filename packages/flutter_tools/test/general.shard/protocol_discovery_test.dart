@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
@@ -14,8 +12,8 @@ import '../src/fake_devices.dart';
 
 void main() {
   group('service_protocol discovery', () {
-    FakeDeviceLogReader logReader;
-    ProtocolDiscovery discoverer;
+    late FakeDeviceLogReader logReader;
+    late ProtocolDiscovery discoverer;
 
     setUp(() {
       logReader = FakeDeviceLogReader();
@@ -42,20 +40,20 @@ void main() {
       testWithoutContext('discovers uri if logs already produced output', () async {
         logReader.addLine('HELLO WORLD');
         logReader.addLine('Observatory listening on http://127.0.0.1:9999');
-        final Uri uri = await discoverer.uri;
+        final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
       });
 
       testWithoutContext('does not discover uri with no host', () async {
-        final Future<Uri> pendingUri = discoverer.uri;
+        final Future<Uri?> pendingUri = discoverer.uri;
         logReader.addLine('Observatory listening on http12asdasdsd9999');
         await Future<void>.delayed(const Duration(milliseconds: 10));
         logReader.addLine('Observatory listening on http://127.0.0.1:9999');
 
         await Future<void>.delayed(Duration.zero);
 
-        final Uri uri = await pendingUri;
+        final Uri uri = (await pendingUri)!;
         expect(uri, isNotNull);
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
@@ -67,7 +65,7 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        final Uri uri = await discoverer.uri;
+        final Uri uri = (await discoverer.uri)!;
         expect(uri, isNotNull);
         expect(uri.port, 9999);
         expect('$uri', 'http://127.0.0.1:9999');
@@ -82,16 +80,16 @@ void main() {
       });
 
       testWithoutContext('discovers uri if logs not yet produced output', () async {
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('Observatory listening on http://127.0.0.1:3333');
-        final Uri uri = await uriFuture;
+        final Uri uri = (await uriFuture)!;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
       testWithoutContext('discovers uri with Ascii Esc code', () async {
         logReader.addLine('Observatory listening on http://127.0.0.1:3333\x1b[');
-        final Uri uri = await discoverer.uri;
+        final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
       });
@@ -102,17 +100,17 @@ void main() {
       });
 
       testWithoutContext('uri is null when the log reader closes early', () async {
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         await logReader.dispose();
 
         expect(await uriFuture, isNull);
       });
 
       testWithoutContext('uri waits for correct log line', () async {
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('Observatory not listening...');
         final Uri timeoutUri = Uri.parse('http://timeout');
-        final Uri actualUri = await uriFuture.timeout(
+        final Uri? actualUri = await uriFuture.timeout(
           const Duration(milliseconds: 100),
           onTimeout: () => timeoutUri,
         );
@@ -121,23 +119,23 @@ void main() {
 
       testWithoutContext('discovers uri if log line contains Android prefix', () async {
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:52584');
-        final Uri uri = await discoverer.uri;
+        final Uri uri = (await discoverer.uri)!;
         expect(uri.port, 52584);
         expect('$uri', 'http://127.0.0.1:52584');
       });
 
       testWithoutContext('discovers uri if log line contains auth key', () async {
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await uriFuture;
+        final Uri uri = (await uriFuture)!;
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
 
       testWithoutContext('discovers uri if log line contains non-localhost', () async {
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await uriFuture;
+        final Uri uri = (await uriFuture)!;
         expect(uri.port, 54804);
         expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
@@ -151,10 +149,10 @@ void main() {
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
         );
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
-        final Uri uri = await uriFuture;
+        final Uri uri = (await uriFuture)!;
         expect(uri.port, 12346);
         expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
       });
@@ -168,10 +166,10 @@ void main() {
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
         );
-        final Future<Uri> uriFuture = discoverer.uri;
+        final Future<Uri?> uriFuture = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12345/PTwjm8Ii8qg=/');
-        final Uri uri = await uriFuture;
+        final Uri uri = (await uriFuture)!;
         expect(uri.port, 12346);
         expect('$uri', 'http://127.0.0.1:12346/PTwjm8Ii8qg=/');
       });
@@ -306,9 +304,9 @@ void main() {
         );
 
         // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
+        final Future<Uri?> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await nextUri;
+        final Uri uri = (await nextUri)!;
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
@@ -328,9 +326,9 @@ void main() {
         );
 
         // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
+        final Future<Uri?> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await nextUri;
+        final Uri uri = (await nextUri)!;
         expect(uri.port, 1243);
         expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
 
@@ -350,9 +348,9 @@ void main() {
         );
 
         // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
+        final Future<Uri?> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await nextUri;
+        final Uri uri = (await nextUri)!;
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
@@ -372,9 +370,9 @@ void main() {
         );
 
         // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
+        final Future<Uri?> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-        final Uri uri = await nextUri;
+        final Uri uri = (await nextUri)!;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
@@ -394,9 +392,9 @@ void main() {
         );
 
         // Get next port future.
-        final Future<Uri> nextUri = discoverer.uri;
+        final Future<Uri?> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://[::1]:54777/PTwjm8Ii8qg=/\x1b[');
-        final Uri uri = await nextUri;
+        final Uri uri = (await nextUri)!;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
@@ -410,13 +408,13 @@ void main() {
 class MockPortForwarder extends DevicePortForwarder {
   MockPortForwarder([this.availablePort]);
 
-  final int availablePort;
+  final int? availablePort;
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
+  Future<int> forward(int devicePort, { int? hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
-      return availablePort;
+      return availablePort!;
     }
     return hostPort;
   }
