@@ -91,7 +91,7 @@ typedef CompileExpression = Future<String> Function(
   List<String> definitions,
   List<String> typeDefinitions,
   String libraryUri,
-  String klass,
+  String? klass,
   bool isStatic,
 );
 
@@ -237,8 +237,7 @@ Future<vm_service.VmService> setUpVmService(
       final List<String> definitions = List<String>.from(params['definitions']! as List<Object?>);
       final List<String> typeDefinitions = List<String>.from(params['typeDefinitions']! as List<Object?>);
       final String libraryUri = params['libraryUri']! as String;
-      print('hi');
-      final String klass = params['klass'] as String? ?? '';
+      final String? klass = params['klass'] as String?;
       final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
 
       final String kernelBytesBase64 = await compileExpression(isolateId,
