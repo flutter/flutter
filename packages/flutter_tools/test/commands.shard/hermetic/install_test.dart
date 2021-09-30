@@ -75,8 +75,8 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
     return app;
   }
 }
-class FakeIOSApp extends Fake implements IOSApp {}
-class FakeAndroidApk extends Fake implements AndroidApk {}
+class FakeIOSApp extends Fake implements IOSApp { }
+class FakeAndroidApk extends Fake implements AndroidApk { }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override

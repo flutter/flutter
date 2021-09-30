@@ -18,5 +18,5 @@ void main() {
 
   test('Can run with --dart-define', () async {
     await driver.waitFor(find.text('Example,AValue'));
-  });
+  }, timeout: Timeout.none);
 }

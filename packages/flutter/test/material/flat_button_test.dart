@@ -36,10 +36,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0xdd000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(FlatButton));
@@ -56,10 +56,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0xdd000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     // Disabled FlatButton
@@ -81,10 +81,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0x61000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0x61000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
   });
 

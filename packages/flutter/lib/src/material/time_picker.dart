@@ -1290,6 +1290,9 @@ class _TimePickerInput extends StatefulWidget {
     Key? key,
     required this.initialSelectedTime,
     required this.helpText,
+    required this.errorInvalidText,
+    required this.hourLabelText,
+    required this.minuteLabelText,
     required this.autofocusHour,
     required this.autofocusMinute,
     required this.onChanged,
@@ -1303,6 +1306,15 @@ class _TimePickerInput extends StatefulWidget {
 
   /// Optionally provide your own help text to the time picker.
   final String? helpText;
+
+  /// Optionally provide your own validation error text.
+  final String? errorInvalidText;
+
+  /// Optionally provide your own hour label text.
+  final String? hourLabelText;
+
+  /// Optionally provide your own minute label text.
+  final String? minuteLabelText;
 
   final bool? autofocusHour;
 
@@ -1480,12 +1492,13 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                             validator: _validateHour,
                             onSavedSubmitted: _handleHourSavedSubmitted,
                             onChanged: _handleHourChanged,
+                            hourLabelText: widget.hourLabelText,
                           ),
                           const SizedBox(height: 8.0),
                           if (!hourHasError.value && !minuteHasError.value)
                             ExcludeSemantics(
                               child: Text(
-                                MaterialLocalizations.of(context).timePickerHourLabel,
+                                widget.hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
                                 style: theme.textTheme.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1511,12 +1524,13 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                             autofocus: widget.autofocusMinute,
                             validator: _validateMinute,
                             onSavedSubmitted: _handleMinuteSavedSubmitted,
+                            minuteLabelText: widget.minuteLabelText,
                           ),
                           const SizedBox(height: 8.0),
                           if (!hourHasError.value && !minuteHasError.value)
                             ExcludeSemantics(
                               child: Text(
-                                MaterialLocalizations.of(context).timePickerMinuteLabel,
+                                widget.minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
                                 style: theme.textTheme.caption,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1540,7 +1554,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
           ),
           if (hourHasError.value || minuteHasError.value)
             Text(
-              MaterialLocalizations.of(context).invalidTimeLabel,
+              widget.errorInvalidText ?? MaterialLocalizations.of(context).invalidTimeLabel,
               style: theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.error),
             )
           else
@@ -1560,6 +1574,7 @@ class _HourTextField extends StatelessWidget {
     required this.validator,
     required this.onSavedSubmitted,
     required this.onChanged,
+    required this.hourLabelText,
     this.restorationId,
   }) : super(key: key);
 
@@ -1569,6 +1584,7 @@ class _HourTextField extends StatelessWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
   final ValueChanged<String> onChanged;
+  final String? hourLabelText;
   final String? restorationId;
 
   @override
@@ -1579,7 +1595,7 @@ class _HourTextField extends StatelessWidget {
       isHour: true,
       autofocus: autofocus,
       style: style,
-      semanticHintText: MaterialLocalizations.of(context).timePickerHourLabel,
+      semanticHintText: hourLabelText ??  MaterialLocalizations.of(context).timePickerHourLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
       onChanged: onChanged,
@@ -1595,6 +1611,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.autofocus,
     required this.validator,
     required this.onSavedSubmitted,
+    required this.minuteLabelText,
     this.restorationId,
   }) : super(key: key);
 
@@ -1603,6 +1620,7 @@ class _MinuteTextField extends StatelessWidget {
   final bool? autofocus;
   final FormFieldValidator<String> validator;
   final ValueChanged<String?> onSavedSubmitted;
+  final String? minuteLabelText;
   final String? restorationId;
 
   @override
@@ -1613,7 +1631,7 @@ class _MinuteTextField extends StatelessWidget {
       isHour: false,
       autofocus: autofocus,
       style: style,
-      semanticHintText: MaterialLocalizations.of(context).timePickerMinuteLabel,
+      semanticHintText: minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
       validator: validator,
       onSavedSubmitted: onSavedSubmitted,
     );
@@ -1768,6 +1786,9 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 }
 
+/// Signature for when the time picker entry mode is changed.
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+
 /// A material design time picker designed to appear inside a popup dialog.
 ///
 /// Pass this widget to [showDialog]. The value returned by [showDialog] is the
@@ -1784,8 +1805,12 @@ class TimePickerDialog extends StatefulWidget {
     this.cancelText,
     this.confirmText,
     this.helpText,
+    this.errorInvalidText,
+    this.hourLabelText,
+    this.minuteLabelText,
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
+    this.onEntryModeChanged,
   }) : assert(initialTime != null),
        super(key: key);
 
@@ -1808,6 +1833,15 @@ class TimePickerDialog extends StatefulWidget {
   /// Optionally provide your own help text to the header of the time picker.
   final String? helpText;
 
+  /// Optionally provide your own validation error text.
+  final String? errorInvalidText;
+
+  /// Optionally provide your own hour label text.
+  final String? hourLabelText;
+
+  /// Optionally provide your own minute label text.
+  final String? minuteLabelText;
+
   /// Restoration ID to save and restore the state of the [TimePickerDialog].
   ///
   /// If it is non-null, the time picker will persist and restore the
@@ -1821,6 +1855,9 @@ class TimePickerDialog extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// Callback called when the selected entry mode is changed.
+  final EntryModeChangeCallback? onEntryModeChanged;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -1917,12 +1954,21 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   final RestorableBoolN _autofocusMinute = RestorableBoolN(null);
   final RestorableBool _announcedInitialTime = RestorableBool(false);
 
+  late final VoidCallback _entryModeListener;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     localizations = MaterialLocalizations.of(context);
     _announceInitialTimeOnce();
     _announceModeOnce();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _entryModeListener = () => widget.onEntryModeChanged?.call(_entryMode.value);
+    _entryMode.addListener(_entryModeListener);
   }
 
   @override
@@ -2220,6 +2266,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 _TimePickerInput(
                   initialSelectedTime: _selectedTime.value,
                   helpText: widget.helpText,
+                  errorInvalidText: widget.errorInvalidText,
+                  hourLabelText: widget.hourLabelText,
+                  minuteLabelText: widget.minuteLabelText,
                   autofocusHour: _autofocusHour.value,
                   autofocusMinute: _autofocusMinute.value,
                   onChanged: _handleTimeChanged,
@@ -2255,6 +2304,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   void dispose() {
     _vibrateTimer?.cancel();
     _vibrateTimer = null;
+    _entryMode.removeListener(_entryModeListener);
     super.dispose();
   }
 }
@@ -2286,8 +2336,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// determine the initial time entry selection of the picker (either a clock
 /// dial or text input).
 ///
-/// Optional strings for the [helpText], [cancelText], and [confirmText] can be
-/// provided to override the default values.
+/// Optional strings for the [helpText], [cancelText], [errorInvalidText],
+/// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
+/// override the default values.
 ///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a
@@ -2342,7 +2393,11 @@ Future<TimeOfDay?> showTimePicker({
   String? cancelText,
   String? confirmText,
   String? helpText,
+  String? errorInvalidText,
+  String? hourLabelText,
+  String? minuteLabelText,
   RouteSettings? routeSettings,
+  EntryModeChangeCallback? onEntryModeChanged,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2356,6 +2411,10 @@ Future<TimeOfDay?> showTimePicker({
     cancelText: cancelText,
     confirmText: confirmText,
     helpText: helpText,
+    errorInvalidText: errorInvalidText,
+    hourLabelText: hourLabelText,
+    minuteLabelText: minuteLabelText,
+    onEntryModeChanged: onEntryModeChanged,
   );
   return showDialog<TimeOfDay>(
     context: context,

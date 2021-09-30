@@ -471,7 +471,7 @@ void main() {
   "generator": "pub",
   "generatorVersion": "2.12.0-76.0.dev"
 }
- ''');
+''');
       final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -722,5 +722,6 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
   }) async { }
 }

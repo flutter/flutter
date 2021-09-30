@@ -126,7 +126,7 @@ class MultiRootFileSystem extends ForwardingFileSystem {
     } else if (path is FileSystemEntity) {
       uri = path.uri;
     } else {
-      throw ArgumentError('Invalid type for "path": ${path?.runtimeType}');
+      throw ArgumentError('Invalid type for "path": ${(path as Object?)?.runtimeType}');
     }
 
     if (!uri.hasScheme || uri.scheme != _scheme) {

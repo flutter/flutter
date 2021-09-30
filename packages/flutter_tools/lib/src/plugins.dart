@@ -89,13 +89,12 @@ class Plugin {
   factory Plugin._fromMultiPlatformYaml(
     String name,
     String path,
-    dynamic pluginYaml,
+    YamlMap pluginYaml,
     List<String> dependencies,
     FileSystem fileSystem,
     bool isDirectDependency,
   ) {
-    assert (pluginYaml != null && pluginYaml['platforms'] != null,
-            'Invalid multi-platform plugin specification $name.');
+    assert (pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
     assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
@@ -190,7 +189,7 @@ class Plugin {
     bool isDirectDependency,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
-    final String pluginClass = pluginYaml['pluginClass'] as String;
+    final String pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String;
     if (pluginYaml != null && pluginClass != null) {
       final String androidPackage = pluginYaml['androidPackage'] as String;
       if (androidPackage != null) {

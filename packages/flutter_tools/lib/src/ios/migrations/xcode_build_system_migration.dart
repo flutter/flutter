@@ -5,7 +5,7 @@
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
+import '../../xcode_project.dart';
 
 // Xcode legacy build system no longer supported by Xcode.
 // Set in https://github.com/flutter/flutter/pull/21901/.

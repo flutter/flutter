@@ -7,23 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
-
-class MockClipboard {
-  dynamic _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -841,6 +826,66 @@ void main() {
     expect(find.text('Suggestions'), findsNothing);
     expect(selectedResults, <String>['Result']);
   });
+
+  testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
+    final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
+    final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
+
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
+      result: 'Result',
+      suggestions: 'Suggestions',
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[localObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == 'nested') {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) => Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate, useRootNavigator: true);
+                      },
+                      child: const Text('showSearchRootNavigator')),
+                  TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate);
+                      },
+                      child: const Text('showSearchLocalNavigator')),
+                ],
+              ),
+              settings: settings,
+            );
+          }
+          throw UnimplementedError();
+        },
+        initialRoute: 'nested',
+      ),
+    ));
+
+    expect(rootObserver.pushCount, 0);
+    expect(localObserver.pushCount, 0);
+
+    // showSearch normal and back
+    await tester.tap(find.text('showSearchLocalNavigator'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount, 0);
+    expect(localObserver.pushCount, 1);
+
+    // showSearch with rootNavigator
+    await tester.tap(find.text('showSearchRootNavigator'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount, 1);
+    expect(localObserver.pushCount, 1);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -1024,5 +1069,18 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
         },
       ),
     );
+  }
+}
+
+class _MyNavigatorObserver extends NavigatorObserver {
+  int pushCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    // don't count the root route
+    if (<String>['nested', '/'].contains(route.settings.name)) {
+      return;
+    }
+    pushCount++;
   }
 }

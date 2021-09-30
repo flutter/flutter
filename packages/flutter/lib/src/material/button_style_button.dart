@@ -14,6 +14,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'theme_data.dart';
 
 /// The base [StatefulWidget] class for buttons whose style is defined by a [ButtonStyle] object.
@@ -32,6 +33,8 @@ abstract class ButtonStyleButton extends StatefulWidget {
     Key? key,
     required this.onPressed,
     required this.onLongPress,
+    required this.onHover,
+    required this.onFocusChange,
     required this.style,
     required this.focusNode,
     required this.autofocus,
@@ -58,6 +61,19 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   ///  * [enabled], which is true if the button is enabled.
   final VoidCallback? onLongPress;
+
+  /// Called when a pointer enters or exits the button response area.
+  ///
+  /// The value passed to the callback is true if a pointer has entered this
+  /// part of the material and false if a pointer has exited this part of the
+  /// material.
+  final ValueChanged<bool>? onHover;
+
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Customizes this button's appearance.
   ///
@@ -176,49 +192,15 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
+class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin, TickerProviderStateMixin {
   AnimationController? _controller;
   double? _elevation;
   Color? _backgroundColor;
-  final Set<MaterialState> _states = <MaterialState>{};
-
-  bool get _hovered => _states.contains(MaterialState.hovered);
-  bool get _focused => _states.contains(MaterialState.focused);
-  bool get _pressed => _states.contains(MaterialState.pressed);
-  bool get _disabled => _states.contains(MaterialState.disabled);
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
-  void _handleHighlightChanged(bool value) {
-    if (_pressed != value) {
-      setState(() {
-        _updateState(MaterialState.pressed, value);
-      });
-    }
-  }
-
-  void _handleHoveredChanged(bool value) {
-    if (_hovered != value) {
-      setState(() {
-        _updateState(MaterialState.hovered, value);
-      });
-    }
-  }
-
-  void _handleFocusedChanged(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _updateState(MaterialState.focused, value);
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
   }
 
   @override
@@ -230,13 +212,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   @override
   void didUpdateWidget(ButtonStyleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
-    if (_disabled && _pressed) {
-      _handleHighlightChanged(false);
+    if (isDisabled && isPressed) {
+      removeMaterialState(MaterialState.pressed);
     }
   }
 
@@ -256,7 +238,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     T? resolve<T>(MaterialStateProperty<T>? Function(ButtonStyle? style) getProperty) {
       return effectiveValue(
-        (ButtonStyle? style) => getProperty(style)?.resolve(_states),
+        (ButtonStyle? style) => getProperty(style)?.resolve(materialStates),
       );
     }
 
@@ -367,13 +349,19 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
-          onHighlightChanged: _handleHighlightChanged,
-          onHover: _handleHoveredChanged,
+          onHighlightChanged: updateMaterialState(MaterialState.pressed),
+          onHover: updateMaterialState(
+            MaterialState.hovered,
+            onChanged: widget.onHover,
+          ),
           mouseCursor: resolvedMouseCursor,
           enableFeedback: resolvedEnableFeedback,
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: _handleFocusedChanged,
+          onFocusChange: updateMaterialState(
+            MaterialState.focused,
+            onChanged: widget.onFocusChange,
+          ),
           autofocus: widget.autofocus,
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
@@ -538,7 +526,7 @@ class _RenderInputPadding extends RenderShiftedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
-      hitTest: (BoxHitTestResult result, Offset? position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == center);
         return child!.hitTest(result, position: center);
       },

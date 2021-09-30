@@ -99,7 +99,7 @@ void main() {
     id: 'testid',
     label: 'testlabel',
     sdkNameAndVersion: 'testsdknameandversion',
-    disabled: false,
+    enabled: true,
     pingCommand: const <String>['testping'],
     pingSuccessRegex: RegExp('testpingsuccess'),
     postBuildCommand: const <String>['testpostbuild'],
@@ -113,7 +113,7 @@ void main() {
 
   const String testConfigPingSuccessOutput = 'testpingsuccess\n';
   const String testConfigForwardPortSuccessOutput = 'testforwardportsuccess\n';
-  final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(disabled: true);
+  final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
   final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
     explicitForwardPortCommand: true,
     forwardPortCommand: null,
@@ -576,6 +576,18 @@ void main() {
     );
     expect(screenshotCommandWasExecuted, false);
     expect(screenshotFile.existsSync(), false);
+  });
+
+  testWithoutContext('CustomDevice returns correct target platform', () async {
+    final CustomDevice device = CustomDevice(
+      config: testConfig.copyWith(
+        platform: TargetPlatform.linux_x64
+      ),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.empty()
+    );
+
+    expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
 }
 

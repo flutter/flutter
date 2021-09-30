@@ -27,7 +27,7 @@ void main() {
     _checkInstallationURL((Platform platform) => userMessages.androidSdkInstallHelp(platform));
     _checkInstallationURL((Platform platform) => userMessages.androidMissingSdkManager('/', platform));
     _checkInstallationURL((Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform));
-    _checkInstallationURL((Platform platform) => userMessages.androidSdkBuildToolsOutdated('/', 0, '', platform));
+    _checkInstallationURL((Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform));
     _checkInstallationURL((Platform platform) => userMessages.androidStudioInstallation(platform));
   });
 }

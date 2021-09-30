@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -90,6 +94,57 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
+  testWidgets('Switch does not get distorted upon changing constraints with parent', (WidgetTester tester) async {
+    const double maxWidth = 300;
+    const double maxHeight = 100;
+
+    const ValueKey<String> boundaryKey = ValueKey<String>('switch container');
+
+    Widget buildSwitch({required double width, required double height}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: maxWidth,
+              height: maxHeight,
+              child: RepaintBoundary(
+                key: boundaryKey,
+                child: SizedBox(
+                  width: width,
+                  height: height,
+                  child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: true,
+                    onChanged: (_) {},
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(
+      width: maxWidth,
+      height: maxHeight,
+    ));
+    await expectLater(
+      find.byKey(boundaryKey),
+      matchesGoldenFile('switch_test.big.on.png'),
+    );
+
+    await tester.pumpWidget(buildSwitch(
+      width: 20,
+      height: 10,
+    ));
+    await expectLater(
+      find.byKey(boundaryKey),
+      matchesGoldenFile('switch_test.small.on.png'),
+    );
   });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {

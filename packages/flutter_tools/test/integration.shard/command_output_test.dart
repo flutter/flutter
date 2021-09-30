@@ -81,7 +81,7 @@ void main() {
     ]);
 
     // contains all of the experiments in features.dart
-    expect(result.stdout.split('\n'), containsAll(<Matcher>[
+    expect((result.stdout as String).split('\n'), containsAll(<Matcher>[
       for (final Feature feature in allFeatures)
         contains(feature.configSetting),
     ]));
@@ -246,5 +246,20 @@ void main() {
       'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
       'A crash report has been written to',
     ));
+  });
+
+  testWithoutContext('flutter supports trailing args', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'test',
+      'test/hello_test.dart',
+      '-r',
+      'json',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, 0);
+    expect(result.stderr, isEmpty);
   });
 }

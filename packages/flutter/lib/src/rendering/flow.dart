@@ -389,21 +389,27 @@ class RenderFlow extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
+      _clipRectLayer.layer = null;
       _paintWithDelegate(context, offset);
     } else {
-      _clipRectLayer = context.pushClipRect(
+      _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,
         Offset.zero & size,
         _paintWithDelegate,
         clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
+        oldLayer: _clipRectLayer.layer,
       );
     }
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
@@ -420,8 +426,8 @@ class RenderFlow extends RenderBox
       final bool absorbed = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? position) {
-          return child.hitTest(result, position: position!);
+        hitTest: (BoxHitTestResult result, Offset position) {
+          return child.hitTest(result, position: position);
         },
       );
       if (absorbed)

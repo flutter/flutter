@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -445,7 +451,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -470,7 +476,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -497,7 +503,7 @@ void main() {
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
         FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar'],
           stdin: stdin,
         ),
       );
@@ -523,7 +529,7 @@ void main() {
       Cache.flutterRoot = '';
       processManager.addCommand(
         FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/pub', 'upgrade', '-h'],
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h'],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
       );
