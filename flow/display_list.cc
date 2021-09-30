@@ -987,7 +987,7 @@ void DisplayList::RenderTo(SkCanvas* canvas) const {
 }
 
 bool DisplayList::Equals(const DisplayList& other) const {
-  if (used_ != other.used_ || op_count_ != other.op_count_) {
+  if (byte_count_ != other.byte_count_ || op_count_ != other.op_count_) {
     return false;
   }
   uint8_t* ptr = storage_.get();
@@ -995,18 +995,22 @@ bool DisplayList::Equals(const DisplayList& other) const {
   if (ptr == o_ptr) {
     return true;
   }
-  return CompareOps(ptr, ptr + used_, o_ptr, o_ptr + other.used_);
+  return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other.byte_count_);
 }
 
 DisplayList::DisplayList(uint8_t* ptr,
-                         size_t used,
+                         size_t byte_count,
                          int op_count,
-                         const SkRect& cull)
+                         size_t nested_byte_count,
+                         int nested_op_count,
+                         const SkRect& cull_rect)
     : storage_(ptr),
-      used_(used),
+      byte_count_(byte_count),
       op_count_(op_count),
+      nested_byte_count_(nested_byte_count),
+      nested_op_count_(nested_op_count),
       bounds_({0, 0, -1, -1}),
-      bounds_cull_(cull) {
+      bounds_cull_(cull_rect) {
   static std::atomic<uint32_t> nextID{1};
   do {
     unique_id_ = nextID.fetch_add(+1, std::memory_order_relaxed);
@@ -1015,7 +1019,7 @@ DisplayList::DisplayList(uint8_t* ptr,
 
 DisplayList::~DisplayList() {
   uint8_t* ptr = storage_.get();
-  DisposeOps(ptr, ptr + used_);
+  DisposeOps(ptr, ptr + byte_count_);
 }
 
 #define DL_BUILDER_PAGE 4096
@@ -1059,15 +1063,20 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   while (save_level_ > 0) {
     restore();
   }
-  size_t used = used_;
+  size_t bytes = used_;
   int count = op_count_;
+  size_t nested_bytes = nested_bytes_;
+  int nested_count = nested_op_count_;
   used_ = allocated_ = op_count_ = 0;
-  storage_.realloc(used);
-  return sk_sp<DisplayList>(
-      new DisplayList(storage_.release(), used, count, cull_));
+  nested_bytes_ = nested_op_count_ = 0;
+  storage_.realloc(bytes);
+  return sk_sp<DisplayList>(new DisplayList(storage_.release(), bytes, count,
+                                            nested_bytes, nested_count,
+                                            cull_rect_));
 }
 
-DisplayListBuilder::DisplayListBuilder(const SkRect& cull) : cull_(cull) {}
+DisplayListBuilder::DisplayListBuilder(const SkRect& cull_rect)
+    : cull_rect_(cull_rect) {}
 
 DisplayListBuilder::~DisplayListBuilder() {
   uint8_t* ptr = storage_.get();
@@ -1418,10 +1427,14 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
       ? Push<DrawSkPictureMatrixOp>(0, 1, std::move(picture), *matrix,
                                     render_with_attributes)
       : Push<DrawSkPictureOp>(0, 1, std::move(picture), render_with_attributes);
+  nested_bytes_ += picture->approximateBytesUsed();
+  nested_op_count_ += picture->approximateOpCount(true);
 }
 void DisplayListBuilder::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
   Push<DrawDisplayListOp>(0, 1, std::move(display_list));
+  nested_bytes_ += display_list->bytes(true);
+  nested_op_count_ += display_list->op_count(true);
 }
 void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar x,
