@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.android;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_INITIAL_ROUTE;
 
@@ -79,6 +80,7 @@ import java.util.Arrays;
   @VisibleForTesting @Nullable OnPreDrawListener activePreDrawListener;
   private boolean isFlutterEngineFromHost;
   private boolean isFlutterUiDisplayed;
+  private boolean isFirstFrameRendered;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -87,6 +89,7 @@ import java.util.Arrays;
         public void onFlutterUiDisplayed() {
           host.onFlutterUiDisplayed();
           isFlutterUiDisplayed = true;
+          isFirstFrameRendered = true;
         }
 
         @Override
@@ -98,6 +101,7 @@ import java.util.Arrays;
 
   FlutterActivityAndFragmentDelegate(@NonNull Host host) {
     this.host = host;
+    this.isFirstFrameRendered = false;
   }
 
   /**
@@ -781,17 +785,19 @@ import java.util.Arrays;
   void onTrimMemory(int level) {
     ensureAlive();
     if (flutterEngine != null) {
-      // This is always an indication that the Dart VM should collect memory
-      // and free any unneeded resources.
-      flutterEngine.getDartExecutor().notifyLowMemoryWarning();
       // Use a trim level delivered while the application is running so the
       // framework has a chance to react to the notification.
-      if (level == TRIM_MEMORY_RUNNING_LOW) {
-        Log.v(TAG, "Forwarding onTrimMemory() to FlutterEngine. Level: " + level);
+      // Avoid being too aggressive before the first frame is rendered. If it is
+      // not at least running critical, we should avoid delaying the frame for
+      // an overly aggressive GC.
+      boolean trim =
+          isFirstFrameRendered
+              ? level >= TRIM_MEMORY_RUNNING_LOW
+              : level >= TRIM_MEMORY_RUNNING_CRITICAL;
+      if (trim) {
+        flutterEngine.getDartExecutor().notifyLowMemoryWarning();
         flutterEngine.getSystemChannel().sendMemoryPressureWarning();
       }
-    } else {
-      Log.w(TAG, "onTrimMemory() invoked before FlutterFragment was attached to an Activity.");
     }
   }
 
