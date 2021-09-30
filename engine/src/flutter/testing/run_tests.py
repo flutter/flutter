@@ -351,13 +351,15 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   RunCmd(command, cwd=test_runner_dir, env=env)
 
 
-def RunAndroidTests(android_variant='android_debug_unopt'):
+def RunAndroidTests(android_variant='android_debug_unopt', adb_path=None):
   test_runner_name = 'flutter_shell_native_unittests'
   tests_path = os.path.join(out_dir, android_variant, test_runner_name)
   remote_path = '/data/local/tmp'
   remote_tests_path = os.path.join(remote_path, test_runner_name)
-  RunCmd(['adb', 'push', tests_path, remote_path], cwd=buildroot_dir)
-  RunCmd(['adb', 'shell', remote_tests_path])
+  if adb_path == None:
+    adb_path = 'adb'
+  RunCmd([adb_path, 'push', tests_path, remote_path], cwd=buildroot_dir)
+  RunCmd([adb_path, 'shell', remote_tests_path])
 
 def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
@@ -552,6 +554,8 @@ def main():
       default=False, help='Capture core dumps from crashes of engine tests.')
   parser.add_argument('--use-sanitizer-suppressions', dest='sanitizer_suppressions', action='store_true',
       default=False, help='Provide the sanitizer suppressions lists to the via environment to the tests.')
+  parser.add_argument('--adb-path', dest='adb_path', action='store',
+      default=None, help='Provide the path of adb used for android tests.  By default it looks on $PATH.')
 
   args = parser.parse_args()
 
@@ -602,7 +606,7 @@ def main():
 
   if 'android' in types:
     assert not IsWindows(), "Android engine files can't be compiled on Windows."
-    RunAndroidTests(args.android_variant)
+    RunAndroidTests(args.android_variant, args.adb_path)
 
   if 'objc' in types:
     assert IsMac(), "iOS embedding tests can only be run on macOS."
