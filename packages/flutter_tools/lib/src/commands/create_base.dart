@@ -18,7 +18,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';

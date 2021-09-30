@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
