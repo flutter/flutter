@@ -139,13 +139,20 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final Process process = await _processManager.start(
-      <String>[
-        executable,
-        ...?debuggingOptions?.dartEntrypointArgs,
-      ],
-      environment: _computeEnvironment(debuggingOptions, traceStartup, route),
-    );
+    Process process;
+    final List<String> command = <String>[
+      executable,
+      ...?debuggingOptions?.dartEntrypointArgs,
+    ];
+    try {
+      process = await _processManager.start(
+        command,
+        environment: _computeEnvironment(debuggingOptions, traceStartup, route),
+      );
+    } on ProcessException catch (e) {
+      _logger.printError('Unable to start executable "${command.join(' ')}": $e');
+      rethrow;
+    }
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
@@ -167,7 +174,7 @@ abstract class DesktopDevice extends Device {
       }
       _logger.printError(
         'Error waiting for a debug connection: '
-        'The log reader stopped unexpectedly.',
+        'The log reader stopped unexpectedly, or never started.',
       );
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');

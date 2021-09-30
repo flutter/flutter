@@ -418,6 +418,67 @@ void main() {
     expect(tester.getRect(find.byType(FloatingActionButton)), const Rect.fromLTRB(372, 528, 428, 584));
     expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
   });
+
+  testWidgets('notch with margin and top padding, home safe area', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/90024
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.only(top: 128),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: SafeArea(
+            child: Scaffold(
+              bottomNavigationBar: ShapeListener(
+                BottomAppBar(
+                  shape: RectangularNotch(),
+                  notchMargin: 6.0,
+                  child: SizedBox(height: 100.0),
+                ),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: null,
+                child: Icon(Icons.add),
+              ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
+    final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
+    final Size babSize = babBox.size;
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
+    final Size fabSize = fabBox.size;
+
+    final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0) - 6.0;
+    final double fabRight = fabLeft + fabSize.width + 6.0;
+    final double fabBottom = 6.0 + fabSize.height / 2.0;
+
+    final Path expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
+
+    final Path actualPath = shapeListenerState.cache.value;
+
+    expect(
+      actualPath,
+      coversSameAreaAs(
+        expectedPath,
+        areaToCompare: (Offset.zero & babSize).inflate(5.0),
+      ),
+    );
+  });
 }
 
 // The bottom app bar clip path computation is only available at paint time.
