@@ -7,6 +7,8 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
