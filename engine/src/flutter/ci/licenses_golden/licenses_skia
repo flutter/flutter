@@ -1,4 +1,4 @@
-Signature: bd0ef0a7dac47f7582fa23ab442d0a36
+Signature: cca14028da704cae41c4af9091e46d12
 
 UNUSED LICENSES:
 
@@ -2968,6 +2968,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Texture.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
