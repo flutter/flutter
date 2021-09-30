@@ -858,9 +858,14 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
     final Match eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);
     if (eventMessageMatch != null) {
-      final dynamic decodedJson = jsonDecode(eventMessageMatch.group(1));
-      if (decodedJson is String) {
-        _linesController.add(decodedJson);
+      final String message = eventMessageMatch.group(1);
+      try {
+        final dynamic decodedJson = jsonDecode(message);
+        if (decodedJson is String) {
+          _linesController.add(decodedJson);
+        }
+      } on FormatException {
+        globals.printError('Logger returned non-JSON response: $message');
       }
     }
   }
