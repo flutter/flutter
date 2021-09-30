@@ -1,4 +1,4 @@
-Signature: cca14028da704cae41c4af9091e46d12
+Signature: 7a4be6e29bef5d583fe786ef65295a1a
 
 UNUSED LICENSES:
 
@@ -2980,6 +2980,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTypesPriv.mm
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
