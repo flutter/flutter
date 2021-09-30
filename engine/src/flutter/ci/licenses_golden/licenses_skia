@@ -1,4 +1,4 @@
-Signature: 5a4fe41a59b58844f3eec37a569f0765
+Signature: c1ff23f6dbae82d3beb44c6457a92d11
 
 UNUSED LICENSES:
 
@@ -3815,6 +3815,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLDehydrator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInliner.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLInliner.h
+FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicMap.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.h
@@ -4074,6 +4076,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/MSKPBench.cpp
 FILE: ../../../third_party/skia/bench/MSKPBench.h
 FILE: ../../../third_party/skia/experimental/graphite/include/private/MtlTypesPriv.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.mm
 FILE: ../../../third_party/skia/fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
