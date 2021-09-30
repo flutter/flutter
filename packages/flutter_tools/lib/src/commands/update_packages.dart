@@ -4,9 +4,7 @@
 
 // @dart = 2.8
 
-import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals_null_migrated.dart' as globals;
@@ -162,9 +161,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   );
 
   Future<void> _downloadCoverageData() async {
-    final Status status = globals.logger.startProgress(
-      'Downloading lcov data for package:flutter...',
-    );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int> data = await _net.fetchUrl(coverageUri);
@@ -178,7 +174,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
-    status.stop();
   }
 
   @override
@@ -286,7 +281,8 @@ class UpdatePackagesCommand extends FlutterCommand {
     // First, collect up the explicit dependencies:
     final List<PubspecYaml> pubspecs = <PubspecYaml>[];
     final Set<String> specialDependencies = <String>{};
-    for (final Directory directory in packages) { // these are all the directories with pubspec.yamls we care about
+    // Visit all the directories with pubspec.yamls we care about.
+    for (final Directory directory in packages) {
       if (doUpgrade) {
         globals.printTrace('Reading pubspec.yaml from: ${directory.path}');
       }
@@ -335,14 +331,19 @@ class UpdatePackagesCommand extends FlutterCommand {
     // get" on it, depending on whether we are upgrading or not. If upgrading,
     // the pub tool will attempt to bring these dependencies up to the most
     // recent possible versions while honoring all their constraints. If not
-    // upgrading the pub tool will attempt to download any necessary components
-    // to the pub cache to warm the cache.
+    // upgrading the pub tool will attempt to download any necessary package
+    // versions to the pub cache to warm the cache.
     final PubDependencyTree tree = PubDependencyTree(); // object to collect results
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
     try {
       final File fakePackage = _pubspecFor(tempDir);
       fakePackage.createSync();
-      fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values, verbose: doUpgrade, useCurrentVersions: !doUpgrade));
+      fakePackage.writeAsStringSync(
+        _generateFakePubspec(
+          dependencies.values,
+          useAnyVersion: doUpgrade,
+        ),
+      );
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
       Directory temporaryFlutterSdk;
@@ -376,11 +377,11 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
 
       if (doUpgrade) {
-        // Then we run "pub deps --style=compact" on the result. We pipe all the
-        // output to tree.fill(), which parses it so that it can create a graph
-        // of all the dependencies so that we can figure out the transitive
-        // dependencies later. It also remembers which version was selected for
-        // each package.
+        // If upgrading, we run "pub deps --style=compact" on the result. We
+        // pipe all the output to tree.fill(), which parses it so that it can
+        // create a graph of all the dependencies so that we can figure out the
+        // transitive dependencies later. It also remembers which version was
+        // selected for each package.
         await pub.batch(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
@@ -390,8 +391,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
     } finally {
-      globals.logger.printStatus('Not deleting temp dir $tempDir.');
-      // tempDir.deleteSync(recursive: true);
+      tempDir.deleteSync(recursive: true);
     }
 
     if (doUpgrade) {
@@ -444,8 +444,15 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Stopwatch timer = Stopwatch()..start();
     int count = 0;
 
+    // Now we run pub get on each of the affected packages to update their
+    // pubspec.lock files with the right transitive dependencies.
+    //
+    // This can be expensive, so we run them in parallel. If we hadn't already
+    // warmed the cache above, running them in parallel could be dangerous due
+    // to contention when unpacking downloaded dependencies, but since we have
+    // downloaded all that we need, it is safe to run them in parallel.
     final Status status = globals.logger.startProgress(
-      'Running "flutter pub get" in affected directories...',
+      'Running "flutter pub get" in affected packages...',
     );
     try {
       final TaskQueue<void> queue = TaskQueue<void>();
@@ -462,12 +469,18 @@ class UpdatePackagesCommand extends FlutterCommand {
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
-          globals.printStatus('Completed pub get in ${dir.path} in ${seconds.toStringAsFixed(1)}s...');
+          globals.printStatus('Ran pub get in ${dir.path} in ${seconds.toStringAsFixed(1)}s...');
         }));
         count += 1;
       }
+      unawaited(queue.add(() async {
+        final Stopwatch stopwatch = Stopwatch();
+        await _downloadCoverageData();
+        stopwatch.stop();
+        final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
+        globals.printStatus('Downloaded lcov data for package:flutter in ${seconds.toStringAsFixed(1)}s...');
+      }));
       await queue.tasksComplete;
-      await _downloadCoverageData();
       status?.stop();
       // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
@@ -476,7 +489,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
-    globals.printStatus("\nRan 'pub' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
+    globals.printStatus("\nRan 'pub get' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
 
     return FlutterCommandResult.success();
   }
@@ -1255,8 +1268,8 @@ class PubspecDependency extends PubspecLine {
 
   /// This generates the entry for this dependency for the pubspec.yaml for the
   /// fake package that we'll use to get the version numbers figured out.
-  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool useAny = true}) {
-    final String versionToUse = useAny || version.isEmpty ? 'any' : version;
+  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool useAnyVersion = true}) {
+    final String versionToUse = useAnyVersion || version.isEmpty ? 'any' : version;
     switch (kind) {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
@@ -1315,11 +1328,11 @@ File _pubspecFor(Directory directory) {
 /// dependencies.
 String _generateFakePubspec(
   Iterable<PubspecDependency> dependencies, {
-  bool verbose = true,
-  bool useCurrentVersions = false
+  bool useAnyVersion = false
 }) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
+  final bool verbose = useAnyVersion;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
   result.writeln("  sdk: '>=2.10.0 <3.0.0'");
@@ -1350,7 +1363,7 @@ String _generateFakePubspec(
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
-      dependency.describeForFakePubspec(result, overrides, useAny: !useCurrentVersions);
+      dependency.describeForFakePubspec(result, overrides, useAnyVersion: useAnyVersion);
     }
   }
   result.write(overrides.toString());
@@ -1569,93 +1582,4 @@ environment:
 ''');
 
   return directory;
-}
-
-typedef TaskQueueClosure<T> = Future<T> Function();
-
-class _TaskQueueItem<T> {
-  _TaskQueueItem(this._closure, this._completer, {this.onComplete});
-
-  final TaskQueueClosure<T> _closure;
-  final Completer<T> _completer;
-  void Function() onComplete;
-
-  Future<void> run() async {
-    try {
-      _completer.complete(await _closure());
-    } catch (e) { // ignore: avoid_catches_without_on_clauses
-      _completer.completeError(e);
-    } finally {
-      onComplete?.call();
-    }
-  }
-}
-
-/// A task queue of Futures to be completed in parallel, throttling
-/// the number of simultaneous tasks.
-///
-/// The tasks return results of type T.
-class TaskQueue<T> {
-  /// Creates a task queue with a maximum number of simultaneous jobs.
-  /// The [maxJobs] parameter defaults to the number of CPU cores on the
-  /// system.
-  TaskQueue({int maxJobs})
-      : maxJobs = maxJobs ?? Platform.numberOfProcessors;
-
-  /// The maximum number of jobs that this queue will run simultaneously.
-  final int maxJobs;
-
-  final Queue<_TaskQueueItem<T>> _pendingTasks = Queue<_TaskQueueItem<T>>();
-  final Set<_TaskQueueItem<T>> _activeTasks = <_TaskQueueItem<T>>{};
-  final Set<Completer<void>> _completeListeners = <Completer<void>>{};
-
-  /// Returns a future that completes when all tasks in the [TaskQueue] are
-  /// complete.
-  Future<void> get tasksComplete {
-    // In case this is called when there are no tasks, we want it to
-    // signal complete immediately.
-    if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
-      return Future<void>.value();
-    }
-    final Completer<void> completer = Completer<void>();
-    _completeListeners.add(completer);
-    return completer.future;
-  }
-
-  /// Adds a single closure to the task queue, returning a future that
-  /// completes when the task completes.
-  Future<T> add(TaskQueueClosure<T> task) {
-    final Completer<T> completer = Completer<T>();
-    _pendingTasks.add(_TaskQueueItem<T>(task, completer));
-    if (_activeTasks.length < maxJobs) {
-      _processTask();
-    }
-    return completer.future;
-  }
-
-  // Process a single task.
-  void _processTask() {
-    if (_pendingTasks.isNotEmpty && _activeTasks.length <= maxJobs) {
-      final _TaskQueueItem<T> item = _pendingTasks.removeFirst();
-      _activeTasks.add(item);
-      item.onComplete = () {
-        _activeTasks.remove(item);
-        _processTask();
-      };
-      item.run();
-    } else {
-      _checkForCompletion();
-    }
-  }
-
-  void _checkForCompletion() {
-    if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
-      for (final Completer<void> completer in _completeListeners) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      }
-      _completeListeners.clear();
-    }
-  }
 }
