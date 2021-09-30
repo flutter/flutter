@@ -167,8 +167,10 @@ class DisplayList : public SkRefCnt {
   static const SkSamplingOptions CubicSampling;
 
   DisplayList()
-      : used_(0),
+      : byte_count_(0),
         op_count_(0),
+        nested_byte_count_(0),
+        nested_op_count_(0),
         unique_id_(0),
         bounds_({0, 0, 0, 0}),
         bounds_cull_({0, 0, 0, 0}) {}
@@ -177,13 +179,21 @@ class DisplayList : public SkRefCnt {
 
   void Dispatch(Dispatcher& ctx) const {
     uint8_t* ptr = storage_.get();
-    Dispatch(ctx, ptr, ptr + used_);
+    Dispatch(ctx, ptr, ptr + byte_count_);
   }
 
   void RenderTo(SkCanvas* canvas) const;
 
-  size_t bytes() const { return used_; }
-  int op_count() const { return op_count_; }
+  // SkPicture always includes nested bytes, but nested ops are
+  // only included if requested. The defaults used here for these
+  // accessors follow that pattern.
+  size_t bytes(bool nested = true) const {
+    return sizeof(DisplayList) + byte_count_ +
+           (nested ? nested_byte_count_ : 0);
+  }
+  int op_count(bool nested = false) const {
+    return op_count_ + (nested ? nested_op_count_ : 0);
+  }
   uint32_t unique_id() const { return unique_id_; }
 
   const SkRect& bounds() {
@@ -198,11 +208,19 @@ class DisplayList : public SkRefCnt {
   bool Equals(const DisplayList& other) const;
 
  private:
-  DisplayList(uint8_t* ptr, size_t used, int op_count, const SkRect& cull_rect);
+  DisplayList(uint8_t* ptr,
+              size_t byte_count,
+              int op_count,
+              size_t nested_byte_count,
+              int nested_op_count,
+              const SkRect& cull_rect);
 
   std::unique_ptr<uint8_t, SkFunctionWrapper<void(void*), sk_free>> storage_;
-  size_t used_;
+  size_t byte_count_;
   int op_count_;
+
+  size_t nested_byte_count_;
+  int nested_op_count_;
 
   uint32_t unique_id_;
   SkRect bounds_;
@@ -452,7 +470,7 @@ class Dispatcher {
 // the DisplayListCanvasRecorder class.
 class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
  public:
-  DisplayListBuilder(const SkRect& cull = kMaxCull_);
+  DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
   ~DisplayListBuilder();
 
   void setAntiAlias(bool aa) override;
@@ -571,8 +589,12 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   int op_count_ = 0;
   int save_level_ = 0;
 
-  SkRect cull_;
-  static constexpr SkRect kMaxCull_ =
+  // bytes and ops from |drawPicture| and |drawDisplayList|
+  size_t nested_bytes_ = 0;
+  int nested_op_count_ = 0;
+
+  SkRect cull_rect_;
+  static constexpr SkRect kMaxCullRect_ =
       SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
   template <typename T, typename... Args>

@@ -222,20 +222,41 @@ static sk_sp<SkTextBlob> TestBlob2 = MakeTextBlob("TestBlob2");
 typedef const std::function<void(DisplayListBuilder&)> DlInvoker;
 
 struct DisplayListInvocation {
-  int op_count;
-  size_t byte_count;
+  int op_count_;
+  size_t byte_count_;
 
   // in some cases, running the sequence through an SkCanvas will result
   // in fewer ops/bytes. Attribute invocations are recorded in an SkPaint
   // and not forwarded on, and SkCanvas culls unused save/restore/transforms.
-  int sk_op_count;
-  size_t sk_byte_count;
+  int sk_op_count_;
+  size_t sk_byte_count_;
 
   DlInvoker invoker;
 
   bool sk_version_matches() {
-    return (op_count == sk_op_count && byte_count == sk_byte_count);
+    return (op_count_ == sk_op_count_ && byte_count_ == sk_byte_count_);
   }
+
+  // A negative sk_op_count means "do not test this op".
+  // Used mainly for these cases:
+  // - we cannot encode a DrawShadowRec (Skia private header)
+  // - SkCanvas cannot receive a DisplayList
+  // - SkCanvas may or may not inline an SkPicture
+  bool sk_testing_invalid() { return sk_op_count_ < 0; }
+
+  bool is_empty() { return byte_count_ == 0; }
+
+  int op_count() { return op_count_; }
+  // byte count for the individual ops, no DisplayList overhead
+  size_t raw_byte_count() { return byte_count_; }
+  // byte count for the ops with DisplayList overhead, comparable
+  // to |DisplayList.byte_count().
+  size_t byte_count() { return sizeof(DisplayList) + byte_count_; }
+
+  int sk_op_count() { return sk_op_count_; }
+  // byte count for the ops with DisplayList overhead as translated
+  // through an SkCanvas interface, comparable to |DisplayList.byte_count().
+  size_t sk_byte_count() { return sizeof(DisplayList) + sk_byte_count_; }
 
   sk_sp<DisplayList> Build() {
     DisplayListBuilder builder;
@@ -714,8 +735,8 @@ TEST(DisplayList, SingleOpSizes) {
       auto& invocation = group.variants[i];
       sk_sp<DisplayList> dl = invocation.Build();
       auto desc = group.op_name + "(variant " + std::to_string(i + 1) + ")";
-      ASSERT_EQ(dl->op_count(), invocation.op_count) << desc;
-      EXPECT_EQ(dl->bytes(), invocation.byte_count) << desc;
+      ASSERT_EQ(dl->op_count(false), invocation.op_count()) << desc;
+      EXPECT_EQ(dl->bytes(false), invocation.byte_count()) << desc;
     }
   }
 }
@@ -727,12 +748,12 @@ TEST(DisplayList, SingleOpDisplayListsNotEqualEmpty) {
       sk_sp<DisplayList> dl = group.variants[i].Build();
       auto desc =
           group.op_name + "(variant " + std::to_string(i + 1) + " != empty)";
-      if (group.variants[i].byte_count != 0) {
-        ASSERT_FALSE(dl->Equals(*empty)) << desc;
-        ASSERT_FALSE(empty->Equals(*dl)) << desc;
-      } else {
+      if (group.variants[i].is_empty()) {
         ASSERT_TRUE(dl->Equals(*empty)) << desc;
         ASSERT_TRUE(empty->Equals(*dl)) << desc;
+      } else {
+        ASSERT_FALSE(dl->Equals(*empty)) << desc;
+        ASSERT_FALSE(empty->Equals(*dl)) << desc;
       }
     }
   }
@@ -749,8 +770,10 @@ TEST(DisplayList, SingleOpDisplayListsRecapturedAreEqual) {
       sk_sp<DisplayList> copy = builder.Build();
       auto desc =
           group.op_name + "(variant " + std::to_string(i + 1) + " == copy)";
-      ASSERT_EQ(copy->op_count(), dl->op_count()) << desc;
-      ASSERT_EQ(copy->bytes(), dl->bytes()) << desc;
+      ASSERT_EQ(copy->op_count(false), dl->op_count(false)) << desc;
+      ASSERT_EQ(copy->bytes(false), dl->bytes(false)) << desc;
+      ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
+      ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
       ASSERT_EQ(copy->bounds(), dl->bounds()) << desc;
       ASSERT_TRUE(copy->Equals(*dl)) << desc;
       ASSERT_TRUE(dl->Equals(*copy)) << desc;
@@ -761,12 +784,7 @@ TEST(DisplayList, SingleOpDisplayListsRecapturedAreEqual) {
 TEST(DisplayList, SingleOpDisplayListsRecapturedViaSkCanvasAreEqual) {
   for (auto& group : allGroups) {
     for (size_t i = 0; i < group.variants.size(); i++) {
-      if (group.variants[i].sk_op_count < 0) {
-        // A negative sk_op_count means "do not test this op".
-        // Used mainly for these cases:
-        // - we cannot encode a DrawShadowRec (Skia private header)
-        // - SkCanvas cannot receive a DisplayList
-        // - SkCanvas may or may not inline an SkPicture
+      if (group.variants[i].sk_testing_invalid()) {
         continue;
       }
       // Verify a DisplayList (re)built by "rendering" it to an
@@ -782,8 +800,10 @@ TEST(DisplayList, SingleOpDisplayListsRecapturedViaSkCanvasAreEqual) {
       dl->RenderTo(&recorder);
       sk_sp<DisplayList> sk_copy = recorder.Build();
       auto desc = group.op_name + "[variant " + std::to_string(i + 1) + "]";
-      EXPECT_EQ(sk_copy->op_count(), group.variants[i].sk_op_count) << desc;
-      EXPECT_EQ(sk_copy->bytes(), group.variants[i].sk_byte_count) << desc;
+      EXPECT_EQ(sk_copy->op_count(false), group.variants[i].sk_op_count())
+          << desc;
+      EXPECT_EQ(sk_copy->bytes(false), group.variants[i].sk_byte_count())
+          << desc;
       if (group.variants[i].sk_version_matches()) {
         EXPECT_EQ(sk_copy->bounds(), dl->bounds()) << desc;
         EXPECT_TRUE(dl->Equals(*sk_copy)) << desc << " == sk_copy";
@@ -814,8 +834,10 @@ TEST(DisplayList, SingleOpDisplayListsCompareToEachOther) {
         auto desc = group.op_name + "(variant " + std::to_string(i + 1) +
                     " ==? variant " + std::to_string(j + 1) + ")";
         if (i == j) {
-          ASSERT_EQ(listA->op_count(), listB->op_count()) << desc;
-          ASSERT_EQ(listA->bytes(), listB->bytes()) << desc;
+          ASSERT_EQ(listA->op_count(false), listB->op_count(false)) << desc;
+          ASSERT_EQ(listA->bytes(false), listB->bytes(false)) << desc;
+          ASSERT_EQ(listA->op_count(true), listB->op_count(true)) << desc;
+          ASSERT_EQ(listA->bytes(true), listB->bytes(true)) << desc;
           ASSERT_EQ(listA->bounds(), listB->bounds()) << desc;
           ASSERT_TRUE(listA->Equals(*listB)) << desc;
           ASSERT_TRUE(listB->Equals(*listA)) << desc;
@@ -840,8 +862,8 @@ static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
     if (j >= group.variants.size())
       continue;
     DisplayListInvocation& invocation = group.variants[j];
-    op_count += invocation.op_count;
-    byte_count += invocation.byte_count;
+    op_count += invocation.op_count();
+    byte_count += invocation.raw_byte_count();
     invocation.invoker(builder);
   }
   sk_sp<DisplayList> dl = builder.Build();
@@ -856,8 +878,8 @@ static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
       name += " variant " + std::to_string(v_index + 1);
     }
   }
-  EXPECT_EQ(dl->op_count(), op_count) << name;
-  EXPECT_EQ(dl->bytes(), byte_count) << name;
+  EXPECT_EQ(dl->op_count(false), op_count) << name;
+  EXPECT_EQ(dl->bytes(false), byte_count + sizeof(DisplayList)) << name;
   return dl;
 }
 
@@ -883,12 +905,12 @@ TEST(DisplayList, DisplayListsWithVaryingOpComparisons) {
         ASSERT_FALSE(variant_dl->Equals(*default_dl)) << desc << " != Default";
         ASSERT_FALSE(default_dl->Equals(*variant_dl)) << "Default != " << desc;
       }
-      if (group.variants[vi].byte_count != 0) {
-        ASSERT_FALSE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
-        ASSERT_FALSE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
-      } else {
+      if (group.variants[vi].is_empty()) {
         ASSERT_TRUE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
         ASSERT_TRUE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
+      } else {
+        ASSERT_FALSE(variant_dl->Equals(*missing_dl)) << desc << " != omitted";
+        ASSERT_FALSE(missing_dl->Equals(*variant_dl)) << "omitted != " << desc;
       }
     }
   }
