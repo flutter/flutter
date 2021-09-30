@@ -680,35 +680,39 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)viewWillAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillAppear");
+  if ([_engine.get() viewController] == self) {
+    // Send platform settings to Flutter, e.g., platform brightness.
+    [self onUserSettingsChanged:nil];
 
-  // Send platform settings to Flutter, e.g., platform brightness.
-  [self onUserSettingsChanged:nil];
-
-  // Only recreate surface on subsequent appearances when viewport metrics are known.
-  // First time surface creation is done on viewDidLayoutSubviews.
-  if (_viewportMetrics.physical_width) {
-    [self surfaceUpdated:YES];
+    // Only recreate surface on subsequent appearances when viewport metrics are known.
+    // First time surface creation is done on viewDidLayoutSubviews.
+    if (_viewportMetrics.physical_width) {
+      [self surfaceUpdated:YES];
+    }
+    [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
+    [[_engine.get() restorationPlugin] markRestorationComplete];
   }
-  [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
-  [[_engine.get() restorationPlugin] markRestorationComplete];
 
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
-  [self onUserSettingsChanged:nil];
-  [self onAccessibilityStatusChanged:nil];
-  if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
-    [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.resumed"];
+  if ([_engine.get() viewController] == self) {
+    [self onUserSettingsChanged:nil];
+    [self onAccessibilityStatusChanged:nil];
+    if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
+      [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.resumed"];
+    }
   }
   [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillDisappear");
-  [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
-
+  if ([_engine.get() viewController] == self) {
+    [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
+  }
   [super viewWillDisappear:animated];
 }
 
