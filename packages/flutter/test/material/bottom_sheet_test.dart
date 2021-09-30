@@ -58,15 +58,14 @@ void main() {
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(height: 200.0,
-            child: const Text('BottomSheet'),
-          );
-        },
-      );
-    });
+    scaffoldKey.currentState!.showBottomSheet<void>(
+      enableDrag: false,
+      builder: (BuildContext context){
+        return Container(height: 200.0,
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
 
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
@@ -91,15 +90,14 @@ void main() {
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(height: 200.0,
-            child: const Text('BottomSheet'),
-          );
-        },
-      );
-    });
+    scaffoldKey.currentState!.showBottomSheet<void>(
+      enableDrag: true,
+      builder: (BuildContext context){
+        return Container(height: 200.0,
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
 
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
