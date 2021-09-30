@@ -6,9 +6,7 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -78,10 +76,6 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 
 void main() {
   Cache.flutterRoot = '';
-  final MemoryFileSystem fakefs = MemoryFileSystem.test()
-    ..directory('bin').createSync()
-    ..directory('bin/internal').createSync()
-    ..file('bin/internal/devtools.version').writeAsStringSync('1.0.0');
 
   testWithoutContext('Does not serve devtools if launcher is null', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
@@ -110,11 +104,8 @@ void main() {
   testWithoutContext('Can use devtools with existing devtools URI', () async {
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
       processManager: FakeProcessManager.empty(),
-      fileSystem: fakefs,
       dartExecutable: 'dart',
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      persistentToolState: null,
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       // Uses real devtools instance which should be a no-op if

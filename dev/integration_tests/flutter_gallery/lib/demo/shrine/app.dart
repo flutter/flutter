@@ -37,6 +37,11 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // The automatically applied scrollbars on desktop can cause a crash for
+      // demos where many scrollables are all attached to the same
+      // PrimaryScrollController. The gallery needs to be migrated before
+      // enabling this. https://github.com/flutter/gallery/issues/523
+      scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
       title: 'Shrine',
       home: HomePage(
         backdrop: Backdrop(

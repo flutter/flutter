@@ -816,7 +816,7 @@ class Image extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.
   ///

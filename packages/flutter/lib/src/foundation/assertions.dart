@@ -867,7 +867,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
-  /// For example, you could report all errors to your server.
+  /// For example, you could report all errors to your server. Consider calling
+  /// [presentError] from your custom error handler in order to see the logs in
+  /// the console as well.
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
@@ -877,6 +879,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].

@@ -63,8 +63,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
   @override
