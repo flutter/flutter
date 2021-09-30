@@ -249,7 +249,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       Expanded(
         child: Center(child: active ? item.activeIcon : item.icon),
       ),
-      Text(item.label!),
+      if (item.label != null) Text(item.label!),
     ];
   }
 
