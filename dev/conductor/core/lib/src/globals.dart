@@ -9,7 +9,7 @@ import 'package:platform/platform.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
 
-const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
+const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 const String gsutilBinary = 'gsutil.py';
 
