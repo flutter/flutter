@@ -157,6 +157,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     child: child,
   );
 
+  // These are shortcuts are shared between most platforms except macOS for it
+  // uses different modifier keys as the line/word modifer.
   static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
@@ -270,7 +272,9 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + backspace
   };
 
-  // macOS document shortcuts: https://support.apple.com/en-us/HT201236
+  // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
+  // The macOS shortcuts uses different word/line modifiers than most other
+  // platforms.
   static const Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
     SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToNextWordBoundaryIntent(forward: false),

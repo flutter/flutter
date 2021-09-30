@@ -161,7 +161,8 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
     return _isValid;
   }
 
-
+  // Computes the vertical distance from the `from` line's bottom to the `to`
+  // lines top.
   double _lineDistance(int from, int to) {
     double lineHeight = 0;
     for (int index = from + 1; index < to; index += 1) {
@@ -2409,8 +2410,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   MapEntry<int, Offset> _lineNumberFor(TextPosition startPosition, List<ui.LineMetrics> metrics) {
-    // ui.LineMetrics should include the line boundaries so we don't have to
-    // do this.
+    // TODO(LongCatIsLooong): include line boundaries information in
+    // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
     int line = 0;
     double accumulatedHeight = 0;
@@ -2421,7 +2422,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       line += 1;
       accumulatedHeight += lineMetrics.height;
     }
-    assert(false);
+    assert(false, 'unable to find the line for $startPosition');
     return MapEntry<int, Offset>(math.max(0, metrics.length - 1), Offset(offset.dx, accumulatedHeight));
   }
 
@@ -2436,11 +2437,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The [VerticalCaretMovementRun.isValid] property indicates whether the text
   /// layout has changed and the vertical caret run is invalidated.
   ///
-  /// The caller is responsible for discarding a [VerticalCaretMovementRun] when
+  /// The caller should typically discard a [VerticalCaretMovementRun] when
   /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
-  /// occasions where the vertical caret run should be interrupted, and create
-  /// a new [VerticalCaretMovementRun] using the current caret location when the
-  /// user presses the arrow up/down key again.
+  /// occasions where the vertical caret run should be interrupted.
   VerticalCaretMovementRun startVerticalCaretMovement(TextPosition startPosition) {
     final List<ui.LineMetrics> metrics = _textPainter.computeLineMetrics();
     final MapEntry<int, Offset> currentLine = _lineNumberFor(startPosition, metrics);

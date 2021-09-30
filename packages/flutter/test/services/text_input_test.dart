@@ -77,6 +77,7 @@ void main() {
           ),
         );
       });
+
       test('replace before selection', () {
         const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
@@ -114,6 +115,36 @@ void main() {
           // replace the second whitespace with "AA".
           const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), 'AA'),
           const TextEditingValue(text:  'From a falseAAproposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('delete after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "p".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), ''),
+          const TextEditingValue(text:  'From a false roposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('delete inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "a".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), ''),
+          const TextEditingValue(text:  'From  false proposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+
+      test('delete inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the second whitespace.
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), ''),
+          const TextEditingValue(text:  'From a falseproposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
         );
       });
     });

@@ -2815,7 +2815,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       intent.cause,
     );
   }
-  late final Action<ReplaceTextIntent> _replaceTextAction = _makeOverridable(CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText));
+  late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
   void _updateSelection(UpdateSelectionIntent intent) {
     userUpdateTextEditingValue(
@@ -2823,7 +2823,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       intent.cause,
     );
   }
-  late final Action<UpdateSelectionIntent> _updateSelectionAction = _makeOverridable(CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection));
+  late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
 
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
 
@@ -3260,6 +3260,7 @@ class _CharacterBoundary extends _TextBoundary {
       offset: CharacterRange.at(textEditingValue.text, position.offset, endOffset).stringBeforeLength,
     );
   }
+
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
@@ -3280,7 +3281,7 @@ class _CharacterBoundary extends _TextBoundary {
   }
 }
 
-// UAX #29 defined word boundaries.
+// [UAX #29](https://unicode.org/reports/tr29/) defined word boundaries.
 class _WordBoundary extends _TextBoundary {
   const _WordBoundary(this.textLayout, this.textEditingValue);
 

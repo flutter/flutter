@@ -80,6 +80,19 @@ class TextSelection extends TextRange {
 
   /// The position at which the selection originates.
   ///
+  /// {@template flutter.services.TextSelection.TextAffinity}
+  /// The [TextAffinity] of the resulting [TextPosition] is based on the
+  /// relative logical position in the text to the other selection endpoint:
+  ///  * if [baseOffset] > [extentOffset], [base] will have
+  ///    [TextAffinity.upstream] and [extent] will have
+  ///    [TextAffinity.downstream].
+  ///  * if [baseOffset] < [extentOffset], [base] will have
+  ///    [TextAffinity.downstream] and [extent] will have
+  ///    [TextAffinity.upstream].
+  ///  * if [baseOffset] == [extentOffset], [base] and [extent] will both have
+  ///    the collapsed selection's [affinity].
+  /// {@endtemplate}
+  ///
   /// Might be larger than, smaller than, or equal to extent.
   TextPosition get base {
     final TextAffinity affinity;
@@ -98,6 +111,8 @@ class TextSelection extends TextRange {
   /// When the user uses the arrow keys to adjust the selection, this is the
   /// value that changes. Similarly, if the current theme paints a caret on one
   /// side of the selection, this is the location at which to paint the caret.
+  ///
+  /// {@macro flutter.services.TextSelection.TextAffinity}
   ///
   /// Might be larger than, smaller than, or equal to base.
   TextPosition get extent {

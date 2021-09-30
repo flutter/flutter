@@ -88,7 +88,7 @@ void main() {
   }
 
   testWidgets(
-    'Movement/Deletion shortcuts do nothing when the slection is invalid',
+    'Movement/Deletion shortcuts do nothing when the selection is invalid',
     (WidgetTester tester) async {
       await tester.pumpWidget(buildEditableText());
       controller.text = testText;
