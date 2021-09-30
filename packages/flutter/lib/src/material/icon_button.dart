@@ -49,6 +49,22 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ** See code in examples/api/lib/material/icon_button/icon_button.0.dart **
 /// {@end-tool}
 ///
+/// ### Icon sizes
+///
+/// When creating an icon button with an [Icon], do not override the icon's size
+/// with its [Icon.size] parameter, use the icon button's [iconSize] parameter instead.
+/// For example do this:
+///
+/// ```dart
+/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
+/// ```
+///
+/// Do _not_ do this:
+///
+/// ```dart
+/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// ```
+///
 /// ### Adding a filled background
 ///
 /// Icon buttons don't support specifying a background color or other
