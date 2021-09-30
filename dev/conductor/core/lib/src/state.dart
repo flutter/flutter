@@ -19,7 +19,7 @@ String luciConsoleLink(String channel, String groupName) {
     'channel $channel not recognized',
   );
   assert(
-    <String>['framework', 'engine', 'devicelab', 'packaging'].contains(groupName),
+    <String>['flutter', 'engine', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
@@ -68,8 +68,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
-  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'framework')}');
-  buffer.writeln('\tDevicelab LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'devicelab')}');
+  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
