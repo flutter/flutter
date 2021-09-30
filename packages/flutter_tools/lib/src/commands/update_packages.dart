@@ -469,7 +469,8 @@ class UpdatePackagesCommand extends FlutterCommand {
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
-          globals.printStatus('Ran pub get in ${dir.path} in ${seconds.toStringAsFixed(1)}s...');
+          final String relativeDir = globals.fs.path.relative(dir.path, from: Cache.flutterRoot);
+          globals.printStatus('Ran pub get in $relativeDir in ${seconds.toStringAsFixed(1)}s...');
         }));
         count += 1;
       }
