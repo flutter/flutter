@@ -310,14 +310,12 @@ class FormField<T> extends StatefulWidget {
   /// error text.
   ///
   /// {@template flutter.widgets.FormField.autovalidateMode}
-  /// If [AutovalidateMode.onUserInteraction] this form field will only
-  /// auto-validate after its content changes, if [AutovalidateMode.always] it
-  /// will auto validate even without user interaction and
-  /// if [AutovalidateMode.disabled] the auto validation will be disabled.
+  /// If [AutovalidateMode.onUserInteraction], this FormField will only
+  /// auto-validate after its content changes. If [AutovalidateMode.always], it
+  /// will auto-validate even without user interaction. If
+  /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled] if `autovalidate` is false which
-  /// means no auto validation will occur. If `autovalidate` is true then this
-  /// is set to [AutovalidateMode.always] for backward compatibility.
+  /// Defaults to [AutovalidateMode.disabled], cannot be null.
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
 
