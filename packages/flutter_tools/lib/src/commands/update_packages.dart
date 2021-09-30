@@ -1298,6 +1298,11 @@ class PubspecDependency extends PubspecLine {
         }
     }
   }
+
+  @override
+  String toString() {
+    return '$name: $version';
+  }
 }
 
 /// Generates the File object for the pubspec.yaml file of a given Directory.
@@ -1345,7 +1350,7 @@ String _generateFakePubspec(
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
-      dependency.describeForFakePubspec(result, overrides);
+      dependency.describeForFakePubspec(result, overrides, useAny: !useCurrentVersions);
     }
   }
   result.write(overrides.toString());
