@@ -8,6 +8,8 @@ source_set("scenic") {
   testonly = true
 
   sources = [
+    "fake_flatland.cc",
+    "fake_flatland.h",
     "fake_resources.cc",
     "fake_resources.h",
     "fake_session.cc",
