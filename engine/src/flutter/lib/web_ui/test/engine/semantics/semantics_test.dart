@@ -131,7 +131,7 @@ void _testEngineSemanticsOwner() {
     expect(placeholder.isConnected, isFalse);
   });
 
-  void renderLabel(String label) {
+  void renderSemantics({String? label, String? tooltip}) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
@@ -148,11 +148,16 @@ void _testEngineSemanticsOwner() {
       id: 1,
       actions: 0,
       flags: 0,
-      label: label,
+      label: label ?? '',
+      tooltip: tooltip ?? '',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
     );
     semantics().updateSemantics(builder.build());
+  }
+
+  void renderLabel(String label) {
+    renderSemantics(label: label);
   }
 
   test('produces an aria-label', () async {
@@ -191,6 +196,53 @@ void _testEngineSemanticsOwner() {
 
     // Remove
     renderLabel('');
+
+    expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <sem></sem>
+  </sem-c>
+</sem>''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('tooltip is part of label', () async {
+    semantics().semanticsEnabled = true;
+
+    // Create
+    renderSemantics(tooltip: 'tooltip');
+
+    final Map<int, SemanticsObject> tree = semantics().debugSemanticsTree!;
+    expect(tree.length, 2);
+    expect(tree[0]!.id, 0);
+    expect(tree[0]!.element.tagName.toLowerCase(), 'flt-semantics');
+    expect(tree[1]!.id, 1);
+    expect(tree[1]!.tooltip, 'tooltip');
+
+    expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <sem aria-label="tooltip">
+      <sem-v>tooltip</sem-v>
+    </sem>
+  </sem-c>
+</sem>''');
+
+    // Update
+    renderSemantics(label: 'Hello', tooltip: 'tooltip');
+
+    expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <sem aria-label="tooltip\nHello">
+      <sem-v>tooltip\nHello</sem-v>
+    </sem>
+  </sem-c>
+</sem>''');
+
+    // Remove
+    renderSemantics();
 
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
