@@ -21,15 +21,21 @@ namespace flutter_runner {
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
+// Assume a 60hz refresh rate.
+static constexpr fml::TimeDelta kDefaultFlatlandPresentationInterval =
+    fml::TimeDelta::FromSecondsF(1.0 / 60.0);
+
 // The component residing on the raster thread that is responsible for
 // maintaining the Flatland instance connection and presenting updates.
 class FlatlandConnection final {
  public:
-  FlatlandConnection(std::string debug_label,
-                     fml::closure error_callback,
-                     on_frame_presented_event on_frame_presented_callback,
-                     uint64_t max_frames_in_flight,
-                     fml::TimeDelta vsync_offset);
+  FlatlandConnection(
+      std::string debug_label,
+      fidl::InterfaceHandle<fuchsia::ui::composition::Flatland> flatland,
+      fml::closure error_callback,
+      on_frame_presented_event on_frame_presented_callback,
+      uint64_t max_frames_in_flight,
+      fml::TimeDelta vsync_offset);
 
   ~FlatlandConnection();
 
@@ -73,7 +79,8 @@ class FlatlandConnection final {
   bool first_call = true;
 
   std::vector<zx::event> acquire_fences_;
-  std::vector<zx::event> release_fences_;
+  std::vector<zx::event> current_present_release_fences_;
+  std::vector<zx::event> previous_present_release_fences_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandConnection);
 };

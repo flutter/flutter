@@ -4,7 +4,7 @@
 
 #include "flatland_connection.h"
 
-#include <lib/fdio/directory.h>
+#include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
 
@@ -12,17 +12,18 @@ namespace flutter_runner {
 
 FlatlandConnection::FlatlandConnection(
     std::string debug_label,
+    fidl::InterfaceHandle<fuchsia::ui::composition::Flatland> flatland,
     fml::closure error_callback,
     on_frame_presented_event on_frame_presented_callback,
     uint64_t max_frames_in_flight,
     fml::TimeDelta vsync_offset)
-    : error_callback_(error_callback),
+    : flatland_(flatland.Bind()),
+      error_callback_(error_callback),
       on_frame_presented_callback_(std::move(on_frame_presented_callback)) {
-  zx_status_t status =
-      fdio_service_connect("/svc/fuchsia.ui.composition.Flatland",
-                           flatland_.NewRequest().TakeChannel().release());
-  FML_DCHECK(status == ZX_OK);
-
+  flatland_.set_error_handler([callback = error_callback_](zx_status_t status) {
+    FML_LOG(ERROR) << "Flatland disconnected" << zx_status_get_string(status);
+    callback();
+  });
   flatland_->SetDebugName(debug_label);
   flatland_.events().OnError =
       fit::bind_member(this, &FlatlandConnection::OnError);
@@ -44,18 +45,22 @@ void FlatlandConnection::Present() {
   fuchsia::ui::composition::PresentArgs present_args;
   present_args.set_requested_presentation_time(0);
   present_args.set_acquire_fences(std::move(acquire_fences_));
-  present_args.set_release_fences(std::move(release_fences_));
+  present_args.set_release_fences(std::move(previous_present_release_fences_));
   present_args.set_unsquashable(false);
   flatland_->Present(std::move(present_args));
 
+  // In Flatland, release fences apply to the content of the previous present.
+  // Keeping track of the old frame's release fences and swapping ensure we set
+  // the correct ones for VulkanSurface's interpretation.
+  previous_present_release_fences_.clear();
+  previous_present_release_fences_.swap(current_present_release_fences_);
   acquire_fences_.clear();
-  release_fences_.clear();
 }
 
 void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
   if (first_call) {
     fml::TimePoint now = fml::TimePoint::Now();
-    callback(now, now + fml::TimeDelta::FromMilliseconds(5));
+    callback(now, now + kDefaultFlatlandPresentationInterval);
     first_call = false;
     return;
   }
@@ -78,7 +83,7 @@ void FlatlandConnection::OnNextFrameBegin(
   if (fire_callback_) {
     fml::TimePoint now = fml::TimePoint::Now();
     // TODO(fxbug.dev/64201): Calculate correct frame times.
-    fire_callback_(now, now + fml::TimeDelta::FromMilliseconds(5));
+    fire_callback_(now, now + kDefaultFlatlandPresentationInterval);
   }
 }
 
@@ -92,7 +97,7 @@ void FlatlandConnection::EnqueueAcquireFence(zx::event fence) {
 }
 
 void FlatlandConnection::EnqueueReleaseFence(zx::event fence) {
-  release_fences_.push_back(std::move(fence));
+  current_present_release_fences_.push_back(std::move(fence));
 }
 
 }  // namespace flutter_runner
