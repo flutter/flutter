@@ -1001,26 +1001,11 @@ class RawScrollbar extends StatefulWidget {
   /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
   /// is unspecified).
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad}
   /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
   /// thumb in a [RawScrollbar].
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: RawScrollbar(
-  ///       child: ListView(
-  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
-  ///         physics: const BouncingScrollPhysics(),
-  ///       ),
-  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
-  ///       thickness: 15.0,
-  ///       thumbColor: Colors.blue,
-  ///       isAlwaysShown: true,
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.shape.0.dart **
   /// {@end-tool}
   final OutlinedBorder? shape;
 
