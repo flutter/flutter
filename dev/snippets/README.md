@@ -160,9 +160,6 @@ contains a list of templates. These templates represent an entire app that the
 `sample` or `dartpad` can be placed into, basically a replacement for
 `lib/main.dart` in a flutter app package.
 
-For more information about how to create, use, or update templates, see
-[config/templates/README.md](config/templates/README.md).
-
 #### Analysis
 
 The `../bots/analyze_sample_code.dart` script finds code inside the `@tool

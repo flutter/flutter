@@ -97,7 +97,6 @@ class _FollowCurve2DState extends State<FollowCurve2D>
   }
 }
 
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 

@@ -140,7 +140,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// to allow further overriding, or to allow the [Intent] to propagate to
   /// parent widgets that also support this [Intent].
   ///
-  /// {@tool sample}
+  /// {@tool dartpad}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
   /// that consists of multiple text fields for area code, prefix and line

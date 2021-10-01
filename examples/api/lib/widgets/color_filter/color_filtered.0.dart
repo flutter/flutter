@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
@@ -40,7 +39,8 @@ class MyStatelessWidget extends StatelessWidget {
               BlendMode.modulate,
             ),
             child: Image.network(
-                'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+            ),
           ),
           ColorFiltered(
             colorFilter: const ColorFilter.mode(
@@ -48,7 +48,8 @@ class MyStatelessWidget extends StatelessWidget {
               BlendMode.saturation,
             ),
             child: Image.network(
-                'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
+            ),
           ),
         ],
       ),

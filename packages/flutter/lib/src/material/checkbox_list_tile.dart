@@ -69,7 +69,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled checkbox widget, called

@@ -173,8 +173,9 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
-/// {@tool sample}
-///
+/// {@tool dartpad}
+/// An example the shows how to use the [Stepper], and the [Stepper] UI
+/// appearance.
 ///
 /// ** See code in examples/api/lib/material/stepper/stepper.0.dart **
 /// {@end-tool}
