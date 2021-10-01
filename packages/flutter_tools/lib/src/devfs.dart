@@ -613,6 +613,7 @@ class DevFS {
       fs: _fileSystem,
       projectRootPath: projectRootPath,
       packageConfig: packageConfig,
+      checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
     ).then((CompilerOutput result) {
       compileTimer.stop();
       return result;

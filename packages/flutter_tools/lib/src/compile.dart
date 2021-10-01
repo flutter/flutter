@@ -462,6 +462,10 @@ abstract class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
+  ///
+  /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
+  /// to ensure that the generated registrant file has been updated such that
+  /// it is wrapping [mainUri].
   Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
@@ -470,6 +474,7 @@ abstract class ResidentCompiler {
     required String projectRootPath,
     required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -610,6 +615,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required String outputPath,
     required PackageConfig packageConfig,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
     String? projectRootPath,
     FileSystem? fs,
   }) async {
@@ -618,7 +624,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
     // `generated_main.dart` contains the Dart plugin registry.
-    if (projectRootPath != null && fs != null) {
+    if (checkDartPluginRegistry && projectRootPath != null && fs != null) {
       final File generatedMainDart = fs.file(
         fs.path.join(
           projectRootPath,

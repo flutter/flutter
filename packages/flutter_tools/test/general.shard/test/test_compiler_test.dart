@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -40,6 +41,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('test/foo.dart').createSync(recursive: true);
+    fileSystem.file('.packages').createSync();
     residentCompiler = FakeResidentCompiler(fileSystem);
   });
 
@@ -113,6 +115,57 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),
   });
+
+  testUsingContext('TestCompiler updates generated_main.dart', () async {
+    final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: foo
+dependencies:
+  flutter:
+    sdk: flutter
+  a_plugin: 1.0.0
+''');
+      fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
+      fakeDartPlugin.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: a_plugin
+flutter:
+  plugin:
+    implements: a
+    platforms:
+      linux:
+        dartPluginClass: APlugin
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.5.0"
+''');
+
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    final FakeTestCompiler testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+    );
+
+    await testCompiler.compile(Uri.parse('test/foo.dart'));
+
+    final File generatedMain = fileSystem
+      .directory('.dart_tool')
+      .childDirectory('flutter_build')
+      .childFile('generated_main.dart');
+
+    expect(generatedMain, exists);
+    expect(
+      generatedMain.readAsLinesSync(),
+      contains("import 'test/foo.dart' as entrypoint;")
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Platform: () => linuxPlatform,
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => BufferLogger.test(),
+  });
 }
 
 /// Override the creation of the Resident Compiler to simplify testing.
@@ -150,6 +203,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     String projectRootPath,
     FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     if (compilerOutput != null) {
       fileSystem.file(compilerOutput.outputFilename).createSync(recursive: true);
