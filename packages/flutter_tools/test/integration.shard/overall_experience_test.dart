@@ -25,10 +25,7 @@
 // @dart = 2.8
 // This file is ready to transition, just uncomment /*?*/, /*!*/, and /*late*/.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
+// This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
 
 import 'dart:async';
@@ -40,7 +37,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem, platform;
+import 'test_utils.dart' show fileSystem;
 
 const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
@@ -189,7 +186,7 @@ Future<ProcessTestResult> runFlutter(
   List<Transition> transitions, {
   bool debug = false,
   bool logging = true,
-  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes!
+  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
   final Stopwatch clock = Stopwatch()..start();
   final Process process = await processManager.start(
@@ -358,7 +355,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/87924
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -622,5 +619,5 @@ void main() {
       '',
       'Application finished.',
     ]);
-  }, skip: Platform.isWindows); // TODO(zanderso): Re-enable when this test is reliable on device lab, https://github.com/flutter/flutter/issues/81556
+  });
 }
