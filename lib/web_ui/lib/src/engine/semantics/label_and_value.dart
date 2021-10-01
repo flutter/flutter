@@ -52,17 +52,24 @@ class LabelAndValue extends RoleManager {
   void update() {
     final bool hasValue = semanticsObject.hasValue;
     final bool hasLabel = semanticsObject.hasLabel;
+    final bool hasTooltip = semanticsObject.hasTooltip;
 
     // If the node is incrementable the value is reported to the browser via
     // the respective role manager. We do not need to also render it again here.
     final bool shouldDisplayValue = hasValue && !semanticsObject.isIncrementable;
 
-    if (!hasLabel && !shouldDisplayValue) {
+    if (!hasLabel && !shouldDisplayValue && !hasTooltip) {
       _cleanUpDom();
       return;
     }
 
     final StringBuffer combinedValue = StringBuffer();
+    if (hasTooltip) {
+      combinedValue.write(semanticsObject.tooltip);
+      if (hasLabel || shouldDisplayValue) {
+        combinedValue.write('\n');
+      }
+    }
     if (hasLabel) {
       combinedValue.write(semanticsObject.label);
       if (shouldDisplayValue) {

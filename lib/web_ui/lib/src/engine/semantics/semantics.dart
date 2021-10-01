@@ -600,6 +600,22 @@ class SemanticsObject {
     _dirtyFields |= _additionalActionsIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  String? get tooltip => _tooltip;
+  String? _tooltip;
+
+  /// Whether this object contains a non-empty tooltip.
+  bool get hasTooltip => _tooltip != null && _tooltip!.isNotEmpty;
+
+  static const int _tooltipIndex = 1 << 22;
+
+  /// Whether the [tooltip] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isTooltipDirty => _isDirty(_tooltipIndex);
+  void _markTooltipDirty() {
+    _dirtyFields |= _tooltipIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -812,6 +828,11 @@ class SemanticsObject {
       _markDecreasedValueDirty();
     }
 
+    if (_tooltip != update.tooltip) {
+      _tooltip = update.tooltip;
+      _markTooltipDirty();
+    }
+
     if (_textDirection != update.textDirection) {
       _textDirection = update.textDirection;
       _markTextDirectionDirty();
@@ -882,7 +903,7 @@ class SemanticsObject {
   /// Detects the roles that this semantics object corresponds to and manages
   /// the lifecycles of [SemanticsObjectRole] objects.
   void _updateRoles() {
-    _updateRole(Role.labelAndValue, (hasLabel || hasValue) && !isTextField && !isVisualOnly);
+    _updateRole(Role.labelAndValue, (hasLabel || hasValue || hasTooltip) && !isTextField && !isVisualOnly);
     _updateRole(Role.textField, isTextField);
 
     final bool shouldUseTappableRole =
