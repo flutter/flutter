@@ -164,7 +164,6 @@ class FlatlandExternalViewEmbedder final
 
   struct FlatlandLayer {
     fuchsia::ui::composition::TransformId transform_id;
-    fuchsia::ui::composition::ContentId image_id;
   };
 
   FlatlandConnection& flatland_;
