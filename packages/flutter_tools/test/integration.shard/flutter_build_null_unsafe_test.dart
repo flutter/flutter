@@ -78,6 +78,6 @@ String unsafeString = null;
         if (targetPlatform == 'ios') '--no-codesign',
       ], workingDirectory: projectRoot.path);
       expect(result.exitCode, 0);
-    }, timeout: const Timeout(Duration(minutes: 3)));
+    });
   }
 }
