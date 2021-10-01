@@ -61,7 +61,6 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   resultPort.close();
   exitPort.close();
   errorPort.close();
-  isolate.kill();
   Timeline.finishSync();
   return result.future;
 }
@@ -94,8 +93,8 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(
-    '${configuration.debugLabel}: returning result',
-    () { configuration.resultPort.send(result); },
+    '${configuration.debugLabel}: exiting and returning a result', () {},
     flow: Flow.step(configuration.flowId),
   );
+  Isolate.exit(configuration.resultPort, result);
 }
