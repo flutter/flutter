@@ -63,5 +63,3 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

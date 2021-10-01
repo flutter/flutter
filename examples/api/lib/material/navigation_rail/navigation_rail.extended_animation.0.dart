@@ -126,5 +126,3 @@ class MyNavigationRailFab extends StatelessWidget {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

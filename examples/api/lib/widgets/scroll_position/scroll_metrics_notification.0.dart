@@ -58,5 +58,3 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

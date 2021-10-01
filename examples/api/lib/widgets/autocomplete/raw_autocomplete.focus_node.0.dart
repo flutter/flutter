@@ -90,5 +90,3 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

@@ -156,5 +156,3 @@ class _MyCounterState extends State<MyCounter> with RestorationMixin {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

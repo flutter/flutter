@@ -85,5 +85,3 @@ class AutocompleteBasicUserExample extends StatelessWidget {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

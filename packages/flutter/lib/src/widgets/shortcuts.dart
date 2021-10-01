@@ -229,7 +229,7 @@ abstract class ShortcutActivator {
 /// considered without considering sides (e.g. control left and control right are
 /// considered the same).
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, the counter is increased when the following key
 /// sequences are pressed:
 ///
@@ -401,7 +401,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
   /// whether the specified modifier conditions are met.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad}
   /// In the following example, the shortcut `Control + C` increases the counter:
   ///
   /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.single_activator.0.dart **
@@ -540,7 +540,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// results in a question mark, which is 'Shift+Slash' on a US keyboard, but
 /// 'Shift+Comma' on a French keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
 /// the counter is increased:
 ///
@@ -739,7 +739,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
 /// from a counter. When the child widget has keyboard focus, and a user presses
 /// the keys that have been defined in [Shortcuts], the action that is bound
@@ -751,7 +751,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// ** See code in examples/api/lib/widgets/shortcuts/shortcuts.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This slightly more complicated, but more flexible, example creates a custom
 /// [Action] subclass to increment and decrement within a widget (a [Column])
 /// that has keyboard focus. When the user presses the up and down arrow keys,

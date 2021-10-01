@@ -77,5 +77,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

@@ -30,7 +30,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. This maps
 /// to the [leading] and [trailing] properties of [ExpansionTile].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates different configurations of ExpansionTile.
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **

@@ -60,5 +60,3 @@ class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBo
   void debugAssertDoesMeetConstraints() => true;
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

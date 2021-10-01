@@ -173,7 +173,7 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool sample}
 ///
 ///
 /// ** See code in examples/api/lib/material/stepper/stepper.0.dart **
@@ -256,7 +256,7 @@ class Stepper extends StatefulWidget {
   /// [ControlsDetails.currentStep] value within the callback can change the text
   /// of the continue or cancel button depending on which step users are at.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart

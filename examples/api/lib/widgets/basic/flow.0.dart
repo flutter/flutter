@@ -121,5 +121,3 @@ class FlowMenuDelegate extends FlowDelegate {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

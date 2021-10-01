@@ -192,5 +192,3 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

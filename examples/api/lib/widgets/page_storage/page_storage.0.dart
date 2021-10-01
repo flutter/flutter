@@ -90,5 +90,3 @@ class ColorBoxPage extends StatelessWidget {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
