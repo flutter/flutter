@@ -33,27 +33,23 @@ class DartPluginRegistrantTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     assert(environment.generateDartPluginRegistry);
-    final File packagesFile = environment.projectDir
-        .childDirectory('.dart_tool')
-        .childFile('package_config.json');
+    final FlutterProject project = _project
+      ?? FlutterProject.fromDirectory(environment.projectDir);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      project.packageConfigFile,
       logger: environment.logger,
     );
-    final String targetFile = environment.defines[kTargetFile] ??
+    final String targetFilePath = environment.defines[kTargetFile] ??
         environment.fileSystem.path.join('lib', 'main.dart');
-    final File mainFile = environment.fileSystem.file(targetFile);
+    final File mainFile = environment.fileSystem.file(targetFilePath);
     final Uri mainFileUri = mainFile.absolute.uri;
-    final String mainUri = packageConfig.toPackageUri(mainFileUri)?.toString() ?? mainFileUri.toString();
-    final File newMainDart = environment.projectDir
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build')
-        .childFile('generated_main.dart');
+    final String mainFileUriString = packageConfig.toPackageUri(mainFileUri)?.toString()
+      ?? mainFileUri.toString();
+
     await generateMainDartWithPluginRegistrant(
-      _project ?? FlutterProject.fromDirectory(environment.projectDir),
+      project,
       packageConfig,
-      mainUri,
-      newMainDart,
+      mainFileUriString,
       mainFile,
       throwOnPluginPubspecError: false,
     );

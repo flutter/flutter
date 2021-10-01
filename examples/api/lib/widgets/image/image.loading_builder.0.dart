@@ -53,7 +53,7 @@ class MyStatelessWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Image.network(
-        'https://example.com/image.jpg',
+        'https://flutter.github.io/assets-for-api-docs/assets/widgets/falcon.jpg',
         loadingBuilder: (BuildContext context, Widget child,
             ImageChunkEvent? loadingProgress) {
           if (loadingProgress == null) {

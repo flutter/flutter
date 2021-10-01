@@ -189,28 +189,28 @@ void main() {
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(13, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
+          xcodeProjectInterpreter.version = Version(14, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 0);
+          xcodeProjectInterpreter.version = Version(13, 3, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 2);
+          xcodeProjectInterpreter.version = Version(13, 0, 2);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });

@@ -1632,7 +1632,6 @@ targets:
 
   - name: Linux deferred components
     recipe: flutter/deferred_components
-    bringup: true
     properties:
       dependencies: >-
         [

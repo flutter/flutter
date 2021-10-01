@@ -59,7 +59,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   double? _devicePixelRatio;
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
   /// instead.
-  set devicePixelRatioTestValue(double devicePixelRatio) {
+  set devicePixelRatioTestValue(double devicePixelRatio) { // ignore: avoid_setters_without_getters
     _devicePixelRatio = devicePixelRatio;
     onMetricsChanged?.call();
   }
@@ -75,7 +75,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.Size? _physicalSizeTestValue;
   /// Hides the real physical size and reports the given [physicalSizeTestValue]
   /// instead.
-  set physicalSizeTestValue (ui.Size physicalSizeTestValue) {
+  set physicalSizeTestValue (ui.Size physicalSizeTestValue) { // ignore: avoid_setters_without_getters
     _physicalSizeTestValue = physicalSizeTestValue;
     onMetricsChanged?.call();
   }
@@ -91,7 +91,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.WindowPadding? _viewInsetsTestValue;
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
   /// instead.
-  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) {
+  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) { // ignore: avoid_setters_without_getters
     _viewInsetsTestValue = viewInsetsTestValue;
     onMetricsChanged?.call();
   }
@@ -107,7 +107,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.WindowPadding? _viewPaddingTestValue;
   /// Hides the real view padding and reports the given [paddingTestValue]
   /// instead.
-  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) {
+  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) { // ignore: avoid_setters_without_getters
     _viewPaddingTestValue = viewPaddingTestValue;
     onMetricsChanged?.call();
   }
@@ -122,7 +122,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.WindowPadding get padding => _paddingTestValue ?? _window.padding;
   ui.WindowPadding? _paddingTestValue;
   /// Hides the real padding and reports the given [paddingTestValue] instead.
-  set paddingTestValue(ui.WindowPadding paddingTestValue) {
+  set paddingTestValue(ui.WindowPadding paddingTestValue) { // ignore: avoid_setters_without_getters
     _paddingTestValue = paddingTestValue;
     onMetricsChanged?.call();
   }
@@ -136,7 +136,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
   ui.WindowPadding? _systemGestureInsetsTestValue;
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
-  set systemGestureInsetsTestValue(ui.WindowPadding systemGestureInsetsTestValue) {
+  set systemGestureInsetsTestValue(ui.WindowPadding systemGestureInsetsTestValue) { // ignore: avoid_setters_without_getters
     _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
     onMetricsChanged?.call();
   }
@@ -157,7 +157,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.Locale get locale => _localeTestValue ?? platformDispatcher.locale;
   ui.Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  set localeTestValue(ui.Locale localeTestValue) {
+  set localeTestValue(ui.Locale localeTestValue) { // ignore: avoid_setters_without_getters
     _localeTestValue = localeTestValue;
     onLocaleChanged?.call();
   }
@@ -171,7 +171,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   List<ui.Locale> get locales => _localesTestValue ?? platformDispatcher.locales;
   List<ui.Locale>? _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  set localesTestValue(List<ui.Locale> localesTestValue) {
+  set localesTestValue(List<ui.Locale> localesTestValue) { // ignore: avoid_setters_without_getters
     _localesTestValue = localesTestValue;
     onLocaleChanged?.call();
   }
@@ -192,7 +192,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue = '';
   /// Sets a faked initialLifecycleState for testing.
-  set initialLifecycleStateTestValue(String state) {
+  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
     _initialLifecycleStateTestValue = state;
   }
 
@@ -201,7 +201,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   double? _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
-  set textScaleFactorTestValue(double textScaleFactorTestValue) {
+  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
     _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged?.call();
   }
@@ -223,7 +223,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
   /// Hides the real text scale factor and reports the given
   /// [platformBrightnessTestValue] instead.
-  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) {
+  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
     _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged?.call();
   }
@@ -239,7 +239,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   bool? _alwaysUse24HourFormatTestValue;
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
   /// Deletes any existing test clock format and returns to using the real clock
@@ -288,7 +288,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   String? _defaultRouteNameTestValue;
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
     _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
   /// Deletes any existing test default route name and returns to using the real
@@ -312,7 +312,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   bool? _semanticsEnabledTestValue;
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged?.call();
   }
@@ -342,7 +342,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.AccessibilityFeatures? _accessibilityFeaturesTestValue;
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
-  set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) {
+  set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
@@ -358,7 +358,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.ViewConfiguration? _viewConfiguration;
 
   /// Hide the real view configuration and report the provided [value] instead.
-  set viewConfigurationTestValue(ui.ViewConfiguration? value) {
+  set viewConfigurationTestValue(ui.ViewConfiguration? value) { // ignore: avoid_setters_without_getters
     _viewConfiguration = value;
     onMetricsChanged?.call();
   }
