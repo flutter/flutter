@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for CupertinoScrollbar
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
-// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
-// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
-// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

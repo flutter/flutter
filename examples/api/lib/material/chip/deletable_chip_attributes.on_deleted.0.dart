@@ -8,15 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for DeletableChipAttributes.onDeleted
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to use [onDeleted] to remove an entry when the
-// delete button is tapped.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

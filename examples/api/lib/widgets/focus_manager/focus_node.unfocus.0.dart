@@ -8,22 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FocusNode.unfocus
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows the difference between the different [UnfocusDisposition]
-// values for [unfocus].
-//
-// Try setting focus on the four text fields by selecting them, and then
-// select "UNFOCUS" to see what happens when the current
-// [FocusManager.primaryFocus] is unfocused.
-//
-// Try pressing the TAB key after unfocusing to see what the next widget
-// chosen is.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

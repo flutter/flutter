@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for MaterialStateProperty
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how you can override the default text and icon
-// color (the "foreground color") of a [TextButton] with a
-// [MaterialStateProperty]. In this example, the button's text color
-// will be `Colors.blue` when the button is being pressed, hovered,
-// or focused. Otherwise, the text color will be `Colors.red`.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

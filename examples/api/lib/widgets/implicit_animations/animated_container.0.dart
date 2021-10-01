@@ -8,16 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for AnimatedContainer
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following example (depicted above) transitions an AnimatedContainer
-// between two states. It adjusts the `height`, `width`, `color`, and
-// [alignment] properties when tapped.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

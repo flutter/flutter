@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for MediaQueryData.systemGestureInsets
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// For apps that might be deployed on Android Q devices with full gesture
-// navigation enabled, use [systemGestureInsets] with [Padding]
-// to avoid having the left and right edges of the [Slider] from appearing
-// within the area reserved for system gesture navigation.
-//
-// By default, [Slider]s expand to fill the available width. So, we pad the
-// left and right sides.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

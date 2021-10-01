@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for MouseRegion.onExit
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following example shows a blue rectangular that turns yellow when
-// hovered. Since the hover state is completely contained within a widget
-// that unconditionally creates the `MouseRegion`, you can ignore the
-// aforementioned restriction.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

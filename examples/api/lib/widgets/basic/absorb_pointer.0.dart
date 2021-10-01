@@ -8,16 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for AbsorbPointer
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following sample has an [AbsorbPointer] widget wrapping the button on
-// top of the stack, which absorbs pointer events, preventing its child button
-// __and__ the button below it in the stack from receiving the pointer events.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

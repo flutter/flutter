@@ -8,27 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Actions
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example creates a custom [Action] subclass `ModifyAction` for modifying
-// a model, and another, `SaveAction` for saving it.
-//
-// This example demonstrates passing arguments to the [Intent] to be carried to
-// the [Action]. Actions can get data either from their own construction (like
-// the `model` in this example), or from the intent passed to them when invoked
-// (like the increment `amount` in this example).
-//
-// This example also demonstrates how to use Intents to limit a widget's
-// dependencies on its surroundings. The `SaveButton` widget defined in this
-// example can invoke actions defined in its ancestor widgets, which can be
-// customized to match the part of the widget tree that it is in. It doesn't
-// need to know about the `SaveAction` class, only the `SaveIntent`, and it
-// only needs to know about a value notifier, not the entire model.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

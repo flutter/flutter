@@ -8,21 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Navigator
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following example demonstrates how a nested [Navigator] can be used to
-// present a standalone user registration journey.
-//
-// Even though this example uses two [Navigator]s to demonstrate nested
-// [Navigator]s, a similar result is possible using only a single [Navigator].
-//
-// Run this example with `flutter run --route=/signup` to start it with
-// the signup flow instead of on the home page.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

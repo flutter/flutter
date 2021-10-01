@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for DataTable
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to display a [DataTable] with three columns: name, age, and
-// role. The columns are defined by three [DataColumn] objects. The table
-// contains three rows of data for three example users, the data for which
-// is defined by three [DataRow] objects.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/data_table.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

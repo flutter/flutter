@@ -8,21 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InputDecoration.prefixIconConstraints
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows the differences between two `TextField` widgets when
-// [prefixIconConstraints] is set to the default value and when one is not.
-//
-// Note that [isDense] must be set to true to be able to
-// set the constraints smaller than 48px.
-//
-// If null, [BoxConstraints] with a minimum width and height of 48px is
-// used.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

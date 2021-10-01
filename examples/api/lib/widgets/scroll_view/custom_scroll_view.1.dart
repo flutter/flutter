@@ -8,21 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for CustomScrollView
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// By default, if items are inserted at the "top" of a scrolling container like
-// [ListView] or [CustomScrollView], the top item and all of the items below it
-// are scrolled downwards. In some applications, it's preferable to have the
-// top of the list just grow upwards, without changing the scroll position.
-// This example demonstrates how to do that with a [CustomScrollView] with
-// two [SliverList] children, and the [CustomScrollView.center] set to the key
-// of the bottom SliverList. The top one SliverList will grow upwards, and the
-// bottom SliverList will grow downwards.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

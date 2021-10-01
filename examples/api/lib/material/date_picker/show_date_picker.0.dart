@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for showDatePicker
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample demonstrates how to create a restorable Material date picker.
-// This is accomplished by enabling state restoration by specifying
-// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
-// push [DatePickerDialog] when the button is tapped.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

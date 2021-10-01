@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InputDecoration
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to style a `TextField` using an `InputDecorator`. The
-// TextField displays a "send message" icon to the left of the input area,
-// which is surrounded by a border an all sides. It displays the `hintText`
-// inside the input area to help the user understand what input is required. It
-// displays the `helperText` and `counterText` below the input area.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

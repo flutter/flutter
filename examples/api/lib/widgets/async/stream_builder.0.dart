@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for StreamBuilder
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
-// for an auction. Every time the StreamBuilder receives a bid from the Stream,
-// it will display the price of the bid below an icon. If the Stream emits an
-// error, the error is displayed below an error icon. When the Stream finishes
-// emitting bids, the final price is displayed.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

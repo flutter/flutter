@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for TweenAnimationBuilder
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows an [IconButton] that "zooms" in when the widget first
-// builds (its size smoothly increases from 0 to 24) and whenever the button
-// is pressed, it smoothly changes its size to the new target value of either
-// 48 or 24.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

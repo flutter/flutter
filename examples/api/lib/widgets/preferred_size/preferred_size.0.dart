@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for PreferredSize
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows a custom widget, similar to an [AppBar], which uses a
-// [PreferredSize] widget, with its height set to 80 logical pixels.
-// Changing the [PreferredSize] can be used to change the height
-// of the custom app bar.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for IgnorePointer
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following sample has an [IgnorePointer] widget wrapping the `Column`
-// which contains a button.
-// When [ignoring] is set to `true` anything inside the `Column` can
-// not be tapped. When [ignoring] is set to `false` anything
-// inside the `Column` can be tapped.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

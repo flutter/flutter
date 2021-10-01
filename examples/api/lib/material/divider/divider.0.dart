@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Divider
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to display a Divider between an orange and blue box
-// inside a column. The Divider is 20 logical pixels in height and contains a
-// vertically centered black line that is 5 logical pixels thick. The black
-// line is indented by 20 logical pixels.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

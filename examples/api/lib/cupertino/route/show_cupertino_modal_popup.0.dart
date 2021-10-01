@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for showCupertinoModalPopup
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample demonstrates how to create a restorable Cupertino modal route.
-// This is accomplished by enabling state restoration by specifying
-// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
-// push [CupertinoModalPopupRoute] when the [CupertinoButton] is tapped.
-//
-// {@macro flutter.widgets.RestorationManager}
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/cupertino.dart';
 

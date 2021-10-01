@@ -8,25 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for PointerSignalResolver
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// Here is an example that demonstrates the effect of not using the resolver
-// versus using it.
-//
-// When this example is set to _not_ use the resolver, then triggering the
-// mouse wheel over the outer box will cause only the outer box to change
-// color, but triggering the mouse wheel over the inner box will cause _both_
-// the outer and the inner boxes to change color (because they're both
-// receiving the event).
-//
-// When this example is set to _use_ the resolver, then only the box located
-// directly under the cursor will change color when the mouse wheel is
-// triggered.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

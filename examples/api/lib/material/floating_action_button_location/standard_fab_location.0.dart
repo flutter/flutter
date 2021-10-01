@@ -8,24 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for StandardFabLocation
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This is an example of a user-defined [FloatingActionButtonLocation].
-//
-// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a
-// [FloatingActionButton] using a custom [FloatingActionButtonLocation].
-//
-// The new [FloatingActionButtonLocation] is defined
-// by extending [StandardFabLocation] with two mixins,
-// [FabEndOffsetX] and [FabFloatOffsetY], and overriding the
-// [getOffsetX] method to adjust the FAB's x-coordinate, creating a
-// [FloatingActionButtonLocation] slightly different from
-// [FloatingActionButtonLocation.endFloat].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

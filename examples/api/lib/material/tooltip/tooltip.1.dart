@@ -8,24 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Tooltip
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example covers most of the attributes available in Tooltip.
-// `decoration` has been used to give a gradient and borderRadius to Tooltip.
-// `height` has been used to set a specific height of the Tooltip.
-// `preferBelow` is false, the tooltip will prefer showing above [Tooltip]'s child widget.
-// However, it may show the tooltip below if there's not enough space
-// above the widget.
-// `textStyle` has been used to set the font size of the 'message'.
-// `showDuration` accepts a Duration to continue showing the message after the long
-// press has been released or the mouse pointer exits the child widget.
-// `waitDuration` accepts a Duration for which a mouse pointer has to hover over the child
-// widget before the tooltip is shown.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

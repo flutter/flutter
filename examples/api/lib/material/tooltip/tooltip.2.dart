@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Tooltip
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows a rich [Tooltip] that specifies the [richMessage]
-// parameter instead of the [message] parameter (only one of these may be
-// non-null. Any [InlineSpan] can be specified for the [richMessage] attribute,
-// including [WidgetSpan].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

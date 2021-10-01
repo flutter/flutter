@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for showModalBottomSheet
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example demonstrates how to use `showModalBottomSheet` to display a
-// bottom sheet that obscures the content behind it when a user taps a button.
-// It also demonstrates how to close the bottom sheet using the [Navigator]
-// when a user taps on a button inside the bottom sheet.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

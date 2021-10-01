@@ -8,22 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for RawScrollbar
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows an app with two scrollables in the same route. Since by
-// default, there is one [PrimaryScrollController] per route, and they both have a
-// scroll direction of [Axis.vertical], they would both try to attach to that
-// controller. The [Scrollbar] cannot support multiple positions attached to
-// the same controller, so one [ListView], and its [Scrollbar] have been
-// provided a unique [ScrollController].
-//
-// Alternatively, a new PrimaryScrollController could be created above one of
-// the [ListView]s.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

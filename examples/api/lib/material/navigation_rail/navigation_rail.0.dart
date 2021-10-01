@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for NavigationRail
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows a [NavigationRail] used within a Scaffold with 3
-// [NavigationRailDestination]s. The main content is separated by a divider
-// (although elevation on the navigation rail can be used instead). The
-// `_selectedIndex` is updated by the `onDestinationSelected` callback.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Action.Action.overridable
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample implements a custom text input field that handles the
-// [DeleteTextIntent] intent, as well as a US telephone number input widget
-// that consists of multiple text fields for area code, prefix and line
-// number. When the backspace key is pressed, the phone number input widget
-// sends the focus to the preceding text field when the currently focused
-// field becomes empty.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

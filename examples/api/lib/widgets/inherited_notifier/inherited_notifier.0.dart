@@ -8,25 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InheritedNotifier
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows three spinning squares that use the value of the notifier
-// on an ancestor [InheritedNotifier] (`SpinModel`) to give them their
-// rotation. The [InheritedNotifier] doesn't need to know about the children,
-// and the `notifier` argument doesn't need to be an animation controller, it
-// can be anything that implements [Listenable] (like a [ChangeNotifier]).
-//
-// The `SpinModel` class could just as easily listen to another object (say, a
-// separate object that keeps the value of an input or data model value) that
-// is a [Listenable], and get the value from that. The descendants also don't
-// need to have an instance of the [InheritedNotifier] in order to use it, they
-// just need to know that there is one in their ancestry. This can help with
-// decoupling widgets from their models.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //********************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

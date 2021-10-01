@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for OverflowBar
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example defines a simple approximation of a dialog
-// layout, where the layout of the dialog's action buttons are
-// defined by an [OverflowBar]. The content is wrapped in a
-// [SingleChildScrollView], so that if overflow occurs, the
-// action buttons will still be accessible by scrolling,
-// no matter how much vertical space is available.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

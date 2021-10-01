@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FlexibleSpaceBar
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample application demonstrates the different features of the
-// [FlexibleSpaceBar] when used in a [SliverAppBar]. This app bar is configured
-// to stretch into the overscroll space, and uses the
-// [FlexibleSpaceBar.stretchModes] to apply `fadeTitle`, `blurBackground` and
-// `zoomBackground`. The app bar also makes use of [CollapseMode.parallax] by
-// default.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

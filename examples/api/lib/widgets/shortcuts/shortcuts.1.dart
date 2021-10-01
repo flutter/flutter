@@ -8,24 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Shortcuts
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This slightly more complicated, but more flexible, example creates a custom
-// [Action] subclass to increment and decrement within a widget (a [Column])
-// that has keyboard focus. When the user presses the up and down arrow keys,
-// the counter will increment and decrement a data model using the custom
-// actions.
-//
-// One thing that this demonstrates is passing arguments to the [Intent] to be
-// carried to the [Action]. This shows how actions can get data either from
-// their own construction (like the `model` in this example), or from the
-// intent passed to them when invoked (like the increment `amount` in this
-// example).
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 //****************************************************************************

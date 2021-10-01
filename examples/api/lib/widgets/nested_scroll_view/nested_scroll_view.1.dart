@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for NestedScrollView
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This simple example shows a [NestedScrollView] whose header contains a
-// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
-// floating behavior is coordinated between the outer and inner [Scrollable]s,
-// so it behaves as it would in a single scrollable.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

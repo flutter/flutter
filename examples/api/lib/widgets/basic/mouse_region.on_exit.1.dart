@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for MouseRegion.onExit
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// The following example shows a widget that hides its content one second
-// after being hovered, and also exposes the enter and exit callbacks.
-// Because the widget conditionally creates the `MouseRegion`, and leaks the
-// hover state, it needs to take the restriction into consideration. In this
-// case, since it has access to the event that triggers the disappearance of
-// the `MouseRegion`, it simply trigger the exit callback during that event
-// as well.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

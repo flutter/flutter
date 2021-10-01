@@ -8,23 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FocusableActionDetector
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how keyboard interaction can be added to a custom control
-// that changes color when hovered and focused, and can toggle a light when
-// activated, either by touch or by hitting the `X` key on the keyboard when
-// the "And Me" button has the keyboard focus (be sure to use TAB to move the
-// focus to the "And Me" button before trying it out).
-//
-// This example defines its own key binding for the `X` key, but in this case,
-// there is also a default key binding for [ActivateAction] in the default key
-// bindings created by [WidgetsApp] (the parent for [MaterialApp], and
-// [CupertinoApp]), so the `ENTER` key will also activate the buttons.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 //****************************************************************************

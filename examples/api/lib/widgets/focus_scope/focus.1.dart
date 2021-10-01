@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Focus
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how to wrap another widget in a [Focus] widget to make it
-// focusable. It wraps a [Container], and changes the container's color when it
-// is set as the [FocusManager.primaryFocus].
-//
-// If you also want to handle mouse hover and/or keyboard actions on a widget,
-// consider using a [FocusableActionDetector], which combines several different
-// widgets to provide those capabilities.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

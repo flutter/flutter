@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Slider
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// ![A slider widget, consisting of 5 divisions and showing the default value
-// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
-//
-// The Sliders value is part of the Stateful widget subclass to change the value
-// setState was called.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

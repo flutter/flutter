@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for CheckboxListTile
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
-//
-// This widget shows a checkbox that, when checked, slows down all animations
-// (including the animation of the checkbox itself getting checked!).
-//
-// This sample requires that you also import 'package:flutter/scheduler.dart',
-// so that you can reference [timeDilation].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 //****************************************************************************

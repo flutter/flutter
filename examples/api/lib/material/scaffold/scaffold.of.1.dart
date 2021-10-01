@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Scaffold.of
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// When the [Scaffold] is actually created in the same `build` function, the
-// `context` argument to the `build` function can't be used to find the
-// [Scaffold] (since it's "above" the widget being returned in the widget
-// tree). In such cases, the following technique with a [Builder] can be used
-// to provide a new scope with a [BuildContext] that is "under" the
-// [Scaffold]:
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

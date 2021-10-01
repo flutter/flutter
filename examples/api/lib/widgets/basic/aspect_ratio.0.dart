@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for AspectRatio
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This examples shows how AspectRatio sets width when its parent's width
-// constraint is infinite. Since its parent's allowed height is a fixed value,
-// the actual width is determined via the given AspectRatio.
-//
-// Since the height is fixed at 100.0 in this example and the aspect ratio is
-// set to 16 / 9, the width should then be 100.0 / 9 * 16.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

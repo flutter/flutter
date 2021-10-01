@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Tooltip
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example show a basic [Tooltip] which has a [Text] as child.
-// [message] contains your label to be shown by the tooltip when
-// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
-// the tooltip is shown when the widget is long pressed.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

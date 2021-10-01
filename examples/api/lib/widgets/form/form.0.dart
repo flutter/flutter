@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Form
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows a [Form] with one [TextFormField] to enter an email
-// address and an [ElevatedButton] to submit the form. A [GlobalKey] is used here
-// to identify the [Form] and validate input.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

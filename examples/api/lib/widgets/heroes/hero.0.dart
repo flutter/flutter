@@ -8,23 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Hero
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows a [Hero] used within a [ListTile].
-//
-// Tapping on the Hero-wrapped rectangle triggers a hero
-// animation as a new [MaterialPageRoute] is pushed. Both the size
-// and location of the rectangle animates.
-//
-// Both widgets use the same [Hero.tag].
-//
-// The Hero widget uses the matching tags to identify and execute this
-// animation.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

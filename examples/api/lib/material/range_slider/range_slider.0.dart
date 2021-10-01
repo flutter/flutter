@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for RangeSlider
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// ![A range slider widget, consisting of 5 divisions and showing the default
-// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
-//
-// This range values are in intervals of 20 because the Range Slider has 5
-// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
-// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

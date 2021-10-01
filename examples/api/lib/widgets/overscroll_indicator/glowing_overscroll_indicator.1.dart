@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for GlowingOverscrollIndicator
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example demonstrates how to use a [NestedScrollView] to manipulate the
-// placement of a [GlowingOverscrollIndicator] when building a
-// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
-// indicator.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

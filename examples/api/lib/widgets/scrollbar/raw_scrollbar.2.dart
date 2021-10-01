@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for RawScrollbar
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without
-// the fade animation. This requires that a [ScrollController] is provided to
-// `controller` for both the [RawScrollbar] and the [GridView].
-// Alternatively, the [PrimaryScrollController] can be used automatically so long
-// as it is attached to the singular [ScrollPosition] associated with the GridView.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Shortcuts
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
-// from a counter. When the child widget has keyboard focus, and a user presses
-// the keys that have been defined in [Shortcuts], the action that is bound
-// to the appropriate [Intent] for the key is invoked.
-//
-// It also shows the use of a [CallbackAction] to avoid creating a new [Action]
-// subclass.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 //****************************************************************************

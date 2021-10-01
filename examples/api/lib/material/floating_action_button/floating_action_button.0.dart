@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FloatingActionButton
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how to display a [FloatingActionButton] in a
-// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

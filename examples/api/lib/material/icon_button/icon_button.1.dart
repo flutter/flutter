@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for IconButton
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// In this sample the icon button's background color is defined with an [Ink]
-// widget whose child is an [IconButton]. The icon button's filled background
-// is a light shade of blue, it's a filled circle, and it's as big as the
-// button is.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

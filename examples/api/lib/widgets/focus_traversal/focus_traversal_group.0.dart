@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FocusTraversalGroup
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows three rows of buttons, each grouped by a
-// [FocusTraversalGroup], each with different traversal order policies. Use tab
-// traversal to see the order they are traversed in.  The first row follows a
-// numerical order, the second follows a lexical order (ordered to traverse
-// right to left), and the third ignores the numerical order assigned to it and
-// traverses in widget order.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

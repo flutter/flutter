@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for FloatingActionButton
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how to make an extended [FloatingActionButton] in a
-// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
-// [Text] label that reads "Approve".
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

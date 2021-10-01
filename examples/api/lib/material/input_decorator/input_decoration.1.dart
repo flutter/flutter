@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InputDecoration
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to style a "collapsed" `TextField` using an
-// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
-// input area with a border, but does not add padding around them.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

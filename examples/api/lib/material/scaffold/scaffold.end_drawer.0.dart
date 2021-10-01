@@ -8,17 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for Scaffold.endDrawer
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// To disable the drawer edge swipe, set the
-// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
-// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
-// close it.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

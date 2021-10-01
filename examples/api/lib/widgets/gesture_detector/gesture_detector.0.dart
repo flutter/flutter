@@ -8,16 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for GestureDetector
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example contains a black light bulb wrapped in a [GestureDetector]. It
-// turns the light bulb yellow when the "TURN LIGHT ON" button is tapped by
-// setting the `_lights` field, and off again when "TURN LIGHT OFF" is tapped.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

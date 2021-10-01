@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for GestureDetector
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example uses a [Container] that wraps a [GestureDetector] widget which
-// detects a tap.
-//
-// Since the [GestureDetector] does not have a child, it takes on the size of its
-// parent, making the entire area of the surrounding [Container] clickable. When
-// tapped, the [Container] turns yellow by setting the `_color` field. When
-// tapped again, it goes back to white.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

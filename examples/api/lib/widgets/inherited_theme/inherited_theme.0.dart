@@ -8,21 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InheritedTheme
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example demonstrates how `InheritedTheme.capture()` can be used
-// to wrap the contents of a new route with the inherited themes that
-// are present when the route was built - but are not present when route
-// is actually shown.
-//
-// If the same code is run without `InheritedTheme.capture(), the
-// new route's Text widget will inherit the "something must be wrong"
-// fallback text style, rather than the default text style defined in MyApp.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //****************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)

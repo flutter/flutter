@@ -8,23 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for LogicalKeySet
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// In the following example, the counter is increased when the following key
-// sequences are pressed:
-//
-//  * Control left, then C.
-//  * Control right, then C.
-//  * C, then Control left.
-//
-// But not when:
-//
-//  * Control left, then A, then C.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 //****************************************************************************

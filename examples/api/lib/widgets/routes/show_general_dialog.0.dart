@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for showGeneralDialog
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample demonstrates how to create a restorable dialog. This is
-// accomplished by enabling state restoration by specifying
-// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
-// push [RawDialogRoute] when the button is tapped.
-//
-// {@macro flutter.widgets.RestorationManager}
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

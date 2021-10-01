@@ -8,18 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for InputDecoration
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows how to create a `TextField` with hint text, a red border
-// on all sides, and an error message. To display a red border and error
-// message, provide `errorText` to the `InputDecoration` constructor.
-//
-// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

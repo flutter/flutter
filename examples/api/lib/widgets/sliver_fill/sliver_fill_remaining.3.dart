@@ -8,20 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for SliverFillRemaining
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// In this sample the [SliverFillRemaining]'s child stretches to fill the
-// overscroll area when [fillOverscroll] is true. This sample also features a
-// button that is pinned to the bottom of the sliver, regardless of size or
-// overscroll behavior. Try switching [fillOverscroll] to see the difference.
-//
-// This sample only shows the overscroll behavior on devices that support
-// overscroll.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 

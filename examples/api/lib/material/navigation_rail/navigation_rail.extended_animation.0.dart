@@ -8,19 +8,7 @@
 // of samples, and may be ignored if you are just exploring the sample.
 
 // Flutter code sample for NavigationRail.extendedAnimation
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This example shows how to use this animation to create a [FloatingActionButton]
-// that animates itself between the normal and extended states of the
-// [NavigationRail].
-//
-// An instance of `MyNavigationRailFab` is created for [NavigationRail.leading].
-// Pressing the FAB button toggles the "extended" state of the [NavigationRail].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 //********************************************************************************
 //* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
