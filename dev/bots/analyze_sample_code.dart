@@ -678,7 +678,9 @@ class SampleChecker {
       if (sectionMap != null)
         sectionMap[path] = section;
     }
-    final TaskQueue<File> sampleQueue = TaskQueue<File>();
+    // TODO(dacoharkes): Remove workaround when pub global can run concurrently.
+    // https://github.com/dart-lang/pub/issues/3165
+    final TaskQueue<File> sampleQueue = TaskQueue<File>(maxJobs: 1);
     for (final Sample sample in samples) {
       final Future<File> futureFile = sampleQueue.add(() => _writeSample(sample));
       if (sampleMap != null) {
