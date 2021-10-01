@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Flutter code sample for FocusScope
-
 
 import 'package:flutter/material.dart';
 
@@ -167,5 +165,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     // of its parent.
     return LayoutBuilder(builder: _buildStack);
   }
-
 }

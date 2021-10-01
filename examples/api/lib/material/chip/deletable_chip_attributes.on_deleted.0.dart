@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Flutter code sample for DeletableChipAttributes.onDeleted
-
 
 import 'package:flutter/material.dart';
 
@@ -92,5 +90,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return const CastList();
   }
-
 }

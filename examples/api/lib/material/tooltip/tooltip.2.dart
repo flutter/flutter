@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Flutter code sample for Tooltip
-
 
 import 'package:flutter/material.dart';
 
@@ -50,5 +48,4 @@ class MyStatelessWidget extends StatelessWidget {
       child: Text('Tap this text and hold down to show a tooltip.'),
     );
   }
-
 }
