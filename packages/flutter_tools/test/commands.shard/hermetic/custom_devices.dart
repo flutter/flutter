@@ -234,6 +234,8 @@ class FakeTerminal implements Terminal {
     );
 
   @override
+  bool get singleCharMode => terminal.singleCharMode;
+  @override
   set singleCharMode(bool value) => terminal.singleCharMode = value;
 
   @override

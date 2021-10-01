@@ -2191,6 +2191,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required String projectRootPath,
     @required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);

@@ -81,11 +81,11 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # there are plenty of valid reasons to return null
-    # - avoid_returning_null_for_future # not yet tested
+    # - avoid_returning_null # still violated by some pre-nnbd code that we haven't yet migrated
+    - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     # - avoid_returning_this # there are plenty of valid reasons to return this
-    # - avoid_setters_without_getters # not yet tested
+    - avoid_setters_without_getters
     - avoid_shadowing_type_parameters
     - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io
