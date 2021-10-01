@@ -494,7 +494,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -551,7 +551,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -848,7 +848,7 @@ void main() {
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -1220,11 +1220,11 @@ class FakeWipConnection extends Fake implements WipConnection {
 class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
-  set instance(Chromium chromium) {
+  bool _hasInstance = false;
+  void setInstance(Chromium chromium) {
     _hasInstance = true;
     currentCompleter.complete(chromium);
   }
-  bool _hasInstance = false;
 
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();

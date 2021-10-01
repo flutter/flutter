@@ -1265,5 +1265,9 @@ class FakeFileSystem extends Fake implements FileSystem {
   p.Context get path => p.Context();
 
   @override
+  Directory get currentDirectory {
+    throw UnimplementedError();
+  }
+  @override
   set currentDirectory(dynamic path) { }
 }

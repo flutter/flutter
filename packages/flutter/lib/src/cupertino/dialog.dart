@@ -2012,6 +2012,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsLayout();
   }
 
+  Color get dialogColor => _buttonBackgroundPaint.color;
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
     if (value == _buttonBackgroundPaint.color)
@@ -2021,6 +2022,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dialogPressedColor => _pressedButtonBackgroundPaint.color;
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
     if (value == _pressedButtonBackgroundPaint.color)
@@ -2030,6 +2032,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dividerColor => _dividerPaint.color;
   final Paint _dividerPaint;
   set dividerColor(Color value) {
     if (value == _dividerPaint.color)
@@ -2039,8 +2042,8 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  bool _isActionSheet;
   bool get isActionSheet => _isActionSheet;
+  bool _isActionSheet;
   set isActionSheet(bool value) {
     if (value == _isActionSheet)
       return;
