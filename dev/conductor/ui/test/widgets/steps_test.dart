@@ -5,6 +5,7 @@
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:conductor_ui/widgets/progression.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
@@ -23,7 +24,9 @@ void main() {
         ),
       );
 
-      expect(find.text('Initialize a New Flutter Release'), findsOneWidget);
+      final List<Step> steps =
+          tester.widgetList<Step>(find.byType(Step)).toList();
+      expect(steps, hasLength(5));
     });
   });
 }
