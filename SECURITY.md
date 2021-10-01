@@ -29,11 +29,14 @@ who have been designated the "vulnerability management team" receive these e-mai
 such an e-mail, they will:
 
 0. Reply to the e-mail acknowledging its receipt, cc'ing `security@flutter.dev` so that the other
-   members of the team are aware that they are handling the issue.
+   members of the team are aware that they are handling the issue. If the e-mail does not describe
+   an actual vulnerability, the process will stop here. (Unfortunately, we do receive spam at this
+   address, as well as well-meaning but ultimately misguided reports that do not represent issues
+   for which this process is appropriate.)
 1. Create a new [security advisory](https://github.com/flutter/flutter/security/advisories/new).
    One must be one of the repo admins to do this. Vulnerability management team members who are not
    also a repo admin will reach out to the repo admins until they find one who can create the advisory.
-   The repo admins who are also vulnerability management team members are @Hixie, @tvolkert, and @pcsosinski.
+   The repo admins who are also vulnerability management team members are @Hixie and @tvolkert.
 2. [Add the reporter](https://docs.github.com/en/free-pro-team@latest/github/managing-security-vulnerabilities/adding-a-collaborator-to-a-security-advisory)
    to the security advisory so that they can get updates.
 3. Reopen https://github.com/flutter/flutter/issues/72555 to ensure that security vulnerabilities
