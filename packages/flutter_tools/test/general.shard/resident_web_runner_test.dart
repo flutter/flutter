@@ -279,11 +279,11 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
-    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     webDevFS.report = UpdateFSReport(success: false, syncedBytes: 0);
 
     expect(await residentWebRunner.run(), 1);
@@ -1115,6 +1115,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required String projectRootPath,
     @required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }

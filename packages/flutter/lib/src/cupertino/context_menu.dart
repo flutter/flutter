@@ -74,45 +74,10 @@ enum _ContextMenuLocation {
 /// Photos app on iOS.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: SizedBox(
-///         width: 100,
-///         height: 100,
-///         child: CupertinoContextMenu(
-///           child: Container(
-///             color: Colors.red,
-///           ),
-///           actions: <Widget>[
-///             CupertinoContextMenuAction(
-///               child: const Text('Action one'),
-///               onPressed: () {
-///                 Navigator.pop(context);
-///               },
-///             ),
-///             CupertinoContextMenuAction(
-///               child: const Text('Action two'),
-///               onPressed: () {
-///                 Navigator.pop(context);
-///               },
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -389,7 +354,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -793,8 +758,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
             children: <Widget>[
               Positioned.fromRect(
                 rect: sheetRect,
-                child: Opacity(
-                  opacity: _sheetOpacity.value,
+                child: FadeTransition(
+                  opacity: _sheetOpacity,
                   child: Transform.scale(
                     alignment: getSheetAlignment(_contextMenuLocation),
                     scale: sheetScale,
@@ -1063,8 +1028,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     return Transform.scale(
       alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
       scale: _sheetScaleAnimation.value,
-      child: Opacity(
-        opacity: _sheetOpacityAnimation.value,
+      child: FadeTransition(
+        opacity: _sheetOpacityAnimation,
         child: child,
       ),
     );

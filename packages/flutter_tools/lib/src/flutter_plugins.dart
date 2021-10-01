@@ -1271,7 +1271,6 @@ Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
-  File newMainDart,
   File mainFile, {
   bool throwOnPluginPubspecError = false,
 }) async {
@@ -1294,6 +1293,7 @@ Future<void> generateMainDartWithPluginRegistrant(
     MacOSPlugin.kConfigKey: <Object?>[],
     WindowsPlugin.kConfigKey: <Object?>[],
   };
+  final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
       if (newMainDart.existsSync()) {

@@ -26,13 +26,6 @@ final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutt
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
-/// Finds the location of the pub executable, with the assumption that it is
-/// in the same location as the Dart executable used to run this script.
-String get _pubExecutable {
-  final File dartExecutable = File(Platform.resolvedExecutable);
-  return path.join(path.dirname(dartExecutable.absolute.path), Platform.isWindows ? 'pub.exe' : 'pub');
-}
-
 Future<void> main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
@@ -129,8 +122,9 @@ Future<void> main(List<String> arguments) async {
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
       Process.runSync(
-        _pubExecutable,
+        Platform.resolvedExecutable,
         <String>[
+          'pub',
           'global',
           'activate',
           'snippets',
@@ -440,17 +434,35 @@ class SampleChecker {
   // The cached JSON Flutter version information from 'flutter --version --machine'.
   String? _flutterVersion;
 
-  Future<ProcessResult> _runSnippetsScript(List<String> args) async {
+  Future<Process> _runSnippetsScript(List<String> args) async {
     final String workingDirectory = path.join(_flutterRoot, 'dev', 'docs');
     if (_flutterVersion == null) {
       // Capture the flutter version information once so that the snippets tool doesn't
       // have to run it for every snippet.
+      if (verbose) {
+        print(<String>[_flutter, '--version', '--machine'].join(' '));
+      }
       final ProcessResult versionResult = Process.runSync(_flutter, <String>['--version', '--machine']);
+      if (verbose) {
+        stdout.write(versionResult.stdout);
+        stderr.write(versionResult.stderr);
+      }
       _flutterVersion = versionResult.stdout as String? ?? '';
     }
-    return Process.run(
-      _pubExecutable,
+    if (verbose) {
+      print(<String>[
+        Platform.resolvedExecutable,
+        'pub',
+        'global',
+        'run',
+        'snippets',
+        ...args,
+      ].join(' '));
+    }
+    return Process.start(
+      Platform.resolvedExecutable,
       <String>[
+        'pub',
         'global',
         'run',
         'snippets',
@@ -472,7 +484,14 @@ class SampleChecker {
     final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
-    final File inputFile = File(path.join(_tempDirectory.path, inputName))..createSync(recursive: true);
+    final String inputFilePath = path.join(_tempDirectory.path, inputName);
+    if (verbose) {
+      stdout.writeln('Creating $inputFilePath.');
+    }
+    final File inputFile = File(inputFilePath)..createSync(recursive: true);
+    if (verbose) {
+      stdout.writeln('Writing $inputFilePath.');
+    }
     inputFile.writeAsStringSync(sample.input.join('\n'));
     final File outputFile = File(path.join(_tempDirectory.path, '$sampleId.dart'));
     final List<String> args = <String>[
@@ -483,15 +502,22 @@ class SampleChecker {
       '--no-format-output',
       ...sample.args,
     ];
-    if (verbose)
+    if (verbose) {
       print('Generating sample for ${sample.start.filename}:${sample.start.line}');
-    final ProcessResult process = await _runSnippetsScript(args);
-    if (verbose)
-      stderr.write('${process.stderr}');
-    if (process.exitCode != 0) {
+    }
+    final Process process = await _runSnippetsScript(args);
+    if (verbose) {
+      process.stdout.transform(utf8.decoder).forEach(stdout.write);
+    }
+    process.stderr.transform(utf8.decoder).forEach(stderr.write);
+    final int exitCode = await process.exitCode.timeout(const Duration(seconds: 30), onTimeout: () {
+      stderr.writeln('Snippet script timed out.');
+      return -1;
+    });
+    if (exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
-            '(using input from ${inputFile.path}):\n${process.stdout}\n${process.stderr}',
+        '(using input from ${inputFile.path}).',
         file: sample.start.filename,
         line: sample.start.line,
       );
@@ -739,6 +765,12 @@ linter:
   rules:
     # Samples want to print things pretty often.
     avoid_print: false
+
+analyzer:
+  errors:
+    # TODO(https://github.com/flutter/flutter/issues/74381):
+    # Clean up existing unnecessary imports, and remove line to ignore.
+    unnecessary_import: ignore
 ''');
     }
   }

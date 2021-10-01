@@ -843,7 +843,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
   int _alpha;
 
@@ -895,12 +895,6 @@ class RenderOpacity extends RenderProxyBox {
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);
@@ -993,7 +987,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
+      _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
@@ -1008,12 +1002,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);
@@ -2382,8 +2370,8 @@ class RenderTransform extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: transformHitTests ? _effectiveTransform : null,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
       },
     );
   }
@@ -2677,8 +2665,8 @@ class RenderFittedBox extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: _transform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
       },
     );
   }
@@ -2763,8 +2751,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
           ? Offset(translation.dx * size.width, translation.dy * size.height)
           : null,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
       },
     );
   }
@@ -5056,7 +5044,6 @@ class RenderIndexedSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
     config.indexInParent = index;
   }
 
@@ -5296,8 +5283,8 @@ class RenderFollowerLayer extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: getCurrentTransform(),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return super.hitTestChildren(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
       },
     );
   }

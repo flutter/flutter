@@ -113,6 +113,11 @@ void main() {
     expect(materialWidget.color, Colors.grey[800]);
     expect(materialWidget.shape, _defaultDialogShape);
     expect(materialWidget.elevation, 24.0);
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dy, 360.0);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
@@ -235,6 +240,23 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Custom dialog alignment', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      alignment: Alignment.bottomLeft,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 40.0);
+    expect(bottomLeft.dy, 576.0);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
@@ -1297,54 +1319,6 @@ void main() {
     );
   });
 
-  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-
-    expect(semantics, includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    ));
-
-    semantics.dispose();
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/78229.
   testWidgets('AlertDialog has correct semantics for content in iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1378,7 +1352,6 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1547,7 +1520,6 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),

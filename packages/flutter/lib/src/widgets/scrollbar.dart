@@ -85,10 +85,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
+    OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
   }) : assert(color != null),
+       assert(radius == null || shape == null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
@@ -103,6 +105,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _textDirection = textDirection,
        _thickness = thickness,
        _radius = radius,
+       _shape = shape,
        _padding = padding,
        _mainAxisMargin = mainAxisMargin,
        _crossAxisMargin = crossAxisMargin,
@@ -217,6 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Radius? get radius => _radius;
   Radius? _radius;
   set radius(Radius? value) {
+    assert(shape == null || value == null);
     if (radius == value)
       return;
 
@@ -224,6 +228,26 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// The [OutlinedBorder] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [color] (or grey if it
+  /// is unspecified).
+  ///
+  OutlinedBorder? get shape => _shape;
+  OutlinedBorder? _shape;
+  set shape(OutlinedBorder? value){
+    assert(radius == null || value == null);
+    if(shape == value)
+      return;
+
+    _shape = value;
+    notifyListeners();
+  }
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
   ///
@@ -438,19 +462,37 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         break;
     }
 
+    // Whether we paint or not, calculating these rects allows us to hit test
+    // when the scrollbar is transparent.
     _trackRect = trackOffset & trackSize;
-    canvas.drawRect(_trackRect!, _paintTrack());
-    canvas.drawLine(
-      trackOffset,
-      Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
-      _paintTrack(isBorder: true),
-    );
-
     _thumbRect = Offset(x, y) & thumbSize;
-    if (radius == null)
-      canvas.drawRect(_thumbRect!, _paintThumb);
-    else
-      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+
+    // Paint if the opacity dictates visibility
+    if (fadeoutOpacityAnimation.value != 0.0) {
+      // Track
+      canvas.drawRect(_trackRect!, _paintTrack());
+      // Track Border
+      canvas.drawLine(
+        trackOffset,
+        Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
+        _paintTrack(isBorder: true),
+      );
+      if (radius != null) {
+        // Rounded rect thumb
+        canvas.drawRRect(
+            RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+        return;
+      }
+      if (shape == null) {
+        // Square thumb
+        canvas.drawRect(_thumbRect!, _paintThumb);
+        return;
+      }
+      // Custom-shaped thumb
+      final Path outerPath = shape!.getOuterPath(_thumbRect!);
+      canvas.drawPath(outerPath, _paintThumb);
+      shape!.paint(canvas, _thumbRect!);
+    }
   }
 
   double _thumbExtent() {
@@ -539,7 +581,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null
         || _lastMetrics == null
-        || fadeoutOpacityAnimation.value == 0.0
         || _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent)
       return;
 
@@ -572,7 +613,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// be used.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
     if (_thumbRect == null) {
-      // We have never painted the scrollbar, so we do not know where it will be.
+      // We have not computed the scrollbar position yet.
       return false;
     }
 
@@ -716,64 +757,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
 ///
-/// ```dart
-/// final ScrollController _firstController = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return LayoutBuilder(
-///       builder: (BuildContext context, BoxConstraints constraints) {
-///         return Row(
-///           children: <Widget>[
-///             SizedBox(
-///                 width: constraints.maxWidth / 2,
-///                 // Only one scroll position can be attached to the
-///                 // PrimaryScrollController if using Scrollbars. Providing a
-///                 // unique scroll controller to this scroll view prevents it
-///                 // from attaching to the PrimaryScrollController.
-///                 child: Scrollbar(
-///                   isAlwaysShown: true,
-///                   controller: _firstController,
-///                   child: ListView.builder(
-///                       controller: _firstController,
-///                       itemCount: 100,
-///                       itemBuilder: (BuildContext context, int index) {
-///                         return Padding(
-///                           padding: const EdgeInsets.all(8.0),
-///                           child: Text('Scrollable 1 : Index $index'),
-///                         );
-///                       }
-///                   ),
-///                 )
-///             ),
-///             SizedBox(
-///                 width: constraints.maxWidth / 2,
-///                 // This vertical scroll view has not been provided a
-///                 // ScrollController, so it is using the
-///                 // PrimaryScrollController.
-///                 child: Scrollbar(
-///                   isAlwaysShown: true,
-///                   child: ListView.builder(
-///                       itemCount: 100,
-///                       itemBuilder: (BuildContext context, int index) {
-///                         return Container(
-///                             height: 50,
-///                             color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
-///                             child: Padding(
-///                               padding: const EdgeInsets.all(8.0),
-///                               child: Text('Scrollable 2 : Index $index'),
-///                             )
-///                         );
-///                       }
-///                   ),
-///                 )
-///             ),
-///           ],
-///         );
-///       }
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart **
 /// {@end-tool}
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
@@ -803,22 +787,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [PrimaryScrollController] since it has an [Axis.vertical] scroll direction
 /// and has not been provided a [ScrollController].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return RawScrollbar(
-///     child: GridView.builder(
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
@@ -828,28 +797,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, the [PrimaryScrollController] can be used automatically so long
 /// as it is attached to the singular [ScrollPosition] associated with the GridView.
 ///
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return RawScrollbar(
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: GridView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -869,6 +817,7 @@ class RawScrollbar extends StatefulWidget {
     required this.child,
     this.controller,
     this.isAlwaysShown,
+    this.shape,
     this.radius,
     this.thickness,
     this.thumbColor,
@@ -888,6 +837,7 @@ class RawScrollbar extends StatefulWidget {
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(fadeDuration != null),
+       assert(radius == null || shape == null),
        assert(timeToFade != null),
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
@@ -1036,6 +986,39 @@ class RawScrollbar extends StatefulWidget {
   ///     a subtree.
   /// {@endtemplate}
   final bool? isAlwaysShown;
+
+  /// The [OutlinedBorder] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
+  /// is unspecified).
+  ///
+  /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar]:
+  ///
+  /// {@tool dartpad --template=stateless_widget_material}
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: RawScrollbar(
+  ///       child: ListView(
+  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
+  ///         physics: const BouncingScrollPhysics(),
+  ///       ),
+  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
+  ///       thickness: 15.0,
+  ///       thumbColor: Colors.blue,
+  ///       isAlwaysShown: true,
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final OutlinedBorder? shape;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
@@ -1217,6 +1200,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
+      shape: widget.shape,
       crossAxisMargin: widget.crossAxisMargin
     );
   }
@@ -1346,6 +1330,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..padding = MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
+      ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;

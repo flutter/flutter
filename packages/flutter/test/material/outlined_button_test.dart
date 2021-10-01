@@ -613,6 +613,182 @@ void main() {
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
   });
 
+  testWidgets("OutlinedButton response doesn't hover when disabled", (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Focus');
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: OutlinedButton(
+              autofocus: true,
+              onPressed: () {},
+              onLongPress: () {},
+              onHover: (bool value) { hovering = value; },
+              focusNode: focusNode,
+              child: SizedBox(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    await tester.pumpAndSettle();
+    expect(hovering, isTrue);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: OutlinedButton(
+              focusNode: focusNode,
+              onHover: (bool value) { hovering = value; },
+              onPressed: null,
+              child: SizedBox(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('disabled and hovered OutlinedButton responds to mouse-exit', (WidgetTester tester) async {
+    int onHoverCount = 0;
+    late bool hover;
+
+    Widget buildFrame({ required bool enabled }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: OutlinedButton(
+                onPressed: enabled ? () { } : null,
+                onHover: (bool value) {
+                  onHoverCount += 1;
+                  hover = value;
+                },
+                child: const Text('OutlinedButton'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)));
+    await tester.pumpAndSettle();
+    expect(onHoverCount, 1);
+    expect(hover, true);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(Offset.zero);
+    // Even though the OutlinedButton has been disabled, the mouse-exit still
+    // causes onHover(false) to be called.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)));
+    await tester.pumpAndSettle();
+    // We no longer see hover events because the OutlinedButton is disabled
+    // and it's no longer in the "hovering" state.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    await tester.pumpAndSettle();
+    // The OutlinedButton was enabled while it contained the mouse, however
+    // we do not call onHover() because it may call setState().
+    expect(onHoverCount, 2);
+    expect(hover, false);
+
+    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)) - const Offset(1, 1));
+    await tester.pumpAndSettle();
+    // Moving the mouse a little within the OutlinedButton doesn't change anything.
+    expect(onHoverCount, 2);
+    expect(hover, false);
+  });
+
+  testWidgets('Can set OutlinedButton focus and Can set unFocus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: OutlinedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: () {  },
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('When OutlinedButton disable, Can not set OutlinedButton focus.', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: OutlinedButton(
+            focusNode: node,
+            onFocusChange: (bool focused) => gotFocus = focused,
+            onPressed: null,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
     Widget buildFrame(VoidCallback? onPressed) {
       return Directionality(

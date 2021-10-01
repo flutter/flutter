@@ -148,7 +148,12 @@ class _FlutterProject {
 
   Future<void> build(String target) async {
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput =  await evalFlutter('build', options: <String>[target, '-v']);
+      final String buildOutput =  await evalFlutter('build', options: <String>[
+        target,
+        '-v',
+        if (target == 'ios')
+          '--no-codesign',
+      ]);
 
       if (target == 'ios' || target == 'macos') {
         // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
