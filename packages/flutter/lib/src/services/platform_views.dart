@@ -790,13 +790,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   int? get textureId;
 
-  /// The unique identifier of the Android view controlled by this controller.
-  @Deprecated(
-    'Call `controller.viewId` instead. '
-    'This feature was deprecated after v1.20.0-2.0.pre.',
-  )
-  int get id => viewId;
-
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
