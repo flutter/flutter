@@ -121,7 +121,7 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
-      ProcessResult activateResult = Process.runSync(
+      final activateResult = Process.runSync(
         Platform.resolvedExecutable,
         <String>[
           'pub',
