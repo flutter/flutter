@@ -1,0 +1,30 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+source_set("base_view") {
+  sources = [
+    "base_view.cc",
+    "base_view.h",
+    "embedded_view_utils.cc",
+    "embedded_view_utils.h",
+    "math.h",
+  ]
+
+  include_dirs = [ "//flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/fuchsia_testing" ]
+
+  public_deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.sys",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.views",
+    "$fuchsia_sdk_root/pkg:scenic_cpp",
+    "$fuchsia_sdk_root/pkg:sys_cpp",
+    "//flutter/fml",
+  ]
+
+  deps = [ "$fuchsia_sdk_root/pkg:trace" ]
+}

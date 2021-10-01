@@ -1,27 +1,36 @@
 # This configuration file specifies several test suites with their package and
 # test command for femu_test.py.
 
-- package: flutter_runner_tzdata_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
-- package: fml_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
-- package: flow_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
-- package: runtime_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
-- package: shell_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
-- package: testing_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
-- package: txt_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
-- package: ui_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
-- package: embedder_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
-- package: dart_utils_tests-0.far
-  test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
+# Legacy Component Framework v1 components.
+- test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
+  package: flutter_runner_tests-0.far
+# TODO(richkadel): Enable this test once the CI fuchsia image for femu tests has been updated to
+# meet the test requirements. Changes are in progress to support this test.
+# - test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
+#   packages:
+#     - flutter-embedder-test2-0.far
+#     - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/child-view2/child-view2/child-view2.far
+#     - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/parent-view2/parent-view2/parent-view2.far
+#     - flutter_jit_runner-0.far
 
-# Legacy v1 components.
-- package: flutter_runner_tests-0.far
-  test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
+# v2 components.
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
+  package: flutter_runner_tzdata_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/fml_tests#meta/fml_tests.cm -- --gtest_filter=-MessageLoop.TimeSensitiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure
+  package: fml_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
+  package: flow_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
+  package: runtime_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm -- --gtest_filter=-ShellTest.ReportTimingsIsCalledLaterInReleaseMode:ShellTest.ReportTimingsIsCalledSoonerInNonReleaseMode:ShellTest.DisallowedDartVMFlag:FuchsiaShellTest.LocaltimesVaryOnTimezoneChanges
+  package: shell_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/testing_tests#meta/testing_tests.cm
+  package: testing_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/txt_tests#meta/txt_tests.cm -- --gtest_filter=-ParagraphTest.*
+  package: txt_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
+  package: ui_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
+  package: embedder_tests-0.far
+- test_command: run-test-suite fuchsia-pkg://fuchsia.com/dart_utils_tests#meta/dart_utils_tests.cm
+  package: dart_utils_tests-0.far

@@ -10,7 +10,7 @@
 # launch the vm service in the runner.
 flutter_debug_build_cfg = {
   runtime_meta = "//flutter/shell/platform/fuchsia/flutter/meta/jit_runtime"
-  runner_dep = "//flutter/shell/platform/fuchsia/flutter:jit"
+  runner_dep = "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner"
   platform_name = "flutter_runner"
   is_aot = false
   is_product = false
@@ -26,7 +26,7 @@ flutter_debug_build_cfg = {
 # # profile aot runner is built without asserts.
 # flutter_aot_debug_build_cfg = {
 #   runtime_meta = "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"
-#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:flutter_aot_runner"
 #   platform_name = "flutter_runner"
 #   is_aot = true
 #   is_product = false
@@ -39,7 +39,7 @@ flutter_debug_build_cfg = {
 #   runtime_meta =
 #       "//flutter/shell/platform/fuchsia/flutter/meta/aot_runtime"  # profile
 #                                                                    # runner
-#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot"
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:flutter_aot_runner"
 #   platform_name = "flutter_runner"
 #   is_aot = true
 #   is_product = false
@@ -51,7 +51,7 @@ flutter_debug_build_cfg = {
 # flutter_release_build_cfg = {
 #   runtime_meta =
 #       "//flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime"
-#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:aot_product"
+#   runner_dep = "//flutter/shell/platform/fuchsia/flutter:flutter_aot_product_runner"
 #   platform_name = "flutter_runner"
 #   is_aot = true
 #   is_product = true

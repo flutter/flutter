@@ -448,6 +448,9 @@ deps = {
   'src/third_party/pkg/process_runner':
   Var('github_git') + '/google/process_runner.git' + '@' + 'd632ea0bfd814d779fcc53a361ed33eaf3620a0b', # 4.0.1
 
+  'src/third_party/pkg/quiver':
+  Var('github_git') + '/google/quiver-dart.git' + '@' + '66f473cca1332496e34a783ba4527b04388fd561', # 2.1.5
+
   'src/third_party/pkg/vector_math':
   Var('github_git') + '/google/vector_math.dart.git' + '@' + 'v2.1.0',
 
