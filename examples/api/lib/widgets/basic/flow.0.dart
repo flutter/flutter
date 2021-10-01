@@ -10,9 +10,6 @@
 // Flutter code sample for Flow
 
 
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:flutter/material.dart';
 
 void main() => runApp(const FlowApp());

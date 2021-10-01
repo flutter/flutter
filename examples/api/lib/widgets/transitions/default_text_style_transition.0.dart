@@ -41,9 +41,6 @@ class MyStatefulWidget extends StatefulWidget {
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with TickerProviderStateMixin {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   late AnimationController _controller;
   late TextStyleTween _styleTween;
   late CurvedAnimation _curvedAnimation;
@@ -82,8 +79,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

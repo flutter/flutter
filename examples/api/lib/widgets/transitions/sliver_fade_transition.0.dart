@@ -43,9 +43,6 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// This is the private State class that goes with MyStatefulWidget.
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(

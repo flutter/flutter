@@ -42,9 +42,6 @@ class MyStatefulWidget extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   bool isSameAddress = true;
   final TextEditingController shippingAddress1 = TextEditingController();
   final TextEditingController shippingAddress2 = TextEditingController();
@@ -137,8 +134,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ],
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

@@ -29,9 +29,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 class AlmostEndFloatFabLocation extends StandardFabLocation
     with FabEndOffsetX, FabFloatOffsetY {
   @override
@@ -44,17 +41,11 @@ class AlmostEndFloatFabLocation extends StandardFabLocation
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
 /// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -70,8 +61,5 @@ class MyStatelessWidget extends StatelessWidget {
       floatingActionButtonLocation: AlmostEndFloatFabLocation(),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

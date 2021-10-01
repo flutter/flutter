@@ -37,9 +37,6 @@ class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return CustomScrollView(
       // The ScrollPhysics are overridden here to illustrate the functionality
@@ -84,8 +81,5 @@ class MyStatelessWidget extends StatelessWidget {
       ],
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

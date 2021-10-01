@@ -29,9 +29,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 // This is the path that the child will follow. It's a CatmullRomSpline so
 // that the coordinates can be specified that it must pass through. If the
 // tension is set to 1.0, it will linearly interpolate between those points,
@@ -107,17 +104,11 @@ class _FollowCurve2DState extends State<FollowCurve2D>
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
 /// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
@@ -136,8 +127,5 @@ class MyStatelessWidget extends StatelessWidget {
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

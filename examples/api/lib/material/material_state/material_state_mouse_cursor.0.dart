@@ -11,13 +11,7 @@
 
 
 import 'package:flutter/material.dart';
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:flutter/rendering.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
 
 void main() => runApp(const MyApp());
 
@@ -41,9 +35,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 class ListTileCursor extends MaterialStateMouseCursor {
   @override
   MouseCursor resolve(Set<MaterialState> states) {
@@ -57,17 +48,11 @@ class ListTileCursor extends MaterialStateMouseCursor {
   String get debugDescription => 'ListTileCursor()';
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
 /// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text('Disabled ListTile'),
@@ -75,8 +60,5 @@ class MyStatelessWidget extends StatelessWidget {
       mouseCursor: ListTileCursor(),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

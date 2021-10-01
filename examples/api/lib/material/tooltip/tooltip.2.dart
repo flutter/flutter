@@ -39,9 +39,6 @@ class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return const Tooltip(
       richMessage: TextSpan(
@@ -57,8 +54,5 @@ class MyStatelessWidget extends StatelessWidget {
       child: Text('Tap this text and hold down to show a tooltip.'),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

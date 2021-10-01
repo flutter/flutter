@@ -51,9 +51,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   @override
   String? get restorationId => widget.restorationId;
 
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   // The current value of the answer is stored in a [RestorableProperty].
   // During state restoration it is automatically restored to its old value.
   // If no restoration data is available to restore the answer from, it is
@@ -90,8 +87,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       onPressed: _incrementAnswer,
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

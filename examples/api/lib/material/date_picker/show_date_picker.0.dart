@@ -49,9 +49,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   @override
   String? get restorationId => widget.restorationId;
 
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   final RestorableDateTime _selectedDate =
       RestorableDateTime(DateTime(2021, 7, 25));
   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture =
@@ -115,8 +112,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

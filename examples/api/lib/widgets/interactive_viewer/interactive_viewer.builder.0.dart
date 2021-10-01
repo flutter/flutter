@@ -12,9 +12,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 void main() => runApp(const IVBuilderExampleApp());

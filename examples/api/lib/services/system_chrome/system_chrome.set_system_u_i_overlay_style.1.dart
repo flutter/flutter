@@ -10,22 +10,10 @@
 // Flutter code sample for SystemChrome.setSystemUIOverlayStyle
 
 
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'dart:math' as math;
 
-//* ▲▲▲▲▲▲▲▲ code-dartImports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
 import 'package:flutter/material.dart';
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:flutter/services.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
 
 void main() => runApp(const MyApp());
 
@@ -54,9 +42,6 @@ class MyStatefulWidget extends StatefulWidget {
 
 /// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   final math.Random _random = math.Random();
   SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
 
@@ -86,8 +71,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

@@ -10,13 +10,7 @@
 // Flutter code sample for AnimatedBuilder
 
 
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'dart:math' as math;
-
-//* ▲▲▲▲▲▲▲▲ code-dartImports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
 
 import 'package:flutter/material.dart';
 
@@ -49,9 +43,6 @@ class MyStatefulWidget extends StatefulWidget {
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with TickerProviderStateMixin {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 10),
     vsync: this,
@@ -83,8 +74,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       },
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

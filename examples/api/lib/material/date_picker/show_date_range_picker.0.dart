@@ -49,9 +49,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   @override
   String? get restorationId => widget.restorationId;
 
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   final RestorableDateTimeN _startDate =
       RestorableDateTimeN(DateTime(2021, 1, 1));
   final RestorableDateTimeN _endDate =
@@ -132,8 +129,5 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
 
 }

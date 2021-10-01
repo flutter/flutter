@@ -10,26 +10,11 @@
 // Flutter code sample for NavigationRail.extendedAnimation
 
 
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'dart:ui';
-
-//* ▲▲▲▲▲▲▲▲ code-dartImports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
 
 import 'package:flutter/material.dart';
 
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 void main() => runApp(const MyApp());
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -106,12 +91,6 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 class MyNavigationRailFab extends StatelessWidget {
   const MyNavigationRailFab({Key? key, this.onPressed}) : super(key: key);
