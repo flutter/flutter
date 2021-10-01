@@ -63,20 +63,8 @@ template("_fuchsia_dart_library") {
   }
 
   foreach(third_party_dep, meta.third_party_deps) {
-    name = third_party_dep.name
-    version = third_party_dep.version
-    args += [
-      name,
-      version,
-    ]
+    _deps += [ "//flutter/shell/platform/fuchsia/dart:" + third_party_dep.name ]
   }
-
-  third_party_deps_json =
-      exec_script("//flutter/tools/fuchsia/sdk/find_dart_libraries.py",
-                  args,
-                  "json")
-
-  _deps += third_party_deps_json
 
   dart_library(target_name) {
     package_root = "${_fuchsia_sdk_path}/${meta.root}"

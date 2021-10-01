@@ -47,6 +47,15 @@ function engine-error {
   fi
 }
 
+# engine-warning prints a line to stderr with a yellow WARNING: prefix.
+function engine-warning {
+  if engine-is-stderr-tty; then
+    echo -e >&2 "\033[1;33mWARNING:\033[0m $*"
+  else
+    echo -e >&2 "WARNING: $*"
+  fi
+}
+
 function ensure_fuchsia_dir() {
   if [[ -z "${FUCHSIA_DIR}" ]]; then
     engine-error "A valid fuchsia.git checkout is required." \

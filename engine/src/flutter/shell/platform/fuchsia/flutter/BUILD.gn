@@ -820,5 +820,6 @@ group("tests") {
     ":testing_tests",
     ":txt_tests",
     ":ui_tests",
+    "integration_flutter_tests",
   ]
 }
