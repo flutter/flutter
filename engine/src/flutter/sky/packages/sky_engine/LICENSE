@@ -295,6 +295,7 @@ etc1
 fuchsia-vulkan
 khronos
 libwebp
+pkg
 txt
 vulkan
 vulkan-deps
