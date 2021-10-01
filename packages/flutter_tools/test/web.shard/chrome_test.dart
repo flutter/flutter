@@ -12,9 +12,9 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 
-import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../src/common.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 const List<String> kChromeArgs = <String>[
   '--disable-background-timer-throttling',
@@ -547,7 +547,7 @@ void main() {
       contains('Unable to connect to Chrome debug port:'),
     );
     expect(logger.errorText, contains('SocketException'));
-  }, timeout: const Timeout.factor(2));
+  });
 }
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
