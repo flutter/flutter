@@ -160,13 +160,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   Action<T>? _currentCallingAction;
-  set _callingAction(Action<T>? newAction) {
-    if (newAction == _currentCallingAction) {
-      return;
-    }
-    assert(newAction == null || _currentCallingAction == null);
-    _currentCallingAction = newAction;
+  void _updateCallingAction(Action<T>? value) {
+    _currentCallingAction = value;
   }
+
   /// The [Action] overridden by this [Action].
   ///
   /// The [Action.overridable] constructor creates an overridable [Action] that
@@ -1526,9 +1523,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  set _callingAction(Action<T>? newAction) {
-    super._callingAction = newAction;
-    defaultAction._callingAction = newAction;
+  void _updateCallingAction(Action<T>? value) {
+    super._updateCallingAction(value);
+    defaultAction._updateCallingAction(value);
   }
 
   Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
@@ -1537,11 +1534,11 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       debugAssertMutuallyRecursive = true;
       return true;
     }());
-    overrideAction._callingAction = defaultAction;
+    overrideAction._updateCallingAction(defaultAction);
     final Object? returnValue = overrideAction is ContextAction<T>
       ? overrideAction.invoke(intent, context)
       : overrideAction.invoke(intent);
-    overrideAction._callingAction = null;
+    overrideAction._updateCallingAction(null);
     assert(() {
       debugAssertMutuallyRecursive = false;
       return true;
@@ -1564,9 +1561,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       debugAssertIsActionEnabledMutuallyRecursive = true;
       return true;
     }());
-    overrideAction._callingAction = defaultAction;
+    overrideAction._updateCallingAction(defaultAction);
     final bool isOverrideEnabled = overrideAction.isActionEnabled;
-    overrideAction._callingAction = null;
+    overrideAction._updateCallingAction(null);
     assert(() {
       debugAssertIsActionEnabledMutuallyRecursive = false;
       return true;
@@ -1592,9 +1589,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
     }());
 
     final Action<T>? overrideAction = getOverrideAction();
-    overrideAction?._callingAction = defaultAction;
+    overrideAction?._updateCallingAction(defaultAction);
     final bool returnValue = (overrideAction ?? defaultAction).isEnabled(intent);
-    overrideAction?._callingAction = null;
+    overrideAction?._updateCallingAction(null);
     assert(() {
       debugAssertIsEnabledMutuallyRecursive = false;
       return true;
@@ -1610,9 +1607,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
       return true;
     }());
     final Action<T>? overrideAction = getOverrideAction();
-    overrideAction?._callingAction = defaultAction;
+    overrideAction?._updateCallingAction(defaultAction);
     final bool isEnabled = (overrideAction ?? defaultAction).consumesKey(intent);
-    overrideAction?._callingAction = null;
+    overrideAction?._updateCallingAction(null);
     assert(() {
       debugAssertConsumeKeyMutuallyRecursive = false;
       return true;
@@ -1674,11 +1671,11 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
     // overrideAction is not a ContextAction and thus have no access to the
     // calling BuildContext.
     final Action<T> wrappedDefault = _ContextActionToActionAdapter<T>(invokeContext: context!, action: defaultAction);
-    overrideAction._callingAction = wrappedDefault;
+    overrideAction._updateCallingAction(wrappedDefault);
     final Object? returnValue = overrideAction is ContextAction<T>
       ? overrideAction.invoke(intent, context)
       : overrideAction.invoke(intent);
-    overrideAction._callingAction = null;
+    overrideAction._updateCallingAction(null);
 
     assert(() {
       debugAssertMutuallyRecursive = false;
@@ -1710,8 +1707,8 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   final ContextAction<T> action;
 
   @override
-  set _callingAction(Action<T>? newAction) {
-    action._callingAction = newAction;
+  void _updateCallingAction(Action<T>? value) {
+    action._updateCallingAction(value);
   }
 
   @override

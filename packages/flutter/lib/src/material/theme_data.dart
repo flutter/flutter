@@ -28,6 +28,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
@@ -317,6 +318,7 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     Typography? typography,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
@@ -462,6 +464,7 @@ class ThemeData with Diagnosticable {
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
@@ -543,6 +546,7 @@ class ThemeData with Diagnosticable {
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      navigationBarTheme: navigationBarTheme,
       navigationRailTheme: navigationRailTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
@@ -677,6 +681,7 @@ class ThemeData with Diagnosticable {
     required this.colorScheme,
     required this.dialogTheme,
     required this.floatingActionButtonTheme,
+    required this.navigationBarTheme,
     required this.navigationRailTheme,
     required this.typography,
     required this.cupertinoOverrideTheme,
@@ -763,6 +768,7 @@ class ThemeData with Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(navigationBarTheme != null),
        assert(navigationRailTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
@@ -1269,6 +1275,10 @@ class ThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the background color, text style, and icon themes
+  /// of a [NavigationBar].
+  final NavigationBarThemeData navigationBarTheme;
+
   /// A theme for customizing the background color, elevation, text style, and
   /// icon themes of a [NavigationRail].
   final NavigationRailThemeData navigationRailTheme;
@@ -1485,6 +1495,7 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     Typography? typography,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
@@ -1576,6 +1587,7 @@ class ThemeData with Diagnosticable {
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
@@ -1737,6 +1749,7 @@ class ThemeData with Diagnosticable {
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
+      navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
@@ -1826,6 +1839,7 @@ class ThemeData with Diagnosticable {
         && other.colorScheme == colorScheme
         && other.dialogTheme == dialogTheme
         && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.navigationBarTheme == navigationBarTheme
         && other.navigationRailTheme == navigationRailTheme
         && other.typography == typography
         && other.cupertinoOverrideTheme == cupertinoOverrideTheme
@@ -1914,6 +1928,7 @@ class ThemeData with Diagnosticable {
       colorScheme,
       dialogTheme,
       floatingActionButtonTheme,
+      navigationBarTheme,
       navigationRailTheme,
       typography,
       cupertinoOverrideTheme,
@@ -1999,6 +2014,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));

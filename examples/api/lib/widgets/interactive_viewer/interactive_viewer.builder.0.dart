@@ -46,7 +46,7 @@ class IVBuilderExampleApp extends StatelessWidget {
 
 class _IVBuilderExample extends StatefulWidget {
   @override
-  _IVBuilderExampleState createState() => _IVBuilderExampleState();
+  State<_IVBuilderExample> createState() => _IVBuilderExampleState();
 }
 
 class _IVBuilderExampleState extends State<_IVBuilderExample> {
@@ -58,7 +58,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
-  late Quad _cachedViewport;
+  Quad? _cachedViewport;
   late int _firstVisibleRow;
   late int _firstVisibleColumn;
   late int _lastVisibleRow;

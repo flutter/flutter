@@ -2375,10 +2375,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool selectionChanged = _value.selection != value.selection;
 
     if (textChanged) {
-      value = widget.inputFormatters?.fold<TextEditingValue>(
-        value,
-        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-      ) ?? value;
+      try {
+        value = widget.inputFormatters?.fold<TextEditingValue>(
+          value,
+          (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+        ) ?? value;
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while applying input formatters'),
+        ));
+      }
     }
 
     // Put all optional user callback invocations in a batch edit to prevent

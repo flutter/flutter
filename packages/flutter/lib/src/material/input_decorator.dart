@@ -373,8 +373,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     assert(widget.helperText != null);
     return Semantics(
       container: true,
-      child: Opacity(
-        opacity: 1.0 - _controller.value,
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
         child: Text(
           widget.helperText!,
           style: widget.helperStyle,
@@ -391,8 +391,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     return Semantics(
       container: true,
       liveRegion: true,
-      child: Opacity(
-        opacity: _controller.value,
+      child: FadeTransition(
+        opacity: _controller,
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
@@ -441,8 +441,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     if (widget.errorText != null) {
       return Stack(
         children: <Widget>[
-          Opacity(
-            opacity: 1.0 - _controller.value,
+          FadeTransition(
+            opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
             child: _helper,
           ),
           _buildError(),
@@ -454,8 +454,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return Stack(
         children: <Widget>[
           _buildHelper(),
-          Opacity(
-            opacity: _controller.value,
+          FadeTransition(
+            opacity: _controller,
             child: _error,
           ),
         ],
@@ -2231,14 +2231,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    final TextStyle? inlineLabelStyle = decoration!.label != null ? decoration!.labelStyle : decoration!.hintStyle;
-
     // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
     // Setting TextStyle.height to 1 ensures that the label's height will equal
     // its font size.
-    final TextStyle effectiveInlineLabelStyle = themeData.fixTextFieldOutlineLabel
-      ? inlineStyle.merge(inlineLabelStyle).copyWith(height: 1)
-      : inlineStyle.merge(inlineLabelStyle);
+    final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
+      ? inlineStyle.merge(decoration!.labelStyle).copyWith(height: 1)
+      : inlineStyle.merge(decoration!.labelStyle);
     final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2250,7 +2248,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           curve: _kTransitionCurve,
           style: widget._labelShouldWithdraw
             ? _getFloatingLabelStyle(themeData)
-            : effectiveInlineLabelStyle,
+            : inlineLabelStyle,
           child: decoration!.label ?? Text(
             decoration!.labelText!,
             overflow: TextOverflow.ellipsis,
@@ -2373,7 +2371,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * effectiveInlineLabelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
       if (decoration!.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)

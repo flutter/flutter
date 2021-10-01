@@ -883,6 +883,41 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar will show on hover without needing to scroll first for metrics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: RawScrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Hover over scrollbar with mouse. Even though we have not scrolled, the
+    // ScrollMetricsNotification will have informed the Scrollbar's hit testing.
+    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await mouseGesture.addPointer();
+    addTearDown(mouseGesture.removePointer);
+    await mouseGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+    // Scrollbar should have appeared in response to hover event.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(

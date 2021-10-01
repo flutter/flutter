@@ -279,11 +279,11 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
-    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     webDevFS.report = UpdateFSReport(success: false, syncedBytes: 0);
 
     expect(await residentWebRunner.run(), 1);
@@ -494,7 +494,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -551,7 +551,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -848,7 +848,7 @@ void main() {
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -1115,6 +1115,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required String projectRootPath,
     @required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -1219,11 +1220,11 @@ class FakeWipConnection extends Fake implements WipConnection {
 class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
-  set instance(Chromium chromium) {
+  bool _hasInstance = false;
+  void setInstance(Chromium chromium) {
     _hasInstance = true;
     currentCompleter.complete(chromium);
   }
-  bool _hasInstance = false;
 
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();

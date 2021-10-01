@@ -100,6 +100,7 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
     const int kFatalDeviceHardwareError =  483;
+    const int kDeviceDoesNotExist = 433;
 
     late FileExceptionHandler exceptionHandler;
 
@@ -246,6 +247,44 @@ void main() {
 
       const String expectedMessage = 'There is a problem with the device driver '
         'that this file or directory is stored on';
+      expect(() async => file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when the device does not exist', () async {
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+
+      const String expectedMessage = 'The device was not found.';
       expect(() async => file.writeAsBytes(<int>[0]),
              throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''),
@@ -1225,6 +1264,10 @@ class FakeFileSystem extends Fake implements FileSystem {
   @override
   p.Context get path => p.Context();
 
+  @override
+  Directory get currentDirectory {
+    throw UnimplementedError();
+  }
   @override
   set currentDirectory(dynamic path) { }
 }

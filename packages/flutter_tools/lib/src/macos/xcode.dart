@@ -22,7 +22,7 @@ Version get xcodeRequiredVersion => Version(12, 0, 1, text: '12.0.1');
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => xcodeRequiredVersion;
+Version get xcodeRecommendedVersion => Version(13, 0, 0, text: '13.0.0');
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
