@@ -21,6 +21,7 @@ ensure_fuchsia_dir
 
 out=""
 port="8084"
+component_framework_version=2
 device_name=""
 remote=false
 only_serve_runners=false
@@ -28,6 +29,13 @@ while (($#)); do
   case "$1" in
     --out)
       out="$2"
+      shift
+      ;;
+    -c)
+      component_framework_version="$2"
+      # for `pm serve` `config.json` and if "2" (the default for this script)
+      # use `pkgctl add` (which is not supported on older instances of fuchsia)
+      # instead of `amberctl add_src`.
       shift
       ;;
     -p)
@@ -56,15 +64,68 @@ if [[ -z "${out}" ]]; then
   exit 1
 fi
 
+if [[ ${component_framework_version} != [12] ]]; then
+  engine-error "valid values for -c are 1 or 2"
+  exit 1
+fi
+
+fuchsia_build_dir="$(<"${FUCHSIA_DIR}/.fx-build-dir")"
+if [[ "${fuchsia_build_dir:0:1}" != "/" ]]; then
+  fuchsia_build_dir="${FUCHSIA_DIR}/${fuchsia_build_dir}"
+fi
+
+# If remote, there is currently no equivalent check, but perhaps there could be?
+if [[ $remote != true ]]; then
+  # Warn if the package server for the fuchsia packages is not running. Test
+  # runners and any fuchsia package dependencies not included in the fuchsia
+  # system image (via `--with-base` instead of `--with`) typically require
+  # running `fx serve` (or equivalent commands), for the default `fuchsia.com`
+  # (`devhost`) package URL domain.
+  active_fuchsia_repo=$(
+    ps -eo args \
+      | sed -nre \
+          "s#.*\bpm .*\bserve\b.* -repo ($FUCHSIA_DIR/out/.*)/amber-files.*#\1#p"
+  )
+  if [[ "${active_fuchsia_repo}" == "" ]]; then
+    engine-warning 'The default fuchsia package server may not be running.'
+    echo 'If your test requires packages or test runners from fuchsia, those'
+    echo 'packages will need to be bundled in the fuchsia system image (such as'
+    echo 'via `fx set ... --with-base <package_target> ...). If your test'
+    echo 'includes fuchsia package dependencies that need to be served, kill'
+    echo 'this flutter "engine" package server first, run `fx serve` (in'
+    echo 'another window or shell), and then re-run this `serve.sh` script.'
+    echo '(The launch order is important.)'
+  elif [[ "${active_fuchsia_repo}" != "${fuchsia_build_dir}" ]]; then
+    engine-warning 'There default fuchsia package server may be'
+    echo 'serving packages from the wrong build directory:'
+    echo "  ${active_fuchsia_repo}"
+    echo 'which does not match your current build directory:'
+    echo "  ${fuchsia_build_dir}"
+    echo 'It may be serving the wrong packages. If so, kill all package'
+    echo 'servers, and restart them. Make sure you start the fuchsia package'
+    echo 'server (for example, via `fx serve`) **before** starting this'
+    echo '`serve.sh` script'
+  fi
+fi
+
 # Start our package server
 # TODO: Need to ask for the out directory to find the package list
 # TODO: Generate the all_packages.list file
-cd "${FLUTTER_ENGINE_SRC_DIR}" || exit
+cd "${FLUTTER_ENGINE_SRC_DIR}/${out}" || exit
+
+if ! [[ -d "${FLUTTER_ENGINE_SRC_DIR}/${out}/tuf" ]]; then
+  # Create the repository to serve
+  "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/tools/pm" newrepo -vt \
+    -repo "${FLUTTER_ENGINE_SRC_DIR}/${out}/tuf"
+fi
+
+# Serve packages (run as a background process)
 "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/tools/pm" serve -vt \
-  -repo "${FLUTTER_ENGINE_FUCHSIA_SDK_DIR}/${out}/tuf" \
+  -repo "${FLUTTER_ENGINE_SRC_DIR}/${out}/tuf" \
   -l ":${port}" \
-  -c 2 \
-  -p "${FLUTTER_ENGINE_SRC_DIR}/flutter/tools/fuchsia/all_packages.list"&
+  -c "${component_framework_version}" \
+  -p "${FLUTTER_ENGINE_SRC_DIR}/flutter/tools/fuchsia/all_packages.list" \
+    &
 serve_pid=$!
 
 # Add debug symbols to the symbol index.
@@ -119,8 +180,7 @@ run_ssh_command() {
     return 1
   fi
 
-  build_dir="$(<"${FUCHSIA_DIR}/.fx-build-dir")"
-  ssh_config="${FUCHSIA_DIR}/${build_dir}/ssh-keys/ssh_config"
+  ssh_config="${fuchsia_build_dir}/ssh-keys/ssh_config"
   if [[ ! -e $ssh_config ]]; then
     engine-error "No valid ssh_config at $ssh_config"
   fi
@@ -132,10 +192,19 @@ run_ssh_command() {
   fi
 }
 
+if [[ $remote != true && -z "${device_name}" ]]; then
+  device_name="$(cat ${fuchsia_build_dir}.device)"
+fi
+
+echo -n "Connecting to "
+if $remote; then
+  echo -n "remote device via ssh tunnel on port 8022..."
+else
+  echo -n "device '${device_name}', port ${port}..."
+fi
 # State is used to prevent too much output
 state="discover"
 while true; do
-  sleep 1
   if ! kill -0 "${serve_pid}" 2> /dev/null; then
     echo "Server died, exiting"
     serve_pid=
@@ -155,6 +224,7 @@ while true; do
   fi
 
   if [[ "$state" == "discover" && "$ping_result" == 0 ]]; then
+    echo
     echo "Device up"
     state="config"
   fi
@@ -175,9 +245,16 @@ while true; do
     fi
 
     config_url="http://${addr}:${port}/config.json"
-    run_ssh_command pkgctl add \
-      -n "engine" \
-      "${config_url}"
+
+    if [[ ${component_framework_version} == 2 ]]; then
+      run_ssh_command pkgctl repo add \
+        -n "engine" \
+        "${config_url}"
+    else
+      run_ssh_command amberctl add_src \
+        -n "engine" \
+        -f "${config_url}"
+    fi
     err=$?
 
     if [[ $err -ne 0 ]]; then
@@ -186,47 +263,51 @@ while true; do
     fi
 
     if [[ $only_serve_runners == true ]]; then
-      run_ssh_command "pkgctl rule replace json '
-        {
-          \"version\": \"1\",
-          \"content\": [
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/flutter_jit_runner/\", \"path_prefix_replacement\": \"/flutter_jit_runner/\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/flutter_jit_runner\", \"path_prefix_replacement\": \"/flutter_jit_runner\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/flutter_aot_runner/\", \"path_prefix_replacement\": \"/flutter_aot_runner/\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/flutter_aot_runner\", \"path_prefix_replacement\": \"/flutter_aot_runner\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/dart_jit_runner/\", \"path_prefix_replacement\": \"/dart_jit_runner/\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/dart_jit_runner\", \"path_prefix_replacement\": \"/dart_jit_runner\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/dart_aot_runner/\", \"path_prefix_replacement\": \"/dart_aot_runner/\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"engine\",
-              \"path_prefix_match\": \"/dart_aot_runner\", \"path_prefix_replacement\": \"/dart_aot_runner\"
-            },
-            {
-              \"host_match\": \"fuchsia.com\", \"host_replacement\": \"devhost\",
-              \"path_prefix_match\": \"/\", \"path_prefix_replacement\": \"/\"
-          }]
-        }'"
+      run_ssh_command "pkgctl rule replace json '$(cat <<EOF
+{
+  "version": "1",
+  "content": [
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/flutter_jit_runner/", "path_prefix_replacement": "/flutter_jit_runner/"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/flutter_jit_runner", "path_prefix_replacement": "/flutter_jit_runner"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/flutter_aot_runner/", "path_prefix_replacement": "/flutter_aot_runner/"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/flutter_aot_runner", "path_prefix_replacement": "/flutter_aot_runner"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/dart_jit_runner/", "path_prefix_replacement": "/dart_jit_runner/"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/dart_jit_runner", "path_prefix_replacement": "/dart_jit_runner"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/dart_aot_runner/", "path_prefix_replacement": "/dart_aot_runner/"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "engine",
+      "path_prefix_match": "/dart_aot_runner", "path_prefix_replacement": "/dart_aot_runner"
+    },
+    {
+      "host_match": "fuchsia.com", "host_replacement": "devhost",
+      "path_prefix_match": "/", "path_prefix_replacement": "/"
+    }
+  ]
+}
+EOF
+)'"
+
       err=$?
       if [[ $err -ne 0 ]]; then
         engine-error "Failed to add runner rewrite rules"
@@ -244,6 +325,8 @@ while true; do
     else
       sleep 1
     fi
+  else
+    sleep 1
+    echo -n "."
   fi
 done
-
