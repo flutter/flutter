@@ -1,4 +1,4 @@
-Signature: 7a4be6e29bef5d583fe786ef65295a1a
+Signature: 1de64ab3f627e8062de425ea8c6092c4
 
 UNUSED LICENSES:
 
@@ -5822,6 +5822,8 @@ FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPoison.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLBuiltinVariableScanner.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLTransform.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC.
 
