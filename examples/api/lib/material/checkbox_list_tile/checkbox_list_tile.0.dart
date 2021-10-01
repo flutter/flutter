@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
