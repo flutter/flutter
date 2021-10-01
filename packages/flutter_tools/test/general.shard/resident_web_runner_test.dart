@@ -1030,8 +1030,14 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
   );
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice { }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String name;
@@ -1101,6 +1107,9 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeChromeDevice extends Fake implements ChromiumDevice { }
 
 class FakeWipDebugger extends Fake implements WipDebugger { }
