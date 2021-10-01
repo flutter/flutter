@@ -11,22 +11,22 @@ import 'package:platform/platform.dart';
 
 void main() {
   group('Progession steps and substeps workflow', () {
-    testWidgets('Step 2 should be disabled if Step 1 is disabled',
+    testWidgets(
+        'All substeps should be checked before able to proceed to the next step',
         (WidgetTester tester) async {
       const String channelName = 'dev';
       final pb.ConductorState state = pb.ConductorState(
         releaseChannel: channelName,
       );
-      await tester.pumpWidget(
-        MainProgression(
-          releaseState: state,
-          stateFilePath: defaultStateFilePath(const LocalPlatform()),
-        ),
-      );
+      await tester.pumpWidget(MainProgression(
+        releaseState: state,
+        stateFilePath: defaultStateFilePath(const LocalPlatform()),
+      ));
 
-      final List<Step> steps =
-          tester.widgetList<Step>(find.byType(Step)).toList();
-      expect(steps, hasLength(5));
+      final List<CheckboxListTile> substeps = tester
+          .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+          .toList();
+      // print(substeps.length);
     });
   });
 }

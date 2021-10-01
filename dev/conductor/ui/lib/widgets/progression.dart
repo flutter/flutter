@@ -50,12 +50,28 @@ class MainProgressionState extends State<MainProgression> {
     }
   }
 
+  ScrollController? _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Scrollbar(
         isAlwaysShown: true,
+        controller: _scrollController,
         child: ListView(
+          controller: _scrollController,
           children: <Widget>[
             ConductorStatus(
               releaseState: widget.releaseState,
