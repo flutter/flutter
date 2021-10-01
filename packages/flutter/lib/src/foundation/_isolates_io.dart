@@ -19,7 +19,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   final ReceivePort exitPort = ReceivePort();
   final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
+  await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
     _IsolateConfiguration<Q, FutureOr<R>>(
       callback,
