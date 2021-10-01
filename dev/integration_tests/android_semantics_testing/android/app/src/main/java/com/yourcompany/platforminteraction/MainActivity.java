@@ -12,17 +12,17 @@ import java.lang.StringBuilder;
 
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.content.Context;
 
-import io.flutter.app.FlutterActivity;
+import androidx.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterView;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-import io.flutter.view.FlutterView;
 
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -30,23 +30,26 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      GeneratedPluginRegistrant.registerWith(this);
-      new MethodChannel(getFlutterView(), "semantics").setMethodCallHandler(new SemanticsTesterMethodHandler());
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+      GeneratedPluginRegistrant.registerWith(flutterEngine);
+      new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "semantics")
+          .setMethodCallHandler(
+              (call, result) -> {
+                  new SemanticsTesterMethodHandler();
+              }
+          );
   }
 
-  class SemanticsTesterMethodHandler implements MethodCallHandler {
+  class SemanticsTesterMethodHandler implements MethodChannel.MethodCallHandler {
     Float mScreenDensity = 1.0f;
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        FlutterView flutterView = getFlutterView();
+        FlutterView flutterView = (FlutterView) findViewById(FLUTTER_VIEW_ID);
         AccessibilityNodeProvider provider = flutterView.getAccessibilityNodeProvider();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(displayMetrics);
-        mScreenDensity = displayMetrics.density;
+        mScreenDensity = (float)getResources().getConfiguration().densityDpi / 160.0f;
         if (methodCall.method.equals("getSemanticsNode")) {
             Map<String, Object> data = methodCall.arguments();
             @SuppressWarnings("unchecked")

@@ -42,6 +42,10 @@ android {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.deprecation = true
+}
+
 flutter {
     source '../..'
 }
