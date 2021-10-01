@@ -21,60 +21,25 @@ import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
-const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
+///
+/// These version pins must be pins, not ranges! Allowing these to be ranges
+/// defeats the whole purpose of pinning all our dependencies, which is to
+/// prevent upstream changes from causing our CI to fail randomly in ways
+/// unrelated to the commits. It also, more importantly, risks breaking users
+/// in ways that prevent them from every upgrading Flutter again!
+const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
-  // PACKAGES WITH INCOMPATIBLE LATER VERSIONS
-  // Dart analyzer does not catch renamed or deleted files.
-  // Therefore, we control the version of flutter_gallery_assets so that
-  // existing tests do not fail when the package has a new version.
-  'flutter_gallery_assets': '^1.0.1',
+  'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
-  // DART TEAM OWNED NNBD DEPS
-  'archive': '">=3.0.0-nullsafety.0"',
-  'async': '">=2.5.0-nullsafety.3"',
-  'boolean_selector': '">=2.1.0-nullsafety.3"',
-  'characters': '">=1.1.0-nullsafety.5"',
-  'charcode': '">=1.2.0-nullsafety.3"',
-  'clock': '">=1.1.0-nullsafety.3"',
-  'collection': '">=1.15.0-nullsafety.5"',
-  'fake_async': '">=1.2.0-nullsafety.3"',
-  'intl': '">=0.17.0-nullsafety.2"',
-  'js': '">=0.6.3-nullsafety.3"',
-  'matcher': '">=0.12.10-nullsafety.3"',
-  'meta': '">=1.3.0-nullsafety.6"',
-  'path': '">=1.8.0-nullsafety.3"',
-  'pedantic': '">=1.10.0-nullsafety.3"',
-  'petitparser': '">=4.0.0-nullsafety.1"',
-  'pool': '">=1.5.0-nullsafety.3"',
-  'source_map_stack_trace': '">=2.1.0-nullsafety.4"',
-  'source_maps': '">=0.10.10-nullsafety.3"',
-  'source_span': '">=1.8.0-nullsafety.4"',
-  'stack_trace': '">=1.10.0-nullsafety.6"',
-  'stream_channel': '">=2.1.0-nullsafety.3"',
-  'string_scanner': '">=1.1.0-nullsafety.3"',
-  'term_glyph': '">=1.2.0-nullsafety.3"',
-  'test': '">=1.16.0-nullsafety.16"',
-  'test_api': '">=0.2.19-nullsafety.6"',
-  'test_core': '">=0.3.12-nullsafety.15"',
-  'typed_data': '">=1.3.0-nullsafety.5"',
-  'vector_math': '">=2.1.0-nullsafety.5"',
-  'vm_service': '">=6.0.1-nullsafety.1"',
-  'xml': '">=5.0.0-nullsafety.1"',
-  // FLUTTER TEAM OWNED NNBD DEPS
-  'connectivity': '">=3.0.0-nullsafety.1"',
-  'device_info': '">=2.0.0-nullsafety.1"',
-  'file': '">=6.0.0-nullsafety.4"',
-  'path_provider': '">=2.0.0-nullsafety.1"',
-  'platform': '">=3.0.0-nullsafety.4"',
-  'process': '">=4.0.0-nullsafety.4"',
-  'process_runner': '">=4.0.0-nullsafety.5"',
-  'url_launcher': '">=6.0.0-nullsafety.1"',
-  // This is pinned to avoid the performance regression from a reverted feature
-  // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
-  // when a new major version of shelf is published.
+  // "shelf" is pinned to avoid the performance regression from a reverted
+  // feature from https://github.com/dart-lang/shelf/issues/189 . This can be
+  // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
-  // Latest version does not resolve on our CI.
-  'video_player': '2.1.1',
+  'video_player': '2.1.1', // Latest version does not resolve on our CI.
+  // "test" is pinned because 1.18.1 fails when running web tests with this error:
+  // FileSystemException: Cannot open file, path = '.../.pub-cache/hosted/pub.dartlang.org/test-1.18.1/lib/src/runner/browser/static/host.dart.js' (OS Error: No such file or directory, errno = 2)
+  // When removing this remove `pedantic` from dev/bots/allowlist.dart also.
+  'test': '1.17.12', // https://github.com/dart-lang/test/issues/1594
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1277,7 +1242,7 @@ class PubspecDependency extends PubspecLine {
         assert(kind != DependencyKind.unknown);
         break;
       case DependencyKind.normal:
-        if (!_kManuallyPinnedDependencies.containsKey(name)) {
+        if (!kManuallyPinnedDependencies.containsKey(name)) {
           dependencies.writeln('  $name: $versionToUse');
         }
         break;
@@ -1339,7 +1304,7 @@ String _generateFakePubspec(
   result.writeln("  sdk: '>=2.10.0 <3.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
-  if (_kManuallyPinnedDependencies.isNotEmpty) {
+  if (kManuallyPinnedDependencies.isNotEmpty) {
     if (verbose) {
       globals.printStatus('WARNING: the following packages use hard-coded version constraints:');
     }
@@ -1347,7 +1312,7 @@ String _generateFakePubspec(
       for (final PubspecDependency dependency in dependencies)
         dependency.name,
     };
-    for (final String package in _kManuallyPinnedDependencies.keys) {
+    for (final String package in kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
         if (verbose) {
@@ -1355,7 +1320,7 @@ String _generateFakePubspec(
         }
         continue;
       }
-      final String version = _kManuallyPinnedDependencies[package];
+      final String version = kManuallyPinnedDependencies[package];
       result.writeln('  $package: $version');
       if (verbose) {
         globals.printStatus('  - $package: $version');
