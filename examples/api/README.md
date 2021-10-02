@@ -108,3 +108,18 @@ compile (in the context of the sample analyzer), but doesn't need to do
 anything. See [the snippets
 documentation](https://pub.dev/packages/snippets#snippet-tool) for more
 information about the context that the analyzer uses.
+
+## Writing Tests
+
+Examples should have tests. There is already a "smoke test" that runs all the
+api examples, just to make sure that they start up without crashing. Beyond
+that, it is possible to write tests of functionality in the examples, capture
+golden tests, and generally just do what we normally do for unit tests. The one
+thing that makes it more challenging is that the examples can't really be
+written for testability in any obvious way, since that would probably complicate
+the example and make it harder to explain. You can still do a lot though, with
+composition and overrides.
+
+Tests go into a directory under [test](./test) that matches their location under
+[lib](./lib). They are named the same as the example they are testing, with
+`_test.dart` at the end, like other tests.
