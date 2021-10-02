@@ -34,6 +34,56 @@ typedef ScrollableWidgetBuilder = Widget Function(
   ScrollController scrollController,
 );
 
+class DraggableScrollableSheetController {
+  DraggableScrollableSheetController();
+
+  late _DraggableScrollableSheetScrollController _scrollController;
+
+  void _attach(_DraggableScrollableSheetScrollController scrollController) {
+    _scrollController = scrollController;
+  }
+
+  void reset() {
+    _scrollController.extent.currentExtent =
+        _scrollController.extent.initialExtent;
+  }
+
+  List<double> get snapSizes => _scrollController.extent.snapSizes;
+
+  double pixelsToExtent(double pixels) =>
+      _scrollController.extent.pixelsToExtent(pixels);
+
+  void animateTo(
+    double offset, {
+    Duration duration = const Duration(milliseconds: 200),
+    Curve curve = Curves.easeOut,
+  }) {
+    final AnimationController controller = AnimationController.unbounded(
+      vsync: _scrollController.position.context.vsync,
+      value: _scrollController.extent.currentExtent,
+    );
+    CurvedAnimation(parent: controller, curve: curve).addListener(() {
+      _scrollController.extent.updateExtent(controller.value,
+          _scrollController.position.context.notificationContext!);
+    });
+    controller
+        .animateTo(offset, duration: duration)
+        .then<void>((void value) => _scrollController.position.goBallistic(0));
+  }
+
+  void jumpTo(double value) {
+    _scrollController.extent.currentExtent = value;
+  }
+
+  double get minExtent => _scrollController.extent.minExtent;
+
+  double get maxExtent => _scrollController.extent.maxExtent;
+
+  double get extent => _scrollController.extent.currentExtent;
+
+  double get pixels => _scrollController.extent.currentPixels;
+}
+
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
 ///
@@ -118,6 +168,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.expand = true,
     this.snap = false,
     this.snapSizes,
+    this.controller,
     required this.builder,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
@@ -194,13 +245,16 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// being built or since the last call to [DraggableScrollableActuator.reset].
   final List<double>? snapSizes;
 
+  final DraggableScrollableSheetController? controller;
+
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
   final ScrollableWidgetBuilder builder;
 
   @override
-  State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
+  State<DraggableScrollableSheet> createState() =>
+      _DraggableScrollableSheetState();
 }
 
 /// A [Notification] related to the extent, which is the size, and scroll
@@ -223,7 +277,8 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// notifications are used primarily to drive animations. The [Scaffold] widget
 /// listens for extent notifications and responds by driving animations for the
 /// [FloatingActionButton] as the bottom sheet scrolls up.
-class DraggableScrollableNotification extends Notification with ViewportNotificationMixin {
+class DraggableScrollableNotification extends Notification
+    with ViewportNotificationMixin {
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
   ///
@@ -235,17 +290,17 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  }) : assert(extent != null),
-       assert(initialExtent != null),
-       assert(minExtent != null),
-       assert(maxExtent != null),
-       assert(0.0 <= minExtent),
-       assert(maxExtent <= 1.0),
-       assert(minExtent <= extent),
-       assert(minExtent <= initialExtent),
-       assert(extent <= maxExtent),
-       assert(initialExtent <= maxExtent),
-       assert(context != null);
+  })  : assert(extent != null),
+        assert(initialExtent != null),
+        assert(minExtent != null),
+        assert(maxExtent != null),
+        assert(0.0 <= minExtent),
+        assert(maxExtent <= 1.0),
+        assert(minExtent <= extent),
+        assert(minExtent <= initialExtent),
+        assert(extent <= maxExtent),
+        assert(initialExtent <= maxExtent),
+        assert(context != null);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -269,7 +324,8 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('minExtent: $minExtent, extent: $extent, maxExtent: $maxExtent, initialExtent: $initialExtent');
+    description.add(
+        'minExtent: $minExtent, extent: $extent, maxExtent: $maxExtent, initialExtent: $initialExtent');
   }
 }
 
@@ -327,6 +383,7 @@ class _DraggableSheetExtent {
     hasChanged = true;
     _currentExtent.value = value.clamp(minExtent, maxExtent);
   }
+
   double get currentExtent => _currentExtent.value;
   double get currentPixels => extentToPixels(_currentExtent.value);
 
@@ -407,19 +464,20 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialExtent: widget.initialChildSize,
       onExtentChanged: _setExtent,
     );
-    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
+    _scrollController =
+        _DraggableScrollableSheetScrollController(extent: _extent);
+    widget.controller?._attach(_scrollController);
   }
 
   List<double> _impliedSnapSizes() {
     for (int index = 0; index < (widget.snapSizes?.length ?? 0); index += 1) {
       final double snapSize = widget.snapSizes![index];
       assert(snapSize >= widget.minChildSize && snapSize <= widget.maxChildSize,
-        '${_snapSizeErrorMessage(index)}\nSnap sizes must be between `minChildSize` and `maxChildSize`. ');
+          '${_snapSizeErrorMessage(index)}\nSnap sizes must be between `minChildSize` and `maxChildSize`. ');
       assert(index == 0 || snapSize > widget.snapSizes![index - 1],
-        '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
+          '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
     }
-    widget.snapSizes?.asMap().forEach((int index, double snapSize) {
-    });
+    widget.snapSizes?.asMap().forEach((int index, double snapSize) {});
     // Ensure the snap sizes start and end with the min and max child sizes.
     if (widget.snapSizes == null || widget.snapSizes!.isEmpty) {
       return <double>[
@@ -469,7 +527,8 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+        _extent.availablePixels =
+            widget.maxChildSize * constraints.biggest.height;
         final Widget sheet = FractionallySizedBox(
           heightFactor: _extent.currentExtent,
           alignment: Alignment.bottomCenter,
@@ -512,8 +571,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   String _snapSizeErrorMessage(int invalidIndex) {
-    final List<String> snapSizesWithIndicator = widget.snapSizes!.asMap().keys.map(
-          (int index) {
+    final List<String> snapSizesWithIndicator =
+        widget.snapSizes!.asMap().keys.map(
+      (int index) {
         final String snapSizeString = widget.snapSizes![index].toString();
         if (index == invalidIndex) {
           return '>>> $snapSizeString <<<';
@@ -545,11 +605,11 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String? debugLabel,
     required this.extent,
-  }) : assert(extent != null),
-       super(
-         debugLabel: debugLabel,
-         initialScrollOffset: initialScrollOffset,
-       );
+  })  : assert(extent != null),
+        super(
+          debugLabel: debugLabel,
+          initialScrollOffset: initialScrollOffset,
+        );
 
   _DraggableSheetExtent extent;
 
@@ -600,7 +660,7 @@ class _DraggableScrollableSheetScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
     required this.getExtent,
-  })  : super(
+  }) : super(
           physics: physics,
           context: context,
           initialPixels: initialPixels,
@@ -638,8 +698,8 @@ class _DraggableScrollableSheetScrollPosition
   void applyUserOffset(double delta) {
     if (!listShouldScroll &&
         (!(extent.isAtMin || extent.isAtMax) ||
-          (extent.isAtMin && delta < 0) ||
-          (extent.isAtMax && delta > 0))) {
+            (extent.isAtMin && delta < 0) ||
+            (extent.isAtMax && delta > 0))) {
       extent.addPixelDelta(-delta, context.notificationContext!);
     } else {
       super.applyUserOffset(delta);
@@ -649,10 +709,12 @@ class _DraggableScrollableSheetScrollPosition
   bool get _isAtSnapSize {
     return extent.snapSizes.any(
       (double snapSize) {
-        return (extent.currentExtent - snapSize).abs() <= extent.pixelsToExtent(physics.tolerance.distance);
+        return (extent.currentExtent - snapSize).abs() <=
+            extent.pixelsToExtent(physics.tolerance.distance);
       },
     );
   }
+
   bool get _shouldSnap => extent.snap && extent.hasChanged && !_isAtSnapSize;
 
   @override
@@ -693,7 +755,8 @@ class _DraggableScrollableSheetScrollPosition
       );
     }
 
-    final AnimationController ballisticController = AnimationController.unbounded(
+    final AnimationController ballisticController =
+        AnimationController.unbounded(
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
@@ -705,11 +768,13 @@ class _DraggableScrollableSheetScrollPosition
       final double delta = ballisticController.value - lastPosition;
       lastPosition = ballisticController.value;
       extent.addPixelDelta(delta, context.notificationContext!);
-      if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
+      if ((velocity > 0 && extent.isAtMax) ||
+          (velocity < 0 && extent.isAtMin)) {
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't
         // have more to scroll.
-        velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
+        velocity = ballisticController.velocity +
+            (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
@@ -767,7 +832,8 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final _InheritedResetNotifier? notifier =
+        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -819,12 +885,14 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget? widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final InheritedWidget? widget =
+        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
+    final _InheritedResetNotifier inheritedNotifier =
+        widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier!._wasCalled;
     inheritedNotifier.notifier!._wasCalled = false;
     return wasCalled;
@@ -885,8 +953,8 @@ class _SnappingSimulation extends Simulation {
   // non-zero, select the size in the velocity's direction. Otherwise,
   // the nearest snap size.
   double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
-    final int indexOfNextSize = pixelSnapSizes
-        .indexWhere((double size) => size >= position);
+    final int indexOfNextSize =
+        pixelSnapSizes.indexWhere((double size) => size >= position);
     if (indexOfNextSize == 0) {
       return pixelSnapSizes.first;
     }
