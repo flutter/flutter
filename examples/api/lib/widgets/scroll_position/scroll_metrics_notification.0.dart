@@ -57,4 +57,3 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
     );
   }
 }
-

@@ -163,4 +163,3 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
     );
   }
 }
-

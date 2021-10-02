@@ -128,4 +128,3 @@ class SignUpPage extends StatelessWidget {
     );
   }
 }
-

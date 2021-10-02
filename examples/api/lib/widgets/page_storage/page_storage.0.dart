@@ -89,4 +89,3 @@ class ColorBoxPage extends StatelessWidget {
     );
   }
 }
-

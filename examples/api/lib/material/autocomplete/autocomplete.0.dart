@@ -52,4 +52,3 @@ class AutocompleteBasicExample extends StatelessWidget {
     );
   }
 }
-

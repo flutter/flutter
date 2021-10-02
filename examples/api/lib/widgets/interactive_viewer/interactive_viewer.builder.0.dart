@@ -185,4 +185,3 @@ class _TableBuilder extends StatelessWidget {
     );
   }
 }
-

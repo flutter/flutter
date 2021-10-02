@@ -121,4 +121,3 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
     );
   }
 }
-

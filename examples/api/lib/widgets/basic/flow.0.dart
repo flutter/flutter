@@ -120,4 +120,3 @@ class FlowMenuDelegate extends FlowDelegate {
     }
   }
 }
-

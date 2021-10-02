@@ -125,4 +125,3 @@ class MyNavigationRailFab extends StatelessWidget {
     );
   }
 }
-

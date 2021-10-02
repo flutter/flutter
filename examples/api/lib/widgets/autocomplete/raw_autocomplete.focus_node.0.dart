@@ -89,4 +89,3 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
     );
   }
 }
-

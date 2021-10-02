@@ -157,4 +157,3 @@ class _DemoBottomAppBar extends StatelessWidget {
     );
   }
 }
-

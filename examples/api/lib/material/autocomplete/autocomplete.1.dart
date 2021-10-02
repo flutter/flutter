@@ -84,4 +84,3 @@ class AutocompleteBasicUserExample extends StatelessWidget {
     );
   }
 }
-
