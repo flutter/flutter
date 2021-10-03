@@ -11,12 +11,14 @@ void main() {
   late Widget textBuilderUnderTest;
 
   Widget builderForValueListenable(
-    ValueListenable<String?> valueListenable,
-  ) {
+    ValueListenable<String?> valueListenable, {
+    ValueWidgetRebuildFilter<String?>? filter,
+  }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
+        filter: filter,
         builder: (BuildContext context, String? value, Widget? child) {
           if (value == null)
             return const Placeholder();
@@ -72,6 +74,41 @@ void main() {
 
     expect(find.text('Gilfoyle'), findsNothing);
     expect(find.text('Hendricks'), findsOneWidget);
+  });
+
+  testWidgets('Initial build ignores filter', (WidgetTester tester) async {
+    valueListenable = SpyStringValueNotifier('Bachman');
+    await tester.pumpWidget(builderForValueListenable(
+      valueListenable,
+      filter: (_, __) => false,
+    ));
+
+    expect(find.text('Bachman'), findsOneWidget);
+  });
+
+  testWidgets('Widget updates only when filter returns true', (WidgetTester tester) async {
+    valueListenable = SpyStringValueNotifier('Bachman');
+    await tester.pumpWidget(builderForValueListenable(
+      valueListenable,
+      filter: (String? oldValue, String? newValue) {
+        return oldValue == 'Dinesh' && newValue == 'Gilfoyle';
+      },
+    ));
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Bachman'), findsOneWidget);
+    expect(find.text('Gilfoyle'), findsNothing);
+
+    valueListenable.value = 'Dinesh';
+    await tester.pump();
+    expect(find.text('Bachman'), findsOneWidget);
+    expect(find.text('Dinesh'), findsNothing);
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Bachman'), findsNothing);
+    expect(find.text('Gilfoyle'), findsOneWidget);
   });
 
   testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {

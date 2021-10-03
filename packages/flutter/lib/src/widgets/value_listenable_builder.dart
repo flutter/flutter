@@ -18,6 +18,18 @@ import 'framework.dart';
 ///    a [ValueListenable] changes value.
 typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
+/// Decides whether to call the [builder] of the [ValueListenableBuilder] to
+/// rebuild the widget.
+///
+/// The [ValueListenable<T>] values before and after an update are provided
+/// to allow controlling rebuilds depending on them.
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], a widget which invokes this filter each time
+///    a [ValueListenable] changes value.
+typedef ValueWidgetRebuildFilter<T> = bool Function(T oldValue, T newValue);
+
 /// A widget whose content stays synced with a [ValueListenable].
 ///
 /// Given a [ValueListenable<T>] and a [builder] which builds widgets from
@@ -119,6 +131,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
     required this.valueListenable,
     required this.builder,
     this.child,
+    this.filter,
   }) : assert(valueListenable != null),
        assert(builder != null),
        super(key: key);
@@ -147,6 +160,15 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// example, if the [valueListenable] is a [String] and the [builder] simply
   /// returns a [Text] widget with the [String] value.
   final Widget? child;
+
+  /// A [ValueWidgetRebuildFilter] which controls rebuilds.
+  ///
+  /// This argument is optional. If not set, the [builder] is called each time
+  /// the [ValueListenable]'s value changes. Otherwise, the [builder] is called
+  /// only when the function returns `true`.
+  ///
+  /// Note that this filter is not applied to the initial build.
+  final ValueWidgetRebuildFilter<T>? filter;
 
   @override
   State<StatefulWidget> createState() => _ValueListenableBuilderState<T>();
@@ -179,7 +201,11 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   }
 
   void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
+    final ValueWidgetRebuildFilter<T>? filter = widget.filter;
+    if (filter == null || filter(value, widget.valueListenable.value)) {
+      setState(() {});
+    }
+    value = widget.valueListenable.value;
   }
 
   @override
