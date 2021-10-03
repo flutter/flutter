@@ -219,6 +219,11 @@ class FlutterProject {
     .childDirectory('generated')
     .childDirectory(manifest.appName);
 
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('generated_main.dart');
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),

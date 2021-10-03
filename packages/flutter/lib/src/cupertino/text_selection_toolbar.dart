@@ -196,6 +196,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   @override
   bool get isRepaintBoundary => true;
 
+  Offset get anchor => _anchor;
   Offset _anchor;
   set anchor(Offset value) {
     if (value == _anchor) {
@@ -205,6 +206,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  bool get isAbove => _isAbove;
   bool _isAbove;
   set isAbove(bool value) {
     if (_isAbove == value) {

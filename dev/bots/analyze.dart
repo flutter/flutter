@@ -118,10 +118,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo
+  // Analyze all the sample code in the repo.
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -1370,7 +1370,7 @@ Future<void> _checkConsumerDependencies() async {
 
   // Do not change this signature without following the directions in
   // dev/bots/allowlist.dart
-  const String kExpected = 'nkO7DCjvSMB6VKyw+V9MU46m3xFEk/oYSbmgAWqvbXE=';
+  const String kExpected = 'vET/prkUbnIkuST0BZfUYQ+Go2N+CysKnVrKeQQTglo=';
 
   if (disallowed.isNotEmpty) {
     exitWithError(<String>[

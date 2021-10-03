@@ -3594,6 +3594,148 @@ void main() {
     await tester.pumpWidget(Container(child: build(key)));
     expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
   });
+
+  testWidgets('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
+    final GlobalKey navigatorKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    final Map<String, Widget> routes = <String, Widget>{
+      '/': const Text('A'),
+      '/second': Text('B', key: innerKey),
+    };
+    late final NavigatorState navigator = navigatorKey.currentState! as NavigatorState;
+    final FocusScopeNode focusNode = FocusScopeNode();
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        FocusScope(node: focusNode, child: Container()),
+        Expanded(
+          child: MaterialApp(
+            home: Navigator(
+              key: navigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext _, Animation<double> __,
+                      Animation<double> ___) {
+                    return routes[settings.name!]!;
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    ));
+    expect(navigator.widget.requestFocus, true);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+    // Pop does not take focus.
+    expect(focusNode.hasFocus, true);
+
+    navigator.pushReplacementNamed('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(focusNode.hasFocus, false);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(),
+    );
+    await tester.pumpAndSettle();
+    // addLocalHistoryEntry does not take focus.
+    expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('Navigator does not request focus if requestFocus is false',
+          (WidgetTester tester) async {
+        final GlobalKey navigatorKey = GlobalKey();
+        final GlobalKey innerKey = GlobalKey();
+        final Map<String, Widget> routes = <String, Widget>{
+          '/': const Text('A'),
+          '/second': Text('B', key: innerKey),
+        };
+        late final NavigatorState navigator =
+        navigatorKey.currentState! as NavigatorState;
+        final FocusScopeNode focusNode = FocusScopeNode();
+
+        await tester.pumpWidget(Column(
+          children: <Widget>[
+            FocusScope(node: focusNode, child: Container()),
+            Expanded(
+              child: MaterialApp(
+                home: Navigator(
+                  key: navigatorKey,
+                  onGenerateRoute: (RouteSettings settings) {
+                    return PageRouteBuilder<void>(
+                      settings: settings,
+                      pageBuilder: (BuildContext _, Animation<double> __,
+                          Animation<double> ___) {
+                        return routes[settings.name!]!;
+                      },
+                    );
+                  },
+                  requestFocus: false,
+                ),
+              ),
+            ),
+          ],
+        ));
+        expect(find.text('A'), findsOneWidget);
+        expect(find.text('B', skipOffstage: false), findsNothing);
+        expect(focusNode.hasFocus, false);
+
+        focusNode.requestFocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+
+        navigator.pushNamed('/second');
+        await tester.pumpAndSettle();
+        expect(find.text('A', skipOffstage: false), findsOneWidget);
+        expect(find.text('B'), findsOneWidget);
+        expect(focusNode.hasFocus, true);
+
+        navigator.pop();
+        await tester.pumpAndSettle();
+        expect(find.text('A'), findsOneWidget);
+        expect(find.text('B', skipOffstage: false), findsNothing);
+        expect(focusNode.hasFocus, true);
+
+        navigator.pushReplacementNamed('/second');
+        await tester.pumpAndSettle();
+        expect(find.text('A', skipOffstage: false), findsNothing);
+        expect(find.text('B'), findsOneWidget);
+        expect(focusNode.hasFocus, true);
+
+        ModalRoute.of(innerKey.currentContext!)!.addLocalHistoryEntry(
+          LocalHistoryEntry(),
+        );
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, true);
+      });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);

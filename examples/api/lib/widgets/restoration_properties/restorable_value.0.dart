@@ -29,10 +29,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       title: 'Flutter Code Sample',
-      home: const Center(
-        child: MyStatefulWidget(restorationId: 'main'),
-      ),
       color: const Color(0xffffffff),
+      builder: (BuildContext context, Widget? child) {
+        return const Center(
+          child: MyStatefulWidget(restorationId: 'main'),
+        );
+      },
     );
   }
 }

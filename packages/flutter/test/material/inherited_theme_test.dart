@@ -211,8 +211,8 @@ void main() {
     }
 
     Color bannerColor() {
-      return tester.widget<Container>(
-        find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
+      return tester.widget<Material>(
+        find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first,
       ).color!;
     }
 

@@ -62,7 +62,6 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
-  Timeout timeout,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
@@ -167,7 +166,10 @@ void testUsingContext(
       // BotDetector implementation in the overrides.
       BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
     });
-  }, testOn: testOn, skip: skip, timeout: timeout);
+  }, testOn: testOn, skip: skip);
+  // We don't support "timeout"; see ../../dart_test.yaml which
+  // configures all tests to have a 15 minute timeout which should
+  // definitely be enough.
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -312,9 +314,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
-    return null;
-  }
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
 
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {

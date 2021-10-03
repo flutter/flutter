@@ -790,6 +790,7 @@ class _TextStyleProxy implements TextStyle {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }
@@ -825,6 +826,7 @@ class _TextStyleProxy implements TextStyle {
     double? decorationThickness,
     String? debugLabel,
     TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }
