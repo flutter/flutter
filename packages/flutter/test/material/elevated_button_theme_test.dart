@@ -33,7 +33,7 @@ void main() {
     expect(material.color, colorScheme.primary);
     expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);

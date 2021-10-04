@@ -57,14 +57,14 @@ void main() {
                   onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
-                bottomNavigationBar: BottomAppBar(
+                bottomNavigationBar: const BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                    BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50.0))),
+                    ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30.0))),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
-                  child: const SizedBox(height: 100.0),
+                  child: SizedBox(height: 100.0),
                 ),
               ),
             ),
