@@ -90,6 +90,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Returns the frame buffer id for the engine to render to.
   uint32_t GetFrameBufferId(size_t width, size_t height);
 
+  // Called when the engine is restarted.
+  //
+  // This should reset necessary states to as if the view has just been
+  // created. This is typically caused by a hot restart (Shift-R in CLI.)
+  void OnPreEngineRestart();
+
   // |WindowBindingHandlerDelegate|
   void OnWindowSizeChanged(size_t width, size_t height) override;
 
@@ -206,6 +212,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
     // and the buffers have been swapped.
     kDone,
   };
+
+  // Initialize states related to keyboard.
+  //
+  // This is called when the view is first created, or restarted.
+  void InitializeKeyboard();
 
   // Sends a window metrics update to the Flutter engine using current window
   // dimensions in physical
