@@ -55,17 +55,7 @@ void FlutterWindowsView::SetEngine(
 
   // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
-#ifdef WINUWP
-  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = nullptr;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      nullptr;
-#else
-  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = SendInput;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      GetKeyState;
-#endif
-  RegisterKeyboardHandlers(internal_plugin_messenger, dispatch_event,
-                           get_key_state);
+  InitializeKeyboard();
   platform_handler_ = PlatformHandler::Create(internal_plugin_messenger, this);
   cursor_handler_ = std::make_unique<flutter::CursorHandler>(
       internal_plugin_messenger, binding_handler_.get());
@@ -135,6 +125,11 @@ void FlutterWindowsView::ForceRedraw() {
     SendWindowMetrics(resize_target_width_, resize_target_height_,
                       binding_handler_->GetDpiScale());
   }
+}
+
+void FlutterWindowsView::OnPreEngineRestart() {
+  keyboard_handlers_.clear();
+  InitializeKeyboard();
 }
 
 void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
@@ -255,6 +250,21 @@ void FlutterWindowsView::OnPlatformBrightnessChanged() {
 
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
   binding_handler_->OnCursorRectUpdated(rect);
+}
+
+void FlutterWindowsView::InitializeKeyboard() {
+  auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
+#ifdef WINUWP
+  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = nullptr;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      nullptr;
+#else
+  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = SendInput;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      GetKeyState;
+#endif
+  RegisterKeyboardHandlers(internal_plugin_messenger, dispatch_event,
+                           get_key_state);
 }
 
 // Sends new size  information to FlutterEngine.
