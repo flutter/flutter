@@ -1,21 +1,21 @@
 # API Example Code
 
-This directory contains the API sample code that is referenced from the
-API documentation in the framework.
+This directory contains the API sample code that is referenced from the API
+documentation in the framework.
 
 The examples can be run individually by just specifying the path to the example
 on the command line (or in the run configuration of an IDE).
 
-For example (no pun intended!), to run, the first example from the `Curve2D` class in Chrome, you
-would run it like so from the [api](.) directory:
+For example (no pun intended!), to run, the first example from the `Curve2D`
+class in Chrome, you would run it like so from the [api](.) directory:
 
 ```
 % flutter run -d chrome lib/animation/curves/curve2_d.0.dart
 ```
 
 All of these same examples are available on the API docs site. For instance, the
-example above is available on [this
-page](https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
+example above is available on [this page](
+https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
 Most of the samples are available as interactive examples in
 [Dartpad](https://dartpad.dev), but some (the ones marked with `{@tool sample}`
 in the framework source code), just don't make sense on the web, and so are
@@ -51,11 +51,12 @@ block for the other symbols will point to the first symbol's example location.
 
 ## Authoring
 
-> For more detailed information about authoring examples, see [the snippets package](https://pub.dev/packages/snippets).
+> For more detailed information about authoring examples, see
+> [the snippets package](https://pub.dev/packages/snippets).
 
-When authoring examples, first place a block in the Dartdoc
-documentation for the symbol you would like to attach it to. Here's what it
-might look like if you wanted to add a new example to the `Curve2D` class:
+When authoring examples, first place a block in the Dartdoc documentation for
+the symbol you would like to attach it to. Here's what it might look like if you
+wanted to add a new example to the `Curve2D` class:
 
 ```dart
 /// {@tool dartpad}
@@ -66,11 +67,11 @@ might look like if you wanted to add a new example to the `Curve2D` class:
 /// {@end-tool}
 ```
 
-The "See code" link needs to be formatted exactly as above, with no wrapping or
-newlines, one space after the "`**`" at the beginning, and one space before the
-"`**`" at the end, and the words "See code" at the beginning of the line.  This
-is what the snippets tool and the IDE use when finding the example source code
-that you are creating.
+The "See code in" line needs to be formatted exactly as above, with no wrapping
+or newlines, one space after the "`**`" at the beginning, and one space before
+the "`**`" at the end, and the words "See code in" at the beginning of the line.
+This is what the snippets tool and the IDE use when finding the example source
+code that you are creating.
 
 Use `{@tool dartpad}` for Dartpad examples, and use `{@tool sample}` for
 examples that shouldn't be run/shown in Dartpad.
@@ -87,7 +88,8 @@ hasn't been used in an example before, you may have to add it to the
 
 ## Snippets
 
-There is another type of example that can also be authored, using `{@tool snippet}`. Snippet examples are just written inline in the source, like so:
+There is another type of example that can also be authored, using `{@tool
+snippet}`. Snippet examples are just written inline in the source, like so:
 
 ```dart
 /// {@tool dartpad}
@@ -105,21 +107,29 @@ The source for these snippets isn't stored under the [`examples/api`](.)
 directory, or available in Dartpad in the API docs, since they're not intended
 to be runnable, they just show some incomplete snippet of example code. It must
 compile (in the context of the sample analyzer), but doesn't need to do
-anything. See [the snippets
-documentation](https://pub.dev/packages/snippets#snippet-tool) for more
-information about the context that the analyzer uses.
+anything. See [the snippets documentation](
+https://pub.dev/packages/snippets#snippet-tool) for more information about the
+context that the analyzer uses.
 
 ## Writing Tests
 
-Examples should have tests. There is already a "smoke test" that runs all the
-api examples, just to make sure that they start up without crashing. Beyond
-that, it is possible to write tests of functionality in the examples, capture
-golden tests, and generally just do what we normally do for unit tests. The one
-thing that makes it more challenging is that the examples can't really be
-written for testability in any obvious way, since that would probably complicate
-the example and make it harder to explain. You can still do a lot though, with
-composition and overrides.
+Examples are required to have tests. There is already a "smoke test" that runs
+all the API examples, just to make sure that they start up without crashing. In
+addition, we also require writing tests of functionality in the examples, and
+generally just do what we normally do for writing tests. The one thing that
+makes it more challenging for the examples is that they can't really be written
+for testability in any obvious way, since that would probably complicate the
+example and make it harder to explain.
+
+As an example, in regular framework code, you might include a parameter for a
+`Platform` object that can be overridden by a test to supply a dummy platform,
+but in the example, this would be unnecessary complexity for the example. In all
+other ways, these are just normal tests.
 
 Tests go into a directory under [test](./test) that matches their location under
 [lib](./lib). They are named the same as the example they are testing, with
-`_test.dart` at the end, like other tests.
+`_test.dart` at the end, like other tests. For instance, a `LayoutBuilder`
+example that resides in [`lib/widgets/layout_builder/layout_builder.0.dart`](
+./lib/widgets/layout_builder/layout_builder.0.dart) would have its tests in a
+file named [`test/animation/curves/curve2_d.0_test.dart`](
+./test/widgets/layout_builder/layout_builder.0_test.dart)
