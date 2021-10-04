@@ -288,6 +288,8 @@ public class FlutterLoader {
 
       shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
 
+      shellArgs.add("--prefetched-default-font-manager");
+
       if (metaData != null && metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY)) {
         shellArgs.add("--enable-skparagraph");
       }
