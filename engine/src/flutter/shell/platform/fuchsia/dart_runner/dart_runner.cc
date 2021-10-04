@@ -165,6 +165,13 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
         bindings_.AddBinding(this, std::move(request));
       });
 
+  context_->outgoing()
+      ->AddPublicService<fuchsia::component::runner::ComponentRunner>(
+          [this](fidl::InterfaceRequest<
+                 fuchsia::component::runner::ComponentRunner> request) {
+            component_runner_bindings_.AddBinding(this, std::move(request));
+          });
+
 #if !defined(DART_PRODUCT)
   // The VM service isolate uses the process-wide namespace. It writes the
   // vm service protocol port under /tmp. The VMServiceObject exposes that

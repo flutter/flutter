@@ -36,6 +36,8 @@ class DartRunner : public fuchsia::sys::Runner,
   // Not owned by DartRunner.
   sys::ComponentContext* context_;
   fidl::BindingSet<fuchsia::sys::Runner> bindings_;
+  fidl::BindingSet<fuchsia::component::runner::ComponentRunner>
+      component_runner_bindings_;
 
 #if !defined(AOT_RUNTIME)
   dart_utils::MappedResource vm_snapshot_data_;
