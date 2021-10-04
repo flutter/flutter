@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 
 import '../common.dart';
 
 const int _kNumIterations = 10;
-const int _kNumWarmUp = 10;
+const int _kNumWarmUp = 100;
 
 class Data {
   Data(this.value);
@@ -20,17 +17,17 @@ class Data {
   final int value;
 }
 
-test(int length) {
+List<Data> test(int length) {
   return List<Data>.generate(length,
       (int index) => Data(index * index));
 }
 
-void main() async {
+Future<void> main() async {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {
-    await compute(test, 100);
+    await compute(test, 10);
   }
 
   final Stopwatch watch = Stopwatch();
