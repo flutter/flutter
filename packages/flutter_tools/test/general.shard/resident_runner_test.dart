@@ -796,7 +796,7 @@ void main() {
         },
       ),
     ]);
-    final FakeDelegateFlutterDevice flutterDevice =  FakeDelegateFlutterDevice(
+    final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
       device,
       BuildInfo.debug,
       FakeResidentCompiler(),

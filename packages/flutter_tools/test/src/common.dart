@@ -148,7 +148,6 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 @isTest
 void test(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
@@ -162,12 +161,14 @@ void test(String description, FutureOr<void> Function() body, {
       });
       return body();
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 
@@ -182,7 +183,6 @@ void test(String description, FutureOr<void> Function() body, {
 @isTest
 void testWithoutContext(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
@@ -194,12 +194,14 @@ void testWithoutContext(String description, FutureOr<void> Function() body, {
         contextKey: const _NoContext(),
       });
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 

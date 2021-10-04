@@ -1524,7 +1524,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
