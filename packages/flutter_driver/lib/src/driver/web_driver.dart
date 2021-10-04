@@ -222,11 +222,7 @@ class WebFlutterDriver extends FlutterDriver {
 class FlutterWebConnection {
   /// Creates a FlutterWebConnection with WebDriver
   /// and whether the WebDriver supports timeline action.
-  FlutterWebConnection(this._driver, this.supportsTimelineAction) {
-    _driver.logs.get(async_io.LogType.browser).listen((async_io.LogEntry entry) {
-      print('[${entry.level}]: ${entry.message}');
-    });
-  }
+  FlutterWebConnection(this._driver, this.supportsTimelineAction);
 
   final async_io.WebDriver _driver;
 

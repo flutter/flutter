@@ -34,7 +34,7 @@ void main() {
     final Completer<void> sawBackgroundMessage = Completer<void>.sync();
     final Completer<void> sawNewBackgroundMessage = Completer<void>.sync();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-        print('[LOG]:"$line"');
+        printOnFailure('[LOG]:"$line"');
         if (line.contains('Main thread') && !sawForegroundMessage.isCompleted) {
           sawForegroundMessage.complete();
         }
@@ -68,7 +68,7 @@ void main() {
     final Completer<void> sawBackgroundMessage = Completer<void>.sync();
     final Completer<void> sawNewBackgroundMessage = Completer<void>.sync();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-        print('[LOG]:"$line"');
+        printOnFailure('[LOG]:"$line"');
         if (line.contains('Isolate thread') && !sawBackgroundMessage.isCompleted) {
           sawBackgroundMessage.complete();
         }
