@@ -104,6 +104,7 @@ class ExpansionTile extends StatefulWidget {
     this.backgroundColor,
     this.collapsedBackgroundColor,
     this.textColor,
+    this.hoverColor,
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
@@ -149,6 +150,9 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   final Color? backgroundColor;
+
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color? hoverColor;
 
   /// When not null, defines the background color of tile when the sublist is collapsed.
   final Color? collapsedBackgroundColor;
@@ -361,6 +365,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               title: widget.title,
               subtitle: widget.subtitle,
               trailing: widget.trailing ?? _buildTrailingIcon(context),
+              hoverColor: widget.hoverColor,
             ),
           ),
           ClipRect(

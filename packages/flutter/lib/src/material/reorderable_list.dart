@@ -80,6 +80,7 @@ class ReorderableListView extends StatefulWidget {
     this.prototypeItem,
     this.proxyDecorator,
     this.buildDefaultDragHandles = true,
+    this.dragHandlesPosition,
     this.padding,
     this.header,
     this.scrollDirection = Axis.vertical,
@@ -178,6 +179,7 @@ class ReorderableListView extends StatefulWidget {
     this.prototypeItem,
     this.proxyDecorator,
     this.buildDefaultDragHandles = true,
+    this.dragHandlesPosition,
     this.padding,
     this.header,
     this.scrollDirection = Axis.vertical,
@@ -283,6 +285,9 @@ class ReorderableListView extends StatefulWidget {
   /// ```
   ///{@end-tool}
   final bool buildDefaultDragHandles;
+
+  ///poistion og the Drag Handles
+  final AlignmentDirectional? dragHandlesPosition;
 
   /// {@macro flutter.widgets.reorderable_list.padding}
   final EdgeInsets? padding;
@@ -433,10 +438,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                   Positioned.directional(
                     textDirection: Directionality.of(context),
                     start: 0,
-                    end: 0,
+                    end: 8,
                     bottom: 8,
                     child: Align(
-                      alignment: AlignmentDirectional.bottomCenter,
+                      alignment: widget.dragHandlesPosition??AlignmentDirectional.bottomCenter,
                       child: ReorderableDragStartListener(
                         index: index,
                         child: const Icon(Icons.drag_handle),
@@ -456,7 +461,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                     bottom: 0,
                     end: 8,
                     child: Align(
-                      alignment: AlignmentDirectional.centerEnd,
+                      alignment: widget.dragHandlesPosition??AlignmentDirectional.centerEnd,
                       child: ReorderableDragStartListener(
                         index: index,
                         child: const Icon(Icons.drag_handle),
