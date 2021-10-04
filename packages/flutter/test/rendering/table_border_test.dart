@@ -129,8 +129,8 @@ void main() {
   });
 
   test('TableBorder.all with a borderRadius', () {
-    final TableBorder tableA = TableBorder.all(borderRadius: BorderRadius.circular(8.0));
-    expect(tableA.borderRadius, BorderRadius.circular(8.0));
+    final TableBorder tableA = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0)));
+    expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
 
 }

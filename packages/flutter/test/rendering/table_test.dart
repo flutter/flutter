@@ -257,7 +257,7 @@ void main() {
   test('Table paints a borderRadius', () {
     final RenderTable table = RenderTable(
       textDirection: TextDirection.ltr,
-      border: TableBorder.all(borderRadius: BorderRadius.circular(8.0)),
+      border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
     );
     layout(table);
     table.setFlatChildren(2, <RenderBox>[
