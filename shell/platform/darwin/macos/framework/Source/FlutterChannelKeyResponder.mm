@@ -68,7 +68,7 @@
     @"keymap" : @"macos",
     @"type" : type,
     @"keyCode" : @(event.keyCode),
-    @"modifiers" : @(event.modifierFlags),
+    @"modifiers" : @(modifierFlags),
   } mutableCopy];
   // Calling these methods on any other type of event
   // (e.g NSEventTypeFlagsChanged) will raise an exception.
