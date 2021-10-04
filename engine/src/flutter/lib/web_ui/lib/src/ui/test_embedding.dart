@@ -19,7 +19,6 @@ Future<dynamic> ensureTestPlatformInitializedThenRunTest(dynamic Function() body
   return _testPlatformInitializedFuture!.then<dynamic>((_) => body());
 }
 
-// TODO(yjbanov): can we make this late non-null? See https://github.com/dart-lang/sdk/issues/42214
 Future<void>? _platformInitializedFuture;
 
 Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
@@ -35,14 +34,10 @@ Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
   engine.scheduleFrameCallback = () {};
   debugEmulateFlutterTesterEnvironment = true;
 
+  // Initialize platform once and reuse across all tests.
   if (_platformInitializedFuture != null) {
     return _platformInitializedFuture!;
   }
-
-  // Only load the Ahem font once and await the same future in all tests.
   return _platformInitializedFuture =
-      webOnlyInitializePlatform(assetManager: engine.WebOnlyMockAssetManager())
-          .timeout(const Duration(seconds: 2), onTimeout: () async {
-    throw Exception('Timed out loading Ahem font.');
-  });
+      webOnlyInitializePlatform(assetManager: engine.WebOnlyMockAssetManager());
 }
