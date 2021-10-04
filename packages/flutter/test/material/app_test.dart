@@ -11,7 +11,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -461,7 +460,7 @@ void main() {
     expect(dependentBuildCount, equals(4));
 
     // didChangeAccessibilityFeatures
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
     addTearDown(tester.binding.window.clearAccessibilityFeaturesTestValue);
 
     await tester.pump();
@@ -768,7 +767,7 @@ void main() {
 
   testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -795,7 +794,7 @@ void main() {
 
   testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -828,7 +827,7 @@ void main() {
 
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -1171,26 +1170,6 @@ class MockScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
-}
-
-class MockAccessibilityFeature implements AccessibilityFeatures {
-  @override
-  bool get accessibleNavigation => true;
-
-  @override
-  bool get boldText => true;
-
-  @override
-  bool get disableAnimations => true;
-
-  @override
-  bool get highContrast => true;
-
-  @override
-  bool get invertColors => true;
-
-  @override
-  bool get reduceMotion => true;
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

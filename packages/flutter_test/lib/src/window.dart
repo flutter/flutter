@@ -5,6 +5,8 @@
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
+import 'package:flutter/foundation.dart';
+
 /// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
 /// allows faking of some properties for testing purposes.
 ///
@@ -342,6 +344,9 @@ class TestWindow implements ui.SingletonFlutterWindow {
   ui.AccessibilityFeatures? _accessibilityFeaturesTestValue;
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
+  ///
+  /// Consider using [FakeAccessibilityFeatures] to provide specific
+  /// values for the various accessibility features under test.
   set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
@@ -429,8 +434,85 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
-  /// Window, and makes things easier when we do rolls to give us time to catch
-  /// up.
+  /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+}
+
+/// Test version of [AccessibilityFeatures] in which specific features may
+/// be set to arbitrary values.
+///
+/// By default, all features are disabled. For an instance where all the
+/// features are enabled, consider the [FakeAccessibilityFeatures.allOn]
+/// constant.
+@immutable
+// ignore: avoid_implementing_value_types
+class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
+  /// Creates a test instance of [AccessibilityFeatures].
+  ///
+  /// By default, all features are disabled.
+  const FakeAccessibilityFeatures({
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
+    this.boldText = false,
+    this.reduceMotion = false,
+    this.highContrast = false,
+  });
+
+  /// An instance of [AccessibilityFeatures] where all the features are enabled.
+  static const FakeAccessibilityFeatures allOn = FakeAccessibilityFeatures(
+    accessibleNavigation: true,
+    invertColors: true,
+    disableAnimations: true,
+    boldText: true,
+    reduceMotion: true,
+    highContrast: true,
+  );
+
+  @override
+  final bool accessibleNavigation;
+
+  @override
+  final bool invertColors;
+
+  @override
+  final bool disableAnimations;
+
+  @override
+  final bool boldText;
+
+  @override
+  final bool reduceMotion;
+
+  @override
+  final bool highContrast;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeAccessibilityFeatures
+        && other.accessibleNavigation == accessibleNavigation
+        && other.invertColors == invertColors
+        && other.disableAnimations == disableAnimations
+        && other.boldText == boldText
+        && other.reduceMotion == reduceMotion
+        && other.highContrast == highContrast;
+  }
+
+  @override
+  int get hashCode => ui.hashValues(accessibleNavigation, invertColors, disableAnimations, boldText, reduceMotion, highContrast);
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [AccessibilityFeatures], and makes things easier when we do rolls to
+  /// give us time to catch up.
+  ///
+  /// If you would like to add to this class, changes must first be made in the
+  /// engine, followed by the framework.
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
