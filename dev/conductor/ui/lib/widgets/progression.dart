@@ -30,7 +30,8 @@ class MainProgression extends StatefulWidget {
 
 class MainProgressionState extends State<MainProgression> {
   int _currentStep = 0;
-  int _navigateStep = 0; // allow users to navigate already completed steps
+  // allow users to navigate back to already completed steps
+  int _navigateStep = 0;
 
   void tapped(int step) {
     setState(() => _navigateStep = step);
@@ -47,6 +48,16 @@ class MainProgressionState extends State<MainProgression> {
     if (_currentStep > 0) {
       setState(() => _currentStep -= 1);
       setState(() => _navigateStep = _currentStep);
+    }
+  }
+
+  StepState handlerStepState(int index) {
+    if (_currentStep > index) {
+      return StepState.complete;
+    } else if (_currentStep == index) {
+      return StepState.indexed;
+    } else {
+      return StepState.disabled;
     }
   }
 
@@ -88,9 +99,7 @@ class MainProgressionState extends State<MainProgression> {
                     ],
                   ),
                   isActive: true,
-                  state: _currentStep >= 1
-                      ? StepState.complete
-                      : StepState.disabled,
+                  state: handlerStepState(0),
                 ),
                 Step(
                   title: const Text('Flutter Engine Cherrypicks'),
@@ -100,9 +109,7 @@ class MainProgressionState extends State<MainProgression> {
                     ],
                   ),
                   isActive: true,
-                  state: _currentStep >= 2
-                      ? StepState.complete
-                      : StepState.disabled,
+                  state: handlerStepState(1),
                 ),
                 Step(
                   title: const Text('Flutter Framework Cherrypicks'),
@@ -112,9 +119,7 @@ class MainProgressionState extends State<MainProgression> {
                     ],
                   ),
                   isActive: true,
-                  state: _currentStep >= 3
-                      ? StepState.complete
-                      : StepState.disabled,
+                  state: handlerStepState(2),
                 ),
                 Step(
                   title: const Text('Publish the Release'),
@@ -124,9 +129,7 @@ class MainProgressionState extends State<MainProgression> {
                     ],
                   ),
                   isActive: true,
-                  state: _currentStep >= 4
-                      ? StepState.complete
-                      : StepState.disabled,
+                  state: handlerStepState(3),
                 ),
                 Step(
                   title: const Text('Release is Successfully published'),
@@ -134,9 +137,7 @@ class MainProgressionState extends State<MainProgression> {
                     children: const <Widget>[],
                   ),
                   isActive: true,
-                  state: _currentStep >= 4
-                      ? StepState.complete
-                      : StepState.disabled,
+                  state: handlerStepState(4),
                 ),
               ],
             ),
