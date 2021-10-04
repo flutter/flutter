@@ -50,19 +50,7 @@ class MainProgressionState extends State<MainProgression> {
     }
   }
 
-  ScrollController? _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _scrollController?.dispose();
-    super.dispose();
-  }
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +60,8 @@ class MainProgressionState extends State<MainProgression> {
         controller: _scrollController,
         child: ListView(
           controller: _scrollController,
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          physics: const ClampingScrollPhysics(),
           children: <Widget>[
             ConductorStatus(
               releaseState: widget.releaseState,

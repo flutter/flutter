@@ -4,6 +4,7 @@
 
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
+import 'package:conductor_ui/main.dart';
 import 'package:conductor_ui/widgets/progression.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,15 +19,41 @@ void main() {
       final pb.ConductorState state = pb.ConductorState(
         releaseChannel: channelName,
       );
-      await tester.pumpWidget(MainProgression(
-        releaseState: state,
-        stateFilePath: defaultStateFilePath(const LocalPlatform()),
-      ));
+      // await tester.pumpWidget(MaterialApp(
+      //   home: Column(
+      //     children: <Widget>[
+      //       MainProgression(
+      //         releaseState: state,
+      //         stateFilePath: defaultStateFilePath(const LocalPlatform()),
+      //       ),
+      //     ],
+      //   ),
+      // ));
 
-      final List<CheckboxListTile> substeps = tester
-          .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
-          .toList();
-      // print(substeps.length);
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MaterialApp(
+              home: Material(
+                child: Center(
+                  child: Column(
+                    children: <Widget>[
+                      MainProgression(
+                        releaseState: state,
+                        stateFilePath:
+                            defaultStateFilePath(const LocalPlatform()),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.byType(Stepper), findsOneWidget);
+      // expect(find.text('Substep 1'), findsOneWidget);
     });
   });
 }
