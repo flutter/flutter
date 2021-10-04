@@ -278,6 +278,8 @@ void main() {
           '/',
           '-scheme',
           'Free',
+          '-destination',
+          'id=123',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -286,7 +288,7 @@ void main() {
     ]);
 
     expect(
-        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(deviceId: '123', scheme: 'Free')),
         const <String, String>{});
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
@@ -308,6 +310,8 @@ void main() {
           '/',
           '-sdk',
           'iphonesimulator',
+          '-destination',
+          'generic/platform=iOS Simulator',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -340,6 +344,8 @@ void main() {
           'xcodebuild',
           '-project',
           '/',
+          '-destination',
+          'generic/platform=iOS',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
         ],
@@ -371,6 +377,8 @@ void main() {
           fileSystem.path.separator,
           '-scheme',
           'Free',
+          '-destination',
+          'generic/platform=iOS',
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
