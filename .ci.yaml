@@ -12,6 +12,7 @@ enabled_branches:
   - stable
   - flutter-2.7-candidate.1
 
+
 platform_properties:
   linux:
     properties:
