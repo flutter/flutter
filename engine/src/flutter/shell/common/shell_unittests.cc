@@ -3044,5 +3044,38 @@ TEST_F(ShellTest, UserTagSetOnStartup) {
   isolate_create_latch.Wait();
 }
 
+TEST_F(ShellTest, PrefetchDefaultFontManager) {
+  auto settings = CreateSettingsForFixture();
+  settings.prefetched_default_font_manager = true;
+
+  auto shell = CreateShell(std::move(settings));
+
+  auto get_font_manager_count = [&] {
+    fml::AutoResetWaitableEvent latch;
+    size_t font_manager_count;
+    fml::TaskRunner::RunNowOrPostTask(
+        shell->GetTaskRunners().GetUITaskRunner(),
+        [this, &shell, &latch, &font_manager_count]() {
+          font_manager_count =
+              GetFontCollection(shell.get())->GetFontManagersCount();
+          latch.Signal();
+        });
+    latch.Wait();
+    return font_manager_count;
+  };
+
+  size_t initial_font_manager_count = get_font_manager_count();
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  // If the prefetched_default_font_manager flag is set, then the default font
+  // manager will not be added until the engine starts running.
+  ASSERT_EQ(get_font_manager_count(), initial_font_manager_count + 1);
+
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter

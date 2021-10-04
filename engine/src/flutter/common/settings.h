@@ -181,6 +181,10 @@ struct Settings {
   // Font settings
   bool use_test_fonts = false;
 
+  // Indicates whether the embedding started a prefetch of the default font
+  // manager before creating the engine.
+  bool prefetched_default_font_manager = false;
+
   // Selects the SkParagraph implementation of the text layout engine.
   bool enable_skparagraph = false;
 
