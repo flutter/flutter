@@ -688,6 +688,52 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get shows working directory on process exception', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        exitCode: 66,
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
+    final Pub pub = Pub(
+      platform: FakePlatform(environment: const <String, String>{}),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      processManager: processManager,
+    );
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+    );
+    expect(logger.statusText,
+      'Running "flutter pub get" in /...\n'
+      'out1\n'
+      'out2\n'
+      'out3\n'
+    );
+    expect(logger.errorText,
+      'err1\n'
+      'err2\n'
+      'err3\n'
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub cache in root is used', () async {
     String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();

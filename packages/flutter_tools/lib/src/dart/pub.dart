@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -263,6 +265,14 @@ class _DefaultPub implements Pub {
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       status?.cancel();
+      if (exception is io.ProcessException) {
+        throw io.ProcessException(
+          exception.executable,
+          exception.arguments,
+          '${exception.message}\nWorking directory: "$directory"',
+          exception.errorCode,
+        );
+      }
       rethrow;
     }
 
