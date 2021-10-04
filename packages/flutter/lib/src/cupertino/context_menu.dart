@@ -1157,7 +1157,7 @@ class _ContextMenuSheet extends StatelessWidget {
       flex: 2,
       child: IntrinsicHeight(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(13.0),
+          borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: actions,
