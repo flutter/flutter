@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show File;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
