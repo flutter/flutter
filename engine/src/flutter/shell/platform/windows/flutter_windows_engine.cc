@@ -257,6 +257,10 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
     return host->HandlePlatformMessage(engine_message);
   };
+  args.on_pre_engine_restart_callback = [](void* user_data) {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    host->view()->OnPreEngineRestart();
+  };
 
   args.custom_task_runners = &custom_task_runners;
 
