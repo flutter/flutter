@@ -71,8 +71,8 @@ linter:
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
-    # - avoid_positional_boolean_parameters # not yet tested
-    # - avoid_print # not yet tested
+    # - avoid_positional_boolean_parameters # would have been nice to enable this but by now there's too many places that break it
+    - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
     # - avoid_redundant_argument_values # not yet tested
     - avoid_relative_lib_imports

@@ -47,8 +47,8 @@ class Calculator {
       final int n = result.length;
       onResultListener('Decoded $n results');
     } catch (e, stack) {
-      print('Invalid JSON file: $e');
-      print(stack);
+      debugPrint('Invalid JSON file: $e');
+      debugPrint('$stack');
     }
   }
 
