@@ -149,24 +149,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (project.hasProperty("multi-dex-enabled") &&
-            project.property("multi-dex-enabled").toBoolean() &&
-            project.android.defaultConfig.minSdkVersion <= 20) {
-            project.android {
-                defaultConfig {
-                    multiDexEnabled true
-                }
-                buildTypes {
-                    release {
-                        multiDexKeepFile project.file('multidex-flutter-keepfile.txt')
-                    }
-                }
-            }
-            project.dependencies {
-                implementation "androidx.multidex:multidex:2.0.1"
-            }
-        }
-
         if (project.hasProperty('deferred-component-names')) {
             String[] componentNames = project.property('deferred-component-names').split(',').collect {":${it}"}
             project.android {
@@ -230,6 +212,26 @@ class FlutterPlugin implements Plugin<Project> {
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
                 }
+            }
+        }
+
+        if (project.hasProperty("multidex-enabled") &&
+            project.property("multidex-enabled").toBoolean() &&
+            project.android.defaultConfig.minSdkVersion <= 20) {
+            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_multidex_keepfile.txt")
+            project.android {
+                defaultConfig {
+                    multiDexEnabled true
+                }
+                buildTypes {
+                    release {
+                        multiDexKeepFile project.file(flutterMultidexKeepfile)
+                    }
+                }
+            }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
             }
         }
 

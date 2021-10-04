@@ -4,46 +4,7 @@
 
 import '../base/file_system.dart';
 
-File _getMultiDexKeepFile(Directory projectDir) {
-  return projectDir.childDirectory('android')
-    .childDirectory('app')
-    .childFile('multidex-flutter-keepfile.txt');
-}
-
-/// Creates a multi dex keep file if it does not exist.
-///
-/// Otherwise, does nothing. This does not verify the contents
-/// of the keep file are valid.
-void ensureMultiDexKeepFileExists(final Directory projectDir) {
-  final File keepFile = _getMultiDexKeepFile(projectDir);
-  if (keepFile.existsSync()) {
-    return;
-  }
-  keepFile.createSync(recursive: true);
-
-  final StringBuffer buffer = StringBuffer();
-  // TODO(garyq): Programmatically determine the classes to keep.
-  //
-  // We include both FlutterApplication and FlutterMultiDexApplication as the develoepr may choose
-  // to manually install multidex support.
-  buffer.write('''
-io/flutter/app/FlutterApplication.class
-io/flutter/app/FlutterMultiDexApplication.class
-io/flutter/view/FlutterMain.class
-io/flutter/util/PathUtils.class
-''');
-  keepFile.writeAsStringSync(buffer.toString(), flush: true);
-}
-
-/// Returns true if the multi dex keep file exists.
-bool multiDexKeepFileExists(final Directory projectDir) {
-  if (_getMultiDexKeepFile(projectDir).existsSync()) {
-    return true;
-  }
-  return false;
-}
-
-File _getMultiDexUtilsFile(Directory projectDir) {
+File _getMultidexUtilsFile(Directory projectDir) {
   return projectDir.childDirectory('android')
     .childDirectory('app')
     .childDirectory('src')
@@ -52,15 +13,15 @@ File _getMultiDexUtilsFile(Directory projectDir) {
     .childDirectory('io')
     .childDirectory('flutter')
     .childDirectory('app')
-    .childFile('FlutterMultiDexSupportUtils.java');
+    .childFile('FlutterMultidexSupportUtils.java');
 }
 
-/// Creates the FlutterMultiDexSupportUtils.java file if it does not exist.
+/// Creates the FlutterMultidexSupportUtils.java file if it does not exist.
 ///
 /// Otherwise, does nothing. This does not verify the contents
 /// of the java file are valid.
-void ensureMultiDexUtilsExists(final Directory projectDir) {
-  final File utilsFile = _getMultiDexUtilsFile(projectDir);
+void ensureMultidexUtilsExists(final Directory projectDir) {
+  final File utilsFile = _getMultidexUtilsFile(projectDir);
   if (utilsFile.existsSync()) {
     return;
   }
@@ -73,17 +34,17 @@ void ensureMultiDexUtilsExists(final Directory projectDir) {
 package io.flutter.app;
 
 import android.content.Context;
-import androidx.multidex.MultiDex;
+import androidx.multidex.Multidex;
 
 /**
- * A utility class that adds MultiDex support for apps that support minSdk 20
+ * A utility class that adds Multidex support for apps that support minSdk 20
  * and below.
  *
- * <p>If the minSdk version is 21 or above, multi dex is natively supported.
+ * <p>If the minSdk version is 21 or above, multidex is natively supported.
  */
-public class FlutterMultiDexSupportUtils {
-  public static void installMultiDexSupport(Context context) {
-    MultiDex.install(context);
+public class FlutterMultidexSupportUtils {
+  public static void installMultidexSupport(Context context) {
+    Multidex.install(context);
   }
 }
 
@@ -91,9 +52,9 @@ public class FlutterMultiDexSupportUtils {
   utilsFile.writeAsStringSync(buffer.toString(), flush: true);
 }
 
-/// Returns true if the FlutterMultiDexSupportUtils.java file exists.
-bool multiDexUtilsExists(final Directory projectDir) {
-  if (_getMultiDexKeepFile(projectDir).existsSync()) {
+/// Returns true if the FlutterMultidexSupportUtils.java file exists.
+bool multidexUtilsExists(final Directory projectDir) {
+  if (_getMultidexUtilsFile(projectDir).existsSync()) {
     return true;
   }
   return false;

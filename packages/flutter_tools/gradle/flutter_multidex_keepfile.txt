@@ -1,0 +1,4 @@
+io/flutter/app/FlutterApplication.class
+io/flutter/app/FlutterMultidexApplication.class
+io/flutter/view/FlutterMain.class
+io/flutter/util/PathUtils.class

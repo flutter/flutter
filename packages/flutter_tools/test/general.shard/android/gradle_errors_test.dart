@@ -9,7 +9,9 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
@@ -17,6 +19,8 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
+  final FileSystem fileSystem = MemoryFileSystem.test();
+
   group('gradleErrors', () {
     testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
@@ -30,6 +34,7 @@ void main() {
           minSdkVersion,
           transformInputIssue,
           lockFileDepMissing,
+          multidexErrorHandler,
         ])
       );
     });
@@ -326,6 +331,94 @@ A problem occurred configuring root project 'android'.
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
+  group('multidex errors', () {
+    testUsingContext('retries if multidex support enabled', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory)), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      AnsiTerminal: () => _TestPromptTerminal('y')
+    });
+
+    testUsingContext('exits if multidex support skipped', () async {
+      const String errorMessage = r'''
+Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
+  at com.android.tools.r8.utils.T0.error(SourceFile:1)
+  at com.android.tools.r8.utils.T0.a(SourceFile:2)
+  at com.android.tools.r8.dex.P.a(SourceFile:740)
+  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
+  at com.android.tools.r8.dex.b.a(SourceFile:14)
+  at com.android.tools.r8.dex.b.b(SourceFile:25)
+  at com.android.tools.r8.D8.d(D8.java:133)
+  at com.android.tools.r8.D8.b(D8.java:1)
+  at com.android.tools.r8.utils.Y.a(SourceFile:36)
+  ... 38 more
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDexDebug'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
+   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
+     The number of method references in a .dex file cannot exceed 64K.
+     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
+
+      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory)), equals(GradleBuildStatus.exit));
+
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      AnsiTerminal: () => _TestPromptTerminal('n')
     });
   });
 
@@ -665,5 +758,23 @@ class FakeGradleUtils extends GradleUtils {
   @override
   String getExecutable(FlutterProject project) {
     return 'gradlew';
+  }
+}
+
+/// Simple terminal that returns the specified string when
+/// promptForCharInput is called.
+class _TestPromptTerminal extends AnsiTerminal {
+  _TestPromptTerminal(this.promptResult);
+
+  final String promptResult;
+
+  @override
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
+    Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) {
+    return Future<String>.value(promptResult);
   }
 }

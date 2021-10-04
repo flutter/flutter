@@ -417,7 +417,7 @@ class FlutterDevice {
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{
-      'multi-dex': hotRunner.multiDexEnabled,
+      'multidex': hotRunner.multidexEnabled,
     };
 
     await startEchoingDeviceLog();

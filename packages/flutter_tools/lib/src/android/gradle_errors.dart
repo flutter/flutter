@@ -72,12 +72,12 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
-  multiDexErrorHandler
+  multidexErrorHandler
 ];
 
-// MultiDex error message.
+// Multidex error message.
 @visibleForTesting
-final GradleHandledError multiDexErrorHandler = GradleHandledError(
+final GradleHandledError multidexErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:',
     'The number of method references in a .dex file cannot exceed 64K.',
@@ -87,39 +87,34 @@ final GradleHandledError multiDexErrorHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    globals.printStatus('${globals.logger.terminal.warningMark} App requires MultiDex support', emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
     globals.printStatus(
-      'MultiDex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multi dex support. '
+      'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support. '
       'The following files will be added by flutter:\n',
       indent: 4
     );
     globals.printStatus(
-      'android/app/multidex-flutter-keepfile.txt',
+      'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java\n',
       indent: 8
     );
     globals.printStatus(
-      'android/app/src/main/java/io/flutter/app/FlutterMultiDexSupportUtils.java\n',
-      indent: 8
-    );
-    globals.printStatus(
-      "You may pass the --no-multi-dex flag to skip Flutter's multi dex support to use a manual solution.",
+      "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.",
       indent: 4
     );
     final String selection = await globals.terminal.promptForCharInput(
       <String>['y', 'n'],
       logger: globals.logger,
-      prompt: 'Do you want to continue with adding multi dex support for Android?',
+      prompt: 'Do you want to continue with adding multidex support for Android?',
       defaultChoiceIndex: 0,
       displayAcceptedCharacters: true,
     );
     if (selection == 'y') {
-      ensureMultiDexKeepFileExists(project.directory);
-      ensureMultiDexUtilsExists(project.directory);
+      ensureMultidexUtilsExists(project.directory);
       return GradleBuildStatus.retry;
     }
     return GradleBuildStatus.exit;
   },
-  eventLabel: 'multi-dex-error',
+  eventLabel: 'multidex-error',
 );
 
 // Permission defined error message.
