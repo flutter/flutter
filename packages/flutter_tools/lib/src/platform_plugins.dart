@@ -49,22 +49,14 @@ abstract class NativeOrDartPlugin {
 
 /// Contains parameters to template an Android plugin.
 ///
-/// The [name] of the plugin is required. Additionally, either:
-/// - [defaultPackage], or
-/// - an implementation consisting of:
-///   - the [package] and [pluginClass] that will be the entry point to the
-///     plugin's native code, and/or
-///   - the [dartPluginClass] that will be the entry point for the plugin's
-///     Dart code
-/// is required.
-class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
+/// The required fields include: [name] of the plugin, [package] of the plugin and
+/// the [pluginClass] that will be the entry point to the plugin's native code.
+class AndroidPlugin extends PluginPlatform {
   AndroidPlugin({
     required this.name,
+    required this.package,
+    required this.pluginClass,
     required this.pluginPath,
-    this.package,
-    this.pluginClass,
-    this.dartPluginClass,
-    this.defaultPackage,
     required FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
@@ -72,10 +64,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
-      package: yaml['package'] as String?,
-      pluginClass: yaml[kPluginClass] as String?,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
+      package: yaml['package'] as String,
+      pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
       fileSystem: fileSystem,
     );
@@ -83,16 +73,11 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
   final FileSystem _fileSystem;
 
-  @override
-  bool isNative() => pluginClass != null;
-
   static bool validate(YamlMap yaml) {
     if (yaml == null) {
       return false;
     }
-    return (yaml['package'] is String && yaml['pluginClass'] is String)||
-           yaml[kDartPluginClass] is String ||
-           yaml[kDefaultPackage] is String;
+    return yaml['package'] is String && yaml['pluginClass'] is String;
   }
 
   static const String kConfigKey = 'android';
@@ -101,16 +86,10 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
 
   /// The plugin package name defined in pubspec.yaml.
-  final String? package;
+  final String package;
 
-  /// The native plugin main class defined in pubspec.yaml, if any.
-  final String? pluginClass;
-
-  /// The Dart plugin main class defined in pubspec.yaml, if any.
-  final String? dartPluginClass;
-
-  /// The default implementation package defined in pubspec.yaml, if any.
-  final String? defaultPackage;
+  /// The plugin main class defined in pubspec.yaml.
+  final String pluginClass;
 
   /// The absolute path to the plugin in the pub cache.
   final String pluginPath;
@@ -119,10 +98,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (package != null) 'package': package,
-      if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
-      if (defaultPackage != null) kDefaultPackage : defaultPackage,
+      'package': package,
+      'class': pluginClass,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
       'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
@@ -141,13 +118,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'src',
       'main',
     );
-
-    final String? package = this.package;
-    // Don't attempt to validate the native code if there isn't supposed to
-    // be any.
-    if (package == null) {
-      return supportedEmbeddings;
-    }
 
     final List<String> mainClassCandidates = <String>[
       _fileSystem.path.join(
@@ -200,21 +170,13 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
 /// Contains the parameters to template an iOS plugin.
 ///
-/// The [name] of the plugin is required. Additionally, either:
-/// - [defaultPackage], or
-/// - an implementation consisting of:
-///   - the [pluginClass] (with optional [classPrefix]) that will be the entry
-///     point to the plugin's native code, and/or
-///   - the [dartPluginClass] that will be the entry point for the plugin's
-///     Dart code
-/// is required.
-class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
+/// The required fields include: [name] of the plugin, the [pluginClass] that
+/// will be the entry point to the plugin's native code.
+class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
     required this.name,
     required this.classPrefix,
-    this.pluginClass,
-    this.dartPluginClass,
-    this.defaultPackage,
+    required this.pluginClass,
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
@@ -222,9 +184,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return IOSPlugin(
       name: name,
       classPrefix: '',
-      pluginClass: yaml[kPluginClass] as String?,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -232,9 +192,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String ||
-           yaml[kDartPluginClass] is String ||
-           yaml[kDefaultPackage] is String;
+    return yaml['pluginClass'] is String;
   }
 
   static const String kConfigKey = 'ios';
@@ -244,21 +202,14 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   /// Note, this is here only for legacy reasons. Multi-platform format
   /// always sets it to empty String.
   final String classPrefix;
-  final String? pluginClass;
-  final String? dartPluginClass;
-  final String? defaultPackage;
-
-  @override
-  bool isNative() => pluginClass != null;
+  final String pluginClass;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'prefix': classPrefix,
-      if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
-      if (defaultPackage != null) kDefaultPackage : defaultPackage,
+      'class': pluginClass,
     };
   }
 }

@@ -136,35 +136,44 @@ class Plugin {
           WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
 
-    // TODO(stuartmorgan): Consider merging web into this common handling; the
-    // fact that its implementation of Dart-only plugins and default packages
-    // are separate is legacy.
-    final List<String> sharedHandlingPlatforms = <String>[
-      AndroidPlugin.kConfigKey,
-      IOSPlugin.kConfigKey,
-      LinuxPlugin.kConfigKey,
-      MacOSPlugin.kConfigKey,
-      WindowsPlugin.kConfigKey,
-    ];
-    final Map<String, String> defaultPackages = <String, String>{};
-    final Map<String, String> dartPluginClasses = <String, String>{};
-    for (final String platform in sharedHandlingPlatforms) {
-        final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
-        if (defaultPackage != null) {
-          defaultPackages[platform] = defaultPackage;
-        }
-        final String? dartClass = _getPluginDartClassForPlatform(platformsYaml, platform);
-        if (dartClass != null) {
-          dartPluginClasses[platform] = dartClass;
-        }
-    }
+    final String? defaultPackageForLinux =
+        _getDefaultPackageForPlatform(platformsYaml, LinuxPlugin.kConfigKey);
+
+    final String? defaultPackageForMacOS =
+        _getDefaultPackageForPlatform(platformsYaml, MacOSPlugin.kConfigKey);
+
+    final String? defaultPackageForWindows =
+        _getDefaultPackageForPlatform(platformsYaml, WindowsPlugin.kConfigKey);
+
+    final String? defaultPluginDartClassForLinux =
+        _getPluginDartClassForPlatform(platformsYaml, LinuxPlugin.kConfigKey);
+
+    final String? defaultPluginDartClassForMacOS =
+        _getPluginDartClassForPlatform(platformsYaml, MacOSPlugin.kConfigKey);
+
+    final String? defaultPluginDartClassForWindows =
+        _getPluginDartClassForPlatform(platformsYaml, WindowsPlugin.kConfigKey);
 
     return Plugin(
       name: name,
       path: path,
       platforms: platforms,
-      defaultPackagePlatforms: defaultPackages,
-      pluginDartClassPlatforms: dartPluginClasses,
+      defaultPackagePlatforms: <String, String>{
+        if (defaultPackageForLinux != null)
+          LinuxPlugin.kConfigKey : defaultPackageForLinux,
+        if (defaultPackageForMacOS != null)
+          MacOSPlugin.kConfigKey : defaultPackageForMacOS,
+        if (defaultPackageForWindows != null)
+          WindowsPlugin.kConfigKey : defaultPackageForWindows,
+      },
+      pluginDartClassPlatforms: <String, String>{
+        if (defaultPluginDartClassForLinux != null)
+          LinuxPlugin.kConfigKey : defaultPluginDartClassForLinux,
+        if (defaultPluginDartClassForMacOS != null)
+          MacOSPlugin.kConfigKey : defaultPluginDartClassForMacOS,
+        if (defaultPluginDartClassForWindows != null)
+          WindowsPlugin.kConfigKey : defaultPluginDartClassForWindows,
+      },
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',

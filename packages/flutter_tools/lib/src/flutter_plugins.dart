@@ -353,9 +353,8 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, AndroidPlugin.kConfigKey);
   final List<Map<String, Object?>> androidPlugins =
-    _extractPlatformMaps(nativePlugins, AndroidPlugin.kConfigKey);
+    _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
 
   final Map<String, Object> templateContext = <String, Object>{
     'plugins': androidPlugins,
@@ -677,9 +676,9 @@ const String _dartPluginRegisterWith = r'''
       }
 ''';
 
-// TODO(egarciad): Evaluate merging the web and non-web plugin registry templates.
+// TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
 // https://github.com/flutter/flutter/issues/80406
-const String _dartPluginRegistryForNonWebTemplate = '''
+const String _dartPluginRegistryForDesktopTemplate = '''
 //
 // Generated file. Do not edit.
 // This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
@@ -689,12 +688,6 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
-{{#android}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/android}}
-{{#ios}}
-import 'package:{{pluginName}}/{{pluginName}}.dart';
-{{/ios}}
 {{#linux}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
 {{/linux}}
@@ -710,15 +703,7 @@ class _PluginRegistrant {
 
   @pragma('vm:entry-point')
   static void register() {
-    if (Platform.isAndroid) {
-      {{#android}}
-$_dartPluginRegisterWith
-      {{/android}}
-    } else if (Platform.isIOS) {
-      {{#ios}}
-$_dartPluginRegisterWith
-      {{/ios}}
-    } else if (Platform.isLinux) {
+    if (Platform.isLinux) {
       {{#linux}}
 $_dartPluginRegisterWith
       {{/linux}}
@@ -748,8 +733,7 @@ void main(List<String> args) {
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, IOSPlugin.kConfigKey);
-  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(nativePlugins, IOSPlugin.kConfigKey);
+  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
     'deploymentTarget': '9.0',
@@ -1135,15 +1119,11 @@ bool hasPlugins(FlutterProject project) {
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
-// TODO(stuartmorgan): Expand implementation to apply to all implementations,
-// not just Dart-only, per the federated plugin spec.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
   final List<String> platforms = <String>[
-    AndroidPlugin.kConfigKey,
-    IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
@@ -1155,28 +1135,20 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
+      // The plugin doesn't implement this platform.
       if (plugin.platforms[platform] == null &&
           plugin.defaultPackagePlatforms[platform] == null) {
-        // The plugin doesn't implement this platform.
         continue;
       }
-      String? implementsPackage = plugin.implementsPackage;
+      // The plugin doesn't implement an interface, verify that it has a default implementation.
+      final String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
         final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
-        final bool hasInlineDartImplementation =
-          plugin.pluginDartClassPlatforms[platform] != null;
-        if (defaultImplementation == null && !hasInlineDartImplementation) {
+        if (defaultImplementation == null) {
           if (throwOnPluginPubspecError) {
             globals.printError(
-              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
-              'it specify an implementation in pubspec.yaml.\n\n'
-              'To set an inline implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platform:\n'
-              '        $kDartPluginClass: <plugin-class>\n'
-              '\n'
+              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor sets "
+              'a default implementation in pubspec.yaml.\n\n'
               'To set a default implementation, use:\n'
               'flutter:\n'
               '  plugin:\n'
@@ -1194,18 +1166,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           didFindError = true;
           continue;
         }
-        if (defaultImplementation != null) {
-          defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
-          continue;
-        } else if (platform != 'linux' && platform != 'macos' && platform != 'windows') {
-          // An interface package (i.e., one with no 'implements') with an
-          // inline implementation is its own default implementation.
-          // TODO(stuartmorgan): This should be true on desktop as well, but
-          // enabling that would be a breaking change for most existing
-          // Dart-only plugins. See https://github.com/flutter/flutter/issues/87862
-          implementsPackage = plugin.name;
-          defaultImplementations['$platform/${plugin.name}'] = plugin.name;
-        }
+        defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
+        continue;
       }
       if (plugin.pluginDartClassPlatforms[platform] == null ||
           plugin.pluginDartClassPlatforms[platform] == 'none') {
@@ -1287,8 +1249,6 @@ Future<void> generateMainDartWithPluginRegistrant(
   final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
-    AndroidPlugin.kConfigKey: <Object?>[],
-    IOSPlugin.kConfigKey: <Object?>[],
     LinuxPlugin.kConfigKey: <Object?>[],
     MacOSPlugin.kConfigKey: <Object?>[],
     WindowsPlugin.kConfigKey: <Object?>[],
@@ -1314,7 +1274,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   }
   try {
     _renderTemplateToFile(
-      _dartPluginRegistryForNonWebTemplate,
+      _dartPluginRegistryForDesktopTemplate,
       templateContext,
       newMainDart,
       globals.templateRenderer,
