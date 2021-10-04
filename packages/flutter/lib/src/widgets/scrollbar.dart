@@ -750,7 +750,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
@@ -784,7 +784,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [DropdownButton]
 /// {@endtemplate}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [RawScrollbar] that executes a fade animation as
 /// scrolling occurs. The RawScrollbar will fade into view as the user scrolls,
 /// and fade out when scrolling stops. The [GridView] uses the
@@ -794,7 +794,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without
 /// the fade animation. This requires that a [ScrollController] is provided to
 /// `controller` for both the [RawScrollbar] and the [GridView].
@@ -1001,26 +1001,11 @@ class RawScrollbar extends StatefulWidget {
   /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
   /// is unspecified).
   ///
-  /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
-  /// thumb in a [RawScrollbar]:
+  /// {@tool dartpad}
+  /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar].
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: RawScrollbar(
-  ///       child: ListView(
-  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
-  ///         physics: const BouncingScrollPhysics(),
-  ///       ),
-  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
-  ///       thickness: 15.0,
-  ///       thumbColor: Colors.blue,
-  ///       isAlwaysShown: true,
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.shape.0.dart **
   /// {@end-tool}
   final OutlinedBorder? shape;
 

@@ -2,46 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for NavigationRail.extendedAnimation
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example shows how to use this animation to create a [FloatingActionButton]
-// that animates itself between the normal and extended states of the
-// [NavigationRail].
-//
-// An instance of `MyNavigationRailFab` is created for [NavigationRail.leading].
-// Pressing the FAB button toggles the "extended" state of the [NavigationRail].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-dartImports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'dart:ui';
 
-//* ▲▲▲▲▲▲▲▲ code-dartImports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
 import 'package:flutter/material.dart';
 
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 void main() => runApp(const MyApp());
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
-//********************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -119,12 +86,6 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 class MyNavigationRailFab extends StatelessWidget {
   const MyNavigationRailFab({Key? key, this.onPressed}) : super(key: key);
 
@@ -164,6 +125,3 @@ class MyNavigationRailFab extends StatelessWidget {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

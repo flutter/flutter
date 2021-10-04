@@ -93,7 +93,7 @@ enum BottomNavigationBarLandscapeLayout {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets, which means it defaults to [BottomNavigationBarType.fixed], and
@@ -104,7 +104,7 @@ enum BottomNavigationBarLandscapeLayout {
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has four [BottomNavigationBarItem]
 /// widgets, which means it defaults to [BottomNavigationBarType.shifting], and

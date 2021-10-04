@@ -29,7 +29,7 @@ import 'theme.dart';
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 ///
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.0.dart **
@@ -99,7 +99,7 @@ class ReorderableListView extends StatefulWidget {
   /// This example creates a list using the
   /// [ReorderableListView.builder] constructor. Using the [IndexedWidgetBuilder], The
   /// list items are built lazily on demand.
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   ///
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.reorderable_list_view_builder.0.dart **
@@ -171,7 +171,7 @@ class ReorderableListView extends StatefulWidget {
   /// The following sample specifies `buildDefaultDragHandles: false`, and
   /// uses a [Card] at the leading edge of each item for the item's drag handle.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   ///
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **

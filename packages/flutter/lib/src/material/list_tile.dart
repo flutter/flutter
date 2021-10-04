@@ -439,7 +439,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
@@ -448,7 +448,7 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
@@ -636,7 +636,7 @@ class ListTile extends StatelessWidget {
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the
   /// selected index, and using that to set the `selected` property on the
   /// corresponding [ListTile].

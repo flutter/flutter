@@ -26,7 +26,7 @@ function generate_docs() {
     # assets-for-api-docs repo:
     # https://github.com/flutter/assets-for-api-docs/tree/master/packages/snippets
     # >>> If you update this version, also update it in dev/bots/analyze_sample_code.dart <<<
-    "$DART" pub global activate snippets 0.2.3
+    "$DART" pub global activate snippets 0.2.5
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.

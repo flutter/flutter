@@ -67,7 +67,7 @@ enum _FloatingActionButtonType {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
@@ -76,7 +76,7 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
