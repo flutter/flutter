@@ -15,6 +15,9 @@
 
 namespace flutter {
 
+// Encode a 32-bit unicode code point into a UTF-8 byte array.
+//
+// See https://en.wikipedia.org/wiki/UTF-8#Encoding for the algorithm.
 std::string ConvertChar32ToUtf8(char32_t ch);
 
 // A delegate of |KeyboardKeyHandler| that handles events by sending
@@ -30,9 +33,10 @@ std::string ConvertChar32ToUtf8(char32_t ch);
 class KeyboardKeyEmbedderHandler
     : public KeyboardKeyHandler::KeyboardKeyHandlerDelegate {
  public:
-  using SendEvent = std::function<void(const FlutterKeyEvent& /* event */,
-                                       FlutterKeyEventCallback /* callback */,
-                                       void* /* user_data */)>;
+  using SendEventHandler =
+      std::function<void(const FlutterKeyEvent& /* event */,
+                         FlutterKeyEventCallback /* callback */,
+                         void* /* user_data */)>;
   using GetKeyStateHandler = std::function<SHORT(int /* nVirtKey */)>;
 
   // Build a KeyboardKeyEmbedderHandler.
@@ -40,12 +44,12 @@ class KeyboardKeyEmbedderHandler
   // Use `send_event` to define how the class should dispatch converted
   // flutter events, as well as how to receive the response, to the engine. It's
   // typically FlutterWindowsEngine::SendKeyEvent. The 2nd and 3rd parameter
-  // of the SendEvent call might be nullptr.
+  // of the SendEventHandler call might be nullptr.
   //
   // Use `get_key_state` to define how the class should get a reliable result of
   // the state for a virtual key. It's typically Win32's GetKeyState, but can
   // also be nullptr (for UWP).
-  explicit KeyboardKeyEmbedderHandler(SendEvent send_event,
+  explicit KeyboardKeyEmbedderHandler(SendEventHandler send_event,
                                       GetKeyStateHandler get_key_state);
 
   virtual ~KeyboardKeyEmbedderHandler();
@@ -85,6 +89,16 @@ class KeyboardKeyEmbedderHandler
     bool toggled_on;
   };
 
+  // Implements the core logic of |KeyboardHook|, leaving out some state
+  // guards.
+  void KeyboardHookImpl(int key,
+                        int scancode,
+                        int action,
+                        char32_t character,
+                        bool extended,
+                        bool was_down,
+                        std::function<void(bool)> callback);
+
   // Assign |critical_keys_| with basic information.
   void InitCriticalKeys();
   // Update |critical_keys_| with last seen logical and physical key.
@@ -98,8 +112,14 @@ class KeyboardKeyEmbedderHandler
   // if their pressing states have been desynchronized.
   void SynchronizeCritialPressedStates();
 
+  // Wraps perform_send_event_ with state tracking. Use this instead of
+  // |perform_send_event_| to send events to the framework.
+  void SendEvent(const FlutterKeyEvent& event,
+                 FlutterKeyEventCallback callback,
+                 void* user_data);
+
   std::function<void(const FlutterKeyEvent&, FlutterKeyEventCallback, void*)>
-      sendEvent_;
+      perform_send_event_;
   GetKeyStateHandler get_key_state_;
 
   // A map from physical keys to logical keys, each entry indicating a pressed
@@ -111,6 +131,9 @@ class KeyboardKeyEmbedderHandler
   // A self-incrementing integer, used as the ID for the next entry for
   // |pending_responses_|.
   uint64_t response_id_;
+  // Whether any events has been sent with |PerformSendEvent| during a
+  // |KeyboardHook|.
+  bool sent_any_events;
 
   // Important keys whose states are checked and guaranteed synchronized
   // on every key event.
@@ -123,11 +146,6 @@ class KeyboardKeyEmbedderHandler
   static uint64_t GetLogicalKey(int key, bool extended, int scancode);
   static void HandleResponse(bool handled, void* user_data);
   static void ConvertUtf32ToUtf8_(char* out, char32_t ch);
-  // Create an empty event.
-  //
-  // This is used when no key data needs to be sent. For the reason, see the
-  // |KeyboardKeyEmbedderHandler| class.
-  static FlutterKeyEvent CreateEmptyEvent();
   static FlutterKeyEvent SynthesizeSimpleEvent(FlutterKeyEventType type,
                                                uint64_t physical,
                                                uint64_t logical,
