@@ -2105,22 +2105,24 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return decoration!.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
   }
 
+  Color Function(Set<MaterialState>) _resolveIconColor(ThemeData themeData) => (Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
+      return themeData.disabledColor;
+
+    if (states.contains(MaterialState.focused))
+      return themeData.colorScheme.primary;
+
+    switch (themeData.brightness) {
+    case Brightness.dark:
+      return Colors.white70;
+    case Brightness.light:
+      return Colors.black45;
+    }
+  };
+
   Color _getIconColor(ThemeData themeData) {
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
-          return themeData.disabledColor;
-
-        if (states.contains(MaterialState.focused))
-          return themeData.colorScheme.primary;
-
-        switch (themeData.brightness) {
-          case Brightness.dark:
-            return Colors.white70;
-          case Brightness.light:
-            return Colors.black45;
-        }
-      }).resolve(materialState);
+      ?? MaterialStateProperty.resolveWith(_resolveIconColor(themeData)).resolve(materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData) {
@@ -2150,7 +2152,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineStyle(ThemeData themeData) {
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.labelStyle ?? themeData.inputDecorationTheme.labelStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
     if (style == null) {
       return themeData.textTheme.subtitle1!.merge(widget.baseStyle)
@@ -2161,7 +2164,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle ?? themeData.inputDecorationTheme.floatingLabelStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
     if (style == null) {
       final Color color = decoration!.errorText != null
@@ -2194,48 +2198,45 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.textTheme.caption!.copyWith(color: color).merge(decoration!.errorStyle);
   }
 
-  Set<MaterialState> get materialState => <MaterialState>{
-        if (!decoration!.enabled) MaterialState.disabled,
-        if (isFocused) MaterialState.focused,
-        if (isHovering) MaterialState.hovered,
-        if (decoration!.errorText != null) MaterialState.error,
-      };
+  Set<MaterialState> get materialState {
+    return <MaterialState>{
+      if (!decoration!.enabled) MaterialState.disabled,
+      if (isFocused) MaterialState.focused,
+      if (isHovering) MaterialState.hovered,
+      if (decoration!.errorText != null) MaterialState.error,
+    };
+  }
 
   InputBorder _getDefaultBorder(ThemeData themeData) {
-    final InputBorder? border =  MaterialStateProperty.resolveAs(decoration!.border, materialState);
+    final InputBorder border =  MaterialStateProperty.resolveAs(decoration!.border, materialState)
+      ?? const UnderlineInputBorder();
 
-
-    if (border != null && decoration!.border is MaterialStateProperty<InputBorder>) {
+    if (decoration!.border is MaterialStateProperty<InputBorder>) {
       return border;
     }
 
-    if (border != null && border.borderSide == BorderSide.none) {
+    if (border.borderSide == BorderSide.none) {
       return border;
     }
 
-    return MaterialStateUnderlineInputBorder.resolveWith((Set<MaterialState> states) {
-      Color borderColor;
-      double borderWeight;
+    final Color borderColor;
+    if (decoration!.enabled || isFocused) {
+      borderColor = decoration!.errorText == null
+        ? _getDefaultBorderColor(themeData)
+        : themeData.errorColor;
+    } else {
+      borderColor = (decoration!.filled == true && decoration!.border?.isOutline != true)
+        ? Colors.transparent
+        : themeData.disabledColor;
+    }
 
-      if (!states.contains(MaterialState.disabled) || states.contains(MaterialState.focused)) {
-        borderColor = states.contains(MaterialState.error)
-          ? themeData.errorColor
-          : _getDefaultBorderColor(themeData);
-      } else {
-        borderColor = (decoration!.filled == true && decoration!.border?.isOutline != true)
-          ? Colors.transparent
-          : themeData.disabledColor;
-      }
+    final double borderWeight;
+    if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled)
+      borderWeight = 0.0;
+    else
+      borderWeight = isFocused ? 2.0 : 1.0;
 
-      if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled)
-        borderWeight = 0.0;
-      else
-        borderWeight = isFocused ? 2.0 : 1.0;
-
-
-      final InputBorder border = decoration!.border ?? const UnderlineInputBorder();
-      return border.copyWith(borderSide: BorderSide(color: borderColor, width: borderWeight));
-    }).resolve(materialState);
+    return border.copyWith(borderSide: BorderSide(color: borderColor, width: borderWeight));
   }
 
   @override
@@ -2283,8 +2284,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // Setting TextStyle.height to 1 ensures that the label's height will equal
     // its font size.
     final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
-        ? inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)).copyWith(height: 1)
-        : inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState));
+      ? inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)).copyWith(height: 1)
+      : inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState));
     final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2697,11 +2698,11 @@ class InputDecoration {
   /// See [Icon], [ImageIcon].
   final Widget? icon;
 
-  /// The color of the icon
+  /// The color of the [icon].
   ///
   /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final Color? iconColor;
 
   /// Optional widget that describes the input field.
@@ -2739,8 +2740,8 @@ class InputDecoration {
   /// input field.
   ///
   /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// When the [labelText] is above (i.e., vertically adjacent to) the input
   /// field, the text uses the [floatingLabelStyle] instead.
@@ -2753,8 +2754,8 @@ class InputDecoration {
   /// vertically adjacent to) the input field.
   ///
   /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
   final TextStyle? floatingLabelStyle;
@@ -2770,8 +2771,8 @@ class InputDecoration {
   /// The style to use for the [helperText].
   ///
   /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [helperText] can occupy.
@@ -2798,8 +2799,8 @@ class InputDecoration {
   /// The style to use for the [hintText].
   ///
   /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
@@ -2997,8 +2998,8 @@ class InputDecoration {
   /// The style to use for the [prefixText].
   ///
   /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3012,8 +3013,8 @@ class InputDecoration {
   /// Defaults to [iconColor]
   ///
   /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final Color? prefixIconColor;
 
   /// An icon that appears after the editable part of the text field and
@@ -3083,8 +3084,8 @@ class InputDecoration {
   /// The style to use for the [suffixText].
   ///
   /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3098,8 +3099,8 @@ class InputDecoration {
   /// Defaults to [iconColor]
   ///
   /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final Color? suffixIconColor;
 
   /// The constraints for the suffix icon.
@@ -3147,8 +3148,8 @@ class InputDecoration {
   /// The style to use for the [counterText].
   ///
   /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
@@ -3328,9 +3329,9 @@ class InputDecoration {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.selected] state, i.e.  if the segment is selected or not.
+  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
   ///
-  /// If [border] derives from [InbputBorder] the border's [InputBorder.borderSide],
+  /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
   /// values are desired for  a given state, all four borders – [errorBorder],
@@ -3767,8 +3768,8 @@ class InputDecorationTheme with Diagnosticable {
   /// the text uses the [floatingLabelStyle] instead.
   ///
   /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -3781,8 +3782,8 @@ class InputDecorationTheme with Diagnosticable {
   /// text uses the [labelStyle] instead.
   ///
   /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
   final TextStyle? floatingLabelStyle;
@@ -3790,8 +3791,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for [InputDecoration.helperText].
   ///
   /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [InputDecoration.helperText] can occupy.
@@ -3810,8 +3811,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for the [InputDecoration.hintText].
   ///
   /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// Also used for the [InputDecoration.labelText] when the
   /// [InputDecoration.labelText] is displayed on top of the input field (i.e.,
@@ -3875,8 +3876,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The Color to use for the [InputDecoration.icon].
   ///
   /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? iconColor;
@@ -3884,8 +3885,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for the [InputDecoration.prefixText].
   ///
   /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? prefixStyle;
@@ -3893,8 +3894,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The Color to use for the [InputDecoration.prefixIcon].
   ///
   /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? prefixIconColor;
@@ -3902,8 +3903,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for the [InputDecoration.suffixText].
   ///
   /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? suffixStyle;
@@ -3911,8 +3912,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The Color to use for the [InputDecoration.suffixIcon].
   ///
   /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? suffixIconColor;
@@ -3920,8 +3921,8 @@ class InputDecorationTheme with Diagnosticable {
   /// The style to use for the [InputDecoration.counterText].
   ///
   /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.selected] state, i.e.
-  /// if the segment is selected or not.
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
@@ -4091,7 +4092,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.selected] state, i.e.  if the segment is selected or not.
+  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
