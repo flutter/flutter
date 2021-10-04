@@ -27,7 +27,7 @@ the code will need to adhere to the following rules.
 - Only built-in functions present in GLSL ES 100 are used.
 - Debug symbols must be stripped, you can use the `spirv-opt` `--strip-debug` flag.
 
-These rules may become less strict in future versions. Confirmant SPIR-V should succesfully transpile from the current version onwards.  In other words, a spir-v shader you use now that meets these rules should keep working, but the output of the transpiler may change for that shader.
+These rules may become less strict in future versions. Conformant SPIR-V should successfully transpile from the current version onwards.  In other words, a SPIR-V shader you use now that meets these rules should keep working, but the output of the transpiler may change for that shader.
 
 Support for textures, control flow, and structured types is planned, but not currently included.
 
@@ -41,7 +41,7 @@ To test the exception tests directly: `./testing/run_tests.py --type dart --dart
 
 ### Pixel Tests
 
-Pixel tests should run as part of unit-testing for each implementation of `dart:ui`. Currently, FragmentShader is only supported in C++. These tests aim to validate the correctness of transpilation to each target language. Each shader should render the color green for a correct transpilation, and any other color for failure. They will be a GLSL files that are compiled to SPIR-V via `shaderc`. Therefor, the `fragColor` should resolve to `vec4(0.0, 1.0, 0.0, 1.0)`
+Pixel tests should run as part of unit-testing for each implementation of `dart:ui`. Currently, FragmentShader is only supported in C++. These tests aim to validate the correctness of transpilation to each target language. Each shader should render the color green for a correct transpilation, and any other color for failure. They will be a GLSL files that are compiled to SPIR-V via `shaderc`. Therefore, the `fragColor` should resolve to `vec4(0.0, 1.0, 0.0, 1.0)`
 for all tests.
 
 In each test, the uniform `a` is initialized with the value of 1.0.
@@ -51,15 +51,15 @@ To test the pixel tests directly: `./testing/run_tests.py --type dart --dart-fil
 
 #### A Note on Test Isolation
 
-Even the simplest GLSL program tests several instructions, so no test us completely isolated
-to a single op. Also, some of the GLSL 450 op tests will use addition in subtraction, along with the
+Even the simplest GLSL program tests several instructions, so no test is completely isolated
+to a single op. Also, some of the GLSL 450 op tests will use addition and subtraction, along with the
 actual op being tested. However, the GLSL program for each test file is kept as simple as possible,
 to satisfy these conditions: pass if the op works, and fail if the op does not work. In some tests,
-it is sufficient to only call the GLSL op once, while other may need more calls to more completelty
+it is sufficient to only call the GLSL op once, while other may need more calls to more completely
 test the op. Many ops support scalars, vectors, or a combination as parameters. Most tests default
 to using scalars as params, but vec2, vec3, and vec4 parameters are also tested.
 
-- vec2 is tested as a paramter in glsl_op_normalize.glsl
+- vec2 is tested as a parameter in glsl_op_normalize.glsl
 - vec3 is tested as a parameter in glsl_op_cross.glsl
 - vec4 is tested as a parameter in glsl_op_length.glsl
 
