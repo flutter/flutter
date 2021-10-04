@@ -73,6 +73,9 @@ TEST_F(ShellTest, VSyncTargetTime) {
   fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetUITaskRunner(),
                                     [engine = shell->GetEngine()]() {
                                       if (engine) {
+                                        // Engine needs a surface for frames to
+                                        // be scheduled.
+                                        engine->OnOutputSurfaceCreated();
                                         // this implies we can re-use the last
                                         // frame to trigger begin frame rather
                                         // than re-generating the layer tree.
@@ -88,6 +91,29 @@ TEST_F(ShellTest, VSyncTargetTime) {
 
   // validate that the latest target time has also been updated.
   ASSERT_EQ(GetLatestFrameTargetTime(shell.get()), vsync_waiter_target_time);
+
+  // teardown.
+  DestroyShell(std::move(shell), std::move(task_runners));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, AnimatorStartsPaused) {
+  // Create all te prerequisites for a shell.
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+
+  auto shell = CreateShell(std::move(settings), task_runners);
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  ASSERT_FALSE(IsAnimatorRunning(shell.get()));
 
   // teardown.
   DestroyShell(std::move(shell), std::move(task_runners));
