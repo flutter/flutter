@@ -42,7 +42,7 @@ void main() {
           style: BorderStyle.solid,
           width: 1.0,
         ),
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         shape: BoxShape.rectangle,
         // No shadow.
       ),
@@ -85,7 +85,7 @@ void main() {
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF101010));
-      expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
+      expect(actualDecoration.borderRadius, const BorderRadius.all(Radius.circular(5.0)));
       expect(actualDecoration.shape, BoxShape.rectangle);
       expect(actualDecoration.boxShadow![0].blurRadius, 5.0);
       expect(actualDecoration.boxShadow![0].spreadRadius, 2.0);
