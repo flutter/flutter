@@ -17,7 +17,6 @@
         },
         {
             protocol: [
-                "fuchsia.component.runner.ComponentRunner",
                 "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
                 "fuchsia.intl.PropertyProvider",  // For dartVM timezone support
