@@ -14,7 +14,7 @@
             "fuchsia.logger.LogSink",
             "fuchsia.net.name.Lookup",
             "fuchsia.posix.socket.Provider",
-            "fuchsia.tracing.provider.Registry",
+            "fuchsia.tracing.provider.Registry"
         ]
     }
 }
