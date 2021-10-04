@@ -96,6 +96,8 @@ class ShellTest : public FixtureTest {
                                    const SkData& key,
                                    const SkData& value);
 
+  static bool IsAnimatorRunning(Shell* shell);
+
   enum ServiceProtocolEnum {
     kGetSkSLs,
     kEstimateRasterCacheMemory,
