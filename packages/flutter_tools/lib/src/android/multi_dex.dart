@@ -2,32 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
-import 'package:process/process.dart';
-import 'package:xml/xml.dart';
-
-import '../artifacts.dart';
-import '../base/analyze_size.dart';
-import '../base/common.dart';
-import '../base/deferred_component.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/terminal.dart';
-import '../base/utils.dart';
-import '../build_info.dart';
-import '../cache.dart';
-import '../convert.dart';
-import '../flutter_manifest.dart';
-import '../project.dart';
-import '../reporting/reporting.dart';
-import 'android_builder.dart';
-import 'android_studio.dart';
-import 'gradle_errors.dart';
-import 'gradle_utils.dart';
 
 File _getMultiDexKeepFile(Directory projectDir) {
   return projectDir.childDirectory('android')
@@ -35,7 +10,10 @@ File _getMultiDexKeepFile(Directory projectDir) {
     .childFile('multidex-flutter-keepfile.txt');
 }
 
-// This creates a 
+/// Creates a multi dex keep file if it does not exist.
+///
+/// Otherwise, does nothing. This does not verify the contents
+/// of the keep file are valid.
 void ensureMultiDexKeepFileExists(final Directory projectDir) {
   final File keepFile = _getMultiDexKeepFile(projectDir);
   if (keepFile.existsSync()) {
@@ -57,6 +35,7 @@ io/flutter/util/PathUtils.class
   keepFile.writeAsStringSync(buffer.toString(), flush: true);
 }
 
+/// Returns true if the multi dex keep file exists.
 bool multiDexKeepFileExists(final Directory projectDir) {
   if (_getMultiDexKeepFile(projectDir).existsSync()) {
     return true;
@@ -64,9 +43,8 @@ bool multiDexKeepFileExists(final Directory projectDir) {
   return false;
 }
 
-// This creates a 
-void ensureMultiDexUtilsExists(final Directory projectDir) {
-  final File utilsFile = projectDir.childDirectory('android')
+File _getMultiDexUtilsFile(Directory projectDir) {
+  return projectDir.childDirectory('android')
     .childDirectory('app')
     .childDirectory('src')
     .childDirectory('main')
@@ -75,6 +53,14 @@ void ensureMultiDexUtilsExists(final Directory projectDir) {
     .childDirectory('flutter')
     .childDirectory('app')
     .childFile('FlutterMultiDexSupportUtils.java');
+}
+
+/// Creates the FlutterMultiDexSupportUtils.java file if it does not exist.
+///
+/// Otherwise, does nothing. This does not verify the contents
+/// of the java file are valid.
+void ensureMultiDexUtilsExists(final Directory projectDir) {
+  final File utilsFile = _getMultiDexUtilsFile(projectDir);
   if (utilsFile.existsSync()) {
     return;
   }
@@ -103,4 +89,12 @@ public class FlutterMultiDexSupportUtils {
 
 ''');
   utilsFile.writeAsStringSync(buffer.toString(), flush: true);
+}
+
+/// Returns true if the FlutterMultiDexSupportUtils.java file exists.
+bool multiDexUtilsExists(final Directory projectDir) {
+  if (_getMultiDexKeepFile(projectDir).existsSync()) {
+    return true;
+  }
+  return false;
 }

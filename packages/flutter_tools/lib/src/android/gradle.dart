@@ -294,7 +294,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
-    if (androidBuildInfo.multiDexEnabled && multiDexKeepFileExists(project.directory)) {
+    // Only attempt adding multi dex support if all the flutter generated files exist.
+    // If the files do not exist and it was unintentional, the app will fail to build
+    // and prompt the developer if they wish Flutter to add the files again via gradle_error.dart.
+    if (androidBuildInfo.multiDexEnabled &&
+        multiDexKeepFileExists(project.directory) &&
+        multiDexUtilsExists(project.directory)) {
       command.add('-Pmulti-dex-enabled=true');
       ensureMultiDexKeepFileExists(project.directory);
       ensureMultiDexUtilsExists(project.directory);
