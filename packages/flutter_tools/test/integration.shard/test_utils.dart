@@ -36,15 +36,13 @@ Directory createResolvedTempDirectorySync(String prefix) {
 void writeFile(String path, String content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content)
-    ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
+    ..writeAsStringSync(content);
 }
 
 void writeBytesFile(String path, List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(content)
-    ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
+    ..writeAsBytesSync(content);
 }
 
 void writePackages(String folder) {
