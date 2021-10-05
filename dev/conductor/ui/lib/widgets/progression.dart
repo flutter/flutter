@@ -43,15 +43,19 @@ class MainProgressionState extends State<MainProgression> {
 
   void continued() {
     if (_completedStep < numSteps - 1) {
-      setState(() => _completedStep += 1);
-      setState(() => _currentStepDisplayed = _completedStep);
+      setState(() {
+        _completedStep += 1;
+        _currentStepDisplayed = _completedStep;
+      });
     }
   }
 
   void cancel() {
     if (_completedStep > 0) {
-      setState(() => _completedStep -= 1);
-      setState(() => _currentStepDisplayed = _completedStep);
+      setState(() {
+        _completedStep -= 1;
+        _currentStepDisplayed = _completedStep;
+      });
     }
   }
 

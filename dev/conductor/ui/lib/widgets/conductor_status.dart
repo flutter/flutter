@@ -6,7 +6,7 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
-/// Display the current conductor state, and lets users to delete the current state if there is one.
+/// Display the current conductor state
 class ConductorStatus extends StatefulWidget {
   const ConductorStatus({
     Key? key,
