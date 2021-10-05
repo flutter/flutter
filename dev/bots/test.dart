@@ -61,7 +61,6 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
-bool skipSmokeTest = false;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
@@ -128,10 +127,6 @@ Future<void> main(List<String> args) async {
         _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
         removeArgs.add(arg);
       }
-      if (arg.startsWith('--skip-smoke-test')) {
-        skipSmokeTest = true;
-        removeArgs.add(arg);
-      }
     }
     flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
@@ -188,9 +183,6 @@ Future<void> _validateEngineHash() async {
 }
 
 Future<void> _runSmokeTests() async {
-  if (skipSmokeTest) {
-    return;
-  }
   print('${green}Running smoketests...$reset');
 
   await _validateEngineHash();
@@ -426,7 +418,7 @@ Future<void> _runBuildTests() async {
 Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  final String examplePath = path.relative(exampleDirectory.path, from: Directory.current.path);
+  final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
     if (hasNullSafety) '--no-sound-null-safety',
@@ -552,7 +544,7 @@ Future<void> _flutterBuild(
   bool verifyCaching = false,
   List<String> additionalArgs = const <String>[],
 }) async {
-  final CommandResult result = await runCommand(flutter,
+  await runCommand(flutter,
     <String>[
       'build',
       platformBuildName,
@@ -565,20 +557,6 @@ Future<void> _flutterBuild(
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
-
-  bool hasDeprecatedVersion(String? message) {
-    if (message == null) {
-      return false;
-    }
-    return message.contains(RegExp(r'This app is using a deprecated version of the .* embedding\.'));
-  }
-
-  if (hasDeprecatedVersion(result.flattenedStdout) || hasDeprecatedVersion(result.flattenedStderr)) {
-    exitWithError(<String>[
-      '${red}The platform embedding for $relativePathToApplication (while running "flutter build $platformBuildName") has been deprecated.$reset',
-      'Please update the platform embedding to a supported version.',
-    ]);
-  }
 
   if (verifyCaching) {
     print('${green}Testing $platformLabel cache$reset for $cyan$relativePathToApplication$reset...');

@@ -420,7 +420,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         'This app is using a deprecated version of the Android embedding.\n'
         'To avoid unexpected runtime failures, or future build failures, try to migrate this '
         'app to the V2 embedding.\n'
-        'Take a look at the docs for migrating an app: https://flutter.dev/go/android-project-migration'
+        'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
       );
       for (final Map<String, Object?> plugin in androidPlugins) {
         final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
