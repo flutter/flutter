@@ -46,7 +46,7 @@ void verifyCommand(Command<Object> runner) {
       reason: "top-level command ${runner.name} doesn't have a valid category",
     );
   }
-  
+
   runner.subcommands.values.forEach(verifyCommand);
 }
 
