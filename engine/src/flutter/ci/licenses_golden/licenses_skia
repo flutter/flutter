@@ -1,4 +1,4 @@
-Signature: 99d8f7db310ef3ea625e58c1d63324d1
+Signature: 83e50ac1c71ecbb5bb722c2e9f538610
 
 UNUSED LICENSES:
 
@@ -2955,12 +2955,12 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
-FILE: ../../../third_party/skia/experimental/graphite/src/Pipeline.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/Pipeline.h
-FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDesc.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/PipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
+FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
@@ -2976,8 +2976,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.mm
-FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.h
-FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlPipeline.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlRenderPipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlRenderPipeline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.h
