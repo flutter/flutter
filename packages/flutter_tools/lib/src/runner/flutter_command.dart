@@ -413,10 +413,10 @@ abstract class FlutterCommand extends Command<void> {
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
       if (false) { // ignore: dead_code
         if (ddsEnabled) {
-          globals.printError('${globals.logger.terminal
+          globals.printWarning('${globals.logger.terminal
               .warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
         } else {
-          globals.printError('${globals.logger.terminal
+          globals.printWarning('${globals.logger.terminal
               .warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.');
         }
       }
@@ -1146,7 +1146,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printError(
+      globals.printWarning(
         '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
         'will be removed in a future version of Flutter. '
         'See https://flutter.dev/docs/development/tools/sdk/releases '

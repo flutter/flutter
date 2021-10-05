@@ -9,10 +9,16 @@ import 'package:meta/meta.dart';
 abstract class Stdio {
   final List<String> logs = <String>[];
 
-  /// Error/warning messages printed to STDERR.
+  /// Error messages printed to STDERR.
   @mustCallSuper
   void printError(String message) {
     logs.add('[error] $message');
+  }
+
+  /// Warning messages printed to STDERR.
+  @mustCallSuper
+  void printWarning(String message) {
+    logs.add('[warning] $message');
   }
 
   /// Ordinary STDOUT messages.

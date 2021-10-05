@@ -1561,7 +1561,7 @@ class TerminalHandler {
         _logger.printTrace('Deleting pid file (${_actualPidFile.path}).');
         _actualPidFile.deleteSync();
       } on FileSystemException catch (error) {
-        _logger.printError('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
+        _logger.printWarning('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
       }
       _actualPidFile = null;
     }

@@ -555,8 +555,19 @@ class RecordingPortForwarder implements DevicePortForwarder {
 }
 
 class StreamLogger extends Logger {
+  StreamLogger() : _hadErrorOutput = false, _hadWarningOutput = false;
+
+  bool _hadErrorOutput;
+  bool _hadWarningOutput;
+
   @override
   bool get isVerbose => true;
+
+  @override
+  bool get hadErrorOutput => _hadErrorOutput;
+
+  @override
+  bool get hadWarningOutput => _hadWarningOutput;
 
   @override
   void printError(
@@ -568,6 +579,20 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
+    _hadErrorOutput = true;
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _hadWarningOutput = true;
     _log('[stderr] $message');
   }
 

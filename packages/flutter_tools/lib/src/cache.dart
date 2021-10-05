@@ -321,9 +321,9 @@ class Cache {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
           // This needs to go to stderr to avoid cluttering up stdout if a parent
-          // process is collecting stdout. It's not really an "error" though,
+          // process is collecting stdout. It's not really a "warning" though,
           // so print it in grey.
-          _logger.printError(
+          _logger.printWarning(
             'Waiting for another flutter command to release the startup lock...',
             color: TerminalColor.grey,
           );
@@ -509,7 +509,7 @@ class Cache {
         ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
-      _logger.printError('Failed to delete some stamp files: $err');
+      _logger.printWarning('Failed to delete some stamp files: $err');
     }
   }
 
@@ -703,7 +703,7 @@ abstract class CachedArtifact extends ArtifactSet {
     await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
       if (version == null) {
-        logger.printError(
+        logger.printWarning(
           'No known version for the artifact name "$name". '
           'Flutter can continue, but the artifact may be re-downloaded on '
           'subsequent invocations until the problem is resolved.',
@@ -712,7 +712,7 @@ abstract class CachedArtifact extends ArtifactSet {
         cache.setStampFor(stampName, version!);
       }
     } on FileSystemException catch (err) {
-      logger.printError(
+      logger.printWarning(
         'The new artifact "$name" was downloaded, but Flutter failed to update '
         'its stamp file, receiving the error "$err". '
         'Flutter can continue, but the artifact may be re-downloaded on '
@@ -1103,7 +1103,7 @@ class ArtifactUpdater {
       try {
         file.deleteSync();
       } on FileSystemException catch (e) {
-        _logger.printError('Failed to delete "${file.path}". Please delete manually. $e');
+        _logger.printWarning('Failed to delete "${file.path}". Please delete manually. $e');
         continue;
       }
       for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {

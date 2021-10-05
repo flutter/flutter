@@ -277,7 +277,7 @@ class FlutterVersion {
       );
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.logger.printError('Warning: the Flutter git upstream was overridden '
+        globals.logger.printWarning('Warning: the Flutter git upstream was overridden '
         'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
       }
       globals.logger.printError(error.toString());

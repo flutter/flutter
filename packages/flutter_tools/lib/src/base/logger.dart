@@ -28,14 +28,25 @@ class StopwatchFactory {
 typedef VoidCallback = void Function();
 
 abstract class Logger {
+  /// Whether or not this logger should print [printTrace] messages.
   bool get isVerbose => false;
 
+  /// If true, silences the logger output.
   bool quiet = false;
 
+  /// If true, this logger supports color output.
   bool get supportsColor;
 
+  /// If true, this logger is connected to a terminal.
   bool get hasTerminal;
 
+  /// If true, then [printError] has been called at least once for this logger.
+  bool get hadErrorOutput;
+
+  /// If true, then [printWarning] has been called at least once for this logger.
+  bool get hadWarningOutput;
+
+  /// Returns the terminal attached to this logger.
   Terminal get terminal;
 
   OutputPreferences get _outputPreferences;
@@ -67,6 +78,36 @@ abstract class Logger {
   void printError(
     String message, {
     StackTrace? stackTrace,
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  });
+
+  /// Display a warning `message` to the user. Commands should use this if they
+  /// important information to convey to the user that is not fatal.
+  ///
+  /// The `message` argument is printed to the stderr in cyan by default.
+  ///
+  /// The `emphasis` argument will cause the output message be printed in bold text.
+  ///
+  /// The `color` argument will print the message in the supplied color instead
+  /// of the default of cyan. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  ///
+  /// The `indent` argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  ///
+  /// If `hangingIndent` is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
+  ///
+  /// If `wrap` is specified, then it overrides the
+  /// `outputPreferences.wrapText` setting.
+  void printWarning(
+    String message, {
     bool? emphasis,
     TerminalColor? color,
     int? indent,
@@ -166,6 +207,12 @@ class DelegatingLogger implements Logger {
   bool get hasTerminal => _delegate.hasTerminal;
 
   @override
+  bool get hadErrorOutput => _delegate.hadErrorOutput;
+
+  @override
+  bool get hadWarningOutput => _delegate.hadWarningOutput;
+
+  @override
   Terminal get terminal => _delegate.terminal;
 
   @override
@@ -186,6 +233,24 @@ class DelegatingLogger implements Logger {
     _delegate.printError(
       message,
       stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printWarning(String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    _delegate.printWarning(
+      message,
       emphasis: emphasis,
       color: color,
       indent: indent,
@@ -273,7 +338,9 @@ class StdoutLogger extends Logger {
   })
     : _stdio = stdio,
       _outputPreferences = outputPreferences,
-      _stopwatchFactory = stopwatchFactory;
+      _stopwatchFactory = stopwatchFactory,
+      _hadErrorOutput = false,
+      _hadWarningOutput = false;
 
   @override
   final Terminal terminal;
@@ -281,6 +348,8 @@ class StdoutLogger extends Logger {
   final OutputPreferences _outputPreferences;
   final Stdio _stdio;
   final StopwatchFactory _stopwatchFactory;
+  bool _hadErrorOutput;
+  bool _hadWarningOutput;
 
   Status? _status;
 
@@ -294,6 +363,12 @@ class StdoutLogger extends Logger {
   bool get hasTerminal => _stdio.stdinHasTerminal;
 
   @override
+  bool get hadErrorOutput => _hadErrorOutput;
+
+  @override
+  bool get hadWarningOutput => _hadWarningOutput;
+
+  @override
   void printError(
     String message, {
     StackTrace? stackTrace,
@@ -303,6 +378,7 @@ class StdoutLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    _hadErrorOutput = true;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -318,6 +394,31 @@ class StdoutLogger extends Logger {
     if (stackTrace != null) {
       writeToStdErr('$stackTrace\n');
     }
+    _status?.resume();
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    _hadWarningOutput = true;
+    _status?.pause();
+    message = wrapText(message,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      shouldWrap: wrap ?? _outputPreferences.wrapText,
+      columnWidth: _outputPreferences.wrapColumn,
+    );
+    if (emphasis == true) {
+      message = terminal.bolden(message);
+    }
+    message = terminal.color(message, color ?? TerminalColor.cyan);
+    writeToStdErr('$message\n');
     _status?.resume();
   }
 
@@ -472,7 +573,9 @@ class BufferLogger extends Logger {
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _hadErrorOutput = false,
+       _hadWarningOutput = false;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
@@ -480,8 +583,12 @@ class BufferLogger extends Logger {
     OutputPreferences? outputPreferences,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _stopwatchFactory = const StopwatchFactory();
+       _stopwatchFactory = const StopwatchFactory(),
+       _hadErrorOutput = false,
+       _hadWarningOutput = false;
 
+  bool _hadErrorOutput;
+  bool _hadWarningOutput;
 
   @override
   final OutputPreferences _outputPreferences;
@@ -498,17 +605,25 @@ class BufferLogger extends Logger {
   bool get supportsColor => terminal.supportsColor;
 
   final StringBuffer _error = StringBuffer();
+  final StringBuffer _warning = StringBuffer();
   final StringBuffer _status = StringBuffer();
   final StringBuffer _trace = StringBuffer();
   final StringBuffer _events = StringBuffer();
 
   String get errorText => _error.toString();
+  String get warningText => _warning.toString();
   String get statusText => _status.toString();
   String get traceText => _trace.toString();
   String get eventText => _events.toString();
 
   @override
   bool get hasTerminal => false;
+
+  @override
+  bool get hadErrorOutput => _hadErrorOutput;
+
+  @override
+  bool get hadWarningOutput => _hadWarningOutput;
 
   @override
   void printError(
@@ -520,6 +635,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    _hadErrorOutput = true;
     _error.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -528,6 +644,27 @@ class BufferLogger extends Logger {
         columnWidth: _outputPreferences.wrapColumn,
       ),
       color ?? TerminalColor.red,
+    ));
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    _hadWarningOutput = true;
+    _warning.writeln(terminal.color(
+      wrapText(message,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        shouldWrap: wrap ?? _outputPreferences.wrapText,
+        columnWidth: _outputPreferences.wrapColumn,
+      ),
+      color ?? TerminalColor.cyan,
     ));
   }
 

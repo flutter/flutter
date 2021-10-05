@@ -104,11 +104,9 @@ class CodesignCommand extends Command<void> {
 
     String revision;
     if (argResults!.wasParsed(kRevision)) {
-      stdio.printError(
-          'Warning! When providing an arbitrary revision, the contents of the cache may not');
-      stdio.printError(
-          'match the expected binaries in the conductor tool. It is preferred to check out');
-      stdio.printError(
+      stdio.printWarning(
+          'Warning! When providing an arbitrary revision, the contents of the cache may not '
+          'match the expected binaries in the conductor tool. It is preferred to check out '
           'the desired revision and run that version of the conductor.\n');
       revision = argResults![kRevision] as String;
     } else {
