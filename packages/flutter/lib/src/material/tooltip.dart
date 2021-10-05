@@ -31,7 +31,7 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
@@ -40,7 +40,7 @@ import 'tooltip_theme.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
@@ -56,7 +56,7 @@ import 'tooltip_theme.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example shows a rich [Tooltip] that specifies the [richMessage]
 /// parameter instead of the [message] parameter (only one of these may be
 /// non-null. Any [InlineSpan] can be specified for the [richMessage] attribute,

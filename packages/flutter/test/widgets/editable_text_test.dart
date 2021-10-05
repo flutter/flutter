@@ -2033,6 +2033,71 @@ void main() {
   });
 
   testWidgets(
+    'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84240 .
+      Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+          onSubmitted: (String value) {},
+        ),
+      );
+      await tester.pumpWidget(widget);
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      // This should unfocus the field. Don't restart the input.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.testTextInput.log, isNot(containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ])));
+
+      widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+          onSubmitted: (String value) {
+            focusNode.requestFocus();
+          },
+        ),
+      );
+      await tester.pumpWidget(widget);
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      // This will attempt to unfocus the field but the onSubmitted callback
+      // will cancel that. Restart the input connection in this case.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.testTextInput.log, containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ]));
+
+      tester.testTextInput.log.clear();
+      // TextInputAction.unspecified does not unfocus the input field by default.
+      await tester.testTextInput.receiveAction(TextInputAction.unspecified);
+      expect(tester.testTextInput.log, isNot(containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ])));
+  });
+
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);

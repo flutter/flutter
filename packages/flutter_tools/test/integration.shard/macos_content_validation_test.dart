@@ -145,8 +145,6 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-    }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-       timeout: const Timeout(Duration(minutes: 5)),
-    );
+    }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
   }
 }

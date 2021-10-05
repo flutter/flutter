@@ -113,7 +113,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -874,7 +874,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to

@@ -193,6 +193,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeWebDevice extends Fake implements Device {
   @override
   String get name => 'web';

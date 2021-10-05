@@ -1025,6 +1025,139 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            // Don't apply a scrollbar automatically for this test.
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Try to drag the thumb into overscroll.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // The platform drag handling should not have allowed us to enter overscroll.
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Scrollbar thumb can be dragged into overscroll if the platform allows it', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            // Don't apply a scrollbar automatically for this test.
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Try to drag the thumb into overscroll.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // The platform drag handling should have allowed us to enter overscroll.
+    expect(scrollController.offset, lessThan(-66.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          // The size of the scrollbar thumb shrinks when overscrolling
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 80.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+  }));
+
   // Regression test for https://github.com/flutter/flutter/issues/66444
   testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
@@ -1524,7 +1657,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });

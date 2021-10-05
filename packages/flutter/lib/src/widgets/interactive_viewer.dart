@@ -47,7 +47,7 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows a simple Container that can be panned and zoomed.
 ///
 /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.0.dart **
@@ -185,7 +185,7 @@ class InteractiveViewer extends StatefulWidget {
   /// Passed with the [InteractiveViewer.builder] constructor. Otherwise, the
   /// [child] parameter must be passed directly, and this is null.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// This example shows how to use builder to create a [Table] whose cell
   /// contents are only built when they are visible. Built and remove cells are
   /// logged in the console for illustration.
@@ -221,7 +221,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to true.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// This example shows how to create a pannable table. Because the table is
   /// larger than the entire screen, setting `constrained` to false is necessary
   /// to allow it to be drawn to its full size. The parts of the table that
@@ -342,7 +342,7 @@ class InteractiveViewer extends StatefulWidget {
   /// listeners are notified. If the value is set, InteractiveViewer will update
   /// to respect the new value.
   ///
-  /// {@tool dartpad --template=stateful_widget_material_ticker}
+  /// {@tool dartpad}
   /// This example shows how transformationController can be used to animate the
   /// transformation back to its starting position.
   ///

@@ -2,25 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for ScrollMetricsNotification
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample shows how a [ScrollMetricsNotification] is dispatched when
-// the `windowSize` is changed. Press the floating action button to increase
-// the scrollable window's size.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/material.dart';
 
@@ -75,6 +57,3 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

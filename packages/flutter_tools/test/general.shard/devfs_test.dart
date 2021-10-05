@@ -476,7 +476,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   Future<CompilerOutput> Function(Uri mainUri, List<Uri> invalidatedFiles) onRecompile;
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {String outputPath, PackageConfig packageConfig, String projectRootPath, FileSystem fs, bool suppressErrors = false}) {
+  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {String outputPath, PackageConfig packageConfig, String projectRootPath, FileSystem fs, bool suppressErrors = false, bool checkDartPluginRegistry = false}) {
     return onRecompile?.call(mainUri, invalidatedFiles)
       ?? Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
   }

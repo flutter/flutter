@@ -18,7 +18,7 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows a [Form] with one [TextFormField] to enter an email
 /// address and an [ElevatedButton] to submit the form. A [GlobalKey] is used here
 /// to identify the [Form] and validate input.
