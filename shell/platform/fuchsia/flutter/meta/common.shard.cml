@@ -1,0 +1,53 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file
+{
+    capabilities: [
+        // Required for inspect.
+        // Copied from inspect/client.shard.cml because out-of-tree doesn't
+        // have support for CML includes from the SDK.
+        {
+            
+            directory: "diagnostics",
+            rights: [ "connect" ],
+            path: "/diagnostics",
+        },
+    ],
+    expose: [
+        // Required for inspect.
+        // Copied from inspect/client.shard.cml because out-of-tree doesn't
+        // have support for CML includes from the SDK.
+        {
+            directory: "diagnostics",
+            from: "self",
+            to: "framework",
+        },
+    ],
+    use: [
+        {
+            directory: "config-data",
+            rights: [ "r*" ],
+            path: "/config/data",
+        },
+        {
+            protocol: [
+                "fuchsia.accessibility.SettingsManager",
+                "fuchsia.accessibility.semantics.SemanticsManager",
+                "fuchsia.deprecatedtimezone.Timezone",
+                "fuchsia.device.NameProvider",
+                "fuchsia.feedback.CrashReporter",
+                "fuchsia.fonts.Provider",
+                "fuchsia.intl.PropertyProvider",
+                "fuchsia.logger.LogSink",  // Copied from syslog/client.shard.cml.
+                "fuchsia.net.name.Lookup",
+                "fuchsia.posix.socket.Provider",
+                "fuchsia.sysmem.Allocator",
+                "fuchsia.timezone.Timezone",  // Copied from vulkan/client.shard.cml.
+                "fuchsia.tracing.provider.Registry",  // Copied from vulkan/client.shard.cml.
+                "fuchsia.ui.composition.Allocator",
+                "fuchsia.ui.composition.Flatland",
+                "fuchsia.vulkan.loader.Loader"  // Copied from vulkan/client.shard.cml.
+            ]
+        }
+    ]
+}

@@ -315,6 +315,7 @@ template("jit_runner") {
     binary = "flutter_jit${product_suffix}_runner"
 
     cmx_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")
+    cml_file = rebase_path("meta/flutter_jit${product_suffix}_runner.cml")
 
     resources = [
       {
@@ -394,6 +395,7 @@ template("aot_runner") {
     }
 
     cmx_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cmx")
+    cml_file = rebase_path("meta/flutter_aot${product_suffix}_runner.cml")
 
     binary = "flutter_aot${product_suffix}_runner"
 
