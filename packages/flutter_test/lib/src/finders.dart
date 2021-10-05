@@ -128,6 +128,21 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byKey(Key key, { bool skipOffstage = true }) => _KeyFinder(key, skipOffstage: skipOffstage);
 
+  /// Finds widgets by searching for widgets implementing a particular type.
+  ///
+  /// This matcher accepts subtypes. For example a
+  /// `bySubtype<StatefulWidget>()` will find any stateful widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySubtype<IconButton>(), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySubtype<T extends Widget>({ bool skipOffstage = true }) => _WidgetSubtypeFinder<T>(skipOffstage: skipOffstage);
+
   /// Finds widgets by searching for widgets with a particular type.
   ///
   /// This does not do subclass tests, so for example
@@ -710,6 +725,18 @@ class _KeyFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.key == key;
+  }
+}
+
+class _WidgetSubtypeFinder<T extends Widget> extends MatchFinder {
+  _WidgetSubtypeFinder({ bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+
+  @override
+  String get description => 'is "$T"';
+
+  @override
+  bool matches(Element candidate) {
+    return candidate.widget is T;
   }
 }
 
