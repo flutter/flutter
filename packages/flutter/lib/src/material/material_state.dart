@@ -98,6 +98,9 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// [Set] of [MaterialState]s, like [MaterialState.pressed],
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
+/// [MaterialStateColor] should only be used with widgets that document
+/// their support, like [TimePickerThemeData.dayPeriodColor].
+///
 /// To use a [MaterialStateColor], you can either:
 ///   1. Create a subclass of [MaterialStateColor] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateColor.resolveWith] and pass in a callback that
@@ -111,11 +114,6 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// [MaterialStateColor] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-///
-/// This class enables existing widget implementations with [Color]
-/// properties to be extended to also effectively support `MaterialStateProperty<Color>`
-/// property values. [MaterialStateColor] should only be used with widgets that document
-/// their support, like [TimePickerThemeData.dayPeriodColor].
 ///
 /// {@tool snippet}
 ///
@@ -403,6 +401,9 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// [Set] of [MaterialState]s, like [MaterialState.pressed],
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
+/// [MaterialStateTextStyle] should only be used with widgets that document
+/// their support, like [InputDecorator.labelStyle].
+///
 /// To use a [MaterialStateTextStyle], you can either:
 ///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
@@ -416,12 +417,6 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-///
-/// This class enables existing widget implementations with [TextStyle]
-/// properties to be extended to also effectively support `MaterialStateProperty<TextStyle>`
-/// property values. [MaterialStateTextStyle] should only be used with widgets that document
-/// their support, like [InputDecorator.labelStyle].
-
 abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -469,6 +464,9 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
 /// [Set] of [MaterialState]s, like [MaterialState.pressed],
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
+/// [MaterialStateOutlineInputBorder] should only be used with widgets that document
+/// their support, like [InputDecorator.border].
+///
 /// To use a [MaterialStateOutlineInputBorder], you can either:
 ///   1. Create a subclass of [MaterialStateOutlineInputBorder] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateOutlineInputBorder.resolveWith] and pass in a callback that
@@ -482,11 +480,6 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
 /// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-///
-/// This class enables existing widget implementations with [OutlineInputBorder]
-/// properties to be extended to also effectively support `MaterialStateProperty<OutlineInputBorder>`
-/// property values. [MaterialStateOutlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecorator.labelStyle].
 abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -534,6 +527,9 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [Set] of [MaterialState]s, like [MaterialState.pressed],
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
+/// [MaterialStateUnderlineInputBorder] should only be used with widgets that document
+/// their support, like [InputDecorator.border].
+///
 /// To use a [MaterialStateUnderlineInputBorder], you can either:
 ///   1. Create a subclass of [MaterialStateUnderlineInputBorder] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateUnderlineInputBorder.resolveWith] and pass in a callback that
@@ -547,11 +543,6 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-///
-/// This class enables existing widget implementations with [UnderlineInputBorder]
-/// properties to be extended to also effectively support `MaterialStateProperty<UnderlineInputBorder>`
-/// property values. [MaterialStateUnderlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecorator.labelStyle].
 abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

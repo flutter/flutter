@@ -2105,24 +2105,23 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return decoration!.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
   }
 
-  Color Function(Set<MaterialState>) _resolveIconColor(ThemeData themeData) => (Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
-      return themeData.disabledColor;
-
-    if (states.contains(MaterialState.focused))
-      return themeData.colorScheme.primary;
-
-    switch (themeData.brightness) {
-    case Brightness.dark:
-      return Colors.white70;
-    case Brightness.light:
-      return Colors.black45;
-    }
-  };
-
   Color _getIconColor(ThemeData themeData) {
+    Color _resolveIconColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
+        return themeData.disabledColor;
+
+      if (states.contains(MaterialState.focused))
+        return themeData.colorScheme.primary;
+
+      switch (themeData.brightness) {
+        case Brightness.dark:
+          return Colors.white70;
+        case Brightness.light:
+          return Colors.black45;
+      }
+    }
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveWith(_resolveIconColor(themeData)).resolve(materialState);
+      ?? MaterialStateProperty.resolveWith(_resolveIconColor).resolve(materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData) {
@@ -2147,7 +2146,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
-
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -2532,7 +2530,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color should default to gray, be blue while focused
+/// based on the `MaterialState`. The color defaults to gray, be blue while focused
 /// and red if in an error state.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
@@ -2540,7 +2538,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState` through the use of `ThemeData`. The color should default
+/// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
