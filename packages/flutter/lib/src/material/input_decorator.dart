@@ -477,6 +477,46 @@ enum FloatingLabelBehavior {
   always,
 }
 
+/// Defines the location of the floating label within the [InputDecorator].
+///
+/// See also:
+///
+/// * [InputDecoration.floatingLabelAlignment]
+@immutable
+class FloatingLabelAlignment {
+  const FloatingLabelAlignment._({
+    required this.x,
+  }) : assert(x != null),
+        assert(x >= -1.0 && x <= 1.0);
+
+  /// A value ranging from -1.0 to 1.0 that defines the leftmost and rightmost
+  /// locations of the decorator.
+  final double x;
+
+  /// Aligns the floating label with the top-left location in the input decorator.
+  static const FloatingLabelAlignment left = FloatingLabelAlignment._(x: -1.0);
+  /// Aligns the floating label with the top-center location in the input decorator.
+  static const FloatingLabelAlignment center = FloatingLabelAlignment._(x: 0.0);
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'FloatingLabelAlignment')}(x: $x)';
+  }
+
+  @override
+  int get hashCode => hashList(<Object?>[x]);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FloatingLabelAlignment
+            && x == other.x;
+  }
+}
+
 // Identifies the children of a _RenderDecorationElement.
 enum _DecorationSlot {
   icon,
@@ -500,7 +540,7 @@ class _Decoration {
     required this.isCollapsed,
     required this.floatingLabelHeight,
     required this.floatingLabelProgress,
-    this.centerFloatingLabel = false,
+    required this.floatingLabelAlignment,
     this.border,
     this.borderGap,
     required this.alignLabelWithHint,
@@ -520,13 +560,14 @@ class _Decoration {
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null);
+       assert(floatingLabelProgress != null),
+       assert(floatingLabelAlignment != null);
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
-  final bool centerFloatingLabel;
+  final FloatingLabelAlignment floatingLabelAlignment;
   final InputBorder? border;
   final _InputBorderGap? borderGap;
   final bool alignLabelWithHint;
@@ -555,6 +596,7 @@ class _Decoration {
         && other.isCollapsed == isCollapsed
         && other.floatingLabelHeight == floatingLabelHeight
         && other.floatingLabelProgress == floatingLabelProgress
+        && other.floatingLabelAlignment == floatingLabelAlignment
         && other.border == border
         && other.borderGap == borderGap
         && other.alignLabelWithHint == alignLabelWithHint
@@ -579,6 +621,7 @@ class _Decoration {
       contentPadding,
       floatingLabelHeight,
       floatingLabelProgress,
+      floatingLabelAlignment,
       border,
       borderGap,
       alignLabelWithHint,
@@ -1472,11 +1515,12 @@ class _RenderDecoration extends RenderBox {
 
     if (label != null) {
       final double labelX = _boxParentData(label!).offset.dx;
-      // When floating label is centered, it's x is relative to the origin of
-      // the _BorderContainer and is independent of label's x.
+      final bool centerFloatLabel = decoration.floatingLabelAlignment == FloatingLabelAlignment.center;
+      // When floating label is centered, it's x is relative to
+      // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap!.start = decoration.centerFloatingLabel
+          decoration.borderGap!.start = centerFloatLabel
               ? _boxSize(container).width / 2 + _boxSize(label).width * _kFinalLabelScale / 2
               : (labelX + label!.size.width);
           break;
@@ -1484,7 +1528,7 @@ class _RenderDecoration extends RenderBox {
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, its already relative to _BorderContainer.
-          decoration.borderGap!.start = decoration.centerFloatingLabel
+          decoration.borderGap!.start = centerFloatLabel
               ? _boxSize(container).width / 2 - _boxSize(label).width * _kFinalLabelScale / 2
               : (labelX - _boxSize(icon).width);
           break;
@@ -1526,7 +1570,7 @@ class _RenderDecoration extends RenderBox {
       final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double dx;
-      if (decoration.centerFloatingLabel) {
+      if (decoration.floatingLabelAlignment == FloatingLabelAlignment.center) {
         final double centeredFloatingX = _boxParentData(container!).offset.dx +
             _boxSize(container).width / 2.0 - (labelWidth * _kFinalLabelScale) / 2.0;
         dx = lerpDouble(labelOffset.dx, centeredFloatingX, t)!;
@@ -2459,7 +2503,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         isCollapsed: decoration!.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
-        centerFloatingLabel: decoration!.centerFloatingLabel,
+        floatingLabelAlignment: decoration!.floatingLabelAlignment!,
         floatingLabelProgress: _floatingLabelController.value,
         border: border,
         borderGap: _borderGap,
@@ -2602,7 +2646,7 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior,
-    this.centerFloatingLabel = false,
+    this.floatingLabelAlignment,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2648,6 +2692,7 @@ class InputDecoration {
   const InputDecoration.collapsed({
     required this.hintText,
     this.floatingLabelBehavior,
+    this.floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
     this.filled = false,
@@ -2657,7 +2702,6 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
-       centerFloatingLabel = false,
        icon = null,
        iconColor = null,
        label = null,
@@ -2728,7 +2772,7 @@ class InputDecoration {
   /// When the input field is empty and unfocused, the label is displayed on
   /// top of the input field (i.e., at the same location on the screen where
   /// text may be entered in the input field). When the input field receives
-  /// focus (or if the field is non-empty), depending on [centerFloatingLabel],
+  /// focus (or if the field is non-empty), depending on [floatingLabelAlignment],
   /// the label moves above, either vertically adjacent to, or to the center of
   /// the input field.
   /// {@endtemplate}
@@ -2873,7 +2917,7 @@ class InputDecoration {
   final int? errorMaxLines;
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
-  /// Defines how the floating label should be displayed.
+  /// Defines **how** the floating label should be displayed.
   ///
   /// When [FloatingLabelBehavior.auto] the label will float to the top only when
   /// the field is focused or has some text content, otherwise it will appear
@@ -2889,17 +2933,18 @@ class InputDecoration {
   /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
-  /// {@template flutter.material.inputDecoration.centerFloatingLabel}
-  /// Defines where the floating label should be displayed.
+  /// {@template flutter.material.inputDecoration.floatingLabelAlignment}
+  /// Defines **where** the floating label should be displayed.
   ///
-  /// When true, the label will float to the top center of the field.
+  /// [FloatingLabelAlignment.left] aligns the floating label to the left on top
+  /// of the field.
   ///
-  /// When false, the label will float to the top (vertically adjacent)
-  /// of the field
-  ///
-  /// Defaults to false.
+  /// [FloatingLabelAlignment.center] aligns the floating label to the center on
+  /// top of the field.
   /// {@endtemplate}
-  final bool centerFloatingLabel;
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelAlignment] will be used.
+  final FloatingLabelAlignment? floatingLabelAlignment;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
   /// space).
@@ -3473,7 +3518,7 @@ class InputDecoration {
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
-    bool? centerFloatingLabel,
+    FloatingLabelAlignment? floatingLabelAlignment,
     bool? isCollapsed,
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
@@ -3525,7 +3570,7 @@ class InputDecoration {
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
-      centerFloatingLabel: centerFloatingLabel ?? this.centerFloatingLabel,
+      floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isCollapsed: isCollapsed ?? this.isCollapsed,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
@@ -3576,7 +3621,7 @@ class InputDecoration {
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
-      centerFloatingLabel: centerFloatingLabel,
+      floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
       isCollapsed: isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
@@ -3622,7 +3667,7 @@ class InputDecoration {
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.floatingLabelBehavior == floatingLabelBehavior
-        && other.centerFloatingLabel == centerFloatingLabel
+        && other.floatingLabelAlignment == floatingLabelAlignment
         && other.isDense == isDense
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
@@ -3677,7 +3722,7 @@ class InputDecoration {
       errorStyle,
       errorMaxLines,
       floatingLabelBehavior,
-      centerFloatingLabel,
+      floatingLabelAlignment,
       isDense,
       contentPadding,
       isCollapsed,
@@ -3732,6 +3777,7 @@ class InputDecoration {
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
+      if (floatingLabelAlignment != null) 'floatingLabelAlignment: $floatingLabelAlignment',
       if (isDense ?? false) 'isDense: $isDense',
       if (contentPadding != null) 'contentPadding: $contentPadding',
       if (isCollapsed) 'isCollapsed: $isCollapsed',
@@ -3783,7 +3829,7 @@ class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///
-  /// The values of [isDense], [isCollapsed], [filled], [centerFloatingLabel],
+  /// The values of [isDense], [isCollapsed], [filled], [floatingLabelAlignment],
   /// and [border] must not be null.
   const InputDecorationTheme({
     this.labelStyle,
@@ -3794,7 +3840,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
-    this.centerFloatingLabel = false,
+    this.floatingLabelAlignment = FloatingLabelAlignment.left,
     this.isDense = false,
     this.contentPadding,
     this.isCollapsed = false,
@@ -3817,7 +3863,6 @@ class InputDecorationTheme with Diagnosticable {
     this.alignLabelWithHint = false,
     this.constraints,
   }) : assert(isDense != null),
-       assert(centerFloatingLabel != null),
        assert(isCollapsed != null),
        assert(filled != null),
        assert(alignLabelWithHint != null);
@@ -3908,8 +3953,8 @@ class InputDecorationTheme with Diagnosticable {
   /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
-  /// {@macro flutter.material.inputDecoration.centerFloatingLabel}
-  final bool centerFloatingLabel;
+  /// {@macro flutter.material.inputDecoration.floatingLabelAlignment}
+  final FloatingLabelAlignment floatingLabelAlignment;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
   /// less vertical space).
@@ -4219,7 +4264,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
-    bool? centerFloatingLabel,
+    FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
     bool? isCollapsed,
@@ -4251,7 +4296,7 @@ class InputDecorationTheme with Diagnosticable {
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
-      centerFloatingLabel: centerFloatingLabel ?? this.centerFloatingLabel,
+      floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       iconColor: iconColor,
@@ -4287,7 +4332,7 @@ class InputDecorationTheme with Diagnosticable {
       errorStyle,
       errorMaxLines,
       floatingLabelBehavior,
-      centerFloatingLabel,
+      floatingLabelAlignment,
       isDense,
       contentPadding,
       isCollapsed,
@@ -4336,7 +4381,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.suffixIconColor == suffixIconColor
         && other.counterStyle == counterStyle
         && other.floatingLabelBehavior == floatingLabelBehavior
-        && other.centerFloatingLabel == centerFloatingLabel
+        && other.floatingLabelAlignment == floatingLabelAlignment
         && other.filled == filled
         && other.fillColor == fillColor
         && other.focusColor == focusColor
@@ -4364,7 +4409,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
-    properties.add(DiagnosticsProperty<bool>('centerFloatingLabel', centerFloatingLabel, defaultValue: defaultTheme.centerFloatingLabel));
+    properties.add(DiagnosticsProperty<FloatingLabelAlignment>('floatingLabelAlignment', floatingLabelAlignment, defaultValue: defaultTheme.floatingLabelAlignment));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));

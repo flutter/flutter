@@ -2963,6 +2963,11 @@ void main() {
     expect(tester.getTopRight(find.text('hint')).dx, 760.0);
   });
 
+  testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
+    expect(FloatingLabelAlignment.left.toString(), 'FloatingLabelAlignment(x: -1.0)');
+    expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment(x: 0.0)');
+  });
+
   testWidgets('InputDecorator centerFloatingLabel layout', (WidgetTester tester) async {
     // LTR with icon
     await tester.pumpWidget(
@@ -2972,7 +2977,7 @@ void main() {
         textDirection: TextDirection.ltr,
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          centerFloatingLabel: true,
+          floatingLabelAlignment: FloatingLabelAlignment.center,
           icon: Icon(Icons.insert_link),
           labelText: 'label',
           hintText: 'hint',
@@ -2991,7 +2996,7 @@ void main() {
         textDirection: TextDirection.ltr,
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          centerFloatingLabel: true,
+          floatingLabelAlignment: FloatingLabelAlignment.center,
           labelText: 'label',
           hintText: 'hint',
           filled: true,
@@ -3009,7 +3014,7 @@ void main() {
         textDirection: TextDirection.rtl,
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          centerFloatingLabel: true,
+          floatingLabelAlignment: FloatingLabelAlignment.center,
           icon: Icon(Icons.insert_link),
           labelText: 'label',
           hintText: 'hint',
@@ -3028,7 +3033,7 @@ void main() {
         textDirection: TextDirection.rtl,
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          centerFloatingLabel: true,
+          floatingLabelAlignment: FloatingLabelAlignment.center,
           labelText: 'label',
           hintText: 'hint',
           filled: true,
@@ -3976,7 +3981,7 @@ void main() {
                     isEmpty: true,
                     decoration: InputDecoration(
                       icon: Icon(Icons.insert_link),
-                      centerFloatingLabel: true,
+                      floatingLabelAlignment: FloatingLabelAlignment.center,
                       labelText: 'primaryLink',
                       hintText: 'Primary link to story',
                       border: OutlineInputBorder(),
@@ -4019,7 +4024,7 @@ void main() {
                     isFocused: true,
                     isEmpty: true,
                     decoration: InputDecoration(
-                      centerFloatingLabel: true,
+                      floatingLabelAlignment: FloatingLabelAlignment.center,
                       labelText: 'primaryLink',
                       hintText: 'Primary link to story',
                       border: OutlineInputBorder(),
