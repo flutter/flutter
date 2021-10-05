@@ -121,7 +121,7 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
-      Process.runSync(
+      final ProcessResult activateResult = Process.runSync(
         Platform.resolvedExecutable,
         <String>[
           'pub',
@@ -132,6 +132,9 @@ Future<void> main(List<String> arguments) async {
         ],
         workingDirectory: _flutterRoot,
       );
+      if (activateResult.exitCode != 0) {
+        exit(activateResult.exitCode);
+      }
     } on ProcessException catch (e) {
       stderr.writeln('Unable to global activate snippets package at version $_snippetsActivateVersion: $e');
       exit(1);
