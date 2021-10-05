@@ -8,7 +8,7 @@
         binary: "bin/app",
         forward_stdout_to: "log",
         forward_stderr_to: "log",
-        // needed for JIT builds
+        // Needed for JIT builds.
         job_policy_ambient_mark_vmo_exec: "true",
     },
     capabilities: [
