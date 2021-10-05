@@ -26,6 +26,14 @@ class MainProgression extends StatefulWidget {
 
   @override
   MainProgressionState createState() => MainProgressionState();
+
+  static const List<String> _stepTitles = <String>[
+    'Initialize a New Flutter Release',
+    'Flutter Engine Cherrypicks',
+    'Flutter Framework Cherrypicks',
+    'Publish the Release',
+    'Release is Successfully published'
+  ];
 }
 
 class MainProgressionState extends State<MainProgression> {
@@ -100,7 +108,7 @@ class MainProgressionState extends State<MainProgression> {
               onStepCancel: cancel,
               steps: <Step>[
                 Step(
-                  title: const Text('Initialize a New Flutter Release'),
+                  title: const Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
                       ConductorSubsteps(continued: continued),

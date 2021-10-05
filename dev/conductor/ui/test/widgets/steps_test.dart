@@ -42,6 +42,90 @@ void main() {
       await tester.tap(find.text('Substep 3').first);
       await tester.pumpAndSettle();
       expect(find.text('Continue'), findsOneWidget);
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+          equals(StepState.indexed));
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+          equals(StepState.disabled));
+
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+          equals(StepState.complete));
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+          equals(StepState.indexed));
+    });
+
+    testWidgets('When continue is clicked, proceed to the next step',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MaterialApp(
+              home: Material(
+                child: Column(
+                  children: const <Widget>[
+                    MainProgression(
+                      releaseState: null,
+                      stateFilePath: './testPath',
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Substep 1').first);
+      await tester.tap(find.text('Substep 2').first);
+      await tester.tap(find.text('Substep 3').first);
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+          equals(StepState.indexed));
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+          equals(StepState.disabled));
+
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+          equals(StepState.complete));
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+          equals(StepState.indexed));
+    });
+
+    testWidgets('User is able to navigate back to a previously completed step',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MaterialApp(
+              home: Material(
+                child: Column(
+                  children: const <Widget>[
+                    MainProgression(
+                      releaseState: null,
+                      stateFilePath: './testPath',
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Substep 1').first);
+      await tester.tap(find.text('Substep 2').first);
+      await tester.tap(find.text('Substep 3').first);
+      await tester.tap(find.text('Continue'));
+      await tester.tap(find.text('Initialize a New Flutter Release'));
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+          equals(StepState.complete));
+      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+          equals(StepState.indexed));
     });
   });
 }
