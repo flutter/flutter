@@ -507,16 +507,22 @@ import java.util.Arrays;
     Log.v(TAG, "onPostResume()");
     ensureAlive();
     if (flutterEngine != null) {
-      if (platformPlugin != null) {
-        // TODO(mattcarroll): find a better way to handle the update of UI overlays than calling
-        // through
-        //                    to platformPlugin. We're implicitly entangling the Window, Activity,
-        // Fragment,
-        //                    and engine all with this one call.
-        platformPlugin.updateSystemUiOverlays();
-      }
+      updateSystemUiOverlays();
     } else {
       Log.w(TAG, "onPostResume() invoked before FlutterFragment was attached to an Activity.");
+    }
+  }
+
+  /**
+   * Refreshes Android's window system UI (AKA system chrome) to match Flutter's desired system
+   * chrome style.
+   */
+  void updateSystemUiOverlays() {
+    if (platformPlugin != null) {
+      // TODO(mattcarroll): find a better way to handle the update of UI overlays than calling
+      // through to platformPlugin. We're implicitly entangling the Window, Activity,
+      // Fragment, and engine all with this one call.
+      platformPlugin.updateSystemUiOverlays();
     }
   }
 
@@ -1009,5 +1015,17 @@ import java.util.Arrays;
      * <p>This defaults to true, unless a cached engine is used.
      */
     boolean shouldRestoreAndSaveState();
+
+    /**
+     * Refreshes Android's window system UI (AKA system chrome) to match Flutter's desired system
+     * chrome style.
+     *
+     * <p>This is useful when using the splash screen API available in Android 12. {@code
+     * SplashScreenView#remove} resets the system UI colors to the values set prior to the execution
+     * of the Dart entrypoint. As a result, the values set from Dart are reverted by this API. To
+     * workaround this issue, call this method after removing the splash screen with {@code
+     * SplashScreenView#remove}.
+     */
+    void updateSystemUiOverlays();
   }
 }

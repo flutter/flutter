@@ -1127,6 +1127,13 @@ public class FlutterActivity extends Activity
     return false;
   }
 
+  @Override
+  public void updateSystemUiOverlays() {
+    if (delegate != null) {
+      delegate.updateSystemUiOverlays();
+    }
+  }
+
   private boolean stillAttachedForEvent(String event) {
     if (delegate == null) {
       Log.w(TAG, "FlutterActivity " + hashCode() + " " + event + " called after release.");
