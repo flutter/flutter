@@ -137,6 +137,7 @@ class CheckboxListTile extends StatelessWidget {
     this.contentPadding,
     this.tristate = false,
     this.shape,
+    this.hoverColor,
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
@@ -190,6 +191,9 @@ class CheckboxListTile extends StatelessWidget {
 
   /// {@macro flutter.material.ListTile.tileColor}
   final Color? tileColor;
+
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color? hoverColor;
 
   /// The primary content of the list tile.
   ///
@@ -332,6 +336,7 @@ class CheckboxListTile extends StatelessWidget {
           visualDensity: visualDensity,
           focusNode: focusNode,
           enableFeedback: enableFeedback,
+          hoverColor: hoverColor,
         ),
       ),
     );
