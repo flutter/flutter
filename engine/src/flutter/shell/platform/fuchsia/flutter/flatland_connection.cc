@@ -35,6 +35,7 @@ FlatlandConnection::FlatlandConnection(
 
 FlatlandConnection::~FlatlandConnection() = default;
 
+// This method is called from the raster thread.
 void FlatlandConnection::Present() {
   // TODO(fxbug.dev/64201): Consider a more complex presentation loop that
   // accumulates Present calls until OnNextFrameBegin.
@@ -57,18 +58,36 @@ void FlatlandConnection::Present() {
   acquire_fences_.clear();
 }
 
+// This method is called from the UI thread.
 void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
-  if (first_call) {
+  if (first_call_to_await_vsync_) {
     fml::TimePoint now = fml::TimePoint::Now();
     callback(now, now + kDefaultFlatlandPresentationInterval);
-    first_call = false;
+    first_call_to_await_vsync_ = false;
     return;
   }
-  fire_callback_ = callback;
+
+  {
+    std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
+    threadsafe_state_.fire_callback_ = callback;
+
+    if (threadsafe_state_.fire_callback_pending_) {
+      fml::TimePoint now = fml::TimePoint::Now();
+      // TODO(fxbug.dev/64201): Calculate correct frame times.
+      threadsafe_state_.fire_callback_(
+          now, now + kDefaultFlatlandPresentationInterval);
+      threadsafe_state_.fire_callback_ = nullptr;
+      threadsafe_state_.fire_callback_pending_ = false;
+    }
+  }
 }
 
+// This method is called from the UI thread.
 void FlatlandConnection::AwaitVsyncForSecondaryCallback(
-    FireCallbackCallback callback) {}
+    FireCallbackCallback callback) {
+  fml::TimePoint now = fml::TimePoint::Now();
+  callback(now, now);
+}
 
 void FlatlandConnection::OnError(
     fuchsia::ui::composition::FlatlandError error) {
@@ -76,26 +95,37 @@ void FlatlandConnection::OnError(
   error_callback_();
 }
 
+// This method is called from the raster thread.
 void FlatlandConnection::OnNextFrameBegin(
     fuchsia::ui::composition::OnNextFrameBeginValues values) {
   present_credits_ += values.additional_present_credits();
 
-  if (fire_callback_) {
-    fml::TimePoint now = fml::TimePoint::Now();
-    // TODO(fxbug.dev/64201): Calculate correct frame times.
-    fire_callback_(now, now + kDefaultFlatlandPresentationInterval);
+  {
+    std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
+    if (threadsafe_state_.fire_callback_) {
+      fml::TimePoint now = fml::TimePoint::Now();
+      // TODO(fxbug.dev/64201): Calculate correct frame times.
+      threadsafe_state_.fire_callback_(
+          now, now + kDefaultFlatlandPresentationInterval);
+      threadsafe_state_.fire_callback_ = nullptr;
+    } else {
+      threadsafe_state_.fire_callback_pending_ = true;
+    }
   }
 }
 
+// This method is called from the raster thread.
 void FlatlandConnection::OnFramePresented(
     fuchsia::scenic::scheduling::FramePresentedInfo info) {
   on_frame_presented_callback_(std::move(info));
 }
 
+// This method is called from the raster thread.
 void FlatlandConnection::EnqueueAcquireFence(zx::event fence) {
   acquire_fences_.push_back(std::move(fence));
 }
 
+// This method is called from the raster thread.
 void FlatlandConnection::EnqueueReleaseFence(zx::event fence) {
   current_present_release_fences_.push_back(std::move(fence));
 }

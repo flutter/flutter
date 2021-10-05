@@ -59,6 +59,15 @@ class FlatlandConnectionTest : public ::testing::Test {
     return std::move(flatland_handle_);
   }
 
+  // Syntactic sugar for OnNextFrameBegin
+  void OnNextFrameBegin(int num_present_credits) {
+    fuchsia::ui::composition::OnNextFrameBeginValues on_next_frame_begin_values;
+    on_next_frame_begin_values.set_additional_present_credits(
+        num_present_credits);
+    fake_flatland().FireOnNextFrameBeginEvent(
+        std::move(on_next_frame_begin_values));
+  }
+
  private:
   async::TestLoop loop_;
   std::unique_ptr<async::LoopInterface> session_subloop_;
@@ -183,6 +192,83 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   loop().RunUntilIdle();
   EXPECT_EQ(presents_called, 2u);
   EXPECT_EQ(release_fence_handle, first_release_fence_handle);
+}
+
+TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
+  // Set up callbacks which allow sensing of how many presents were handled.
+  size_t presents_called = 0u;
+  zx_handle_t release_fence_handle;
+  fake_flatland().SetPresentHandler([&presents_called,
+                                     &release_fence_handle](auto present_args) {
+    presents_called++;
+    release_fence_handle = present_args.release_fences().empty()
+                               ? ZX_HANDLE_INVALID
+                               : present_args.release_fences().front().get();
+  });
+
+  // Set up a callback which allows sensing of how many vsync's
+  // (`OnFramePresented` events) were handled.
+  size_t vsyncs_handled = 0u;
+  on_frame_presented_event on_frame_presented = [&vsyncs_handled](auto...) {
+    vsyncs_handled++;
+  };
+
+  // Create the FlatlandConnection but don't pump the loop.  No FIDL calls are
+  // completed yet.
+  flutter_runner::FlatlandConnection flatland_connection(
+      GetCurrentTestName(), TakeFlatlandHandle(), []() { FAIL(); },
+      std::move(on_frame_presented), 1, fml::TimeDelta::Zero());
+  EXPECT_EQ(presents_called, 0u);
+  EXPECT_EQ(vsyncs_handled, 0u);
+
+  // Pump the loop. Nothing is called.
+  loop().RunUntilIdle();
+  EXPECT_EQ(presents_called, 0u);
+  EXPECT_EQ(vsyncs_handled, 0u);
+
+  // Simulate an AwaitVsync that comes after the first call.
+  bool await_vsync_callback_fired = false;
+  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
+                    kDefaultFlatlandPresentationInterval);
+  EXPECT_TRUE(await_vsync_callback_fired);
+
+  // Set the callback with AwaitVsync, callback should not be fired
+  await_vsync_callback_fired = false;
+  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
+                    kDefaultFlatlandPresentationInterval);
+  EXPECT_FALSE(await_vsync_callback_fired);
+
+  // Fire the `OnNextFrameBegin` event. AwaitVsync callback should be fired.
+  await_vsync_callback_fired = false;
+  OnNextFrameBegin(1);
+  loop().RunUntilIdle();
+  EXPECT_TRUE(await_vsync_callback_fired);
+
+  // Second consecutive ONFB should not call the fire callback and should
+  // instead set it to be pending to fire on next AwaitVsync
+  await_vsync_callback_fired = false;
+  OnNextFrameBegin(1);
+  loop().RunUntilIdle();
+  EXPECT_FALSE(await_vsync_callback_fired);
+
+  // Now an AwaitVsync should immediately fire the pending callback
+  await_vsync_callback_fired = false;
+  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
+                    kDefaultFlatlandPresentationInterval);
+  EXPECT_TRUE(await_vsync_callback_fired);
+
+  // With the pending callback fired, The new callback should be set for the
+  // next OnNextFrameBegin to call
+  await_vsync_callback_fired = false;
+  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
+                    kDefaultFlatlandPresentationInterval);
+  EXPECT_FALSE(await_vsync_callback_fired);
+
+  // Now OnNextFrameBegin should fire the callback
+  await_vsync_callback_fired = false;
+  OnNextFrameBegin(1);
+  loop().RunUntilIdle();
+  EXPECT_TRUE(await_vsync_callback_fired);
 }
 
 }  // namespace flutter_runner::testing

@@ -14,6 +14,7 @@
 #include "vsync_waiter.h"
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 
 namespace flutter_runner {
@@ -21,9 +22,9 @@ namespace flutter_runner {
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
-// Assume a 60hz refresh rate.
+// Set to zero for now for maximum simplicity until we have real values.
 static constexpr fml::TimeDelta kDefaultFlatlandPresentationInterval =
-    fml::TimeDelta::FromSecondsF(1.0 / 60.0);
+    fml::TimeDelta::FromSecondsF(0);
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Flatland instance connection and presenting updates.
@@ -42,6 +43,8 @@ class FlatlandConnection final {
   void Present();
 
   // Used to implement VsyncWaiter functionality.
+  // Note that these two methods are called from the UI thread while the
+  // rest of the methods on this class are called from the raster thread.
   void AwaitVsync(FireCallbackCallback callback);
   void AwaitVsyncForSecondaryCallback(FireCallbackCallback callback);
 
@@ -75,8 +78,16 @@ class FlatlandConnection final {
   on_frame_presented_event on_frame_presented_callback_;
   uint32_t present_credits_ = 1;
 
-  FireCallbackCallback fire_callback_;
-  bool first_call = true;
+  // This struct contains state that is accessed from both from the UI thread
+  // (in AwaitVsync) and the raster thread (in OnNextFrameBegin). You should
+  // always lock mutex_ before touching anything in this struct
+  struct {
+    std::mutex mutex_;
+    FireCallbackCallback fire_callback_;
+    bool fire_callback_pending_ = false;
+  } threadsafe_state_;
+
+  bool first_call_to_await_vsync_ = true;
 
   std::vector<zx::event> acquire_fences_;
   std::vector<zx::event> current_present_release_fences_;
