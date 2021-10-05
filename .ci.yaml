@@ -195,7 +195,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -462,7 +462,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -484,7 +484,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -506,7 +506,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -528,7 +528,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -550,7 +550,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -572,7 +572,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -595,7 +595,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -618,7 +618,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -641,7 +641,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -664,7 +664,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -706,7 +706,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -877,7 +877,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -895,7 +895,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
         ["devicelab"]
