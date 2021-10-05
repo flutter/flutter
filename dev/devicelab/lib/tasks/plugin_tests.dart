@@ -179,7 +179,7 @@ class _FlutterProject {
           // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
           // See _reduceDarwinPluginMinimumVersion for details.
           final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
-          if (iosDeploymentTargetCount != 9) {
+          if (iosDeploymentTargetCount != 12) {
             throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
           }
           if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
