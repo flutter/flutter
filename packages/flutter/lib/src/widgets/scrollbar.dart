@@ -16,6 +16,7 @@ import 'gesture_detector.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
+import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
@@ -1367,7 +1368,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (scrollOffsetGlobal != position.pixels) {
       // Ensure we don't drag into overscroll if the physics do not allow it.
       final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
-      position.jumpTo(scrollOffsetGlobal - physicsAdjustment);
+      double newPosition = scrollOffsetGlobal - physicsAdjustment;
+
+      // The physics may allow overscroll when actually *scrolling*, but
+      // dragging on the scrollbar does not always allow us to enter overscroll.
+      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          newPosition = newPosition.clamp(0.0, position.maxScrollExtent);
+          break;
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+          // We can only drag the scrollbar into overscroll on mobile
+          // platforms, and only if the physics allow it.
+          break;
+      }
+      position.jumpTo(newPosition);
     }
   }
 
