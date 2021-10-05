@@ -385,6 +385,9 @@ public class FlutterAndroidComponentTest {
     public void detachFromFlutterEngine() {}
 
     @Override
+    public void updateSystemUiOverlays() {}
+
+    @Override
     public boolean popSystemNavigator() {
       return false;
     }

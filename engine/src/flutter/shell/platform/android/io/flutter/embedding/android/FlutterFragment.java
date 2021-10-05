@@ -1275,6 +1275,13 @@ public class FlutterFragment extends Fragment
     return true;
   }
 
+  @Override
+  public void updateSystemUiOverlays() {
+    if (delegate != null) {
+      delegate.updateSystemUiOverlays();
+    }
+  }
+
   /**
    * {@inheritDoc}
    *
