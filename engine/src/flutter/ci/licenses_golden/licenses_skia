@@ -1,4 +1,4 @@
-Signature: 9dfc1d2b50e4e66a7cfa7cc8fa255a67
+Signature: 16a124e6d3757e637fca19fc6c45ddef
 
 UNUSED LICENSES:
 
@@ -2983,6 +2983,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvide
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTypesPriv.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlUtils.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
@@ -4085,6 +4086,7 @@ FILE: ../../../third_party/skia/bench/MSKPBench.h
 FILE: ../../../third_party/skia/experimental/graphite/include/private/MtlTypesPriv.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlUtils.mm
 FILE: ../../../third_party/skia/fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
