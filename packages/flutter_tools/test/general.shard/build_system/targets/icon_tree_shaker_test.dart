@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -13,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:meta/meta.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -27,16 +24,16 @@ const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
 const String relativePath = 'fonts/MaterialIcons-Regular.otf';
 
 void main() {
-  BufferLogger logger;
-  MemoryFileSystem fileSystem;
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  DevFSStringContent fontManifestContent;
+  late BufferLogger logger;
+  late MemoryFileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late DevFSStringContent fontManifestContent;
 
-  String dartPath;
-  String constFinderPath;
-  String fontSubsetPath;
-  List<String> fontSubsetArgs;
+  late String dartPath;
+  late String constFinderPath;
+  late String fontSubsetPath;
+  late List<String> fontSubsetArgs;
 
   List<String> _getConstFinderArgs(String appDillPath) => <String>[
     dartPath,
@@ -65,7 +62,7 @@ void main() {
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
-    @required CompleterIOSink stdinSink,
+    required CompleterIOSink stdinSink,
   }) {
     assert(stdinSink != null);
     stdinSink.clear();
