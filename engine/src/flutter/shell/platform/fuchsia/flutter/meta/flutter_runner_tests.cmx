@@ -2,7 +2,7 @@
   "program": {
     "binary": "bin/app",
     "env_vars": [
-       "ICU_TIMEZONE_FILES_DIR=/pkg/data/tzdata"
+      "ICU_TIMEZONE_FILES_DIR=/pkg/data/tzdata"
     ]
   },
   "facets": {
