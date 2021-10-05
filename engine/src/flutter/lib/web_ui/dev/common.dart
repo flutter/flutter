@@ -24,6 +24,7 @@ abstract class PlatformBinding {
   static PlatformBinding get instance {
     return _instance ??= _createInstance();
   }
+
   static PlatformBinding? _instance;
 
   static PlatformBinding _createInstance() {
@@ -65,7 +66,7 @@ class _WindowsBinding implements PlatformBinding {
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
-      path.join(versionDir.path, 'chrome-win', 'chrome.exe');
+      path.join(versionDir.path, 'chrome.exe');
 
   @override
   String getFirefoxDownloadUrl(String version) =>
@@ -103,7 +104,7 @@ class _LinuxBinding implements PlatformBinding {
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
-      path.join(versionDir.path, 'chrome-linux', 'chrome');
+      path.join(versionDir.path, 'chrome');
 
   @override
   String getFirefoxDownloadUrl(String version) =>
@@ -143,12 +144,13 @@ class _MacBinding implements PlatformBinding {
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) => path.join(
-      versionDir.path,
-      'chrome-mac',
-      'Chromium.app',
-      'Contents',
-      'MacOS',
-      'Chromium');
+        versionDir.path,
+        'chrome-mac',
+        'Chromium.app',
+        'Contents',
+        'MacOS',
+        'Chromium',
+      );
 
   @override
   String getFirefoxDownloadUrl(String version) =>
@@ -231,11 +233,16 @@ const List<String> kAllBrowserNames = <String>[
 /// The [browserName] matches the browser name passed as the `--browser` option.
 BrowserEnvironment getBrowserEnvironment(String browserName) {
   switch (browserName) {
-    case kChrome: return ChromeEnvironment();
-    case kEdge: return EdgeEnvironment();
-    case kFirefox: return FirefoxEnvironment();
-    case kSafari: return SafariMacOsEnvironment();
-    case kSafariIos: return SafariIosEnvironment();
+    case kChrome:
+      return ChromeEnvironment();
+    case kEdge:
+      return EdgeEnvironment();
+    case kFirefox:
+      return FirefoxEnvironment();
+    case kSafari:
+      return SafariMacOsEnvironment();
+    case kSafariIos:
+      return SafariIosEnvironment();
   }
   throw UnsupportedError('Browser $browserName is not supported.');
 }
