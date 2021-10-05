@@ -101,6 +101,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -205,6 +206,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -288,6 +290,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -450,6 +453,7 @@ void main() {
               String line,
               FlutterProject project,
               bool usesAndroidX,
+                bool multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },

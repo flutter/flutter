@@ -19,8 +19,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  final FileSystem fileSystem = MemoryFileSystem.test();
-
   group('gradleErrors', () {
     testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
@@ -360,7 +358,7 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory)), equals(GradleBuildStatus.retry));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.retry));
 
       expect(testLogger.statusText,
         contains(
@@ -403,7 +401,7 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory)), equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
 
       expect(testLogger.statusText,
         contains(

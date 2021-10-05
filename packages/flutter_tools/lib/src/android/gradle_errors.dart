@@ -11,7 +11,7 @@ import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';
-import 'multi_dex.dart';
+import 'multidex.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -32,6 +32,7 @@ class GradleHandledError {
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) handler;
 
   /// The [BuildEvent] label is named gradle-[eventLabel].
@@ -86,31 +87,39 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
-    globals.printStatus(
-      'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support. '
-      'The following files will be added by flutter:\n',
-      indent: 4
-    );
-    globals.printStatus(
-      'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java\n',
-      indent: 8
-    );
-    globals.printStatus(
-      "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.",
-      indent: 4
-    );
-    final String selection = await globals.terminal.promptForCharInput(
-      <String>['y', 'n'],
-      logger: globals.logger,
-      prompt: 'Do you want to continue with adding multidex support for Android?',
-      defaultChoiceIndex: 0,
-      displayAcceptedCharacters: true,
-    );
-    if (selection == 'y') {
-      ensureMultidexUtilsExists(project.directory);
-      return GradleBuildStatus.retry;
+    if (multidexEnabled) {
+      globals.printStatus(
+        'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support. '
+        'The following files will be added by flutter:\n',
+        indent: 4
+      );
+      globals.printStatus(
+        'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java\n',
+        indent: 8
+      );
+      globals.printStatus(
+        "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.",
+        indent: 4
+      );
+      final String selection = await globals.terminal.promptForCharInput(
+        <String>['y', 'n'],
+        logger: globals.logger,
+        prompt: 'Do you want to continue with adding multidex support for Android?',
+        defaultChoiceIndex: 0,
+        displayAcceptedCharacters: true,
+      );
+      if (selection == 'y') {
+        ensureMultidexUtilsExists(project.directory);
+        return GradleBuildStatus.retry;
+      }
+    } else {
+      globals.printStatus(
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        indent: 4
+      );
     }
     return GradleBuildStatus.exit;
   },
@@ -127,6 +136,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
     globals.printStatus(
@@ -163,6 +173,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
@@ -192,6 +203,7 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
     globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
@@ -213,6 +225,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     const String licenseNotAcceptedMatcher =
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
@@ -246,6 +259,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
@@ -318,6 +332,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -358,6 +373,7 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -391,6 +407,7 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')

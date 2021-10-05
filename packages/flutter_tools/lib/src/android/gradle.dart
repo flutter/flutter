@@ -28,7 +28,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
-import 'multi_dex.dart';
+import 'multidex.dart';
 
 /// The directory where the APK artifact is generated.
 Directory getApkDirectory(FlutterProject project) {
@@ -397,6 +397,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           line: detectedGradleErrorLine!,
           project: project,
           usesAndroidX: usesAndroidX,
+          multidexEnabled: androidBuildInfo.multidexEnabled,
         );
 
         if (retries >= 1) {

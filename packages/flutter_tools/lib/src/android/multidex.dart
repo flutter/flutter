@@ -30,11 +30,12 @@ void ensureMultidexUtilsExists(final Directory projectDir) {
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 // Generated file. Please do not edit.
+// If you wish to remove Flutter's multidex support, delete this entire file.
 
 package io.flutter.app;
 
 import android.content.Context;
-import androidx.multidex.Multidex;
+import androidx.multidex.MultiDex;
 
 /**
  * A utility class that adds Multidex support for apps that support minSdk 20
@@ -44,10 +45,9 @@ import androidx.multidex.Multidex;
  */
 public class FlutterMultidexSupportUtils {
   public static void installMultidexSupport(Context context) {
-    Multidex.install(context);
+    MultiDex.install(context);
   }
 }
-
 ''');
   utilsFile.writeAsStringSync(buffer.toString(), flush: true);
 }
