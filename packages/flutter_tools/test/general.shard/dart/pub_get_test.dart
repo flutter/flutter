@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show ProcessException;
+
 import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -693,18 +695,31 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
+      FakeCommand(
+        command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
           '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
         ],
+        onRun: () {
+          throw const ProcessException(
+            'bin/cache/dart-sdk/bin/dart',
+            <String>[
+              '__deprecated_pub',
+              '--verbosity=warning',
+              'get',
+              '--no-precompile',
+            ],
+            'message',
+            1,
+          );
+        },
         exitCode: 66,
         stderr: 'err1\nerr2\nerr3\n',
         stdout: 'out1\nout2\nout3\n',
-        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
       ),
     ]);
 
@@ -718,19 +733,18 @@ void main() {
     );
     await expectLater(
       () => pub.get(context: PubContext.flutterTests),
-      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', 'pub get failed (66; err3)')),
+      throwsA(
+        isA<ProcessException>().having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('Working directory: "/"'),
+        ),
+      ),
     );
     expect(logger.statusText,
       'Running "flutter pub get" in /...\n'
-      'out1\n'
-      'out2\n'
-      'out3\n'
     );
-    expect(logger.errorText,
-      'err1\n'
-      'err2\n'
-      'err3\n'
-    );
+    expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
 
