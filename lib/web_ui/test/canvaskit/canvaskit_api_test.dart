@@ -27,7 +27,6 @@ void testMain() {
     _paintStyleTests();
     _strokeCapTests();
     _strokeJoinTests();
-    _filterQualityTests();
     _blurStyleTests();
     _tileModeTests();
     _fillTypeTests();
@@ -141,21 +140,6 @@ void _strokeJoinTests() {
   test('ui.StrokeJoin converts to SkStrokeJoin', () {
     for (final ui.StrokeJoin join in ui.StrokeJoin.values) {
       expect(toSkStrokeJoin(join).value, join.index);
-    }
-  });
-}
-
-void _filterQualityTests() {
-  test('filter quality mapping is correct', () {
-    expect(canvasKit.FilterQuality.None.value, ui.FilterQuality.none.index);
-    expect(canvasKit.FilterQuality.Low.value, ui.FilterQuality.low.index);
-    expect(canvasKit.FilterQuality.Medium.value, ui.FilterQuality.medium.index);
-    expect(canvasKit.FilterQuality.High.value, ui.FilterQuality.high.index);
-  });
-
-  test('ui.FilterQuality converts to SkFilterQuality', () {
-    for (final ui.FilterQuality cap in ui.FilterQuality.values) {
-      expect(toSkFilterQuality(cap).value, cap.index);
     }
   });
 }
@@ -418,7 +402,8 @@ void _maskFilterTests() {
   });
   test('MaskFilter.MakeBlur with NaN sigma returns null', () {
     expect(
-        canvasKit.MaskFilter.MakeBlur(canvasKit.BlurStyle.Normal, double.nan, false),
+        canvasKit.MaskFilter.MakeBlur(
+            canvasKit.BlurStyle.Normal, double.nan, false),
         isNull);
   });
 }
@@ -466,11 +451,17 @@ void _imageFilterTests() {
     );
   });
 
+  test('toSkFilterOptions', () {
+    for (final ui.FilterQuality filterQuality in ui.FilterQuality.values) {
+      expect(toSkFilterOptions(filterQuality), isNotNull);
+    }
+  });
+
   test('MakeMatrixTransform', () {
     expect(
       canvasKit.ImageFilter.MakeMatrixTransform(
         toSkMatrixFromFloat32(Matrix4.identity().storage),
-        canvasKit.FilterQuality.Medium,
+        toSkFilterOptions(ui.FilterQuality.medium),
         null,
       ),
       isNotNull,
@@ -627,7 +618,8 @@ typedef CanvasCallback = void Function(ui.Canvas canvas);
 
 Future<ui.Image> toImage(CanvasCallback callback, int width, int height) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
+  final ui.Canvas canvas = ui.Canvas(
+      recorder, ui.Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
   callback(canvas);
   final ui.Picture picture = recorder.endRecording();
   return picture.toImage(width, height);
@@ -639,7 +631,8 @@ Future<bool> fuzzyCompareImages(ui.Image golden, ui.Image img) async {
   if (golden.width != img.width || golden.height != img.height) {
     return false;
   }
-  int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
+  int getPixel(ByteData data, int x, int y) =>
+      data.getUint32((x + y * golden.width) * 4);
   final ByteData goldenData = (await golden.toByteData())!;
   final ByteData imgData = (await img.toByteData())!;
   for (int y = 0; y < golden.height; y++) {
@@ -654,8 +647,8 @@ Future<bool> fuzzyCompareImages(ui.Image golden, ui.Image img) async {
 
 void _matrix4x4CompositionTests() {
   test('compose4x4MatrixInCanvas', () async {
-    const double rotateAroundX = pi / 6;  // 30 degrees
-    const double rotateAroundY = pi / 9;  // 20 degrees
+    const double rotateAroundX = pi / 6; // 30 degrees
+    const double rotateAroundY = pi / 9; // 20 degrees
     const int width = 150;
     const int height = 150;
     const ui.Color black = ui.Color.fromARGB(255, 0, 0, 0);
@@ -666,9 +659,14 @@ void _matrix4x4CompositionTests() {
       const double width3 = width / 3.0;
       const double width5 = width / 5.0;
       const double width10 = width / 10.0;
-      canvas.drawRect(const ui.Rect.fromLTRB(-width3, -width3, width3, width3), ui.Paint()..color = green);
-      canvas.drawRect(const ui.Rect.fromLTRB(-width5, -width5, -width10, width5), ui.Paint()..color = black);
-      canvas.drawRect(const ui.Rect.fromLTRB(-width5, -width5, width5, -width10), ui.Paint()..color = black);
+      canvas.drawRect(const ui.Rect.fromLTRB(-width3, -width3, width3, width3),
+          ui.Paint()..color = green);
+      canvas.drawRect(
+          const ui.Rect.fromLTRB(-width5, -width5, -width10, width5),
+          ui.Paint()..color = black);
+      canvas.drawRect(
+          const ui.Rect.fromLTRB(-width5, -width5, width5, -width10),
+          ui.Paint()..color = black);
     }
 
     final ui.Image incrementalMatrixImage = await toImage((ui.Canvas canvas) {
@@ -692,7 +690,8 @@ void _matrix4x4CompositionTests() {
       });
     }, width, height);
 
-    final bool areEqual = await fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
+    final bool areEqual =
+        await fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
     expect(areEqual, true);
   });
 }
@@ -940,7 +939,8 @@ void _pathTests() {
     //    |           |
     // 20 +-----------+
     final SkPath segment = measure1.getSegment(5, 15, true);
-    expect(fromSkRect(segment.getBounds()), const ui.Rect.fromLTRB(15, 10, 20, 15));
+    expect(fromSkRect(segment.getBounds()),
+        const ui.Rect.fromLTRB(15, 10, 20, 15));
 
     final SkContourMeasure? measure2 = iter.next();
     expect(measure2, isNull);
@@ -985,8 +985,8 @@ void _canvasTests() {
 
   setUp(() {
     recorder = SkPictureRecorder();
-    canvas =
-        recorder.beginRecording(toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)));
+    canvas = recorder
+        .beginRecording(toSkRect(const ui.Rect.fromLTRB(0, 0, 100, 100)));
   });
 
   tearDown(() {

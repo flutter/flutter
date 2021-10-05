@@ -46,7 +46,6 @@ class CanvasKit {
   external SkPaintStyleEnum get PaintStyle;
   external SkStrokeCapEnum get StrokeCap;
   external SkStrokeJoinEnum get StrokeJoin;
-  external SkFilterQualityEnum get FilterQuality;
   external SkBlurStyleEnum get BlurStyle;
   external SkTileModeEnum get TileMode;
   external SkFilterModeEnum get FilterMode;
@@ -115,7 +114,6 @@ class CanvasKit {
     ColorSpace colorSpace,
   );
   external SkSurface MakeSWCanvasSurface(html.CanvasElement canvas);
-  external void setCurrentContext(int glContext);
 
   /// Creates an image from decoded pixels represented as a list of bytes.
   ///
@@ -660,30 +658,6 @@ SkStrokeJoin toSkStrokeJoin(ui.StrokeJoin strokeJoin) {
 }
 
 @JS()
-class SkFilterQualityEnum {
-  external SkFilterQuality get None;
-  external SkFilterQuality get Low;
-  external SkFilterQuality get Medium;
-  external SkFilterQuality get High;
-}
-
-@JS()
-class SkFilterQuality {
-  external int get value;
-}
-
-final List<SkFilterQuality> _skFilterQualitys = <SkFilterQuality>[
-  canvasKit.FilterQuality.None,
-  canvasKit.FilterQuality.Low,
-  canvasKit.FilterQuality.Medium,
-  canvasKit.FilterQuality.High,
-];
-
-SkFilterQuality toSkFilterQuality(ui.FilterQuality filterQuality) {
-  return _skFilterQualitys[filterQuality.index];
-}
-
-@JS()
 class SkTileModeEnum {
   external SkTileMode get Clamp;
   external SkTileMode get Repeat;
@@ -904,6 +878,53 @@ class SkPaint {
 
 @JS()
 @anonymous
+abstract class CkFilterOptions {}
+
+@JS()
+@anonymous
+class _CkCubicFilterOptions extends CkFilterOptions {
+  external double get B;
+  external double get C;
+
+  external factory _CkCubicFilterOptions({double B, double C});
+}
+
+@JS()
+@anonymous
+class _CkTransformFilterOptions extends CkFilterOptions {
+  external SkFilterMode get filter;
+  external SkMipmapMode get mipmap;
+
+  external factory _CkTransformFilterOptions(
+      {SkFilterMode filter, SkMipmapMode mipmap});
+}
+
+final Map<ui.FilterQuality, CkFilterOptions> _filterOptions =
+    <ui.FilterQuality, CkFilterOptions>{
+  ui.FilterQuality.none: _CkTransformFilterOptions(
+    filter: canvasKit.FilterMode.Nearest,
+    mipmap: canvasKit.MipmapMode.None,
+  ),
+  ui.FilterQuality.low: _CkTransformFilterOptions(
+    filter: canvasKit.FilterMode.Linear,
+    mipmap: canvasKit.MipmapMode.None,
+  ),
+  ui.FilterQuality.medium: _CkTransformFilterOptions(
+    filter: canvasKit.FilterMode.Linear,
+    mipmap: canvasKit.MipmapMode.Linear,
+  ),
+  ui.FilterQuality.high: _CkCubicFilterOptions(
+    B: 1.0 / 3,
+    C: 1.0 / 3,
+  ),
+};
+
+CkFilterOptions toSkFilterOptions(ui.FilterQuality filterQuality) {
+  return _filterOptions[filterQuality]!;
+}
+
+@JS()
+@anonymous
 class SkMaskFilter {
   external void delete();
 }
@@ -936,7 +957,7 @@ class SkImageFilterNamespace {
 
   external SkImageFilter MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
-    SkFilterQuality filterQuality,
+    CkFilterOptions filterOptions,
     void input, // we don't use this yet
   );
 
