@@ -19,11 +19,10 @@ void main() {
             return MaterialApp(
               home: Material(
                 child: Column(
-                  children: <Widget>[
+                  children: const <Widget>[
                     MainProgression(
                       releaseState: null,
-                      stateFilePath:
-                          defaultStateFilePath(const LocalPlatform()),
+                      stateFilePath: './testPath',
                     ),
                   ],
                 ),

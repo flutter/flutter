@@ -29,32 +29,36 @@ class MainProgression extends StatefulWidget {
 }
 
 class MainProgressionState extends State<MainProgression> {
-  int _currentStep = 0;
-  // allow users to navigate back to already completed steps
-  int _navigateStep = 0;
+  /// [_completedStep] keeps track of which step the user has completed until.
+  /// [_currentStepDisplayed] tracks the step which the user is currently viewing.
+  ///
+  /// For example, if an user completes 3/5 steps but clicks and visits the 1st step,
+  /// [_completedStep] is 2, and [_currentStepDisplayed] is 0
+  int _completedStep = 0;
+  int _currentStepDisplayed = 0;
 
   void tapped(int step) {
-    setState(() => _navigateStep = step);
+    setState(() => _currentStepDisplayed = step);
   }
 
   void continued() {
-    if (_currentStep < numSteps - 1) {
-      setState(() => _currentStep += 1);
-      setState(() => _navigateStep = _currentStep);
+    if (_completedStep < numSteps - 1) {
+      setState(() => _completedStep += 1);
+      setState(() => _currentStepDisplayed = _completedStep);
     }
   }
 
   void cancel() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep -= 1);
-      setState(() => _navigateStep = _currentStep);
+    if (_completedStep > 0) {
+      setState(() => _completedStep -= 1);
+      setState(() => _currentStepDisplayed = _completedStep);
     }
   }
 
   StepState handlerStepState(int index) {
-    if (_currentStep > index) {
+    if (_completedStep > index) {
       return StepState.complete;
-    } else if (_currentStep == index) {
+    } else if (_completedStep == index) {
       return StepState.indexed;
     } else {
       return StepState.disabled;
@@ -86,7 +90,7 @@ class MainProgressionState extends State<MainProgression> {
               },
               type: StepperType.vertical,
               physics: const ScrollPhysics(),
-              currentStep: _navigateStep,
+              currentStep: _currentStepDisplayed,
               onStepTapped: (int step) => tapped(step),
               onStepContinue: continued,
               onStepCancel: cancel,
