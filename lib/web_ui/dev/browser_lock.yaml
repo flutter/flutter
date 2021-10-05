@@ -8,9 +8,9 @@ chrome:
   # `self.m.platform.name.capitalize()` evaluates to. See:
   #
   # recipe_modules/web_util/api.py
-  Linux: 768968 # Major version 84
-  Mac: 768985 # Major version 84
-  Win: 768975 # Major version 84
+  Linux: 927388 # Major version 96
+  Mac: 927385 # Major version 96
+  Win: 927369 # Major version 96
 
 ## Firefox does not use CIPD. To update the version, simply update it in this
 ## file.
