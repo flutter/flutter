@@ -796,7 +796,7 @@ void main() {
         },
       ),
     ]);
-    final FakeDelegateFlutterDevice flutterDevice =  FakeDelegateFlutterDevice(
+    final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
       device,
       BuildInfo.debug,
       FakeResidentCompiler(),
@@ -2220,6 +2220,9 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String sdkNameAndVersion = 'Android',

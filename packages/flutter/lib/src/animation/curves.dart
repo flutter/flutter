@@ -466,7 +466,7 @@ class ThreePointCubic extends Curve {
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to use a [Curve2D] to modify the position of a widget
 /// so that it can follow an arbitrary path.
 ///

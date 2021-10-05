@@ -98,9 +98,6 @@ class FakeAndroidViewController implements AndroidViewController {
       throw UnimplementedError();
 
   @override
-  int get id => throw UnimplementedError();
-
-  @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
     throw UnimplementedError();
   }

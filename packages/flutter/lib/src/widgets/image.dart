@@ -756,7 +756,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad}
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
   ///
@@ -796,7 +796,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad}
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
   ///
@@ -816,7 +816,7 @@ class Image extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad}
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.
   ///

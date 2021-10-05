@@ -61,17 +61,14 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String? platformName = environment.defines[kTargetPlatform];
-    if (platformName == null) {
-      return true;
-    }
-    final TargetPlatform? targetPlatform = getTargetPlatformForName(platformName);
-    // TODO(egarciad): Support Android and iOS.
-    // https://github.com/flutter/flutter/issues/52267
-    return targetPlatform != TargetPlatform.darwin &&
-           targetPlatform != TargetPlatform.linux_x64 &&
-           targetPlatform != TargetPlatform.linux_arm64 &&
-           targetPlatform != TargetPlatform.windows_x64 &&
-           targetPlatform != TargetPlatform.windows_uwp_x64;
+    final TargetPlatform? targetPlatform = platformName == null ? null
+      : getTargetPlatformForName(platformName);
+    // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
+    // source generation step shouldn't be platform dependent, and the generated
+    // code should just do the right thing on every platform.
+    return targetPlatform == TargetPlatform.fuchsia_arm64 ||
+           targetPlatform == TargetPlatform.fuchsia_x64 ||
+           targetPlatform == TargetPlatform.web_javascript;
   }
 
   @override

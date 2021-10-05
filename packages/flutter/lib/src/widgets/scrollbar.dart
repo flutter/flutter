@@ -429,37 +429,46 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     final double x, y;
     final Size thumbSize, trackSize;
-    final Offset trackOffset;
+    final Offset trackOffset, borderStart, borderEnd;
 
     _debugAssertIsValidOrientation(resolvedOrientation);
+
     switch(resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        borderStart = trackOffset + Offset(trackSize.width, 0.0);
+        borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
+        borderStart = trackOffset;
+        borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
         break;
       case ScrollbarOrientation.top:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(0.0, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
+        borderStart = trackOffset + Offset(0.0, trackSize.height);
+        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
         break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(0.0, y - crossAxisMargin);
+        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
+        borderStart = trackOffset;
+        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
         break;
     }
 
@@ -473,15 +482,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // Track
       canvas.drawRect(_trackRect!, _paintTrack());
       // Track Border
-      canvas.drawLine(
-        trackOffset,
-        Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
-        _paintTrack(isBorder: true),
-      );
+      canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
       if (radius != null) {
         // Rounded rect thumb
-        canvas.drawRRect(
-            RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
+        canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
         return;
       }
       if (shape == null) {
@@ -747,7 +751,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
@@ -781,7 +785,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   * [DropdownButton]
 /// {@endtemplate}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [RawScrollbar] that executes a fade animation as
 /// scrolling occurs. The RawScrollbar will fade into view as the user scrolls,
 /// and fade out when scrolling stops. The [GridView] uses the
@@ -791,7 +795,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without
 /// the fade animation. This requires that a [ScrollController] is provided to
 /// `controller` for both the [RawScrollbar] and the [GridView].
@@ -998,26 +1002,11 @@ class RawScrollbar extends StatefulWidget {
   /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
   /// is unspecified).
   ///
-  /// Here is an example of using a [StadiumBorder] for drawing the [shape] of the
-  /// thumb in a [RawScrollbar]:
+  /// {@tool dartpad}
+  /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar].
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: RawScrollbar(
-  ///       child: ListView(
-  ///         children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
-  ///         physics: const BouncingScrollPhysics(),
-  ///       ),
-  ///       shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
-  ///       thickness: 15.0,
-  ///       thumbColor: Colors.blue,
-  ///       isAlwaysShown: true,
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.shape.0.dart **
   /// {@end-tool}
   final OutlinedBorder? shape;
 

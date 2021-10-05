@@ -1985,7 +1985,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to

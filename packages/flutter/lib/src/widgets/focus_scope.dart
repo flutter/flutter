@@ -61,7 +61,7 @@ import 'inherited_notifier.dart';
 /// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
 /// a widget, call `Focus.of(context).unfocus()`.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
@@ -69,7 +69,7 @@ import 'inherited_notifier.dart';
 /// ** See code in examples/api/lib/widgets/focus_scope/focus.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to wrap another widget in a [Focus] widget to make it
 /// focusable. It wraps a [Container], and changes the container's color when it
 /// is set as the [FocusManager.primaryFocus].
@@ -81,7 +81,7 @@ import 'inherited_notifier.dart';
 /// ** See code in examples/api/lib/widgets/focus_scope/focus.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows how to focus a newly-created widget immediately after it
 /// is created.
 ///
@@ -672,7 +672,7 @@ class _FocusState extends State<Focus> {
 /// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
 /// a widget, call `Focus.of(context).unfocus()`.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example demonstrates using a [FocusScope] to restrict focus to a particular
 /// portion of the app. In this case, restricting focus to the visible part of a
 /// Stack.

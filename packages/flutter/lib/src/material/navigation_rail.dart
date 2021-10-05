@@ -35,7 +35,7 @@ import 'theme.dart';
 /// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
@@ -284,7 +284,7 @@ class NavigationRail extends StatefulWidget {
   /// This can be used to synchronize animations in the [leading] or [trailing]
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// This example shows how to use this animation to create a [FloatingActionButton]
   /// that animates itself between the normal and extended states of the
   /// [NavigationRail].

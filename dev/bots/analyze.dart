@@ -1344,47 +1344,39 @@ Future<void> _checkConsumerDependencies() async {
     print(result.stderr as Object);
     exit(result.exitCode);
   }
-  final Set<String> dependencySet = <String>{};
+  final Set<String> dependencies = <String>{};
   for (final String line in result.stdout.toString().split('\n')) {
     if (!line.contains('->')) {
       continue;
     }
     final List<String> parts = line.split('->');
     final String name = parts[0].trim();
-    dependencySet.add(name);
+    dependencies.add(name);
   }
-  final List<String> dependencies = dependencySet.toList()
-    ..sort();
-  final List<String> disallowed = <String>[];
-  final StreamController<Digest> controller = StreamController<Digest>();
-  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
-  for (final String dependency in dependencies) {
-    hasher.add(utf8.encode(dependency));
-    if (!kCorePackageAllowList.contains(dependency)) {
-      disallowed.add(dependency);
-    }
-  }
-  hasher.close();
-  final Digest digest = await controller.stream.last;
-  final String signature = base64.encode(digest.bytes);
 
-  // Do not change this signature without following the directions in
-  // dev/bots/allowlist.dart
-  const String kExpected = 'nkO7DCjvSMB6VKyw+V9MU46m3xFEk/oYSbmgAWqvbXE=';
+  final Set<String> removed = kCorePackageAllowList.difference(dependencies);
+  final Set<String> added = dependencies.difference(kCorePackageAllowList);
 
-  if (disallowed.isNotEmpty) {
+  String plural(int n, String s, String p) => n == 1 ? s : p;
+
+  if (added.isNotEmpty) {
     exitWithError(<String>[
-      'Warning: transitive closure contained non-allowlisted packages:',
-      '${disallowed..join(', ')}',
-      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
+      '  ${added.join(', ')}',
+      'We strongly desire to keep the number of dependencies to a minimum and',
+      'therefore would much prefer not to add new dependencies.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package',
+      'allowlist if you nonetheless believe this is a necessary addition.',
     ]);
   }
 
-  if (signature != kExpected) {
+  if (removed.isNotEmpty) {
     exitWithError(<String>[
-      'Warning: transitive closure sha256 does not match expected signature.',
-      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
-      '$signature != $kExpected',
+      'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
+      '  ${removed.join(', ')}',
+      'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
+      'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
+      'Thanks!',
     ]);
   }
 }

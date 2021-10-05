@@ -110,10 +110,7 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: false,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+          generateDartPluginRegistry: false);
 
       expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
@@ -123,14 +120,10 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: true,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+          generateDartPluginRegistry: true);
 
       expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
-
     testWithoutContext('skipped based on platform', () async {
       const Map<String, bool> canSkip = <String, bool>{
         'darwin-x64': false,
@@ -139,8 +132,8 @@ void main() {
         'windows-x64': false,
         'windows-uwp-x64': false,
         'web-javascript': true,
-        'ios': true,
-        'android': true,
+        'ios': false,
+        'android': false,
         'fuchsia-arm64': true,
         'fuchsia-x64': true,
       };
@@ -258,7 +251,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
@@ -395,7 +390,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
