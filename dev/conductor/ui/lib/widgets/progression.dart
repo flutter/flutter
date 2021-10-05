@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'conductor_status.dart';
 import 'substeps.dart';
 
-const int numSteps = 5;
-
 /// Displays the progression and each step of the release from the conductor.
 ///
 // TODO(Yugue): Add documentation to explain
@@ -50,7 +48,7 @@ class MainProgressionState extends State<MainProgression> {
   }
 
   void continued() {
-    if (_completedStep < numSteps - 1) {
+    if (_completedStep < MainProgression._stepTitles.length - 1) {
       setState(() {
         _completedStep += 1;
         _currentStepDisplayed = _completedStep;
@@ -108,7 +106,7 @@ class MainProgressionState extends State<MainProgression> {
               onStepCancel: cancel,
               steps: <Step>[
                 Step(
-                  title: const Text(MainProgression._stepTitles[0]),
+                  title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
                       ConductorSubsteps(continued: continued),
@@ -118,7 +116,7 @@ class MainProgressionState extends State<MainProgression> {
                   state: handlerStepState(0),
                 ),
                 Step(
-                  title: const Text('Flutter Engine Cherrypicks'),
+                  title: Text(MainProgression._stepTitles[1]),
                   content: Column(
                     children: <Widget>[
                       ConductorSubsteps(continued: continued),
@@ -128,7 +126,7 @@ class MainProgressionState extends State<MainProgression> {
                   state: handlerStepState(1),
                 ),
                 Step(
-                  title: const Text('Flutter Framework Cherrypicks'),
+                  title: Text(MainProgression._stepTitles[2]),
                   content: Column(
                     children: <Widget>[
                       ConductorSubsteps(continued: continued),
@@ -138,7 +136,7 @@ class MainProgressionState extends State<MainProgression> {
                   state: handlerStepState(2),
                 ),
                 Step(
-                  title: const Text('Publish the Release'),
+                  title: Text(MainProgression._stepTitles[3]),
                   content: Column(
                     children: <Widget>[
                       ConductorSubsteps(continued: continued),
@@ -148,7 +146,7 @@ class MainProgressionState extends State<MainProgression> {
                   state: handlerStepState(3),
                 ),
                 Step(
-                  title: const Text('Release is Successfully published'),
+                  title: Text(MainProgression._stepTitles[4]),
                   content: Column(
                     children: const <Widget>[],
                   ),

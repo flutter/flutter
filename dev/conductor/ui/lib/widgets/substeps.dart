@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-const int numSubsteps = 3;
-
 /// Group and display all substeps within a step into a widget.
 /// When all substeps are checked, [continued] can be executed to proceed to the next step.
 class ConductorSubsteps extends StatefulWidget {
@@ -18,10 +16,17 @@ class ConductorSubsteps extends StatefulWidget {
 
   @override
   ConductorSubstepsState createState() => ConductorSubstepsState();
+
+  static const List<String> _substepTitles = <String>[
+    'Substep 1',
+    'Substep 2',
+    'Substep 3',
+  ];
 }
 
 class ConductorSubstepsState extends State<ConductorSubsteps> {
-  List<bool> substepChecked = List<bool>.filled(numSubsteps, false);
+  List<bool> substepChecked =
+      List<bool>.filled(ConductorSubsteps._substepTitles.length, false);
   bool _continuePressed = false;
 
   void tapped() {
@@ -43,7 +48,7 @@ class ConductorSubstepsState extends State<ConductorSubsteps> {
           onChanged: (bool? newValue) {
             substepPressed(0);
           },
-          title: const Text('Substep 1'),
+          title: Text(ConductorSubsteps._substepTitles[0]),
           controlAffinity: ListTileControlAffinity.leading,
           activeColor: Colors.grey,
           selected: substepChecked[0],
@@ -53,7 +58,7 @@ class ConductorSubstepsState extends State<ConductorSubsteps> {
           onChanged: (bool? newValue) {
             substepPressed(1);
           },
-          title: const Text('Substep 2'),
+          title: Text(ConductorSubsteps._substepTitles[1]),
           controlAffinity: ListTileControlAffinity.leading,
           activeColor: Colors.grey,
           selected: substepChecked[1],
@@ -63,7 +68,7 @@ class ConductorSubstepsState extends State<ConductorSubsteps> {
           onChanged: (bool? newValue) {
             substepPressed(2);
           },
-          title: const Text('Substep 3'),
+          title: Text(ConductorSubsteps._substepTitles[2]),
           controlAffinity: ListTileControlAffinity.leading,
           activeColor: Colors.grey,
           selected: substepChecked[2],
