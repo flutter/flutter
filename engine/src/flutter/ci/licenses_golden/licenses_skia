@@ -1,4 +1,4 @@
-Signature: 488573f5268f7b635253fb4b15a47b9b
+Signature: 99d8f7db310ef3ea625e58c1d63324d1
 
 UNUSED LICENSES:
 
@@ -2946,6 +2946,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawContext.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawContext.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawList.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
@@ -2962,8 +2964,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/SurfaceDrawContext.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/SurfaceDrawContext.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.cpp
@@ -3094,6 +3094,7 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLTypeReference.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarations.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
 ----------------------------------------------------------------------------------------------------
