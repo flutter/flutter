@@ -962,7 +962,10 @@ void main() {
 }
 ''');
     // Start with a generated_main.dart file.
-    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart').createSync(recursive: true);
+    globals.fs.directory('.dart_tool')
+              .childDirectory('flutter_build')
+              .childFile('generated_main.dart')
+              .createSync(recursive: true);
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
