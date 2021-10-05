@@ -402,7 +402,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
 /// [MaterialStateTextStyle] should only be used with widgets that document
-/// their support, like [InputDecorator.labelStyle].
+/// their support, like [InputDecoration.labelStyle].
 ///
 /// To use a [MaterialStateTextStyle], you can either:
 ///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
@@ -465,7 +465,7 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
 /// [MaterialStateOutlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecorator.border].
+/// their support, like [InputDecoration.border].
 ///
 /// To use a [MaterialStateOutlineInputBorder], you can either:
 ///   1. Create a subclass of [MaterialStateOutlineInputBorder] and implement the abstract `resolve` method.
