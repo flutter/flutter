@@ -124,9 +124,9 @@ class FlutterOptions {
 
 /// flutter command categories for usage.
 class FlutterCommandCategory {
-  static const String installation = 'Flutter installation';
+  static const String sdk = 'Flutter SDK';
   static const String project = 'Project';
-  static const String tools = 'Tools & devices';
+  static const String tools = 'Tools & Devices';
 }
 
 abstract class FlutterCommand extends Command<void> {

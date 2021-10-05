@@ -39,7 +39,7 @@ void verifyCommand(Command<Object> runner) {
     expect(
       runner.category,
       anyOf(
-        FlutterCommandCategory.installation,
+        FlutterCommandCategory.sdk,
         FlutterCommandCategory.project,
         FlutterCommandCategory.tools,
       ),

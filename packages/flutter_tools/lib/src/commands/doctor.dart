@@ -32,7 +32,7 @@ class DoctorCommand extends FlutterCommand {
   final String description = 'Show information about the installed tooling.';
 
   @override
-  final String category = FlutterCommandCategory.installation;
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

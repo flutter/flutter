@@ -78,7 +78,7 @@ class PrecacheCommand extends FlutterCommand {
     'for all currently enabled platforms';
 
   @override
-  final String category = FlutterCommandCategory.installation;
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   bool get shouldUpdateCache => false;

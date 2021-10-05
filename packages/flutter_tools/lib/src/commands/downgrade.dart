@@ -77,7 +77,7 @@ class DowngradeCommand extends FlutterCommand {
   String get name => 'downgrade';
 
   @override
-  final String category = FlutterCommandCategory.installation;
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
