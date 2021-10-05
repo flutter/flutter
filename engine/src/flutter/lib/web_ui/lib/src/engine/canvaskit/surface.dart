@@ -114,9 +114,6 @@ class Surface {
   SurfaceFrame acquireFrame(ui.Size size) {
     final CkSurface surface = createOrUpdateSurfaces(size);
 
-    if (surface.context != null) {
-      canvasKit.setCurrentContext(surface.context!);
-    }
     // ignore: prefer_function_declarations_over_variables
     final SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, CkCanvas canvas) {
@@ -171,10 +168,6 @@ class Surface {
       // new canvas larger than required to avoid many canvas creations.
       final ui.Size newSize = previousCanvasSize == null ? size : size * 1.4;
 
-      // Only resources from the current context can be disposed.
-      if (_glContext != null && _glContext != 0) {
-        canvasKit.setCurrentContext(_glContext!);
-      }
       _surface?.dispose();
       _surface = null;
       _addedToScene = false;
@@ -342,7 +335,6 @@ class Surface {
       return _makeSoftwareCanvasSurface(
           htmlCanvas!, 'Failed to initialize WebGL context');
     } else {
-      canvasKit.setCurrentContext(_glContext!);
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
         _grContext!,
         size.width.ceil(),
@@ -374,9 +366,6 @@ class Surface {
   }
 
   bool _presentSurface() {
-    if (_surface!.context != null) {
-      canvasKit.setCurrentContext(_surface!.context!);
-    }
     _surface!.flush();
     return true;
   }

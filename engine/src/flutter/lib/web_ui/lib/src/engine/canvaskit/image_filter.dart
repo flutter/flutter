@@ -18,8 +18,7 @@ import 'skia_object_cache.dart';
 /// whenever possible.
 ///
 /// Currently implemented by [CkImageFilter] and [CkColorFilter].
-abstract class CkManagedSkImageFilterConvertible
-    implements ui.ImageFilter {
+abstract class CkManagedSkImageFilterConvertible implements ui.ImageFilter {
   ManagedSkiaObject<SkImageFilter> get imageFilter;
 }
 
@@ -134,7 +133,8 @@ class _CkBlurImageFilter extends CkImageFilter {
 }
 
 class _CkMatrixImageFilter extends CkImageFilter {
-  _CkMatrixImageFilter({ required Float64List matrix, required this.filterQuality })
+  _CkMatrixImageFilter(
+      {required Float64List matrix, required this.filterQuality})
       : this.matrix = Float64List.fromList(matrix), // ignore: unnecessary_this
         super._();
 
@@ -145,18 +145,19 @@ class _CkMatrixImageFilter extends CkImageFilter {
   SkImageFilter _initSkiaObject() {
     return canvasKit.ImageFilter.MakeMatrixTransform(
       toSkMatrixFromFloat64(matrix),
-      toSkFilterQuality(filterQuality),
+      toSkFilterOptions(filterQuality),
       null,
     );
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
-    return other is _CkMatrixImageFilter
-        && other.filterQuality == filterQuality
-        && listEquals<double>(other.matrix, matrix);
+    }
+    return other is _CkMatrixImageFilter &&
+        other.filterQuality == filterQuality &&
+        listEquals<double>(other.matrix, matrix);
   }
 
   @override

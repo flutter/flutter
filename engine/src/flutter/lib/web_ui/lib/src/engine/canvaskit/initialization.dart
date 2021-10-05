@@ -62,7 +62,7 @@ const bool canvasKitForceCpuOnly = bool.fromEnvironment(
 /// The version of CanvasKit used by the web engine by default.
 // DO NOT EDIT THE NEXT LINE OF CODE MANUALLY
 // See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
-const String canvaskitVersion = '0.28.1';
+const String canvaskitVersion = '0.30.0';
 
 /// The URL to use when downloading the CanvasKit script and associated wasm.
 ///
