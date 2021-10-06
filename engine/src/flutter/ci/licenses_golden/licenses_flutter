@@ -196,6 +196,7 @@ FILE: ../../../flutter/fml/message_loop.cc
 FILE: ../../../flutter/fml/message_loop.h
 FILE: ../../../flutter/fml/message_loop_impl.cc
 FILE: ../../../flutter/fml/message_loop_impl.h
+FILE: ../../../flutter/fml/message_loop_impl_unittests.cc
 FILE: ../../../flutter/fml/message_loop_task_queues.cc
 FILE: ../../../flutter/fml/message_loop_task_queues.h
 FILE: ../../../flutter/fml/message_loop_task_queues_benchmark.cc
