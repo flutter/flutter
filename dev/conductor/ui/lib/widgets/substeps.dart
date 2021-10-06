@@ -5,14 +5,15 @@
 import 'package:flutter/material.dart';
 
 /// Group and display all substeps within a step into a widget.
-/// When all substeps are checked, [continued] can be executed to proceed to the next step.
+/// 
+/// When all substeps are checked, [continueNextStep] can be executed to proceed to the next step.
 class ConductorSubsteps extends StatefulWidget {
   const ConductorSubsteps({
     Key? key,
-    required this.continued,
+    required this.continueNextStep,
   }) : super(key: key);
 
-  final VoidCallback continued;
+  final VoidCallback continueNextStep;
 
   @override
   ConductorSubstepsState createState() => ConductorSubstepsState();
@@ -77,7 +78,7 @@ class ConductorSubstepsState extends State<ConductorSubsteps> {
           ElevatedButton(
             onPressed: () {
               tapped();
-              widget.continued();
+              widget.continueNextStep();
             },
             child: const Text('Continue'),
           ),

@@ -7,91 +7,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Progession steps and substeps workflow', () {
-    testWidgets(
-        'All substeps of the current step must be checked before able to continue to the next step',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return MaterialApp(
-              home: Material(
-                child: Column(
-                  children: const <Widget>[
-                    MainProgression(
-                      releaseState: null,
-                      stateFilePath: './testPath',
-                    ),
-                  ],
-                ),
+  testWidgets(
+      'All substeps of the current step must be checked before able to continue to the next step',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: Column(
+                children: const <Widget>[
+                  MainProgression(
+                    releaseState: null,
+                    stateFilePath: './testPath',
+                  ),
+                ],
               ),
-            );
-          },
-        ),
-      );
+            ),
+          );
+        },
+      ),
+    );
 
-      expect(find.byType(Stepper), findsOneWidget);
-      expect(find.text('Initialize a New Flutter Release'), findsOneWidget);
-      expect(find.text('Continue'), findsNWidgets(0));
+    expect(find.byType(Stepper), findsOneWidget);
+    expect(find.text('Initialize a New Flutter Release'), findsOneWidget);
+    expect(find.text('Continue'), findsNWidgets(0));
 
-      await tester.tap(find.text('Substep 1').first);
-      await tester.tap(find.text('Substep 2').first);
-      await tester.pumpAndSettle();
-      expect(find.text('Continue'), findsNWidgets(0));
+    await tester.tap(find.text('Substep 1').first);
+    await tester.tap(find.text('Substep 2').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Continue'), findsNWidgets(0));
 
-      await tester.tap(find.text('Substep 3').first);
-      await tester.pumpAndSettle();
-      expect(find.text('Continue'), findsOneWidget);
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
-          equals(StepState.indexed));
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
-          equals(StepState.disabled));
+    await tester.tap(find.text('Substep 3').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Continue'), findsOneWidget);
+    expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+        equals(StepState.indexed));
+    expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+        equals(StepState.disabled));
 
-      await tester.tap(find.text('Continue'));
-      await tester.pumpAndSettle();
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
-          equals(StepState.complete));
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
-          equals(StepState.indexed));
-    });
-
-    testWidgets('When continue is clicked, proceed to the next step',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return MaterialApp(
-              home: Material(
-                child: Column(
-                  children: const <Widget>[
-                    MainProgression(
-                      releaseState: null,
-                      stateFilePath: './testPath',
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-      await tester.tap(find.text('Substep 1').first);
-      await tester.tap(find.text('Substep 2').first);
-      await tester.tap(find.text('Substep 3').first);
-      await tester.pumpAndSettle();
-
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
-          equals(StepState.indexed));
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
-          equals(StepState.disabled));
-
-      await tester.tap(find.text('Continue'));
-      await tester.pumpAndSettle();
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
-          equals(StepState.complete));
-      expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
-          equals(StepState.indexed));
-    });
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Stepper>(find.byType(Stepper)).steps[0].state,
+        equals(StepState.complete));
+    expect(tester.widget<Stepper>(find.byType(Stepper)).steps[1].state,
+        equals(StepState.indexed));
   });
 }

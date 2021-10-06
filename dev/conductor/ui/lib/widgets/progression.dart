@@ -35,37 +35,18 @@ class MainProgression extends StatefulWidget {
 }
 
 class MainProgressionState extends State<MainProgression> {
-  /// [_completedStep] keeps track of which step the user has completed until.
-  /// [_currentStepDisplayed] tracks the step which the user is currently viewing.
-  ///
-  /// For example, if an user completes 3/5 steps but clicks and visits the 1st step,
-  /// [_completedStep] is 2, and [_currentStepDisplayed] is 0
   int _completedStep = 0;
-  int _currentStepDisplayed = 0;
 
-  void tapped(int step) {
-    setState(() => _currentStepDisplayed = step);
-  }
-
-  void continued() {
+  // Move forward the stepper to the next step of the release.
+  void continueNextStep() {
     if (_completedStep < MainProgression._stepTitles.length - 1) {
       setState(() {
         _completedStep += 1;
-        _currentStepDisplayed = _completedStep;
       });
     }
   }
 
-  void cancel() {
-    if (_completedStep > 0) {
-      setState(() {
-        _completedStep -= 1;
-        _currentStepDisplayed = _completedStep;
-      });
-    }
-  }
-
-  StepState handlerStepState(int index) {
+  StepState handleStepState(int index) {
     if (_completedStep > index) {
       return StepState.complete;
     } else if (_completedStep == index) {
@@ -100,50 +81,48 @@ class MainProgressionState extends State<MainProgression> {
               },
               type: StepperType.vertical,
               physics: const ScrollPhysics(),
-              currentStep: _currentStepDisplayed,
-              onStepTapped: (int step) => tapped(step),
-              onStepContinue: continued,
-              onStepCancel: cancel,
+              currentStep: _completedStep,
+              onStepContinue: continueNextStep,
               steps: <Step>[
                 Step(
                   title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continued: continued),
+                      ConductorSubsteps(continueNextStep: continueNextStep),
                     ],
                   ),
                   isActive: true,
-                  state: handlerStepState(0),
+                  state: handleStepState(0),
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[1]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continued: continued),
+                      ConductorSubsteps(continueNextStep: continueNextStep),
                     ],
                   ),
                   isActive: true,
-                  state: handlerStepState(1),
+                  state: handleStepState(1),
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[2]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continued: continued),
+                      ConductorSubsteps(continueNextStep: continueNextStep),
                     ],
                   ),
                   isActive: true,
-                  state: handlerStepState(2),
+                  state: handleStepState(2),
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[3]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continued: continued),
+                      ConductorSubsteps(continueNextStep: continueNextStep),
                     ],
                   ),
                   isActive: true,
-                  state: handlerStepState(3),
+                  state: handleStepState(3),
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[4]),
@@ -151,7 +130,7 @@ class MainProgressionState extends State<MainProgression> {
                     children: const <Widget>[],
                   ),
                   isActive: true,
-                  state: handlerStepState(4),
+                  state: handleStepState(4),
                 ),
               ],
             ),
