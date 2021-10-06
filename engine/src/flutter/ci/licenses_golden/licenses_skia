@@ -1,4 +1,4 @@
-Signature: 6b0bb097b6593c49c4106bfc5b968c0e
+Signature: 40bb1b6c244a35aaa9d566ca9ace83c5
 
 UNUSED LICENSES:
 
@@ -2938,6 +2938,7 @@ FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
 FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
+FILE: ../../../third_party/skia/experimental/graphite/include/private/GraphiteTypesPriv.h
 FILE: ../../../third_party/skia/experimental/graphite/src/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
