@@ -6,6 +6,12 @@ import 'dart:html' as html;
 
 import 'package:meta/meta.dart';
 
+// iOS 15 launched WebGL 2.0, but there's something broken about it, which
+// leads to apps failing to load. For now, we're forcing WebGL 1 on iOS.
+//
+// TODO(yjbanov): https://github.com/flutter/flutter/issues/91333
+bool get _workAroundBug91333 => operatingSystem == OperatingSystem.iOs;
+
 /// The HTML engine used by the current browser.
 enum BrowserEngine {
   /// The engine that powers Chrome, Samsung Internet Browser, UC Browser,
@@ -240,6 +246,9 @@ int _detectWebGLVersion() {
     height: 1,
   );
   if (canvas.getContext('webgl2') != null) {
+    if (_workAroundBug91333) {
+      return WebGLVersion.webgl1;
+    }
     return WebGLVersion.webgl2;
   }
   if (canvas.getContext('webgl') != null) {
