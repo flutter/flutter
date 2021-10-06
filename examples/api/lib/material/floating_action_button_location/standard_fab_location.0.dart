@@ -2,36 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateless_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for StandardFabLocation
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This is an example of a user-defined [FloatingActionButtonLocation].
-//
-// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a
-// [FloatingActionButton] using a custom [FloatingActionButtonLocation].
-//
-// The new [FloatingActionButtonLocation] is defined
-// by extending [StandardFabLocation] with two mixins,
-// [FabEndOffsetX] and [FabFloatOffsetY], and overriding the
-// [getOffsetX] method to adjust the FAB's x-coordinate, creating a
-// [FloatingActionButtonLocation] slightly different from
-// [FloatingActionButtonLocation.endFloat].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -46,9 +22,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 class AlmostEndFloatFabLocation extends StandardFabLocation
     with FabEndOffsetX, FabFloatOffsetY {
   @override
@@ -61,17 +34,10 @@ class AlmostEndFloatFabLocation extends StandardFabLocation
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -87,8 +53,4 @@ class MyStatelessWidget extends StatelessWidget {
       floatingActionButtonLocation: AlmostEndFloatFabLocation(),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

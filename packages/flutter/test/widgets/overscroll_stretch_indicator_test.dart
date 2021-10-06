@@ -97,7 +97,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, greaterThan(510.0));
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.vertical.top.png'),
+      matchesGoldenFile('overscroll_stretch.vertical.start.stretched.png'),
     );
 
     await gesture.up();
@@ -110,7 +110,11 @@ void main() {
 
     // Jump to end of the list
     controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pumpAndSettle();
     expect(controller.offset, 150.0);
+    expect(box1.localToGlobal(Offset.zero).dy, -150.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 100.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 350.0);
     await expectLater(
       find.byType(CustomScrollView),
       matchesGoldenFile('overscroll_stretch.vertical.end.png'),
@@ -125,8 +129,16 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, lessThan(350.0));
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.vertical.bottom.png'),
+      matchesGoldenFile('overscroll_stretch.vertical.end.stretched.png'),
     );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Stretch released back
+    expect(box1.localToGlobal(Offset.zero).dy, -150.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 100.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 
   testWidgets('Stretch overscroll works in reverse - vertical', (WidgetTester tester) async {
@@ -162,7 +174,7 @@ void main() {
     );
   });
 
-  testWidgets('Stretch overscroll horizontally', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - horizontal', (WidgetTester tester) async {
     final Key box1Key = UniqueKey();
     final Key box2Key = UniqueKey();
     final Key box3Key = UniqueKey();
@@ -235,7 +247,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.left.png'),
+      matchesGoldenFile('overscroll_stretch.horizontal.start.stretched.png'),
     );
 
     await gesture.up();
@@ -248,7 +260,11 @@ void main() {
 
     // Jump to end of the list
     controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pumpAndSettle();
     expect(controller.offset, 100.0);
+    expect(box1.localToGlobal(Offset.zero).dx, -100.0);
+    expect(box2.localToGlobal(Offset.zero).dx, 200.0);
+    expect(box3.localToGlobal(Offset.zero).dx, 500.0);
     await expectLater(
       find.byType(CustomScrollView),
       matchesGoldenFile('overscroll_stretch.horizontal.end.png'),
@@ -263,8 +279,16 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.right.png'),
+      matchesGoldenFile('overscroll_stretch.horizontal.end.stretched.png'),
     );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Stretch released back
+    expect(box1.localToGlobal(Offset.zero).dx, -100.0);
+    expect(box2.localToGlobal(Offset.zero).dx, 200.0);
+    expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
   testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {

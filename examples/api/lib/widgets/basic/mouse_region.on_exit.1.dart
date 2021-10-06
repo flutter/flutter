@@ -2,32 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateful_widget_scaffold_center.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for MouseRegion.onExit
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// The following example shows a widget that hides its content one second
-// after being hovered, and also exposes the enter and exit callbacks.
-// Because the widget conditionally creates the `MouseRegion`, and leaks the
-// hover state, it needs to take the restriction into consideration. In this
-// case, since it has access to the event that triggers the disappearance of
-// the `MouseRegion`, it simply trigger the exit callback during that event
-// as well.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -46,9 +26,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
@@ -111,10 +88,6 @@ class _MyTimedButton extends State<MyTimedButton> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
-/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
@@ -122,11 +95,7 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Key key = UniqueKey();
   bool hovering = false;
 
@@ -160,8 +129,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ],
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

@@ -19,7 +19,7 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
 // If you update this version, also update it in dev/bots/docs.sh
-const String _snippetsActivateVersion = '0.2.3';
+const String _snippetsActivateVersion = '0.2.5';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
@@ -121,7 +121,7 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['global-activate-snippets']! as bool) {
     try {
-      Process.runSync(
+      final ProcessResult activateResult = Process.runSync(
         Platform.resolvedExecutable,
         <String>[
           'pub',
@@ -132,6 +132,9 @@ Future<void> main(List<String> arguments) async {
         ],
         workingDirectory: _flutterRoot,
       );
+      if (activateResult.exitCode != 0) {
+        exit(activateResult.exitCode);
+      }
     } on ProcessException catch (e) {
       stderr.writeln('Unable to global activate snippets package at version $_snippetsActivateVersion: $e');
       exit(1);
@@ -434,15 +437,32 @@ class SampleChecker {
   // The cached JSON Flutter version information from 'flutter --version --machine'.
   String? _flutterVersion;
 
-  Future<ProcessResult> _runSnippetsScript(List<String> args) async {
+  Future<Process> _runSnippetsScript(List<String> args) async {
     final String workingDirectory = path.join(_flutterRoot, 'dev', 'docs');
     if (_flutterVersion == null) {
       // Capture the flutter version information once so that the snippets tool doesn't
       // have to run it for every snippet.
+      if (verbose) {
+        print(<String>[_flutter, '--version', '--machine'].join(' '));
+      }
       final ProcessResult versionResult = Process.runSync(_flutter, <String>['--version', '--machine']);
+      if (verbose) {
+        stdout.write(versionResult.stdout);
+        stderr.write(versionResult.stderr);
+      }
       _flutterVersion = versionResult.stdout as String? ?? '';
     }
-    return Process.run(
+    if (verbose) {
+      print(<String>[
+        Platform.resolvedExecutable,
+        'pub',
+        'global',
+        'run',
+        'snippets',
+        ...args,
+      ].join(' '));
+    }
+    return Process.start(
       Platform.resolvedExecutable,
       <String>[
         'pub',
@@ -467,7 +487,14 @@ class SampleChecker {
     final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
     final String inputName = '$sampleId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
-    final File inputFile = File(path.join(_tempDirectory.path, inputName))..createSync(recursive: true);
+    final String inputFilePath = path.join(_tempDirectory.path, inputName);
+    if (verbose) {
+      stdout.writeln('Creating $inputFilePath.');
+    }
+    final File inputFile = File(inputFilePath)..createSync(recursive: true);
+    if (verbose) {
+      stdout.writeln('Writing $inputFilePath.');
+    }
     inputFile.writeAsStringSync(sample.input.join('\n'));
     final File outputFile = File(path.join(_tempDirectory.path, '$sampleId.dart'));
     final List<String> args = <String>[
@@ -478,15 +505,22 @@ class SampleChecker {
       '--no-format-output',
       ...sample.args,
     ];
-    if (verbose)
+    if (verbose) {
       print('Generating sample for ${sample.start.filename}:${sample.start.line}');
-    final ProcessResult process = await _runSnippetsScript(args);
-    if (verbose)
-      stderr.write('${process.stderr}');
-    if (process.exitCode != 0) {
+    }
+    final Process process = await _runSnippetsScript(args);
+    if (verbose) {
+      process.stdout.transform(utf8.decoder).forEach(stdout.write);
+    }
+    process.stderr.transform(utf8.decoder).forEach(stderr.write);
+    final int exitCode = await process.exitCode.timeout(const Duration(seconds: 30), onTimeout: () {
+      stderr.writeln('Snippet script timed out.');
+      return -1;
+    });
+    if (exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
-            '(using input from ${inputFile.path}):\n${process.stdout}\n${process.stderr}',
+        '(using input from ${inputFile.path}).',
         file: sample.start.filename,
         line: sample.start.line,
       );

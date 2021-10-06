@@ -236,6 +236,7 @@ class TestTerminal extends AnsiTerminal {
     return mockStdInStream;
   }
 
+  @override
   bool singleCharMode = false;
 
   @override

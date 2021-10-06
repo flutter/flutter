@@ -2033,6 +2033,71 @@ void main() {
   });
 
   testWidgets(
+    'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/84240 .
+      Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+          onSubmitted: (String value) {},
+        ),
+      );
+      await tester.pumpWidget(widget);
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      // This should unfocus the field. Don't restart the input.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.testTextInput.log, isNot(containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ])));
+
+      widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          focusNode: focusNode,
+          controller: controller,
+          onSubmitted: (String value) {
+            focusNode.requestFocus();
+          },
+        ),
+      );
+      await tester.pumpWidget(widget);
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      tester.testTextInput.log.clear();
+
+      // This will attempt to unfocus the field but the onSubmitted callback
+      // will cancel that. Restart the input connection in this case.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      expect(tester.testTextInput.log, containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ]));
+
+      tester.testTextInput.log.clear();
+      // TextInputAction.unspecified does not unfocus the input field by default.
+      await tester.testTextInput.receiveAction(TextInputAction.unspecified);
+      expect(tester.testTextInput.log, isNot(containsAllInOrder(<Matcher>[
+        matchesMethodCall('TextInput.clearClient'),
+        matchesMethodCall('TextInput.setClient'),
+      ])));
+  });
+
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
@@ -7749,6 +7814,39 @@ void main() {
       final dynamic error = tester.takeException();
       expect(error, isFlutterError);
       expect(error.toString(), contains(errorText));
+    });
+
+    testWidgets('input formatters can throw errors', (WidgetTester tester) async {
+      final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
+        (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
+      );
+      final TextEditingController controller = TextEditingController(
+        text: 'flutter is the best!',
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          showSelectionHandles: true,
+          maxLines: 2,
+          controller: controller,
+          inputFormatters: <TextInputFormatter>[badFormatter],
+          focusNode: FocusNode(),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.blue,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          keyboardType: TextInputType.text,
+        ),
+      ));
+
+      // Interact with the field to establish the input connection.
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      await tester.enterText(find.byType(EditableText), 'text');
+
+      final dynamic error = tester.takeException();
+      expect(error, isFlutterError);
+      expect(error.toString(), contains(errorText));
+      expect(controller.text, 'text');
     });
   });
 

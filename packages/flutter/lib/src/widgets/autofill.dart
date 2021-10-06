@@ -51,7 +51,7 @@ enum AutofillContextAction {
 /// autofillable input fields in an [AutofillGroup], so the user input of the
 /// [Form] can be saved for future autofill by the platform.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
 /// `AutofillGroup`s.
 ///

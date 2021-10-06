@@ -157,14 +157,14 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
 ///
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a customized [SnackBar]. It utilizes
 /// [behavior], [shape], [padding], [width], and [duration] to customize the
 /// location, appearance, and the duration for which the [SnackBar] is visible.

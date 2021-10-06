@@ -3422,7 +3422,7 @@ void main() {
     expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
-    expect(getLabelStyle(tester).color, hintStyle.color);
+    expect(getLabelStyle(tester).color, labelStyle.color);
   });
 
   testWidgets('InputDecorationTheme style overrides (focused)', (WidgetTester tester) async {
@@ -3660,6 +3660,110 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+    expect(decoration.alignLabelWithHint, false);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+  });
+
+  testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
+    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.green);
+    });
+
+    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.blue);
+    });
+
+    // InputDecorationTheme arguments define InputDecoration properties.
+    InputDecoration decoration = const InputDecoration().applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+      ),
+    );
+
+    expect(decoration.labelStyle, themeStyle);
+    expect(decoration.helperStyle, themeStyle);
+    expect(decoration.hintStyle, themeStyle);
+    expect(decoration.errorStyle, themeStyle);
+    expect(decoration.isDense, true);
+    expect(decoration.contentPadding, const EdgeInsets.all(1.0));
+    expect(decoration.prefixStyle, themeStyle);
+    expect(decoration.suffixStyle, themeStyle);
+    expect(decoration.counterStyle, themeStyle);
+    expect(decoration.filled, true);
+    expect(decoration.fillColor, Colors.red);
+    expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+
+    // InputDecoration (baseDecoration) defines InputDecoration properties
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+      return const OutlineInputBorder();
+    });
+    decoration = InputDecoration(
+      labelStyle: decorationStyle,
+      helperStyle: decorationStyle,
+      hintStyle: decorationStyle,
+      errorStyle: decorationStyle,
+      isDense: false,
+      contentPadding: const EdgeInsets.all(4.0),
+      prefixStyle: decorationStyle,
+      suffixStyle: decorationStyle,
+      counterStyle: decorationStyle,
+      filled: false,
+      fillColor: Colors.blue,
+      border: border,
+      alignLabelWithHint: false,
+      constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    ).applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        helperMaxLines: 5,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        errorMaxLines: 4,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
+      ),
+    );
+
+    expect(decoration.labelStyle, decorationStyle);
+    expect(decoration.helperStyle, decorationStyle);
+    expect(decoration.helperMaxLines, 5);
+    expect(decoration.hintStyle, decorationStyle);
+    expect(decoration.errorStyle, decorationStyle);
+    expect(decoration.errorMaxLines, 4);
+    expect(decoration.isDense, false);
+    expect(decoration.contentPadding, const EdgeInsets.all(4.0));
+    expect(decoration.prefixStyle, decorationStyle);
+    expect(decoration.suffixStyle, decorationStyle);
+    expect(decoration.counterStyle, decorationStyle);
+    expect(decoration.filled, false);
+    expect(decoration.fillColor, Colors.blue);
+    expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
     expect(decoration.alignLabelWithHint, false);
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
@@ -5242,68 +5346,6 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
 
     // Verify that the styles were passed along
-    expect(getLabelStyle(tester).color, labelStyle.color);
-  });
-
-  testWidgets('hintStyle is used for labelText when labelText is on top of the input field and labelStyle is used for labelText when labelText moves above widget', (WidgetTester tester) async {
-    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
-    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.purple));
-    final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.red));
-
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        isFocused: false, // Label appears inline, on top of the input field.
-        decoration: InputDecoration(
-          labelText: 'label',
-          labelStyle: labelStyle,
-          hintStyle: hintStyle,
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 56dps:
-    //   12 - top padding
-    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
-    //    4 - floating label / input text gap
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getBorderBottom(tester), 56.0);
-    expect(getBorderWeight(tester), 1.0);
-
-    // Verify that the hintStyle was used
-    expect(getLabelStyle(tester).color, hintStyle.color);
-
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        isFocused: true, // Label moves above (i.e., vertically adjacent to) the input field
-        decoration: InputDecoration(
-          labelText: 'label',
-          labelStyle: labelStyle,
-          hintStyle: hintStyle,
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    // Overall height for this InputDecorator is 56dps:
-    //   12 - top padding
-    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
-    //    4 - floating label / input text gap
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
-    expect(getBorderBottom(tester), 56.0);
-    expect(getBorderWeight(tester), 2.0);
-
-    // Verify that the labelStyle was used
     expect(getLabelStyle(tester).color, labelStyle.color);
   });
 }
