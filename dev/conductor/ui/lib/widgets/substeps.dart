@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 /// Group and display all substeps within a step into a widget.
-/// 
+///
 /// When all substeps are checked, [continueNextStep] can be executed to proceed to the next step.
 class ConductorSubsteps extends StatefulWidget {
   const ConductorSubsteps({
