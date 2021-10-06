@@ -164,7 +164,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
   bool shouldExitOnNoCerts = false,
 }) async {
   if (!platform.isMacOS) {
-    throw Exception('Codesigning identity lookup is only supported on macOS.');
+    return null;
   }
 
   // If the user's environment is missing the tools needed to find and read
