@@ -92,7 +92,7 @@ template("flutter_snapshot") {
       # Also, this define excludes debugging and profiling code from Flutter.
       args += [ "-Ddart.vm.product=true" ]
     } else {
-      if (!is_debug) {
+      if (flutter_runtime_mode == "profile") {
         # The following define excludes debugging code from Flutter.
         args += [ "-Ddart.vm.profile=true" ]
       }

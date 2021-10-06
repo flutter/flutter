@@ -154,11 +154,6 @@ template("flutter_dart_component") {
     # the kernel will ignore this variable.
     generate_manifest = true
 
-    # TODO(richkadel): verify the above statement about aot is true (AOT builds,
-    # using these new scripts derived from Fuchsia, have not been tested yet);
-    # because as of now, the Fuchsia package/component appears to require data
-    # from `_convert_kernel_manifest`.
-
     platform_name = build_cfg.platform_name
     product = build_cfg.is_product
     is_aot = build_cfg.is_aot
@@ -230,7 +225,6 @@ template("flutter_dart_component") {
       # No asserts in debug or release product.
       # No asserts in non-product release
       # Yes asserts in non-product debug.
-      # if (is_debug && !dart_force_product)
       if (build_cfg.enable_asserts) {
         args += [ "--enable_asserts" ]
       }
@@ -263,17 +257,23 @@ template("flutter_dart_component") {
     manifest = _manifest
     manifest_output_name = _manifest_output_name
 
-    _convert_kernel_target_name =
-        "${_kernel_target_name}_convert_kernel_manifest"
-    _convert_kernel_manifest_file =
-        # TODO(richkadel): This is prefixed by "dartlang/", which is not found.
-        # Is the current toolchain set incorrectly somewhere?
-        string_replace(
-            "${target_gen_dir}/${_convert_kernel_target_name}_kernel_manifest.json",
-            "dartlang/",
-            "")
+    if (!build_cfg.is_aot) {
+      _convert_kernel_target_name =
+          "${_kernel_target_name}_convert_kernel_manifest"
+      _convert_kernel_manifest_file =
+          # TODO(richkadel): This is prefixed by "dartlang/", which is not found.
+          # Is the current toolchain set incorrectly somewhere?
+          string_replace(
+              "${target_gen_dir}/${_convert_kernel_target_name}_kernel_manifest.json",
+              "dartlang/",
+              "")
 
-    resources_in_json_files = [ rebase_path(_convert_kernel_manifest_file) ]
+      # TODO(richkadel): Adds the json resource names in the manifest to the
+      # collection of `json_of_resources` files, read by
+      # `prepare_package_inputs.py`. These resources are computed (only known)
+      # at some point during the build/compile phase.
+      resources_in_json_files = [ rebase_path(_convert_kernel_manifest_file) ]
+    }
   }
 
   group(target_name) {

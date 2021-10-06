@@ -5,27 +5,17 @@
 import("//flutter/tools/fuchsia/flutter/flutter_build_config.gni")
 
 declare_args() {
-  # If set to true, will force the runners to be built in
-  # product mode which means they will not have an exposed vm service
-  flutter_force_product = false
-}
-
-declare_args() {
-  # TODO(richkadel): Make sure we're using 'debug' (non-aot) consistently,
-  # across dart and flutter rules.
-  # Since we're not REALLY building flutter apps, can I just git rid of this
-  # setting, and the configs in flutter/tools/fuchsia/flutter/flutter_build_config.gni?
-  # I think it's confusing to have both that one and .../dart/dart_build_config.gni.
-
-  # if (flutter_force_product) {
-  #   # Product AOT
-  #   flutter_default_build_cfg = flutter_release_build_cfg
-  # } else if (is_debug) {
-  # Non-product JIT
-  flutter_default_build_cfg = flutter_debug_build_cfg
-
-  # } else {
-  #   # Non-product AOT
-  #   flutter_default_build_cfg = flutter_profile_build_cfg
-  # }
+  if (flutter_runtime_mode == "release") {
+    # Product AOT
+    flutter_default_build_cfg = flutter_release_build_cfg
+  } else if (flutter_runtime_mode == "jit_release") {
+    # Product JIT
+    flutter_default_build_cfg = flutter_jit_release_build_cfg
+  } else if (flutter_runtime_mode == "debug") {
+    # Non-product JIT
+    flutter_default_build_cfg = flutter_debug_build_cfg
+  } else {  # "profile"
+    # Non-product AOT
+    flutter_default_build_cfg = flutter_profile_build_cfg
+  }
 }
