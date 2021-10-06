@@ -232,7 +232,7 @@ class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
-        
+
       ));
     } on VersionCheckError {
       // Don't perform the update check if the version check failed.

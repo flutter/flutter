@@ -370,7 +370,7 @@ void main() {
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
       Platform: () => FakePlatform(
-        
+
       ),
     });
 

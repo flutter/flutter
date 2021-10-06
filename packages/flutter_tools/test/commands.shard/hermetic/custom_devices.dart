@@ -462,7 +462,7 @@ void main() {
       'custom-devices add command fails when feature is not enabled',
       () async {
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          
+
         );
         expect(
           runner.run(const <String>['custom-devices', 'add']),

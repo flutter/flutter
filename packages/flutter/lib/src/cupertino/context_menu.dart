@@ -1170,23 +1170,23 @@ class _ContextMenuSheet extends StatelessWidget {
         return _orientation == Orientation.portrait
           ? <Widget>[
             const Spacer(
-              
+
             ),
             menu,
             const Spacer(
-              
+
             ),
           ]
         : <Widget>[
             menu,
             const Spacer(
-              
+
             ),
           ];
       case _ContextMenuLocation.right:
         return <Widget>[
           const Spacer(
-            
+
           ),
           menu,
         ];
@@ -1194,7 +1194,7 @@ class _ContextMenuSheet extends StatelessWidget {
         return <Widget>[
           menu,
           const Spacer(
-            
+
           ),
         ];
     }

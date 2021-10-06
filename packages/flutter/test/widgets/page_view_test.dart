@@ -1084,7 +1084,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
-        
+
       ),
     ));
 

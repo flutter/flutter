@@ -954,7 +954,7 @@ void main() {
       ).first.toRect();
 
       painter.textHeightBehavior = const TextHeightBehavior(
-        
+
       );
       painter.layout();
 

@@ -20,7 +20,7 @@ void main() {
           ),
           const Expanded(
             child: AbsorbPointer(
-              
+
             ),
           ),
         ],

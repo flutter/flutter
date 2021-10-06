@@ -173,7 +173,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           bottomNavigationBar: BottomAppBar(
-            
+
           ),
         ),
       ),
@@ -195,7 +195,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           bottomNavigationBar: ShapeListener(BottomAppBar(
-            
+
           )),
           floatingActionButton: FloatingActionButton(
             onPressed: null,

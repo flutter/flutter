@@ -655,7 +655,7 @@ void main() {
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
-      
+
     ));
 
     final ScrollController controller = primaryScrollController(tester);
@@ -2481,7 +2481,7 @@ void main() {
 
   testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
-      
+
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));

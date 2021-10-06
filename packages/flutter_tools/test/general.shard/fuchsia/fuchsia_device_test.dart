@@ -480,7 +480,7 @@ void main() {
       expect(device.supportsScreenshot, true);
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
-        
+
       ),
     });
 

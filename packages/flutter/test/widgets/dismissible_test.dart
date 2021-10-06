@@ -232,7 +232,7 @@ void main() {
   testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        
+
       ),
     );
     expect(dismissedItems, isEmpty);
@@ -251,7 +251,7 @@ void main() {
   testWidgets('Horizontal fling triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
-        
+
       ),
     );
     expect(dismissedItems, isEmpty);

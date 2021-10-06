@@ -10,7 +10,7 @@ void main() {
     expect(
       const BorderSide(),
       const BorderSide(
-        
+
       ),
     );
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);

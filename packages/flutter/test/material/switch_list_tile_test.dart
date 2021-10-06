@@ -220,7 +220,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,

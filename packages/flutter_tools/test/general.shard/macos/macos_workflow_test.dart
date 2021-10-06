@@ -13,7 +13,7 @@ final FakePlatform macOS = FakePlatform(
 );
 
 final FakePlatform linux = FakePlatform(
-  
+
 );
 
 void main() {

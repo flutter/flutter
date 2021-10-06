@@ -455,7 +455,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -499,7 +499,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -545,7 +545,7 @@ void main() {
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -1950,7 +1950,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2004,7 +2004,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2045,7 +2045,7 @@ void main() {
     }) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -2089,7 +2089,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2137,7 +2137,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: textDirection,

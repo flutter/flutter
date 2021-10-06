@@ -1182,7 +1182,7 @@ void main() {
     // Turn on sorting
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(
-        
+
       )),
     ));
 

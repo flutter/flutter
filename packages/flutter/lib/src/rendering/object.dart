@@ -208,7 +208,7 @@ class PaintingContext extends ClipContext {
       assert(() {
         // register the call for RepaintBoundary metrics
         child.debugRegisterRepaintBoundaryPaint(
-          
+
         );
         child._layerHandle.layer!.debugCreator = child.debugCreator ?? child;
         return true;

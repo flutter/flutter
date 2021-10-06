@@ -548,7 +548,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).attach(
-        
+
       );
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{

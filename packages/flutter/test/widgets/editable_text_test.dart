@@ -1450,7 +1450,7 @@ void main() {
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
           toolbarOptions: const ToolbarOptions(
-            
+
           ),
           style: textStyle,
           cursorColor: cursorColor,
@@ -3465,7 +3465,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3496,7 +3496,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3537,7 +3537,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -3976,7 +3976,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          
+
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -8760,7 +8760,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: const MediaQueryData(
-        
+
       ),
       child: Directionality(
         textDirection: TextDirection.ltr,

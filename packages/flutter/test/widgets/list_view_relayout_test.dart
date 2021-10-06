@@ -97,7 +97,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          
+
         ),
       ),
     );
@@ -138,7 +138,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          
+
         ),
       ),
     );
