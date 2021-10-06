@@ -348,27 +348,6 @@ public class FlutterView extends SurfaceView
   }
 
   /**
-   * Updates this to support rendering as a transparent {@link SurfaceView}.
-   *
-   * <p>Sets it on top of its window. The background color still needs to be controlled from within
-   * the Flutter UI itself.
-   *
-   * @deprecated FlutterView in the v1 embedding is always a SurfaceView and will cover
-   *     accessibility highlights when transparent. Consider migrating to the v2 Android embedding,
-   *     using {@link io.flutter.embedding.android.FlutterView.RenderMode#texture}, and setting
-   *     {@link io.flutter.embedding.android.FlutterView.TransparencyMode#transparent}. See also
-   *     https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects.
-   */
-  @Deprecated
-  public void enableTransparentBackground() {
-    Log.w(
-        TAG,
-        "FlutterView in the v1 embedding is always a SurfaceView and will cover accessibility highlights when transparent. Consider migrating to the v2 Android embedding. https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects");
-    setZOrderOnTop(true);
-    getHolder().setFormat(PixelFormat.TRANSPARENT);
-  }
-
-  /**
    * Reverts this back to the {@link SurfaceView} defaults, at the back of its window and opaque.
    */
   public void disableTransparentBackground() {

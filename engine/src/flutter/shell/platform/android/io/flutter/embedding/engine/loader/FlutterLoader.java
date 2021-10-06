@@ -55,25 +55,6 @@ public class FlutterLoader {
   private static FlutterLoader instance;
 
   /**
-   * Returns a singleton {@code FlutterLoader} instance.
-   *
-   * <p>The returned instance loads Flutter native libraries in the standard way. A singleton object
-   * is used instead of static methods to facilitate testing without actually running native library
-   * linking.
-   *
-   * @return The Flutter loader.
-   * @deprecated Use the {@link io.flutter.FlutterInjector} instead.
-   */
-  @Deprecated
-  @NonNull
-  public static FlutterLoader getInstance() {
-    if (instance == null) {
-      instance = new FlutterLoader();
-    }
-    return instance;
-  }
-
-  /**
    * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
    * ExecutorService}.
    */
