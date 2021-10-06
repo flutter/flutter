@@ -215,9 +215,10 @@ TaskFunction createPictureCachePerfE2ETest() {
   ).run;
 }
 
-TaskFunction createFlutterGalleryStartupTest() {
+TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+    target: target,
   ).run;
 }
 
@@ -502,10 +503,11 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 
 /// Measure application startup performance.
 class StartupTest {
-  const StartupTest(this.testDirectory, { this.reportMetrics = true });
+  const StartupTest(this.testDirectory, { this.reportMetrics = true, this.target = 'lib/main.dart' });
 
   final String testDirectory;
   final bool reportMetrics;
+  final String target;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -522,6 +524,7 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm,android-arm64',
+            '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -531,6 +534,7 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm',
+            '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -540,6 +544,7 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm64',
+            '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -548,6 +553,7 @@ class StartupTest {
             'ios',
              '-v',
             '--profile',
+            '--target=$target',
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
@@ -565,6 +571,7 @@ class StartupTest {
           '--verbose',
           '--profile',
           '--trace-startup',
+          '--target=$target',
           '-d',
           device.deviceId,
           if (applicationBinaryPath != null)

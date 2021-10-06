@@ -54,6 +54,7 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await _runMicrobench('lib/gestures/gesture_detector_bench.dart'),
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
+      ...await _runMicrobench('lib/language/compute_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_bench.dart'),
       ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
       ...await _runMicrobench('lib/foundation/all_elements_bench.dart'),

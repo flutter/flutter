@@ -386,7 +386,6 @@ Review licenses that have not been accepted (y/N)?
       ..latestVersion = sdkVersion;
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
-      sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
       FakePlatform(),

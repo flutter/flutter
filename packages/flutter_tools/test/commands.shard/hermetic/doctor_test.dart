@@ -672,7 +672,7 @@ class NoOpDoctor implements Doctor {
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
 
   @override
-  Future<void> summary() => null;
+  Future<void> summary() async { }
 
   @override
   List<DoctorValidator> get validators => <DoctorValidator>[];
@@ -1021,6 +1021,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String get name => 'name';

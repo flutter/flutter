@@ -1933,7 +1933,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       scrollOffset: math.max(0.0, correctedOffset),
       overlap: math.min(0.0, correctedOffset),
       layoutOffset: math.max(0.0, -correctedOffset),
-      remainingPaintExtent: mainAxisExtent,
+      remainingPaintExtent: mainAxisExtent + math.min(0.0, correctedOffset),
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
       growthDirection: GrowthDirection.forward,

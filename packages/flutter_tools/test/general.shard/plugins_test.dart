@@ -966,6 +966,53 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         ProcessManager: () => FakeProcessManager.any(),
       });
 
+      testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins', () async {
+        // Create a plugin without a pluginClass.
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      android:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+        final File registrantFile = androidProject.pluginRegistrantHost
+          .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Injecting creates generated iOS registrant, but does not include Dart-only plugins', () async {
+        flutterProject.isModule = true;
+        // Create a plugin without a pluginClass.
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      ios:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, iosPlatform: true);
+
+        final File registrantFile = iosProject.pluginRegistrantImplementation;
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
       testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
         flutterProject.isModule = true;
         // Create a plugin without a pluginClass.
@@ -1547,6 +1594,12 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   Directory pluginRegistrantHost;
+
+  @override
+  File get pluginRegistrantHeader => pluginRegistrantHost.childFile('GeneratedPluginRegistrant.h');
+
+  @override
+  File get pluginRegistrantImplementation => pluginRegistrantHost.childFile('GeneratedPluginRegistrant.m');
 
   @override
   File podfile;

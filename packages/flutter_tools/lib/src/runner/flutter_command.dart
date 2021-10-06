@@ -122,6 +122,13 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
+/// flutter command categories for usage.
+class FlutterCommandCategory {
+  static const String sdk = 'Flutter SDK';
+  static const String project = 'Project';
+  static const String tools = 'Tools & Devices';
+}
+
 abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
@@ -187,8 +194,6 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _excludeDebug = false;
   bool _excludeRelease = false;
-
-  BuildMode _defaultBuildMode;
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -833,9 +838,11 @@ abstract class FlutterCommand extends Command<void> {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  set defaultBuildMode(BuildMode value) {
-    _defaultBuildMode = value;
-  }
+  /// The build mode that this command will use if no build mode is
+  /// explicitly specified.
+  ///
+  /// Use [getBuildMode] to obtain the actual effective build mode.
+  BuildMode defaultBuildMode;
 
   BuildMode getBuildMode() {
     // No debug when _excludeDebug is true.
@@ -865,7 +872,7 @@ abstract class FlutterCommand extends Command<void> {
     if (jitReleaseResult) {
       return BuildMode.jitRelease;
     }
-    return _defaultBuildMode;
+    return defaultBuildMode;
   }
 
   void usesFlavorOption() {

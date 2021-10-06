@@ -2331,7 +2331,7 @@ abstract class BuildContext {
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to build an off-screen widget tree used to measure
 /// the layout size of the rendered tree. For some use cases, the simpler
 /// [Offstage] widget may be a better alternative to this approach.
@@ -4371,8 +4371,11 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad}
+/// This example shows how to override the standard error widget builder in release
+/// mode, but use the standard one in debug mode.
 ///
+/// The error occurs when you click the "Error Prone" button.
 ///
 /// ** See code in examples/api/lib/widgets/framework/error_widget.0.dart **
 /// {@end-tool}

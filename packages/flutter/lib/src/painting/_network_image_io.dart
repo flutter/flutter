@@ -96,7 +96,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         // The network may be only temporarily unavailable, or the file will be
         // added on the server later. Avoid having future calls to resolve
         // fail to check the network again.
-        await response.drain<List<int>>();
+        await response.drain<List<int>>(<int>[]);
         throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
       }
 
