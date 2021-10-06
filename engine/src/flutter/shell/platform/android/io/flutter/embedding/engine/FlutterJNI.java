@@ -135,6 +135,8 @@ public class FlutterJNI {
     FlutterJNI.prefetchDefaultFontManagerCalled = true;
   }
 
+  private static native void nativePrefetchDefaultFontManager();
+
   private static boolean prefetchDefaultFontManagerCalled = false;
 
   /**
@@ -165,6 +167,14 @@ public class FlutterJNI {
     FlutterJNI.initCalled = true;
   }
 
+  private static native void nativeInit(
+      @NonNull Context context,
+      @NonNull String[] args,
+      @Nullable String bundlePath,
+      @NonNull String appStoragePath,
+      @NonNull String engineCachesPath,
+      long initTimeMillis);
+
   private static boolean initCalled = false;
   // END methods related to FlutterLoader
 
@@ -175,20 +185,6 @@ public class FlutterJNI {
 
   // This is set from native code via JNI.
   @Nullable private static String observatoryUri;
-
-  /** @deprecated Use {@link #init(Context, String[], String, String, String, long)} instead. */
-  @Deprecated
-  public static native void nativeInit(
-      @NonNull Context context,
-      @NonNull String[] args,
-      @Nullable String bundlePath,
-      @NonNull String appStoragePath,
-      @NonNull String engineCachesPath,
-      long initTimeMillis);
-
-  /** @deprecated Use {@link #prefetchDefaultFontManager()} instead. */
-  @Deprecated
-  public static native void nativePrefetchDefaultFontManager();
 
   private native boolean nativeGetIsSoftwareRenderingEnabled();
 

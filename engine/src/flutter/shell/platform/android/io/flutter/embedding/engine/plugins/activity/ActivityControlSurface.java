@@ -51,25 +51,6 @@ import io.flutter.embedding.android.ExclusiveAppComponent;
  */
 public interface ActivityControlSurface {
   /**
-   * Call this method from the {@link android.app.Activity} that is displaying the visual content of
-   * the {@link io.flutter.embedding.engine.FlutterEngine} that is associated with this {@code
-   * ActivityControlSurface}.
-   *
-   * <p>Once an {@link android.app.Activity} is created, and its associated {@link
-   * io.flutter.embedding.engine.FlutterEngine} is executing Dart code, the {@link
-   * android.app.Activity} should invoke this method. At that point the {@link
-   * io.flutter.embedding.engine.FlutterEngine} is considered "attached" to the {@link
-   * android.app.Activity} and all {@link ActivityAware} plugins are given access to the {@link
-   * android.app.Activity}.
-   *
-   * @deprecated Prefer using the {@link #attachToActivity(ExclusiveAppComponent, Lifecycle)} API to
-   *     avoid situations where multiple activities are driving the FlutterEngine simultaneously.
-   *     See https://github.com/flutter/flutter/issues/66192.
-   */
-  @Deprecated
-  void attachToActivity(@NonNull Activity activity, @NonNull Lifecycle lifecycle);
-
-  /**
    * Call this method from the {@link ExclusiveAppComponent} that is displaying the visual content
    * of the {@link io.flutter.embedding.engine.FlutterEngine} that is associated with this {@code
    * ActivityControlSurface}.
@@ -80,10 +61,6 @@ public interface ActivityControlSurface {
    * io.flutter.embedding.engine.FlutterEngine} is considered "attached" to the {@link
    * ExclusiveAppComponent} and all {@link ActivityAware} plugins are given access to the {@link
    * ExclusiveAppComponent}'s {@link android.app.Activity}.
-   *
-   * <p>This method differs from {@link #attachToActivity(Activity, Lifecycle)} in that it calls
-   * back the existing {@link ExclusiveAppComponent} to give it a chance to cleanly detach before a
-   * new {@link ExclusiveAppComponent} is attached.
    */
   void attachToActivity(
       @NonNull ExclusiveAppComponent<Activity> exclusiveActivity, @NonNull Lifecycle lifecycle);
