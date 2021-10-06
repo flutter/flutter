@@ -136,15 +136,14 @@ void main() {
     testWithoutContext('No valid code signing certificates on non-macOS platform', () async {
       final FakeProcessManager processManager = FakeProcessManager.empty();
 
-      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+      expect(() async => getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
         platform: FakePlatform(operatingSystem: 'linux'),
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
-      );
+      ), throwsException);
 
-      expect(developmentTeam, isNull);
       expect(processManager, hasNoRemainingExpectations);
     });
 
