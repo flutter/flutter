@@ -602,6 +602,47 @@ void testMain() {
           hasLength(1));
       HtmlViewEmbedder.debugDisableOverlays = false;
     });
+
+    test(
+        'correctly renders when overlays are disabled and a subset '
+        'of views is used', () async {
+      HtmlViewEmbedder.debugDisableOverlays = true;
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+      await _createPlatformView(1, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
+      sb.addPlatformView(1, width: 10, height: 10);
+      sb.pop();
+      // The below line should not throw an error.
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+          domRenderer.glassPaneShadow!
+              .querySelectorAll('flt-platform-view-slot'),
+          hasLength(2));
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(1, width: 10, height: 10);
+      sb.pop();
+      // The below line should not throw an error.
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      expect(
+          domRenderer.glassPaneShadow!
+              .querySelectorAll('flt-platform-view-slot'),
+          hasLength(1));
+
+      HtmlViewEmbedder.debugDisableOverlays = false;
+    });
     // TODO(dit): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
