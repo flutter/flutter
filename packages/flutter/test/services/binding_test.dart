@@ -106,6 +106,5 @@ void main() {
     expect(flutterAssetsCallCount, 4);
     await rootBundle.loadString('test_asset2');
     expect(flutterAssetsCallCount, 4);
-
   });
 }
