@@ -19,7 +19,7 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration}
+/// {@tool dartpad}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
 /// ** See code in examples/api/lib/widgets/restoration_properties/restorable_value.0.dart **

@@ -1077,6 +1077,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     String projectRootPath,
     FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     return output;
   }

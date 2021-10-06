@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/roll_dev.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
 import './common.dart';
+
+const String _kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 void main() {
   group('rollDev()', () {
@@ -68,7 +69,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -81,7 +82,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -112,7 +113,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -125,7 +126,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -184,7 +185,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -197,7 +198,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -266,7 +267,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -279,7 +280,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -341,7 +342,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -354,7 +355,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -420,7 +421,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -433,7 +434,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -515,7 +516,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -528,7 +529,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',
@@ -614,7 +615,7 @@ void main() {
           '--origin',
           'upstream',
           '--',
-          kUpstreamRemote,
+          _kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
@@ -627,7 +628,7 @@ void main() {
           'remote',
           'get-url',
           remote,
-        ], stdout: kUpstreamRemote),
+        ], stdout: _kUpstreamRemote),
         const FakeCommand(command: <String>[
           'git',
           'status',

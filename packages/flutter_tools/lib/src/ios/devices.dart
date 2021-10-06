@@ -704,6 +704,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   }
 
   /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  IOSDeployDebugger get debuggerStream => _iosDeployDebugger;
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
@@ -736,14 +737,13 @@ class IOSDeviceLogReader extends DeviceLogReader {
           _linesController.close();
         }
       });
-      assert(_idevicesyslogProcess == null);
-      _idevicesyslogProcess = process;
+      assert(idevicesyslogProcess == null);
+      idevicesyslogProcess = process;
     });
   }
 
   @visibleForTesting
-  set idevicesyslogProcess(Process process) => _idevicesyslogProcess = process;
-  Process _idevicesyslogProcess;
+  Process idevicesyslogProcess;
 
   // Returns a stateful line handler to properly capture multiline output.
   //
@@ -781,7 +781,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
       loggingSubscription.cancel();
     }
-    _idevicesyslogProcess?.kill();
+    idevicesyslogProcess?.kill();
     _iosDeployDebugger?.detach();
   }
 }

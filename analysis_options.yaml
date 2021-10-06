@@ -27,15 +27,12 @@ analyzer:
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
-    # allow having TODOs in the code
+    # allow having TODO/HACK comments in the code
     todo: ignore
+    hack: ignore
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
-    # Ignore analyzer hints for updating pubspecs when using Future or
-    # Stream and not importing dart:async
-    # Please see https://github.com/flutter/flutter/pull/24528 for details.
-    sdk_version_async_exported_from_core: ignore
     # TODO(https://github.com/flutter/flutter/issues/74381):
     # Clean up existing unnecessary imports, and remove line to ignore.
     unnecessary_import: ignore
@@ -70,7 +67,7 @@ linter:
     - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
-    # - avoid_implementing_value_types # not yet tested
+    - avoid_implementing_value_types
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
@@ -81,11 +78,11 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # there are plenty of valid reasons to return null
-    # - avoid_returning_null_for_future # not yet tested
+    # - avoid_returning_null # still violated by some pre-nnbd code that we haven't yet migrated
+    - avoid_returning_null_for_future
     - avoid_returning_null_for_void
     # - avoid_returning_this # there are plenty of valid reasons to return this
-    # - avoid_setters_without_getters # not yet tested
+    - avoid_setters_without_getters
     - avoid_shadowing_type_parameters
     - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io

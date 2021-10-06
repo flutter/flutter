@@ -343,6 +343,9 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
+  @override
+  String get category => FlutterCommandCategory.project;
+
   List<Device> devices;
   bool webMode = false;
 

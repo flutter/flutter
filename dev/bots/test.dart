@@ -278,6 +278,8 @@ Future<void> _runGeneralToolTests() async {
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
     // Detect unit test time regressions (poor time delay handling, etc).
+    // This overrides the 15 minute default for tools tests.
+    // See the README.md and dart_test.yaml files in the flutter_tools package.
     perTestTimeout: const Duration(seconds: 2),
   );
 }
@@ -295,8 +297,6 @@ Future<void> _runWebToolTests() async {
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'web.shard')],
-    enableFlutterToolAsserts: true,
-    perTestTimeout: const Duration(minutes: 3),
     includeLocalEngineEnv: true,
   );
 }
@@ -307,25 +307,6 @@ Future<void> _runIntegrationToolTests() async {
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  // Make sure devtools is ready first, because that might take a while and we don't
-  // want any of the tests to time out while they themselves try to activate devtools.
-  final Map<String, String> pubEnvironment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
-  await runCommand(
-    pub,
-    <String>[
-      'global',
-      'activate',
-      'devtools',
-      File(path.join(flutterRoot, 'bin', 'internal', 'devtools.version')).readAsStringSync(),
-    ],
-    environment: pubEnvironment,
-  );
 
   await _pubRunTest(
     toolsPath,
@@ -693,6 +674,7 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
   }

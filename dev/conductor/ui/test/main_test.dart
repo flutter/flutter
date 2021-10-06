@@ -10,13 +10,12 @@ import 'package:conductor_ui/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('group', () {
+  group('Main app', () {
     testWidgets('Handles null state', (WidgetTester tester) async {
       await tester.pumpWidget(const MyApp(null));
 
-      expect(find.text('Flutter Conductor'), findsOneWidget);
-      expect(find.textContaining('No persistent state file found at'),
-          findsOneWidget);
+      expect(find.textContaining('Flutter Desktop Conductor'), findsOneWidget);
+      expect(find.textContaining('No persistent state file found at'), findsOneWidget);
     });
 
     testWidgets('App prints release channel from state file',
@@ -27,8 +26,8 @@ void main() {
       );
       await tester.pumpWidget(MyApp(state));
 
-      expect(find.text('Flutter Conductor'), findsOneWidget);
-      expect(find.textContaining(channelName), findsOneWidget);
+      expect(find.textContaining('Flutter Desktop Conductor'), findsOneWidget);
+      expect(find.textContaining('Conductor version'), findsOneWidget);
       expect(find.text('1'), findsNothing);
     });
   }, skip: Platform.isWindows); // This app does not support Windows [intended]

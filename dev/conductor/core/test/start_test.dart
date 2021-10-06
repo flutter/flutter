@@ -282,8 +282,10 @@ void main() {
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
       expect(state.engine.dartRevision, nextDartRevision);
+      expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
+      expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
       expect(state.incrementLevel, incrementLevel);

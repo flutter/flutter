@@ -494,7 +494,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -551,7 +551,7 @@ void main() {
     _setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -848,7 +848,7 @@ void main() {
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final Chromium chrome = Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
-    chromiumLauncher.instance = chrome;
+    chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
       fileSystem: fileSystem,
@@ -936,6 +936,47 @@ void main() {
       },
     )));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  // While this file should be ignored on web, generating it here will cause a
+  // perf regression in hot restart.
+  testUsingContext('Does not generate generated_main.dart', () async {
+    // Create necessary files for [DartPluginRegistrantTarget]
+    final File packageConfig = globals.fs.directory('.dart_tool')
+        .childFile('package_config.json');
+    packageConfig.createSync(recursive: true);
+    packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    // Start with a generated_main.dart file.
+    globals.fs.directory('.dart_tool')
+              .childDirectory('flutter_build')
+              .childFile('generated_main.dart')
+              .createSync(recursive: true);
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    await residentWebRunner.runSourceGenerators();
+
+    // generated_main.dart should be untouched, indicating that its
+    // generation didn't run. If it had run, the file would have been removed as
+    // there are no plugins in the project.
+    expect(project.dartPluginRegistrant.existsSync(), true);
+    expect(project.dartPluginRegistrant.readAsStringSync(), '');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1030,8 +1071,14 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
   );
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeWebServerDevice extends FakeDevice implements WebServerDevice { }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String name;
@@ -1101,6 +1148,9 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeChromeDevice extends Fake implements ChromiumDevice { }
 
 class FakeWipDebugger extends Fake implements WipDebugger { }
@@ -1115,6 +1165,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required String projectRootPath,
     @required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -1219,11 +1270,11 @@ class FakeWipConnection extends Fake implements WipConnection {
 class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
-  set instance(Chromium chromium) {
+  bool _hasInstance = false;
+  void setInstance(Chromium chromium) {
     _hasInstance = true;
     currentCompleter.complete(chromium);
   }
-  bool _hasInstance = false;
 
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();
