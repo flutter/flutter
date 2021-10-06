@@ -129,7 +129,7 @@ void main() {
         '4.0.0': '6.7',
         '4.0.5': '6.7',
         '4.1.0': '6.7',
-        '7.0.0': '7.0.2',
+        '7.0.1': '7.0.2',
       };
 
       for (final MapEntry<String, String> entry in testCases.entries) {
