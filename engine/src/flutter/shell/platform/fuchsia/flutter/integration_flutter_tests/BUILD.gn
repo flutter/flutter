@@ -4,6 +4,5 @@
 
 group("integration_flutter_tests") {
   testonly = true
-  # TODO(fxbug.dev/86055): re-enable
-  # deps = [ "embedder:tests" ]
+  deps = [ "embedder:tests" ]
 }

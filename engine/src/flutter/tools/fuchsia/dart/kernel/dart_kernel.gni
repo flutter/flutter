@@ -157,10 +157,9 @@ template("dart_kernel") {
     _kernel_deps += invoker.deps
   }
 
-  # TODO(richkadel): The manifest is currently used by flutter_dart_component, to populate the file
-  # it calls `_convert_kernel_manifest_file`, so I can't make this conditional, right? Or is it
-  # possible to build Dart AOT Fuchsia packages/components without the data in this file (in which
-  # case I should make it conditional there as well)?
+  # TODO(richkadel): The manifest (if not using AOT) is used by
+  # flutter_dart_component, to populate the file it calls
+  # `_convert_kernel_manifest_file`.
   _generate_manifest = false
   if (invoker.is_aot) {
     not_needed(invoker, [ "generate_manifest" ])
@@ -291,17 +290,11 @@ template("dart_kernel") {
       ]
     }
 
-    # TODO(richkadel): NEED TO VALIDATE AND/OR CLEAN UP `is_debug` and `is_aot`.
-    # `is_debug` is set by the flutter `gn` script to true if --unoptimized,
-    # but `--unoptimized` is broken for Fuchsia, according to an open bug in
-    # github flutter/flutter issues. But I have a feeling `is_debug` from
-    # Fuchsia scripts may have a different meaning for dart/flutter at least.
-    # if (is_debug) {
-    args += [ "--embed-sources" ]
-
-    # } else {
-    #   args += [ "--no-embed-sources" ]
-    # }
+    if (flutter_runtime_mode == "debug") {
+      args += [ "--embed-sources" ]
+    } else {
+      args += [ "--no-embed-sources" ]
+    }
 
     if (invoker.is_aot) {
       args += [
@@ -320,12 +313,10 @@ template("dart_kernel") {
       # This define excludes debugging and profiling code from Flutter.
       args += [ "-Ddart.vm.product=true" ]
     } else {
-      # TODO(richkadel): I'm pretty sure we want to assume is_debug even if that's
-      # not what's set by gn flags (--unoptimized = false because true is currentlyh broken for Fuchsia?)
-      #       if (!is_debug) {
-      #         # The following define excludes debugging code from Flutter.
-      #         args += [ "-Ddart.vm.profile=true" ]
-      #       }
+      if (flutter_runtime_mode == "profile") {
+        # The following define excludes debugging code from Flutter.
+        args += [ "-Ddart.vm.profile=true" ]
+      }
     }
 
     if (defined(invoker.main_dart)) {
