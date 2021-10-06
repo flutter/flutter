@@ -566,7 +566,7 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool sample}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///

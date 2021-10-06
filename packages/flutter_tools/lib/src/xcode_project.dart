@@ -244,7 +244,11 @@ class IosProject extends XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>?> buildSettingsForBuildInfo(BuildInfo? buildInfo, { EnvironmentType environmentType = EnvironmentType.physical }) async {
+  Future<Map<String, String>?> buildSettingsForBuildInfo(
+    BuildInfo? buildInfo, {
+    EnvironmentType environmentType = EnvironmentType.physical,
+    String? deviceId,
+  }) async {
     if (!existsSync()) {
       return null;
     }
@@ -262,7 +266,12 @@ class IosProject extends XcodeBasedProject {
       buildInfo,
       scheme,
     );
-    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(environmentType: environmentType, scheme: scheme, configuration: configuration);
+    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+      environmentType: environmentType,
+      scheme: scheme,
+      configuration: configuration,
+      deviceId: deviceId,
+    );
     final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
     if (currentBuildSettings == null) {
       final Map<String, String>? calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
@@ -310,7 +319,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
-  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo) async {
+  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo, String? deviceId) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
     if (bundleIdentifier == null) {
@@ -330,7 +339,7 @@ class IosProject extends XcodeBasedProject {
         // The key WKCompanionAppBundleIdentifier might contain an xcode variable
         // that needs to be substituted before comparing it with bundle id
         if (fromPlist != null && fromPlist.contains(r'$')) {
-          final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
+          final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo, deviceId: deviceId);
           if (allBuildSettings != null) {
             final String substitutedVariable = substituteXcodeVariables(fromPlist, allBuildSettings);
             if (substitutedVariable == bundleIdentifier) {

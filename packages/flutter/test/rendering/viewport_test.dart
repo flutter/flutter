@@ -7,6 +7,8 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -1866,6 +1868,53 @@ void main() {
       ),
     );
   }
+
+  testWidgets('Constrained Shrinkwrapping viewport will not overflow on overscroll', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89717
+    final  ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Column(
+              children: <Widget>[
+                Container(height: 100, color: const Color(0x00000000)),
+                Container(
+                  height: 150,
+                  color: const Color(0xFFF44336),
+                  child: ListView.builder(
+                    controller: controller,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    itemCount: 10,
+                  ),
+                ),
+                Container(height: 100, color: const Color(0x00000000)),
+              ],
+            ),
+          ),
+        )
+    );
+    expect(controller.offset, 0.0);
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+
+    // Overscroll
+    final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.text('Item 0')));
+    await overscrollGesture.moveBy(const Offset(0, 25));
+    await tester.pump();
+    expect(controller.offset, -25.0);
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 125.0);
+    await expectLater(
+      find.byType(Directionality),
+      matchesGoldenFile('shrinkwrapped_overscroll.png'),
+    );
+    await overscrollGesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+    expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+  });
 
   testWidgets('Shrinkwrap allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/10949

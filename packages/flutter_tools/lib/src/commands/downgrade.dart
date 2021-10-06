@@ -77,6 +77,9 @@ class DowngradeCommand extends FlutterCommand {
   String get name => 'downgrade';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,

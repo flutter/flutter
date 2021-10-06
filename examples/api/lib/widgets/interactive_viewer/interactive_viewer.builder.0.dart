@@ -2,28 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for InteractiveViewer.builder
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example shows how to use builder to create a [Table] whose cell
-// contents are only built when they are visible. Built and remove cells are
-// logged in the console for illustration.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 void main() => runApp(const IVBuilderExampleApp());
@@ -203,6 +185,3 @@ class _TableBuilder extends StatelessWidget {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

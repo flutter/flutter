@@ -1101,6 +1101,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
+  /// True if the shared Dart plugin registry (which is different than the one
+  /// used for web) should be generated during source generation.
+  bool get generateDartPluginRegistry => true;
+
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
   //
@@ -1152,7 +1156,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[

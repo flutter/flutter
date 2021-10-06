@@ -43,7 +43,7 @@ import 'theme.dart';
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///

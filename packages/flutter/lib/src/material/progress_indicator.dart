@@ -246,7 +246,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The minimum height of the indicator can be specified using [minHeight].
 /// The indicator can be made taller by wrapping the widget with a [SizedBox].
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
@@ -466,7 +466,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **

@@ -40,7 +40,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
@@ -48,6 +48,26 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// ** See code in examples/api/lib/material/icon_button/icon_button.0.dart **
 /// {@end-tool}
+///
+/// ### Icon sizes
+///
+/// When creating an icon button with an [Icon], do not override the
+/// icon's size with its [Icon.size] parameter, use the icon button's
+/// [iconSize] parameter instead.  For example do this:
+///
+/// ```dart
+/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
+/// ```
+///
+/// Avoid doing this:
+///
+/// ```dart
+/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// ```
+///
+/// If you do, the button's size will be based on the default icon
+/// size, not 72, which may produce unexpected layouts and clipping
+/// issues.
 ///
 /// ### Adding a filled background
 ///
@@ -61,7 +81,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// the underlying [Material] along with the splash and highlight
 /// [InkResponse] contributed by descendant widgets.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// In this sample the icon button's background color is defined with an [Ink]
 /// widget whose child is an [IconButton]. The icon button's filled background
 /// is a light shade of blue, it's a filled circle, and it's as big as the

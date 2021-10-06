@@ -768,6 +768,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const int kUserMappedSectionOpened = 1224;
   const int kAccessDenied = 5;
   const int kFatalDeviceHardwareError = 483;
+  const int kDeviceDoesNotExist = 433;
 
   // Catch errors and bail when:
   String? errorMessage;
@@ -795,6 +796,12 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       errorMessage =
         '$message. There is a problem with the device driver '
         'that this file or directory is stored on.';
+      break;
+    case kDeviceDoesNotExist:
+      errorMessage =
+        '$message. The device was not found.'
+        '\n$e\n'
+        'Verify the device is mounted and try again.';
       break;
     default:
       // Caller must rethrow the exception.

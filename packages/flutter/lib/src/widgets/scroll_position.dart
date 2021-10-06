@@ -989,7 +989,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// so this is useful for listening to [ScrollMetrics] changes that are not
 /// caused by the user scrolling.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample shows how a [ScrollMetricsNotification] is dispatched when
 /// the `windowSize` is changed. Press the floating action button to increase
 /// the scrollable window's size.

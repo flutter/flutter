@@ -812,7 +812,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
 /// "Two", "Free", or "Four".
@@ -968,7 +968,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// from the list corresponds to the [DropdownMenuItem] of the same index
   /// in [items].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
   ///
@@ -993,7 +993,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// To use a separate text style for selected item when it's displayed within
   /// the dropdown button, consider using [selectedItemBuilder].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
   ///

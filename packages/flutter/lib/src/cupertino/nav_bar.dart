@@ -228,7 +228,7 @@ bool _isTransitionable(BuildContext context) {
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
-/// {@tool dartpad --template=stateful_widget_cupertino}
+/// {@tool dartpad}
 /// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
 /// Since [backgroundColor]'s opacity is not 1.0, there is a blur effect and
 /// content slides underneath.

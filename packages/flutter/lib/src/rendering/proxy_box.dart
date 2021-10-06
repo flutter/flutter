@@ -2265,11 +2265,14 @@ class RenderTransform extends RenderProxyBox {
   /// always honor the transformation, regardless of the value of this property.
   bool transformHitTests;
 
-  // Note the lack of a getter for transform because Matrix4 is not immutable
   Matrix4? _transform;
-
-  /// The matrix to transform the child by during painting.
-  set transform(Matrix4 value) {
+  /// The matrix to transform the child by during painting. The provided value
+  /// is copied on assignment.
+  ///
+  /// There is no getter for [transform], because [Matrix4] is mutable, and
+  /// mutations outside of the control of the render object could not reliably
+  /// be reflected in the rendering.
+  set transform(Matrix4 value) { // ignore: avoid_setters_without_getters
     assert(value != null);
     if (_transform == value)
       return;

@@ -2,28 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateful_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for FocusScope
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example demonstrates using a [FocusScope] to restrict focus to a particular
-// portion of the app. In this case, restricting focus to the visible part of a
-// Stack.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -37,9 +21,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 /// A demonstration pane.
 ///
@@ -85,10 +66,6 @@ class Pane extends StatelessWidget {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
-/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
@@ -96,11 +73,7 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   bool backdropIsVisible = false;
   FocusNode backdropNode = FocusNode(debugLabel: 'Close Backdrop Button');
   FocusNode foregroundNode = FocusNode(debugLabel: 'Option Button');
@@ -189,8 +162,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     // of its parent.
     return LayoutBuilder(builder: _buildStack);
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

@@ -8,17 +8,12 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { required this.image, this.scale = 1.0, this.debugLabel });
-
-  @override
-  final ui.Image image;
-
-  @override
-  final double scale;
-
-  @override
-  final String? debugLabel;
+class TestImageInfo extends ImageInfo {
+  const TestImageInfo(this.value, {
+    required ui.Image image,
+    double scale = 1.0,
+    String? debugLabel,
+  }) : super(image: image, scale: scale, debugLabel: debugLabel);
 
   final int value;
 
@@ -29,22 +24,6 @@ class TestImageInfo implements ImageInfo {
   TestImageInfo clone() {
     return TestImageInfo(value, image: image.clone(), scale: scale, debugLabel: debugLabel);
   }
-
-  @override
-  bool isCloneOf(ImageInfo other) {
-    assert(other != null);
-    return other.image.isCloneOf(image)
-        && scale == scale
-        && other.debugLabel == debugLabel;
-  }
-
-  @override
-  void dispose() {
-    image.dispose();
-  }
-
-  @override
-  int get sizeBytes => image.height * image.width * 4;
 
   @override
   int get hashCode => hashValues(value, image, scale, debugLabel);
@@ -58,7 +37,6 @@ class TestImageInfo implements ImageInfo {
         && other.image.isCloneOf(image)
         && other.scale == scale
         && other.debugLabel == debugLabel;
-
   }
 }
 
