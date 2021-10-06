@@ -1,4 +1,4 @@
-Signature: 40bb1b6c244a35aaa9d566ca9ace83c5
+Signature: a14702aaf179ffc557cba4a514944e83
 
 UNUSED LICENSES:
 
@@ -2956,6 +2956,10 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Recording.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Recording.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.cpp
@@ -2969,6 +2973,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Task.h
+FILE: ../../../third_party/skia/experimental/graphite/src/TaskGraph.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/TaskGraph.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Texture.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
