@@ -204,11 +204,11 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 class FadeAnimation extends StatefulWidget {
   const FadeAnimation({
     Key? key,
-    this.child,
+    required this.child,
     this.duration = const Duration(milliseconds: 500),
   }) : super(key: key);
 
-  final Widget? child;
+  final Widget child;
   final Duration duration;
 
   @override

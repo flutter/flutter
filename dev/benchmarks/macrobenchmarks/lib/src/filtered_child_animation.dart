@@ -113,7 +113,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       case FilterType.opacity:
         builder = (BuildContext context, Widget? child) => Opacity(
           opacity: (_controller.value * 2.0 - 1.0).abs(),
-          child: child,
+          child: child!,
         );
         break;
       case FilterType.rotateTransform:

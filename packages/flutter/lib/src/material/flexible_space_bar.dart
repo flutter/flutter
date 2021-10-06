@@ -251,7 +251,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
               opacity: opacity,
-              child: widget.background,
+              child: widget.background!,
             ),
           ));
 
@@ -277,11 +277,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         if (widget.title != null) {
           final ThemeData theme = Theme.of(context);
 
-          Widget? title;
+          Widget title;
           switch (theme.platform) {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
-              title = widget.title;
+              title = widget.title!;
               break;
             case TargetPlatform.android:
             case TargetPlatform.fuchsia:

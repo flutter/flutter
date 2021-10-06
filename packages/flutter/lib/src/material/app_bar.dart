@@ -1001,7 +1001,7 @@ class _AppBarState extends State<AppBar> {
           else
             Opacity(
               opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
-              child: widget.bottom,
+              child: widget.bottom!,
             ),
         ],
       );
