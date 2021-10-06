@@ -219,6 +219,31 @@ static void store_redispatched_event(gpointer event) {
   g_ptr_array_add(redispatched_events(), new_event);
 }
 
+// Make sure that the keyboard can be disposed without crashes when there are
+// unresolved pending events.
+TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
+  FlKeyboardManager* manager =
+      fl_keyboard_manager_new(nullptr, store_redispatched_event);
+
+  GPtrArray* call_records = g_ptr_array_new_with_free_func(g_object_unref);
+  FlKeyMockResponder* responder = fl_key_mock_responder_new(call_records, 1);
+  fl_keyboard_manager_add_responder(manager, FL_KEY_RESPONDER(responder));
+
+  responder->callback_handler = dont_respond;
+  fl_keyboard_manager_handle_event(
+      manager,
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x10, false));
+
+  responder->callback_handler = respond_true;
+  fl_keyboard_manager_handle_event(
+      manager,
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x10, false));
+
+  // Passes if the cleanup of `manager` does not crash.
+  g_object_unref(manager);
+  g_ptr_array_unref(call_records);
+}
+
 TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   GPtrArray* call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlKeyboardCallRecord* record;
@@ -313,7 +338,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
 
   g_ptr_array_clear(redispatched_events());
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  g_ptr_array_clear(call_records);
+  g_ptr_array_unref(call_records);
 }
 
 TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
@@ -369,7 +394,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
   g_ptr_array_clear(redispatched_events());
-  g_ptr_array_clear(call_records);
+  g_ptr_array_unref(call_records);
 }
 
 TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
@@ -437,6 +462,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   g_ptr_array_clear(call_records);
 
   g_ptr_array_clear(redispatched_events());
+  g_ptr_array_unref(call_records);
 }
 
 TEST(FlKeyboardManagerTest, TextInputPluginReturnsFalse) {
@@ -469,7 +495,7 @@ TEST(FlKeyboardManagerTest, TextInputPluginReturnsFalse) {
 
   g_ptr_array_clear(redispatched_events());
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  g_ptr_array_clear(call_records);
+  g_ptr_array_unref(call_records);
 }
 
 TEST(FlKeyboardManagerTest, TextInputPluginReturnsTrue) {
@@ -495,7 +521,7 @@ TEST(FlKeyboardManagerTest, TextInputPluginReturnsTrue) {
   EXPECT_EQ(redispatched_events()->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  g_ptr_array_clear(call_records);
+  g_ptr_array_unref(call_records);
 }
 
 }  // namespace
