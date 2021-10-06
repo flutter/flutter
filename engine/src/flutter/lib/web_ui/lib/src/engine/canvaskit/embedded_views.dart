@@ -538,6 +538,7 @@ class HtmlViewEmbedder {
           skiaSceneHost!.append(overlay.htmlElement);
         }
         _activeCompositionOrder.add(viewId);
+        unusedViews.remove(viewId);
       }
       if (_didPaintBackupSurface) {
         skiaSceneHost!
