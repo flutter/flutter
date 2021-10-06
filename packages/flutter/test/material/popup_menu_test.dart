@@ -2527,6 +2527,7 @@ void main() {
     await buildFrameWithChild();
     expect(tester.widget<InkWell>(find.byType(InkWell)).radius, null);
 
+
     const double testSplashRadius = 50;
 
     await buildFrameWithoutChild(splashRadius: testSplashRadius);
