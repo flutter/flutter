@@ -47,6 +47,7 @@ void main() {
   testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -56,29 +57,33 @@ void main() {
     ));
 
     await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
-      enableDrag: false,
-      builder: (BuildContext context){
-        return Container(height: 200.0,
-          child: const Text('BottomSheet'),
-        );
-      },
-    );
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return Container(
+        height: 200.0,
+        child: const Text('BottomSheet'),
+      );
+    }).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
 
     await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Swipe the bottom sheet to dismiss it.
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
   });
 
   testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -88,28 +93,34 @@ void main() {
     ));
 
     await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
-      enableDrag: true,
-      builder: (BuildContext context){
-        return Container(height: 200.0,
-          child: const Text('BottomSheet'),
-        );
-      },
-    );
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return Container(
+        height: 200.0,
+        child: const Text('BottomSheet'),
+      );
+    },
+    enableDrag: false
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
 
     await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Swipe the bottom sheet, attempting to dismiss it.
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
   testWidgets('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -119,24 +130,28 @@ void main() {
     ));
 
     await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(height: 200.0,
-            child: const Text('BottomSheet'),
-          );
-        },
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return Container(
+        height: 200.0,
+        child: const Text('BottomSheet'),
       );
+    },
+     enableDrag: true
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
     });
 
     await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Swipe the bottom sheet to dismiss it.
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
   });
 
