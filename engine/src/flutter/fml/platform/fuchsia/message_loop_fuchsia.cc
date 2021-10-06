@@ -8,6 +8,8 @@
 #include <lib/async/cpp/task.h>
 #include <lib/async/default.h>
 #include <lib/zx/time.h>
+#include <zircon/status.h>
+
 #include "flutter/fml/platform/fuchsia/task_observers.h"
 
 namespace fml {
@@ -28,6 +30,12 @@ constexpr async_loop_config_t kLoopConfig = {
 
 MessageLoopFuchsia::MessageLoopFuchsia() : loop_(&kLoopConfig) {
   async_set_default_dispatcher(loop_.dispatcher());
+
+  zx_status_t timer_status =
+      zx::timer::create(ZX_TIMER_SLACK_LATE, ZX_CLOCK_MONOTONIC, &timer_);
+  FML_CHECK(timer_status == ZX_OK)
+      << "MessageLoopFuchsia failed to create timer; status="
+      << zx_status_get_string(timer_status);
 }
 
 MessageLoopFuchsia::~MessageLoopFuchsia() {
@@ -39,7 +47,53 @@ MessageLoopFuchsia::~MessageLoopFuchsia() {
 }
 
 void MessageLoopFuchsia::Run() {
+  timer_wait_ = std::make_unique<async::Wait>(
+      timer_.get(), ZX_TIMER_SIGNALED, 0,
+      [this](async_dispatcher_t* dispatcher, async::Wait* wait,
+             zx_status_t status, const zx_packet_signal_t* signal) {
+        if (status == ZX_ERR_CANCELED) {
+          return;
+        }
+        FML_CHECK(signal->observed & ZX_TIMER_SIGNALED);
+
+        // Cancel the timer now, because `RunExpiredTasksNow` might not re-arm
+        // the timer.  That would leave the timer in a signalled state and it
+        // would trigger the async::Wait again immediately, creating a busy
+        // loop.
+        //
+        // NOTE: It is not neccesary to synchronize this with the timer_.set()
+        // call below, even though WakeUp() can be called from any thread and
+        // thus timer_.set() can run in parallel with this timer_.cancel().
+        //
+        // Zircon will synchronize the 2 syscalls internally, and the Wait loop
+        // here is resilient to cancel() and set() being called in any order.
+        timer_.cancel();
+
+        // Run the tasks, which may or may not re-arm the timer for the future.
+        RunExpiredTasksNow();
+
+        // Kick off the next iteration of the timer wait loop.
+        zx_status_t wait_status = wait->Begin(loop_.dispatcher());
+        FML_CHECK(wait_status == ZX_OK)
+            << "MessageLoopFuchsia::WakeUp failed to wait for timer; status="
+            << zx_status_get_string(wait_status);
+      });
+
+  // Kick off the first iteration of the timer wait loop.
+  zx_status_t wait_status = timer_wait_->Begin(loop_.dispatcher());
+  FML_CHECK(wait_status == ZX_OK)
+      << "MessageLoopFuchsia::WakeUp failed to wait for timer; status="
+      << zx_status_get_string(wait_status);
+
+  // Kick off the underlying async loop that services the timer wait in addition
+  // to other tasks and waits queued on its `async_dispatcher_t`.
   loop_.Run();
+
+  // Ensure any pending waits on the timer are properly canceled.
+  if (timer_wait_->is_pending()) {
+    timer_wait_->Cancel();
+    timer_.cancel();
+  }
 }
 
 void MessageLoopFuchsia::Terminate() {
@@ -47,15 +101,13 @@ void MessageLoopFuchsia::Terminate() {
 }
 
 void MessageLoopFuchsia::WakeUp(fml::TimePoint time_point) {
-  fml::TimePoint now = fml::TimePoint::Now();
-  zx::duration due_time{0};
-  if (time_point > now) {
-    due_time = zx::nsec((time_point - now).ToNanoseconds());
-  }
+  constexpr zx::duration kZeroSlack(0);
+  zx::time due_time(time_point.ToEpochDelta().ToNanoseconds());
 
-  auto status = async::PostDelayedTask(
-      loop_.dispatcher(), [this]() { RunExpiredTasksNow(); }, due_time);
-  FML_DCHECK(status == ZX_OK);
+  zx_status_t timer_status = timer_.set(due_time, kZeroSlack);
+  FML_CHECK(timer_status == ZX_OK)
+      << "MessageLoopFuchsia::WakeUp failed to set timer; status="
+      << zx_status_get_string(timer_status);
 }
 
 }  // namespace fml
