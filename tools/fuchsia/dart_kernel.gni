@@ -49,7 +49,7 @@ template("dart_kernel") {
       "--output=" + rebase_path(output),
     ]
 
-    if (is_debug) {
+    if (flutter_runtime_mode == "debug") {
       args += [ "--embed-sources" ]
     } else {
       args += [ "--no-embed-sources" ]
@@ -75,7 +75,7 @@ template("dart_kernel") {
       # Also, this define excludes debugging and profiling code from Flutter.
       args += [ "-Ddart.vm.product=true" ]
     } else {
-      if (!is_debug) {
+      if (flutter_runtime_mode == "profile") {
         # The following define excludes debugging code from Flutter.
         args += [ "-Ddart.vm.profile=true" ]
       }
