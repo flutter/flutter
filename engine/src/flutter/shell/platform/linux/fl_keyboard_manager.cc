@@ -184,13 +184,16 @@ struct _FlKeyboardManager {
   // automatically released on dispose.
   GPtrArray* responder_list;
 
-  // An array of #FlKeyboardPendingEvent. FlKeyboardManager must manually
-  // release the elements unless it is transferring them to
-  // pending_redispatches.
+  // An array of #FlKeyboardPendingEvent.
+  //
+  // Its elements are *not* unreferenced when removed. When FlKeyboardManager is
+  // disposed, this array will be set with a free_func so that the elements are
+  // unreferenced when removed.
   GPtrArray* pending_responds;
 
-  // An array of #FlKeyboardPendingEvent. FlKeyboardManager must manually
-  // release the elements.
+  // An array of #FlKeyboardPendingEvent.
+  //
+  // Its elements are unreferenced when removed.
   GPtrArray* pending_redispatches;
 
   // The last sequence ID used. Increased by 1 by every use.
@@ -207,18 +210,14 @@ static void fl_keyboard_manager_class_init(FlKeyboardManagerClass* klass) {
 
 static void fl_keyboard_manager_init(FlKeyboardManager* self) {}
 
-static void fl_key_event_destroy_notify(gpointer event);
 static void fl_keyboard_manager_dispose(GObject* object) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(object);
 
   if (self->text_input_plugin != nullptr)
     g_clear_object(&self->text_input_plugin);
   g_ptr_array_free(self->responder_list, TRUE);
-  g_ptr_array_set_free_func(self->pending_responds,
-                            fl_key_event_destroy_notify);
+  g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
   g_ptr_array_free(self->pending_responds, TRUE);
-  g_ptr_array_set_free_func(self->pending_redispatches,
-                            fl_key_event_destroy_notify);
   g_ptr_array_free(self->pending_redispatches, TRUE);
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
@@ -278,11 +277,8 @@ static bool fl_keyboard_manager_remove_redispatched(FlKeyboardManager* self,
       self->pending_redispatches, static_cast<const uint64_t*>(&hash),
       compare_pending_by_hash, &result_index);
   if (found) {
-    FlKeyboardPendingEvent* removed =
-        FL_KEYBOARD_PENDING_EVENT(g_ptr_array_remove_index_fast(
-            self->pending_redispatches, result_index));
-    g_return_val_if_fail(removed != nullptr, TRUE);
-    g_object_unref(removed);
+    // The removed object is freed due to `pending_redispatches`'s free_func.
+    g_ptr_array_remove_index_fast(self->pending_redispatches, result_index);
     return TRUE;
   } else {
     return FALSE;
@@ -343,7 +339,7 @@ FlKeyboardManager* fl_keyboard_manager_new(
   self->responder_list = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->pending_responds = g_ptr_array_new();
-  self->pending_redispatches = g_ptr_array_new();
+  self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->last_sequence_id = 1;
 
@@ -398,8 +394,4 @@ gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
   return self->pending_responds->len == 0 &&
          self->pending_redispatches->len == 0;
-}
-
-static void fl_key_event_destroy_notify(gpointer event) {
-  fl_key_event_dispose(reinterpret_cast<FlKeyEvent*>(event));
 }

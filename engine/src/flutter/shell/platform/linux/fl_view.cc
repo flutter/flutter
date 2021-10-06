@@ -67,6 +67,11 @@ enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
+static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
+                                            gpointer gdk_event);
+
+static void redispatch_key_event_by_gtk(gpointer gdk_event);
+
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
@@ -81,6 +86,33 @@ static void fl_view_update_semantics_node_cb(FlEngine* engine,
 
   fl_accessibility_plugin_handle_update_semantics_node(
       self->accessibility_plugin, node);
+}
+
+static void fl_view_init_keyboard(FlView* self) {
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
+  self->keyboard_manager = fl_keyboard_manager_new(
+      fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk),
+      redispatch_key_event_by_gtk);
+  // The embedder responder must be added before the channel responder.
+  fl_keyboard_manager_add_responder(
+      self->keyboard_manager,
+      FL_KEY_RESPONDER(fl_key_embedder_responder_new(self->engine)));
+  fl_keyboard_manager_add_responder(
+      self->keyboard_manager,
+      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger)));
+}
+
+// Called when the engine is restarted.
+//
+// This method should reset states to be as if the engine had just been started,
+// which usually indicates the user has requested a hot restart (Shift-R in the
+// Flutter CLI.)
+static void fl_view_on_pre_engine_restart_cb(FlEngine* engine,
+                                             gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
+  g_clear_object(&self->keyboard_manager);
+  fl_view_init_keyboard(self);
 }
 
 // Converts a GDK button event into a Flutter event and sends it to the engine.
@@ -162,11 +194,6 @@ static void fl_view_plugin_registry_iface_init(
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
 
-static void redispatch_key_event_by_gtk(gpointer gdk_event);
-
-static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
-                                            gpointer gdk_event);
-
 static gboolean event_box_button_release_event(GtkWidget* widget,
                                                GdkEventButton* event,
                                                FlView* view);
@@ -198,20 +225,13 @@ static void fl_view_constructed(GObject* object) {
   self->engine = fl_engine_new(self->project, self->renderer);
   fl_engine_set_update_semantics_node_handler(
       self->engine, fl_view_update_semantics_node_cb, self, nullptr);
+  fl_engine_set_on_pre_engine_restart_handler(
+      self->engine, fl_view_on_pre_engine_restart_cb, self, nullptr);
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
   self->accessibility_plugin = fl_accessibility_plugin_new(self);
-  self->keyboard_manager = fl_keyboard_manager_new(
-      fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk),
-      redispatch_key_event_by_gtk);
-  // The embedder responder must be added before the channel responder.
-  fl_keyboard_manager_add_responder(
-      self->keyboard_manager,
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(self->engine)));
-  fl_keyboard_manager_add_responder(
-      self->keyboard_manager,
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger)));
+  fl_view_init_keyboard(self);
   self->mouse_cursor_plugin = fl_mouse_cursor_plugin_new(messenger, self);
   self->platform_plugin = fl_platform_plugin_new(messenger);
 
@@ -287,6 +307,8 @@ static void fl_view_dispose(GObject* object) {
 
   if (self->engine != nullptr) {
     fl_engine_set_update_semantics_node_handler(self->engine, nullptr, nullptr,
+                                                nullptr);
+    fl_engine_set_on_pre_engine_restart_handler(self->engine, nullptr, nullptr,
                                                 nullptr);
   }
 
