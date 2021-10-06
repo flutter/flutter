@@ -276,8 +276,8 @@ class FlutterWebConnection {
         timeout: duration ?? const Duration(days: 30),
       );
     } catch (_) {
-      // Returns null if exception thrown.
-      return null;
+      throw DriverError('Failed to retrieve the result of executing flutter driver command - $script. '
+          'Maybe page with Flutter application was closed or application died.');
     } finally {
       // Resets the result.
       await _driver.execute(r'''

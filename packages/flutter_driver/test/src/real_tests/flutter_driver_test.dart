@@ -799,6 +799,12 @@ void main() {
       driver = WebFlutterDriver.connectedTo(fakeConnection);
     });
 
+    test('Command suddenly closes the application', () {
+      fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'response': null}));
+      expect(() => driver.tap(find.text('foo')), throwsDriverError);
+      expect(fakeConnection.commandLog, contains('Flutter driver failed to respond to command'));
+    });
+
     test('closes connection', () async {
       await driver.close();
     });
@@ -1035,7 +1041,7 @@ String _checkAndEncode(dynamic script) {
 }
 
 vms.Response? makeFakeResponse(
-  Map<String, dynamic> response, {
+  Map<String, dynamic>? response, {
   bool isError = false,
 }) {
   return vms.Response.parse(<String, dynamic>{
@@ -1053,10 +1059,17 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
-    final dynamic response = responses[decoded['command']];
-    assert(response != null, 'Missing ${decoded['command']} in responses.');
-    return response;
+    try {
+      final Map<String, dynamic> decoded;
+      decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
+      final dynamic response = responses[decoded['command']];
+      assert(response != null, 'Missing ${decoded['command']} in responses.');
+      return response;
+    } on AssertionError {
+      const String errMsg = 'Flutter driver failed to respond to command';
+      commandLog.add(errMsg);
+      throw DriverError(errMsg);
+    }
   }
 
   @override
