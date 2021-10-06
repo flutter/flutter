@@ -1176,8 +1176,6 @@ abstract class TextEditingActionTarget {
 
   /// Move the current selection to the next line.
   ///
-  /// Move the current selection to the next line.
-  ///
   /// If the selection is invalid, does nothing.
   ///
   /// {@macro flutter.widgets.TextEditingActionTarget.cause}
@@ -1337,8 +1335,6 @@ abstract class TextEditingActionTarget {
     setSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the rightmost point of the current line.
-  ///
   /// Move the current selection to the rightmost point of the current line.
   ///
   /// If the selection is invalid, does nothing.
