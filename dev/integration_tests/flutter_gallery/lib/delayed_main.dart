@@ -17,7 +17,7 @@ Object? createGarbage() {
   return garbage;
 }
 
-void main() async {
+Future<void> main() async {
   // Create some garbage, and simulate some delays between that could be
   // plugin or network call related.
   final List<dynamic> garbage = <dynamic>[];
