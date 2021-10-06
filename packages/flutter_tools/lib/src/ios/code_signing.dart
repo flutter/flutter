@@ -13,6 +13,8 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../convert.dart' show utf8;
 
+const String _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
+
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
@@ -106,10 +108,10 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (_isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
+  if (_isNotEmpty(buildSettings[_developmentTeamBuildSettingName])) {
     logger.printStatus(
       'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
+      'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}'
     );
     return null;
   }
@@ -132,7 +134,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   }
 
   return <String, String>{
-    'DEVELOPMENT_TEAM': developmentTeam,
+    _developmentTeamBuildSettingName: developmentTeam,
   };
 }
 
@@ -246,6 +248,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
   return _certificateOrganizationalUnitExtractionPattern.firstMatch(opensslOutput)?.group(1);
 }
 
+/// Set [shouldExitOnNoCerts] to show instructions for how to add a cert when none are found, then [toolExit].
 Future<String?> _chooseSigningIdentity(
   List<String> validCodeSigningIdentities,
   Logger logger,
