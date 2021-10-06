@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 
 /// Group and display all substeps within a step into a widget.
 ///
-/// When all substeps are checked, [continueNextStep] can be executed to proceed to the next step.
+/// When all substeps are checked, [nextStep] can be executed to proceed to the next step.
 class ConductorSubsteps extends StatefulWidget {
   const ConductorSubsteps({
     Key? key,
-    required this.continueNextStep,
+    required this.nextStep,
   }) : super(key: key);
 
-  final VoidCallback continueNextStep;
+  final VoidCallback nextStep;
 
   @override
   ConductorSubstepsState createState() => ConductorSubstepsState();
@@ -26,14 +26,15 @@ class ConductorSubsteps extends StatefulWidget {
 }
 
 class ConductorSubstepsState extends State<ConductorSubsteps> {
-  List<bool> substepChecked =
-      List<bool>.filled(ConductorSubsteps._substepTitles.length, false);
-  bool _continuePressed = false;
+  List<bool> substepChecked = List<bool>.filled(ConductorSubsteps._substepTitles.length, false);
+  bool _nextStepPressed = false;
 
+  // Hide the continue button once it is pressed.
   void tapped() {
-    setState(() => _continuePressed = true);
+    setState(() => _nextStepPressed = true);
   }
 
+  // When substepChecked[0] is true, the first substep is checked. If it false, it is unchecked.
   void substepPressed(int index) {
     setState(() {
       substepChecked[index] = !substepChecked[index];
@@ -74,11 +75,11 @@ class ConductorSubstepsState extends State<ConductorSubsteps> {
           activeColor: Colors.grey,
           selected: substepChecked[2],
         ),
-        if (!substepChecked.contains(false) && !_continuePressed)
+        if (!substepChecked.contains(false) && !_nextStepPressed)
           ElevatedButton(
             onPressed: () {
               tapped();
-              widget.continueNextStep();
+              widget.nextStep();
             },
             child: const Text('Continue'),
           ),

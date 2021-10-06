@@ -38,7 +38,7 @@ class MainProgressionState extends State<MainProgression> {
   int _completedStep = 0;
 
   // Move forward the stepper to the next step of the release.
-  void continueNextStep() {
+  void nextStep() {
     if (_completedStep < MainProgression._stepTitles.length - 1) {
       setState(() {
         _completedStep += 1;
@@ -46,6 +46,7 @@ class MainProgressionState extends State<MainProgression> {
     }
   }
 
+  /// Change each step's state according to [_completedStep].
   StepState handleStepState(int index) {
     if (_completedStep > index) {
       return StepState.complete;
@@ -82,13 +83,13 @@ class MainProgressionState extends State<MainProgression> {
               type: StepperType.vertical,
               physics: const ScrollPhysics(),
               currentStep: _completedStep,
-              onStepContinue: continueNextStep,
+              onStepContinue: nextStep,
               steps: <Step>[
                 Step(
                   title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continueNextStep: continueNextStep),
+                      ConductorSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
@@ -98,7 +99,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[1]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continueNextStep: continueNextStep),
+                      ConductorSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
@@ -108,7 +109,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[2]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continueNextStep: continueNextStep),
+                      ConductorSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
@@ -118,7 +119,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[3]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(continueNextStep: continueNextStep),
+                      ConductorSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
