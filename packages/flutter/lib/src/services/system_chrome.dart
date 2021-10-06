@@ -289,12 +289,12 @@ class SystemUiOverlayStyle {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
-      'systemStatusBarContrastEnforced' : systemStatusBarContrastEnforced,
+      'systemStatusBarContrastEnforced': systemStatusBarContrastEnforced,
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
-      'systemNavigationBarContrastEnforced' : systemNavigationBarContrastEnforced,
+      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
     };
   }
 
