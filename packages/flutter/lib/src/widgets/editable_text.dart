@@ -2807,9 +2807,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
-        // If a ScrollBehavior is not provided, only apply scrollbars when multiline.
-        // The overscroll indicator should not be applied in either case,
-        // glowing or stretching.
+        // If a ScrollBehavior is not provided, only apply scrollbars when
+        // multiline. The overscroll indicator should not be applied in
+        // either case, glowing or stretching.
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
             scrollbars: _isMultiline,
             overscroll: false,
