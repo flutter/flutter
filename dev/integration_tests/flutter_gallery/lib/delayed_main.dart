@@ -9,7 +9,7 @@ import 'gallery/app.dart';
 Object? createGarbage() {
   final List<dynamic> garbage = <dynamic>[];
   for (int index = 0; index < 1000; index += 1) {
-    final List<int>? moreGarbage = List<int>.filled(1000, index);
+    final List<int> moreGarbage = List<int>.filled(1000, index);
     if (index.isOdd) {
       garbage.add(moreGarbage);
     }
