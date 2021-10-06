@@ -528,7 +528,7 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
 /// [MaterialStateUnderlineInputBorder] should only be used with widgets that document
-/// their support, like [InputDecorator.border].
+/// their support, like [InputDecoration.border].
 ///
 /// To use a [MaterialStateUnderlineInputBorder], you can either:
 ///   1. Create a subclass of [MaterialStateUnderlineInputBorder] and implement the abstract `resolve` method.
