@@ -40,8 +40,7 @@ void main() {
         isNot(contains(isA<VisualStudioValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
-      isLinuxEnabled: false,
-      isWindowsEnabled: false,
+      
     ),
   }));
 
@@ -59,7 +58,7 @@ void main() {
         isNot(contains(isA<ChromiumValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
-      isWebEnabled: false,
+      
     ),
   }));
 }

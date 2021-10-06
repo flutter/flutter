@@ -125,8 +125,7 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
               child: Text(
                 '(',
                 textAlign: TextAlign.center,
-              ),
-              flex: 1),
+              )),
           Expanded(
               child: DigitInput(
                   focusNode: areaCodeFocusNode,
@@ -137,8 +136,7 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
               child: Text(
                 ')',
                 textAlign: TextAlign.center,
-              ),
-              flex: 1),
+              )),
           Expanded(
               child: DigitInput(
                   focusNode: prefixFocusNode,
@@ -149,8 +147,7 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
               child: Text(
                 '-',
                 textAlign: TextAlign.center,
-              ),
-              flex: 1),
+              )),
           Expanded(
               child: DigitInput(
                   focusNode: lineNumberFocusNode,

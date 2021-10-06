@@ -33,7 +33,7 @@ void _defineTests() {
 
     expect(semanticsTester, hasSemantics(
       TestSemantics.root(
-        children: const <TestSemantics>[],
+        
       ),
     ));
 

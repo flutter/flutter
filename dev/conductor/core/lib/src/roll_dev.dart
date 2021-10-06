@@ -42,8 +42,7 @@ class RollDevCommand extends Command<void> {
     argParser.addOption(
       kCandidateBranch,
       help: 'Specifies which git branch to roll to the dev branch. Required.',
-      valueHelp: 'branch',
-      defaultsTo: null, // This option is required
+      valueHelp: 'branch', // This option is required
     );
     argParser.addFlag(
       kForce,

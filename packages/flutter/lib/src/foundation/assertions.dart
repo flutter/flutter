@@ -228,7 +228,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return value.join('');
+    return value.join();
   }
 }
 
@@ -969,7 +969,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       if (isInDebugMode) {
         debugPrint(
           TextTreeRenderer(
-            wrapWidth: wrapWidth,
             wrapWidthProperties: wrapWidth,
             maxDescendentsTruncatableNode: 5,
           ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
@@ -1042,7 +1041,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         index -= 1;
       }
     }
-    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null, growable: false);
+    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null);
     for (final StackFilter filter in _stackFilters) {
       filter.filter(parsedFrames, reasons);
     }

@@ -354,7 +354,7 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       OperatingSystemUtils: () => osUtils,
     });
 
@@ -370,7 +370,7 @@ void main() {
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
       Platform: () => FakePlatform(
-        operatingSystem: 'linux',
+        
       ),
     });
 

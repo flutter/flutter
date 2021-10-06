@@ -331,7 +331,7 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -343,7 +343,7 @@ void main() {
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -695,7 +695,7 @@ void main() {
       final Key buttonKey = UniqueKey();
       const String value = 'two';
 
-      Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection, onChanged: onChanged);
+      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged);
 
       await tester.pumpWidget(build());
       final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -742,7 +742,7 @@ void main() {
   testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -807,7 +807,6 @@ void main() {
     // test for disabled color
     await tester.pumpWidget(buildFrame(
       icon: customIcon,
-      onChanged: null,
     ));
 
     final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
@@ -840,7 +839,6 @@ void main() {
       iconSize: 30.0,
       iconEnabledColor: Colors.pink,
       iconDisabledColor: Colors.orange,
-      onChanged: null,
     ));
 
     final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
@@ -879,7 +877,6 @@ void main() {
       iconSize: 30.0,
       iconEnabledColor: Colors.pink,
       iconDisabledColor: Colors.orange,
-      onChanged: null,
     ));
 
     final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
@@ -890,7 +887,7 @@ void main() {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
-    Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isDense: true, onChanged: onChanged);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -1214,7 +1211,7 @@ void main() {
     expect(menuRect.topRight, Offset(menuRect.width, buttonRect.top));
 
     await popUpAndDown(
-      buildFrame(alignment: Alignment.center, value: menuItems.first, onChanged: onChanged),
+      buildFrame(value: menuItems.first, onChanged: onChanged),
     );
     expect(menuRect.topLeft, buttonRect.topLeft);
     expect(menuRect.topRight, buttonRect.topRight);
@@ -1272,7 +1269,7 @@ void main() {
 
   testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(buildFrame(items: menuItems, onChanged: onChanged));
+    await tester.pumpWidget(buildFrame(onChanged: onChanged));
 
     expect(semantics, isNot(includesNodeWith(label: menuItems[0])));
     expect(semantics, includesNodeWith(label: menuItems[1]));
@@ -1288,7 +1285,6 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: key,
       value: null,
-      items: menuItems,
       onChanged: (String? _) { },
       hint: const Text('test'),
     ));
@@ -1304,7 +1300,6 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: key,
       value: 'three',
-      items: menuItems,
       onChanged: onChanged,
       hint: const Text('test'),
     ));
@@ -1325,7 +1320,6 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: key,
       value: null,
-      items: menuItems,
       onChanged: onChanged,
     ));
     await tester.tap(find.byKey(key));
@@ -1411,7 +1405,7 @@ void main() {
     );
 
     // [disabledHint] should display when [items] is null
-    await tester.pumpWidget(build(items: null, onChanged: onChanged));
+    await tester.pumpWidget(build(onChanged: onChanged));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
@@ -1421,7 +1415,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
 
     // [disabledHint] should display when [onChanged] is null
-    await tester.pumpWidget(build(items: menuItems, onChanged: null));
+    await tester.pumpWidget(build(items: menuItems));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -1447,7 +1441,7 @@ void main() {
     );
 
     // The selected value should be displayed when the button is disabled.
-    await tester.pumpWidget(build(items: menuItems, onChanged: null, value: 'two'));
+    await tester.pumpWidget(build(items: menuItems, value: 'two'));
     // The dropdown icon and the selected menu item are vertically aligned.
     expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
 
@@ -1455,7 +1449,6 @@ void main() {
     await tester.pumpWidget(build(
       items: menuItems,
       onChanged: onChanged,
-      value: null,
       hint: const Text('hint'),
       disabledHint: const Text('disabledHint'),
     ));
@@ -1464,8 +1457,6 @@ void main() {
     // If [value] is null, the button is disabled, [disabledHint] is displayed when [disabledHint] is non-null.
     await tester.pumpWidget(build(
       items: menuItems,
-      onChanged: null,
-      value: null,
       hint: const Text('hint'),
       disabledHint: const Text('disabledHint'),
     ));
@@ -1474,10 +1465,7 @@ void main() {
     // If [value] is null, the button is disabled, [hint] is displayed when [disabledHint] is null.
     await tester.pumpWidget(build(
       items: menuItems,
-      onChanged: null,
-      value: null,
       hint: const Text('hint'),
-      disabledHint: null,
     ));
     expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
 
@@ -1489,10 +1477,6 @@ void main() {
     // If [value], [hint] and [disabledHint] are null, the button is disabled, nothing displayed.
     await tester.pumpWidget(build(
       items: menuItems,
-      onChanged: null,
-      value: null,
-      hint: null,
-      disabledHint: null,
     ));
     expect(getIndex(), null);
 
@@ -1500,9 +1484,6 @@ void main() {
     await tester.pumpWidget(build(
       items: menuItems,
       onChanged: onChanged,
-      value: null,
-      hint: null,
-      disabledHint: null,
     ));
     expect(getIndex(), null);
   });
@@ -1554,7 +1535,7 @@ void main() {
     expect(textColor('two'), Colors.yellow);
 
     // The selected value should be displayed when the button is disabled.
-    await tester.pumpWidget(build(onChanged: null, value: 'two'));
+    await tester.pumpWidget(build(value: 'two'));
     expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
     // Selected item has a disabled color from [theme.disabledColor]
     // when the button is disable.
@@ -1573,11 +1554,10 @@ void main() {
           buttonKey: buttonKey,
           value: null,
           hint: const Text('hint used when disabled'),
-          disabledHint: null,
         );
       }
       // [hint] should display when [items] is null and [disabledHint] is not defined
-      await tester.pumpWidget(build(items: null));
+      await tester.pumpWidget(build());
       expect(find.text('hint used when disabled'), findsOneWidget);
 
       // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -1598,7 +1578,7 @@ void main() {
       );
     }
     // [hint] should display when [items] is null and [disabledHint] is not defined
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
 
     // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -1743,7 +1723,6 @@ void main() {
             );
           }).toList();
         },
-        onChanged: null,
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
@@ -1781,7 +1760,6 @@ void main() {
             );
           }).toList();
         },
-        onChanged: null,
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
@@ -1819,7 +1797,6 @@ void main() {
             );
           }).toList();
         },
-        onChanged: null,
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
@@ -1857,7 +1834,6 @@ void main() {
             );
           }).toList();
         },
-        onChanged: null,
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
@@ -1895,7 +1871,6 @@ void main() {
       MaterialApp(
         home: Material(
           child: Align(
-            alignment: Alignment.center,
             child: button,
           ),
         ),
@@ -2006,7 +1981,6 @@ void main() {
       MaterialApp(
         home: Material(
           child: Align(
-            alignment: Alignment.center,
             child: button,
           ),
         ),
@@ -2083,12 +2057,11 @@ void main() {
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
       underline: customUnderline,
-      value: 'two',
       onChanged: onChanged,
     ));
     expect(tester.widgetList<DecoratedBox>(decoratedBox).last.decoration, decoration);
 
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged));
     expect(tester.widgetList<DecoratedBox>(decoratedBox).last.decoration, defaultDecoration);
   });
 
@@ -2370,7 +2343,6 @@ void main() {
                     return DropdownButton<String>(
                       isExpanded: true,
                       elevation: 2,
-                      value: null,
                       hint: LayoutBuilder(
                         builder: (BuildContext context, BoxConstraints constraints) {
                           // Stack with a positioned widget is used to override the

@@ -43,7 +43,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
     ).attach(
-      enableDevTools: false,
+      
     );
     expect(exitCode, 2);
   });
@@ -89,7 +89,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).run(
-        enableDevTools: false,
+        
       );
 
       expect(result, 1);
@@ -107,7 +107,7 @@ void main() {
         target: 'main.dart',
         traceStartup: true,
       ).run(
-        enableDevTools: false,
+        
       );
 
       expect(result, 0);
@@ -132,7 +132,7 @@ void main() {
         target: 'main.dart',
         traceStartup: true,
       ).run(
-        enableDevTools: false,
+        
       );
 
       expect(result, 0);

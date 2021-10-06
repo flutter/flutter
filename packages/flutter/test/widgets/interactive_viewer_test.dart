@@ -75,7 +75,6 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),
@@ -246,7 +245,6 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(double.infinity),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),
@@ -385,7 +383,6 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),

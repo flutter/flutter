@@ -216,7 +216,6 @@ void main() {
   testWidgets('Null dialog shape', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
-      shape: null,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -1258,7 +1257,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
+          
         ),
         child: Dialog(
           child: Placeholder(),
@@ -1284,7 +1283,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
+          
         ),
         child: Dialog(
           insetPadding: null,
@@ -1299,7 +1298,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
+          
         ),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),

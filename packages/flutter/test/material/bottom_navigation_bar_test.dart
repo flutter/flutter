@@ -304,7 +304,6 @@ void main() {
             showSelectedLabels: true,
             showUnselectedLabels: true,
             selectedFontSize: selectedFontSize,
-            unselectedFontSize: unselectedFontSize,
             selectedIconTheme: selectedIconTheme,
             unselectedIconTheme: unselectedIconTheme,
             items: const <BottomNavigationBarItem>[
@@ -347,7 +346,6 @@ void main() {
               showSelectedLabels: true,
               showUnselectedLabels: false,
               selectedFontSize: selectedFontSize,
-              unselectedFontSize: unselectedFontSize,
               selectedIconTheme: selectedIconTheme,
               unselectedIconTheme: unselectedIconTheme,
               items: const <BottomNavigationBarItem>[
@@ -389,7 +387,6 @@ void main() {
               showSelectedLabels: false,
               showUnselectedLabels: false,
               selectedFontSize: selectedFontSize,
-              unselectedFontSize: unselectedFontSize,
               selectedIconTheme: selectedIconTheme,
               unselectedIconTheme: unselectedIconTheme,
               items: const <BottomNavigationBarItem>[
@@ -1492,7 +1489,6 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            currentIndex: 0,
             items: List<BottomNavigationBarItem>.generate(itemCount, (int itemIndex) {
               return BottomNavigationBarItem(
                 icon: const Icon(Icons.android),
@@ -2032,7 +2028,6 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon0, width: 200, height: 10),
@@ -2081,7 +2076,6 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
@@ -2126,7 +2120,6 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(

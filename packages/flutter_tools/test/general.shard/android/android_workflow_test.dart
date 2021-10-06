@@ -39,7 +39,6 @@ void main() {
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -135,7 +134,6 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
@@ -154,7 +152,6 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
@@ -178,7 +175,6 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -207,7 +203,6 @@ All SDK package licenses accepted.
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -237,7 +232,6 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -267,7 +261,6 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -282,7 +275,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ], stdout: '',
+      ],
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -293,7 +286,6 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -312,7 +304,6 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -331,7 +322,6 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -345,7 +335,6 @@ Review licenses that have not been accepted (y/N)?
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
-      androidStudio: null,
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -392,7 +381,6 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null,
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -440,7 +428,6 @@ Review licenses that have not been accepted (y/N)?
       ..directory = fileSystem.directory('/foo/bar');
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null,
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -489,7 +476,6 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
-      androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
@@ -511,8 +497,6 @@ Review licenses that have not been accepted (y/N)?
 
   testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
-      androidSdk: null,
-      androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},

@@ -62,7 +62,6 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     return CardItem(
       animation: animation,
       item: item,
-      selected: false,
       // No gesture detector here: we don't want removed items to be interactive.
     );
   }
@@ -196,7 +195,6 @@ class CardItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: SizeTransition(
-        axis: Axis.vertical,
         sizeFactor: animation,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,

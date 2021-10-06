@@ -162,7 +162,6 @@ const String defaultConfigLinux2 = r'''
 ''';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': linuxFlutterRoot,
     'HOME': '/',
@@ -463,7 +462,7 @@ void main() {
       'custom-devices add command fails when feature is not enabled',
       () async {
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          featureEnabled: false
+          
         );
         expect(
           runner.run(const <String>['custom-devices', 'add']),
@@ -555,7 +554,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -644,7 +642,6 @@ void main() {
                 '-w', '1',
                 '192.168.178.1'
               ],
-              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -733,7 +730,6 @@ void main() {
                 '-w', '1',
                 '::1'
               ],
-              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -826,7 +822,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -906,7 +901,6 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1230,7 +1224,6 @@ void main() {
                 'testhostname'
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',

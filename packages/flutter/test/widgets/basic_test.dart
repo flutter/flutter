@@ -160,7 +160,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: Offset.zero,
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -190,7 +189,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: const Offset(0.5, 0.5),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -220,7 +218,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: const Offset(1.0, 1.0),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -258,7 +255,6 @@ void main() {
                   child: FractionalTranslation(
                     key: fractionalTranslationKey,
                     translation: offset,
-                    transformHitTests: true,
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -868,11 +864,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Wrap(
       spacing: 8.0, // gap between adjacent Text widget
-      runSpacing: 4.0, // gap between lines
-      direction: Axis.horizontal,
-      alignment: WrapAlignment.start,
-      runAlignment: WrapAlignment.start,
-      crossAxisAlignment: WrapCrossAlignment.start,
+      runSpacing: 4.0,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
       children: const <Widget>[

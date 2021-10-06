@@ -119,7 +119,7 @@ void main() {
     );
 
     expect(
-      box.toStringDeep(minLevel: DiagnosticLevel.debug),
+      box.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderPadding#00000 relayoutBoundary=up1\n'
         ' │ creator: Padding ← Container ← Align ← [root]\n'
@@ -642,7 +642,6 @@ void main() {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.blue,
-            offset: Offset.zero,
             spreadRadius: 10,
             blurRadius: 20.0,
           ),

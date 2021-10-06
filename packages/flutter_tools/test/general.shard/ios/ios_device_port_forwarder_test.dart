@@ -23,14 +23,11 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['iproxy', '12345:456', '--udid', '1234'],
-        // iproxy does not exit with 0 when it cannot forward.
-        exitCode: 0,
         stdout: null, // no stdout indicates failure.
         environment: kDyLdLibEntry,
       ),
       const FakeCommand(
         command: <String>['iproxy', '12346:456', '--udid', '1234'],
-        exitCode: 0,
         stdout: 'not empty',
         environment: kDyLdLibEntry,
       ),

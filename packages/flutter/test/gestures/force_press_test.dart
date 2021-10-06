@@ -33,7 +33,7 @@ void main() {
       started += 1;
     }
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = onStart;
     force.onPeak = (ForcePressDetails details) => peaked += 1;
@@ -41,7 +41,7 @@ void main() {
     force.onEnd = (ForcePressDetails details) => ended += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
+    final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
@@ -72,7 +72,7 @@ void main() {
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.3, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 4.0, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 5.0, pressureMin: pressureMin, pressureMax: pressureMax));
-    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax));
 
     // We have exceeded the start pressure so update should be greater than 0.
     expect(started, 1);
@@ -92,7 +92,7 @@ void main() {
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.3, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 4.0, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 5.0, pressureMin: pressureMin, pressureMax: pressureMax));
-    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax));
 
     // Update is still called.
     expect(started, 1);
@@ -124,7 +124,7 @@ void main() {
       force.onEnd = (ForcePressDetails details) => ended += 1;
 
       const int pointerValue = 1;
-      final TestPointer pointer = TestPointer(pointerValue);
+      final TestPointer pointer = TestPointer();
       final PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: const Offset(10.0, 10.0), pressure: 0, pressureMin: 0, pressureMax: pressureMax);
       pointer.setDownInfo(down, const Offset(10.0, 10.0));
       force.addPointer(down);
@@ -174,7 +174,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -182,7 +182,7 @@ void main() {
     force.onEnd = (_) => ended += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
+    final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
@@ -226,7 +226,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -237,8 +237,8 @@ void main() {
     drag.onStart = (_) => didStartPan += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
-    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax);
+    final TestPointer pointer = TestPointer();
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
     drag.addPointer(down);
@@ -302,7 +302,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -313,8 +313,8 @@ void main() {
     drag.onStart = (_) => didStartPan += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
-    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax);
+    final TestPointer pointer = TestPointer();
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
     drag.addPointer(down);
@@ -351,7 +351,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -362,8 +362,8 @@ void main() {
     drag.onStart = (_) => didStartPan += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
-    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax);
+    final TestPointer pointer = TestPointer();
+    const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
     drag.addPointer(down);
@@ -421,7 +421,7 @@ void main() {
       return Curves.easeIn.transform(lerp);
     }
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure, interpolation: interpolateWithEasing);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(interpolation: interpolateWithEasing);
 
     force.onStart = onStart;
     force.onPeak = (ForcePressDetails details) => peaked += 1;
@@ -429,7 +429,7 @@ void main() {
     force.onEnd = (ForcePressDetails details) => ended += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
+    final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
@@ -464,7 +464,7 @@ void main() {
     expect(started, 1);
 
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 5.0, pressureMin: pressureMin, pressureMax: pressureMax));
-    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax));
 
     // We have exceeded the start pressure so update should be greater than 0.
     expect(started, 1);
@@ -484,7 +484,7 @@ void main() {
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 3.3, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 4.0, pressureMin: pressureMin, pressureMax: pressureMax));
     tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 6.5, pressureMin: pressureMin, pressureMax: pressureMax));
-    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 1.0, pressureMin: pressureMin, pressureMax: pressureMax));
+    tester.route(const PointerMoveEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressureMin: pressureMin, pressureMax: pressureMax));
 
     // Update is still called.
     expect(started, 1);
@@ -515,7 +515,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -523,7 +523,7 @@ void main() {
     force.onEnd = (_) => ended += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
+    final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);
@@ -567,7 +567,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(startPressure: startPressure, peakPressure: peakPressure);
+    final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -575,7 +575,7 @@ void main() {
     force.onEnd = (_) => ended += 1;
 
     const int pointerValue = 1;
-    final TestPointer pointer = TestPointer(pointerValue);
+    final TestPointer pointer = TestPointer();
     const PointerDownEvent down = PointerDownEvent(pointer: pointerValue, position: Offset(10.0, 10.0), pressure: 0, pressureMin: pressureMin, pressureMax: pressureMax);
     pointer.setDownInfo(down, const Offset(10.0, 10.0));
     force.addPointer(down);

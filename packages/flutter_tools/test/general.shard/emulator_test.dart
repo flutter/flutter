@@ -99,7 +99,6 @@ void main() {
         ]),
         androidSdk: null,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: null,
           featureFlags: TestFeatureFlags(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),

@@ -466,7 +466,6 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomSheet: null,
           body: Placeholder(),
         ),
       ),

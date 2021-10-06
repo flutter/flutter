@@ -269,7 +269,6 @@ void main() {
         axisDirection = AxisDirection.right;
 
       painter = _buildPainter(
-        crossAxisMargin: margin,
         scrollMetrics: startingMetrics,
         scrollbarOrientation: scrollbarOrientation,
       );
@@ -324,9 +323,7 @@ void main() {
 
     // Vertical scroll with TextDirection.ltr
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
-      textDirection: TextDirection.ltr,
     );
     painter.update(
       startingMetrics.copyWith(axisDirection: AxisDirection.down),
@@ -341,7 +338,6 @@ void main() {
 
     // Vertical scroll with TextDirection.rtl
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
       textDirection: TextDirection.rtl,
     );
@@ -358,7 +354,6 @@ void main() {
 
     // Horizontal scroll
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
     );
     painter.update(

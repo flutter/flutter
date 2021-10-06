@@ -78,7 +78,7 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -119,8 +119,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -164,7 +163,7 @@ void main() {
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -194,7 +193,7 @@ void main() {
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -333,7 +332,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: FocusScope(
@@ -372,7 +371,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: FocusScope(
@@ -405,7 +404,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: FocusScope(
@@ -440,7 +439,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: FocusScope(
@@ -473,7 +472,7 @@ void main() {
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -509,7 +508,7 @@ void main() {
     controller.value = value;
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -543,7 +542,7 @@ void main() {
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -576,7 +575,7 @@ void main() {
     const bool enableSuggestions = false;
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -606,7 +605,7 @@ void main() {
     const bool enableIMEPersonalizedLearning = false;
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -638,7 +637,7 @@ void main() {
       const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: FocusScope(
@@ -669,7 +668,7 @@ void main() {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: FocusScope(
@@ -681,7 +680,6 @@ void main() {
                 focusNode: focusNode,
                 style: textStyle,
                 cursorColor: cursorColor,
-                obscureText: false,
               ),
             ),
           ),
@@ -699,7 +697,7 @@ void main() {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: FocusScope(
@@ -791,7 +789,7 @@ void main() {
     final Key key2 = UniqueKey();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -834,7 +832,7 @@ void main() {
     // Updates the style.
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -872,7 +870,7 @@ void main() {
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -903,7 +901,7 @@ void main() {
   testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -935,7 +933,7 @@ void main() {
   testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -967,7 +965,7 @@ void main() {
   testWidgets('multiline keyboard is requested when set implicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -998,7 +996,7 @@ void main() {
   testWidgets('single line inputs have correct default keyboard', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -1007,8 +1005,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1029,7 +1026,7 @@ void main() {
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -1038,8 +1035,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1073,7 +1069,7 @@ void main() {
   testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -1082,8 +1078,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1147,7 +1142,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -1455,7 +1450,7 @@ void main() {
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
           toolbarOptions: const ToolbarOptions(
-            selectAll: false,
+            
           ),
           style: textStyle,
           cursorColor: cursorColor,
@@ -1487,7 +1482,6 @@ void main() {
           focusNode: focusNode,
           toolbarOptions: const ToolbarOptions(
             copy: true,
-            selectAll: false,
           ),
           style: textStyle,
           cursorColor: cursorColor,
@@ -1522,12 +1516,6 @@ void main() {
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
           readOnly: true,
-          toolbarOptions: const ToolbarOptions(
-            paste: true,
-            cut: true,
-            selectAll: true,
-            copy: true,
-          ),
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -1631,7 +1619,6 @@ void main() {
         const TextEditingValue(
           text: 'Lorem ipsum dolor sit amet',
           selection: TextSelection(baseOffset: 0, extentOffset: 3),
-          composing: TextRange.empty,
         ),
       );
     }
@@ -1722,7 +1709,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1800,7 +1787,7 @@ void main() {
               backgroundCursorColor: Colors.grey,
               controller: TextEditingController(),
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              style: Typography.material2018().black.subtitle1!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -1846,7 +1833,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1883,7 +1870,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1923,7 +1910,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1963,9 +1950,8 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
-        maxLines: 1,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
           assert(!onSubmittedCalled);
@@ -2003,7 +1989,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         maxLines: 3,
         onEditingComplete: () {
@@ -2039,7 +2025,7 @@ void main() {
       Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
           focusNode: focusNode,
           controller: controller,
@@ -2063,7 +2049,7 @@ void main() {
       widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
           focusNode: focusNode,
           controller: controller,
@@ -2134,9 +2120,8 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
-          autocorrect: true,
           autocorrectionTextRectColor: rectColor,
           showCursor: false,
           onEditingComplete: () { },
@@ -2192,7 +2177,7 @@ void main() {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -2201,7 +2186,7 @@ void main() {
                       backgroundCursorColor: Colors.grey,
                       controller: currentController,
                       focusNode: focusNode,
-                      style: Typography.material2018(platform: TargetPlatform.android)
+                      style: Typography.material2018()
                           .black
                           .subtitle1!,
                       cursorColor: Colors.blue,
@@ -2268,7 +2253,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
         textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -2308,7 +2293,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
         textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -2320,7 +2305,6 @@ void main() {
               focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
-              maxLines: 1,
             ),
           ),
         ),
@@ -2334,7 +2318,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -2373,7 +2357,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -3385,7 +3369,6 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
-                          value: '',
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
@@ -3434,7 +3417,7 @@ void main() {
     });
     final TextEditingController controller = TextEditingController();
     final MediaQuery mediaQuery = MediaQuery(
-      data: const MediaQueryData(devicePixelRatio: 1.0),
+      data: const MediaQueryData(),
       child: EditableText(
         controller: controller,
         backgroundCursorColor: Colors.red,
@@ -3482,14 +3465,14 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          devicePixelRatio: 1.0,
+          
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -3513,14 +3496,14 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          devicePixelRatio: 1.0,
+          
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -3554,19 +3537,18 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          devicePixelRatio: 1.0,
+          
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children:  <Widget>[
               EditableText(
                 key: ValueKey<String>(controller1.text),
                 controller: controller1,
                 focusNode: FocusNode(),
-                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                style: Typography.material2018().black.subtitle1!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),
@@ -3575,7 +3557,7 @@ void main() {
                 key: ValueKey<String>(controller2.text),
                 controller: controller2,
                 focusNode: FocusNode(),
-                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                style: Typography.material2018().black.subtitle1!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 minLines: 10,
@@ -3679,7 +3661,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: EditableText(
           textDirection: TextDirection.rtl,
           controller: controller,
@@ -3730,7 +3712,7 @@ void main() {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -3785,7 +3767,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -3886,7 +3868,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -3994,14 +3976,14 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          devicePixelRatio: 1.0,
+          
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardAppearance: Brightness.dark,
@@ -4078,7 +4060,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -4247,7 +4229,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -4384,7 +4366,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -4555,7 +4537,6 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 20,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4577,7 +4558,6 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 39,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4602,7 +4582,6 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: testText.length,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4624,7 +4603,6 @@ void main() {
         const TextSelection(
           baseOffset: 20,
           extentOffset: 57,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4713,7 +4691,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4725,7 +4702,6 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowDown,
       ],
-      shift: false,
       lineModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
@@ -4735,7 +4711,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: testText.length,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4748,7 +4723,6 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowUp,
       ],
-      shift: false,
       lineModifier: true,
       targetPlatform: defaultTargetPlatform,
     );
@@ -4773,8 +4747,6 @@ void main() {
         LogicalKeyboardKey.arrowRight,
         LogicalKeyboardKey.arrowRight,
       ],
-      shift: false,
-      lineModifier: false,
       targetPlatform: defaultTargetPlatform,
     );
 
@@ -4783,7 +4755,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4806,7 +4777,6 @@ void main() {
         const TextSelection(
           baseOffset: 3,
           extentOffset: testText.length,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4841,8 +4811,6 @@ void main() {
       <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowUp,
       ],
-      shift: false,
-      lineModifier: false,
       targetPlatform: defaultTargetPlatform,
     );
 
@@ -5077,7 +5045,7 @@ void main() {
               controller: controller,
               autofocus: true,
               focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              style: Typography.material2018().black.subtitle1!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -5257,7 +5225,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5292,7 +5260,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -5334,7 +5301,6 @@ void main() {
       equals(
         TextSelection.collapsed(
           offset: afterHomeOffset,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -5387,7 +5353,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5422,7 +5388,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -5443,7 +5408,6 @@ void main() {
     // Move back to position 23.
     controller.selection = const TextSelection.collapsed(
       offset: 23,
-      affinity: TextAffinity.downstream,
     );
     await tester.pump();
 
@@ -5470,7 +5434,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5481,7 +5444,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5496,7 +5458,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 20,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5522,7 +5483,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 20,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5533,7 +5493,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 35,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5559,7 +5518,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 72,
-              affinity: TextAffinity.downstream,
             ),
           ),
           reason: 'on $platform',
@@ -5756,7 +5714,7 @@ void main() {
             maxLines: 2,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+            style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5888,7 +5846,6 @@ void main() {
       MaterialApp(
         home: EditableText(
           controller: TextEditingController(text: 'A' * 1000),
-          maxLines: 1,
           focusNode: FocusNode(),
           style: textStyle,
           cursorColor: Colors.blue,
@@ -5906,7 +5863,6 @@ void main() {
       MaterialApp(
         home: EditableText(
           controller: TextEditingController(text: 'A' * 1000),
-          maxLines: 1,
           focusNode: FocusNode(),
           style: textStyle,
           cursorColor: Colors.blue,
@@ -5924,7 +5880,6 @@ void main() {
       MaterialApp(
         home: EditableText(
           controller: TextEditingController(text: 'A' * 1000),
-          maxLines: 1,
           focusNode: FocusNode(),
           style: textStyle,
           cursorColor: Colors.blue,
@@ -5941,7 +5896,6 @@ void main() {
       MaterialApp(
         home: EditableText(
           controller: TextEditingController(text: 'A' * 1000),
-          maxLines: 1,
           focusNode: FocusNode(),
           style: textStyle,
           cursorColor: Colors.blue,
@@ -5988,7 +5942,6 @@ void main() {
           controller: controller,
           cursorColor: cursorColor,
           focusNode: focusNode,
-          maxLines: 1,
           obscureText: true,
           style: textStyle,
         );
@@ -6020,7 +5973,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -6118,7 +6071,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
       inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
       onChanged: (String s) => controller.text += ' onChanged',
@@ -6217,7 +6170,7 @@ void main() {
               focusNode: FocusNode(),
               cursorColor: Colors.red,
               backgroundCursorColor: Colors.blue,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+              style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
               keyboardType: TextInputType.text,
               inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
             ),
@@ -6261,7 +6214,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -6305,7 +6258,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -6353,7 +6306,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -6413,7 +6366,7 @@ void main() {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -6536,7 +6489,7 @@ void main() {
         builder: (BuildContext context, StateSetter setter) {
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -6612,7 +6565,7 @@ void main() {
         builder: (BuildContext context, StateSetter setter) {
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -6689,7 +6642,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -6733,7 +6686,7 @@ void main() {
           builder: (BuildContext context, StateSetter setter) {
             return MaterialApp(
               home: MediaQuery(
-                data: const MediaQueryData(devicePixelRatio: 1.0),
+                data: const MediaQueryData(),
                 child: Directionality(
                   textDirection: TextDirection.ltr,
                   child: Center(
@@ -6804,7 +6757,7 @@ void main() {
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
           backgroundCursorColor: Colors.grey,
         ),
@@ -6866,7 +6819,7 @@ void main() {
         showSelectionHandles: true,
         autofocus: true,
         focusNode: FocusNode(),
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
         selectionControls: materialTextSelectionControls,
@@ -6886,7 +6839,7 @@ void main() {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -6895,8 +6848,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -6959,7 +6911,7 @@ void main() {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -6968,8 +6920,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -7041,7 +6992,7 @@ void main() {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -7050,8 +7001,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode,
-              maxLines: 1, // Sets text keyboard implicitly.
+              focusNode: focusNode, // Sets text keyboard implicitly.
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -7082,7 +7032,7 @@ void main() {
   testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -7114,7 +7064,7 @@ void main() {
     // Test default cursor
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -7144,7 +7094,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+        style: Typography.material2018().black.subtitle1!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -7165,7 +7115,7 @@ void main() {
 
   testWidgets('EditableText can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(devicePixelRatio: 1.0),
+      data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: FocusScope(
@@ -7185,7 +7135,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(devicePixelRatio: 1.0),
+      data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: FocusScope(
@@ -7207,11 +7157,10 @@ void main() {
 
   testWidgets('EditableText inherits DefaultTextHeightBehavior', (WidgetTester tester) async {
     const TextHeightBehavior customTextHeightBehavior = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(devicePixelRatio: 1.0),
+      data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: FocusScope(
@@ -7236,7 +7185,6 @@ void main() {
 
   testWidgets('EditableText defaultTextHeightBehavior is used over inherited widget', (WidgetTester tester) async {
     const TextHeightBehavior inheritedTextHeightBehavior = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
     const TextHeightBehavior customTextHeightBehavior = TextHeightBehavior(
@@ -7244,7 +7192,7 @@ void main() {
       applyHeightToFirstAscent: false,
     );
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(devicePixelRatio: 1.0),
+      data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: FocusScope(
@@ -7712,7 +7660,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           selectionControls: materialTextSelectionControls,
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
@@ -7739,7 +7687,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onChanged: (String text) {
             throw FlutterError(errorText);
@@ -7765,7 +7713,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onEditingComplete: () {
             throw FlutterError(errorText);
@@ -7796,7 +7744,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
           onSubmitted: (String text) {
             throw FlutterError(errorText);
@@ -7832,7 +7780,7 @@ void main() {
           focusNode: FocusNode(),
           cursorColor: Colors.red,
           backgroundCursorColor: Colors.blue,
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+          style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
           keyboardType: TextInputType.text,
         ),
       ));
@@ -7855,7 +7803,7 @@ void main() {
     final UnsettableController unsettableController = UnsettableController();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -7911,7 +7859,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              style: Typography.material2018().black.subtitle1!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -7967,7 +7915,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -8106,7 +8054,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -8252,7 +8200,7 @@ void main() {
             controller: controller,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -8363,7 +8311,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              style: Typography.material2018().black.subtitle1!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -8433,7 +8381,7 @@ void main() {
               showSelectionHandles: true,
               autofocus: true,
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              style: Typography.material2018().black.subtitle1!,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: materialTextSelectionControls,
@@ -8474,7 +8422,7 @@ void main() {
                 setState = setter;
                 return EditableText(
                   focusNode: focusNode,
-                  style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                  style: Typography.material2018().black.subtitle1!,
                   cursorColor: Colors.blue,
                   backgroundCursorColor: Colors.grey,
                   selectionControls: enableInteractiveSelection ? materialTextSelectionControls : null,
@@ -8535,7 +8483,6 @@ void main() {
         home: EditableText(
           autofocus: true,
           controller: TextEditingController(text: 'A'),
-          maxLines: 1,
           focusNode: focusNode,
           style: textStyle,
           cursorColor: Colors.blue,
@@ -8580,7 +8527,7 @@ void main() {
               child: EditableText(
                 key: key,
                 focusNode: focusNode,
-                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                style: Typography.material2018().black.subtitle1!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 controller: controller,
@@ -8813,12 +8760,11 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: const MediaQueryData(
-        devicePixelRatio: 1.0,
+        
       ),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Transform.translate(
@@ -8826,7 +8772,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
               child: EditableText(
                 controller: TextEditingController(),
                 focusNode: FocusNode(),
-                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                style: Typography.material2018().black.subtitle1!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),

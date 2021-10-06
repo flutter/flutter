@@ -892,10 +892,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionUpdate?.call(ScaleUpdateDetails(
           focalPoint: event.position,
           localFocalPoint: event.localPosition,
-          rotation: 0.0,
           scale: scaleChange,
-          horizontalScale: 1.0,
-          verticalScale: 1.0,
         ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
@@ -923,10 +920,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
         localFocalPoint: event.localPosition,
-        rotation: 0.0,
         scale: scaleChange,
-        horizontalScale: 1.0,
-        verticalScale: 1.0,
       ));
       widget.onInteractionEnd?.call(ScaleEndDetails());
     }
@@ -1047,8 +1041,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       key: _parentKey,
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
-        dragStartBehavior: DragStartBehavior.start,
+        behavior: HitTestBehavior.opaque,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

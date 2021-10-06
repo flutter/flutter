@@ -117,13 +117,11 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                               BoxShadow(
                                 offset: Offset(0.0, 6.0),
                                 blurRadius: 10.0,
-                                spreadRadius: 0.0,
                                 color: _kKeyPenumbraOpacity,
                               ),
                               BoxShadow(
                                 offset: Offset(0.0, 1.0),
                                 blurRadius: 18.0,
-                                spreadRadius: 0.0,
                                 color: _kAmbientShadowOpacity,
                               ),
                             ],

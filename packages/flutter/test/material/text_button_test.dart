@@ -184,8 +184,7 @@ void main() {
 
     await gesture.removePointer();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
+    skip: isBrowser,
   );
 
   testWidgets('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -253,8 +252,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
+    skip: isBrowser,
   );
 
   testWidgets('TextButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -528,7 +526,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.0),
+            data: const MediaQueryData(),
             child: Center(
               child: TextButton(
                 onPressed: () { },
@@ -641,7 +639,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     textButton = find.byType(TextButton);
     expect(tester.widget<TextButton>(textButton).enabled, true);
@@ -651,7 +649,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     textButton = find.byType(TextButton);
     expect(tester.widget<TextButton>(textButton).enabled, true);
@@ -660,7 +658,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(),
     );
     textButton = find.byType(TextButton);
     expect(tester.widget<TextButton>(textButton).enabled, false);

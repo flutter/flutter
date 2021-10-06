@@ -34,7 +34,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
+          data: const MediaQueryData(),
           child: RepaintBoundary(
             key: key,
             child: Container(
@@ -130,7 +130,7 @@ void main() {
           child: Container(
             color: CupertinoColors.white,
             child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
+                const CupertinoActivityIndicator.partiallyRevealed(),
           ),
         ),
       ),
@@ -162,7 +162,7 @@ void main() {
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
   return MediaQuery(
-    data: const MediaQueryData(platformBrightness: Brightness.light),
+    data: const MediaQueryData(),
     child: CupertinoActivityIndicator(
       animating: animating ?? true,
     ),

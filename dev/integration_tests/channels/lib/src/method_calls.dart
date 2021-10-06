@@ -90,7 +90,7 @@ Future<TestStepResult> _methodCallErrorHandshake(
   channel.setMethodCallHandler((MethodCall call) async {
     received.add(call.arguments);
     throw PlatformException(
-        code: 'error', message: null, details: arguments);
+        code: 'error', details: arguments);
   });
   dynamic errorDetails = nothing;
   dynamic error = nothing;

@@ -651,8 +651,7 @@ flutter:
 
     expect(flutterManifest, matchesManifest(
       appVersion:  '0.0.1',
-      buildName: '0.0.1',
-      buildNumber: null),
+      buildName: '0.0.1'),
     );
   });
 
@@ -716,9 +715,7 @@ flutter:
     );
 
     expect(flutterManifest, matchesManifest(
-      appVersion: null,
-      buildName: null,
-      buildNumber: null),
+      ),
     );
   });
 
@@ -737,9 +734,7 @@ flutter:
     );
 
     expect(flutterManifest, matchesManifest(
-      appVersion: null,
-      buildName: null,
-      buildNumber: null),
+      ),
     );
   });
 

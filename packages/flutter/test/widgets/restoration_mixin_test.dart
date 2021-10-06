@@ -171,7 +171,7 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: null,
+          
         ),
       ),
     );
@@ -214,7 +214,7 @@ void main() {
       UnmanagedRestorationScope(
         bucket: root,
         child: const _TestRestorableWidget(
-          restorationId: null,
+          
         ),
       ),
     );

@@ -73,7 +73,6 @@ void main() {
         TestSemantics.rootChild(
           id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: null,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
@@ -221,8 +220,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,

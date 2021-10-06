@@ -1310,7 +1310,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
-        shape = const RoundedRectangleBorder(borderRadius: BorderRadius.zero);
+        shape = const RoundedRectangleBorder();
         elevation = 0;
         break;
 
@@ -2271,7 +2271,7 @@ class _MonthItemState extends State<_MonthItem> {
       // border.
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
       decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary, width: 1),
+        border: Border.all(color: colorScheme.primary),
         shape: BoxShape.circle,
       );
     }

@@ -35,8 +35,6 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -68,8 +66,6 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -100,8 +96,6 @@ void main() {
       defines: <String, String>{
         kDeferredComponents: 'true',
       },
-      artifacts: null,
-      processManager: null,
       fileSystem: fileSystem,
       logger: logger,
     );

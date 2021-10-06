@@ -302,7 +302,6 @@ Future<String?> _chooseSigningIdentity(
       List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
-      displayAcceptedCharacters: true,
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
       logger: logger,
     );

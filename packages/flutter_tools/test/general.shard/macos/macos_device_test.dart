@@ -28,7 +28,7 @@ final FakePlatform macOS = FakePlatform(
 );
 
 final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
+  
 );
 
 void main() {
@@ -108,7 +108,7 @@ void main() {
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(isMacOSEnabled: false),
+        featureFlags: TestFeatureFlags(),
         platform: macOS,
       ),
     );

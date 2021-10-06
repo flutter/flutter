@@ -813,7 +813,7 @@ void main() {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: TestWidget(
-        restorationId: 'app',
+        
       ),
     ));
 

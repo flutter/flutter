@@ -42,7 +42,6 @@ final Platform macosPlatform = FakePlatform(
   }
 );
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }

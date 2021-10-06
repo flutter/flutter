@@ -289,7 +289,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
-                perspective: _kDefaultPerspective,
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
                 magnification: widget.magnification,

@@ -455,8 +455,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -500,8 +499,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -547,8 +545,7 @@ void main() {
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -1182,7 +1179,6 @@ void main() {
               ListTile(
                 title: Text('A', key: childKey),
                 dense: true,
-                enabled: true,
                 onTap: () {},
               ),
             ],
@@ -1230,7 +1226,6 @@ void main() {
               ListTile(
                 title: Text('A', key: childKey),
                 dense: true,
-                enabled: true,
                 autofocus: true,
                 onTap: () {},
               ),
@@ -1955,8 +1950,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2010,8 +2004,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2052,8 +2045,7 @@ void main() {
     }) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -2097,8 +2089,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2146,8 +2137,7 @@ void main() {
     Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
+          
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -2326,7 +2316,6 @@ void main() {
         home: Material(
           child: Center(
             child: ListTile(
-              enabled: true,
               selected: selected,
               leading: TestIcon(key: leadingKey),
               trailing: TestIcon(key: trailingKey),
