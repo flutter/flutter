@@ -8702,12 +8702,19 @@ void main() {
     ));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(invoked, isFalse);
 
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    expect(invoked, isTrue);
+
+    invoked = false;
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(invoked, isTrue);
   });

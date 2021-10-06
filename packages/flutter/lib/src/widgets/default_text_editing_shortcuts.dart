@@ -161,9 +161,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   );
 
   static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
-    // Allows space to be used as an input instead of a shortcut by another
-    // widget. See https://github.com/flutter/flutter/issues/90907
+    // Allows space and enter to be used as input instead of a shortcut by
+    // another widget. See https://github.com/flutter/flutter/issues/90907
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): DoNothingAndStopPropagationTextIntent(),
   };
 
   static const Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
