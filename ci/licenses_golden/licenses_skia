@@ -1,4 +1,4 @@
-Signature: 6d7bfeccebecd74353127061e6560e22
+Signature: 8d8fc5d3b9480f8938701e0513446bad
 
 UNUSED LICENSES:
 
@@ -3067,6 +3067,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramVisitor.h
+FILE: ../../../third_party/skia/src/sksl/analysis/SwitchCaseContainsExit.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLChildCall.cpp
