@@ -312,7 +312,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       return <String>[];
     }
 
-
     final List<String> projectPaths = globals.fs.directory(rootPath)
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {

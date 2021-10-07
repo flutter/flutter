@@ -72,6 +72,13 @@ void main() {
         terminal: terminal,
       );
       runner = createTestCommandRunner(command);
+
+      // Setup repo roots
+      const String homePath = '/home/user/flutter';
+      Cache.flutterRoot = homePath;
+      for (final String dir in <String>['dev', 'examples', 'packages']) {
+        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
+      }
     });
 
     testUsingContext('SIGABRT throws Exception', () async {
@@ -103,6 +110,10 @@ void main() {
           ),
         ),
       );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 
