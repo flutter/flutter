@@ -1306,6 +1306,7 @@ targets:
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
+    bringup: true # Failing after gradle update https://github.com/flutter/flutter/issues/91422
     presubmit: false
     timeout: 60
     properties:
