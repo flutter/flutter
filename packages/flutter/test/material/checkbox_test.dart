@@ -890,8 +890,8 @@ void main() {
   });
 
   testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
-    final RoundedRectangleBorder roundedRectangleBorder =
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(5));
+    const RoundedRectangleBorder roundedRectangleBorder =
+        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 
     const BorderSide side = BorderSide(
       width: 4,

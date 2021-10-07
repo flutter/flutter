@@ -871,9 +871,9 @@ void main() {
                     labelText: 'label',
                     alignLabelWithHint: alignLabelWithHint,
                     hintText: 'hint',
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(width: 1, color: Colors.black, style: BorderStyle.solid),
-                      borderRadius: BorderRadius.circular(0),
+                    border: const OutlineInputBorder(
+                      borderSide: BorderSide(width: 1, color: Colors.black, style: BorderStyle.solid),
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
                 ),
@@ -3775,11 +3775,11 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           filled: true,
-          fillColor: const Color(0xFF00FF00),
+          fillColor: Color(0xFF00FF00),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.all(Radius.circular(12.0)),
           ),
         ),
       ),

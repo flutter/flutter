@@ -505,7 +505,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
-    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(

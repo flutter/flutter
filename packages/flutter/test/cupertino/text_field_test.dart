@@ -500,7 +500,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(5),
+        const BorderRadius.all(Radius.circular(5)),
       );
       expect(
         decoration.border!.bottom.color.value,
@@ -526,7 +526,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(5),
+        const BorderRadius.all(Radius.circular(5)),
       );
       expect(
         decoration.border!.bottom.color.value,
