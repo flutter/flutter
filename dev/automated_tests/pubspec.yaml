@@ -8,6 +8,8 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  flutter_goldens:
+    sdk: flutter
   integration_test:
     sdk: flutter
   test: 1.17.12

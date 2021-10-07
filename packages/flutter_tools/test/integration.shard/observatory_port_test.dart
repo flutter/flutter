@@ -27,7 +27,7 @@ Future<void> waitForObservatoryMessage(Process process, int port) async {
   process.stdout
     .transform(utf8.decoder)
     .listen((String line) {
-      print(line);
+      printOnFailure(line);
       if (line.contains('An Observatory debugger and profiler on Flutter test device is available at')) {
         if (line.contains('http://127.0.0.1:$port')) {
           completer.complete();
@@ -38,7 +38,7 @@ Future<void> waitForObservatoryMessage(Process process, int port) async {
     });
   process.stderr
     .transform(utf8.decoder)
-    .listen(print);
+    .listen(printOnFailure);
   return completer.future;
 }
 

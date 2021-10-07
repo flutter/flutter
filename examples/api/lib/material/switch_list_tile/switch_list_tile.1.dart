@@ -59,7 +59,7 @@ class LinkedLabelSwitch extends StatelessWidget {
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
-                    print('Label has been tapped.');
+                    debugPrint('Label has been tapped.');
                   },
               ),
             ),
