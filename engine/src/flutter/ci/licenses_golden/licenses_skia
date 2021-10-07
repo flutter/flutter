@@ -1,4 +1,4 @@
-Signature: c6e5961583da342fba4e14d52fada638
+Signature: c144507b8d1caabae84151859f2c0908
 
 UNUSED LICENSES:
 
@@ -2939,7 +2939,6 @@ FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/include/private/GraphiteTypesPriv.h
-FILE: ../../../third_party/skia/experimental/graphite/src/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.cpp
@@ -2977,6 +2976,12 @@ FILE: ../../../third_party/skia/experimental/graphite/src/TaskGraph.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TaskGraph.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Texture.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
+FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
@@ -3066,7 +3071,11 @@ FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
+FILE: ../../../third_party/skia/src/sksl/SkSLThreadContext.h
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCanExitWithoutReturningValue.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCheckProgramUnrolledSize.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopUnrollInfo.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsConstantExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramVisitor.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLSwitchCaseContainsExit.cpp
@@ -3107,6 +3116,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTypeReference.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarations.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadFunctions.cpp
+FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
@@ -3841,6 +3852,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLMemoryPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLThreadContext.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp
