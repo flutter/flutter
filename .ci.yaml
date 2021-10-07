@@ -1312,6 +1312,14 @@ targets:
     properties:
       tags: >
         ["devicelab","android","linux"]
+      dependencies: >-
+        [
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      caches: >-
+        [
+          {"name": "openjdk", "path": "java11"}
+        ]
       task_name: android_obfuscate_test
     scheduler: luci
 
