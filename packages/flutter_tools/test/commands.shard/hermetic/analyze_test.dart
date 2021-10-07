@@ -53,6 +53,10 @@ void main() {
     AnalyzeCommand command;
     CommandRunner<void> runner;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       platform = FakePlatform();
