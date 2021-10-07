@@ -84,7 +84,7 @@ platform_properties:
         [
           {"dependency": "android_sdk"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"}
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Mac-10.15
       device_os: N
@@ -167,7 +167,7 @@ platform_properties:
             {"dependency": "android_sdk"},
             {"dependency": "certs"},
             {"dependency": "chrome_and_driver", "version": "version:84"},
-            {"dependency": "open_jdk"}
+            {"dependency": "open_jdk", "version": "version:11"}
           ]
       os: Windows-10
       device_os: N
