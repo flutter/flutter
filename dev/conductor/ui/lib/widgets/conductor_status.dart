@@ -127,6 +127,7 @@ ABANDONED: The cherrypick will NOT be applied in this release.''',
           child: Icon(
             Icons.info,
             size: 20.0,
+            // Only the engine tooltip has a key, because only the engine tooltip is tested.
             key: widget.engineOrFramework == 'engine' ? const Key('conductorStatusTooltip1') : null,
           ),
         ),
@@ -162,9 +163,7 @@ class CherrypickTableState extends State<CherrypickTable> {
       decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
       columns: <DataColumn>[
         DataColumn(label: Text('${widget.engineOrFramework == 'engine' ? 'Engine' : 'Framework'} Cherrypicks')),
-        DataColumn(
-          label: StatusTooltip(engineOrFramework: widget.engineOrFramework),
-        ),
+        DataColumn(label: StatusTooltip(engineOrFramework: widget.engineOrFramework)),
       ],
       rows: cherrypicks.map((Map<String, Object> cherrypick) {
         return DataRow(

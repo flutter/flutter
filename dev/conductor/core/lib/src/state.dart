@@ -93,6 +93,7 @@ String presentState(pb.ConductorState state) {
   return buffer.toString();
 }
 
+// Returns the conductor state in a map<K, V> format for the desktop app to use
 Map<String, Object> presentStateDesktop(pb.ConductorState state) {
   final List<Map<String, Object>> engineCherrypicks = <Map<String, Object>>[];
   for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -105,11 +106,11 @@ Map<String, Object> presentStateDesktop(pb.ConductorState state) {
         .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
   }
 
-  final Map<String, Object> stateDesktop = <String, Object>{
+  return <String, Object>{
     'conductorVersion': state.conductorVersion,
     'releaseChannel': state.releaseChannel,
     'releaseVersion': state.releaseVersion,
-    'startedAt': DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt()).toString(),
+    'startedAt': DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt()).toString(),
     'updatedAt': DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt()).toString(),
     'engineCandidateBranch': state.engine.candidateBranch,
     'engineStartingGitHEAD': state.engine.startingGitHead,
@@ -126,8 +127,6 @@ Map<String, Object> presentStateDesktop(pb.ConductorState state) {
     'frameworkCherrypicks': frameworkCherrypicks,
     'currentPhase': state.currentPhase,
   };
-
-  return stateDesktop;
 }
 
 String presentPhases(ReleasePhase currentPhase) {
