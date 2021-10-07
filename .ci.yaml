@@ -45,7 +45,7 @@ platform_properties:
         [
           {"dependency": "android_sdk"},
           {"dependency": "curl"},
-          {"dependency": "open_jdk"}
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Linux
       device_os: "N"
