@@ -38,6 +38,7 @@ void main() {
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      print(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
@@ -55,6 +56,7 @@ void main() {
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      print(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }

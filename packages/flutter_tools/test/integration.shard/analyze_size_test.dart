@@ -31,9 +31,8 @@ void main() {
       '--target-platform=android-arm64'
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
 
     final String line = result.stdout.toString()
@@ -68,9 +67,8 @@ void main() {
       '--no-codesign',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build ios:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
     final String line = result.stdout.toString()
@@ -104,9 +102,8 @@ void main() {
       '--enable-macos-desktop',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter config:');
-    printOnFailure(configResult.stdout.toString());
-    printOnFailure(configResult.stderr.toString());
+    print(configResult.stdout);
+    print(configResult.stderr);
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -116,9 +113,8 @@ void main() {
       '--code-size-directory=${codeSizeDir.path}',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build macos:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
     final String line = result.stdout.toString()
@@ -151,9 +147,8 @@ void main() {
       '--debug',
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
 
     expect(result.exitCode, 1);

@@ -43,13 +43,6 @@ const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
 final String flutterBin = fileSystem.path.join(flutterRoot, 'bin', 'flutter');
 
-void debugPrint(String message) {
-  // This is called to intentionally print debugging output when a test is
-  // either taking too long or has failed.
-  // ignore: avoid_print
-  print(message);
-}
-
 typedef LineHandler = String/*?*/ Function(String line);
 
 abstract class Transition {
@@ -143,7 +136,7 @@ class LogLine {
   String toString() => '$stamp $channel: $message';
 
   void printClearly() {
-    debugPrint('$stamp $channel: ${clarify(message)}');
+    print('$stamp $channel: ${clarify(message)}');
   }
 
   static String clarify(String line) {
@@ -204,9 +197,9 @@ Future<ProcessTestResult> runFlutter(
   int nextTransition = 0;
   void describeStatus() {
     if (transitions.isNotEmpty) {
-      debugPrint('Expected state transitions:');
+      print('Expected state transitions:');
       for (int index = 0; index < transitions.length; index += 1) {
-        debugPrint(
+        print(
           '${index.toString().padLeft(5)} '
           '${index <  nextTransition ? 'ALREADY MATCHED ' :
              index == nextTransition ? 'NOW WAITING FOR>' :
@@ -214,9 +207,9 @@ Future<ProcessTestResult> runFlutter(
       }
     }
     if (logs.isEmpty) {
-      debugPrint('So far nothing has been logged${ debug ? "" : "; use debug:true to print all output" }.');
+      print('So far nothing has been logged${ debug ? "" : "; use debug:true to print all output" }.');
     } else {
-      debugPrint('Log${ debug ? "" : " (only contains logged lines; use debug:true to print all output)" }:');
+      print('Log${ debug ? "" : " (only contains logged lines; use debug:true to print all output)" }:');
       for (final LogLine log in logs) {
         log.printClearly();
       }
@@ -228,12 +221,12 @@ Future<ProcessTestResult> runFlutter(
     if (!streamingLogs) {
       streamingLogs = true;
       if (!debug) {
-        debugPrint('Test is taking a long time (${clock.elapsed.inSeconds} seconds so far).');
+        print('Test is taking a long time (${clock.elapsed.inSeconds} seconds so far).');
       }
       describeStatus();
-      debugPrint('(streaming all logs from this point on...)');
+      print('(streaming all logs from this point on...)');
     } else {
-      debugPrint('(taking a long time...)');
+      print('(taking a long time...)');
     }
   }
   String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5, " ")}s]';
@@ -247,7 +240,7 @@ Future<ProcessTestResult> runFlutter(
     }
     if (nextTransition < transitions.length && transitions[nextTransition].matches(line)) {
       if (streamingLogs) {
-        debugPrint('(matched ${transitions[nextTransition]})');
+        print('(matched ${transitions[nextTransition]})');
       }
       if (transitions[nextTransition].logging != null) {
         if (!logging && transitions[nextTransition].logging/*!*/) {
@@ -256,9 +249,9 @@ Future<ProcessTestResult> runFlutter(
         logging = transitions[nextTransition].logging/*!*/;
         if (streamingLogs) {
           if (logging) {
-            debugPrint('(enabled logging)');
+            print('(enabled logging)');
           } else {
-            debugPrint('(disabled logging)');
+            print('(disabled logging)');
           }
         }
       }
@@ -293,8 +286,8 @@ Future<ProcessTestResult> runFlutter(
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStdout);
   process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(processStderr);
   unawaited(process.exitCode.timeout(expectedMaxDuration, onTimeout: () { // This is a failure timeout, must not be short.
-    debugPrint('${stamp()} (process is not quitting, trying to send a "q" just in case that helps)');
-    debugPrint('(a functional test should never reach this point)');
+    print('${stamp()} (process is not quitting, trying to send a "q" just in case that helps)');
+    print('(a functional test should never reach this point)');
     final LogLine inLog = LogLine('stdin', stamp(), 'q');
     logs.add(inLog);
     if (streamingLogs) {
@@ -305,24 +298,24 @@ Future<ProcessTestResult> runFlutter(
   }).catchError((Object error) { /* ignore errors here, they will be reported on the next line */ }));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
-    debugPrint('${stamp()} (process terminated with exit code $exitCode)');
+    print('${stamp()} (process terminated with exit code $exitCode)');
   }
   timeout?.cancel();
   if (nextTransition < transitions.length) {
-    debugPrint('The subprocess terminated before all the expected transitions had been matched.');
+    print('The subprocess terminated before all the expected transitions had been matched.');
     if (logs.any((LogLine line) => line.couldBeCrash)) {
-      debugPrint('The subprocess may in fact have crashed. Check the stderr logs below.');
+      print('The subprocess may in fact have crashed. Check the stderr logs below.');
     }
-    debugPrint('The transition that we were hoping to see next but that we never saw was:');
-    debugPrint('${nextTransition.toString().padLeft(5)} NOW WAITING FOR> ${transitions[nextTransition]}');
+    print('The transition that we were hoping to see next but that we never saw was:');
+    print('${nextTransition.toString().padLeft(5)} NOW WAITING FOR> ${transitions[nextTransition]}');
     if (!streamingLogs) {
       describeStatus();
-      debugPrint('(process terminated with exit code $exitCode)');
+      print('(process terminated with exit code $exitCode)');
     }
     throw TestFailure('Missed some expected transitions.');
   }
   if (streamingLogs) {
-    debugPrint('${stamp()} (completed execution successfully!)');
+    print('${stamp()} (completed execution successfully!)');
   }
   return ProcessTestResult(exitCode, logs);
 }

@@ -385,7 +385,9 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    markTestSkipped('Skipping "$golden" test: $reason');
+    print(
+      'Skipping "$golden" test : $reason'
+    );
     return true;
   }
 
@@ -500,9 +502,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
     if (testExpectation == null || testExpectation.isEmpty) {
-      // There is no baseline for this test.
-      markTestSkipped(
-        'No expectations provided by Skia Gold for test: $golden. '
+      // There is no baseline for this test
+      print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
         'https://flutter-gold.skia.org.\n'
         'Validate image output found at $basedir'

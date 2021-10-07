@@ -28,9 +28,8 @@ void main() {
       '--no-color',
       ...arguments,
     ], workingDirectory: projectPath);
-    printOnFailure('Output of flutter ${arguments.join(" ")}');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.exitCode, exitCode, reason: 'Expected to exit with non-zero exit code.');
     assertContains(result.stdout.toString(), statusTextContains);
     assertContains(result.stdout.toString(), errorTextContains);

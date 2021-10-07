@@ -416,7 +416,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-    debugPrint(kDebugWarning);
+    print(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;

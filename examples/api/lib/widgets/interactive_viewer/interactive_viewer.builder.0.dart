@@ -122,10 +122,10 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                   cellWidth: _cellWidth,
                   builder: (BuildContext context, int row, int column) {
                     if (!_isCellVisible(row, column, viewport)) {
-                      debugPrint('removing cell ($row, $column)');
+                      print('removing cell ($row, $column)');
                       return Container(height: _cellHeight);
                     }
-                    debugPrint('building cell ($row, $column)');
+                    print('building cell ($row, $column)');
                     return Container(
                       height: _cellHeight,
                       color: row % 2 + column % 2 == 1

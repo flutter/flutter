@@ -47,7 +47,7 @@ void main() {
         onSecondLoad.complete();
       }
     });
-    flutter.stdout.listen(printOnFailure);
+    flutter.stdout.listen(print);
     await flutter.run();
     await onFirstLoad.future;
 
@@ -74,7 +74,7 @@ void main() {
         onSecondLoad.complete();
       }
     });
-    flutter.stdout.listen(printOnFailure);
+    flutter.stdout.listen(print);
     await flutter.run();
     await onFirstLoad.future;
 

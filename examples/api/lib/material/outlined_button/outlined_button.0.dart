@@ -34,7 +34,7 @@ class MyStatelessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        debugPrint('Received click');
+        print('Received click');
       },
       child: const Text('Click Me'),
     );

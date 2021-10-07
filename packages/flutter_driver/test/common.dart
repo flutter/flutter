@@ -20,7 +20,7 @@ void tryToDelete(Directory directory) {
   try {
     directory.deleteSync(recursive: true);
   } on FileSystemException catch (error) {
-    driverLog('test', 'Failed to delete ${directory.path}: $error');
+    print('Failed to delete ${directory.path}: $error');
   }
 }
 

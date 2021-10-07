@@ -47,7 +47,7 @@ class AutocompleteBasicExample extends StatelessWidget {
         });
       },
       onSelected: (String selection) {
-        debugPrint('You just selected $selection');
+        print('You just selected $selection');
       },
     );
   }

@@ -64,7 +64,11 @@ Future<void> main(List<String> args) async {
           await cache.lock();
           process.kill(io.ProcessSignal.sigkill);
         } finally {
-          tryToDelete(tempDir);
+          try {
+            tempDir.deleteSync(recursive: true);
+          } on FileSystemException {
+            // Ignore filesystem exceptions when trying to delete tempdir.
+          }
           Cache.flutterRoot = oldRoot;
         }
         expect(logger.statusText, isEmpty);

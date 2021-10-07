@@ -68,7 +68,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
 
   void _handleOnPressed() {
     focusNode.requestFocus();
-    debugPrint('Button ${widget.name} pressed.');
+    print('Button ${widget.name} pressed.');
     debugDumpFocusTree();
   }
 

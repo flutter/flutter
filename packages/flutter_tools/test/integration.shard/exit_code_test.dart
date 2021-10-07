@@ -36,9 +36,8 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    printOnFailure('Output of dart main.dart:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.exitCode, 0);
   });
 
@@ -56,9 +55,8 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    printOnFailure('Output of dart main.dart:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
     expect(result.exitCode, 1);
   });
 }

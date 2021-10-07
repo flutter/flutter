@@ -67,6 +67,7 @@ String unsafeString = null;
 
   for (final String targetPlatform in targetPlatforms) {
     testWithoutContext('flutter build $targetPlatform --no-sound-null-safety', () {
+      print(tempDir);
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),

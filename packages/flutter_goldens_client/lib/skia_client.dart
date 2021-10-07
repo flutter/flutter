@@ -183,10 +183,9 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       // We do not want to throw for non-zero exit codes here, as an intentional
       // change or new golden file test expect non-zero exit codes. Logging here
-      // is meant to help debugging in CI when an unexpected result occurs.
-      // See also: https://github.com/flutter/flutter/issues/91285
-      print('goldctl imgtest add stdout: ${result.stdout}'); // ignore: avoid_print
-      print('goldctl imgtest add stderr: ${result.stderr}'); // ignore: avoid_print
+      // is meant to inform when an unexpected result occurs.
+      print('goldctl imgtest add stdout: ${result.stdout}');
+      print('goldctl imgtest add stderr: ${result.stderr}');
     }
 
     return true;
@@ -302,10 +301,7 @@ class SkiaGoldClient {
           throw const FormatException('Skia gold expectations do not match expected format.');
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
-        // Ideally we'd use something like package:test's printOnError, but best reliabilty
-        // in getting logs on CI for now we're just using print.
-        // See also: https://github.com/flutter/flutter/issues/91285
-        print( // ignore: avoid_print
+        print(
           'Formatting error detected requesting expectations from Flutter Gold.\n'
           'error: $error\n'
           'url: $requestForExpectations\n'

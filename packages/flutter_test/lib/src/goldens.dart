@@ -6,8 +6,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:path/path.dart' as path;
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
-
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
 /// Compares image pixels against a golden image file.
@@ -270,7 +268,7 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
-    markTestSkipped('Golden file comparison requested for "$golden"; skipping...');
+    print('Golden file comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
 
@@ -290,7 +288,7 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
 
   @override
   Future<bool> compare(double width, double height, Uri golden) {
-    markTestSkipped('Golden comparison requested for "$golden"; skipping...');
+    print('Golden comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
 

@@ -108,14 +108,8 @@ void main() {
     await flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(sawTick1.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () {
-        // This print is useful for people debugging this test. Normally we would avoid printing in
-        // a test but this is an exception because it's useful ambient information.
-        // ignore: avoid_print
-        print('The test app is taking longer than expected to print its synchronization line...');
-      },
+      onTimeout: () { print('The test app is taking longer than expected to print its synchronization line...'); },
     ));
-    printOnFailure('waiting for synchronization line...');
     await sawTick1.future; // after this, app is in steady state
     await flutter.addBreakpoint(
       project.scheduledBreakpointUri,
@@ -132,19 +126,19 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
-    printOnFailure('waiting for pause...');
+    print('waiting for pause...');
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
-    printOnFailure('waiting for debugger message...');
+    print('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
-    printOnFailure('waiting for resume...');
+    print('waiting for resume...');
     await flutter.resume();
-    printOnFailure('waiting for reload future...');
+    print('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
-    printOnFailure('subscription cancel...');
+    print('subscription cancel...');
     await subscription.cancel();
   });
 
@@ -154,7 +148,7 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen(
       (String line) {
-        printOnFailure('[LOG]:"$line"');
+        print('[LOG]:"$line"');
         if (line.contains('(((TICK 1)))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
