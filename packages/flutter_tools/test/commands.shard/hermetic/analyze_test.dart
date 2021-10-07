@@ -6,11 +6,15 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
@@ -33,6 +37,58 @@ void main() {
       ),
       '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s)',
     );
+  });
+
+  group('analysisServer.start()', () {
+    const String sdkPath = 'sdkPath';
+    FileSystem fileSystem;
+    Platform platform;
+    BufferLogger logger;
+    FakeProcessManager processManager;
+    Terminal terminal;
+    AnalysisServer server;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      platform = FakePlatform();
+      logger = BufferLogger.test();
+      processManager = FakeProcessManager.empty();
+      terminal = Terminal.test();
+      server = AnalysisServer(
+        sdkPath,
+        <String>[], // directories
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        terminal: terminal,
+      );
+    });
+
+    testWithoutContext('SIGABRT leads to ToolExit', () async {
+      processManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '$sdkPath/bin/dart',
+              '--disable-dart-dev',
+              '$sdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--sdk',
+              sdkPath,
+            ],
+            exitCode: -6,
+          ),
+        ],
+      );
+      await expectToolExitLater(
+        server.start(),
+        contains('yolo'),
+        //contains('SIGABRT'),
+      );
+      await server.start();
+    });
   });
 
   testWithoutContext('analyze inRepo', () {

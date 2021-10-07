@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:io' show ProcessException;
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
@@ -125,7 +126,10 @@ class AnalyzeOnce extends AnalyzeBase {
       // Completing the future in the callback can't fail.
       unawaited(server.onExit.then<void>((int exitCode) {
         if (!analysisCompleter.isCompleted) {
-          analysisCompleter.completeError('analysis server exited: $exitCode');
+          final Exception error = exitCode == -6
+              ? ToolExit('analysis server exited: -6 (SIGABRT)')
+              : Exception('analysis server exited: $exitCode');
+          analysisCompleter.completeError(error);
         }
       }));
 
