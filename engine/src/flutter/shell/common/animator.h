@@ -117,6 +117,7 @@ class Animator final {
   bool dimension_change_pending_ = false;
   SkISize last_layer_tree_size_ = {0, 0};
   std::deque<uint64_t> trace_flow_ids_;
+  bool has_rendered_ = false;
 
   fml::WeakPtrFactory<Animator> weak_factory_;
 

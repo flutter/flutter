@@ -147,7 +147,7 @@ void Animator::BeginFrame(
     delegate_.OnAnimatorBeginFrame(frame_target_time, frame_number);
   }
 
-  if (!frame_scheduled_) {
+  if (!frame_scheduled_ && has_rendered_) {
     // Under certain workloads (such as our parent view resizing us, which is
     // communicated to us by repeat viewport metrics events), we won't
     // actually have a frame scheduled yet, despite the fact that we *will* be
@@ -177,6 +177,7 @@ void Animator::BeginFrame(
 }
 
 void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
+  has_rendered_ = true;
   if (dimension_change_pending_ &&
       layer_tree->frame_size() != last_layer_tree_size_) {
     dimension_change_pending_ = false;
@@ -268,9 +269,10 @@ void Animator::AwaitVSync() {
           }
         }
       });
-
-  delegate_.OnAnimatorNotifyIdle(
-      dart_frame_deadline_.ToEpochDelta().ToMicroseconds());
+  if (has_rendered_) {
+    delegate_.OnAnimatorNotifyIdle(
+        dart_frame_deadline_.ToEpochDelta().ToMicroseconds());
+  }
 }
 
 void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
