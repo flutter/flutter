@@ -151,7 +151,6 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
       logger: logger,
       config: config,
       terminal: terminal,
-      shouldExitOnNoCerts: false,
     );
 
 /// Set [shouldExitOnNoCerts] to show instructions for how to add a cert when none are found, then [toolExit].
