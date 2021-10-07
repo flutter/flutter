@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../../asset.dart';
@@ -28,13 +25,13 @@ import 'icon_tree_shaker.dart';
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
-  Map<String, DevFSContent> additionalContent,
-  @required TargetPlatform targetPlatform,
-  BuildMode buildMode,
+  Map<String, DevFSContent>? additionalContent,
+  required TargetPlatform targetPlatform,
+  BuildMode? buildMode,
 }) async {
   // Check for an SkSL bundle.
-  final String shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
-  final DevFSContent skslBundle = processSkSLBundle(
+  final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
+  final DevFSContent? skslBundle = processSkSLBundle(
     shaderBundlePath,
     engineVersion: environment.engineVersion,
     fileSystem: environment.fileSystem,
@@ -70,7 +67,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
 
   final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
-    assetBundle.entries[kFontManifestJson] as DevFSStringContent,
+    assetBundle.entries[kFontManifestJson] as DevFSStringContent?,
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
@@ -118,7 +115,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   // Copy deferred components assets only for release or profile builds.
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
-  if (environment.defines[kDeferredComponents] == 'true') {
+  if (environment.defines[kDeferredComponents] == 'true' && buildMode != null) {
     await Future.wait<void>(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =
@@ -185,11 +182,11 @@ const String kSkSLShaderBundlePath = 'io.flutter.shaders.json';
 ///
 /// If the current target platform is different than the platform constructed
 /// for the bundle, a warning will be printed.
-DevFSContent processSkSLBundle(String bundlePath, {
-  @required TargetPlatform targetPlatform,
-  @required FileSystem fileSystem,
-  @required Logger logger,
-  @required String engineVersion,
+DevFSContent? processSkSLBundle(String? bundlePath, {
+  required TargetPlatform targetPlatform,
+  required FileSystem fileSystem,
+  required Logger logger,
+  String? engineVersion,
 }) {
   if (bundlePath == null) {
     return null;
@@ -202,9 +199,9 @@ DevFSContent processSkSLBundle(String bundlePath, {
   }
 
   // Step 2: validate top level bundle structure.
-  Map<String, Object> bundle;
+  Map<String, Object>? bundle;
   try {
-    final Object rawBundle = json.decode(skSLBundleFile.readAsStringSync());
+    final Object? rawBundle = json.decode(skSLBundleFile.readAsStringSync());
     if (rawBundle is Map<String, Object>) {
       bundle = rawBundle;
     } else {
@@ -219,7 +216,7 @@ DevFSContent processSkSLBundle(String bundlePath, {
   // * The engine revision the bundle was compiled with
   //   is the same as the current revision.
   // * The target platform is the same (this one is a warning only).
-  final String bundleEngineRevision = bundle['engineRevision'] as String;
+  final String? bundleEngineRevision = bundle['engineRevision'] as String?;
   if (bundleEngineRevision != engineVersion) {
     logger.printError(
       'Expected Flutter $bundleEngineRevision, but found $engineVersion\n'
@@ -229,16 +226,19 @@ DevFSContent processSkSLBundle(String bundlePath, {
     throw Exception('SkSL bundle was invalid');
   }
 
-  final TargetPlatform bundleTargetPlatform = getTargetPlatformForName(
-    bundle['platform'] as String);
-  if (bundleTargetPlatform != targetPlatform) {
+  final String? parsedPlatform = bundle['platform'] as String?;
+  TargetPlatform? bundleTargetPlatform;
+  if (parsedPlatform != null) {
+    bundleTargetPlatform = getTargetPlatformForName(parsedPlatform);
+  }
+  if (bundleTargetPlatform == null || bundleTargetPlatform != targetPlatform) {
     logger.printError(
       'The SkSL bundle was created for $bundleTargetPlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );
   }
-  return DevFSStringContent(json.encode(<String, Object>{
+  return DevFSStringContent(json.encode(<String, Object?>{
     'data': bundle['data'],
   }));
 }

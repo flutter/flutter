@@ -105,17 +105,20 @@ void main() {
   testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: ScrollConfiguration(
-          behavior: const ScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
-          child: ListView(
-              children: const <Widget>[
-                SizedBox(
-                  height: 1000.0,
-                  width: 1000.0,
-                  child: Text('Test'),
-                )
-              ]
-          )
+      child: MediaQuery(
+        data: const MediaQueryData(size: Size(800, 600)),
+        child: ScrollConfiguration(
+            behavior: const ScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+            child: ListView(
+                children: const <Widget>[
+                  SizedBox(
+                    height: 1000.0,
+                    width: 1000.0,
+                    child: Text('Test'),
+                  )
+                ]
+            )
+        ),
       ),
     ));
 

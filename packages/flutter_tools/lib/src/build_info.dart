@@ -634,7 +634,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
   }
 }
 
-TargetPlatform? getTargetPlatformForName(String platform) {
+TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
     case 'android':
       return TargetPlatform.android;
@@ -669,8 +669,7 @@ TargetPlatform? getTargetPlatformForName(String platform) {
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
-  assert(platform != null);
-  return null;
+  throw Exception('Unsupported platform name "$platform"');
 }
 
 AndroidArch getAndroidArchForName(String platform) {

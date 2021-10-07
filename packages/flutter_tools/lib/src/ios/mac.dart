@@ -189,8 +189,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       ) ?? <String, String>{};
 
   if (codesign && environmentType == EnvironmentType.physical) {
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
       buildSettings: buildSettings,
+      platform: globals.platform,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
