@@ -2723,9 +2723,10 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     '../../bin/cache/dart-sdk/bin/dart',
     snapshotArgs,
   );
-  printOnFailure('Results of generating snapshot:');
-  printOnFailure(snapshotResult.stdout.toString());
-  printOnFailure(snapshotResult.stderr.toString());
+  if (snapshotResult.exitCode != 0) {
+    print(snapshotResult.stdout);
+    print(snapshotResult.stderr);
+  }
   expect(snapshotResult.exitCode, 0);
 }
 
@@ -2767,9 +2768,10 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     workingDirectory: workingDir,
   );
   if (expectedFailures.isEmpty) {
-    printOnFailure('Results of running analyzer:');
-    printOnFailure(exec.stdout.toString());
-    printOnFailure(exec.stderr.toString());
+    if (exec.exitCode != 0) {
+      print(exec.stdout);
+      print(exec.stderr);
+    }
     expect(exec.exitCode, 0);
     return;
   }
@@ -2823,9 +2825,10 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of running flutter test:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
   expect(exec.exitCode, 0);
 }
 

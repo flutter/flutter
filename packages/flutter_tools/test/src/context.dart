@@ -127,7 +127,7 @@ void testUsingContext(
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-          return runZonedGuarded<Future<dynamic>>(() {
+          return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -148,10 +148,9 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, (Object error, StackTrace stackTrace) {
-            // When things fail, it's ok to print to the console!
-            print(error); // ignore: avoid_print
-            print(stackTrace); // ignore: avoid_print
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
+            print(error);
+            print(stackTrace);
             _printBufferedErrors(context);
             throw error;
           });
@@ -177,9 +176,7 @@ void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
-      // This is where the logger outputting errors is implemented, so it has
-      // to use `print`.
-      print(bufferLogger.errorText); // ignore: avoid_print
+      print(bufferLogger.errorText);
     }
     bufferLogger.clear();
   }

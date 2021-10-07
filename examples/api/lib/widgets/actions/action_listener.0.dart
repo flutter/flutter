@@ -92,13 +92,13 @@ class MyAction extends Action<MyIntent> {
   @override
   void addActionListener(ActionListenerCallback listener) {
     super.addActionListener(listener);
-    debugPrint('Action Listener was added');
+    print('Action Listener was added');
   }
 
   @override
   void removeActionListener(ActionListenerCallback listener) {
     super.removeActionListener(listener);
-    debugPrint('Action Listener was removed');
+    print('Action Listener was removed');
   }
 
   @override

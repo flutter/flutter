@@ -42,7 +42,6 @@ class FakeTextChannel implements MethodChannel {
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
-    final StringBuffer output = StringBuffer();
     bool hasError = false;
     for (int i = 0; i < calls.length; i++) {
       final ByteData outgoingData = codec.encodeMethodCall(outgoingCalls[i]);
@@ -51,7 +50,7 @@ class FakeTextChannel implements MethodChannel {
       final String expectedString = utf8.decode(expectedData.buffer.asUint8List());
 
       if (outgoingString != expectedString) {
-        output.writeln(
+        print(
           'Index $i did not match:\n'
           '  actual:   $outgoingString\n'
           '  expected: $expectedString',
@@ -60,7 +59,7 @@ class FakeTextChannel implements MethodChannel {
       }
     }
     if (hasError) {
-      fail('Calls did not match:\n$output');
+      fail('Calls did not match.');
     }
   }
 }

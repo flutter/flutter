@@ -53,9 +53,8 @@ void main() {
       ];
       final ProcessResult result = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
-      printOnFailure('Output of flutter build macos:');
-      printOnFailure(result.stdout.toString());
-      printOnFailure(result.stderr.toString());
+      print(result.stdout);
+      print(result.stderr);
       expect(result.exitCode, 0);
 
       expect(result.stdout, contains('Running pod install'));
@@ -135,9 +134,8 @@ void main() {
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
-      printOnFailure('Output of second build:');
-      printOnFailure(secondBuild.stdout.toString());
-      printOnFailure(secondBuild.stderr.toString());
+      print(secondBuild.stdout);
+      print(secondBuild.stderr);
       expect(secondBuild.exitCode, 0);
 
       expect(secondBuild.stdout, isNot(contains('Running pod install')));

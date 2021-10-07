@@ -50,7 +50,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       // TODO(awdavies): Use something other than print. On fuchsia
       // `stderr`/`stdout` appear to have issues working correctly.
       driverLog = (String source, String message) {
-        print('$source: $message'); // ignore: avoid_print
+        print('$source: $message');
       };
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {

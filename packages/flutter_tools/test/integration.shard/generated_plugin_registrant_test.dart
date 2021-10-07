@@ -138,9 +138,10 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     '../../bin/cache/dart-sdk/bin/dart',
     snapshotArgs,
   );
-  printOnFailure('Output of dart ${snapshotArgs.join(" ")}:');
-  printOnFailure(snapshotResult.stdout.toString());
-  printOnFailure(snapshotResult.stderr.toString());
+  if (snapshotResult.exitCode != 0) {
+    print(snapshotResult.stdout);
+    print(snapshotResult.stderr);
+  }
   expect(snapshotResult.exitCode, 0);
 }
 
@@ -236,8 +237,9 @@ Future<void> _analyzeProject(Directory workingDir) async {
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of flutter analyze:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
   expect(exec.exitCode, 0);
 }

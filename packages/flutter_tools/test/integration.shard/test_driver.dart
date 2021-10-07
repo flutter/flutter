@@ -79,10 +79,6 @@ abstract class FlutterTestDriver {
       lastTime = time;
     }
     if (_printDebugOutputToStdOut) {
-      // This is the one place in this file that can call print. It is gated by
-      // _printDebugOutputToStdOut which should not be set to true in CI; it is
-      // intended only for use in local debugging.
-      // ignore: avoid_print
       print('$time$_logPrefix$line');
     }
   }

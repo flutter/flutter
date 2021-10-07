@@ -64,7 +64,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        debugPrint(r'''
+        print(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -391,7 +391,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
         if (count > 20) {
-          debugPrint('delayForFrameTimings is taking longer than expected...');
+          print('delayForFrameTimings is taking longer than expected...');
         }
       }
     }

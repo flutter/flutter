@@ -41,7 +41,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
     }
     expect(child, isNull);
   } catch (e) {
-    debugPrint(renderObject.toStringDeep());
+    print(renderObject.toStringDeep());
     rethrow;
   }
 }

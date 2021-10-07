@@ -247,7 +247,6 @@ class Cache {
       }
     } on Exception catch (error) {
       // There is currently no logger attached since this is computed at startup.
-      // ignore: avoid_print
       print(userMessages.runnerNoRoot('$error'));
     }
     return normalize('.');

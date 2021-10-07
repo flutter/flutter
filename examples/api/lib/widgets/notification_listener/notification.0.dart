@@ -45,9 +45,9 @@ class MyStatelessWidget extends StatelessWidget {
         body: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollNotification) {
             if (scrollNotification is ScrollStartNotification) {
-              debugPrint('Scrolling has started');
+              print('Scrolling has started');
             } else if (scrollNotification is ScrollEndNotification) {
-              debugPrint('Scrolling has ended');
+              print('Scrolling has ended');
             }
             // Return true to cancel the notification bubbling.
             return true;

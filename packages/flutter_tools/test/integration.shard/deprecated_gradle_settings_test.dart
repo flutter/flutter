@@ -26,10 +26,8 @@ void main() {
       '--target-platform', 'android-arm',
       '--verbose',
     ], workingDirectory: woringDirectory);
-
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
+    print(result.stdout);
+    print(result.stderr);
 
     expect(result.exitCode, 0);
 

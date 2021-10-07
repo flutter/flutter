@@ -38,21 +38,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
+      print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
       if (event.logicalKey == LogicalKeyboardKey.keyR) {
-        debugPrint('Changing color to red.');
+        print('Changing color to red.');
         setState(() {
           _color = Colors.red;
         });
         return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-        debugPrint('Changing color to green.');
+        print('Changing color to green.');
         setState(() {
           _color = Colors.green;
         });
         return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-        debugPrint('Changing color to blue.');
+        print('Changing color to blue.');
         setState(() {
           _color = Colors.blue;
         });
