@@ -190,9 +190,7 @@ void main() {
       false,
     );
     expect(
-      const Border(
-
-      ).isUniform,
+      const Border().isUniform,
       true,
     );
     expect(

@@ -630,8 +630,8 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion: '1.0.0+2',
       buildName: '1.0.0',
-      buildNumber: '2'),
-    );
+      buildNumber: '2',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch with no build version', () {
@@ -651,8 +651,8 @@ flutter:
 
     expect(flutterManifest, matchesManifest(
       appVersion:  '0.0.1',
-      buildName: '0.0.1'),
-    );
+      buildName: '0.0.1',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 2', () {
@@ -673,8 +673,8 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion: '1.0.0-beta+exp.sha.5114f85',
       buildName: '1.0.0-beta',
-      buildNumber: 'exp.sha.5114f85'),
-    );
+      buildNumber: 'exp.sha.5114f85',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor+build version clause', () {
@@ -695,8 +695,8 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion: '1.0+2',
       buildName: '1.0',
-      buildNumber: '2'),
-    );
+      buildNumber: '2',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses empty version clause', () {
@@ -714,9 +714,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest, matchesManifest(
-      ),
-    );
+    expect(flutterManifest, matchesManifest());
   });
 
   testWithoutContext('FlutterManifest parses no version clause', () {
@@ -733,9 +731,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest, matchesManifest(
-      ),
-    );
+    expect(flutterManifest, matchesManifest());
   });
 
     // Regression test for https://github.com/flutter/flutter/issues/31764

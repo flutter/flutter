@@ -125,13 +125,13 @@ void main() {
 
   test('BorderTween nullable test', () {
     BorderTween tween = BorderTween();
-    expect(tween.lerp(0.0),  null);
-    expect(tween.lerp(1.0),  null);
+    expect(tween.lerp(0.0), null);
+    expect(tween.lerp(1.0), null);
 
     tween = BorderTween(end: const Border(top: BorderSide()));
-    expect(tween.lerp(0.0),  const Border());
-    expect(tween.lerp(0.5),  const Border(top: BorderSide(width: 0.5)));
-    expect(tween.lerp(1.0),  const Border(top: BorderSide()));
+    expect(tween.lerp(0.0), const Border());
+    expect(tween.lerp(0.5), const Border(top: BorderSide(width: 0.5)));
+    expect(tween.lerp(1.0), const Border(top: BorderSide()));
   });
 
   test('SizeTween', () {

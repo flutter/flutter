@@ -517,9 +517,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -542,9 +540,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-
-            ),
+            child: TextFormField(),
           ),
         ),
       ),

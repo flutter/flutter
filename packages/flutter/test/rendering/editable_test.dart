@@ -1272,6 +1272,8 @@ void main() {
           startHandleLayerLink: LayerLink(),
           endHandleLayerLink: LayerLink(),
           textDirection: TextDirection.ltr,
+          // Given maxLines of 1 and an offset of 5, the editable will be
+          // scrolled by 5 pixels to the left.
           offset: ViewportOffset.fixed(5.0),
           textSelectionDelegate: delegate,
           selection: const TextSelection.collapsed(

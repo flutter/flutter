@@ -864,7 +864,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Wrap(
       spacing: 8.0, // gap between adjacent Text widget
-      runSpacing: 4.0,
+      runSpacing: 4.0, // gap between lines
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
       children: const <Widget>[

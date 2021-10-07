@@ -32,9 +32,7 @@ void _defineTests() {
     ));
 
     expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-
-      ),
+      TestSemantics.root(),
     ));
 
     semanticsTester.dispose();

@@ -96,9 +96,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(
-
-        ),
+        child: ListView(),
       ),
     );
     expect(list.geometry!.scrollExtent, equals(0.0));
@@ -137,9 +135,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(
-
-        ),
+        child: ListView(),
       ),
     );
 

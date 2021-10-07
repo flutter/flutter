@@ -791,8 +791,7 @@ void main() {
     });
 
     testWithoutContext('v - launchDevToolsInBrowser', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-          <FakeVmServiceRequest>[]);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
       final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 

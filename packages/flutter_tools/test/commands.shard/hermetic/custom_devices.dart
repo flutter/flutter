@@ -461,9 +461,7 @@ void main() {
     testUsingContext(
       'custom-devices add command fails when feature is not enabled',
       () async {
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-
-        );
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner();
         expect(
           runner.run(const <String>['custom-devices', 'add']),
           throwsToolExit(message: featureNotEnabledMessage),
@@ -554,7 +552,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -643,7 +641,7 @@ void main() {
                 '-w', '1',
                 '192.168.178.1'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -732,7 +730,7 @@ void main() {
                 '-w', '1',
                 '::1'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -825,7 +823,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: <String>[],
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -905,7 +903,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1229,7 +1227,7 @@ void main() {
                 'testhostname'
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',

@@ -701,7 +701,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       // host-platform specific, filled out later
       pingCommand: const <String>[],
 
-      postBuildCommand: null,
+      postBuildCommand: const <String>[],
 
       // just install to /tmp/${appName} by default
       installCommand: <String>[

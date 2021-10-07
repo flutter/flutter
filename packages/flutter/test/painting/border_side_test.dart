@@ -9,9 +9,7 @@ void main() {
   test('BorderSide - asserts when constructed incorrectly', () {
     expect(
       const BorderSide(),
-      const BorderSide(
-
-      ),
+      const BorderSide(),
     );
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(

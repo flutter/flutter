@@ -1452,16 +1452,16 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    void onHover(PointerHoverEvent _) {}
-    void onPaintChild() { logs.add('paint'); }
+    void _handleHover(PointerHoverEvent _) {}
+    void _handlePaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onHover: onHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          onHover: _handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1478,8 +1478,10 @@ void main() {
         width: 10,
         child: MouseRegion(
           opaque: false,
-          onHover: onHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          // Dummy callback so that MouseRegion stays affective after opaque
+          // turns false.
+          onHover: _handleHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),

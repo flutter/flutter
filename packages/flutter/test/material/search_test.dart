@@ -786,9 +786,7 @@ void main() {
   testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading] and [buildActions].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(
@@ -827,9 +825,7 @@ void main() {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[rootObserver],

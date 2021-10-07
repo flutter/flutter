@@ -105,7 +105,7 @@ void main() {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(environment: <String, String>{},),
+        platform: FakePlatform(environment: <String, String>{}),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -121,7 +121,7 @@ void main() {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devFinderDevices: '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'},),
+        platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -479,9 +479,7 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       expect(device.supportsScreenshot, true);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(
-
-      ),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('is not supported on Windows', () {
@@ -726,7 +724,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1', uiIsolate: null),
+        FlutterView(id: '1', uiIsolate: fakeIsolate),
         // wrong name.
         FlutterView(
           id: '2',
@@ -752,7 +750,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1', uiIsolate: null),
+        FlutterView(id: '1', uiIsolate: fakeIsolate),
         // wrong name.
         FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
            ...fakeIsolate.toJson(),
@@ -766,7 +764,7 @@ void main() {
     testUsingContext('can handle non flutter view', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
-        FlutterView(id: '1', uiIsolate: null), // no ui isolate.
+        FlutterView(id: '1', uiIsolate: fakeIsolate), // no ui isolate.
       ], expectedIsolateName);
 
       expect(uri, throwsException);

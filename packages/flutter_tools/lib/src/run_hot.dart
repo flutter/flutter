@@ -411,7 +411,7 @@ class HotRunner extends ResidentRunner {
       targetPlatform: _targetPlatform,
       sdkName: _sdkName,
       emulator: _emulator,
-      fullRestart: null,
+      fullRestart: false,
       fastReassemble: false,
       overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
       compileTimeInMs: totalCompileTime.inMilliseconds,

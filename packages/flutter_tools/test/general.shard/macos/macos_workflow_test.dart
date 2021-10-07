@@ -12,9 +12,7 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform(
-
-);
+final FakePlatform linux = FakePlatform();
 
 void main() {
   testWithoutContext('Applies to macOS platform', () {

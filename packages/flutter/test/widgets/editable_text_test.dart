@@ -119,7 +119,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1005,7 +1005,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1035,7 +1035,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1078,7 +1078,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
             ),
@@ -1449,9 +1449,7 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
-          toolbarOptions: const ToolbarOptions(
-
-          ),
+          toolbarOptions: const ToolbarOptions(),
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: cupertinoTextSelectionControls,
@@ -3464,9 +3462,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(
-
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -3495,9 +3491,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(
-
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -3536,9 +3530,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(
-
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
@@ -3975,9 +3967,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(
-
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -6848,7 +6838,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -6920,7 +6910,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -7001,7 +6991,7 @@ void main() {
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
-              focusNode: focusNode, // Sets text keyboard implicitly.
+              focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
               inputFormatters: <TextInputFormatter>[formatter],
@@ -8759,9 +8749,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
-      data: const MediaQueryData(
-
-      ),
+      data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Column(

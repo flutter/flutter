@@ -414,6 +414,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -469,6 +470,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -515,6 +517,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1116,6 +1119,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: true,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);

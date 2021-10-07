@@ -953,9 +953,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 1),
       ).first.toRect();
 
-      painter.textHeightBehavior = const TextHeightBehavior(
-
-      );
+      painter.textHeightBehavior = const TextHeightBehavior();
       painter.layout();
 
       final Rect newGlyphBox = painter.getBoxesForSelection(

@@ -654,9 +654,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
-    await tester.pumpWidget(buildSliverAppBarApp(
-
-    ));
+    await tester.pumpWidget(buildSliverAppBarApp());
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
@@ -2480,9 +2478,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(buildSliverAppBarApp(
-
-    ));
+    await tester.pumpWidget(buildSliverAppBarApp());
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);

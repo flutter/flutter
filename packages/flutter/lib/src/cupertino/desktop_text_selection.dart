@@ -280,6 +280,8 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
+          // This value was measured from a screenshot of TextEdit on MacOS
+          // 10.15.7 on a Macbook Pro.
           vertical: 3.0,
         ),
         child: child,

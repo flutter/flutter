@@ -36,7 +36,8 @@ void main() {
         artifacts: globals.artifacts, // using real artifacts
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
-        logger: globals.logger, // simulate a local engine.
+        // engineVersion being null simulates a local engine.
+        logger: globals.logger,
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);

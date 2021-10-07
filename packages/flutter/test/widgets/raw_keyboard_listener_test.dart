@@ -62,7 +62,7 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'web'); // ignore: avoid_redundant_argument_values
     await tester.idle();
 
     expect(events.length, 2);

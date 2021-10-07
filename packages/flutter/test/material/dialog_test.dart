@@ -1256,9 +1256,7 @@ void main() {
     );
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           child: Placeholder(),
         ),
@@ -1282,9 +1280,7 @@ void main() {
     // Test with no padding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: null,
           child: Placeholder(),
@@ -1297,9 +1293,7 @@ void main() {
     // Test with an insetPadding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
           child: Placeholder(),

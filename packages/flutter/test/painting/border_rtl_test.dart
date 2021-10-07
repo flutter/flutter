@@ -456,9 +456,7 @@ void main() {
       false,
     );
     expect(
-      const BorderDirectional(
-
-      ).isUniform,
+      const BorderDirectional().isUniform,
       true,
     );
     expect(

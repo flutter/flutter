@@ -86,8 +86,9 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+            child: const CupertinoActivityIndicator.partiallyRevealed(
+              progress: 0,
+            ),
           ),
         ),
       ),
@@ -129,8 +130,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(),
+            child: const CupertinoActivityIndicator.partiallyRevealed(),
           ),
         ),
       ),

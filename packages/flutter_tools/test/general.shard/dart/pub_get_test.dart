@@ -35,9 +35,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -81,9 +79,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -131,9 +127,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -180,9 +174,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -212,9 +204,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -247,9 +237,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -286,9 +274,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -325,9 +311,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -364,9 +348,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -402,9 +384,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -442,9 +422,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -484,9 +462,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -532,9 +508,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -619,9 +593,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 

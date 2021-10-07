@@ -1081,9 +1081,7 @@ void main() {
     // PageView() defaults to true.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: PageView(
-
-      ),
+      child: PageView(),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);

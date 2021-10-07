@@ -582,7 +582,7 @@ void main() {
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
-    final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
+    final ScrollController controllerY = ScrollController(initialScrollOffset: 400.0);
     final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
       return List<Widget>.generate(10, (int x) {
         return SizedBox(
@@ -943,8 +943,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/20893.
 
     List<Widget> slivers;
-    final ScrollController controllerX =  ScrollController();
-    final ScrollController controllerY  = ScrollController();
+    final ScrollController controllerX = ScrollController();
+    final ScrollController controllerY = ScrollController();
 
     await tester.pumpWidget(
       Directionality(
@@ -993,8 +993,8 @@ void main() {
 
   testWidgets('Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
     Widget sliver;
-    final ScrollController controllerX =  ScrollController();
-    final ScrollController controllerY  = ScrollController();
+    final ScrollController controllerX = ScrollController();
+    final ScrollController controllerY = ScrollController();
 
     await tester.pumpWidget(
       Directionality(

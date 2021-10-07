@@ -182,7 +182,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
 

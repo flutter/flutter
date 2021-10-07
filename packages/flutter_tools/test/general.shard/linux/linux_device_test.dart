@@ -20,9 +20,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform linux = FakePlatform(
-
-);
+final FakePlatform linux = FakePlatform();
 final FakePlatform windows = FakePlatform(
   operatingSystem: 'windows',
 );

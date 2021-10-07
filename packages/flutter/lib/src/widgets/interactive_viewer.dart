@@ -1041,7 +1041,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       key: _parentKey,
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

@@ -3435,14 +3435,15 @@ void main() {
       MaterialApp(
         home: Material(
           child: DropdownButton<String>(
-              key: key,
-              items: <String>['One', 'Two', 'Three', 'Four']
-                  .map<DropdownMenuItem<String>>((String value) {
+            key: key,
+            onChanged: null,
+            items: <String>['One', 'Two', 'Three', 'Four']
+              .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
                 );
-              }).toList()
+              }).toList(),
           ),
         ),
       ),

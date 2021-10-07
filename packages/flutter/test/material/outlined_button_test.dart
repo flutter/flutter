@@ -293,7 +293,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     await gesture.removePointer();
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
   testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -363,7 +363,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
   testWidgets('OutlinedButton uses stateful color for text color in different states', (WidgetTester tester) async {

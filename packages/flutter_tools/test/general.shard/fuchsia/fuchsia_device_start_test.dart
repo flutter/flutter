@@ -369,9 +369,7 @@ void main() {
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
-      Platform: () => FakePlatform(
-
-      ),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {

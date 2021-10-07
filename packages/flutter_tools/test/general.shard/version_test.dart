@@ -476,7 +476,8 @@ void main() {
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
       <FakeCommand>[
         const FakeCommand(
-          command: <String>['git', 'tag', '--points-at', 'HEAD'], // no tag
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          // no output, since there's no tag
         ),
         const FakeCommand(
           command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],

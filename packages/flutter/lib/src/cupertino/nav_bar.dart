@@ -43,7 +43,7 @@ const Color _kDefaultNavBarBorderColor = Color(0x4D000000);
 const Border _kDefaultNavBarBorder = Border(
   bottom: BorderSide(
     color: _kDefaultNavBarBorderColor,
-    width: 0.0,
+    width: 0.0, // 0.0 means one physical pixel
   ),
 );
 

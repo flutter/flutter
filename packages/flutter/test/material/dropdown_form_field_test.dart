@@ -213,7 +213,8 @@ void main() {
               labelText: 'labelText',
             ),
             value: value,
-            disabledHint: const Text('disabledHint'), // disable the menu to show the disabledHint.
+            onChanged: null, // this disables the menu and shows the disabledHint.
+            disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
                 value: 1,
@@ -364,7 +365,8 @@ void main() {
             ),
             value: value,
             hint: const Text('hint'),
-            disabledHint: const Text('disabledHint'), // disabled
+            onChanged: null, // disabled
+            disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
                 value: 1,

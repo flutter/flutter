@@ -204,6 +204,7 @@ void main() {
     // The label appears within the input text when there is content and floatingLabelBehavior is never
     await tester.pumpWidget(
       buildInputDecorator(
+        // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
           floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -455,6 +456,7 @@ void main() {
     // the floatingLabelBehavior is set to never.
     await tester.pumpWidget(
       buildInputDecorator(
+        // isFocused: false (default)
         decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
