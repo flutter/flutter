@@ -47,7 +47,7 @@ platform_properties:
           {"dependency": "curl"},
           {"dependency": "open_jdk"}
         ]
-      os: Android
+      os: Linux
       device_os: "N"
   mac:
     properties:
