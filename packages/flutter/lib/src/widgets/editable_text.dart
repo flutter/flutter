@@ -58,8 +58,9 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-// The minimum width of an iPad screen.
-const double _kIPadWidth = 1536.0;
+// The minimum width of an iPad screen. The smallest iPad is currently the
+// iPad Mini 6th Gen according to ios-resolution.com.
+const double _kIPadWidth = 1488.0;
 
 /// A controller for an editable text field.
 ///
@@ -2858,11 +2859,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Tracks the location a [_ScribblePlaceholder] should be rendered in the
-  /// text.
-  ///
-  /// A value of -1 indicates there should be no placeholder, otherwise the
-  /// value should be between 0 and the length of the text, inclusive.
+  // Tracks the location a [_ScribblePlaceholder] should be rendered in the
+  // text.
+  //
+  // A value of -1 indicates there should be no placeholder, otherwise the
+  // value should be between 0 and the length of the text, inclusive.
   int _placeholderLocation = -1;
 
   @override
