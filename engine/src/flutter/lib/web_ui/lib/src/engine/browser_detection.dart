@@ -41,6 +41,7 @@ enum BrowserEngine {
 abstract class WebGLVersion {
   /// WebGL 1.0 is based on OpenGL ES 2.0 / GLSL 1.00
   static const int webgl1 = 1;
+
   /// WebGL 2.0 is based on OpenGL ES 3.0 / GLSL 3.00
   static const int webgl2 = 2;
 }
@@ -80,7 +81,8 @@ BrowserEngine _detectBrowserEngine() {
 ///    Note: SAMSUNG-SGH-I717
 ///    SPH/SCH are very old Palm models.
 bool _isSamsungBrowser(String agent) {
-  final RegExp exp = RegExp(r'SAMSUNG|SGH-[I|N|T]|GT-[I|N]|SM-[A|N|P|T|Z]|SHV-E|SCH-[I|J|R|S]|SPH-L');
+  final RegExp exp = RegExp(
+      r'SAMSUNG|SGH-[I|N|T]|GT-[I|N]|SM-[A|N|P|T|Z]|SHV-E|SCH-[I|J|R|S]|SPH-L');
   return exp.hasMatch(agent.toUpperCase());
 }
 
@@ -229,7 +231,8 @@ int? _cachedWebGLVersion;
 
 /// The highest WebGL version supported by the current browser, or -1 if WebGL
 /// is not supported.
-int get webGLVersion => _cachedWebGLVersion ?? (_cachedWebGLVersion = _detectWebGLVersion());
+int get webGLVersion =>
+    _cachedWebGLVersion ?? (_cachedWebGLVersion = _detectWebGLVersion());
 
 /// Detects the highest WebGL version supported by the current browser, or
 /// -1 if WebGL is not supported.
