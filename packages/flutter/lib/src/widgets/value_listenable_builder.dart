@@ -176,11 +176,13 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   late T value;
+  late T _oldValue;
 
   @override
   void initState() {
     super.initState();
     value = widget.valueListenable.value;
+    _oldValue = value;
     widget.valueListenable.addListener(_valueChanged);
   }
 
@@ -189,6 +191,7 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
     if (oldWidget.valueListenable != widget.valueListenable) {
       oldWidget.valueListenable.removeListener(_valueChanged);
       value = widget.valueListenable.value;
+      _oldValue = value;
       widget.valueListenable.addListener(_valueChanged);
     }
     super.didUpdateWidget(oldWidget);
@@ -202,10 +205,10 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
 
   void _valueChanged() {
     final ValueWidgetRebuildFilter<T>? filter = widget.filter;
-    if (filter == null || filter(value, widget.valueListenable.value)) {
-      setState(() {});
+    if (filter == null || filter(_oldValue, widget.valueListenable.value)) {
+      setState(() => value = widget.valueListenable.value);
     }
-    value = widget.valueListenable.value;
+    _oldValue = widget.valueListenable.value;
   }
 
   @override
