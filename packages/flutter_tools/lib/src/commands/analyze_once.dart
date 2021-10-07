@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io' show ProcessException;
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
