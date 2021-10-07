@@ -374,13 +374,13 @@ public class PlatformChannel {
     // TODO(mattcarroll): add color annotation
     Integer statusBarColor = null;
     Brightness statusBarIconBrightness = null;
-    boolean systemStatusBarContrastEnforced = true;
+    Boolean systemStatusBarContrastEnforced = null;
     // TODO(mattcarroll): add color annotation
     Integer systemNavigationBarColor = null;
     Brightness systemNavigationBarIconBrightness = null;
     // TODO(mattcarroll): add color annotation
     Integer systemNavigationBarDividerColor = null;
-    boolean systemNavigationBarContrastEnforced = true;
+    Boolean systemNavigationBarContrastEnforced = null;
 
     if (!encodedStyle.isNull("statusBarColor")) {
       statusBarColor = encodedStyle.getInt("statusBarColor");
@@ -684,22 +684,22 @@ public class PlatformChannel {
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer statusBarColor;
     @Nullable public final Brightness statusBarIconBrightness;
-    @Nullable public final boolean systemStatusBarContrastEnforced;
+    @Nullable public final Boolean systemStatusBarContrastEnforced;
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer systemNavigationBarColor;
     @Nullable public final Brightness systemNavigationBarIconBrightness;
     // TODO(mattcarroll): add color annotation
     @Nullable public final Integer systemNavigationBarDividerColor;
-    @Nullable public final boolean systemNavigationBarContrastEnforced;
+    @Nullable public final Boolean systemNavigationBarContrastEnforced;
 
     public SystemChromeStyle(
         @Nullable Integer statusBarColor,
         @Nullable Brightness statusBarIconBrightness,
-        @Nullable boolean systemStatusBarContrastEnforced,
+        @Nullable Boolean systemStatusBarContrastEnforced,
         @Nullable Integer systemNavigationBarColor,
         @Nullable Brightness systemNavigationBarIconBrightness,
         @Nullable Integer systemNavigationBarDividerColor,
-        @Nullable boolean systemNavigationBarContrastEnforced) {
+        @Nullable Boolean systemNavigationBarContrastEnforced) {
       this.statusBarColor = statusBarColor;
       this.statusBarIconBrightness = statusBarIconBrightness;
       this.systemStatusBarContrastEnforced = systemStatusBarContrastEnforced;
