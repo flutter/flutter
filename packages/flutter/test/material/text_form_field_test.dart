@@ -653,6 +653,23 @@ void main() {
     expect(_validateCalled, 1);
   });
 
+  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: TextFormField(
+                autovalidate: true,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+            ),
+          ),
+        ),
+      );
+      }, throwsAssertionError);
+  });
+
   testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
