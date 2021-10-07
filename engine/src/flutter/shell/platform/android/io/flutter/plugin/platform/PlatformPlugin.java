@@ -393,7 +393,7 @@ public class PlatformPlugin {
     // You can't override the enforced contrast for a transparent status bar until SDK 29.
     // This overrides the translucent scrim that may be placed behind the bar on SDK 29+ to ensure
     // contrast is appropriate when using full screen layout modes like Edge to Edge.
-    if (!systemChromeStyle.systemStatusBarContrastEnforced && Build.VERSION.SDK_INT >= 29) {
+    if (systemChromeStyle.systemStatusBarContrastEnforced != null && Build.VERSION.SDK_INT >= 29) {
       window.setStatusBarContrastEnforced(systemChromeStyle.systemStatusBarContrastEnforced);
     }
 
@@ -432,7 +432,8 @@ public class PlatformPlugin {
     // This overrides the translucent scrim that may be placed behind 2/3 button navigation bars on
     // SDK 29+ to ensure contrast is appropriate when using full screen layout modes like
     // Edge to Edge.
-    if (!systemChromeStyle.systemNavigationBarContrastEnforced && Build.VERSION.SDK_INT >= 29) {
+    if (systemChromeStyle.systemNavigationBarContrastEnforced != null
+        && Build.VERSION.SDK_INT >= 29) {
       window.setNavigationBarContrastEnforced(
           systemChromeStyle.systemNavigationBarContrastEnforced);
     }
