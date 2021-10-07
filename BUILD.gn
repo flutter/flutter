@@ -123,6 +123,11 @@ group("flutter") {
     public_deps += [ "//flutter/testing/android_background_image" ]
   }
 
+  if (is_android) {
+    public_deps +=
+        [ "//flutter/shell/platform/android:flutter_shell_native_unittests" ]
+  }
+
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
@@ -144,11 +149,6 @@ group("flutter") {
       "//flutter/third_party/tonic/tests:tonic_unittests",
       "//flutter/third_party/txt:txt_unittests",
     ]
-
-    if (is_android) {
-      public_deps +=
-          [ "//flutter/shell/platform/android:flutter_shell_native_unittests" ]
-    }
 
     # The accessibility library only supports Mac and Windows at the moment.
     if (is_mac || is_win) {
