@@ -73,7 +73,7 @@ void main() {
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.0.2-all.zip\n');
     });
 
     testWithoutContext('injects the wrapper when some files are missing', () {
@@ -110,7 +110,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.0.2-all.zip\n');
     });
 
     testWithoutContext('injects the wrapper and the Gradle version is derivated from the AGP version', () {
@@ -129,6 +129,7 @@ void main() {
         '4.0.0': '6.7',
         '4.0.5': '6.7',
         '4.1.0': '6.7',
+        '7.0.1': '7.0.2',
       };
 
       for (final MapEntry<String, String> entry in testCases.entries) {

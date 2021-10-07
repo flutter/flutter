@@ -451,6 +451,8 @@ flutter:
 
       expect(getGradleVersionFor('4.0.0'), '6.7');
       expect(getGradleVersionFor('4.1.0'), '6.7');
+
+      expect(getGradleVersionFor('7.0.1'), '7.0.2');
     });
 
     testWithoutContext('throws on unsupported versions', () {

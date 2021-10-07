@@ -19,7 +19,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 
-const String _defaultGradleVersion = '6.7';
+const String _defaultGradleVersion = '7.0.2';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
@@ -181,6 +181,9 @@ String getGradleVersionFor(String androidPluginVersion) {
   }
   if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
     return '6.7';
+  }
+  if (_isWithinVersionRange(androidPluginVersion, min: '7.0.0', max: '7.0.1')) {
+    return '7.0.2';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
