@@ -126,10 +126,9 @@ class AnalyzeOnce extends AnalyzeBase {
       // Completing the future in the callback can't fail.
       unawaited(server.onExit.then<void>((int exitCode) {
         if (!analysisCompleter.isCompleted) {
-          final Exception error = exitCode == -6
-              ? ToolExit('analysis server exited: -6 (SIGABRT)')
-              : Exception('analysis server exited: $exitCode');
-          analysisCompleter.completeError(error);
+          analysisCompleter.completeError(
+            Exception('analysis server exited: $exitCode'),
+          );
         }
       }));
 

@@ -4,17 +4,22 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
@@ -39,14 +44,14 @@ void main() {
     );
   });
 
-  group('analysisServer.start()', () {
-    const String sdkPath = 'sdkPath';
+  group('analyze command', () {
     FileSystem fileSystem;
     Platform platform;
     BufferLogger logger;
     FakeProcessManager processManager;
     Terminal terminal;
-    AnalysisServer server;
+    AnalyzeCommand command;
+    CommandRunner<void> runner;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -54,40 +59,46 @@ void main() {
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
       terminal = Terminal.test();
-      server = AnalysisServer(
-        sdkPath,
-        <String>[], // directories
+      command = AnalyzeCommand(
+        artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
         processManager: processManager,
         terminal: terminal,
       );
+      runner = createTestCommandRunner(command);
     });
 
-    testWithoutContext('SIGABRT leads to ToolExit', () async {
+    testUsingContext('SIGABRT throws Exception', () async {
+      const int SIGABRT = -6;
       processManager.addCommands(
         <FakeCommand>[
           const FakeCommand(
+            // artifact paths are from Artifacts.test() and stable
             command: <String>[
-              '$sdkPath/bin/dart',
+              'HostArtifact.engineDartSdkPath/bin/dart',
               '--disable-dart-dev',
-              '$sdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
               '--sdk',
-              sdkPath,
+              'HostArtifact.engineDartSdkPath',
             ],
-            exitCode: -6,
+            exitCode: SIGABRT,
           ),
         ],
       );
-      await expectToolExitLater(
-        server.start(),
-        contains('yolo'),
-        //contains('SIGABRT'),
+      await expectLater(
+        runner.run(<String>['analyze']),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'description',
+            contains('analysis server exited: $SIGABRT'),
+          ),
+        ),
       );
-      await server.start();
     });
   });
 
