@@ -387,7 +387,7 @@ void main() {
 
   testWidgets('AnimatedCrossFade second child do not receive touch events',
       (WidgetTester tester) async {
-    bool isTouchEventNoticed = false;
+    int numberOfTouchEventNoticed = 0;
 
     Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
       return tester.pumpWidget(
@@ -399,12 +399,12 @@ void main() {
             child: AnimatedCrossFade(
               firstChild: const Text('AAA'),
               secondChild: TextButton(
-                  style: TextButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 600)),
+                  style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
                   onPressed: () {
-                    isTouchEventNoticed = !isTouchEventNoticed;
+                    numberOfTouchEventNoticed++;
                   },
-                  child: const Text('BBB')),
+                  child: const Text('BBB'),
+              ),
               crossFadeState: crossFadeState,
               duration: const Duration(milliseconds: 50),
             ),
@@ -413,17 +413,23 @@ void main() {
       );
     }
 
+    Future<void> touchSecondButton() async {
+      final TestGesture gestureTouchSecondButton = await tester
+          .startGesture(const Offset(150, 300));
+
+      return gestureTouchSecondButton.up();
+    }
+
     await buildAnimatedFrame(CrossFadeState.showSecond);
 
-    final TestGesture gestureTouchSecondButton = await tester.startGesture(const Offset(150, 300));
-    await gestureTouchSecondButton.up();
+    await touchSecondButton();
+    expect(numberOfTouchEventNoticed, 1);
 
-    expect(isTouchEventNoticed, isTrue);
+    await buildAnimatedFrame(CrossFadeState.showFirst);
+    await touchSecondButton();
+    await touchSecondButton();
 
-    await gestureTouchSecondButton.down(const Offset(150, 300));
-    await gestureTouchSecondButton.up();
-
-    expect(isTouchEventNoticed, isFalse);
+    expect(numberOfTouchEventNoticed, 1);
   });
 }
 
