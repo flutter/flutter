@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/base/utils.dart';
+
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
@@ -247,9 +249,13 @@ class CreateCommand extends CreateBase {
       );
     }
 
+    // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
+    final String titleCaseProjectName = projectName.split('_').map(camelCase).map(toTitleCase).join(' ');
+
     final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
+      titleCaseProjectName: titleCaseProjectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPluginHook: generatePlugin,

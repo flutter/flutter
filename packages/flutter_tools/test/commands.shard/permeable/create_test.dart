@@ -1363,6 +1363,44 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
+  testUsingContext('target name is Title Case for objc iOS project.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name', 'my_project', projectDir.path]);
+
+    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
+    expect(xcodeProjectFile, exists);
+    final List<String> xcodeProject = xcodeProjectFile.readAsLinesSync().map((String e) => e.replaceAll('\t', '')).toList();
+    expect(xcodeProject, contains('name = "My Project";'));
+    final int startLineNumberOfTargetSection = xcodeProject.indexOf('/* Begin PBXNativeTarget section */');
+    final int endLineNumberOfTargetSection = xcodeProject.indexOf('/* End PBXNativeTarget section */');
+    final int targetNameLineNumber = xcodeProject.indexOf('name = "My Project";');
+    expect(targetNameLineNumber > startLineNumberOfTargetSection && targetNameLineNumber < endLineNumberOfTargetSection, isTrue);
+  });
+
+  testUsingContext('target name is Title Case for swift iOS project.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
+
+    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
+    expect(xcodeProjectFile, exists);
+    final List<String> xcodeProject = xcodeProjectFile.readAsLinesSync().map((String e) => e.replaceAll('\t', '')).toList();
+    expect(xcodeProject, contains('name = "My Project";'));
+    final int startLineNumberOfTargetSection = xcodeProject.indexOf('/* Begin PBXNativeTarget section */');
+    final int endLineNumberOfTargetSection = xcodeProject.indexOf('/* End PBXNativeTarget section */');
+    final int targetNameLineNumber = xcodeProject.indexOf('name = "My Project";');
+    expect(targetNameLineNumber > startLineNumberOfTargetSection && targetNameLineNumber < endLineNumberOfTargetSection, isTrue);
+  });
+
   testUsingContext('has correct content and formatting with macOS app template', () async {
     Cache.flutterRoot = '../..';
 

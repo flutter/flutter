@@ -315,6 +315,7 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
+    assert(projectName != null);
     return projectName;
   }
 
@@ -323,6 +324,7 @@ abstract class CreateBase extends FlutterCommand {
   Map<String, Object> createTemplateContext({
     String organization,
     String projectName,
+    String titleCaseProjectName,
     String projectDescription,
     String androidLanguage,
     String iosDevelopmentTeam,
@@ -359,6 +361,7 @@ abstract class CreateBase extends FlutterCommand {
     return <String, Object>{
       'organization': organization,
       'projectName': projectName,
+      'titleCaseProjectName': titleCaseProjectName,
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,

@@ -34,6 +34,7 @@ String snakeCase(String str, [ String sep = '_' ]) {
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }
 
+/// Convert 'fooBar' to 'FooBar'.
 String toTitleCase(String str) {
   if (str.isEmpty) {
     return str;
