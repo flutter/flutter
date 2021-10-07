@@ -44,6 +44,9 @@ const String _kDisabledPlatformRequestedMessage = 'currently not supported on yo
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
+  ..stdoutSupportsAnsi = false
+  ..operatingSystem = 'macos';
 
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
@@ -60,6 +63,7 @@ void main() {
   Directory projectDir;
   FakeFlutterVersion fakeFlutterVersion;
   LoggingProcessManager loggingProcessManager;
+  FakeProcessManager fakeProcessManager;
   BufferLogger logger;
 
   setUpAll(() async {
@@ -76,6 +80,7 @@ void main() {
       frameworkRevision: frameworkRevision,
       channel: frameworkChannel,
     );
+    fakeProcessManager = FakeProcessManager.empty();
   });
 
   tearDown(() {
@@ -1306,6 +1311,56 @@ void main() {
   }, overrides: <Type, Generator>{
     FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
+  });
+
+  testUsingContext('has iOS development team with app template', () async {
+    Cache.flutterRoot = '../..';
+
+    final Completer<void> completer = Completer<void>();
+    final StreamController<List<int>> controller = StreamController<List<int>>();
+    const String certificates = '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+    1 valid identities found''';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['which', 'security'],
+      ),
+      const FakeCommand(
+        command: <String>['which', 'openssl'],
+      ),
+      const FakeCommand(
+        command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+        stdout: certificates,
+      ),
+      const FakeCommand(
+        command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+        stdout: 'This is a fake certificate',
+      ),
+      FakeCommand(
+        command: const <String>['openssl', 'x509', '-subject'],
+        stdin: IOSink(controller.sink),
+        stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+      )
+    ]);
+
+    controller.stream.listen((List<int> chunk) {
+      completer.complete();
+    });
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
+
+    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
+    expect(xcodeProjectFile, exists);
+    final String xcodeProject = xcodeProjectFile.readAsStringSync();
+    expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => fakeFlutterVersion,
+    Platform: _kNoColorTerminalMacOSPlatform,
+    ProcessManager: () => fakeProcessManager,
   });
 
   testUsingContext('has correct content and formatting with macOS app template', () async {
@@ -2722,7 +2777,6 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   }
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
-    print('#$line#');
     final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
     final List<String> lineComponents = line.trim().split(analyzerSeparator);
     final String lintName = lineComponents.removeLast();

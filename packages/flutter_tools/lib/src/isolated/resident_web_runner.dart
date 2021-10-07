@@ -145,6 +145,10 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   bool get supportsWriteSkSL => false;
 
+  @override
+  // Web uses a different plugin registry.
+  bool get generateDartPluginRegistry => false;
+
   bool get _enableDwds => debuggingEnabled;
 
   ConnectionResult _connectionResult;

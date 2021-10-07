@@ -158,7 +158,7 @@ Future<void> main() async {
     testWidgets('shows a cached image immediately when skipFadeOnSynchronousLoad=true', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
-      imageProvider.resolve(FakeImageConfiguration());
+      imageProvider.resolve(ImageConfiguration.empty);
       imageProvider.complete();
 
       await tester.pumpWidget(FadeInImage(

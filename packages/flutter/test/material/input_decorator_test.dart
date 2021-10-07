@@ -3664,6 +3664,110 @@ void main() {
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
 
+  testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
+    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.green);
+    });
+
+    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.blue);
+    });
+
+    // InputDecorationTheme arguments define InputDecoration properties.
+    InputDecoration decoration = const InputDecoration().applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+      ),
+    );
+
+    expect(decoration.labelStyle, themeStyle);
+    expect(decoration.helperStyle, themeStyle);
+    expect(decoration.hintStyle, themeStyle);
+    expect(decoration.errorStyle, themeStyle);
+    expect(decoration.isDense, true);
+    expect(decoration.contentPadding, const EdgeInsets.all(1.0));
+    expect(decoration.prefixStyle, themeStyle);
+    expect(decoration.suffixStyle, themeStyle);
+    expect(decoration.counterStyle, themeStyle);
+    expect(decoration.filled, true);
+    expect(decoration.fillColor, Colors.red);
+    expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+
+    // InputDecoration (baseDecoration) defines InputDecoration properties
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+      return const OutlineInputBorder();
+    });
+    decoration = InputDecoration(
+      labelStyle: decorationStyle,
+      helperStyle: decorationStyle,
+      hintStyle: decorationStyle,
+      errorStyle: decorationStyle,
+      isDense: false,
+      contentPadding: const EdgeInsets.all(4.0),
+      prefixStyle: decorationStyle,
+      suffixStyle: decorationStyle,
+      counterStyle: decorationStyle,
+      filled: false,
+      fillColor: Colors.blue,
+      border: border,
+      alignLabelWithHint: false,
+      constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    ).applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        helperMaxLines: 5,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        errorMaxLines: 4,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
+      ),
+    );
+
+    expect(decoration.labelStyle, decorationStyle);
+    expect(decoration.helperStyle, decorationStyle);
+    expect(decoration.helperMaxLines, 5);
+    expect(decoration.hintStyle, decorationStyle);
+    expect(decoration.errorStyle, decorationStyle);
+    expect(decoration.errorMaxLines, 4);
+    expect(decoration.isDense, false);
+    expect(decoration.contentPadding, const EdgeInsets.all(4.0));
+    expect(decoration.prefixStyle, decorationStyle);
+    expect(decoration.suffixStyle, decorationStyle);
+    expect(decoration.counterStyle, decorationStyle);
+    expect(decoration.filled, false);
+    expect(decoration.fillColor, Colors.blue);
+    expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
+    expect(decoration.alignLabelWithHint, false);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+  });
+
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/15742
 

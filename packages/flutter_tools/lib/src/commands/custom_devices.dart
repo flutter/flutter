@@ -159,6 +159,9 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
   String get name => 'custom-devices';
 
   @override
+  String get category => FlutterCommandCategory.tools;
+
+  @override
   Future<FlutterCommandResult> runCommand() async => null;
 
   @override

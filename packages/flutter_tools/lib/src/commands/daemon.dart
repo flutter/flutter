@@ -50,6 +50,9 @@ class DaemonCommand extends FlutterCommand {
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   final bool hidden;
 
   @override

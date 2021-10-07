@@ -33,12 +33,12 @@ void main() {
   group('VMServiceFlutterDriver with logCommunicationToFile', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
     late File logFile;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
@@ -92,12 +92,12 @@ void main() {
   group('VMServiceFlutterDriver with printCommunication', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() async {
       log.clear();
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{'status':'ok'});
@@ -122,7 +122,7 @@ void main() {
   group('VMServiceFlutterDriver.connect', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -130,7 +130,7 @@ void main() {
 
     setUp(() {
       log.clear();
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       vmServiceConnectFunction = (String url, Map<String, dynamic>? headers) async {
@@ -190,7 +190,7 @@ void main() {
 
     test('Connects to isolate number', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
-      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number));
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number!));
       expect(driver, isNotNull);
       expect(
         fakeClient.connectionLog,
@@ -269,7 +269,7 @@ void main() {
     test('connects to unpaused when onExtensionAdded does not contain the '
       'driver extension', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
-      fakeIsolate.extensionRPCs.add('ext.flutter.driver');
+      fakeIsolate.extensionRPCs!.add('ext.flutter.driver');
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -280,11 +280,11 @@ void main() {
   group('VMServiceFlutterDriver', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
@@ -688,11 +688,11 @@ void main() {
   group('VMServiceFlutterDriver with custom timeout', () {
     late FakeVmService fakeClient;
     late FakeVM fakeVM;
-    late FakeIsolate fakeIsolate;
+    late vms.Isolate fakeIsolate;
     late VMServiceFlutterDriver driver;
 
     setUp(() {
-      fakeIsolate = FakeIsolate();
+      fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
@@ -1217,16 +1217,19 @@ class FakeVM extends Fake implements vms.VM {
   }
 }
 
-class FakeIsolate extends Fake implements vms.Isolate {
-  @override
-  String get number => '123';
-
-  @override
-  String get id => number;
-
-  @override
-  vms.Event? pauseEvent;
-
-  @override
-  List<String> get extensionRPCs => <String>[];
-}
+vms.Isolate createFakeIsolate() => vms.Isolate(
+  id: '123',
+  number: '123',
+  name: null,
+  isSystemIsolate: null,
+  isolateFlags: null,
+  startTime: null,
+  runnable: null,
+  livePorts: null,
+  pauseOnExit: null,
+  pauseEvent: null,
+  libraries: null,
+  breakpoints: null,
+  exceptionPauseMode: null,
+  extensionRPCs: <String>[],
+);

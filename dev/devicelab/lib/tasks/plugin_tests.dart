@@ -131,7 +131,7 @@ class _FlutterProject {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '8.0'"
+        ? "s.platform = :ios, '9.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
@@ -173,25 +173,21 @@ class _FlutterProject {
 
         final String podsProjectContent = podsProject.readAsStringSync();
         if (target == 'ios') {
-          // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
-          // Pods Xcode project file 6 times. If this number changes, make sure
-          // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
-          // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
-          // See _reduceDarwinPluginMinimumVersion for details.
-          final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
-          if (iosDeploymentTargetCount != 9) {
-            throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
+          // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
+          // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
+          // in _reduceDarwinPluginMinimumVersion to 7, which is below the target version of 9.
+          if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 7')) {
+            throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
           }
           if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
             throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
           }
         }
 
-        // Same for macOS, but 12.
+        // Same for macOS deployment target, but 10.8.
         // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-        final int macosDeploymentTargetCount = 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
-        if (target == 'macos' && macosDeploymentTargetCount != 12) {
-          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET, $macosDeploymentTargetCount found');
+        if (target == 'macos' && podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
+          throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
         }
       }
     });
