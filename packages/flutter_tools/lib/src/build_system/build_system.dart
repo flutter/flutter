@@ -236,8 +236,11 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static ResolvedFiles _resolveConfiguration(List<Source> config,
-    List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
+  static ResolvedFiles _resolveConfiguration(
+    List<Source> config,
+    List<String> depfiles,
+    Environment environment, {
+    bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (final Source source in config) {

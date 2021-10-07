@@ -415,6 +415,7 @@ class ResidentWebRunner extends ResidentRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: elapsed.inMilliseconds,
+        fastReassemble: false,
       ).send();
     }
     return OperationResult.ok;

@@ -896,9 +896,6 @@ void main() {
   });
 
   testWidgets('setState that does not remove the Dismissible from tree should throw Error', (WidgetTester tester) async {
-    const Axis scrollDirection = Axis.vertical;
-    const DismissDirection dismissDirection = DismissDirection.horizontal;
-
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: StatefulBuilder(

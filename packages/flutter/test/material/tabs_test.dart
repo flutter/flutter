@@ -3308,8 +3308,6 @@ void main() {
   });
 
    testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
-    const double indicatorWeight = 2.0;
-
     const List<Widget> tabListWithText = <Widget>[
       Tab(icon: Icon(Icons.notifications), text: 'Test'),
     ];

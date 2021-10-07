@@ -528,7 +528,6 @@ void main() {
 
   testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    const String value = 'two';
 
     await tester.pumpWidget(
       buildFormFrame(

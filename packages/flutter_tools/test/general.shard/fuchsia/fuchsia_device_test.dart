@@ -726,7 +726,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1'),
+        FlutterView(id: '1', uiIsolate: null),
         // wrong name.
         FlutterView(
           id: '2',
@@ -752,7 +752,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1'),
+        FlutterView(id: '1', uiIsolate: null),
         // wrong name.
         FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
            ...fakeIsolate.toJson(),
@@ -766,7 +766,7 @@ void main() {
     testUsingContext('can handle non flutter view', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
-        FlutterView(id: '1'), // no ui isolate.
+        FlutterView(id: '1', uiIsolate: null), // no ui isolate.
       ], expectedIsolateName);
 
       expect(uri, throwsException);

@@ -278,6 +278,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   Widget build(BuildContext context) {
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
+    assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
     final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(

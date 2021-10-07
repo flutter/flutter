@@ -46,6 +46,7 @@ void main() {
       outputPreferences: OutputPreferences.test(),
       terminal: AnsiTerminal(
         platform: const LocalPlatform(),
+        stdio: null,
       ),
     );
     parser = PlistParser(

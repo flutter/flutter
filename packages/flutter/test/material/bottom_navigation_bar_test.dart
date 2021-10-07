@@ -290,7 +290,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - all labels', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
@@ -332,7 +331,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - selected labels only', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
@@ -373,7 +371,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - no labels', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);

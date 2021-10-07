@@ -259,7 +259,6 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
@@ -318,7 +317,6 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
     Rect rect;
 
     // Vertical scroll with TextDirection.ltr

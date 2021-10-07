@@ -359,6 +359,7 @@ end
           projectDir: globals.fs.currentDirectory,
           outputDir: outputBuildDirectory,
           buildDir: _project.dartTool.childDirectory('flutter_build'),
+          cacheDir: globals.cache.getRoot(),
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,

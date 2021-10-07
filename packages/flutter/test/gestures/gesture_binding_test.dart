@@ -177,7 +177,6 @@ void main() {
 
   test('Should synthesize kPrimaryButton for touch when no button is set', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    const PointerDeviceKind kind = PointerDeviceKind.touch;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
@@ -205,7 +204,6 @@ void main() {
 
   test('Should not synthesize kPrimaryButton for touch when a button is set', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    const PointerDeviceKind kind = PointerDeviceKind.touch;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),

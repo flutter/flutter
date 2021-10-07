@@ -411,6 +411,8 @@ class HotRunner extends ResidentRunner {
       targetPlatform: _targetPlatform,
       sdkName: _sdkName,
       emulator: _emulator,
+      fullRestart: null,
+      fastReassemble: false,
       overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
       compileTimeInMs: totalCompileTime.inMilliseconds,
       transferTimeInMs: totalLaunchAppTime.inMilliseconds,
@@ -758,6 +760,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: true,
           reason: reason,
+          fastReassemble: false,
           overallTimeInMs: restartTimer.elapsed.inMilliseconds,
           syncedBytes: result.updateFSReport?.syncedBytes,
           invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
@@ -783,6 +786,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: true,
           reason: reason,
+          fastReassemble: false,
         ).send();
       }
       status?.cancel();
@@ -832,6 +836,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
+          fastReassemble: false,
         ).send();
       } else {
         HotEvent('exception',
@@ -840,6 +845,7 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
+          fastReassemble: false,
         ).send();
       }
       return OperationResult(errorCode, errorMessage, fatal: true);
@@ -1136,6 +1142,7 @@ Future<OperationResult> _defaultReloadSourcesHelper(
       emulator: emulator,
       fullRestart: false,
       reason: reason,
+      fastReassemble: false,
     ).send();
     // Reset devFS lastCompileTime to ensure the file will still be marked
     // as dirty on subsequent reloads.

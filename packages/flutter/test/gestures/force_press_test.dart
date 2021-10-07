@@ -17,10 +17,6 @@ void main() {
     const double pressureMin = 0;
     const double pressureMax = 6.66;
 
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
-
     int started = 0;
     int peaked = 0;
     int updated = 0;
@@ -165,10 +161,6 @@ void main() {
     const double pressureMin = 0;
     const double pressureMax = 6.66;
 
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
-
     int started = 0;
     int peaked = 0;
     int updated = 0;
@@ -216,10 +208,6 @@ void main() {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
-
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
 
     int started = 0;
     int peaked = 0;
@@ -289,10 +277,6 @@ void main() {
   testGesture('Should not call ended on pointer up if the gesture was never accepted', (GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
 
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
-
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
@@ -337,10 +321,6 @@ void main() {
 
   testGesture('Should call start only once if there is a competing gesture recognizer', (GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
-
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -399,10 +379,6 @@ void main() {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
-
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
 
     int started = 0;
     int peaked = 0;
@@ -506,10 +482,6 @@ void main() {
     const double pressureMin = 0;
     const double pressureMax = 6.66;
 
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
-
     int started = 0;
     int peaked = 0;
     int updated = 0;
@@ -557,10 +529,6 @@ void main() {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
-
-    // Interpolated Flutter pressure values.
-    const double startPressure = 0.4; // = Device pressure of 2.66.
-    const double peakPressure = 0.85; // = Device pressure of 5.66.
 
     int started = 0;
     int peaked = 0;

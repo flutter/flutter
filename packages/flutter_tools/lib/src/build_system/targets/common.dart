@@ -154,7 +154,6 @@ class KernelSnapshot extends Target {
       processManager: environment.processManager,
       artifacts: environment.artifacts,
       fileSystemRoots: <String>[],
-      fileSystemScheme: null,
     );
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {

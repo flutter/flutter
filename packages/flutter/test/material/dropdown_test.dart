@@ -693,7 +693,6 @@ void main() {
   for (final TextDirection textDirection in TextDirection.values) {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
-      const String value = 'two';
 
       Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged);
 
@@ -885,7 +884,6 @@ void main() {
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    const String value = 'two';
 
     Widget build() => buildFrame(buttonKey: buttonKey, isDense: true, onChanged: onChanged);
 

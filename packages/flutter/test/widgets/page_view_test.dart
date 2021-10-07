@@ -11,8 +11,6 @@ import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = Duration(milliseconds: 100);
-
 void main() {
   testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956

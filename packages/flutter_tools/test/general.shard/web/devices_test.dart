@@ -273,6 +273,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
+      operatingSystemUtils: null,
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );

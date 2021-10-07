@@ -10,7 +10,6 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals_null_migrated.dart' as globals;
