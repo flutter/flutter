@@ -439,12 +439,14 @@ TEST_F(ShellTest, LastEntrypoint) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST_F(ShellTest, DisallowedDartVMFlag) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_DisallowedDartVMFlag
+#else
+       DisallowedDartVMFlag
 #endif  // defined(WINUWP)
-
+) {
   // Run this test in a thread-safe manner, otherwise gtest will complain.
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -458,11 +460,14 @@ TEST_F(ShellTest, DisallowedDartVMFlag) {
   ASSERT_DEATH(flutter::SettingsFromCommandLine(command_line), expected);
 }
 
-TEST_F(ShellTest, AllowedDartVMFlag) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_AllowedDartVMFlag
+#else
+       AllowedDartVMFlag
 #endif  // defined(WINUWP)
+) {
   std::vector<const char*> flags = {
       "--enable-isolate-groups",
       "--no-enable-isolate-groups",
@@ -758,18 +763,15 @@ TEST_F(ShellTest,
   DestroyShell(std::move(shell));
 }
 
-// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 TEST_F(ShellTest,
-#if defined(OS_FUCHSIA)
+#if defined(OS_FUCHSIA) || defined(WINUWP)
+       // TODO(dworsham): https://github.com/flutter/flutter/issues/59816
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
        DISABLED_OnPlatformViewDestroyDisablesThreadMerger
 #else
        OnPlatformViewDestroyDisablesThreadMerger
 #endif
 ) {
-#if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP. Not yet implemented";
-#endif  // defined(WINUWP)
   auto settings = CreateSettingsForFixture();
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
   auto end_frame_callback =
@@ -1349,12 +1351,14 @@ TEST_F(ShellTest, ReloadSystemFonts) {
   shell.reset();
 }
 
-TEST_F(ShellTest, WaitForFirstFrame) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires fix";
-#endif  // defined(WINUWP)
-
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_WaitForFirstFrame
+#else
+       WaitForFirstFrame
+#endif
+) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1409,11 +1413,14 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires threading fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_WaitForFirstFrameMultiple
+#else
+       WaitForFirstFrameMultiple
 #endif  // defined(WINUWP)
+) {
 
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
@@ -1438,11 +1445,14 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
 
 /// Makes sure that WaitForFirstFrame works if we rendered a frame with the
 /// single-thread setup.
-TEST_F(ShellTest, WaitForFirstFrameInlined) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires threading fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_WaitForFirstFrameInlined
+#else
+       WaitForFirstFrameInlined
 #endif  // defined(WINUWP)
+) {
 
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
@@ -2029,12 +2039,14 @@ TEST_F(ShellTest, CanRegisterImageDecoders) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires vm service sandboxing fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_OnServiceProtocolGetSkSLsWorks
+#else
+       OnServiceProtocolGetSkSLsWorks
 #endif  // defined(WINUWP)
-
+) {
   fml::ScopedTemporaryDirectory base_dir;
   ASSERT_TRUE(base_dir.fd().is_valid());
   PersistentCache::SetCacheDirectoryPath(base_dir.path());
@@ -2465,11 +2477,14 @@ TEST_F(ShellTest, IgnoresInvalidMetrics) {
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
-TEST_F(ShellTest, OnServiceProtocolSetAssetBundlePathWorks) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires vm service sandboxing fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_OnServiceProtocolSetAssetBundlePathWorks
+#else
+       OnServiceProtocolSetAssetBundlePathWorks
 #endif  // defined(WINUWP)
+) {
 
   Settings settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
@@ -2542,11 +2557,14 @@ TEST_F(ShellTest, EngineRootIsolateLaunchesDontTakeVMDataSettings) {
   isolate_create_latch.Wait();
 }
 
-TEST_F(ShellTest, AssetManagerSingle) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires filesystem sandboxing fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_AssetManagerSingle
+#else
+       AssetManagerSingle
 #endif  // defined(WINUWP)
+) {
 
   fml::ScopedTemporaryDirectory asset_dir;
   fml::UniqueFD asset_dir_fd = fml::OpenDirectory(
@@ -2572,11 +2590,14 @@ TEST_F(ShellTest, AssetManagerSingle) {
   ASSERT_TRUE(result == content);
 }
 
-TEST_F(ShellTest, AssetManagerMulti) {
+TEST_F(ShellTest,
 #if defined(WINUWP)
-  // TODO(cbracken): Re-enable. https://github.com/flutter/flutter/issues/90481
-  GTEST_SKIP() << "Skipped on WinUWP; requires filesystem sandboxing fix";
+       // TODO(cbracken): https://github.com/flutter/flutter/issues/90481
+       DISABLED_AssetManagerMulti
+#else
+       AssetManagerMulti
 #endif  // defined(WINUWP)
+) {
 
   fml::ScopedTemporaryDirectory asset_dir;
   fml::UniqueFD asset_dir_fd = fml::OpenDirectory(
