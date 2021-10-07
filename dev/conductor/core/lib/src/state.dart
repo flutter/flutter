@@ -93,6 +93,43 @@ String presentState(pb.ConductorState state) {
   return buffer.toString();
 }
 
+Map<String, Object> presentStateDesktop(pb.ConductorState state) {
+  final List<Map<String, Object>> engineCherrypicks = <Map<String, Object>>[];
+  for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+    engineCherrypicks.add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+  }
+
+  final List<Map<String, Object>> frameworkCherrypicks = <Map<String, Object>>[];
+  for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+    frameworkCherrypicks
+        .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+  }
+
+  final Map<String, Object> stateDesktop = <String, Object>{
+    'conductorVersion': state.conductorVersion,
+    'releaseChannel': state.releaseChannel,
+    'releaseVersion': state.releaseVersion,
+    'startedAt': DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt()).toString(),
+    'updatedAt': DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt()).toString(),
+    'engineCandidateBranch': state.engine.candidateBranch,
+    'engineStartingGitHEAD': state.engine.startingGitHead,
+    'engineCurrentGitHEAD': state.engine.currentGitHead,
+    'enginePathtoCheckout': state.engine.checkoutPath,
+    'enginePostLUCIDashboard': luciConsoleLink(state.releaseChannel, 'engine'),
+    'engineCherrypicks': engineCherrypicks,
+    'dartRevision': state.engine.dartRevision,
+    'frameworkCandidateBranch': state.framework.candidateBranch,
+    'frameworkStartingGitHEAD': state.framework.startingGitHead,
+    'frameworkCurrentGitHEAD': state.framework.currentGitHead,
+    'frameworkPathtoCheckout': state.framework.checkoutPath,
+    'frameworkPostLUCIDashboard': luciConsoleLink(state.releaseChannel, 'flutter'),
+    'frameworkCherrypicks': frameworkCherrypicks,
+    'currentPhase': state.currentPhase,
+  };
+
+  return stateDesktop;
+}
+
 String presentPhases(ReleasePhase currentPhase) {
   final StringBuffer buffer = StringBuffer();
   bool phaseCompleted = true;
