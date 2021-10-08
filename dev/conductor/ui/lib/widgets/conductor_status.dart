@@ -35,7 +35,7 @@ class ConductorStatusState extends State<ConductorStatus> {
       'Release version:',
       'Release started at:',
       'Release updated at:',
-      'Dart SDK evision:',
+      'Dart SDK revision:',
     ];
     final List<String> statusHeaderDataNames = <String>[
       'conductorVersion',
@@ -126,8 +126,10 @@ COMPLETED: The cherrypick has been successfully applied to the local checkout.
 ABANDONED: The cherrypick will NOT be applied in this release.''',
           child: Icon(
             Icons.info,
-            size: 20.0,
-            // Only the engine tooltip has a key, because only the engine tooltip is tested.
+            size: 16.0,
+
+            /// Only the engine tooltip has a key, because engine and framework tooltips use the same widget.
+            /// Only the engine tooltip is tested.
             key: widget.engineOrFramework == 'engine' ? const Key('conductorStatusTooltip1') : null,
           ),
         ),
