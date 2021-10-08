@@ -62,8 +62,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.border = const Border(
       top: BorderSide(
         color: _kDefaultTabBarBorderColor,
-        width: 0.0, // One physical pixel.
-        style: BorderStyle.solid,
+        width: 0.0, // 0.0 means one physical pixel
       ),
     ),
   }) : assert(items != null),

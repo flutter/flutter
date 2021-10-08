@@ -37,7 +37,7 @@ void main() {
   }
 
   setUp(() {
-    firstDate = DateTime(2001, DateTime.january, 1);
+    firstDate = DateTime(2001);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
     today = DateTime(2016, DateTime.january, 3);
@@ -383,7 +383,7 @@ void main() {
                        showDatePicker(
                          context: context,
                          initialDate: DateTime(2016, DateTime.january, 15),
-                         firstDate:DateTime(2001, DateTime.january, 1),
+                         firstDate:DateTime(2001),
                          lastDate: DateTime(2031, DateTime.december, 31),
                          builder: (BuildContext context, Widget? child) {
                            return Directionality(
@@ -674,7 +674,7 @@ void main() {
 
   group('Input mode', () {
     setUp(() {
-      firstDate = DateTime(2015, DateTime.january, 1);
+      firstDate = DateTime(2015);
       lastDate = DateTime(2017, DateTime.december, 31);
       initialDate = DateTime(2016, DateTime.january, 15);
       initialEntryMode = DatePickerEntryMode.input;
@@ -1282,8 +1282,8 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.values[args['datePickerEntryMode'] as int],
           initialDate: DateTime.fromMillisecondsSinceEpoch(args['selectedDate'] as int),
-          firstDate: DateTime(2021, 1, 1),
-          lastDate: DateTime(2022, 1, 1),
+          firstDate: DateTime(2021),
+          lastDate: DateTime(2022),
         );
       },
     );

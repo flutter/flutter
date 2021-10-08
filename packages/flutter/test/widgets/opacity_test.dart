@@ -76,7 +76,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.0,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
@@ -110,7 +109,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.1,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );

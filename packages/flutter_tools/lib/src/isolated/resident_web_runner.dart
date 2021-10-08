@@ -356,7 +356,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (debuggingOptions.buildInfo.isDebug) {
       await runSourceGenerators();
       // Full restart is always false for web, since the extra recompile is wasteful.
-      final UpdateFSReport report = await _updateDevFS(fullRestart: false);
+      final UpdateFSReport report = await _updateDevFS();
       if (report.success) {
         device.generator.accept();
       } else {
@@ -415,7 +415,7 @@ class ResidentWebRunner extends ResidentRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: elapsed.inMilliseconds,
-        fastReassemble: null,
+        fastReassemble: false,
       ).send();
     }
     return OperationResult.ok;
@@ -498,7 +498,7 @@ class ResidentWebRunner extends ResidentRunner {
         targetPlatform: TargetPlatform.web_javascript,
       );
       if (result != 0) {
-        return UpdateFSReport(success: false);
+        return UpdateFSReport();
       }
     }
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
@@ -589,7 +589,7 @@ class ResidentWebRunner extends ResidentRunner {
           bool force,
           bool pause,
         }) async {
-          await restart(benchmarkMode: false, pause: pause, fullRestart: false);
+          await restart(pause: pause);
         },
         null,
         null,

@@ -248,13 +248,10 @@ class DragAndDropAppState extends State<DragAndDropApp> {
         children: <Widget>[
           Expanded(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 ExampleDragSource(
                   color: Colors.yellow.shade300,
-                  under: true,
-                  heavy: false,
                   child: const Text('under'),
                 ),
                 ExampleDragSource(
@@ -266,7 +263,6 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 ExampleDragSource(
                   color: Colors.indigo.shade300,
                   under: false,
-                  heavy: false,
                   child: const Text('above'),
                 ),
               ],

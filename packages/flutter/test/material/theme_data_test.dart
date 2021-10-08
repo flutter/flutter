@@ -52,7 +52,7 @@ void main() {
   });
 
   test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
-    const TextTheme noBodyText1TextTheme = TextTheme(bodyText1: null);
+    const TextTheme noBodyText1TextTheme = TextTheme();
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
@@ -326,7 +326,7 @@ void main() {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(platform: TargetPlatform.android),
+      typography: Typography.material2018(),
       cupertinoOverrideTheme: null,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),

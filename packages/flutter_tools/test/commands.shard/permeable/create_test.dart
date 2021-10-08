@@ -1950,7 +1950,7 @@ void main() {
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>[ 'ios', 'android', 'web', 'linux', 'windows', 'macos']);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('plugin supports ios if requested', () async {
@@ -1969,7 +1969,7 @@ void main() {
     unexpectedPlatforms: <String>['some_platform']);
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
   });
 
@@ -1991,7 +1991,7 @@ void main() {
     androidIdentifier: 'com.example.flutter_project');
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
   });
 
@@ -2033,7 +2033,7 @@ void main() {
     unexpectedPlatforms: <String>['web']);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
   });
 
@@ -2048,7 +2048,7 @@ void main() {
     expect(projectDir.childDirectory('ios'), exists);
     expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('create an empty plugin, then add android', () async {
@@ -2063,7 +2063,7 @@ void main() {
     expect(
         projectDir.childDirectory('example').childDirectory('android'), exists);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('create an empty plugin, then add linux', () async {
@@ -2531,7 +2531,7 @@ void main() {
     expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Logger: ()=> logger,
   });
 
@@ -2546,7 +2546,7 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
 
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
   });
 
@@ -2723,10 +2723,9 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     '../../bin/cache/dart-sdk/bin/dart',
     snapshotArgs,
   );
-  if (snapshotResult.exitCode != 0) {
-    print(snapshotResult.stdout);
-    print(snapshotResult.stderr);
-  }
+  printOnFailure('Results of generating snapshot:');
+  printOnFailure(snapshotResult.stdout.toString());
+  printOnFailure(snapshotResult.stderr.toString());
   expect(snapshotResult.exitCode, 0);
 }
 
@@ -2768,10 +2767,9 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     workingDirectory: workingDir,
   );
   if (expectedFailures.isEmpty) {
-    if (exec.exitCode != 0) {
-      print(exec.stdout);
-      print(exec.stderr);
-    }
+    printOnFailure('Results of running analyzer:');
+    printOnFailure(exec.stdout.toString());
+    printOnFailure(exec.stderr.toString());
     expect(exec.exitCode, 0);
     return;
   }
@@ -2825,10 +2823,9 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     args,
     workingDirectory: workingDir.path,
   );
-  if (exec.exitCode != 0) {
-    print(exec.stdout);
-    print(exec.stderr);
-  }
+  printOnFailure('Output of running flutter test:');
+  printOnFailure(exec.stdout.toString());
+  printOnFailure(exec.stderr.toString());
   expect(exec.exitCode, 0);
 }
 

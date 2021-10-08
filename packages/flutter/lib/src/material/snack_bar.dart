@@ -489,7 +489,6 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = Padding(
       padding: padding,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: Container(
@@ -528,7 +527,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
 
     snackBar = Material(
       shape: shape,

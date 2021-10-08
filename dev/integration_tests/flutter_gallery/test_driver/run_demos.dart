@@ -45,7 +45,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       await controller.pumpAndSettle();
       // Scroll back to the top
       await controller.drag(demoList, const Offset(0.0, 10000.0));
-      await controller.pumpAndSettle(const Duration(milliseconds: 100));
+      await controller.pumpAndSettle();
     }
     currentDemoCategory = demoCategory;
 

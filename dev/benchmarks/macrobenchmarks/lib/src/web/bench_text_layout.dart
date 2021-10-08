@@ -417,7 +417,6 @@ class ColorItem extends StatelessWidget {
           bottom: false,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text('$_counter:$prefix$index'),
               Text(colorString()),

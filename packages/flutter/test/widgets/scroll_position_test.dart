@@ -168,7 +168,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
-          scrollDirection: Axis.vertical,
           controller: controller,
           children: items.map<Widget>((int item) {
             return Focus(

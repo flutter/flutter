@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'base/context.dart';
-import 'device.dart';
 import 'doctor.dart';
 import 'ios/simulators.dart';
 import 'macos/xcdevice.dart';
@@ -15,7 +14,6 @@ export 'globals_null_migrated.dart';
 
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
-DeviceManager get deviceManager => context.get<DeviceManager>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 
 XCDevice get xcdevice => context.get<XCDevice>();

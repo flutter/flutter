@@ -307,7 +307,7 @@ class NavigationDestination extends StatelessWidget {
             _StatusTransitionWidgetBuilder(
               animation: animation,
               builder: (BuildContext context, Widget? child) {
-                return animation.isForwardOrCompleted
+                return _isForwardOrCompleted(animation)
                     ? selectedIconWidget
                     : unselectedIconWidget;
               },
@@ -329,7 +329,7 @@ class NavigationDestination extends StatelessWidget {
             upperLimit: 1,
             child: Text(
               label,
-              style: animation.isForwardOrCompleted
+              style: _isForwardOrCompleted(animation)
                   ? effectiveSelectedLabelTextStyle
                   : effectiveUnselectedLabelTextStyle,
             ),
@@ -566,7 +566,7 @@ class _NavigationIndicator extends StatelessWidget {
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           return _SelectableAnimatedBuilder(
-            isSelected: animation.isForwardOrCompleted,
+            isSelected: _isForwardOrCompleted(animation),
             duration: const Duration(milliseconds: 100),
             alwaysDoFullAnimation: true,
             builder: (BuildContext context, Animation<double> fadeAnimation) {
@@ -576,7 +576,7 @@ class _NavigationIndicator extends StatelessWidget {
                   width: 64.0,
                   height: 32.0,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                     color: color ?? colorScheme.secondary.withOpacity(.24),
                   ),
                 ),
@@ -725,7 +725,7 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
+          selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
           container: true,
           child: child,
         );
@@ -1154,9 +1154,9 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
   }
 }
 
-/// Convenience static extensions on Animation.
-extension _AnimationUtils on Animation<double> {
-  /// Returns `true` if this animation is ticking forward, or has completed,
-  /// based on [status].
-  bool get isForwardOrCompleted => status == AnimationStatus.forward || status == AnimationStatus.completed;
+/// Returns `true` if this animation is ticking forward, or has completed,
+/// based on [status].
+bool _isForwardOrCompleted(Animation<double> animation) {
+  return animation.status == AnimationStatus.forward
+      || animation.status == AnimationStatus.completed;
 }

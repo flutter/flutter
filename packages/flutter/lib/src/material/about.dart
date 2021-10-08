@@ -570,7 +570,6 @@ class _PackagesViewState extends State<_PackagesView> {
                 return Material(
                     color: Theme.of(context).cardColor,
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       widget.about,
                       const Center(child: CircularProgressIndicator()),
@@ -1470,7 +1469,6 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
                     constraints: BoxConstraints.tightFor(width: masterViewWidth),
@@ -1576,7 +1574,6 @@ class _DetailView extends StatelessWidget {
     return DraggableScrollableSheet(
       initialChildSize: minHeight,
       minChildSize: minHeight,
-      maxChildSize: 1,
       expand: false,
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
@@ -1587,7 +1584,7 @@ class _DetailView extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(_kCardElevation, 0.0, _kCardElevation, 0.0),
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(3.0), bottom: Radius.zero),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(3.0)),
             ),
             child: _builder(
               context,

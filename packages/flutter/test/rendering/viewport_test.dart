@@ -582,7 +582,7 @@ void main() {
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
-    final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
+    final ScrollController controllerY = ScrollController(initialScrollOffset: 400.0);
     final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
       return List<Widget>.generate(10, (int x) {
         return SizedBox(
@@ -943,8 +943,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/20893.
 
     List<Widget> slivers;
-    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
-    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerX = ScrollController();
+    final ScrollController controllerY = ScrollController();
 
     await tester.pumpWidget(
       Directionality(
@@ -993,8 +993,8 @@ void main() {
 
   testWidgets('Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
     Widget sliver;
-    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
-    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerX = ScrollController();
+    final ScrollController controllerY = ScrollController();
 
     await tester.pumpWidget(
       Directionality(
@@ -1130,7 +1130,6 @@ void main() {
                   return i == 10
                   ? SliverPersistentHeader(
                     pinned: true,
-                    floating: false,
                     delegate: _TestSliverPersistentHeaderDelegate(
                       minExtent: 100,
                       maxExtent: 300,
@@ -1284,7 +1283,7 @@ void main() {
                 key: headerKey,
                 pinned: true,
                 floating: true,
-                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, child: null, vsync: vsync),
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, vsync: vsync),
               ),
             ),
           );
@@ -1486,8 +1485,8 @@ void main() {
   }
 
   group('Floating header showOnScreen', () {
-    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.vertical);
-    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.horizontal);
+    testFloatingHeaderShowOnScreen();
+    testFloatingHeaderShowOnScreen(axis: Axis.horizontal);
   });
 
   group('RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion', () {
@@ -1525,7 +1524,7 @@ void main() {
     }
 
     testWidgets('up, forward growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: false));
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
@@ -1543,7 +1542,7 @@ void main() {
     });
 
     testWidgets('right, forward growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: false));
+      await tester.pumpWidget(buildList(axis: Axis.horizontal));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
@@ -1552,7 +1551,7 @@ void main() {
     });
 
     testWidgets('right, reverse growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: true));
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverseGrowth: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
@@ -1561,7 +1560,7 @@ void main() {
     });
 
     testWidgets('down, forward growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: false));
+      await tester.pumpWidget(buildList(axis: Axis.vertical));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
@@ -1570,7 +1569,7 @@ void main() {
     });
 
     testWidgets('down, reverse growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: true));
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverseGrowth: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
@@ -1579,7 +1578,7 @@ void main() {
     });
 
     testWidgets('left, forward growth', (WidgetTester tester) async {
-      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: false));
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
@@ -1698,7 +1697,7 @@ void main() {
 
     testWidgets('Horizontal viewport was given unbounded width', (WidgetTester tester) async {
       await expectFlutterError(
-        widget: buildNestedWidget(Axis.horizontal, Axis.horizontal),
+        widget: buildNestedWidget(Axis.horizontal),
         tester: tester,
         message:
           'FlutterError\n'

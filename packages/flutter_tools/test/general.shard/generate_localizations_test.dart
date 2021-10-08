@@ -823,8 +823,6 @@ flutter:
         preferredSupportedLocales: <String>['en_US'],
         templateArbFile: Uri.file('example.arb', windows: false),
         untranslatedMessagesFile: Uri.file('untranslated', windows: false),
-        // Set synthetic package to true.
-        useSyntheticPackage: true,
       );
 
       expect(
@@ -2063,7 +2061,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
-        useDeferredLoading: false,
       )
         ..loadResources()
         ..writeOutputFiles(BufferLogger.test());
@@ -2120,7 +2117,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
-        useDeferredLoading: false,
       )
         ..loadResources()
         ..writeOutputFiles(BufferLogger.test());

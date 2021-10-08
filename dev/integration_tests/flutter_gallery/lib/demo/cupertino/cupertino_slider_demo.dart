@@ -42,7 +42,6 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                   children: <Widget> [
                     CupertinoSlider(
                       value: _value,
-                      min: 0.0,
                       max: 100.0,
                       onChanged: (double value) {
                         setState(() {
@@ -58,7 +57,6 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                   children: <Widget> [
                     CupertinoSlider(
                       value: _discreteValue,
-                      min: 0.0,
                       max: 100.0,
                       divisions: 5,
                       onChanged: (double value) {

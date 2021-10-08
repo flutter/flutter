@@ -115,7 +115,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 // This button would be not visible, but still focusable from
                 // the foreground pane without the FocusScope.
                 ElevatedButton(
-                  onPressed: () => print('You pressed the other button!'),
+                  onPressed: () => debugPrint('You pressed the other button!'),
                   child: const Text('ANOTHER BUTTON TO FOCUS'),
                 ),
                 DefaultTextStyle(

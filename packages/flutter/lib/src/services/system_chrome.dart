@@ -266,8 +266,6 @@ class SystemUiOverlayStyle {
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
@@ -277,8 +275,6 @@ class SystemUiOverlayStyle {
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
@@ -289,12 +285,12 @@ class SystemUiOverlayStyle {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
-      'systemStatusBarContrastEnforced' : systemStatusBarContrastEnforced ?? true,
+      'systemStatusBarContrastEnforced': systemStatusBarContrastEnforced,
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
-      'systemNavigationBarContrastEnforced' : systemNavigationBarContrastEnforced ?? true,
+      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
     };
   }
 

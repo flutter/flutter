@@ -151,7 +151,6 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
       logger: logger,
       config: config,
       terminal: terminal,
-      shouldExitOnNoCerts: false,
     );
 
 /// Set [shouldExitOnNoCerts] to show instructions for how to add a cert when none are found, then [toolExit].
@@ -302,7 +301,6 @@ Future<String?> _chooseSigningIdentity(
       List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
-      displayAcceptedCharacters: true,
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
       logger: logger,
     );
