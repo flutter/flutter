@@ -39,6 +39,71 @@
     return NO;
   }
 
+  OSType pixel_format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  if (pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
+      pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
+    return [self populateTextureFromYUVAPixelBuffer:pixelBuffer textureOut:textureOut];
+  } else {
+    return [self populateTextureFromRGBAPixelBuffer:pixelBuffer textureOut:textureOut];
+  }
+}
+
+- (BOOL)populateTextureFromYUVAPixelBuffer:(nonnull CVPixelBufferRef)pixelBuffer
+                                textureOut:(nonnull FlutterMetalExternalTexture*)textureOut {
+  CVMetalTextureRef yCVMetalTexture = nullptr;
+  CVMetalTextureRef uvCVMetalTextureRef = nullptr;
+  SkISize textureSize =
+      SkISize::Make(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
+
+  CVReturn yCVReturn = CVMetalTextureCacheCreateTextureFromImage(
+      /*allocator=*/kCFAllocatorDefault,
+      /*textureCache=*/_darwinMetalContext.textureCache,
+      /*sourceImage=*/pixelBuffer,
+      /*textureAttributes=*/nullptr,
+      /*pixelFormat=*/MTLPixelFormatR8Unorm,
+      /*width=*/CVPixelBufferGetWidthOfPlane(pixelBuffer, 0u),
+      /*height=*/CVPixelBufferGetHeightOfPlane(pixelBuffer, 0u),
+      /*planeIndex=*/0u,
+      /*texture=*/&yCVMetalTexture);
+
+  if (yCVReturn != kCVReturnSuccess) {
+    NSLog(@"Could not create Metal texture from pixel buffer: CVReturn %d", yCVReturn);
+    return NO;
+  }
+
+  CVReturn uvCVReturn = CVMetalTextureCacheCreateTextureFromImage(
+      /*allocator=*/kCFAllocatorDefault,
+      /*textureCache=*/_darwinMetalContext.textureCache,
+      /*sourceImage=*/pixelBuffer,
+      /*textureAttributes=*/nullptr,
+      /*pixelFormat=*/MTLPixelFormatRG8Unorm,
+      /*width=*/CVPixelBufferGetWidthOfPlane(pixelBuffer, 1u),
+      /*height=*/CVPixelBufferGetHeightOfPlane(pixelBuffer, 1u),
+      /*planeIndex=*/1u,
+      /*texture=*/&uvCVMetalTextureRef);
+
+  if (uvCVReturn != kCVReturnSuccess) {
+    CVBufferRelease(yCVMetalTexture);
+    NSLog(@"Could not create Metal texture from pixel buffer: CVReturn %d", uvCVReturn);
+    return NO;
+  }
+
+  _textures = {(__bridge FlutterMetalTextureHandle)CVMetalTextureGetTexture(yCVMetalTexture),
+               (__bridge FlutterMetalTextureHandle)CVMetalTextureGetTexture(uvCVMetalTextureRef)};
+  CVBufferRelease(yCVMetalTexture);
+  CVBufferRelease(uvCVMetalTextureRef);
+
+  textureOut->num_textures = 2;
+  textureOut->height = textureSize.height();
+  textureOut->width = textureSize.width();
+  textureOut->pixel_format = FlutterMetalExternalTexturePixelFormat::kYUVA;
+  textureOut->textures = _textures.data();
+
+  return YES;
+}
+
+- (BOOL)populateTextureFromRGBAPixelBuffer:(nonnull CVPixelBufferRef)pixelBuffer
+                                textureOut:(nonnull FlutterMetalExternalTexture*)textureOut {
   SkISize textureSize =
       SkISize::Make(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
 
