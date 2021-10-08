@@ -25,9 +25,9 @@ assignees: ''
 
 <!-- Please include full steps to reproduce so that we can reproduce the problem. -->
 
-1. ...
-2. ...
-3. ...
+1. Execute `flutter run` on the code sample <!-- (see "Code sample" section below) -->
+2. ... <!-- describe steps to demonstrate bug -->
+3. ... <!-- for example "Tap on X and see a crash" -->
 
 **Expected results:** <!-- what did you want to see? -->
 
@@ -39,6 +39,11 @@ assignees: ''
 <!--
       Please create a minimal reproducible sample that shows the problem
       and attach it below between the lines with the backticks.
+
+      To create it you can use `flutter create bug` command and update the `main.dart` file.
+
+      Alternatively, you can use https://dartpad.dev/
+      which is capable of creating and running small Flutter apps.
 
       Without this we will unlikely be able to progress on the issue, and because of that
       we regretfully will have to close it.
