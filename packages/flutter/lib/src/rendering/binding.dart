@@ -109,6 +109,36 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
+      registerBoolServiceExtension(
+        name: 'debugDisableClipLayers',
+        getter: () async => debugDisableClipLayers,
+        setter: (bool value) {
+          if (debugDisableClipLayers == value)
+            return Future<void>.value();
+          debugDisableClipLayers = value;
+          return _forceRepaint();
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'debugDisablePhysicalShapeLayers',
+        getter: () async => debugDisablePhysicalShapeLayers,
+        setter: (bool value) {
+          if (debugDisablePhysicalShapeLayers == value)
+            return Future<void>.value();
+          debugDisablePhysicalShapeLayers = value;
+          return _forceRepaint();
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'debugDisableOpacityLayers',
+        getter: () async => debugDisableOpacityLayers,
+        setter: (bool value) {
+          if (debugDisableOpacityLayers == value)
+            return Future<void>.value();
+          debugDisableOpacityLayers = value;
+          return _forceRepaint();
+        },
+      );
       return true;
     }());
 
