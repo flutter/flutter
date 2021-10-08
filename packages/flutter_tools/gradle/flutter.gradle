@@ -238,7 +238,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android {
                 defaultConfig {
                     // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders = [applicationName:"android.app.Application"]
+                    manifestPlaceholders = [applicationName:project.property("base-application-name")]
                 }
             }
         }

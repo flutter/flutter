@@ -97,3 +97,32 @@ bool androidManifestHasNameVariable(final Directory projectDir) {
   }
   return false;
 }
+
+/// Gets the embedding version metadata stored in the AndroidManifest.xml.
+int getAndroidEmbeddingVersion(final Directory projectDir) {
+  final File manifestFile = _getManifestFile(projectDir);
+  if (!manifestFile.existsSync()) {
+    return 2;
+  }
+  XmlDocument document;
+  try {
+    document = XmlDocument.parse(manifestFile.readAsStringSync());
+  } on XmlParserException {
+    return 2;
+  } on FileSystemException {
+    return 2;
+  }
+  for (final XmlElement application in document.findAllElements('application')) {
+    for (final XmlElement metaData in application.findElements('meta-data')) {
+      final String? name = metaData.getAttribute('android:name');
+      if (name == 'flutterEmbedding') {
+        final String? value = metaData.getAttribute('android:value');
+        if (value == null) {
+          continue;
+        }
+        return int.parse(value);
+      }
+    }
+  }
+  return 1;
+}
