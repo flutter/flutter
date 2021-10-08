@@ -30,35 +30,35 @@
 
 namespace flutter_runner {
 
-class Application;
+class Component;
 
-struct ActiveApplication {
+struct ActiveComponent {
   std::unique_ptr<fml::Thread> platform_thread;
-  std::unique_ptr<Application> application;
+  std::unique_ptr<Component> component;
 
-  ActiveApplication& operator=(ActiveApplication&& other) noexcept {
+  ActiveComponent& operator=(ActiveComponent&& other) noexcept {
     if (this != &other) {
       this->platform_thread.reset(other.platform_thread.release());
-      this->application.reset(other.application.release());
+      this->component.reset(other.component.release());
     }
     return *this;
   }
 
-  ~ActiveApplication() = default;
+  ~ActiveComponent() = default;
 };
 
-// Represents an instance of a Flutter application that contains one of more
+// Represents an instance of a Flutter component that contains one of more
 // Flutter engine instances.
-class Application final : public Engine::Delegate,
-                          public fuchsia::sys::ComponentController,
-                          public fuchsia::ui::app::ViewProvider {
+class Component final : public Engine::Delegate,
+                        public fuchsia::sys::ComponentController,
+                        public fuchsia::ui::app::ViewProvider {
  public:
-  using TerminationCallback = fit::function<void(const Application*)>;
+  using TerminationCallback = fit::function<void(const Component*)>;
 
-  // Creates a dedicated thread to run the application and constructions the
-  // application on it. The application can be accessed only on this thread.
+  // Creates a dedicated thread to run the component and creates the
+  // component on it. The component can be accessed only on this thread.
   // This is a synchronous operation.
-  static ActiveApplication Create(
+  static ActiveComponent Create(
       TerminationCallback termination_callback,
       fuchsia::sys::Package package,
       fuchsia::sys::StartupInfo startup_info,
@@ -67,7 +67,7 @@ class Application final : public Engine::Delegate,
 
   // Must be called on the same thread returned from the create call. The thread
   // may be collected after.
-  ~Application();
+  ~Component();
 
   static void ParseProgramMetadata(
       const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
@@ -86,10 +86,10 @@ class Application final : public Engine::Delegate,
   TerminationCallback termination_callback_;
   const std::string debug_label_;
   UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();
-  fml::UniqueFD application_data_directory_;
-  fml::UniqueFD application_assets_directory_;
+  fml::UniqueFD component_data_directory_;
+  fml::UniqueFD component_assets_directory_;
 
-  fidl::Binding<fuchsia::sys::ComponentController> application_controller_;
+  fidl::Binding<fuchsia::sys::ComponentController> component_controller_;
   fuchsia::io::DirectoryPtr directory_ptr_;
   fuchsia::io::NodePtr cloned_directory_ptr_;
   fidl::InterfaceRequest<fuchsia::io::Directory> directory_request_;
@@ -101,9 +101,9 @@ class Application final : public Engine::Delegate,
   fml::RefPtr<flutter::DartSnapshot> isolate_snapshot_;
   std::set<std::unique_ptr<Engine>> shell_holders_;
   std::pair<bool, uint32_t> last_return_code_;
-  fml::WeakPtrFactory<Application> weak_factory_;
+  fml::WeakPtrFactory<Component> weak_factory_;
 
-  Application(
+  Component(
       TerminationCallback termination_callback,
       fuchsia::sys::Package package,
       fuchsia::sys::StartupInfo startup_info,
@@ -134,7 +134,7 @@ class Application final : public Engine::Delegate,
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Application);
+  FML_DISALLOW_COPY_AND_ASSIGN(Component);
 };
 
 }  // namespace flutter_runner

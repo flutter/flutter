@@ -188,7 +188,7 @@ Runner::Runner(fml::RefPtr<fml::TaskRunner> task_runner,
   SetThreadName("io.flutter.runner.main");
 
   context_->outgoing()->AddPublicService<fuchsia::sys::Runner>(
-      std::bind(&Runner::RegisterApplication, this, std::placeholders::_1));
+      std::bind(&Runner::RegisterComponent, this, std::placeholders::_1));
 
 #if !defined(DART_PRODUCT)
   if (Dart_IsPrecompiledRuntime()) {
@@ -209,9 +209,9 @@ Runner::~Runner() {
 #endif  // !defined(DART_PRODUCT)
 }
 
-void Runner::RegisterApplication(
+void Runner::RegisterComponent(
     fidl::InterfaceRequest<fuchsia::sys::Runner> request) {
-  active_applications_bindings_.AddBinding(this, std::move(request));
+  active_components_bindings_.AddBinding(this, std::move(request));
 }
 
 void Runner::StartComponent(
@@ -219,66 +219,68 @@ void Runner::StartComponent(
     fuchsia::sys::StartupInfo startup_info,
     fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
   // TRACE_DURATION currently requires that the string data does not change
-  // in the traced scope. Since |package| gets moved in the Application::Create
+  // in the traced scope. Since |package| gets moved in the Component::Create
   // call below, we cannot ensure that |package.resolved_url| does not move or
   // change, so we make a copy to pass to TRACE_DURATION.
   // TODO(PT-169): Remove this copy when TRACE_DURATION reads string arguments
   // eagerly.
   std::string url_copy = package.resolved_url;
   TRACE_EVENT1("flutter", "StartComponent", "url", url_copy.c_str());
-  // Notes on application termination: Application typically terminate on the
+  // Notes on component termination: Components typically terminate on the
   // thread on which they were created. This usually means the thread was
-  // specifically created to host the application. But we want to ensure that
-  // access to the active applications collection is made on the same thread. So
+  // specifically created to host the component. But we want to ensure that
+  // access to the active components collection is made on the same thread. So
   // we capture the runner in the termination callback. There is no risk of
-  // there being multiple application runner instance in the process at the same
+  // there being multiple component runner instances in the process at the same
   // time. So it is safe to use the raw pointer.
-  Application::TerminationCallback termination_callback =
-      [application_runner = this](const Application* application) {
-        application_runner->task_runner_->PostTask(
-            [application_runner, application]() {
-              application_runner->OnApplicationTerminate(application);
+  Component::TerminationCallback termination_callback =
+      [component_runner = this](const Component* component) {
+        component_runner->task_runner_->PostTask(
+            [component_runner, component]() {
+              component_runner->OnComponentTerminate(component);
             });
       };
 
-  auto active_application = Application::Create(
+  ActiveComponent active_component = Component::Create(
       std::move(termination_callback),  // termination callback
-      std::move(package),               // application package
+      std::move(package),               // component package
       std::move(startup_info),          // startup info
       context_->svc(),                  // runner incoming services
       std::move(controller)             // controller request
   );
 
-  auto key = active_application.application.get();
-  active_applications_[key] = std::move(active_application);
+  auto key = active_component.component.get();
+  active_components_[key] = std::move(active_component);
 }
 
-void Runner::OnApplicationTerminate(const Application* application) {
-  auto app = active_applications_.find(application);
-  if (app == active_applications_.end()) {
+void Runner::OnComponentTerminate(const Component* component) {
+  auto app = active_components_.find(component);
+  if (app == active_components_.end()) {
     FML_LOG(INFO)
-        << "The remote end of the application runner tried to terminate an "
-           "application that has already been terminated, possibly because we "
+        << "The remote end of the component runner tried to terminate an "
+           "component that has already been terminated, possibly because we "
            "initiated the termination";
     return;
   }
-  auto& active_application = app->second;
+  ActiveComponent& active_component = app->second;
 
   // Grab the items out of the entry because we will have to rethread the
   // destruction.
-  auto application_to_destroy = std::move(active_application.application);
-  auto application_thread = std::move(active_application.platform_thread);
+  std::unique_ptr<Component> component_to_destroy =
+      std::move(active_component.component);
+  std::unique_ptr<fml::Thread> component_thread =
+      std::move(active_component.platform_thread);
 
-  // Delegate the entry.
-  active_applications_.erase(application);
+  // Delete the entry.
+  active_components_.erase(component);
 
-  // Post the task to destroy the application and quit its message loop.
-  application_thread->GetTaskRunner()->PostTask(fml::MakeCopyable(
-      [instance = std::move(application_to_destroy),
-       thread = application_thread.get()]() mutable { instance.reset(); }));
+  // Post the task to destroy the component and quit its message loop.
+  component_thread->GetTaskRunner()->PostTask(fml::MakeCopyable(
+      [instance = std::move(component_to_destroy),
+       thread = component_thread.get()]() mutable { instance.reset(); }));
 
   // Terminate and join the thread's message loop.
-  application_thread->Join();
+  component_thread->Join();
 }
 
 void Runner::SetupICU() {
@@ -315,11 +317,11 @@ void Runner::SetupTraceObserver() {
         runner->prolonged_context_ = trace_acquire_prolonged_context();
         Dart_StartProfiling();
       } else if (trace_state() == TRACE_STOPPING) {
-        for (auto& it : runner->active_applications_) {
+        for (auto& it : runner->active_components_) {
           fml::AutoResetWaitableEvent latch;
           fml::TaskRunner::RunNowOrPostTask(
               it.second.platform_thread->GetTaskRunner(), [&]() {
-                it.second.application->WriteProfileToTrace();
+                it.second.component->WriteProfileToTrace();
                 latch.Signal();
               });
           latch.Wait();

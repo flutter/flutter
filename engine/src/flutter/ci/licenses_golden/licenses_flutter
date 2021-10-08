@@ -1418,6 +1418,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.cc
