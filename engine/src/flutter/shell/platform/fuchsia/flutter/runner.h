@@ -23,7 +23,7 @@
 
 namespace flutter_runner {
 
-// Publishes the |fuchsia::sys::Runner| service and runs applications on
+// Publishes the |fuchsia::sys::Runner| service and runs components on
 // their own threads.
 class Runner final : public fuchsia::sys::Runner {
  public:
@@ -34,33 +34,15 @@ class Runner final : public fuchsia::sys::Runner {
   ~Runner();
 
  private:
-  fml::RefPtr<fml::TaskRunner> task_runner_;
-
-  sys::ComponentContext* context_;
-  fidl::BindingSet<fuchsia::sys::Runner> active_applications_bindings_;
-  std::unordered_map<const Application*, ActiveApplication>
-      active_applications_;
-
-#if !defined(DART_PRODUCT)
-  // The connection between the Dart VM service and The Hub.
-  std::unique_ptr<dart_utils::VMServiceObject> vmservice_object_;
-
-  std::unique_ptr<trace::TraceObserver> trace_observer_;
-  trace_prolonged_context_t* prolonged_context_;
-#endif  // !defined(DART_PRODUCT)
-
   // |fuchsia::sys::Runner|
   void StartComponent(fuchsia::sys::Package package,
                       fuchsia::sys::StartupInfo startup_info,
                       fidl::InterfaceRequest<fuchsia::sys::ComponentController>
                           controller) override;
 
-  void RegisterApplication(
-      fidl::InterfaceRequest<fuchsia::sys::Runner> request);
+  void RegisterComponent(fidl::InterfaceRequest<fuchsia::sys::Runner> request);
 
-  void UnregisterApplication(const Application* application);
-
-  void OnApplicationTerminate(const Application* application);
+  void OnComponentTerminate(const Component* component);
 
   void SetupICU();
 
@@ -76,6 +58,20 @@ class Runner final : public fuchsia::sys::Runner {
   FRIEND_TEST(RunnerTest, TZData);
   FRIEND_TEST(RunnerTZDataTest, LoadsWithoutTZDataPresent);
 #endif  // defined(FRIEND_TEST)
+
+  fml::RefPtr<fml::TaskRunner> task_runner_;
+
+  sys::ComponentContext* context_;
+  fidl::BindingSet<fuchsia::sys::Runner> active_components_bindings_;
+  std::unordered_map<const Component*, ActiveComponent> active_components_;
+
+#if !defined(DART_PRODUCT)
+  // The connection between the Dart VM service and The Hub.
+  std::unique_ptr<dart_utils::VMServiceObject> vmservice_object_;
+
+  std::unique_ptr<trace::TraceObserver> trace_observer_;
+  trace_prolonged_context_t* prolonged_context_;
+#endif  // !defined(DART_PRODUCT)
 
   FML_DISALLOW_COPY_AND_ASSIGN(Runner);
 };

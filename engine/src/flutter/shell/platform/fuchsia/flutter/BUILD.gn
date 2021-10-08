@@ -61,6 +61,8 @@ template("runner_sources") {
       "component.h",
       "engine.cc",
       "engine.h",
+      "file_in_namespace_buffer.cc",
+      "file_in_namespace_buffer.h",
       "flatland_connection.cc",
       "flatland_connection.h",
       "flatland_external_view_embedder.cc",

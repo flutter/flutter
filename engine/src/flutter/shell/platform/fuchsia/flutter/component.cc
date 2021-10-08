@@ -26,6 +26,7 @@
 #include <regex>
 #include <sstream>
 
+#include "file_in_namespace_buffer.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/platform/fuchsia/task_observers.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -38,13 +39,6 @@
 #include "runtime/dart/utils/tempfs.h"
 #include "runtime/dart/utils/vmo.h"
 
-// TODO(kaushikiska): Use these constants from ::llcpp::fuchsia::io
-// Can read from target object.
-constexpr uint32_t OPEN_RIGHT_READABLE = 1u;
-
-// Connection can map target object executable.
-constexpr uint32_t OPEN_RIGHT_EXECUTABLE = 8u;
-
 namespace flutter_runner {
 namespace {
 
@@ -54,99 +48,7 @@ constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
 constexpr char kRunnerConfigPath[] = "/config/data/flutter_runner_config";
 
-class FileInNamespaceBuffer final : public fml::Mapping {
- public:
-  FileInNamespaceBuffer(int namespace_fd, const char* path, bool executable)
-      : address_(nullptr), size_(0) {
-    fuchsia::mem::Buffer buffer;
-    if (!dart_utils::VmoFromFilenameAt(namespace_fd, path, executable,
-                                       &buffer)) {
-      return;
-    }
-    if (buffer.size == 0) {
-      return;
-    }
-
-    uint32_t flags = ZX_VM_PERM_READ;
-    if (executable) {
-      flags |= ZX_VM_PERM_EXECUTE;
-    }
-    uintptr_t addr;
-    zx_status_t status =
-        zx::vmar::root_self()->map(flags, 0, buffer.vmo, 0, buffer.size, &addr);
-    if (status != ZX_OK) {
-      FML_LOG(FATAL) << "Failed to map " << path << ": "
-                     << zx_status_get_string(status);
-    }
-
-    address_ = reinterpret_cast<void*>(addr);
-    size_ = buffer.size;
-  }
-
-  ~FileInNamespaceBuffer() {
-    if (address_ != nullptr) {
-      zx::vmar::root_self()->unmap(reinterpret_cast<uintptr_t>(address_),
-                                   size_);
-      address_ = nullptr;
-      size_ = 0;
-    }
-  }
-
-  // |fml::Mapping|
-  const uint8_t* GetMapping() const override {
-    return reinterpret_cast<const uint8_t*>(address_);
-  }
-
-  // |fml::Mapping|
-  size_t GetSize() const override { return size_; }
-
- private:
-  void* address_;
-  size_t size_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(FileInNamespaceBuffer);
-};
-
-std::unique_ptr<fml::Mapping> CreateWithContentsOfFile(int namespace_fd,
-                                                       const char* file_path,
-                                                       bool executable) {
-  FML_TRACE_EVENT("flutter", "LoadFile", "path", file_path);
-  return std::make_unique<FileInNamespaceBuffer>(namespace_fd, file_path,
-                                                 executable);
-}
-
-std::unique_ptr<fml::FileMapping> MakeFileMapping(const char* path,
-                                                  bool executable) {
-  uint32_t flags = OPEN_RIGHT_READABLE;
-  if (executable) {
-    flags |= OPEN_RIGHT_EXECUTABLE;
-  }
-
-  int fd = 0;
-  // The returned file descriptor is compatible with standard posix operations
-  // such as close, mmap, etc. We only need to treat open/open_at specially.
-  zx_status_t status = fdio_open_fd(path, flags, &fd);
-
-  if (status != ZX_OK) {
-    return nullptr;
-  }
-
-  using Protection = fml::FileMapping::Protection;
-
-  std::initializer_list<Protection> protection_execute = {Protection::kRead,
-                                                          Protection::kExecute};
-  std::initializer_list<Protection> protection_read = {Protection::kRead};
-  auto mapping = std::make_unique<fml::FileMapping>(
-      fml::UniqueFD{fd}, executable ? protection_execute : protection_read);
-
-  if (!mapping->IsValid()) {
-    return nullptr;
-  }
-
-  return mapping;
-}
-
-std::string DebugLabelForURL(const std::string& url) {
+std::string DebugLabelForUrl(const std::string& url) {
   auto found = url.rfind("/");
   if (found == std::string::npos) {
     return url;
@@ -157,7 +59,7 @@ std::string DebugLabelForURL(const std::string& url) {
 
 }  // namespace
 
-void Application::ParseProgramMetadata(
+void Component::ParseProgramMetadata(
     const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
     std::string* data_path,
     std::string* assets_path) {
@@ -178,43 +80,43 @@ void Application::ParseProgramMetadata(
   }
 }
 
-ActiveApplication Application::Create(
+ActiveComponent Component::Create(
     TerminationCallback termination_callback,
     fuchsia::sys::Package package,
     fuchsia::sys::StartupInfo startup_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
     fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
   auto thread = std::make_unique<fml::Thread>();
-  std::unique_ptr<Application> application;
+  std::unique_ptr<Component> component;
 
   fml::AutoResetWaitableEvent latch;
   thread->GetTaskRunner()->PostTask([&]() mutable {
-    application.reset(
-        new Application(std::move(termination_callback), std::move(package),
-                        std::move(startup_info), runner_incoming_services,
-                        std::move(controller)));
+    component.reset(new Component(std::move(termination_callback),
+                                  std::move(package), std::move(startup_info),
+                                  runner_incoming_services,
+                                  std::move(controller)));
     latch.Signal();
   });
 
   latch.Wait();
   return {.platform_thread = std::move(thread),
-          .application = std::move(application)};
+          .component = std::move(component)};
 }
 
-Application::Application(
+Component::Component(
     TerminationCallback termination_callback,
     fuchsia::sys::Package package,
     fuchsia::sys::StartupInfo startup_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
     fidl::InterfaceRequest<fuchsia::sys::ComponentController>
-        application_controller_request)
+        component_controller_request)
     : termination_callback_(std::move(termination_callback)),
-      debug_label_(DebugLabelForURL(startup_info.launch_info.url)),
-      application_controller_(this),
+      debug_label_(DebugLabelForUrl(startup_info.launch_info.url)),
+      component_controller_(this),
       outgoing_dir_(new vfs::PseudoDir()),
       runner_incoming_services_(runner_incoming_services),
       weak_factory_(this) {
-  application_controller_.set_error_handler(
+  component_controller_.set_error_handler(
       [this](zx_status_t status) { Kill(); });
 
   FML_DCHECK(fdio_ns_.is_valid());
@@ -269,13 +171,13 @@ Application::Application(
 
     constexpr mode_t mode = O_RDONLY | O_DIRECTORY;
 
-    application_assets_directory_.reset(
+    component_assets_directory_.reset(
         openat(ns_fd.get(), assets_path.c_str(), mode));
-    FML_DCHECK(application_assets_directory_.is_valid());
+    FML_DCHECK(component_assets_directory_.is_valid());
 
-    application_data_directory_.reset(
+    component_data_directory_.reset(
         openat(ns_fd.get(), data_path.c_str(), mode));
-    FML_DCHECK(application_data_directory_.is_valid());
+    FML_DCHECK(component_data_directory_.is_valid());
   }
 
   // TODO: LaunchInfo::out.
@@ -330,7 +232,7 @@ Application::Application(
                 dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
           } else {
             FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
-                           << ") for flutter app(" << debug_label_
+                           << ") for flutter component(" << debug_label_
                            << "): " << zx_status_get_string(status);
           }
         }
@@ -343,7 +245,7 @@ Application::Application(
 
   // All launch arguments have been read. Perform service binding and
   // final settings configuration. The next call will be to create a view
-  // for this application.
+  // for this component.
   composed_service_dir->AddService(
       fuchsia::ui::app::ViewProvider::Name_,
       std::make_unique<vfs::Service>(
@@ -355,9 +257,9 @@ Application::Application(
 
   outgoing_dir_->AddEntry("svc", std::move(composed_service_dir));
 
-  // Setup the application controller binding.
-  if (application_controller_request) {
-    application_controller_.Bind(std::move(application_controller_request));
+  // Setup the component controller binding.
+  if (component_controller_request) {
+    component_controller_.Bind(std::move(component_controller_request));
   }
 
   // Load and use runner-specific configuration, if it exists.
@@ -371,13 +273,13 @@ Application::Application(
                      << kRunnerConfigPath << "; using default config values.";
   }
 
-  // Load VM and application bytecode.
+  // Load VM and component bytecode.
   // For AOT, compare with flutter_aot_app in flutter_app.gni.
   // For JIT, compare flutter_jit_runner in BUILD.gn.
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
     std::shared_ptr<dart_utils::ElfSnapshot> snapshot =
         std::make_shared<dart_utils::ElfSnapshot>();
-    if (snapshot->Load(application_data_directory_.get(),
+    if (snapshot->Load(component_data_directory_.get(),
                        "app_aot_snapshot.so")) {
       const uint8_t* isolate_data = snapshot->IsolateData();
       const uint8_t* isolate_instructions = snapshot->IsolateInstrs();
@@ -412,38 +314,41 @@ Application::Application(
           std::make_shared<fml::NonOwnedMapping>(isolate_instructions, 0,
                                                  hold_snapshot));
     } else {
-      const int namespace_fd = application_data_directory_.get();
+      const int namespace_fd = component_data_directory_.get();
       settings_.vm_snapshot_data = [namespace_fd]() {
-        return CreateWithContentsOfFile(namespace_fd, "vm_snapshot_data.bin",
-                                        false);
+        return LoadFile(namespace_fd, "vm_snapshot_data.bin",
+                        false /* executable */);
       };
       settings_.vm_snapshot_instr = [namespace_fd]() {
-        return CreateWithContentsOfFile(namespace_fd,
-                                        "vm_snapshot_instructions.bin", true);
+        return LoadFile(namespace_fd, "vm_snapshot_instructions.bin",
+                        true /* executable */);
       };
       settings_.isolate_snapshot_data = [namespace_fd]() {
-        return CreateWithContentsOfFile(namespace_fd,
-                                        "isolate_snapshot_data.bin", false);
+        return LoadFile(namespace_fd, "isolate_snapshot_data.bin",
+                        false /* executable */);
       };
       settings_.isolate_snapshot_instr = [namespace_fd]() {
-        return CreateWithContentsOfFile(
-            namespace_fd, "isolate_snapshot_instructions.bin", true);
+        return LoadFile(namespace_fd, "isolate_snapshot_instructions.bin",
+                        true /* executable */);
       };
     }
   } else {
     settings_.vm_snapshot_data = []() {
-      return MakeFileMapping("/pkg/data/vm_snapshot_data.bin", false);
+      return MakeFileMapping("/pkg/data/vm_snapshot_data.bin",
+                             false /* executable */);
     };
     settings_.vm_snapshot_instr = []() {
-      return MakeFileMapping("/pkg/data/vm_snapshot_instructions.bin", true);
+      return MakeFileMapping("/pkg/data/vm_snapshot_instructions.bin",
+                             true /* executable */);
     };
 
     settings_.isolate_snapshot_data = []() {
-      return MakeFileMapping("/pkg/data/isolate_core_snapshot_data.bin", false);
+      return MakeFileMapping("/pkg/data/isolate_core_snapshot_data.bin",
+                             false /* executable */);
     };
     settings_.isolate_snapshot_instr = [] {
       return MakeFileMapping("/pkg/data/isolate_core_snapshot_instructions.bin",
-                             true);
+                             true /* executable */);
     };
   }
 
@@ -467,7 +372,7 @@ Application::Application(
 
   settings_.icu_data_path = "";
 
-  settings_.assets_dir = application_assets_directory_.get();
+  settings_.assets_dir = component_assets_directory_.get();
 
   // Compare flutter_jit_app in flutter_app.gni.
   settings_.application_kernel_list_asset = "app.dilplist";
@@ -515,26 +420,24 @@ Application::Application(
   settings_.dart_flags.push_back("--profile_period=10000");
 #endif  // defined(__aarch64__)
 
-  auto weak_application = weak_factory_.GetWeakPtr();
   auto platform_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   const std::string component_url = package.resolved_url;
-  settings_.unhandled_exception_callback = [weak_application,
+  settings_.unhandled_exception_callback = [weak = weak_factory_.GetWeakPtr(),
                                             platform_task_runner,
                                             runner_incoming_services,
                                             component_url](
                                                const std::string& error,
                                                const std::string& stack_trace) {
-    if (weak_application) {
+    if (weak) {
       // TODO(cbracken): unsafe. The above check and the PostTask below are
-      // happening on the UI thread. If the Application dtor and thread
+      // happening on the UI thread. If the Component dtor and thread
       // termination happen (on the platform thread) between the previous
       // line and the next line, a crash will occur since we'll be posting
-      // to a dead thread. See Runner::OnApplicationTerminate() in
+      // to a dead thread. See Runner::OnComponentTerminate() in
       // runner.cc.
-      platform_task_runner->PostTask([weak_application,
-                                      runner_incoming_services, component_url,
-                                      error, stack_trace]() {
-        if (weak_application) {
+      platform_task_runner->PostTask([weak, runner_incoming_services,
+                                      component_url, error, stack_trace]() {
+        if (weak) {
           dart_utils::HandleException(runner_incoming_services, component_url,
                                       error, stack_trace);
         } else {
@@ -555,14 +458,14 @@ Application::Application(
   };
 }
 
-Application::~Application() = default;
+Component::~Component() = default;
 
-const std::string& Application::GetDebugLabel() const {
+const std::string& Component::GetDebugLabel() const {
   return debug_label_;
 }
 
-void Application::Kill() {
-  application_controller_.events().OnTerminated(
+void Component::Kill() {
+  component_controller_.events().OnTerminated(
       last_return_code_.second, fuchsia::sys::TerminationReason::EXITED);
 
   termination_callback_(this);
@@ -570,11 +473,11 @@ void Application::Kill() {
   // collected.
 }
 
-void Application::Detach() {
-  application_controller_.set_error_handler(nullptr);
+void Component::Detach() {
+  component_controller_.set_error_handler(nullptr);
 }
 
-void Application::OnEngineTerminate(const Engine* shell_holder) {
+void Component::OnEngineTerminate(const Engine* shell_holder) {
   auto found = std::find_if(shell_holders_.begin(), shell_holders_.end(),
                             [shell_holder](const auto& holder) {
                               return holder.get() == shell_holder;
@@ -584,9 +487,9 @@ void Application::OnEngineTerminate(const Engine* shell_holder) {
     return;
   }
 
-  // We may launch multiple shell in this application. However, we will
+  // We may launch multiple shell in this component. However, we will
   // terminate when the last shell goes away. The error code return to the
-  // application controller will be the last isolate that had an error.
+  // component controller will be the last isolate that had an error.
   auto return_code = shell_holder->GetEngineReturnCode();
   if (return_code.has_value()) {
     last_return_code_ = {true, return_code.value()};
@@ -601,7 +504,7 @@ void Application::OnEngineTerminate(const Engine* shell_holder) {
   }
 }
 
-void Application::CreateView(
+void Component::CreateView(
     zx::eventpair token,
     fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> /*incoming_services*/,
     fidl::InterfaceHandle<
@@ -611,7 +514,7 @@ void Application::CreateView(
                         std::move(view_ref_pair.view_ref));
 }
 
-void Application::CreateViewWithViewRef(
+void Component::CreateViewWithViewRef(
     zx::eventpair view_token,
     fuchsia::ui::views::ViewRefControl control_ref,
     fuchsia::ui::views::ViewRef view_ref) {
@@ -639,7 +542,7 @@ void Application::CreateViewWithViewRef(
       ));
 }
 
-void Application::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
+void Component::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
   if (!svc_) {
     FML_DLOG(ERROR)
         << "Component incoming services was invalid when attempting to "
@@ -663,7 +566,7 @@ void Application::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
 }
 
 #if !defined(DART_PRODUCT)
-void Application::WriteProfileToTrace() const {
+void Component::WriteProfileToTrace() const {
   for (const auto& engine : shell_holders_) {
     engine->WriteProfileToTrace();
   }
