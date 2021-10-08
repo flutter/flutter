@@ -51,6 +51,11 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
+  test('ListTileThemeData copyWith, ==, hashCode basics', () {
+    expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
+    expect(const ListTileThemeData().hashCode, const ListTileThemeData().copyWith().hashCode);
+  });
+
   test('ListTileThemeData defaults', () {
     const ListTileThemeData themeData = ListTileThemeData();
     expect(themeData.dense, null);

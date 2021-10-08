@@ -216,6 +216,47 @@ class ListTileThemeData with Diagnosticable {
   }
 
   @override
+  int get hashCode {
+    return hashValues(
+      dense,
+      shape,
+      style,
+      selectedColor,
+      iconColor,
+      textColor,
+      contentPadding,
+      tileColor,
+      selectedTileColor,
+      horizontalTitleGap,
+      minVerticalPadding,
+      minLeadingWidth,
+      enableFeedback,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ListTileThemeData
+      && other.dense == dense
+      && other.shape == shape
+      && other.style == style
+      && other.selectedColor == selectedColor
+      && other.iconColor == iconColor
+      && other.textColor == textColor
+      && other.contentPadding == contentPadding
+      && other.tileColor == tileColor
+      && other.selectedTileColor == selectedTileColor
+      && other.horizontalTitleGap == horizontalTitleGap
+      && other.minVerticalPadding == minVerticalPadding
+      && other.minLeadingWidth == minLeadingWidth
+      && other.enableFeedback == enableFeedback;
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('dense', dense, defaultValue: null));
@@ -242,6 +283,7 @@ class ListTileThemeData with Diagnosticable {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
+// ignore: avoid_implementing_value_types
 class ListTileTheme extends InheritedTheme implements ListTileThemeData {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
