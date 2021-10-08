@@ -337,6 +337,7 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // Other configuration
     AndroidOverscrollIndicator? androidOverscrollIndicator,
+    bool? applyElevationOverlayColor,
     InputDecorationTheme? inputDecorationTheme,
     InteractiveInkFeatureFactory? splashFactory,
     MaterialTapTargetSize? materialTapTargetSize,
@@ -344,7 +345,6 @@ class ThemeData with Diagnosticable {
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
     VisualDensity? visualDensity,
-    // Flags
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -355,7 +355,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
-    bool? applyElevationOverlayColor,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
