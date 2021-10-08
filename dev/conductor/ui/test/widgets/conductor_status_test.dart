@@ -96,7 +96,8 @@ void main() {
     expect(find.text('v1.0'), findsOneWidget);
     expect(find.text('beta'), findsOneWidget);
     expect(find.text('1.2.0-3.4.pre'), findsOneWidget);
-    expect(find.text('1969-12-31 19:00:00.000'), findsNWidgets(2));
+    expect(find.text('Release started at:'), findsOneWidget);
+    expect(find.text('Release updated at:'), findsOneWidget);
     expect(find.text('fe9708ab688dcda9923f584ba370a66fcbc3811f'), findsOneWidget);
     expect(find.text('94d06a2e1d01a3b0c693b94d70c5e1df9d78d249'), findsOneWidget);
     expect(find.text('a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0'), findsNWidgets(2));
@@ -105,6 +106,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: Offset.zero);
 
+    expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsNothing);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byKey(const Key('conductorStatusTooltip1'))));
     await tester.pumpAndSettle();
