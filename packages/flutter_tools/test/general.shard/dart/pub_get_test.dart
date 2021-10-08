@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -685,6 +686,68 @@ void main() {
       'err2\n'
       'err3\n'
     );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('pub get shows working directory on process exception', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        onRun: () {
+          throw const ProcessException(
+            'bin/cache/dart-sdk/bin/dart',
+            <String>[
+              '__deprecated_pub',
+              '--verbosity=warning',
+              'get',
+              '--no-precompile',
+            ],
+            'message',
+            1,
+          );
+        },
+        exitCode: 66,
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
+    final Pub pub = Pub(
+      platform: FakePlatform(environment: const <String, String>{}),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      processManager: processManager,
+    );
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(
+        isA<ProcessException>().having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('Working directory: "/"'),
+        ).having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('"PUB_ENVIRONMENT": "flutter_cli:flutter_tests"'),
+        ),
+      ),
+    );
+    expect(logger.statusText,
+      'Running "flutter pub get" in /...\n'
+    );
+    expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
 
