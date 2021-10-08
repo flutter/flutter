@@ -333,7 +333,6 @@ Future<vm_service.VmService> createVmServiceDelegate(
   return vm_service.VmService(
     channel,
     channel.add,
-    log: null,
     disposeHandler: () async {
       await channel.close();
     },

@@ -119,7 +119,7 @@ void main() {
     );
 
     expect(
-      box.toStringDeep(minLevel: DiagnosticLevel.debug),
+      box.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderPadding#00000 relayoutBoundary=up1\n'
         ' │ creator: Padding ← Container ← Align ← [root]\n'
@@ -518,9 +518,9 @@ void main() {
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(Container(
-      clipBehavior: Clip.none,
-      decoration: const BoxDecoration(
+    await tester.pumpWidget(
+      Container(
+        decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
@@ -642,7 +642,6 @@ void main() {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.blue,
-            offset: Offset.zero,
             spreadRadius: 10,
             blurRadius: 20.0,
           ),

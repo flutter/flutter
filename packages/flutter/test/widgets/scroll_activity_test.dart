@@ -197,7 +197,7 @@ class _Carousel62209State extends State<Carousel62209> {
   void initState() {
     super.initState();
     _pages = widget.pages.toList();
-    _pageController = PageController(initialPage: 0, keepPage: false);
+    _pageController = PageController(keepPage: false);
   }
 
   @override

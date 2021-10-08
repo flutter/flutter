@@ -49,7 +49,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         itemBuilder: (BuildContext context, int index) {
           return Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Radio<int>(
                   value: index,

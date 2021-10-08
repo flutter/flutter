@@ -47,7 +47,6 @@ class MyStatelessWidget extends StatelessWidget {
               width: 50,
             ),
             Expanded(
-              flex: 1,
               child: Container(
                 color: Colors.amber,
                 height: 100,

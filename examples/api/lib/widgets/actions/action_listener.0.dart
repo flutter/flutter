@@ -53,7 +53,6 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Padding(

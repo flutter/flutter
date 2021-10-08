@@ -59,7 +59,6 @@ class OverflowWidgetTextEditingController extends TextEditingController {
       children: <InlineSpan>[
         const TextSpan(text: 'Hi'),
         WidgetSpan(
-          alignment: PlaceholderAlignment.bottom,
           child: Container(
             color: Colors.redAccent,
             height: 100.0,

@@ -124,7 +124,6 @@ class ShoppingCartSummary extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const Expanded(
                       child: Text('TOTAL'),

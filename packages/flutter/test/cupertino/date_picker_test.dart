@@ -127,7 +127,6 @@ void main() {
         CupertinoApp(
           home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) { },
-            backgroundColor: null,
           ),
         ),
       );
@@ -255,7 +254,6 @@ void main() {
             minuteInterval: 10,
             secondInterval: 12,
             initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 48),
-            mode: CupertinoTimerPickerMode.hms,
             onTimerDurationChanged: (Duration d) {
               duration = d;
             },
@@ -301,7 +299,6 @@ void main() {
         CupertinoApp(
           home: CupertinoDatePicker(
             onDateTimeChanged: (_) { },
-            backgroundColor: null,
           ),
         ),
       );
@@ -381,7 +378,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
                 initialDateTime: DateTime(2018, 1, 1, 10, 30),
               ),
@@ -403,10 +399,9 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
                 // Change the initial date, but it shouldn't affect the present state.
-                initialDateTime: DateTime(2016, 4, 5, 15, 00),
+                initialDateTime: DateTime(2016, 4, 5, 15),
               ),
             ),
           ),
@@ -431,7 +426,7 @@ void main() {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
                 onDateTimeChanged: (_) { },
-                initialDateTime: DateTime(2018, 9, 15, 0, 0),
+                initialDateTime: DateTime(2018, 9, 15),
               ),
             ),
           ),
@@ -451,7 +446,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018, 9, 15, 3, 14),
               ),
@@ -472,7 +466,6 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
@@ -491,7 +484,6 @@ void main() {
               height: 400.0,
               width: 800.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018, 1, 1, 10, 30),
               ),
@@ -718,7 +710,6 @@ void main() {
                 height: 400.0,
                 width: 400.0,
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
                   minimumDate: minimum,
                   maximumDate: maximum,
                   onDateTimeChanged: (DateTime newDate) {
@@ -957,7 +948,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 minimumDate: minDate,
                 onDateTimeChanged: (DateTime newDate) { },
                 initialDateTime: minDate.add(const Duration(days: 1)),
@@ -1166,7 +1156,6 @@ void main() {
               // This is too small to draw the picker out fully.
               width: 100,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: DateTime(2019, 1, 1, 4),
                 onDateTimeChanged: (_) {},
               ),
@@ -1270,7 +1259,6 @@ void main() {
                 width: 500,
                 height: 400,
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
                   initialDateTime: DateTime(2019, 1, 1, 4),
                   onDateTimeChanged: (_) {},
                 ),
@@ -1401,7 +1389,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTimerPicker(
           key: key,
-          mode: CupertinoTimerPickerMode.hms,
           initialTimerDuration: const Duration(hours: 5, minutes: 17, seconds: 19),
           onTimerDurationChanged: (Duration d) {},
         ),
@@ -1503,7 +1490,6 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           hasIncreaseAction: true,
-          hasDecreaseAction: false,
           increasedValue: '1',
           value: '0',
           textDirection: TextDirection.ltr,

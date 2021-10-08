@@ -27,7 +27,6 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static const _ChoiceValue<Widget> kNoFab = _ChoiceValue<Widget>(
     title: 'None',
     label: 'do not show a floating action button',
-    value: null,
   );
 
   static const _ChoiceValue<Widget> kCircularFab = _ChoiceValue<Widget>(

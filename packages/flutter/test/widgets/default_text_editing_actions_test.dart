@@ -54,7 +54,7 @@ void main() {
                         EditableText(
                           controller: controller,
                           focusNode: focusNodeTarget,
-                          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                          style: Typography.material2018().black.subtitle1!,
                           cursorColor: Colors.blue,
                           backgroundCursorColor: Colors.grey,
                         ),

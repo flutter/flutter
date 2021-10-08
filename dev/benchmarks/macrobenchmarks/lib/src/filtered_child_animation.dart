@@ -73,7 +73,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       color: Colors.green,
       boxShadow: complex ? <BoxShadow>[
         const BoxShadow(
-          color: Colors.black,
           blurRadius: 10.0,
         ),
       ] : null,

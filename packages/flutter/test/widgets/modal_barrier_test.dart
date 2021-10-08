@@ -380,7 +380,6 @@ void main() {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: ModalBarrier(
-        dismissible: true,
         semanticsLabel: 'Dismiss',
       ),
     ));
@@ -402,7 +401,7 @@ void main() {
 
   testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const ModalBarrier(dismissible: true));
+    await tester.pumpWidget(const ModalBarrier());
 
     final TestSemantics expectedSemantics = TestSemantics.root();
     expect(semantics, hasSemantics(expectedSemantics));
@@ -448,7 +447,6 @@ class SecondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return const ModalBarrier(
       key: ValueKey<String>('barrier'),
-      dismissible: true,
     );
   }
 }
@@ -461,7 +459,6 @@ class SecondWidgetWithCompetence extends StatelessWidget {
       children: <Widget>[
         const ModalBarrier(
           key: ValueKey<String>('barrier'),
-          dismissible: true,
         ),
         GestureDetector(
           onVerticalDragStart: (_) {},

@@ -56,7 +56,6 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             value: _dropdownValue,
             icon: const Icon(Icons.arrow_downward),
             hint: const Text('This is a regular DropdownButtonFormField'),
-            iconSize: 24,
             elevation: 16,
             style: const TextStyle(color: Colors.deepPurple),
             onChanged: (String? newValue) {

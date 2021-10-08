@@ -252,7 +252,6 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -431,7 +430,6 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -522,7 +520,6 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          padding: EdgeInsets.zero,
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -1177,7 +1174,6 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(
-            padding: EdgeInsets.zero,
             viewPadding: EdgeInsets.only(bottom: 20),
             viewInsets: EdgeInsets.only(bottom: 300),
           ),
@@ -1367,7 +1363,6 @@ void main() {
         MaterialApp(
           home: SafeArea(
             left: false,
-            top: true,
             right: false,
             bottom: false,
             child: Scaffold(
@@ -1424,7 +1419,6 @@ void main() {
         MaterialApp(
           home: SafeArea(
             left: false,
-            top: true,
             right: false,
             bottom: false,
             child: Scaffold(
@@ -1643,7 +1637,6 @@ void main() {
           drawer: const Drawer(
             child: Text('Drawer'),
           ),
-          drawerEnableOpenDragGesture: true,
           body: const Text('Scaffold Body'),
           appBar: AppBar(
             centerTitle: true,
@@ -1712,7 +1705,6 @@ void main() {
               endDrawer: const Drawer(
                 child: Text('Drawer'),
               ),
-              endDrawerEnableOpenDragGesture: true,
               body: const Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
@@ -2076,7 +2068,6 @@ void main() {
             child: const Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-          extendBodyBehindAppBar: false,
         ),
       ));
       final Offset defaultOffset = tester.getCenter(find.byType(FloatingActionButton));

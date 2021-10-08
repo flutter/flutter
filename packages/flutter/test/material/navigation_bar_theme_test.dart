@@ -97,7 +97,6 @@ void main() {
               labelBehavior: labelBehavior,
             ),
             child: NavigationBar(
-              selectedIndex: 0,
               destinations: _destinations(),
             ),
           ),
@@ -137,7 +136,6 @@ void main() {
               height: height,
               backgroundColor: backgroundColor,
               labelBehavior: labelBehavior,
-              selectedIndex: 0,
               destinations: _destinations(),
             ),
           ),
