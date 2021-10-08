@@ -93,7 +93,7 @@ String presentState(pb.ConductorState state) {
   return buffer.toString();
 }
 
-// Returns the conductor state in a map<K, V> format for the desktop app to use
+// Returns the conductor state in a Map<K, V> format for the desktop app to consume.
 Map<String, Object> presentStateDesktop(pb.ConductorState state) {
   final List<Map<String, Object>> engineCherrypicks = <Map<String, Object>>[];
   for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
