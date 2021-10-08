@@ -165,7 +165,8 @@ void main() {
         stdout: revision),
         const FakeCommand(command: <String>[
           'git', 'tag', '--points-at', revision,
-        ]),
+        ],
+        stdout: ''),
         const FakeCommand(command: <String>[
           'git', 'describe', '--match', '*.*.*', '--long', '--tags', revision,
         ],
@@ -266,6 +267,7 @@ void main() {
       testUsingContext('does not throw toolExit at standard remote url with FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
           channel: 'dev',
+          repositoryUrl: flutterStandardUrlDotGit,
         );
         expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
@@ -542,6 +544,7 @@ void main() {
               command: <String>[
                 'git', 'tag', '--points-at', 'HEAD',
               ],
+              stdout: '',
             ),
             const FakeCommand(
               command: <String>[

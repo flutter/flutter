@@ -339,7 +339,9 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion()
+    FlutterVersion: () => FakeFlutterVersion(
+      engineRevision: 'abcdefghijklmnopqrstuvwxyz',
+    )
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {

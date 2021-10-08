@@ -959,6 +959,7 @@ void main() {
     final StringProperty quoted = StringProperty(
       'name',
       'value',
+      quoted: true,
     );
     expect(quoted.toString(), equals('name: "value"'));
     validateStringPropertyJsonSerialization(quoted);
@@ -973,6 +974,7 @@ void main() {
         'name',
         null,
         showName: false,
+        quoted: true,
       ).toString(),
       equals('null'),
     );

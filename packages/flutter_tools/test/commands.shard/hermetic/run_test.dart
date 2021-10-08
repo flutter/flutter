@@ -258,7 +258,7 @@ void main() {
 
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
-        final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+        final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.ios, sdkNameAndVersion: 'iOS 13')
           ..startAppSuccess = false;
 
         mockDeviceManager
@@ -302,7 +302,7 @@ void main() {
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[FakeDevice()];
+      mockDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.ios)];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -310,7 +310,7 @@ void main() {
       }));
 
       mockDeviceManager.devices = <Device>[
-        FakeDevice(),
+        FakeDevice(targetPlatform: TargetPlatform.ios),
         FakeDevice(targetPlatform: TargetPlatform.android_arm),
       ];
 

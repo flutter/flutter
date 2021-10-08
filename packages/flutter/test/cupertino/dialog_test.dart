@@ -1128,7 +1128,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(),
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
         ),
       ),
@@ -1297,7 +1297,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(),
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
           child: CupertinoAlertDialog(
             actions: <Widget>[
               CupertinoDialogAction(child: Text('OK')),

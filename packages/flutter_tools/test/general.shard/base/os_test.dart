@@ -44,7 +44,7 @@ void main() {
           exitCode: 1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.which(kExecutable), isNull);
     });
 
@@ -58,7 +58,7 @@ void main() {
           stdout: kPath1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
@@ -73,7 +73,7 @@ void main() {
           stdout: '$kPath1\n$kPath2',
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
@@ -177,7 +177,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform());
+      createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -193,7 +193,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform());
+      createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
@@ -410,6 +410,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -441,6 +442,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -461,6 +463,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -490,6 +493,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
+          operatingSystem: 'linux',
           operatingSystemVersion: 'undefinedOperatingSystemVersion',
         ),
         processManager: fakeProcessManager,
@@ -523,7 +527,7 @@ void main() {
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       processManager: fakeProcessManager,
     );
 
@@ -614,7 +618,7 @@ void main() {
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         processManager: fakeProcessManager,
       );
 

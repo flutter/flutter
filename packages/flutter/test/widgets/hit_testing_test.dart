@@ -42,7 +42,7 @@ void main() {
     );
 
     final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)));
+        await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)), kind: PointerDeviceKind.touch);
     await gesture.moveBy(const Offset(1, 1));
     await gesture.up();
 

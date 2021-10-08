@@ -814,6 +814,7 @@ void _tests() {
     await mediaQueryBoilerplate(
       tester,
       false,
+      textScaleFactor: 1.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
 
@@ -919,7 +920,7 @@ void _testsInput() {
   testWidgets('Switching to input entry mode triggers entry callback', (WidgetTester tester) async {
     bool triggeredCallback = false;
 
-    await mediaQueryBoilerplate(tester, true, onEntryModeChange: (TimePickerEntryMode mode) {
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.dial, onEntryModeChange: (TimePickerEntryMode mode) {
       if (mode == TimePickerEntryMode.input) {
         triggeredCallback = true;
       }
@@ -931,7 +932,7 @@ void _testsInput() {
   });
 
   testWidgets('Can double tap hours (when selected) to enter input mode', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false);
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
     final Finder hourFinder = find.ancestor(
       of: find.text('7'),
       matching: find.byType(InkWell),
@@ -949,7 +950,7 @@ void _testsInput() {
   });
 
   testWidgets('Can not double tap hours (when not selected) to enter input mode', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false);
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
     final Finder hourFinder = find.ancestor(
       of: find.text('7'),
       matching: find.byType(InkWell),
@@ -975,7 +976,7 @@ void _testsInput() {
   });
 
   testWidgets('Can double tap minutes (when selected) to enter input mode', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false);
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
     final Finder minuteFinder = find.ancestor(
       of: find.text('00'),
       matching: find.byType(InkWell),
@@ -997,7 +998,7 @@ void _testsInput() {
   });
 
   testWidgets('Can not double tap minutes (when not selected) to enter input mode', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false);
+    await mediaQueryBoilerplate(tester, false, entryMode: TimePickerEntryMode.dial);
     final Finder minuteFinder = find.ancestor(
       of: find.text('00'),
       matching: find.byType(InkWell),

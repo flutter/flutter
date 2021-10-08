@@ -73,7 +73,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
+      usage: null,
     );
   });
 

@@ -133,6 +133,8 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       final ChromeOptions options = ChromeOptions(
         url: 'http://localhost:$benchmarkServerPort/index.html',
         userDataDirectory: userDataDir,
+        windowHeight: 1024,
+        windowWidth: 1024,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
       );

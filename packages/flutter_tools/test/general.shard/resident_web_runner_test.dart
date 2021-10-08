@@ -138,7 +138,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html').createSync(recursive: true);
-    webDevFS.report = UpdateFSReport(success: true);
+    webDevFS.report = UpdateFSReport(success: true, syncedBytes: 0);
     debugConnection.fakeVmServiceHost = () => fakeVmServiceHost;
     webDevFS.result = ConnectionResult(
       appConnection,
@@ -160,6 +160,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -189,6 +190,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -208,6 +210,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -221,6 +224,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -280,7 +284,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fileSystem.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
-    webDevFS.report = UpdateFSReport();
+    webDevFS.report = UpdateFSReport(success: false, syncedBytes: 0);
 
     expect(await residentWebRunner.run(), 1);
     // Completing this future ensures that the daemon can exit correctly.
@@ -443,6 +447,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -469,7 +474,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(
       flutterDevice,
       logger: logger,
-      systemClock: SystemClock.fixed(DateTime(2001)),
+      systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
@@ -495,7 +500,7 @@ void main() {
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     );
     webDevFS.report = UpdateFSReport(success: true);
@@ -508,7 +513,7 @@ void main() {
 
     expect(debugConnectionInfo, isNotNull);
 
-    final OperationResult result = await residentWebRunner.restart();
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
@@ -516,7 +521,7 @@ void main() {
 
     // ensure that analytics are sent.
     expect(testUsage.events, <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0', 'cd48': 'false'})),
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
@@ -532,7 +537,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(
       flutterDevice,
       logger: logger,
-      systemClock: SystemClock.fixed(DateTime(2001)),
+      systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
@@ -552,7 +557,7 @@ void main() {
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     );
     webDevFS.report = UpdateFSReport(success: true);
@@ -576,7 +581,7 @@ void main() {
 
 	  // ensure that analytics are sent.
     expect(testUsage.events, <TestUsageEvent>[
-      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0', 'cd48': 'false'})),
+      TestUsageEvent('hot', 'restart', parameters: CustomDimensions.fromMap(<String, String>{'cd27': 'web-javascript', 'cd28': '', 'cd29': 'false', 'cd30': 'true', 'cd13': '0'})),
     ]);
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
@@ -592,7 +597,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(
       flutterDevice,
       logger: logger,
-      systemClock: SystemClock.fixed(DateTime(2001)),
+      systemClock: SystemClock.fixed(DateTime(2001, 1, 1)),
     );
     fakeVmServiceHost = FakeVmServiceHost(requests :kAttachExpectations);
     _setupMocks();
@@ -632,7 +637,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    webDevFS.report = UpdateFSReport();
+    webDevFS.report = UpdateFSReport(success: false,  syncedBytes: 0);
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -689,7 +694,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    webDevFS.report = UpdateFSReport();
+    webDevFS.report = UpdateFSReport(success: false,  syncedBytes: 0);
 
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
@@ -721,7 +726,7 @@ void main() {
     ));
     await connectionInfoCompleter.future;
 
-    final OperationResult result = await residentWebRunner.restart();
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 0);
   }, overrides: <Type, Generator>{
@@ -745,7 +750,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    final OperationResult result = await residentWebRunner.restart();
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(result.code, 1);
     expect(result.message,
@@ -849,7 +854,7 @@ void main() {
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
       logger: logger,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       processManager: FakeProcessManager.any(),
     );
     webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
@@ -862,6 +867,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: logger,
@@ -905,6 +911,7 @@ void main() {
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
+      stayResident: true,
       urlTunneller: null,
       fileSystem: fileSystem,
       logger: logger,
@@ -1054,6 +1061,7 @@ ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
+    stayResident: true,
     urlTunneller: null,
     usage: globals.flutterUsage,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
@@ -1297,6 +1305,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Uri testUri;
   UpdateFSReport report = UpdateFSReport(
     success: true,
+    syncedBytes: 0,
     invalidatedSourcesCount: 1,
   );
   Object reportError;

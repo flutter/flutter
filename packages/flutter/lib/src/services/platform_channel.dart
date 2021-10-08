@@ -411,7 +411,7 @@ class MethodChannel {
     } on MissingPluginException {
       return null;
     } catch (e) {
-      return codec.encodeErrorEnvelope(code: 'error', message: e.toString());
+      return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
     }
   }
 

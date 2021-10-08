@@ -80,6 +80,7 @@ void main() {
     test('should allow null error message,', () {
       final ByteData errorData = method.encodeErrorEnvelope(
         code: 'errorCode',
+        message: null,
         details: 'errorDetails',
       );
       expect(

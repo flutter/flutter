@@ -270,6 +270,7 @@ void main() {
         Offset(0.66, 0.75),
         Offset(1.0, 1.0),
       ],
+      tension: 0.0,
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
@@ -318,6 +319,7 @@ void main() {
         Offset(0.66, 0.75),
         Offset(1.0, 1.0),
       ],
+      tension: 0.0,
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
@@ -417,6 +419,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(0.01, 0.25),
         ],
+        tension: 0.0,
       ),
       isFalse,
     );
@@ -426,6 +429,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(0.01, 0.25),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -436,6 +440,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(1.01, 0.25),
         ],
+        tension: 0.0,
       ),
       isFalse,
     );
@@ -445,6 +450,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(1.01, 0.25),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -456,6 +462,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.75, 0.75),
         ],
+        tension: 0.0,
       ),
       isFalse,
     );
@@ -466,6 +473,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.75, 0.75),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -477,6 +485,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.95, 0.51),
         ],
+        tension: 0.0,
       ),
       isFalse,
     );
@@ -487,6 +496,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.95, 0.51),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -497,6 +507,7 @@ void main() {
           Offset(0.5, 0.05),
           Offset(0.5, 0.95),
         ],
+        tension: 0.0,
       ),
       isFalse,
     );
@@ -506,6 +517,7 @@ void main() {
           Offset(0.5, 0.05),
           Offset(0.5, 0.95),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
   });
@@ -528,6 +540,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(0.01, 0.25),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -538,6 +551,7 @@ void main() {
           Offset(0.2, 0.25),
           Offset(1.01, 0.25),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -549,6 +563,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.75, 0.75),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -560,6 +575,7 @@ void main() {
           Offset(0.50, 0.50),
           Offset(0.95, 0.51),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
 
@@ -570,6 +586,7 @@ void main() {
           Offset(0.5, 0.05),
           Offset(0.5, 0.95),
         ],
+        tension: 0.0,
       );
     }, throwsAssertionError);
   });

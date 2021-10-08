@@ -143,7 +143,7 @@ void main() {
 
     // Default drawerScrimColor
 
-    await tester.pumpWidget(buildFrame());
+    await tester.pumpWidget(buildFrame(drawerScrimColor: null));
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 

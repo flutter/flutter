@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 
 import '../src/common.dart';
-import '../src/fakes.dart';
 import 'test_utils.dart';
 
 const String base64PlistXml =
@@ -47,7 +46,7 @@ void main() {
       outputPreferences: OutputPreferences.test(),
       terminal: AnsiTerminal(
         platform: const LocalPlatform(),
-        stdio: FakeStdio(),
+        stdio: null,
       ),
     );
     parser = PlistParser(

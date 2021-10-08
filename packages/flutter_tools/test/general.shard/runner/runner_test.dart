@@ -190,7 +190,8 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
           'FLUTTER_ROOT': '/',
-        }
+        },
+        operatingSystem: 'linux'
       ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

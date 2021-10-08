@@ -18,6 +18,7 @@ Future<void> main() async {
     imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
+        scale: 1.0,
       )),
     ));
 

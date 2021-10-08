@@ -115,6 +115,7 @@ Future<void> main() async {
           'list',
           'runtimes',
         ],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 
@@ -165,6 +166,7 @@ Future<void> main() async {
           'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
           iOSSimRuntime,
         ],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 
@@ -178,6 +180,7 @@ Future<void> main() async {
           'com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-5-44mm',
           watchSimRuntime,
         ],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 
@@ -185,6 +188,7 @@ Future<void> main() async {
       await eval(
         'xcrun',
         <String>['simctl', 'pair', watchDeviceID, phoneDeviceID],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 
@@ -192,11 +196,13 @@ Future<void> main() async {
       await eval(
         'xcrun',
         <String>['simctl', 'bootstatus', phoneDeviceID, '-b'],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
       await eval(
         'xcrun',
         <String>['simctl', 'bootstatus', watchDeviceID, '-b'],
+        canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 

@@ -342,7 +342,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     bottomChild = TickerMode(
       key: bottomKey,
       enabled: _isTransitioning,
-      child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
+      child: ExcludeSemantics(
+        excluding: true, // Always exclude the semantics of the widget that's fading out.
         child: ExcludeFocus(
           child: FadeTransition(
             opacity: bottomAnimation,

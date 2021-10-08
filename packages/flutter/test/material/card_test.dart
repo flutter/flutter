@@ -87,6 +87,7 @@ void main() {
         child: Material(
           child: Center(
             child: Card(
+              semanticContainer: true,
               child: Column(
                 children: const <Widget>[
                   Text('First child'),
@@ -180,7 +181,7 @@ void main() {
             clipBehavior: Clip.antiAliasWithSaveLayer,
           ),
         ),
-        child: const Card(),
+        child: const Card(clipBehavior: null),
       );
     }));
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);

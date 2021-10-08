@@ -14,7 +14,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(

@@ -128,7 +128,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
           final String data = RendererBinding.instance?.renderView.debugSemantics
-            ?.toStringDeep() ?? 'Semantics not collected.';
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
           return <String, Object>{
             'data': data,
           };

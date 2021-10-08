@@ -30,6 +30,7 @@ void main() {
   Environment environment;
   FakeProcessManager processManager;
   final Platform linux = FakePlatform(
+    operatingSystem: 'linux',
     environment: <String, String>{},
   );
   final Platform windows = FakePlatform(

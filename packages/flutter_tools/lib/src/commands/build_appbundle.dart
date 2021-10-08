@@ -119,6 +119,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
         globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
+        exitOnFail: true,
       );
       validator.clearOutputDir();
       await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents);

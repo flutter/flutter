@@ -252,6 +252,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       suffixText: 'USD',
                       suffixStyle: TextStyle(color: Colors.green),
                     ),
+                    maxLines: 1,
                   ),
                   const SizedBox(height: 24.0),
                   PasswordField(

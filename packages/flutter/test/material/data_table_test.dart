@@ -464,7 +464,7 @@ void main() {
 
     // Check for ascending list
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
+      home: Material(child: buildTable(sortAscending: true)),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
@@ -1181,7 +1181,9 @@ void main() {
 
     // Turn on sorting
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
+      home: Material(child: buildTable(
+        sortEnabled: true,
+      )),
     ));
 
     {
@@ -1288,7 +1290,7 @@ void main() {
       return tableRow.decoration! as BoxDecoration;
     }
 
-    await tester.pumpWidget(buildTable());
+    await tester.pumpWidget(buildTable(selected: false));
     expect(lastTableRowBoxDecoration().color, null);
 
     await tester.pumpWidget(buildTable(selected: true));

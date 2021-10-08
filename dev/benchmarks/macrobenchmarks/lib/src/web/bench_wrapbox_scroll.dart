@@ -155,6 +155,7 @@ class ProductOption extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
       decoration: BoxDecoration(
         border: Border.all(
+          width: 1,
           color: const Color(0xffebebeb),
         ),
         borderRadius: const BorderRadius.all(Radius.circular(15)),

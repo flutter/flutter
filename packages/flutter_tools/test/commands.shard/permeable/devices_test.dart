@@ -42,7 +42,7 @@ void main() {
       isEmpty,
     );
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
     Logger: () => logger,
   });
 

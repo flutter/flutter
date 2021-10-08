@@ -191,7 +191,7 @@ abstract class Target {
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
   ResolvedFiles resolveInputs(Environment environment) {
-    return _resolveConfiguration(inputs, depfiles, environment);
+    return _resolveConfiguration(inputs, depfiles, environment, implicit: true, inputs: true);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
@@ -236,11 +236,8 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static ResolvedFiles _resolveConfiguration(
-    List<Source> config,
-    List<String> depfiles,
-    Environment environment, {
-    bool inputs = true,
+  static ResolvedFiles _resolveConfiguration(List<Source> config,
+    List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (final Source source in config) {

@@ -38,7 +38,7 @@ void main() {
       gradleUtils = GradleUtils(
         cache: Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem),
         fileSystem: fileSystem,
-        platform: FakePlatform(environment: <String, String>{}),
+        platform: FakePlatform(environment: <String, String>{}, operatingSystem: 'linux'),
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );

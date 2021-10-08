@@ -275,6 +275,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           ListTile(
             title: const Text('Simple dropdown:'),

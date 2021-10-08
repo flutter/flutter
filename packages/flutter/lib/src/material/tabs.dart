@@ -124,6 +124,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             margin: iconMargin,

@@ -1372,6 +1372,7 @@ void main() {
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1692,6 +1693,7 @@ void main() {
               Focus(focusNode: topNode, child: Container(height: 100)),
               Expanded(
                 child: ListView(
+                  scrollDirection: Axis.vertical,
                   controller: controller,
                   children: items.map<Widget>((int item) {
                     return Focus(

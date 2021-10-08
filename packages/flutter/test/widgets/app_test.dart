@@ -465,6 +465,7 @@ void main() {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       WidgetsApp(
+        useInheritedMediaQuery: false,
         builder: (BuildContext context, Widget? child) {
           capturedContext = context;
           return const Placeholder();

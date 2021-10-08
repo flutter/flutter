@@ -21,7 +21,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-final Platform platform = FakePlatform();
+final Platform platform = FakePlatform(operatingSystem: 'linux', environment: const <String, String>{});
 void main() {
   FakeProcessManager processManager;
   FileSystem fileSystem;

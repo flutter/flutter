@@ -583,6 +583,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
     _innerController = _NestedScrollController(
       this,
+      initialScrollOffset: 0.0,
       debugLabel: 'inner',
     );
   }

@@ -483,7 +483,7 @@ void main() {
   testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '', nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
 }

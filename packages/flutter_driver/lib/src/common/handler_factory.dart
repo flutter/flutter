@@ -367,7 +367,7 @@ mixin CommandHandlerFactory {
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = _prober.getCenter(target);
     Offset currentLocation = startLocation;
-    final TestPointer pointer = TestPointer();
+    final TestPointer pointer = TestPointer(1);
     _prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {

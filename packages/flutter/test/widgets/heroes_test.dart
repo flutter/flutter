@@ -1308,6 +1308,7 @@ Future<void> main() async {
       ),
       '/two': (BuildContext context) => Material(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               height: 200.0,
@@ -1422,6 +1423,7 @@ Future<void> main() async {
       ),
       '/two': (BuildContext context) => Material(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               height: 200.0,
@@ -2717,6 +2719,7 @@ Future<void> main() async {
         child: Column(
           children: <Widget>[
             HeroMode(
+              enabled: true,
               child: Card(
                 child: Hero(
                   tag: 'a',

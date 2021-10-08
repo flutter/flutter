@@ -542,6 +542,7 @@ void main() {
         child: Image(
           image: TestImageProvider(testImage),
           alignment: Alignment.centerRight,
+          matchTextDirection: false,
         ),
       ),
       Duration.zero,
@@ -565,6 +566,7 @@ void main() {
         child: Image(
           image: TestImageProvider(testImage),
           alignment: Alignment.centerRight,
+          matchTextDirection: false,
         ),
       ),
       Duration.zero,

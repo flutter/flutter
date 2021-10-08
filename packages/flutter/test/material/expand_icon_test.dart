@@ -100,6 +100,7 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
+        isExpanded: false,
         onPressed: (bool isExpanded) {
           expanded = !expanded;
         },
@@ -193,6 +194,7 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
+        isExpanded: false,
         onPressed: (bool _) { },
       ),
     ));
@@ -274,6 +276,7 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(
+        isExpanded: false,
         onPressed: null,
         disabledColor: Colors.cyan,
       ),
@@ -284,6 +287,7 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(
+        isExpanded: false,
         onPressed: null,
         color: Colors.indigo,
         disabledColor: Colors.cyan,

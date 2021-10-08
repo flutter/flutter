@@ -416,6 +416,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 value: widget.rowsPerPage,
                 onChanged: widget.onRowsPerPageChanged,
                 style: footerTextStyle,
+                iconSize: 24.0,
               ),
             ),
           ),

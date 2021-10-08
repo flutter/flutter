@@ -91,7 +91,7 @@ void main() {
       ),
     ));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, buttons: kPrimaryMouseButton);
     await gesture.addPointer(location: Offset.zero);
     await gesture.down(Offset.zero); // Press the mouse button.
     addTearDown(gesture.removePointer);
@@ -415,7 +415,7 @@ void main() {
         onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
-    final TestGesture gesture = await tester.createGesture();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.touch);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
     await tester.pump();
@@ -456,6 +456,7 @@ void main() {
     await tester.pumpWidget(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           MouseRegion(
             onEnter: (PointerEnterEvent details) => enter1.add(details),
@@ -532,6 +533,7 @@ void main() {
     await tester.pumpWidget(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           MouseRegion(
             key: key1,
@@ -1323,6 +1325,7 @@ void main() {
     testWidgets('opaque should default to true', (WidgetTester tester) async {
       final List<String> logs = <String>[];
       await tester.pumpWidget(tripleRegions(
+        opaqueC: null,
         addLog: (String log) => logs.add(log),
       ));
 
@@ -1363,7 +1366,7 @@ void main() {
                 ),
               ),
             ),
-            const MouseRegion(),
+            const MouseRegion(opaque: true),
           ],
         ),
       ),
@@ -1452,16 +1455,19 @@ void main() {
     await gesture.addPointer(location: const Offset(5, 5));
     addTearDown(gesture.removePointer);
 
-    void _handleHover(PointerHoverEvent _) {}
-    void _handlePaintChild() { logs.add('paint'); }
+    void onHover(PointerHoverEvent _) {}
+    void onPaintChild() { logs.add('paint'); }
 
     await tester.pumpWidget(_Scaffold(
       topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          opaque: true,
+          // Dummy callback so that MouseRegion stays affective after opaque
+          // turns false.
+          onHover: onHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1478,10 +1484,8 @@ void main() {
         width: 10,
         child: MouseRegion(
           opaque: false,
-          // Dummy callback so that MouseRegion stays affective after opaque
-          // turns false.
-          onHover: _handleHover,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: _handlePaintChild)),
+          onHover: onHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); }),
@@ -1507,6 +1511,7 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
@@ -1526,6 +1531,7 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.text,
           onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
           child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
@@ -1577,6 +1583,7 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           child: MouseRegion(
+            cursor: MouseCursor.defer,
             onEnter: (_) { logEnters.add('enter'); },
             child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
           ),
@@ -1598,6 +1605,7 @@ void main() {
           cursor: SystemMouseCursors.forbidden,
           child: MouseRegion(
             cursor: SystemMouseCursors.text,
+            opaque: true,
             child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
           ),
         ),
@@ -1866,6 +1874,7 @@ class _ColumnContainer extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),

@@ -147,6 +147,7 @@ class _ShadowWidget extends StatelessWidget {
         ),
         size: Size(width, height),
         isComplex: true,
+        willChange: false,
       ),
     );
   }

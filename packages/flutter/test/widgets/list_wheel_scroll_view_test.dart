@@ -121,6 +121,7 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
+            overAndUnderCenterOpacity: 1,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );

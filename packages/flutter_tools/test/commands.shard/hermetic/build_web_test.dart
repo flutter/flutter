@@ -25,6 +25,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   FileSystem fileSystem;
   final Platform fakePlatform = FakePlatform(
+    operatingSystem: 'linux',
     environment: <String, String>{
       'FLUTTER_ROOT': '/'
     }
@@ -82,7 +83,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -121,7 +122,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
     ProcessManager: () => FakeProcessManager.any(),
   });
 

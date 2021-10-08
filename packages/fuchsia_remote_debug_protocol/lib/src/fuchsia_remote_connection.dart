@@ -260,7 +260,8 @@ class FuchsiaRemoteConnection {
         if (event.eventType == DartVmEventType.started) {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
-          final DartVm? vmService = await _getDartVm(event.uri);
+          final DartVm? vmService = await _getDartVm(event.uri,
+            timeout: _kDartVmConnectionTimeout);
           // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService?.getMainIsolatesByPattern(pattern!) ?? <IsolateRef>[];
           if (result.isNotEmpty) {

@@ -87,7 +87,7 @@ void main() {
   test('ResizeImage takes one dim', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage memoryImage = MemoryImage(bytes);
-    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 10, height: null);
     expect(resizeImage.width, 10);
     expect(resizeImage.height, null);
     expect(resizeImage.imageProvider, memoryImage);

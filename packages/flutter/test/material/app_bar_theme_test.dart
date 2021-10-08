@@ -343,7 +343,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime));
+    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: null));
     expect(getIconText().text.style!.color, Colors.lime);
 
     await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: Colors.purple));

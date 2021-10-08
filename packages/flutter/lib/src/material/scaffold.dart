@@ -279,7 +279,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<SnackBarClosedReason>(),
         () {
           assert(_snackBars.first == controller);
-          hideCurrentSnackBar();
+          hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
         },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -405,7 +405,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<MaterialBannerClosedReason>(),
           () {
         assert(_materialBanners.first == controller);
-        hideCurrentMaterialBanner();
+        hideCurrentMaterialBanner(reason: MaterialBannerClosedReason.hide);
       },
       null, // MaterialBanner doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -2067,7 +2067,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       Completer<SnackBarClosedReason>(),
       () {
         assert(_snackBars.first == controller);
-        hideCurrentSnackBar();
+        hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
       },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -2577,6 +2577,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _previousFloatingActionButtonLocation = _floatingActionButtonLocation;
     _floatingActionButtonMoveController = AnimationController(
       vsync: this,
+      lowerBound: 0.0,
+      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );

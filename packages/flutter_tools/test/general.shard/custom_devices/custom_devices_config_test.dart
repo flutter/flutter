@@ -23,7 +23,8 @@ void main() {
     final Directory directory = fileSystem.directory('custom_devices_config');
 
     writeCustomDevicesConfigFile(
-      directory
+      directory,
+      json: null
     );
 
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(

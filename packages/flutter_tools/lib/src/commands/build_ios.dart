@@ -186,7 +186,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();

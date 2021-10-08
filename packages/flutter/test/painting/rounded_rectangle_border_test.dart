@@ -44,8 +44,8 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
-    const RoundedRectangleBorder c1 = RoundedRectangleBorder(side: BorderSide(), borderRadius: BorderRadius.all(Radius.circular(1.0)));
-    const RoundedRectangleBorder c2 = RoundedRectangleBorder(side: BorderSide(), borderRadius: BorderRadius.all(Radius.circular(2.0)));
+    const RoundedRectangleBorder c1 = RoundedRectangleBorder(side: BorderSide(width: 1.0), borderRadius: BorderRadius.all(Radius.circular(1.0)));
+    const RoundedRectangleBorder c2 = RoundedRectangleBorder(side: BorderSide(width: 1.0), borderRadius: BorderRadius.all(Radius.circular(2.0)));
     expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
     expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
@@ -69,8 +69,8 @@ void main() {
   });
 
   test('RoundedRectangleBorder and CircleBorder', () {
-    const RoundedRectangleBorder r = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
-    const CircleBorder c = CircleBorder();
+    const RoundedRectangleBorder r = RoundedRectangleBorder(side: BorderSide.none, borderRadius: BorderRadius.all(Radius.circular(10.0)));
+    const CircleBorder c = CircleBorder(side: BorderSide.none);
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
       includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],

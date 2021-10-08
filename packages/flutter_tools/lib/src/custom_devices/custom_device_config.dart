@@ -284,7 +284,8 @@ class CustomDeviceConfig {
       '-c', '1',
       'raspberrypi'
     ],
-    explicitPingSuccessRegex: true
+    explicitPingSuccessRegex: true,
+    pingSuccessRegex: null
   );
 
   /// Returns an example custom device config that works on the given host platform.

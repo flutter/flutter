@@ -62,6 +62,7 @@ void main() {
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
+              scrollDirection: Axis.vertical,
               children: items.map<Widget>((int item) {
                 return GestureDetector(
                   onTap: () { tapped.add(item); },

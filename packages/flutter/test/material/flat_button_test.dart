@@ -154,12 +154,13 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
   );
 
   testWidgets('FlatButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    final ColorScheme colorScheme = ColorScheme.fromSwatch();
+    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
 
     Color getTextColor(Set<MaterialState> states) {
       final Set<MaterialState> interactiveStates = <MaterialState>{
@@ -218,6 +219,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
   );
 
   testWidgets('FlatButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -578,7 +580,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: MediaQuery(
-            data: const MediaQueryData(),
+            data: const MediaQueryData(textScaleFactor: 1.0),
             child: Center(
               child: FlatButton(
                 onPressed: () { },
@@ -705,7 +707,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -715,7 +717,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () { wasPressed = true; }),
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -724,7 +726,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(),
+      buildFrame(onPressed: null, onLongPress: null),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, false);

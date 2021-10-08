@@ -20,6 +20,7 @@ import '../../src/context.dart';
 const String home = '/home/me';
 
 final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
   environment: <String, String>{'HOME': home}
 );
 

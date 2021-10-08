@@ -18,11 +18,13 @@ void main() {
       const TextSelection invalidSelection1 = TextSelection(
         baseOffset: -1,
         extentOffset: 0,
+        affinity: TextAffinity.downstream,
         isDirectional: true,
       );
       const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
         extentOffset: -1,
         affinity: TextAffinity.upstream,
+        isDirectional: false,
       );
       expect(invalidSelection1, invalidSelection2);
       expect(invalidSelection1.hashCode, invalidSelection2.hashCode);
@@ -32,6 +34,7 @@ void main() {
       const TextSelection selection1 = TextSelection(
         baseOffset: 1,
         extentOffset: 2,
+        affinity: TextAffinity.downstream,
       );
       const TextSelection selection2 = TextSelection(
         baseOffset: 1,
@@ -63,7 +66,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -82,7 +85,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -126,6 +129,7 @@ void main() {
 
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
+        inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
         autocorrect: false,

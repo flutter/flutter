@@ -149,6 +149,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
       child: IndexedStack(
+        index: 0,
         alignment: Alignment.center,
         children: <Widget>[
           AnimatedOpacity(

@@ -43,7 +43,7 @@ void main() {
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
     RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -76,7 +76,7 @@ void main() {
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
     materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -117,7 +117,7 @@ void main() {
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
     materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -150,7 +150,7 @@ void main() {
 
     expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
     materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
     expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
 
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
@@ -294,6 +294,7 @@ void main() {
     await gesture.removePointer();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
   );
 
   testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -313,7 +314,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: ColorScheme.fromSwatch()),
+        theme: ThemeData.from(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)),
         home: Scaffold(
           backgroundColor: Colors.white,
           body: Center(
@@ -364,6 +365,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
   );
 
   testWidgets('OutlinedButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -512,15 +514,15 @@ void main() {
 
     BorderSide getBorderSide(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return const BorderSide(color: pressedColor);
+        return const BorderSide(color: pressedColor, width: 1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return const BorderSide(color: hoverColor);
+        return const BorderSide(color: hoverColor, width: 1);
       }
       if (states.contains(MaterialState.focused)) {
-        return const BorderSide(color: focusedColor);
+        return const BorderSide(color: focusedColor, width: 1);
       }
-      return const BorderSide(color: defaultColor);
+      return const BorderSide(color: defaultColor, width: 1);
     }
 
     await tester.pumpWidget(
@@ -586,7 +588,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
     outlinedButton = find.byType(OutlinedButton);
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, true);
@@ -596,7 +598,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () { wasPressed = true; }),
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
     outlinedButton = find.byType(OutlinedButton);
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, true);
@@ -605,7 +607,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(),
+      buildFrame(onPressed: null, onLongPress: null),
     );
     outlinedButton = find.byType(OutlinedButton);
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
@@ -856,7 +858,7 @@ void main() {
 
     // Pump a button with a null onPressed callback to make it disabled.
     await tester.pumpWidget(
-      buildFrame(),
+      buildFrame(onPressed: null),
     );
 
     // Expect that the button is disabled and painted with the disabled border color.
@@ -981,7 +983,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: MediaQuery(
-            data: const MediaQueryData(),
+            data: const MediaQueryData(textScaleFactor: 1.0),
             child: Center(
               child: OutlinedButton(
                 style: ButtonStyle(

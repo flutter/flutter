@@ -470,6 +470,7 @@ void main() {
     // optionsBuilder returns nothing for an empty field query.
     focusNode.requestFocus();
     textEditingController.value = const TextEditingValue(
+      text: '',
       selection: TextSelection(baseOffset: 0, extentOffset: 0),
     );
     await tester.pump();

@@ -187,6 +187,7 @@ void main() {
           FakeCommand(
             command: kEmulatorLaunchCommand,
             exitCode: 1,
+            stderr: '',
             stdout: 'dummy text',
             completer: Completer<void>(),
           ),

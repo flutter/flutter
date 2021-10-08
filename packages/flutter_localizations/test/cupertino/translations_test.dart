@@ -144,7 +144,7 @@ void main() {
 
 
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
-      Locale locale = const Locale.fromSubtags(languageCode: 'no');
+      Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
       CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
       expect(localizations, isA<CupertinoLocalizationNo>());
@@ -153,7 +153,7 @@ void main() {
       final String copyButtonLabelNo = localizations.copyButtonLabel;
       final String cutButtonLabelNo = localizations.cutButtonLabel;
 
-      locale = const Locale.fromSubtags(languageCode: 'nb');
+      locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
       localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
       expect(localizations, isA<CupertinoLocalizationNb>());

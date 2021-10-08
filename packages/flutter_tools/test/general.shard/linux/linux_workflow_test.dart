@@ -11,6 +11,7 @@ import '../../src/fakes.dart';
 
 void main() {
   final Platform linux = FakePlatform(
+    operatingSystem: 'linux',
     environment: <String, String>{},
   );
   final Platform notLinux = FakePlatform(
@@ -20,7 +21,7 @@ void main() {
   final FeatureFlags enabledFlags = TestFeatureFlags(
     isLinuxEnabled: true,
   );
-  final FeatureFlags disabledFlags = TestFeatureFlags();
+  final FeatureFlags disabledFlags = TestFeatureFlags(isLinuxEnabled: false);
 
   testWithoutContext('Applies to Linux platform', () {
     final LinuxWorkflow linuxWorkflow = LinuxWorkflow(

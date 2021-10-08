@@ -138,6 +138,7 @@ void main() {
                   onGenerateRoute: (RouteSettings settings) {
                     return CupertinoPageRoute<void>(
                       builder: (BuildContext context) => Align(
+                        alignment: Alignment.center,
                         child: CupertinoContextMenu(
                           actions: const <CupertinoContextMenuAction>[
                             CupertinoContextMenuAction(
@@ -299,6 +300,7 @@ void main() {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.center,
         screenSize: portraitScreenSize,
         child: child,
       ));
@@ -368,6 +370,7 @@ void main() {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.center,
         child: child,
       ));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);

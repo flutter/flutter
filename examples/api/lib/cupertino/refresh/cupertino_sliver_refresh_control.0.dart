@@ -53,6 +53,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             largeTitle: Text('Scroll down'),
           ),
           CupertinoSliverRefreshControl(
+            refreshTriggerPullDistance: 100.0,
+            refreshIndicatorExtent: 60.0,
             onRefresh: () async {
               await Future<void>.delayed(
                 const Duration(milliseconds: 1000),

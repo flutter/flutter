@@ -421,6 +421,7 @@ void main() {
                   height: 100.0,
                   child: AndroidView(
                     viewType: 'webview',
+                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
                   ),
                 ),
@@ -1572,6 +1573,7 @@ void main() {
                   height: 100.0,
                   child: UiKitView(
                     viewType: 'webview',
+                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
                   ),
                 ),

@@ -634,6 +634,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
+      isEnabled: true,
     );
   }
 }
@@ -826,6 +827,7 @@ class InputChip extends StatelessWidget
       onPressed: onPressed,
       pressElevation: pressElevation,
       selected: selected,
+      tapEnabled: true,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       tooltip: tooltip,
@@ -1011,6 +1013,7 @@ class ChoiceChip extends StatelessWidget
       pressElevation: pressElevation,
       selected: selected,
       showCheckmark: false,
+      onDeleted: null,
       tooltip: tooltip,
       side: side,
       shape: shape,
@@ -1395,6 +1398,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       visualDensity: visualDensity,
       labelPadding: labelPadding,
+      isEnabled: true,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -2443,6 +2447,7 @@ class _RenderChip extends RenderBox {
       final Size updatedSize = layoutChild(
         label!,
         BoxConstraints(
+          minWidth: 0.0,
           maxWidth: maxWidth,
           minHeight: rawSize.height,
           maxHeight: size.height,
@@ -2460,6 +2465,7 @@ class _RenderChip extends RenderBox {
       BoxConstraints(
         minHeight: rawSize.height,
         maxHeight: size.height,
+        minWidth: 0.0,
         maxWidth: size.width,
       ),
     );
@@ -2931,6 +2937,7 @@ class _UnconstrainedInkSplashFactory extends InteractiveInkFeatureFactory {
       referenceBox: referenceBox,
       position: position,
       color: color,
+      containedInkWell: false,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
       customBorder: customBorder,

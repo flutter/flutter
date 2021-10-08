@@ -88,6 +88,7 @@ void main() {
                 context,
                 TextSelectionHandleType.left,
                 10.0,
+                null,
               );
             },
           ),
@@ -141,6 +142,7 @@ void main() {
                 context,
                 TextSelectionHandleType.left,
                 10.0,
+                null,
               );
             },
           ),
@@ -202,6 +204,7 @@ void main() {
                   context,
                   TextSelectionHandleType.left,
                   10.0,
+                  null,
                 );
               },
             ),

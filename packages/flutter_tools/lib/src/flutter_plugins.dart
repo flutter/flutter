@@ -27,7 +27,7 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, Object? context, File file, TemplateRenderer templateRenderer) {
   final String renderedTemplate = templateRenderer
-    .renderString(template, context);
+    .renderString(template, context, htmlEscapeValues: false);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }

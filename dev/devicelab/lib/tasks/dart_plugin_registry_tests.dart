@@ -145,6 +145,7 @@ class PluginPlatformInterfaceMacOS {
         final Process run = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           flutterCommandArgs('run', <String>['-d', 'macos', '-v']),
+          environment: null,
         );
         Completer<void> registryExecutedCompleter = Completer<void>();
         final StreamSubscription<void> subscription = run.stdout

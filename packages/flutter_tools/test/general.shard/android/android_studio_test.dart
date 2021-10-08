@@ -59,6 +59,7 @@ const Map<String, dynamic> macStudioInfoPlist2020_3 = <String, dynamic>{
 };
 
 final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
   environment: <String, String>{'HOME': homeLinux},
 );
 

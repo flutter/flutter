@@ -14,6 +14,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: 2,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(

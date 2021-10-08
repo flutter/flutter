@@ -50,6 +50,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
+    assetDirPath: null,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
   );

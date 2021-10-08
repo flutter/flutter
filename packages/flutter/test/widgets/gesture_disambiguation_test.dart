@@ -12,6 +12,7 @@ void main() {
 
     final Widget widget = GestureDetector(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           GestureDetector(
             onTap: () { detector1TapCount += 1; },

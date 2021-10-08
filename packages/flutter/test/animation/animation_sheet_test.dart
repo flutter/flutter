@@ -38,6 +38,7 @@ void main() {
     await tester.pumpFrames(
       builder.record(
         const _DecuplePixels(Duration(seconds: 1)),
+        recording: true,
       ),
       const Duration(milliseconds: 400),
       const Duration(milliseconds: 100),
@@ -92,6 +93,7 @@ void main() {
     await tester.pumpFrames(
       builder.record(
         const _DecuplePixels(Duration(seconds: 1)),
+        recording: true,
       ),
       const Duration(milliseconds: 400),
       const Duration(milliseconds: 100),

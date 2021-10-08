@@ -25,6 +25,7 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
   environment: <String, String>{}
 );
 
@@ -888,8 +889,8 @@ void main() {
 
     testWithoutContext('when PackageProcess throws an exception without containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1113,7 +1114,7 @@ void main() {
       platform: linuxPlatform,
     );
 
-    expect(processManager.killPid(1), true);
+    expect(processManager.killPid(1, io.ProcessSignal.sigterm), true);
     expect(processManager.killPid(3, io.ProcessSignal.sigkill), true);
     expect(fakeProcessManager.killedProcesses, <int, io.ProcessSignal>{
       1: io.ProcessSignal.sigterm,

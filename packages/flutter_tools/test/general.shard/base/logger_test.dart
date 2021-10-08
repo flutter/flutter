@@ -19,7 +19,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-final Platform _kNoAnsiPlatform = FakePlatform();
+final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
@@ -240,7 +240,7 @@ void main() {
 
     testWithoutContext('error', () async {
       final BufferLogger mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(),
+        outputPreferences: OutputPreferences.test(showColor: false),
       );
       final VerboseLogger verboseLogger = VerboseLogger(
         mockLogger,
@@ -346,6 +346,7 @@ void main() {
     int called;
     final List<Platform> testPlatforms = <Platform>[
       FakePlatform(
+        operatingSystem: 'linux',
         environment: <String, String>{},
         executableArguments: <String>[],
       ),
@@ -398,7 +399,7 @@ void main() {
         SpinnerStatus spinnerStatus;
 
         setUp(() {
-          platform = FakePlatform();
+          platform = FakePlatform(stdoutSupportsAnsi: false);
           ansiPlatform = FakePlatform(stdoutSupportsAnsi: true);
 
           terminal = AnsiTerminal(
@@ -669,7 +670,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
@@ -698,7 +699,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 5);
       final List<String> lines = outputStderr();
@@ -721,7 +722,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -744,7 +745,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -767,7 +768,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15);
       final List<String> lines = outputStdout();
@@ -787,7 +788,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
@@ -810,7 +811,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40)
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false)
       );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -833,7 +834,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -913,7 +914,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(),
+        outputPreferences: OutputPreferences.test(showColor: false),
       );
       logger.printStatus(
         null,
@@ -936,7 +937,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(),
+        outputPreferences: OutputPreferences.test(showColor: false),
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopwatch),
       );
       final Status status = logger.startProgress(
@@ -1006,7 +1007,7 @@ void main() {
           platform: _kNoAnsiPlatform,
         ),
         stdio: fakeStdio,
-        outputPreferences: OutputPreferences.test(),
+        outputPreferences: OutputPreferences.test(showColor: false),
       );
       logger.startProgress('AAA').stop();
       logger.startProgress('BBB').stop();

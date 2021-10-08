@@ -254,6 +254,7 @@ void main() {
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
+      softWrap: true,
     );
 
     void relayoutWith({
@@ -275,7 +276,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(3 * lineHeight));
 
-    relayoutWith(softWrap: true, overflow: TextOverflow.clip);
+    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.clip);
     expect(paragraph.size.height, greaterThan(5 * lineHeight));
 
     // Try again with ellipsis overflow. We can't test that the ellipsis are
@@ -290,7 +291,7 @@ void main() {
     // infinite wrapping. However, if we did, we'd never know when to append an
     // ellipsis, so this really means "append ellipsis as soon as we exceed the
     // width".
-    relayoutWith(softWrap: true, overflow: TextOverflow.ellipsis);
+    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Now with no soft wrapping.
@@ -300,7 +301,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
-    relayoutWith(softWrap: false, overflow: TextOverflow.clip);
+    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     relayoutWith(maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
@@ -309,7 +310,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(3 * lineHeight));
 
-    relayoutWith(softWrap: false, overflow: TextOverflow.ellipsis);
+    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Test presence of the fade effect.
@@ -575,6 +576,7 @@ void main() {
           WidgetSpan(child: Text(sentence)),
         ],
       ),
+      textScaleFactor: 1.0,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
@@ -619,6 +621,7 @@ void main() {
           WidgetSpan(child: Text(sentence)),
         ],
       ),
+      textScaleFactor: 1.0,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
@@ -715,6 +718,7 @@ void main() {
         ],
       ),
       overflow: TextOverflow.ellipsis,
+      textScaleFactor: 1.0,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );

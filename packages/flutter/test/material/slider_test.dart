@@ -476,6 +476,7 @@ void main() {
                     width: 144.0 + 2 * 16.0, // _kPreferredTotalWidth
                     child: Slider(
                       key: sliderKey,
+                      min: 0.0,
                       max: 100.0,
                       divisions: 10,
                       value: value,
@@ -521,6 +522,8 @@ void main() {
           child: Material(
             child: Slider(
               value: 0.0,
+              min: 0.0,
+              max: 1.0,
               onChanged: (double newValue) {
                 log.add(newValue);
               },
@@ -541,6 +544,7 @@ void main() {
           child: Material(
             child: Slider(
               value: 0.0,
+              min: 0.0,
               max: 0.0,
               onChanged: (double newValue) {
                 log.add(newValue);
@@ -988,6 +992,7 @@ void main() {
                         maxHeight: double.infinity,
                         child: Slider(
                           key: sliderKey,
+                          min: 0.0,
                           max: 100.0,
                           divisions: isDiscrete ? 10 : null,
                           label: '${value.round()}',
@@ -1120,6 +1125,7 @@ void main() {
           child: Material(
             child: Center(
               child: Slider(
+                min: 0.0,
                 max: 100.0,
                 divisions: divisions,
                 value: 0.25,
@@ -1453,6 +1459,7 @@ void main() {
             child: Material(
               child: Slider(
                 value: 100.0,
+                min: 0.0,
                 max: 200.0,
                 onChanged: (double v) { },
               ),
@@ -1561,6 +1568,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 40.0,
+            min: 0.0,
             max: 200.0,
             divisions: 10,
             semanticFormatterCallback: (double value) => value.round().toString(),
@@ -1944,30 +1952,30 @@ void main() {
     }
 
     // Default (showValueIndicator set to onlyForDiscrete).
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
 
     // With showValueIndicator set to onlyForContinuous.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
 
     // discrete enabled widget with showValueIndicator set to always.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.always);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
 
     // discrete enabled widget with showValueIndicator set to never.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 
@@ -2001,13 +2009,13 @@ void main() {
     );
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(value, equals(0.5));
     await gesture.moveBy(const Offset(-500.0, 0.0));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     // Change the tree to dispose the original widget.
     await tester.pumpWidget(Container());
-    expect(await tester.pumpAndSettle(), equals(1));
+    expect(await tester.pumpAndSettle(const Duration(milliseconds: 100)), equals(1));
     await gesture.up();
   });
 
@@ -2031,6 +2039,7 @@ void main() {
                 children: <Widget>[
                   Slider(
                     key: sliderKey,
+                    min: 0.0,
                     max: 100.0,
                     divisions: divisions,
                     label: '${value.round()}',
@@ -2286,7 +2295,11 @@ void main() {
       inactiveColor: Colors.grey,
       label: 'Set a value',
       max: 100.0,
+      min: 0.0,
       onChanged: null,
+      onChangeEnd: null,
+      onChangeStart: null,
+      semanticFormatterCallback: null,
       value: 50.0,
     ).debugFillProperties(builder);
 

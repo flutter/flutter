@@ -12,7 +12,9 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform();
+final FakePlatform linux = FakePlatform(
+  operatingSystem: 'linux',
+);
 
 void main() {
   testWithoutContext('Applies to macOS platform', () {
@@ -42,7 +44,7 @@ void main() {
   testWithoutContext('Does not apply when feature is disabled', () {
     final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
       platform: macOS,
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isMacOSEnabled: false),
     );
 
     expect(macOSWorkflow.appliesToHostPlatform, false);

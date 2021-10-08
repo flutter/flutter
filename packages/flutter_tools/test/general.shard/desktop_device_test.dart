@@ -182,6 +182,7 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
+        dartFlags: '',
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
         traceSkia: true,

@@ -210,11 +210,13 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
+          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
+            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -235,11 +237,13 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
+          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
+            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -271,6 +275,7 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -282,6 +287,7 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -299,6 +305,7 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -306,6 +313,7 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -335,11 +343,13 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
+          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
+            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -360,11 +370,13 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
+          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
+            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -396,6 +408,7 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -407,6 +420,7 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -424,6 +438,7 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -431,6 +446,7 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -1729,6 +1745,7 @@ void main() {
       await tester.pumpWidget(RepaintBoundary(
         key: key,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           textDirection: TextDirection.ltr,
           children: <Widget>[
@@ -1784,6 +1801,7 @@ void main() {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
       ImageInfo(
         image: image,
+        scale: 1.0,
         debugLabel: 'test.png',
       ),
     );
@@ -1813,7 +1831,7 @@ void main() {
   });
 
   testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
-    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
 
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -1822,6 +1840,7 @@ void main() {
         Future<ImageInfo>.value(
           ImageInfo(
             image: image,
+            scale: 1.0,
             debugLabel: '_TestImage',
           ),
         ),
@@ -1854,7 +1873,7 @@ void main() {
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;
-    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
     final _TestImageProvider provider = _TestImageProvider();
     provider.complete(image);
 

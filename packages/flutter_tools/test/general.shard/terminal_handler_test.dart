@@ -791,7 +791,9 @@ void main() {
     });
 
     testWithoutContext('v - launchDevToolsInBrowser', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsServiceProtocol: true);
       final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
       final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
@@ -1005,7 +1007,7 @@ void main() {
           'enabled': 'true',
         },
       )
-    ], logger: logger, fileSystem: fileSystem);
+    ], logger: logger, supportsScreenshot: false, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
@@ -1039,7 +1041,7 @@ void main() {
           'enabled': 'true',
         },
       )
-    ], logger: logger, web: true, fileSystem: fileSystem);
+    ], logger: logger, supportsScreenshot: false, web: true, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
@@ -1070,6 +1072,7 @@ void main() {
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[],
       logger: logger,
+      supportsScreenshot: false,
       supportsServiceProtocol: false,
       fileSystem: fileSystem,
     );
@@ -1086,6 +1089,7 @@ void main() {
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[],
       logger: logger,
+      supportsScreenshot: false,
       supportsServiceProtocol: false,
       web: true,
       fileSystem: fileSystem,
@@ -1114,6 +1118,7 @@ void main() {
         ),
       ],
       logger: logger,
+      supportsScreenshot: false,
       fileSystem: fileSystem,
     );
 
@@ -1149,6 +1154,7 @@ void main() {
         ),
       ],
       logger: logger,
+      supportsScreenshot: false,
       fileSystem: fileSystem,
     );
 
@@ -1184,6 +1190,7 @@ void main() {
         ),
       ],
       logger: logger,
+      supportsScreenshot: false,
       web: true,
       fileSystem: fileSystem,
     );
