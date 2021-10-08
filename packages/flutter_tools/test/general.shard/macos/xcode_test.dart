@@ -680,6 +680,19 @@ void main() {
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });
+
+        testUsingContext('handles bad output',()  async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: 'Something bad happened, not JSON',
+          ));
+
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, isEmpty);
+          expect(logger.errorText, contains('xcdevice returned non-JSON response'));
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+        });
       });
 
       group('diagnostics', () {
