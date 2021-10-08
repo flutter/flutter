@@ -496,7 +496,7 @@ class RenderStack extends RenderBox
 
     child.layout(childConstraints, parentUsesSize: true);
 
-    late final double x;
+    final double x;
     if (childParentData.left != null) {
       x = childParentData.left!;
     } else if (childParentData.right != null) {
@@ -508,7 +508,7 @@ class RenderStack extends RenderBox
     if (x < 0.0 || x + child.size.width > size.width)
       hasVisualOverflow = true;
 
-    late final double y;
+    final double y;
     if (childParentData.top != null) {
       y = childParentData.top!;
     } else if (childParentData.bottom != null) {
@@ -728,9 +728,9 @@ class RenderIndexedStack extends RenderStack {
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? transformed) {
+      hitTest: (BoxHitTestResult result, Offset transformed) {
         assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed!);
+        return child.hitTest(result, position: transformed);
       },
     );
   }

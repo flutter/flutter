@@ -24,12 +24,10 @@ import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
 
 const String linuxFlutterRoot = '/flutter';
 const String windowsFlutterRoot = r'C:\flutter';
@@ -235,6 +233,8 @@ class FakeTerminal implements Terminal {
       displayAcceptedCharacters: displayAcceptedCharacters
     );
 
+  @override
+  bool get singleCharMode => terminal.singleCharMode;
   @override
   set singleCharMode(bool value) => terminal.singleCharMode = value;
 

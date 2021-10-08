@@ -101,7 +101,7 @@ enum HeroFlightDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows a [Hero] used within a [ListTile].
 ///
 /// Tapping on the Hero-wrapped rectangle triggers a hero
@@ -113,56 +113,7 @@ enum HeroFlightDirection {
 /// The Hero widget uses the matching tags to identify and execute this
 /// animation.
 ///
-/// ```dart
-///  Widget build(BuildContext context) {
-///    return Column(
-///      crossAxisAlignment: CrossAxisAlignment.start,
-///      children: <Widget>[
-///        const SizedBox(
-///          height: 20.0,
-///        ),
-///        ListTile(
-///          leading: Hero(
-///            tag: 'hero-rectangle',
-///            child: _blueRectangle(const Size(50, 50)),
-///          ),
-///          onTap: () => _gotoDetailsPage(context),
-///          title: const Text('Tap on the icon to view hero animation transition.'),
-///        ),
-///      ],
-///    );
-///  }
-///
-///  Widget _blueRectangle(Size size) {
-///   return Container(
-///     width: size.width,
-///     height: size.height,
-///     color: Colors.blue,
-///    );
-///  }
-///
-///  void _gotoDetailsPage(BuildContext context) {
-///    Navigator.of(context).push(MaterialPageRoute<void>(
-///      builder: (BuildContext context) => Scaffold(
-///        appBar: AppBar(
-///          title: const Text('second Page'),
-///        ),
-///        body: Center(
-///          child: Column(
-///            mainAxisAlignment: MainAxisAlignment.center,
-///            children: <Widget>[
-///              Hero(
-///                tag: 'hero-rectangle',
-///                child: _blueRectangle(const Size(200, 200)),
-///              ),
-///            ],
-///          ),
-///        ),
-///      ),
-///    ));
-///  }
-///
-/// ```
+/// ** See code in examples/api/lib/widgets/heroes/hero.0.dart **
 /// {@end-tool}
 ///
 /// ## Discussion
@@ -596,8 +547,8 @@ class _HeroFlight {
           left: offsets.left,
           child: IgnorePointer(
             child: RepaintBoundary(
-              child: Opacity(
-                opacity: _heroOpacity.value,
+              child: FadeTransition(
+                opacity: _heroOpacity,
                 child: child,
               ),
             ),

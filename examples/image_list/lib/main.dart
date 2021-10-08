@@ -98,7 +98,7 @@ Future<void> main() async {
   final HttpServer httpServer =
       await HttpServer.bindSecure('localhost', 0, serverContext);
   final int port = httpServer.port;
-  print('Listening on port $port.');
+  debugPrint('Listening on port $port.');
 
   // Initializes bindings before using any platform channels.
   WidgetsFlutterBinding.ensureInitialized();
@@ -193,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     ).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
-      print(
+      debugPrint(
         '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
       );
     });

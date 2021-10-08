@@ -325,6 +325,7 @@ abstract class CreateBase extends FlutterCommand {
     String projectName,
     String projectDescription,
     String androidLanguage,
+    String iosDevelopmentTeam,
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
@@ -371,12 +372,12 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
-      // TODO(jonahwilliams): update after google3 uuid is updated.
-      // ignore: prefer_const_constructors
-      'pluginProjectUUID': Uuid().v4().toUpperCase(),
+      'pluginProjectUUID': const Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+      'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
       'ios': ios,

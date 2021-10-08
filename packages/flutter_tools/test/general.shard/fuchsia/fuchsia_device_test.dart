@@ -887,6 +887,9 @@ class FuchsiaModulePackage extends ApplicationPackage {
   final String name;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
   MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6);
 
@@ -1008,7 +1011,13 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
-  Future<void> startDartDevelopmentService(Uri observatoryUri, int hostPort, bool ipv6, bool disableServiceAuthCodes, {Logger logger}) async { }
+  Future<void> startDartDevelopmentService(
+    Uri observatoryUri, {
+    @required Logger logger,
+    int hostPort,
+    bool ipv6,
+    bool disableServiceAuthCodes,
+  }) async {}
 
   @override
   Uri get uri => Uri.parse('example');

@@ -138,12 +138,6 @@ class IOSDevices extends PollingDeviceDiscovery {
   List<String> get wellKnownIds => const <String>[];
 }
 
-enum IOSDeviceInterface {
-  none,
-  usb,
-  network,
-}
-
 class IOSDevice extends Device {
   IOSDevice(String id, {
     @required FileSystem fileSystem,
@@ -191,13 +185,13 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotReload => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
-  bool get supportsHotRestart => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotRestart => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
-  bool get supportsFlutterExit => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsFlutterExit => interfaceType == IOSDeviceConnectionInterface.usb;
 
   @override
   final String name;
@@ -207,7 +201,7 @@ class IOSDevice extends Device {
 
   final DarwinArch cpuArchitecture;
 
-  final IOSDeviceInterface interfaceType;
+  final IOSDeviceConnectionInterface interfaceType;
 
   Map<IOSApp, DeviceLogReader> _logReaders;
 
@@ -710,6 +704,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   }
 
   /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  IOSDeployDebugger get debuggerStream => _iosDeployDebugger;
   set debuggerStream(IOSDeployDebugger debugger) {
     // Logging is gathered from syslog on iOS 13 and earlier.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
@@ -742,14 +737,13 @@ class IOSDeviceLogReader extends DeviceLogReader {
           _linesController.close();
         }
       });
-      assert(_idevicesyslogProcess == null);
-      _idevicesyslogProcess = process;
+      assert(idevicesyslogProcess == null);
+      idevicesyslogProcess = process;
     });
   }
 
   @visibleForTesting
-  set idevicesyslogProcess(Process process) => _idevicesyslogProcess = process;
-  Process _idevicesyslogProcess;
+  Process idevicesyslogProcess;
 
   // Returns a stateful line handler to properly capture multiline output.
   //
@@ -787,7 +781,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
       loggingSubscription.cancel();
     }
-    _idevicesyslogProcess?.kill();
+    idevicesyslogProcess?.kill();
     _iosDeployDebugger?.detach();
   }
 }

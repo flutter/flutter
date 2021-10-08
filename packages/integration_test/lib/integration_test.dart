@@ -64,7 +64,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print(r'''
+        debugPrint(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -214,13 +214,16 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration? timeout,
   }) async {
     await super.runTest(
       testBody,
       invariantTester,
       description: description,
-      timeout: timeout,
     );
     results[description] ??= _success;
   }
@@ -256,7 +259,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// The `streams` parameter limits the recorded timeline event streams to only
   /// the ones listed. By default, all streams are recorded.
   /// See `timeline_streams` in
-  /// [Dart-SDK/runtime/vm/timeline.cc](https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc)
+  /// [Dart-SDK/runtime/vm/timeline.cc](https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc)
   ///
   /// If [retainPriorEvents] is true, retains events recorded prior to calling
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
@@ -282,8 +285,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     );
   }
 
-  /// This is a convenience wrap of [traceTimeline] and send the result back to
-  /// the host for the [flutter_driver] style tests.
+  /// This is a convenience method that calls [traceTimeline] and sends the
+  /// result back to the host for the [flutter_driver] style tests.
   ///
   /// This records the timeline during `action` and adds the result to
   /// [reportData] with `reportKey`. The [reportData] contains extra information
@@ -293,7 +296,30 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// to `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
-  /// unique key, otherwise the later result will override earlier one.
+  /// unique key, otherwise the later result will override earlier one. Tests
+  /// that call this multiple times must also provide a custom
+  /// [ResponseDataCallback] to decide where and how to write the output
+  /// timelines. For example,
+  ///
+  /// ```dart
+  /// import 'package:integration_test/integration_test_driver.dart';
+  ///
+  /// Future<void> main() {
+  ///   return integrationDriver(
+  ///     responseDataCallback: (data) async {
+  ///       if (data != null) {
+  ///         for (var entry in data.entries) {
+  ///           print('Writing ${entry.key} to the disk.');
+  ///           await writeResponseData(
+  ///             entry.value as Map<String, dynamic>,
+  ///             testOutputFilename: entry.key,
+  ///           );
+  ///         }
+  ///       }
+  ///     },
+  ///   );
+  /// }
+  /// ```
   ///
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
@@ -365,7 +391,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
         if (count > 20) {
-          print('delayForFrameTimings is taking longer than expected...');
+          debugPrint('delayForFrameTimings is taking longer than expected...');
         }
       }
     }
@@ -388,13 +414,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  Timeout get defaultTestTimeout => _defaultTestTimeout ?? super.defaultTestTimeout;
-
-  /// Configures the default timeout for [testWidgets].
-  ///
-  /// See [TestWidgetsFlutterBinding.defaultTestTimeout] for more details.
-  set defaultTestTimeout(Timeout timeout) => _defaultTestTimeout = timeout;
-  Timeout? _defaultTestTimeout;
+  Timeout defaultTestTimeout = Timeout.none;
 
   @override
   void attachRootWidget(Widget rootWidget) {

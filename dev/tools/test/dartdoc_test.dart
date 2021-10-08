@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';

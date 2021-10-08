@@ -1112,11 +1112,11 @@ void main() {
       find.byType(CupertinoScrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(0.0, 0.0, 9.0, 594.0),
+          rect: const Rect.fromLTRB(0.0, 3.0, 9.0, 597.0),
         )
         ..line(
-          p1: Offset.zero,
-          p2: const Offset(0.0, 594.0),
+          p1: const Offset(9.0, 3.0),
+          p2: const Offset(9.0, 597.0),
           strokeWidth: 1.0,
         )
         ..rrect(

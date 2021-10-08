@@ -64,6 +64,9 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override
@@ -198,12 +201,12 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    globals.persistentToolState.redisplayWelcomeMessage = false;
+    globals.persistentToolState.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    globals.persistentToolState.redisplayWelcomeMessage = true;
+    globals.persistentToolState.setShouldRedisplayWelcomeMessage(true);
   }
 
   Future<bool> hasUncommittedChanges() async {

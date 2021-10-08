@@ -123,8 +123,8 @@ void main() {
       ]),
       ...<PointerEventRecord>[
         for (Duration t = const Duration(milliseconds: 5);
-            t < const Duration(milliseconds: 80);
-            t += const Duration(milliseconds: 16))
+             t < const Duration(milliseconds: 80);
+             t += const Duration(milliseconds: 16))
           PointerEventRecord(t, <PointerEvent>[
             PointerMoveEvent(
               timeStamp: t - const Duration(milliseconds: 1),
@@ -149,7 +149,7 @@ void main() {
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
-      assert(diff.inMilliseconds > -1);
+      assert(diff.inMilliseconds > -1, 'timeDiffs were: $timeDiffs (offending time was ${diff.inMilliseconds}ms)');
     }
 
     const String b = '$kSecondaryMouseButton';

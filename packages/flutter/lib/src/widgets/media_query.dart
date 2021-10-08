@@ -255,8 +255,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  ///
+  /// {@tool dartpad}
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing
@@ -265,31 +264,7 @@ class MediaQueryData {
   /// By default, [Slider]s expand to fill the available width. So, we pad the
   /// left and right sides.
   ///
-  /// ```dart
-  /// double _currentValue = 0.2;
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
-  ///   return Scaffold(
-  ///     appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
-  ///     body: Padding(
-  ///       padding: EdgeInsets.only( // only left and right padding are needed here
-  ///         left: systemGestureInsets.left,
-  ///         right: systemGestureInsets.right,
-  ///       ),
-  ///       child: Slider(
-  ///         value: _currentValue,
-  ///         onChanged: (double newValue) {
-  ///           setState(() {
-  ///             _currentValue = newValue;
-  ///           });
-  ///         },
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/media_query/media_query_data.system_gesture_insets.0.dart **
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:file/file.dart';
@@ -102,8 +100,9 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
     const int kFatalDeviceHardwareError =  483;
+    const int kDeviceDoesNotExist = 433;
 
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -262,6 +261,44 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
+    testWithoutContext('when the device does not exist', () async {
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+
+      const String expectedMessage = 'The device was not found.';
+      expect(() async => file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
     testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -340,7 +377,7 @@ void main() {
 
     testWithoutContext('When reading from a file or directory without permission', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = kUserPermissionDenied,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(kUserPermissionDenied),
         platform: windowsPlatform,
       );
 
@@ -354,7 +391,7 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -531,7 +568,7 @@ void main() {
 
     testWithoutContext('When the current working directory disappears', () async {
      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = kSystemCannotFindFile,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCannotFindFile),
         platform: linuxPlatform,
       );
 
@@ -560,7 +597,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -754,7 +791,7 @@ void main() {
 
     testWithoutContext('When reading from current directory without permission', () {
      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = eacces,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(eacces),
         platform: linuxPlatform,
       );
 
@@ -781,11 +818,9 @@ void main() {
     );
 
     final Object firstPath = fs.path;
+    expect(firstPath, isNotNull);
 
     fs.currentDirectory = null;
-    // For fs.path.absolute usage.
-    fileSystem.path = MemoryFileSystem.test().path;
-
     expect(identical(firstPath, fs.path), false);
   });
 
@@ -833,7 +868,7 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    testWithoutContext('when PackageProcess throws an exception containg non-executable bits', () {
+    testWithoutContext('when PackageProcess throws an exception containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
@@ -1089,8 +1124,8 @@ void main() {
 
   group('CopySync' , () {
     const int eaccess = 13;
-    FileExceptionHandler exceptionHandler;
-    ErrorHandlingFileSystem fileSystem;
+    late FileExceptionHandler exceptionHandler;
+    late ErrorHandlingFileSystem fileSystem;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -1191,20 +1226,22 @@ class ThrowingFakeProcessManager extends Fake implements ProcessManager {
   final Exception _exception;
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     throw _exception;
   }
 }
 
 class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
-  int errorCode;
+  ThrowsOnCurrentDirectoryFileSystem(this.errorCode);
+
+  final int errorCode;
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
 }
 
 class FakeExistsFile extends Fake implements File {
-  Object error;
+  late Object error;
   int existsCount = 0;
 
 
@@ -1225,11 +1262,12 @@ class FakeExistsFile extends Fake implements File {
 
 class FakeFileSystem extends Fake implements FileSystem {
   @override
-  p.Context path;
+  p.Context get path => p.Context();
 
   @override
-  Directory get currentDirectory => null;
-
+  Directory get currentDirectory {
+    throw UnimplementedError();
+  }
   @override
   set currentDirectory(dynamic path) { }
 }

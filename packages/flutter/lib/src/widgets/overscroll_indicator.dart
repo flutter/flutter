@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
@@ -47,71 +48,22 @@ import 'transitions.dart';
 /// [OverscrollIndicatorNotification.paintOffset] to the
 /// notification, or use a [NestedScrollView].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NotificationListener] to manipulate
 /// the placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
 /// indicator.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
-///   return NotificationListener<OverscrollIndicatorNotification>(
-///     onNotification: (OverscrollIndicatorNotification notification) {
-///       if (notification.leading) {
-///         notification.paintOffset = leadingPaintOffset;
-///       }
-///       return false;
-///     },
-///     child: CustomScrollView(
-///       slivers: <Widget>[
-///         const SliverAppBar(title: Text('Custom PaintOffset')),
-///         SliverToBoxAdapter(
-///           child: Container(
-///             color: Colors.amberAccent,
-///             height: 100,
-///             child: const Center(child: Text('Glow all day!')),
-///           ),
-///         ),
-///         const SliverFillRemaining(child: FlutterLogo()),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
 /// placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
 /// indicator.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return NestedScrollView(
-///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return const <Widget>[
-///         SliverAppBar(title: Text('Custom NestedScrollViews')),
-///       ];
-///     },
-///     body: CustomScrollView(
-///       slivers: <Widget>[
-///         SliverToBoxAdapter(
-///           child: Container(
-///             color: Colors.amberAccent,
-///             height: 100,
-///             child: const Center(child: Text('Glow all day!')),
-///           ),
-///         ),
-///         const SliverFillRemaining(child: FlutterLogo()),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -749,12 +701,33 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           }
         }
       }
-    } else if (notification is ScrollEndNotification && notification.dragDetails != null
-        || notification is ScrollUpdateNotification && notification.dragDetails != null) {
+    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
       _stretchController.scrollEnd();
     }
     _lastNotification = notification;
     return false;
+  }
+
+  AlignmentDirectional _getAlignmentForAxisDirection(double overscroll) {
+    // Accounts for reversed scrollables by checking the AxisDirection
+    switch (widget.axisDirection) {
+      case AxisDirection.up:
+        return overscroll > 0
+            ? AlignmentDirectional.topCenter
+            : AlignmentDirectional.bottomCenter;
+      case AxisDirection.right:
+        return overscroll > 0
+            ? AlignmentDirectional.centerEnd
+            : AlignmentDirectional.centerStart;
+      case AxisDirection.down:
+        return overscroll > 0
+            ? AlignmentDirectional.bottomCenter
+            : AlignmentDirectional.topCenter;
+      case AxisDirection.left:
+        return overscroll > 0
+            ? AlignmentDirectional.centerStart
+            : AlignmentDirectional.centerEnd;
+    }
   }
 
   @override
@@ -765,6 +738,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+    double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
@@ -773,28 +748,37 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final double stretch = _stretchController.value;
           double x = 1.0;
           double y = 1.0;
-          final AlignmentDirectional alignment;
 
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
-                  ? AlignmentDirectional.centerEnd
-                  : AlignmentDirectional.centerStart;
+              mainAxisSize = size.width;
               break;
             case Axis.vertical:
               y += stretch;
-              alignment = (_lastOverscrollNotification?.overscroll ?? 0) > 0
-                  ? AlignmentDirectional.bottomCenter
-                  : AlignmentDirectional.topCenter;
+              mainAxisSize = size.height;
               break;
           }
 
-          return Transform(
+          final AlignmentDirectional alignment = _getAlignmentForAxisDirection(
+            _lastOverscrollNotification?.overscroll ?? 0.0
+          );
+
+          final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
+
+          final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
             child: widget.child,
           );
+
+          // Only clip if the viewport dimension is smaller than that of the
+          // screen size in the main axis. If the viewport takes up the whole
+          // screen, overflow from transforming the viewport is irrelevant.
+          if (stretch != 0.0 && viewportDimension != mainAxisSize) {
+            return ClipRect(child: transform);
+          }
+          return transform;
         },
       ),
     );

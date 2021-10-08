@@ -23,7 +23,6 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_vm_services.dart';
 
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
@@ -284,6 +283,9 @@ WebDriverService setUpDriverService() {
   );
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   final PlatformType platformType = PlatformType.web;

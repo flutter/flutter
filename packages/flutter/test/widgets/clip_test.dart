@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=456"
-@Tags(<String>['no-shuffle'])
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -316,6 +315,7 @@ void main() {
 
     await tester.tapAt(const Offset(100.0, 100.0));
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c', 'tap']));
+    log.clear();
   });
 
   testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
@@ -529,9 +529,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipPath(
-                    clipper: ShapeBorderClipper(
+                    clipper: const ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
                     child: Container(
@@ -576,7 +576,7 @@ void main() {
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalModel(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                   color: Colors.red,
                   clipBehavior: clipBehavior,
                   child: Container(
@@ -640,7 +640,7 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalModel(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                     color: Colors.red,
                     child: Container(
                       color: Colors.white,
@@ -681,9 +681,9 @@ void main() {
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalShape(
-                  clipper: ShapeBorderClipper(
+                  clipper: const ShapeBorderClipper(
                     shape: BeveledRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
                     ),
                   ),
                   clipBehavior: clipBehavior,
@@ -747,9 +747,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalShape(
-                    clipper: ShapeBorderClipper(
+                    clipper: const ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
                     color: Colors.red,

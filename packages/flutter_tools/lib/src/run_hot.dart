@@ -381,6 +381,7 @@ class HotRunner extends ResidentRunner {
             // the native build step. If there is a Dart compilation error, it
             // should only be displayed once.
             suppressErrors: applicationBinary == null,
+            checkDartPluginRegistry: true,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
@@ -1453,7 +1454,7 @@ class ProjectFileInvalidator {
       packageConfig = await _createPackageConfig(packagesPath);
       // The frontend_server might be monitoring the package_config.json file,
       // Pub should always produce both files.
-      // TODO(jonahwilliams): remove after https://github.com/flutter/flutter/issues/55249
+      // TODO(zanderso): remove after https://github.com/flutter/flutter/issues/55249
       if (_fileSystem.path.basename(packagesPath) == '.packages') {
         final File packageConfigFile = _fileSystem.file(packagesPath)
           .parent.childDirectory('.dart_tool')

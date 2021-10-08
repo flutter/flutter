@@ -465,13 +465,13 @@ class RenderParagraph extends RenderBox
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -933,13 +933,17 @@ class RenderParagraph extends RenderBox
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
-          childNode.rect = Rect.fromLTWH(
-            childNode.rect.left,
-            childNode.rect.top,
-            childNode.rect.width * parentData.scale!,
-            childNode.rect.height * parentData.scale!,
-          );
-          newChildren.add(childNode);
+          assert(parentData.scale != null || parentData.offset == Offset.zero);
+          // parentData.scale may be null if the render object is truncated.
+          if (parentData.scale != null) {
+            childNode.rect = Rect.fromLTWH(
+              childNode.rect.left,
+              childNode.rect.top,
+              childNode.rect.width * parentData.scale!,
+              childNode.rect.height * parentData.scale!,
+            );
+            newChildren.add(childNode);
+          }
           childIndex += 1;
         }
         child = childAfter(child!);

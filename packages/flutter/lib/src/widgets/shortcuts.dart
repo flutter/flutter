@@ -229,7 +229,7 @@ abstract class ShortcutActivator {
 /// considered without considering sides (e.g. control left and control right are
 /// considered the same).
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, the counter is increased when the following key
 /// sequences are pressed:
 ///
@@ -241,46 +241,7 @@ abstract class ShortcutActivator {
 ///
 ///  * Control left, then A, then C.
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
-/// ```dart preamble
-/// class IncrementIntent extends Intent {
-///   const IncrementIntent();
-/// }
-/// ```
-///
-/// ```dart
-/// int count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Shortcuts(
-///     shortcuts: <ShortcutActivator, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.controlLeft): const IncrementIntent(),
-///     },
-///     child: Actions(
-///       actions: <Type, Action<Intent>>{
-///         IncrementIntent: CallbackAction<IncrementIntent>(
-///           onInvoke: (IncrementIntent intent) => setState(() {
-///             count = count + 1;
-///           }),
-///         ),
-///       },
-///       child: Focus(
-///         autofocus: true,
-///         child: Column(
-///           children: <Widget>[
-///             const Text('Add to the counter by pressing Ctrl+C'),
-///             Text('count: $count'),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/shortcuts/logical_key_set.0.dart **
 /// {@end-tool}
 ///
 /// This is also a thin wrapper around a [Set], but changes the equality
@@ -440,49 +401,10 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
   /// whether the specified modifier conditions are met.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad}
   /// In the following example, the shortcut `Control + C` increases the counter:
   ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
-  /// ```
-  ///
-  /// ```dart preamble
-  /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent();
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  /// int count = 0;
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Shortcuts(
-  ///     shortcuts: const <ShortcutActivator, Intent>{
-  ///       SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
-  ///     },
-  ///     child: Actions(
-  ///       actions: <Type, Action<Intent>>{
-  ///         IncrementIntent: CallbackAction<IncrementIntent>(
-  ///           onInvoke: (IncrementIntent intent) => setState(() {
-  ///             count = count + 1;
-  ///           }),
-  ///         ),
-  ///       },
-  ///       child: Focus(
-  ///         autofocus: true,
-  ///         child: Column(
-  ///           children: <Widget>[
-  ///             const Text('Add to the counter by pressing Ctrl+C'),
-  ///             Text('count: $count'),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.single_activator.0.dart **
   /// {@end-tool}
   const SingleActivator(
     this.trigger, {
@@ -618,46 +540,11 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// results in a question mark, which is 'Shift+Slash' on a US keyboard, but
 /// 'Shift+Comma' on a French keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
 /// the counter is increased:
 ///
-/// ```dart preamble
-/// class HelpMenuIntent extends Intent {
-///   const HelpMenuIntent();
-/// }
-/// ```
-///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return Shortcuts(
-///     shortcuts: const <ShortcutActivator, Intent>{
-///       CharacterActivator('?'): HelpMenuIntent(),
-///     },
-///     child: Actions(
-///       actions: <Type, Action<Intent>>{
-///         HelpMenuIntent: CallbackAction<HelpMenuIntent>(
-///           onInvoke: (HelpMenuIntent intent) {
-///             ScaffoldMessenger.of(context).showSnackBar(
-///               const SnackBar(content: Text('Keep calm and carry on!')),
-///             );
-///             return null;
-///           },
-///         ),
-///       },
-///       child: Focus(
-///         autofocus: true,
-///         child: Column(
-///           children: const <Widget>[
-///             Text('Press question mark for help'),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/shortcuts/character_activator.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -852,8 +739,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
 /// from a counter. When the child widget has keyboard focus, and a user presses
 /// the keys that have been defined in [Shortcuts], the action that is bound
@@ -862,62 +748,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// It also shows the use of a [CallbackAction] to avoid creating a new [Action]
 /// subclass.
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
-/// ```dart preamble
-/// class IncrementIntent extends Intent {
-///   const IncrementIntent();
-/// }
-///
-/// class DecrementIntent extends Intent {
-///   const DecrementIntent();
-/// }
-/// ```
-///
-/// ```dart
-/// int count = 0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Shortcuts(
-///     shortcuts: <ShortcutActivator, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
-///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
-///     },
-///     child: Actions(
-///       actions: <Type, Action<Intent>>{
-///         IncrementIntent: CallbackAction<IncrementIntent>(
-///           onInvoke: (IncrementIntent intent) => setState(() {
-///             count = count + 1;
-///           }),
-///         ),
-///         DecrementIntent: CallbackAction<DecrementIntent>(
-///           onInvoke: (DecrementIntent intent) => setState(() {
-///             count = count - 1;
-///           }),
-///         ),
-///       },
-///       child: Focus(
-///         autofocus: true,
-///         child: Column(
-///           children: <Widget>[
-///             const Text('Add to the counter by pressing the up arrow key'),
-///             const Text(
-///                 'Subtract from the counter by pressing the down arrow key'),
-///             Text('count: $count'),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/shortcuts/shortcuts.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// This slightly more complicated, but more flexible, example creates a custom
 /// [Action] subclass to increment and decrement within a widget (a [Column])
 /// that has keyboard focus. When the user presses the up and down arrow keys,
@@ -930,94 +764,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// intent passed to them when invoked (like the increment `amount` in this
 /// example).
 ///
-/// ```dart imports
-/// import 'package:flutter/services.dart';
-/// ```
-///
-/// ```dart preamble
-/// class Model with ChangeNotifier {
-///   int count = 0;
-///   void incrementBy(int amount) {
-///     count += amount;
-///     notifyListeners();
-///   }
-///
-///   void decrementBy(int amount) {
-///     count -= amount;
-///     notifyListeners();
-///   }
-/// }
-///
-/// class IncrementIntent extends Intent {
-///   const IncrementIntent(this.amount);
-///
-///   final int amount;
-/// }
-///
-/// class DecrementIntent extends Intent {
-///   const DecrementIntent(this.amount);
-///
-///   final int amount;
-/// }
-///
-/// class IncrementAction extends Action<IncrementIntent> {
-///   IncrementAction(this.model);
-///
-///   final Model model;
-///
-///   @override
-///   void invoke(covariant IncrementIntent intent) {
-///     model.incrementBy(intent.amount);
-///   }
-/// }
-///
-/// class DecrementAction extends Action<DecrementIntent> {
-///   DecrementAction(this.model);
-///
-///   final Model model;
-///
-///   @override
-///   void invoke(covariant DecrementIntent intent) {
-///     model.decrementBy(intent.amount);
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Model model = Model();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Shortcuts(
-///     shortcuts: <ShortcutActivator, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(2),
-///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(2),
-///     },
-///     child: Actions(
-///       actions: <Type, Action<Intent>>{
-///         IncrementIntent: IncrementAction(model),
-///         DecrementIntent: DecrementAction(model),
-///       },
-///       child: Focus(
-///         autofocus: true,
-///         child: Column(
-///           children: <Widget>[
-///             const Text('Add to the counter by pressing the up arrow key'),
-///             const Text(
-///                 'Subtract from the counter by pressing the down arrow key'),
-///             AnimatedBuilder(
-///               animation: model,
-///               builder: (BuildContext context, Widget? child) {
-///                 return Text('count: ${model.count}');
-///               },
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/shortcuts/shortcuts.1.dart **
 /// {@end-tool}
 ///
 /// See also:
