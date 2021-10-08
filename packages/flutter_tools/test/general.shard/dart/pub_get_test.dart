@@ -695,7 +695,7 @@ void main() {
     ]);
 
     final Pub pub = Pub(
-      platform: FakePlatform(environment: const <String, String>{}),
+      platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
