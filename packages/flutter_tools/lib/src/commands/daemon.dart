@@ -307,6 +307,7 @@ class DaemonDomain extends Domain {
         if (message.level == 'status') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
+          // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error') {
           globals.stdio.stderrWrite('${message.message}\n');

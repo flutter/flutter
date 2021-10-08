@@ -146,6 +146,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -191,6 +192,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -342,6 +344,9 @@ class SwitchListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color? hoverColor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -410,6 +415,7 @@ class SwitchListTile extends StatelessWidget {
           visualDensity: visualDensity,
           focusNode: focusNode,
           enableFeedback: enableFeedback,
+          hoverColor: hoverColor,
         ),
       ),
     );

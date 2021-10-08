@@ -354,7 +354,7 @@ Future<void> main() async {
             key: key,
             width: 100.0,
             height: 50.0,
-            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle, borderRadius: BorderRadius.circular(20.0)),
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle, borderRadius: const BorderRadius.all(Radius.circular(20.0))),
           ),
           onTap: () {
             itemsTapped.add(1);

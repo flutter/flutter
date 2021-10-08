@@ -129,7 +129,7 @@ void main() {
 
     group('AndroidSdk', () {
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
 
         await expectLater(
           () => runBuildApkCommand(
@@ -150,7 +150,7 @@ void main() {
     });
 
     testUsingContext('shrinking is enabled by default on release mode', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
@@ -179,7 +179,7 @@ void main() {
     });
 
     testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
@@ -209,7 +209,7 @@ void main() {
     });
 
     testUsingContext('--extra-front-end-options are provided to gradle project', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
@@ -239,7 +239,7 @@ void main() {
     });
 
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
@@ -271,7 +271,7 @@ void main() {
     });
 
     testUsingContext('guides the user when the shrinker fails', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       const String r8StdoutWarning =
         "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
         '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
@@ -322,7 +322,7 @@ void main() {
     });
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       // Simulate a non-androidx project.
       tempDir
         .childDirectory('flutter_project')
@@ -375,7 +375,7 @@ void main() {
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,

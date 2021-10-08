@@ -10,6 +10,7 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'flutter_plugins.dart';
 import 'globals_null_migrated.dart' as globals;
+import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
@@ -475,12 +476,23 @@ class IosProject extends XcodeBasedProject {
       templateRenderer: globals.templateRenderer,
     );
     final String iosBundleIdentifier = parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
+
+    final String? iosDevelopmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+      processManager: globals.processManager,
+      platform: globals.platform,
+      logger: globals.logger,
+      config: globals.config,
+      terminal: globals.terminal,
+    );
+
     template.render(
       target,
       <String, Object>{
         'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': iosBundleIdentifier,
+        'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+        'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,

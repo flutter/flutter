@@ -576,7 +576,7 @@ class _NavigationIndicator extends StatelessWidget {
                   width: 64.0,
                   height: 32.0,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                     color: color ?? colorScheme.secondary.withOpacity(.24),
                   ),
                 ),
