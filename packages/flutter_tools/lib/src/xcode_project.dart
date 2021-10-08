@@ -495,7 +495,7 @@ class IosProject extends XcodeBasedProject {
       <String, Object>{
         'ios': true,
         'projectName': projectName,
-        'titleCaseProjectName': 'titleCaseProjectName',
+        'titleCaseProjectName': titleCaseProjectName,
         'iosIdentifier': iosBundleIdentifier,
         'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
         'iosDevelopmentTeam': iosDevelopmentTeam ?? '',

@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
@@ -1363,7 +1364,7 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
-  testUsingContext('target name is Title Case for objc iOS project.', () async {
+  testUsingContext('display name is Title Case for objc iOS project.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1371,34 +1372,78 @@ void main() {
 
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name', 'my_project', projectDir.path]);
 
-    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
-    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
-    expect(xcodeProjectFile, exists);
-    final List<String> xcodeProject = xcodeProjectFile.readAsLinesSync().map((String e) => e.replaceAll('\t', '')).toList();
-    expect(xcodeProject, contains('name = "My Project";'));
-    final int startLineNumberOfTargetSection = xcodeProject.indexOf('/* Begin PBXNativeTarget section */');
-    final int endLineNumberOfTargetSection = xcodeProject.indexOf('/* End PBXNativeTarget section */');
-    final int targetNameLineNumber = xcodeProject.indexOf('name = "My Project";');
-    expect(targetNameLineNumber > startLineNumberOfTargetSection && targetNameLineNumber < endLineNumberOfTargetSection, isTrue);
+    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
   });
 
-  testUsingContext('target name is Title Case for swift iOS project.', () async {
+  testUsingContext('display name is Title Case for swift iOS project.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=app', '--offline', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
 
-    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
-    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
-    expect(xcodeProjectFile, exists);
-    final List<String> xcodeProject = xcodeProjectFile.readAsLinesSync().map((String e) => e.replaceAll('\t', '')).toList();
-    expect(xcodeProject, contains('name = "My Project";'));
-    final int startLineNumberOfTargetSection = xcodeProject.indexOf('/* Begin PBXNativeTarget section */');
-    final int endLineNumberOfTargetSection = xcodeProject.indexOf('/* End PBXNativeTarget section */');
-    final int targetNameLineNumber = xcodeProject.indexOf('name = "My Project";');
-    expect(targetNameLineNumber > startLineNumberOfTargetSection && targetNameLineNumber < endLineNumberOfTargetSection, isTrue);
+    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
+  testUsingContext('display name is Title Case for objc iOS module.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=objc', '--project-name', 'my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('display name is Title Case for swift iOS module.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('has correct content and formatting with macOS app template', () async {
