@@ -97,11 +97,8 @@ static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
-static const char* kDartSystraceTraceBufferArgs[]{
-    "--timeline_recorder=systrace",
-};
-
-static const char* kDartFuchsiaTraceArgs[] FML_ALLOW_UNUSED_TYPE = {
+// This is the same as --timeline_recorder=systrace.
+static const char* kDartSystraceTraceBufferArgs[] = {
     "--systrace_timeline",
 };
 
@@ -386,7 +383,8 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   }
 
 #if defined(OS_FUCHSIA)
-  PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
+  PushBackAll(&args, kDartSystraceTraceBufferArgs,
+              fml::size(kDartSystraceTraceBufferArgs));
   PushBackAll(&args, kDartSystraceTraceStreamsArgs,
               fml::size(kDartSystraceTraceStreamsArgs));
 #else
