@@ -697,8 +697,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != oldDelegate.mainAxisMargin
         || crossAxisMargin != oldDelegate.crossAxisMargin
         || radius != oldDelegate.radius
-        || minLength != oldDelegate.minLength
+        || shape != oldDelegate.shape
         || padding != oldDelegate.padding
+        || minLength != oldDelegate.minLength
         || minOverscrollLength != oldDelegate.minOverscrollLength
         || scrollbarOrientation != oldDelegate.scrollbarOrientation;
   }
@@ -1311,9 +1312,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
-  void  updateScrollbarPainter() {
+  void updateScrollbarPainter() {
     scrollbarPainter
-      ..color =  widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
