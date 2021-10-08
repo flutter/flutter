@@ -49,11 +49,11 @@ fml::RefPtr<NativeLibrary> NativeLibrary::CreateForCurrentProcess() {
   return fml::AdoptRef(new NativeLibrary(::GetModuleHandle(nullptr), false));
 }
 
-NativeLibrary::SymbolHandle NativeLibrary::Resolve(const char* symbol) const {
+const uint8_t* NativeLibrary::ResolveSymbol(const char* symbol) {
   if (symbol == nullptr || handle_ == nullptr) {
     return nullptr;
   }
-  return ::GetProcAddress(handle_, symbol);
+  return reinterpret_cast<const uint8_t*>(::GetProcAddress(handle_, symbol));
 }
 
 }  // namespace fml

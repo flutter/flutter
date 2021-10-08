@@ -468,17 +468,6 @@ deps = {
     'dep_type': 'cipd'
   },
 
-  'src/third_party/android_tools/trace_to_text': {
-    'packages': [
-      {
-        'version': 'git_tag:v20.1',
-        'package': 'perfetto/trace_to_text/${{platform}}'
-      }
-    ],
-    'condition': 'download_android_deps',
-    'dep_type': 'cipd'
-  },
-
   'src/third_party/android_tools/ndk': {
      'packages': [
        {
