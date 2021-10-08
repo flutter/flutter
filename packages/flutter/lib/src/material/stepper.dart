@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -624,18 +625,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildLabelText(int index) {
-    return Column(
-      children: <Widget> [
-        if (widget.steps[index].label != null)
-          Container(
-            child: AnimatedDefaultTextStyle(
-              style: _labelStyle(index),
-              duration: kThemeAnimationDuration,
-              child: widget.steps[index].label!,
-              ),
-          )
-      ]
-    );
+    if (widget.steps[index].label != null)
+      return Container(
+        child: AnimatedDefaultTextStyle(
+          style: _labelStyle(index),
+          duration: kThemeAnimationDuration,
+          child: widget.steps[index].label!,
+        ),
+      );
+    return const SizedBox();
   }
 
   Widget _buildVerticalHeader(int index) {
