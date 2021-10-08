@@ -108,7 +108,6 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
     data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: EdgeInsets.zero,
     ),
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),

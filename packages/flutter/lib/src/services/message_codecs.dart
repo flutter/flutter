@@ -478,7 +478,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
         return buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        final List<Object?> result = List<Object?>.filled(length, null, growable: false);
+        final List<Object?> result = List<Object?>.filled(length, null);
         for (int i = 0; i < length; i++)
           result[i] = readValue(buffer);
         return result;

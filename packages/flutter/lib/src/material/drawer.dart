@@ -506,7 +506,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ///
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
-    _controller.fling(velocity: 1.0);
+    _controller.fling();
     widget.drawerCallback?.call(true);
   }
 
@@ -619,7 +619,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: MouseRegion(
-                        opaque: true,
                         child: Container( // The drawer's "scrim"
                           color: _scrimColorTween.evaluate(_controller),
                         ),

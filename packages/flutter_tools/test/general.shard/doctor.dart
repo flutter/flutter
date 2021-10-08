@@ -39,10 +39,7 @@ void main() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         isNot(contains(isA<VisualStudioValidator>())));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(
-      isLinuxEnabled: false,
-      isWindowsEnabled: false,
-    ),
+    FeatureFlags: () => TestFeatureFlags(),
   }));
 
   test('doctor validators includes web when feature is enabled', () => testbed.run(() {
@@ -58,8 +55,6 @@ void main() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         isNot(contains(isA<ChromiumValidator>())));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(
-      isWebEnabled: false,
-    ),
+    FeatureFlags: () => TestFeatureFlags(),
   }));
 }

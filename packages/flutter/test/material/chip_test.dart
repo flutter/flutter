@@ -618,7 +618,6 @@ void main() {
     expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byKey(iconKey)).dx));
     await tester.pumpWidget(
       _wrapForChip(
-        textDirection: TextDirection.ltr,
         child: test,
       ),
     );
@@ -787,7 +786,6 @@ void main() {
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
       _wrapForChip(
-        textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
@@ -1415,9 +1413,6 @@ void main() {
                   selected: selected,
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
                 );
               }),
             ],
@@ -1497,9 +1492,6 @@ void main() {
                   selected: selected,
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
                 );
               }),
             ],
@@ -1575,8 +1567,6 @@ void main() {
                   label: Text('Long Chip Label', key: labelKey),
                   shape: const StadiumBorder(),
                   showCheckmark: false,
-                  tapEnabled: true,
-                  isEnabled: true,
                 );
               }),
             ],
@@ -1620,7 +1610,6 @@ void main() {
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
-        textDirection: TextDirection.ltr,
         child: Theme(
           data: theme,
           child: const InputChip(
@@ -1650,7 +1639,6 @@ void main() {
 
     Widget buildChip() {
       return _wrapForChip(
-        textDirection: TextDirection.ltr,
         child: Theme(
           data: theme,
           child: const Chip(
@@ -1730,7 +1718,6 @@ void main() {
               return RawChip(
                 showCheckmark: showCheckmark,
                 onDeleted: isDeletable ? () { } : null,
-                tapEnabled: true,
                 avatar: avatar,
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
@@ -1776,7 +1763,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check default theme with disabled widget.
-    await tester.pumpWidget(buildApp(isSelectable: false, isPressable: false, isDeletable: true));
+    await tester.pumpWidget(buildApp(isSelectable: false));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester);
@@ -1816,8 +1803,6 @@ void main() {
     await tester.pumpWidget(buildApp(
       chipTheme: customTheme,
       isSelectable: false,
-      isPressable: false,
-      isDeletable: true,
     ));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
@@ -1996,7 +1981,6 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: RawChip(
-            isEnabled: true,
             label: const Text('test'),
             selected: selected,
             onSelected: (bool value) {
@@ -2048,7 +2032,6 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: RawChip(
-            isEnabled: true,
             label: const Text('test'),
             selected: selected,
             onSelected: (bool value) {
@@ -2208,8 +2191,6 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: RawChip(
-            isEnabled: true,
-            tapEnabled: true,
             onPressed: () {},
             label: const Text('test'),
           ),
@@ -2263,8 +2244,6 @@ void main() {
         await tester.pumpWidget(const MaterialApp(
         home: Material(
           child: RawChip(
-            isEnabled: true,
-            tapEnabled: true,
             label: Text('test'),
           ),
         ),
@@ -2317,7 +2296,7 @@ void main() {
           children: <Widget>[
             Chip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              shape: const RoundedRectangleBorder(),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onDeleted: () {
@@ -2354,7 +2333,6 @@ void main() {
       const MaterialApp(
         home: Material(
           child: RawChip(
-            selected: false,
             label: Text('raw chip'),
           ),
         ),
@@ -2383,7 +2361,6 @@ void main() {
         home: Material(
           child: FilterChip(
             onSelected: (bool valueChanged) { },
-            selected: false,
             label: const Text('filter chip'),
           ),
         ),
@@ -2397,7 +2374,6 @@ void main() {
       const MaterialApp(
         home: Material(
           child: InputChip(
-            selected: false,
             label: Text('input chip'),
           ),
         ),
@@ -2420,7 +2396,6 @@ void main() {
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
-        textDirection: TextDirection.ltr,
         child: Theme(
           data: theme,
           child: inputChip,
@@ -2467,7 +2442,7 @@ void main() {
           children: <Widget>[
             InputChip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              shape: const RoundedRectangleBorder(),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onPressed: () {
@@ -2488,7 +2463,7 @@ void main() {
     await tester.pumpWidget(
       _wrapForChip(
         child: InputChip(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () { },
@@ -2496,7 +2471,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(InputChip).hitTestable(at: Alignment.center), findsOneWidget);
+    expect(find.byType(InputChip).hitTestable(), findsOneWidget);
   });
 
   void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
@@ -2702,7 +2677,7 @@ void main() {
       else if (states.contains(MaterialState.selected))
         sideColor = selectedColor;
 
-      return BorderSide(color: sideColor, width: 1);
+      return BorderSide(color: sideColor);
     }
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
@@ -2787,7 +2762,7 @@ void main() {
       else if (states.contains(MaterialState.selected))
         sideColor = selectedColor;
 
-      return BorderSide(color: sideColor, width: 1);
+      return BorderSide(color: sideColor);
     }
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
@@ -2875,7 +2850,7 @@ void main() {
       else if (states.contains(MaterialState.selected))
         return null;
 
-      return BorderSide(color: sideColor, width: 1);
+      return BorderSide(color: sideColor);
     }
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
@@ -3018,8 +2993,8 @@ void main() {
   testWidgets('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {
     const OutlinedBorder themeShape = StadiumBorder();
     const OutlinedBorder selectedShape = RoundedRectangleBorder();
-    const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001), width: 1);
-    const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002), width: 1);
+    const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001));
+    const BorderSide selectedBorderSide = BorderSide(color: Color(0x00000002));
 
     OutlinedBorder? getShape(Set<MaterialState> states) {
       if (states.contains(MaterialState.selected))
@@ -3071,7 +3046,7 @@ void main() {
         child: InputChip(
           focusNode: focusNode,
           autofocus: true,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () { },
@@ -3086,10 +3061,9 @@ void main() {
         child: InputChip(
           focusNode: focusNode,
           autofocus: true,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
-          onPressed: null,
         ),
       ),
     );
@@ -3114,7 +3088,6 @@ void main() {
               focusNode: focusNode2,
               autofocus: true,
               label: const Text('Chip B'),
-              onPressed: null,
             ),
           ],
         ),
@@ -3240,7 +3213,6 @@ void main() {
     await _pumpCheckmarkChip(
       tester,
       chip: _selectedInputChip(),
-      brightness: Brightness.light,
     );
 
     _expectCheckmarkColor(
@@ -3253,7 +3225,6 @@ void main() {
     await _pumpCheckmarkChip(
       tester,
       chip: _selectedFilterChip(),
-      brightness: Brightness.light,
     );
 
     _expectCheckmarkColor(
@@ -3424,7 +3395,6 @@ void main() {
       _chipWithOptionalDeleteButton(
         deleteButtonKey: deleteButtonKey,
         deletable: true,
-        useDeleteButtonTooltip: true,
         chipTooltip: 'Chip Tooltip',
       ),
     );

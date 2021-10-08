@@ -908,7 +908,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput?> _reject() async {
     if (!_compileRequestNeedsConfirmation) {
-      return Future<CompilerOutput?>.value(null);
+      return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
     _server?.stdin.writeln('reject');

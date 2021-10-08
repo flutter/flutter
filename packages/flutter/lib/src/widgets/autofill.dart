@@ -195,7 +195,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
         TextInput.finishAutofillContext(shouldSave: false);
         break;
       case AutofillContextAction.commit:
-        TextInput.finishAutofillContext(shouldSave: true);
+        TextInput.finishAutofillContext();
         break;
     }
   }

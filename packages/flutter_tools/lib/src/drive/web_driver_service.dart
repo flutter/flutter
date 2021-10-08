@@ -91,7 +91,6 @@ class WebDriverService extends DriverService {
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: false,
       route: route,
     );
 

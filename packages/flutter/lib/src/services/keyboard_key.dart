@@ -254,9 +254,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('keyLabel', keyLabel, showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('keyLabel', keyLabel));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   /// Mask for the 32-bit value portion of the key code.
@@ -3552,8 +3552,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   // Key constants for all keyboard keys in the USB HID specification at the

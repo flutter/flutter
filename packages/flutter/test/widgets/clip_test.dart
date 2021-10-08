@@ -395,7 +395,6 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: ClipRect(
-                clipBehavior: Clip.hardEdge,
                 child: Container(
                   color: Colors.blue,
                 ),

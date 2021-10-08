@@ -84,7 +84,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: children,
             ),
           );

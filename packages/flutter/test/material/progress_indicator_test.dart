@@ -50,7 +50,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200.0,
-            child: LinearProgressIndicator(value: null),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
@@ -368,7 +368,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
-        child: CircularProgressIndicator(value: null),
+        child: CircularProgressIndicator(),
       ),
     );
 
