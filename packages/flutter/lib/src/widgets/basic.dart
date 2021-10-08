@@ -252,7 +252,7 @@ class Opacity extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? child,
+    required Widget? child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        super(key: key, child: child);
