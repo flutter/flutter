@@ -361,14 +361,6 @@ def RunAndroidTests(android_variant='android_debug_unopt', adb_path=None):
   RunCmd([adb_path, 'push', tests_path, remote_path], cwd=buildroot_dir)
   RunCmd([adb_path, 'shell', remote_tests_path])
 
-  systrace_test = os.path.join(buildroot_dir, 'flutter', 'testing',
-      'android_systrace_test.py')
-  scenario_apk = os.path.join(out_dir, android_variant, 'firebase_apks',
-      'scenario_app.apk')
-  RunCmd([systrace_test, '--adb-path', adb_path, '--apk-path', scenario_apk,
-      '--package-name', 'dev.flutter.scenarios'])
-
-
 def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   AssertExpectedXcodeVersion()
