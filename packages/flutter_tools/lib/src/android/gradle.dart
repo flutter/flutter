@@ -306,7 +306,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final String baseApplicationName =
         getAndroidEmbeddingVersion(project.directory) >= 2 ?
-          'andorid.app.Application' :
+          'android.app.Application' :
           'io.flutter.app.FlutterApplication';
     command.add('-Pbase-application-name=$baseApplicationName');
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;

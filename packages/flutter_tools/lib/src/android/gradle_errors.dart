@@ -133,7 +133,6 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           logger: globals.logger,
           prompt: 'Do you want to continue with adding multidex support for Android?',
           defaultChoiceIndex: 0,
-          displayAcceptedCharacters: true,
         );
         if (selection == 'y') {
           ensureMultiDexApplicationExists(project.directory);

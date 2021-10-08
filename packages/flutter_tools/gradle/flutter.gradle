@@ -235,10 +235,14 @@ class FlutterPlugin implements Plugin<Project> {
                 implementation "androidx.multidex:multidex:2.0.1"
             }
         } else {
+            String baseApplicationName = "android.app.Application"
+            if (project.hasProperty("base-application-name")) {
+                baseApplicationName = project.property("base-application-name")
+            }
             project.android {
                 defaultConfig {
                     // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders = [applicationName:project.property("base-application-name")]
+                    manifestPlaceholders = [applicationName:baseApplicationName]
                 }
             }
         }
