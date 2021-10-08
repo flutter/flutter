@@ -20,8 +20,6 @@ void main() {
       discoverer = ProtocolDiscovery.observatory(
         logReader,
         ipv6: false,
-        hostPort: null,
-        devicePort: null,
         throttleDuration: const Duration(milliseconds: 5),
         logger: BufferLogger.test(),
       );
@@ -144,7 +142,6 @@ void main() {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
-          hostPort: null,
           devicePort: 12346,
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
@@ -161,7 +158,6 @@ void main() {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
-          hostPort: null,
           devicePort: 12346,
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
@@ -186,7 +182,6 @@ void main() {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
-          hostPort: null,
           devicePort: 12345,
           throttleDuration: const Duration(milliseconds: 200),
           logger: BufferLogger.test(),
@@ -203,7 +198,6 @@ void main() {
         discoverer = ProtocolDiscovery.observatory(
           logReader,
           ipv6: false,
-          hostPort: null,
           devicePort: 12346,
           throttleDuration: const Duration(milliseconds: 10),
           logger: BufferLogger.test(),
@@ -225,8 +219,6 @@ void main() {
           discoverer = ProtocolDiscovery.observatory(
             logReader,
             ipv6: false,
-            hostPort: null,
-            devicePort: null,
             throttleDuration: kThrottleDuration,
             logger: BufferLogger.test(),
           );
@@ -261,7 +253,6 @@ void main() {
           discoverer = ProtocolDiscovery.observatory(
             logReader,
             ipv6: false,
-            hostPort: null,
             devicePort: 12345,
             throttleDuration: kThrottleTimeInMilliseconds,
             logger: BufferLogger.test(),
@@ -297,8 +288,6 @@ void main() {
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
-          hostPort: null,
-          devicePort: null,
           ipv6: false,
           logger: BufferLogger.test(),
         );
@@ -320,7 +309,6 @@ void main() {
           logReader,
           portForwarder: MockPortForwarder(99),
           hostPort: 1243,
-          devicePort: null,
           ipv6: false,
           logger: BufferLogger.test(),
         );
@@ -342,7 +330,6 @@ void main() {
           logReader,
           portForwarder: MockPortForwarder(99),
           hostPort: 0,
-          devicePort: null,
           ipv6: false,
           logger: BufferLogger.test(),
         );
@@ -365,7 +352,6 @@ void main() {
           portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
-          devicePort: null,
           logger: BufferLogger.test(),
         );
 
@@ -387,7 +373,6 @@ void main() {
           portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
-          devicePort: null,
           logger: BufferLogger.test(),
         );
 
