@@ -165,7 +165,7 @@ class Step {
   final bool isActive;
 
   /// [label] appears under the number icon.
-  final String? label;
+  final Widget? label;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -577,6 +577,27 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
+  TextStyle _labelStyle(int index) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
+    assert(widget.steps[index].state != null);
+    switch (widget.steps[index].state) {
+      case StepState.indexed:
+      case StepState.editing:
+      case StepState.complete:
+        return textTheme.caption!;
+      case StepState.disabled:
+        return textTheme.bodyText1!.copyWith(
+          color: _isDark() ? _kDisabledDark : _kDisabledLight,
+        );
+      case StepState.error:
+        return textTheme.bodyText1!.copyWith(
+          color: _isDark() ? _kErrorDark : _kErrorLight,
+        );
+    }
+  }
+
   Widget _buildHeaderText(int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -602,6 +623,21 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildLabelText(int index) {
+    return Column(
+      children: <Widget> [
+        if (widget.steps[index].label != null)
+          Container(
+            child: AnimatedDefaultTextStyle(
+              style: _labelStyle(index),
+              duration: kThemeAnimationDuration,
+              child: widget.steps[index].label!,
+              ),
+          )
+      ]
+    );
+  }
+
   Widget _buildVerticalHeader(int index) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -613,6 +649,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               // flood the tips of the connector lines.
               _buildLine(!_isFirst(index)),
               _buildIcon(index),
+              _buildLabelText(index),
               _buildLine(!_isLast(index)),
             ],
           ),
