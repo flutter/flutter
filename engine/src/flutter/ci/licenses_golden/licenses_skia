@@ -1,4 +1,4 @@
-Signature: b9b404dc97b12c420638aa6dc9c43c3d
+Signature: 3deec1217500854a16105d10f9b9eb05
 
 UNUSED LICENSES:
 
@@ -644,6 +644,7 @@ FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/index.html
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/main.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/shared.js
 FILE: ../../../third_party/skia/demos.skia.org/demos/web_worker/worker.js
+FILE: ../../../third_party/skia/demos.skia.org/demos/webgpu/index.html
 FILE: ../../../third_party/skia/docker/binary-size/Dockerfile
 FILE: ../../../third_party/skia/docker/cmake-release/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-build-tools/Dockerfile
@@ -5639,6 +5640,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/Composition.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.h
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/CCToner.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/DropShadowEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.h
