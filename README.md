@@ -65,8 +65,8 @@ and see the results instantly without restarting your app or losing its state.
 ### Extensible and open model
 
 Flutter works with any development tool (or none at all) but includes editor
-plug-ins for both [Visual Studio Code] and [IntelliJ] / [Android-Studio]. Flutter
-provides [thousands of packages][Flutter packages] to speed your development,
+plug-ins for both [Visual Studio Code] and [IntelliJ] / [Android Studio]. Flutter
+provides [thousands of packages][Flutter packages] to speed your developmnt,
 regardless of your target platform. And accessing other native code is easy,
 with support for both [FFI] and [platform-specific APIs][platform channels].
 
@@ -90,7 +90,7 @@ Information on how to get started can be found in our
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ]: https://plugins.jetbrains.com/plugin/9212-flutter
-[Android-Studio]: https://flutter.dev/docs/development/tools/android-studio
+[Android Studio]: https://flutter.dev/docs/development/tools/android-studio
 [Flutter packages]: https://pub.dev/flutter
 [FFI]: https://flutter.dev/docs/development/platform-integration/c-interop
 [platform channels]: https://flutter.dev/docs/development/platform-integration/platform-channels
