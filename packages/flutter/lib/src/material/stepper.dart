@@ -138,6 +138,7 @@ class Step {
     required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
+    this.label,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -162,6 +163,9 @@ class Step {
 
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
+
+  /// [label] appears under the number icon.
+  final String? label;
 }
 
 /// A material stepper widget that displays progress through a sequence of
