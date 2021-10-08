@@ -94,6 +94,9 @@ void main() {
     );
 
     expect(find.text('No persistent state file found at $testPath'), findsNothing);
+    for (final String headerElement in ConductorStatus.headerElements) {
+      expect(find.text('$headerElement:'), findsOneWidget);
+    }
     expect(find.text(conductorVersion), findsOneWidget);
     expect(find.text(releaseChannel), findsOneWidget);
     expect(find.text(releaseVersion), findsOneWidget);
@@ -143,12 +146,11 @@ void main() {
     );
 
     expect(find.text('No persistent state file found at $testPath'), findsNothing);
-    expect(find.text('Conductor Version:'), findsOneWidget);
+    for (final String headerElement in ConductorStatus.headerElements) {
+      expect(find.text('$headerElement:'), findsOneWidget);
+    }
     expect(find.text(releaseChannel), findsOneWidget);
-    expect(find.text('Release Version:'), findsOneWidget);
-    expect(find.text('Release Started at:'), findsOneWidget);
-    expect(find.text('Release Updated at:'), findsOneWidget);
-    expect(find.text('Dart SDK Revision:'), findsOneWidget);
+    expect(find.text('Unknown'), findsNWidgets(3));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);

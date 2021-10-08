@@ -25,20 +25,7 @@ Future<void> main() async {
     throw Exception('The conductor only supports MacOS and Linux desktop');
   }
   final File _stateFile = _fs.file(_stateFilePath);
-  // final pb.ConductorState? state = _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
-
-  const String releaseChannel = 'beta';
-  const String releaseVersion = '1.2.0-3.4.pre';
-  const String candidateBranch = 'flutter-1.2-candidate.3';
-  const String workingBranch = 'cherrypicks-$candidateBranch';
-  const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
-  const String engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
-  const String engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
-  const String frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
-
-  final pb.ConductorState state = pb.ConductorState(
-    releaseChannel: releaseChannel,
-  );
+  final pb.ConductorState? state = _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
 
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp(state));

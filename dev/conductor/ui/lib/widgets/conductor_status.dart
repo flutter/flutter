@@ -19,21 +19,30 @@ class ConductorStatus extends StatefulWidget {
 
   @override
   ConductorStatusState createState() => ConductorStatusState();
+
+  static final List<String> headerElements = <String>[
+    'Conductor Version',
+    'Release Channel',
+    'Release Version',
+    'Release Started at',
+    'Release Updated at',
+    'Dart SDK Revision',
+  ];
 }
 
 class ConductorStatusState extends State<ConductorStatus> {
   /// Returns the conductor state in a Map<K, V> format for the desktop app to consume.
   Map<String, Object> presentStateDesktop(pb.ConductorState state) {
-    final List<Map<String, Object>> engineCherrypicks = <Map<String, Object>>[];
+    final List<Map<String, String>> engineCherrypicks = <Map<String, String>>[];
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
       engineCherrypicks
-          .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+          .add(<String, String>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
     }
 
-    final List<Map<String, Object>> frameworkCherrypicks = <Map<String, Object>>[];
+    final List<Map<String, String>> frameworkCherrypicks = <Map<String, String>>[];
     for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
       frameworkCherrypicks
-          .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+          .add(<String, String>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
     }
 
     return <String, Object>{
@@ -66,15 +75,6 @@ class ConductorStatusState extends State<ConductorStatus> {
       currentStatus = presentStateDesktop(widget.releaseState!);
     }
 
-    final List<String> statusLookup = <String>[
-      'Conductor Version',
-      'Release Channel',
-      'Release Version',
-      'Release Started at',
-      'Release Updated at',
-      'Dart SDK Revision',
-    ];
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,11 +92,13 @@ class ConductorStatusState extends State<ConductorStatus> {
                   1: FixedColumnWidth(400.0),
                 },
                 children: <TableRow>[
-                  for (String status in statusLookup)
+                  for (String headerElement in ConductorStatus.headerElements)
                     TableRow(
                       children: <Widget>[
-                        Text('$status:'),
-                        SelectableText(currentStatus[status]! as String),
+                        Text('$headerElement:'),
+                        SelectableText((currentStatus[headerElement] == null || currentStatus[headerElement] == '')
+                            ? 'Unknown'
+                            : currentStatus[headerElement]! as String),
                       ],
                     ),
                 ],
@@ -183,9 +185,9 @@ class CherrypickTable extends StatefulWidget {
 class CherrypickTableState extends State<CherrypickTable> {
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, Object>> cherrypicks = widget.engineOrFramework == 'engine'
-        ? widget.currentStatus['Engine Cherrypicks']! as List<Map<String, Object>>
-        : widget.currentStatus['Framework Cherrypicks']! as List<Map<String, Object>>;
+    final List<Map<String, String>> cherrypicks = widget.engineOrFramework == 'engine'
+        ? widget.currentStatus['Engine Cherrypicks']! as List<Map<String, String>>
+        : widget.currentStatus['Framework Cherrypicks']! as List<Map<String, String>>;
 
     return DataTable(
       dataRowHeight: 30.0,
@@ -195,14 +197,14 @@ class CherrypickTableState extends State<CherrypickTable> {
         DataColumn(label: Text('${widget.engineOrFramework == 'engine' ? 'Engine' : 'Framework'} Cherrypicks')),
         DataColumn(label: StatusTooltip(engineOrFramework: widget.engineOrFramework)),
       ],
-      rows: cherrypicks.map((Map<String, Object> cherrypick) {
+      rows: cherrypicks.map((Map<String, String> cherrypick) {
         return DataRow(
           cells: <DataCell>[
             DataCell(
-              SelectableText(cherrypick['trunkRevision']! as String),
+              SelectableText(cherrypick['trunkRevision']!),
             ),
             DataCell(
-              SelectableText(cherrypick['state']! as String),
+              SelectableText(cherrypick['state']!),
             ),
           ],
         );
