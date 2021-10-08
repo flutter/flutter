@@ -38,7 +38,6 @@ void main() {
           color: const Color(0xFF202020),
         ),
         borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-        shape: BoxShape.rectangle,
         // No shadow.
       ),
     );

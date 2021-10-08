@@ -792,7 +792,6 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
                   shape: const RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey, width: 6),
                     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -831,7 +830,6 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
                   shape: const RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey, width: 6),
                     borderRadius: BorderRadius.all(Radius.circular(8)),

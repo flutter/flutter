@@ -862,7 +862,6 @@ void main() {
                     alignLabelWithHint: alignLabelWithHint,
                     hintText: 'hint',
                     border: const OutlineInputBorder(
-                      borderSide: BorderSide(width: 1, color: Colors.black, style: BorderStyle.solid),
                       borderRadius: BorderRadius.zero,
                     ),
                   ),

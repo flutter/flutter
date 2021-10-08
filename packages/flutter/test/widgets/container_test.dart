@@ -518,9 +518,9 @@ void main() {
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(Container(
-      clipBehavior: Clip.none,
-      decoration: const BoxDecoration(
+    await tester.pumpWidget(
+      Container(
+        decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
