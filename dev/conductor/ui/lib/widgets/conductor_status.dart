@@ -22,6 +22,43 @@ class ConductorStatus extends StatefulWidget {
 }
 
 class ConductorStatusState extends State<ConductorStatus> {
+  /// Returns the conductor state in a Map<K, V> format for the desktop app to consume.
+  Map<String, Object> presentStateDesktop(pb.ConductorState state) {
+    final List<Map<String, Object>> engineCherrypicks = <Map<String, Object>>[];
+    for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
+      engineCherrypicks
+          .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+    }
+
+    final List<Map<String, Object>> frameworkCherrypicks = <Map<String, Object>>[];
+    for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
+      frameworkCherrypicks
+          .add(<String, Object>{'trunkRevision': cherrypick.trunkRevision, 'state': '${cherrypick.state}'});
+    }
+
+    return <String, Object>{
+      'Conductor Version': state.conductorVersion,
+      'Release Channel': state.releaseChannel,
+      'Release Version': state.releaseVersion,
+      'Release Started at': DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt()).toString(),
+      'Release Updated at': DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt()).toString(),
+      'Engine Candidate Branch': state.engine.candidateBranch,
+      'Engine Starting Git HEAD': state.engine.startingGitHead,
+      'Engine Current Git HEAD': state.engine.currentGitHead,
+      'Engine Path to Checkout': state.engine.checkoutPath,
+      'Engine Post LUCI Dashboard': luciConsoleLink(state.releaseChannel, 'engine'),
+      'Engine Cherrypicks': engineCherrypicks,
+      'Dart SDK Revision': state.engine.dartRevision,
+      'Framework Candidate Branch': state.framework.candidateBranch,
+      'Framework Starting Git HEAD': state.framework.startingGitHead,
+      'Framework Current Git HEAD': state.framework.currentGitHead,
+      'Framework Path to Checkout': state.framework.checkoutPath,
+      'Framework Post LUCI Dashboard': luciConsoleLink(state.releaseChannel, 'flutter'),
+      'Framework Cherrypicks': frameworkCherrypicks,
+      'Current Phase': state.currentPhase,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     late final Map<String, Object> currentStatus;
@@ -29,28 +66,22 @@ class ConductorStatusState extends State<ConductorStatus> {
       currentStatus = presentStateDesktop(widget.releaseState!);
     }
 
-    final List<String> statusHeaderTitles = <String>[
-      'Conductor version:',
-      'Release channel:',
-      'Release version:',
-      'Release started at:',
-      'Release updated at:',
-      'Dart SDK revision:',
-    ];
-    final List<String> statusHeaderDataNames = <String>[
-      'conductorVersion',
-      'releaseChannel',
-      'releaseVersion',
-      'startedAt',
-      'updatedAt',
-      'dartRevision',
+    final List<String> statusLookup = <String>[
+      'Conductor Version',
+      'Release Channel',
+      'Release Version',
+      'Release Started at',
+      'Release Updated at',
+      'Dart SDK Revision',
     ];
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (widget.releaseState != null) ...<Widget>[
+        if (widget.releaseState == null) ...<Widget>[
+          SelectableText('No persistent state file found at ${widget.stateFilePath}')
+        ] else ...<Widget>[
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,11 +92,11 @@ class ConductorStatusState extends State<ConductorStatus> {
                   1: FixedColumnWidth(400.0),
                 },
                 children: <TableRow>[
-                  for (int i = 0; i < statusHeaderTitles.length; i++)
+                  for (String status in statusLookup)
                     TableRow(
                       children: <Widget>[
-                        Text(statusHeaderTitles[i]),
-                        SelectableText(currentStatus[statusHeaderDataNames[i]]! as String),
+                        Text('$status:'),
+                        SelectableText(currentStatus[status]! as String),
                       ],
                     ),
                 ],
@@ -90,8 +121,6 @@ class ConductorStatusState extends State<ConductorStatus> {
               )
             ],
           )
-        ] else ...<Widget>[
-          SelectableText('No persistent state file found at ${widget.stateFilePath}'),
         ],
       ],
     );
@@ -110,6 +139,7 @@ class StatusTooltip extends StatefulWidget {
   State<StatusTooltip> createState() => _StatusTooltipState();
 }
 
+/// Displays explanations for each status type as a tooltip
 class _StatusTooltipState extends State<StatusTooltip> {
   @override
   Widget build(BuildContext context) {
@@ -127,10 +157,7 @@ ABANDONED: The cherrypick will NOT be applied in this release.''',
           child: Icon(
             Icons.info,
             size: 16.0,
-
-            /// Only the engine tooltip has a key, because engine and framework tooltips use the same widget.
-            /// Only the engine tooltip is tested.
-            key: widget.engineOrFramework == 'engine' ? const Key('conductorStatusTooltip1') : null,
+            key: Key('${widget.engineOrFramework}ConductorStatusTooltip'),
           ),
         ),
       ],
@@ -138,6 +165,7 @@ ABANDONED: The cherrypick will NOT be applied in this release.''',
   }
 }
 
+/// Shows the engine and framework cherrypicks' SHA in two separate tables with their corresponding status.
 class CherrypickTable extends StatefulWidget {
   const CherrypickTable({
     Key? key,
@@ -156,8 +184,8 @@ class CherrypickTableState extends State<CherrypickTable> {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, Object>> cherrypicks = widget.engineOrFramework == 'engine'
-        ? widget.currentStatus['engineCherrypicks']! as List<Map<String, Object>>
-        : widget.currentStatus['frameworkCherrypicks']! as List<Map<String, Object>>;
+        ? widget.currentStatus['Engine Cherrypicks']! as List<Map<String, Object>>
+        : widget.currentStatus['Framework Cherrypicks']! as List<Map<String, Object>>;
 
     return DataTable(
       dataRowHeight: 30.0,

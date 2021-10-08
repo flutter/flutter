@@ -36,6 +36,7 @@ void main() {
 
   testWidgets('Conductor_status displays correct status with a state file', (WidgetTester tester) async {
     const String testPath = './testPath';
+    const String conductorVersion = 'v1.0';
     const String releaseChannel = 'beta';
     const String releaseVersion = '1.2.0-3.4.pre';
     const String candidateBranch = 'flutter-1.2-candidate.3';
@@ -43,7 +44,7 @@ void main() {
     const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
     const String engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
     const String engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
-    const String frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
+    const String frameworkCherrypick = '768cd702b691584b2c67b8d30b5cb33e0ef6f0';
 
     final pb.ConductorState state = pb.ConductorState(
       engine: pb.Repository(
@@ -68,7 +69,7 @@ void main() {
         currentGitHead: 'frameworkCurrentGitHead',
         checkoutPath: 'frameworkCheckoutPath',
       ),
-      conductorVersion: 'v1.0',
+      conductorVersion: conductorVersion,
       releaseChannel: releaseChannel,
       releaseVersion: releaseVersion,
     );
@@ -93,14 +94,15 @@ void main() {
     );
 
     expect(find.text('No persistent state file found at $testPath'), findsNothing);
-    expect(find.text('v1.0'), findsOneWidget);
-    expect(find.text('beta'), findsOneWidget);
-    expect(find.text('1.2.0-3.4.pre'), findsOneWidget);
-    expect(find.text('Release started at:'), findsOneWidget);
-    expect(find.text('Release updated at:'), findsOneWidget);
-    expect(find.text('fe9708ab688dcda9923f584ba370a66fcbc3811f'), findsOneWidget);
-    expect(find.text('94d06a2e1d01a3b0c693b94d70c5e1df9d78d249'), findsOneWidget);
-    expect(find.text('a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0'), findsNWidgets(2));
+    expect(find.text(conductorVersion), findsOneWidget);
+    expect(find.text(releaseChannel), findsOneWidget);
+    expect(find.text(releaseVersion), findsOneWidget);
+    expect(find.text('Release Started at:'), findsOneWidget);
+    expect(find.text('Release Updated at:'), findsOneWidget);
+    expect(find.text(dartRevision), findsOneWidget);
+    expect(find.text(engineCherrypick1), findsOneWidget);
+    expect(find.text(engineCherrypick2), findsOneWidget);
+    expect(find.text(frameworkCherrypick), findsOneWidget);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
@@ -108,7 +110,53 @@ void main() {
 
     expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsNothing);
     await tester.pump();
-    await gesture.moveTo(tester.getCenter(find.byKey(const Key('conductorStatusTooltip1'))));
+    await gesture.moveTo(tester.getCenter(find.byKey(const Key('engineConductorStatusTooltip'))));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsOneWidget);
+  });
+
+  testWidgets('Conductor_status displays correct status with a null state file except a releaseChannel',
+      (WidgetTester tester) async {
+    const String testPath = './testPath';
+    const String releaseChannel = 'beta';
+    final pb.ConductorState state = pb.ConductorState(
+      releaseChannel: releaseChannel,
+    );
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: Column(
+                children: <Widget>[
+                  ConductorStatus(
+                    releaseState: state,
+                    stateFilePath: testPath,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.text('No persistent state file found at $testPath'), findsNothing);
+    expect(find.text('Conductor Version:'), findsOneWidget);
+    expect(find.text(releaseChannel), findsOneWidget);
+    expect(find.text('Release Version:'), findsOneWidget);
+    expect(find.text('Release Started at:'), findsOneWidget);
+    expect(find.text('Release Updated at:'), findsOneWidget);
+    expect(find.text('Dart SDK Revision:'), findsOneWidget);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: Offset.zero);
+
+    expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsNothing);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byKey(const Key('engineConductorStatusTooltip'))));
     await tester.pumpAndSettle();
     expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsOneWidget);
   });
