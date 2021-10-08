@@ -153,6 +153,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    usesFatalLogOutputOption(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');

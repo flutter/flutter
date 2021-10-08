@@ -555,25 +555,8 @@ class RecordingPortForwarder implements DevicePortForwarder {
 }
 
 class StreamLogger extends Logger {
-  StreamLogger() : _hadErrorOutput = false, _hadWarningOutput = false;
-
-  bool _hadErrorOutput;
-  bool _hadWarningOutput;
-
   @override
   bool get isVerbose => true;
-
-  @override
-  bool get hadErrorOutput => _hadErrorOutput;
-
-  @override
-  void clearHadErrorOutput() => _hadErrorOutput = false;
-
-  @override
-  bool get hadWarningOutput => _hadWarningOutput;
-
-  @override
-  void clearHadWarningOutput() => _hadWarningOutput = false;
 
   @override
   void printError(
@@ -585,7 +568,7 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _hadErrorOutput = true;
+    hadErrorOutput = true;
     _log('[stderr] $message');
   }
 
@@ -598,7 +581,7 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _hadWarningOutput = true;
+    hadWarningOutput = true;
     _log('[stderr] $message');
   }
 
@@ -630,9 +613,7 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(
-      stopwatch: Stopwatch(),
-    )..start();
+    return SilentStatus.empty();
   }
 
   @override

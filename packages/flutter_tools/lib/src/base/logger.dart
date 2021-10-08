@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
+import 'common.dart';
 import 'io.dart';
 import 'terminal.dart' show Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
@@ -40,17 +41,21 @@ abstract class Logger {
   /// If true, this logger is connected to a terminal.
   bool get hasTerminal;
 
-  /// If true, then [printError] has been called at least once for this logger.
-  bool get hadErrorOutput;
+  /// If true, then [printError] has been called at least once for this logger
+  /// since the last time it was set to false.
+  bool hadErrorOutput = false;
 
-  /// Clears the [hadErrorOutput] flag.
-  void clearHadErrorOutput();
+  /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
+  /// [hadErrorOutput] is true.
+  bool errorsAreFatal = false;
 
-  /// If true, then [printWarning] has been called at least once for this logger.
-  bool get hadWarningOutput;
+  /// If true, then [printWarning] has been called at least once for this logger
+  /// since the last time it was reset to false.
+  bool hadWarningOutput = false;
 
-  /// Clears the [hadWarningOutput] flag.
-  void clearHadWarningOutput();
+  /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
+  /// [hadWarningOutput] is true.
+  bool warningsAreFatal = false;
 
   /// Returns the terminal attached to this logger.
   Terminal get terminal;
@@ -60,7 +65,8 @@ abstract class Logger {
   /// Display an error `message` to the user. Commands should use this if they
   /// fail in some way.
   ///
-  /// The `message` argument is printed to the stderr in red by default.
+  /// The `message` argument is printed to the stderr in [TerminalColor.red] by
+  /// default.
   ///
   /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
@@ -94,7 +100,8 @@ abstract class Logger {
   /// Display a warning `message` to the user. Commands should use this if they
   /// important information to convey to the user that is not fatal.
   ///
-  /// The `message` argument is printed to the stderr in cyan by default.
+  /// The `message` argument is printed to the stderr in [TerminalColor.cyan] by
+  /// default.
   ///
   /// The `emphasis` argument will cause the output message be printed in bold text.
   ///
@@ -124,7 +131,7 @@ abstract class Logger {
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// The `message` argument is printed to the stderr in red by default.
+  /// The `message` argument is printed to the stdout.
   ///
   /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
@@ -191,9 +198,19 @@ abstract class Logger {
 
   /// Clears all output.
   void clear();
+
+  /// Causes the logger to check if either [hadErrorOutput] and/or
+  /// [hadWarningOutput] are true and call [throwToolExit] if [errorsAreFatal]
+  /// or [warningsAreFatal] are also true, respectively.
+  void checkForFatalLogs() {
+    if ((warningsAreFatal && hadWarningOutput) || (errorsAreFatal && hadErrorOutput)) {
+      throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
+          'during the run, and --fatal-logger-output is enabled.');
+    }
+  }
 }
 
-/// A [Logger] that forwards all methods to another one.
+/// A [Logger] that forwards all methods to another logger.
 ///
 /// Classes can derive from this to add functionality to an existing [Logger].
 class DelegatingLogger implements Logger {
@@ -213,18 +230,6 @@ class DelegatingLogger implements Logger {
   bool get hasTerminal => _delegate.hasTerminal;
 
   @override
-  bool get hadErrorOutput => _delegate.hadErrorOutput;
-
-  @override
-  void clearHadErrorOutput() => _delegate.clearHadErrorOutput();
-
-  @override
-  bool get hadWarningOutput => _delegate.hadWarningOutput;
-
-  @override
-  void clearHadWarningOutput() => _delegate.clearHadWarningOutput();
-
-  @override
   Terminal get terminal => _delegate.terminal;
 
   @override
@@ -232,6 +237,30 @@ class DelegatingLogger implements Logger {
 
   @override
   bool get isVerbose => _delegate.isVerbose;
+
+  @override
+  bool get hadErrorOutput => _delegate.hadErrorOutput;
+
+  @override
+  set hadErrorOutput(bool value) => _delegate.hadErrorOutput = value;
+
+  @override
+  bool get errorsAreFatal => _delegate.errorsAreFatal;
+
+  @override
+  set errorsAreFatal(bool value) => _delegate.errorsAreFatal = value;
+
+  @override
+  bool get hadWarningOutput => _delegate.hadWarningOutput;
+
+  @override
+  set hadWarningOutput(bool value) => _delegate.hadWarningOutput = value;
+
+  @override
+  bool get warningsAreFatal => _delegate.warningsAreFatal;
+
+  @override
+  set warningsAreFatal(bool value) => _delegate.warningsAreFatal = value;
 
   @override
   void printError(String message, {
@@ -321,6 +350,9 @@ class DelegatingLogger implements Logger {
 
   @override
   void clear() => _delegate.clear();
+
+  @override
+  void checkForFatalLogs() => _delegate.checkForFatalLogs();
 }
 
 /// If [logger] is a [DelegatingLogger], walks the delegate chain and returns
@@ -350,9 +382,7 @@ class StdoutLogger extends Logger {
   })
     : _stdio = stdio,
       _outputPreferences = outputPreferences,
-      _stopwatchFactory = stopwatchFactory,
-      _hadErrorOutput = false,
-      _hadWarningOutput = false;
+      _stopwatchFactory = stopwatchFactory;
 
   @override
   final Terminal terminal;
@@ -360,8 +390,6 @@ class StdoutLogger extends Logger {
   final OutputPreferences _outputPreferences;
   final Stdio _stdio;
   final StopwatchFactory _stopwatchFactory;
-  bool _hadErrorOutput;
-  bool _hadWarningOutput;
 
   Status? _status;
 
@@ -375,18 +403,6 @@ class StdoutLogger extends Logger {
   bool get hasTerminal => _stdio.stdinHasTerminal;
 
   @override
-  bool get hadErrorOutput => _hadErrorOutput;
-
-  @override
-  void clearHadErrorOutput() => _hadErrorOutput = false;
-
-  @override
-  bool get hadWarningOutput => _hadWarningOutput;
-
-  @override
-  void clearHadWarningOutput() => _hadWarningOutput = false;
-
-  @override
   void printError(
     String message, {
     StackTrace? stackTrace,
@@ -396,7 +412,7 @@ class StdoutLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _hadErrorOutput = true;
+    hadErrorOutput = true;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -424,7 +440,7 @@ class StdoutLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _hadWarningOutput = true;
+    hadWarningOutput = true;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -487,9 +503,7 @@ class StdoutLogger extends Logger {
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
-      return SilentStatus(
-        stopwatch: _stopwatchFactory.createStopwatch(),
-      )..start();
+      return SilentStatus.empty();
     }
     if (supportsColor) {
       _status = SpinnerStatus(
@@ -591,9 +605,7 @@ class BufferLogger extends Logger {
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory,
-       _hadErrorOutput = false,
-       _hadWarningOutput = false;
+       _stopwatchFactory = stopwatchFactory;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
@@ -601,12 +613,7 @@ class BufferLogger extends Logger {
     OutputPreferences? outputPreferences,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _stopwatchFactory = const StopwatchFactory(),
-       _hadErrorOutput = false,
-       _hadWarningOutput = false;
-
-  bool _hadErrorOutput;
-  bool _hadWarningOutput;
+       _stopwatchFactory = const StopwatchFactory();
 
   @override
   final OutputPreferences _outputPreferences;
@@ -638,18 +645,6 @@ class BufferLogger extends Logger {
   bool get hasTerminal => false;
 
   @override
-  bool get hadErrorOutput => _hadErrorOutput;
-
-  @override
-  void clearHadErrorOutput() => _hadErrorOutput = false;
-
-  @override
-  bool get hadWarningOutput => _hadWarningOutput;
-
-  @override
-  void clearHadWarningOutput() => _hadWarningOutput = false;
-
-  @override
   void printError(
     String message, {
     StackTrace? stackTrace,
@@ -659,7 +654,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _hadErrorOutput = true;
+    hadErrorOutput = true;
     _error.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -680,7 +675,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _hadWarningOutput = true;
+    hadWarningOutput = true;
     _warning.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -730,9 +725,7 @@ class BufferLogger extends Logger {
   }) {
     assert(progressIndicatorPadding != null);
     printStatus(message);
-    return SilentStatus(
-      stopwatch: _stopwatchFactory.createStopwatch(),
-    )..start();
+    return SilentStatus.empty();
   }
 
   @override
@@ -786,8 +779,32 @@ class VerboseLogger extends DelegatingLogger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     _emit(
       _LogType.error,
+      wrapText(message,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        shouldWrap: wrap ?? _outputPreferences.wrapText,
+        columnWidth: _outputPreferences.wrapColumn,
+      ),
+      stackTrace,
+    );
+  }
+
+  @override
+  void printWarning(
+      String message, {
+        StackTrace? stackTrace,
+        bool? emphasis,
+        TerminalColor? color,
+        int? indent,
+        int? hangingIndent,
+        bool? wrap,
+      }) {
+    hadWarningOutput = true;
+    _emit(
+      _LogType.warning,
       wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
@@ -868,15 +885,22 @@ class VerboseLogger extends DelegatingLogger {
     final String indent = ''.padLeft(prefix.length);
     final String indentMessage = message.replaceAll('\n', '\n$indent');
 
-    if (type == _LogType.error) {
-      super.printError(prefix + terminal.bolden(indentMessage));
-      if (stackTrace != null) {
-        super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
-      }
-    } else if (type == _LogType.status) {
-      super.printStatus(prefix + terminal.bolden(indentMessage));
-    } else {
-      super.printStatus(prefix + indentMessage);
+    switch (type) {
+      case _LogType.error:
+        super.printError(prefix + terminal.bolden(indentMessage));
+        if (stackTrace != null) {
+          super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+        }
+        break;
+      case _LogType.warning:
+        super.printWarning(prefix + terminal.bolden(indentMessage));
+        break;
+      case _LogType.status:
+        super.printStatus(prefix + terminal.bolden(indentMessage));
+        break;
+      case _LogType.trace:
+        super.printTrace(prefix + indentMessage);
+        break;
     }
   }
 
@@ -897,6 +921,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     if (message.trim().isNotEmpty == true) {
       message = 'ERROR: $message';
     }
@@ -912,7 +937,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
   }
 }
 
-enum _LogType { error, status, trace }
+enum _LogType { error, warning, status, trace }
 
 typedef SlowWarningCallback = String Function();
 
@@ -981,7 +1006,7 @@ abstract class Status {
   }
 }
 
-/// A [SilentStatus] shows nothing.
+/// A [Status] that shows nothing.
 class SilentStatus extends Status {
   SilentStatus({
     required Stopwatch stopwatch,
@@ -990,6 +1015,10 @@ class SilentStatus extends Status {
     onFinish: onFinish,
     stopwatch: stopwatch,
   );
+
+  /// An empty [SilentStatus] shows nothing, doesn't require a stopwatch, and is
+  /// started automatically when created.
+  SilentStatus.empty() : super(stopwatch: Stopwatch()) { start(); }
 
   @override
   void finish() {

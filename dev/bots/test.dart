@@ -1629,6 +1629,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String>? environment,
   List<String> tests = const <String>[],
   bool shuffleTests = true,
+  bool fatalLogOutput = true,
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
@@ -1642,7 +1643,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
-    '--fatal-log-output',
+    if (fatalLogOutput) '--fatal-log-errors',
     ...options,
     ...tags,
     ...flutterTestArgs,

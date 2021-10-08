@@ -115,6 +115,8 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kFatalLogErrors = 'fatal-log-errors';
+  static const String kFatalLogWarnings = 'fatal-log-warnings';
 }
 
 /// flutter command categories for usage.
@@ -177,6 +179,8 @@ abstract class FlutterCommand extends Command<void> {
   bool _usesPortOption = false;
 
   bool _usesIpv6Flag = false;
+
+  bool _usesFatalLogs = false;
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
@@ -269,6 +273,22 @@ abstract class FlutterCommand extends Command<void> {
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;
+  }
+
+  void usesFatalLogOutputOption({ @required bool verboseHelp }) {
+    argParser.addFlag(FlutterOptions.kFatalLogErrors,
+        defaultsTo: false,
+        hide: !verboseHelp,
+        help: 'Causes the command to fail if errors or warnings are sent to the log '
+            'during its execution. Implies --${FlutterOptions.kFatalLogWarnings}'
+    );
+    argParser.addFlag(FlutterOptions.kFatalLogWarnings,
+        defaultsTo: false,
+        hide: !verboseHelp,
+        help: 'Causes the command to fail if warnings are sent to the log '
+            'during its execution.'
+    );
+    _usesFatalLogs = true;
   }
 
   String get targetFile {
@@ -1123,6 +1143,10 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
+        if (_usesFatalLogs) {
+          globals.logger.errorsAreFatal = boolArg(FlutterOptions.kFatalLogErrors);
+          globals.logger.warningsAreFatal = boolArg(FlutterOptions.kFatalLogWarnings);
+        }
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
@@ -1139,6 +1163,9 @@ abstract class FlutterCommand extends Command<void> {
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
+          if (_usesFatalLogs) {
+            globals.logger.checkForFatalLogs();
+          }
         }
       },
     );
@@ -1150,9 +1177,8 @@ abstract class FlutterCommand extends Command<void> {
         '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
         'will be removed in a future version of Flutter. '
         'See https://flutter.dev/docs/development/tools/sdk/releases '
-        'for previous releases of Flutter.',
+        'for previous releases of Flutter.\n',
       );
-      globals.printError('');
     }
   }
 

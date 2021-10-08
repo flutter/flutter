@@ -320,13 +320,17 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          // This needs to go to stderr to avoid cluttering up stdout if a parent
-          // process is collecting stdout. It's not really a "warning" though,
-          // so print it in grey.
+          // This needs to go to stderr to avoid cluttering up stdout if a
+          // parent process is collecting stdout (e.g. when calling "flutter
+          // version --machine". It's not really a "warning" though, so print it
+          // in grey. Also, make sure that it isn't counted as a warning for
+          // Logger.warningsAreFatal.
+          final bool oldWarnings = _logger.hadWarningOutput;
           _logger.printWarning(
             'Waiting for another flutter command to release the startup lock...',
             color: TerminalColor.grey,
           );
+          _logger.hadWarningOutput = oldWarnings;
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));

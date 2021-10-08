@@ -43,6 +43,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+    usesFatalLogOutputOption(verboseHelp: verboseHelp);
   }
 
   void _addSubcommand(BuildSubCommand command) {
