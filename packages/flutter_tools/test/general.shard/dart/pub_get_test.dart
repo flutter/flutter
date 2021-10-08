@@ -737,6 +737,10 @@ void main() {
           (ProcessException error) => error.message,
           'message',
           contains('Working directory: "/"'),
+        ).having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('"PUB_ENVIRONMENT": "flutter_cli:flutter_tests"'),
         ),
       ),
     );
