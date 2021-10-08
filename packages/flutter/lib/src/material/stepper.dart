@@ -751,8 +751,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               SizedBox(
                 height: 72.0,
-                child: Center(
-                  child: _buildIcon(i),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Center(
+                      child: _buildIcon(i),
+                    ),
+                    Center(
+                      child: _buildLabelText(i),
+                    ),
+                  ],
                 ),
               ),
               Container(
