@@ -101,7 +101,7 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex = 0, required this.length, required TickerProvider vsync })
+  TabController({ int initialIndex = 0, this.animate = true, required this.length, required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
@@ -117,14 +117,15 @@ class TabController extends ChangeNotifier {
     required int index,
     required int previousIndex,
     required AnimationController? animationController,
+    required this.animate,
     required this.length,
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController;
 
 
-  /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
-  /// if they are non-null.
+  /// Creates a new [TabController] with `index`, `previousIndex` `length`, and
+  /// `animate` if they are non-null.
   ///
   /// This method is used by [DefaultTabController].
   ///
@@ -134,6 +135,7 @@ class TabController extends ChangeNotifier {
     required int? index,
     required int? length,
     required int? previousIndex,
+    required bool? animate,
   }) {
     if (index != null) {
       _animationController!.value = index.toDouble();
@@ -143,6 +145,7 @@ class TabController extends ChangeNotifier {
       length: length ?? this.length,
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
+      animate: animate ?? this.animate,
     );
   }
 
@@ -174,7 +177,7 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
-    if (duration != null) {
+    if (duration != null && animate) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
@@ -192,6 +195,10 @@ class TabController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Determines whether tab changes will be animated in the [TabController] and
+  /// [TabBarView]. Defaults to `true` unless specified.
+  bool animate;
 
   /// The index of the currently selected tab.
   ///
@@ -331,6 +338,7 @@ class DefaultTabController extends StatefulWidget {
   const DefaultTabController({
     Key? key,
     required this.length,
+    this.animate = true,
     this.initialIndex = 0,
     required this.child,
   }) : assert(initialIndex != null),
@@ -348,6 +356,13 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// Defaults to zero.
   final int initialIndex;
+
+  /// Whether to animate tab transitions or not.
+  ///
+  /// Defaults to `true` and will skip animating the [DefaultTabController] and
+  /// [TabBarView] if set to `false`, changing the state instantaneously
+  /// instead.
+  final bool animate;
 
   /// The widget below this widget in the tree.
   ///
@@ -383,6 +398,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     _controller = TabController(
       vsync: this,
       length: widget.length,
+      animate: widget.animate,
       initialIndex: widget.initialIndex,
     );
   }
@@ -418,6 +434,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
         length: widget.length,
         index: newIndex,
         previousIndex: previousIndex,
+        animate: widget.animate,
       );
     }
   }
