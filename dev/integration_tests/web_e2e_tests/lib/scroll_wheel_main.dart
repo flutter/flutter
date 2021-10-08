@@ -105,5 +105,6 @@ void dispatchMouseWheelEvent(int mouseX, int mouseY,
     deltaMode: deltaMode,
     deltaX : deltaX,
     deltaY : deltaY,
+    shiftKey: false,
   ));
 }

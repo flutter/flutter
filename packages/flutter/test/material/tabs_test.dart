@@ -89,6 +89,7 @@ class _NestedTabBarContainer extends StatelessWidget {
             ],
           ),
           Expanded(
+            flex: 1,
             child: TabBarView(
               controller: tabController,
               children: <Widget>[
@@ -324,7 +325,7 @@ void main() {
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C'));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
@@ -333,7 +334,7 @@ void main() {
     expect(controller.index, 2);
     expect(controller.previousIndex, 2);
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C'));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
     await tester.tap(find.text('B'));
     await tester.pump();
     expect(controller.indexIsChanging, true);
@@ -342,14 +343,14 @@ void main() {
     expect(controller.previousIndex, 2);
     expect(controller.indexIsChanging, false);
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C'));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
     await tester.tap(find.text('C'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(controller.index, 2);
     expect(controller.previousIndex, 1);
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C'));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -1900,6 +1901,8 @@ void main() {
           child: TabBar(
             padding: padding,
             labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
+            isScrollable: false,
             controller: controller,
             tabs: tabs,
           ),
@@ -1955,6 +1958,7 @@ void main() {
           child: TabBar(
             padding: padding,
             labelPadding: EdgeInsets.zero,
+            indicatorPadding: EdgeInsets.zero,
             isScrollable: true,
             controller: controller,
             tabs: tabs,
@@ -2215,6 +2219,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: tabs.length,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(
@@ -2288,6 +2293,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: tabs.length,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(
@@ -2431,6 +2437,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: 2,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(
@@ -2480,6 +2487,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: tabs.length,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(
@@ -2689,11 +2697,13 @@ void main() {
     final TabController controller1 = TabController(
       vsync: const TestVSync(),
       length: 2,
+      initialIndex: 0,
     );
 
     final TabController controller2 = TabController(
       vsync: const TestVSync(),
       length: 2,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(buildFrame(controller1));
@@ -3187,6 +3197,7 @@ void main() {
                   : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
                   child: Row(
+                    mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       IconButton(
@@ -3308,6 +3319,8 @@ void main() {
   });
 
    testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0;
+
     const List<Widget> tabListWithText = <Widget>[
       Tab(icon: Icon(Icons.notifications), text: 'Test'),
     ];
@@ -3315,8 +3328,8 @@ void main() {
       Tab(icon: Icon(Icons.notifications), child: Text('Test')),
     ];
 
-    const TabBar tabBarWithText = TabBar(tabs: tabListWithText);
-    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild);
+    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight);
+    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight);
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
@@ -3352,6 +3365,7 @@ void main() {
     await tester.pumpWidget(TabControllerFrame(
       builder: buildTabControllerFrame,
       length: tabs.length,
+      initialIndex: 0,
     ));
 
     final RenderBox box = tester.renderObject(find.byType(TabBar));
@@ -3685,7 +3699,7 @@ void main() {
 
   testWidgets('Tabs are given uniform padding in case of few tabs having both text and icon', (WidgetTester tester) async {
     const EdgeInsetsGeometry expectedPaddingAdjusted = EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0);
-    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(horizontal: 16.0);
+    const EdgeInsetsGeometry expectedPaddingDefault = EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3850,6 +3864,7 @@ void main() {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: 2,
+      initialIndex: 0,
     );
 
     await tester.pumpWidget(

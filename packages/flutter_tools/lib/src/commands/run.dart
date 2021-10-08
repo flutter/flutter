@@ -248,7 +248,7 @@ class RunCommand extends RunCommandBase {
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
-    addPublishPort(verboseHelp: verboseHelp);
+    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -563,6 +563,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

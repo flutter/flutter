@@ -40,7 +40,7 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: processManager,
       logger: testLogger,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: fileSystem,
     );
 

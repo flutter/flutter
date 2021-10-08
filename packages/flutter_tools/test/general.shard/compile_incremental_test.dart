@@ -58,7 +58,7 @@ void main() {
       logger: testLogger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorStdoutHandler,
     );
@@ -68,7 +68,7 @@ void main() {
       logger: testLogger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       fileSystemRoots: <String>[
         '/foo/bar/fizz',
       ],

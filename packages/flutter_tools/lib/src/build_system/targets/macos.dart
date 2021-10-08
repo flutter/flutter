@@ -254,6 +254,7 @@ class CompileMacOSFramework extends Target {
     }
 
     final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode,

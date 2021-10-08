@@ -13,5 +13,7 @@ Future<void> main() async {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/animated_image.dart',
     'animated_image',
+    measureCpuGpu: true,
+    measureMemory: true,
   ).run);
 }

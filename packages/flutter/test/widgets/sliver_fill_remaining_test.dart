@@ -259,6 +259,7 @@ void main() {
               key: key,
               color: Colors.blue[300],
               child: Align(
+                alignment: Alignment.center,
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
                   child: ElevatedButton(
@@ -295,6 +296,7 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const Flexible(
+                  fit: FlexFit.loose,
                   child: Center(child: FlutterLogo(size: 100)),
                 ),
                 ElevatedButton(
@@ -446,6 +448,7 @@ void main() {
                 key: key,
                 color: Colors.blue[300],
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(
@@ -565,6 +568,7 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Flexible(
+                    fit: FlexFit.loose,
                     child: Center(child: FlutterLogo(size: 100)),
                   ),
                   ElevatedButton(
@@ -724,6 +728,7 @@ void main() {
                 key: key,
                 color: Colors.blue[300],
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(

@@ -331,6 +331,7 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
+                dragStartBehavior: DragStartBehavior.start,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;

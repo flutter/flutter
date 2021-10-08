@@ -560,7 +560,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport();
+      return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -1607,7 +1607,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart();
+        final OperationResult result = await residentRunner.restart(fullRestart: false);
         if (result.fatal) {
           throwToolExit(result.message);
         }

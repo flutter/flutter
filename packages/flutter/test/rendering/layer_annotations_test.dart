@@ -524,7 +524,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1),
+          AnnotatedRegionLayer<int>(1, opaque: false),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],
@@ -626,7 +626,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, size: Size.zero),
+          AnnotatedRegionLayer<int>(1, opaque: false, size: Size.zero),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: true),
           ],
@@ -651,7 +651,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1),
+          AnnotatedRegionLayer<int>(1, opaque: false),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],

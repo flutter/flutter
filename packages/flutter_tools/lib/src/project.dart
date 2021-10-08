@@ -550,6 +550,7 @@ to migrate your project.
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
+      overwriteExisting: true,
     );
   }
 

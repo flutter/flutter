@@ -43,7 +43,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'unknown');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -70,6 +70,7 @@ void main() {
           command: <String>[
             'git', 'describe', '--tags', 'abcd'
           ],
+          exitCode: 0,
           stdout: 'v1.2.3'
         )
       ]),

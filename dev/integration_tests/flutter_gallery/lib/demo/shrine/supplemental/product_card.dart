@@ -45,6 +45,7 @@ class ProductCard extends StatelessWidget {
         children: <Widget>[
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               AspectRatio(
                 aspectRatio: imageAspectRatio,
@@ -55,6 +56,7 @@ class ProductCard extends StatelessWidget {
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       product == null ? '' : product!.name,

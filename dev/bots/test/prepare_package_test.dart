@@ -266,6 +266,7 @@ void main() {
           tempDir,
           testRef,
           Branch.dev,
+          strict: true,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -494,7 +495,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(), throwsException);
+        expect(() async => publisher.publishArchive(false), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {

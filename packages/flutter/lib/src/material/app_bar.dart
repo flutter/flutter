@@ -1011,6 +1011,7 @@ class _AppBarState extends State<AppBar> {
     if (widget.primary) {
       appBar = SafeArea(
         bottom: false,
+        top: true,
         child: appBar,
       );
     }

@@ -360,7 +360,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(platformBrightness: Brightness.light),
         child: boilerplate(child: const CupertinoButton(
           color: bgColor,
           disabledColor: inactive,

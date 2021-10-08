@@ -202,7 +202,9 @@ class BoxConstraints extends Constraints {
   BoxConstraints loosen() {
     assert(debugAssertIsValid());
     return BoxConstraints(
+      minWidth: 0.0,
       maxWidth: maxWidth,
+      minHeight: 0.0,
       maxHeight: maxHeight,
     );
   }

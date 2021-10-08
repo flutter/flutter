@@ -320,6 +320,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
+          axisDirection: AxisDirection.down,
           offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),

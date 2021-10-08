@@ -55,7 +55,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
-        androidSdk: FakeAndroidSdk(),
+        androidSdk: FakeAndroidSdk('adb'),
         featureFlags: TestFeatureFlags(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       ),

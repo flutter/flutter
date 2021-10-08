@@ -187,7 +187,7 @@ void main() {
         HotRunnerConfig: () => failingTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -216,7 +216,7 @@ void main() {
               false,
               true,
             ),
-        ).restart();
+        ).restart(fullRestart: false);
         expect(result.isOk, false);
         expect(result.message, 'setupHotReload failed');
         expect(failingTestingConfig.updateDevFSCompleteCalled, false);
@@ -224,7 +224,7 @@ void main() {
         HotRunnerConfig: () => failingTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
@@ -254,7 +254,7 @@ void main() {
         HotRunnerConfig: () => shutdownTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -276,7 +276,7 @@ void main() {
         HotRunnerConfig: () => shutdownTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
@@ -328,7 +328,6 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: true,
-            fastReassemble: false,
             hotEventOverallTimeInMs: 64000,
             hotEventSyncedBytes: 4,
             hotEventInvalidatedSourcesCount: 2,
@@ -343,7 +342,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -416,7 +415,7 @@ void main() {
               false,
               true,
             ),
-        ).restart();
+        ).restart(fullRestart: false);
 
         expect(result.isOk, true);
         expect(testUsage.events, <TestUsageEvent>[
@@ -446,7 +445,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -480,7 +479,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -508,13 +507,13 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(), throwsA('updateDevFS failed'));
+        await expectLater(runner.restart(fullRestart: false), throwsA('updateDevFS failed'));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -548,13 +547,15 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).attach();
+      ).attach(
+        enableDevTools: false,
+      );
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => TestHotRunnerConfig(),
       Artifacts: () => Artifacts.test(),
       FileSystem: () => fileSystem,
-      Platform: () => FakePlatform(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });

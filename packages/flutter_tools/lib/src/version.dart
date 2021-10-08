@@ -67,7 +67,7 @@ class FlutterVersion {
       globals.processUtils,
       _workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: false, gitRef: _frameworkRevision);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -231,7 +231,9 @@ class FlutterVersion {
     }
     DateTime localFrameworkCommitDate;
     try {
-      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
+      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
+        lenient: false
+      ));
     } on VersionCheckError {
       // Don't perform the update check if the version check failed.
       return;
@@ -274,6 +276,7 @@ class FlutterVersion {
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
         branch: '$_versionCheckRemote/$branch',
+        lenient: false,
       );
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {

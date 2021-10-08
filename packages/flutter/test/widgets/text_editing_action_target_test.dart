@@ -40,6 +40,7 @@ class _FakeEditableTextState with TextSelectionDelegate, TextEditingActionTarget
       endHandleLayerLink: LayerLink(),
       text: textSpan,
       selection: textEditingValue.selection,
+      textAlign: TextAlign.start,
     );
     return _renderEditable!;
   }
@@ -1738,6 +1739,7 @@ void main() {
       ),
       textEditingValue: const TextEditingValue(
         text: text,
+        selection: TextSelection.collapsed(offset: -1),
       ),
     );
     final RenderEditable editable = editableTextState.renderEditable;

@@ -327,6 +327,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
+                mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Container(
                     height: 128.0,

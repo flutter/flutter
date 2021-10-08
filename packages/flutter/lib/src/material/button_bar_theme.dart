@@ -205,6 +205,7 @@ class ButtonBarThemeData with Diagnosticable {
       'buttonAlignedDropdown',
       value: buttonAlignedDropdown,
       ifTrue: 'dropdown width matches button',
+      defaultValue: null,
     ));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: null));

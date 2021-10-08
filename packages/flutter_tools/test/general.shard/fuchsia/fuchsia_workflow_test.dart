@@ -19,9 +19,9 @@ void main() {
 
   testWithoutContext('Fuchsia workflow does not apply to host platform if feature is disabled', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isFuchsiaEnabled: false),
       fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
     );
 
     expect(fuchsiaWorkflow.appliesToHostPlatform, false);
@@ -40,8 +40,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can not list and launch devices if there is no ffx when using default workflow', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
-      platform: FakePlatform(environment: <String, String>{}),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig, ffx: null),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, false);
@@ -52,8 +52,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can not list and launch devices if there is no dev finder when ffx is disabled', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
-      platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: null, sshConfig: sshConfig, ffx: ffx),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, false);
@@ -64,8 +64,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can not launch devices if there is no ssh config when using default workflow', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(ffx: ffx),
-      platform: FakePlatform(environment: <String, String>{}),
+      fuchsiaArtifacts: FuchsiaArtifacts(sshConfig: null, ffx: ffx),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, false);
@@ -76,8 +76,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can not launch devices if there is no ssh config when ffx is disabled', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder),
-      platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
+      fuchsiaArtifacts: FuchsiaArtifacts(sshConfig: null, devFinder: devFinder),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, false);
@@ -88,8 +88,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can list and launch devices supported with sufficient SDK artifacts when using default workflow', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
-      platform: FakePlatform(environment: <String, String>{}),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: null, sshConfig: sshConfig, ffx: ffx),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, true);
@@ -100,8 +100,8 @@ void main() {
   testWithoutContext('Fuchsia workflow can list and launch devices supported with sufficient SDK artifacts when ffx is disabled', () {
     final FuchsiaWorkflow fuchsiaWorkflow = FuchsiaWorkflow(
       featureFlags: TestFeatureFlags(),
-      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
-      platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
+      fuchsiaArtifacts: FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig, ffx: null),
+      platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
     );
 
     expect(fuchsiaWorkflow.canLaunchDevices, true);

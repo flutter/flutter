@@ -224,7 +224,7 @@ void main() {
     );
     layout(root, phase: EnginePhase.compositingBits);
 
-    final OffsetLayer rootLayer = OffsetLayer();
+    final OffsetLayer rootLayer = OffsetLayer(offset: Offset.zero);
     final PaintingContext context = PaintingContext(
       rootLayer,
       const Rect.fromLTWH(0, 0, 500, 500),

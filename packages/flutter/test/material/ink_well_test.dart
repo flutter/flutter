@@ -1339,6 +1339,7 @@ void main() {
 
     expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
       label: 'Foo',
+      hasTapAction: false,
       hasLongPressAction: true,
       isFocusable: true,
       textDirection: TextDirection.ltr,

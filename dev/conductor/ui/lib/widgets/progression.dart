@@ -75,7 +75,12 @@ class MainProgressionState extends State<MainProgression> {
               stateFilePath: widget.stateFilePath,
             ),
             Stepper(
-              controlsBuilder: (BuildContext context, ControlsDetails details) => Row(),
+              controlsBuilder: (BuildContext context, ControlsDetails details) {
+                return Row(
+                  children: const <Widget>[],
+                );
+              },
+              type: StepperType.vertical,
               physics: const ScrollPhysics(),
               currentStep: _completedStep,
               onStepContinue: nextStep,
@@ -122,7 +127,9 @@ class MainProgressionState extends State<MainProgression> {
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[4]),
-                  content: Column(),
+                  content: Column(
+                    children: const <Widget>[],
+                  ),
                   isActive: true,
                   state: handleStepState(4),
                 ),

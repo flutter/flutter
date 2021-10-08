@@ -19,7 +19,9 @@ void main() {
             ),
           ),
           const Expanded(
-            child: AbsorbPointer(),
+            child: AbsorbPointer(
+              absorbing: true,
+            ),
           ),
         ],
       ),
@@ -32,6 +34,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       AbsorbPointer(
+        absorbing: true,
         child: Semantics(
           label: 'test',
           textDirection: TextDirection.ltr,

@@ -556,6 +556,7 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
       final vms.VmService service = vms.VmService(
         controller.stream,
         socket.add,
+        log: null,
         disposeHandler: () => socket!.close(),
         streamClosed: streamClosedCompleter.future
       );

@@ -472,6 +472,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
+          padding: EdgeInsets.zero,
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -618,7 +619,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/33455
   testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
-    final CupertinoTabController controller = CupertinoTabController();
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -676,7 +677,7 @@ void main() {
     "while preserving the previous controller's tab index",
     (WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
-      final CupertinoTabController oldController = CupertinoTabController();
+      final CupertinoTabController oldController = CupertinoTabController(initialIndex: 0);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -705,6 +706,7 @@ void main() {
             tabBar: CupertinoTabBar(
               items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
             ),
+            controller: null,
             tabBuilder:
             (BuildContext context, int index) {
               return CustomPaint(
@@ -761,6 +763,7 @@ void main() {
             tabBar: CupertinoTabBar(
               items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             ),
+            controller: null,
             tabBuilder: (BuildContext context, int index) => const Placeholder(),
           ),
         ),
@@ -790,7 +793,7 @@ void main() {
     expect(find.text('Tab 3'), findsOneWidget);
 
     controller.dispose();
-    controller = CupertinoTabController();
+    controller = CupertinoTabController(initialIndex: 0);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -1033,7 +1036,9 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(
+          viewInsets: EdgeInsets.zero,
+        ),
         child: CupertinoApp(
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),

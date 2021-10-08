@@ -17,6 +17,7 @@ void main() {
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
       child: RenderCustomPaint(
+        preferredSize: Size.zero,
         painter: TestCallbackPainter(onPaint: () {}),
       ),
     );
@@ -275,6 +276,7 @@ void main() {
 
   test('RenderOpacity does composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
+      opacity: 1.0,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
@@ -295,6 +297,7 @@ void main() {
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -309,6 +312,7 @@ void main() {
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -429,6 +433,7 @@ void main() {
 
   void _testFittedBoxWithClipRectLayer() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
+      alignment: Alignment.center,
       fit: BoxFit.cover,
       clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
@@ -441,6 +446,7 @@ void main() {
 
   void _testFittedBoxWithTransformLayer() {
     _testLayerReuse<TransformLayer>(RenderFittedBox(
+      alignment: Alignment.center,
       fit: BoxFit.fill,
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
@@ -510,6 +516,7 @@ void main() {
   test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true', () {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
+      showWhenUnlinked: true,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
@@ -536,6 +543,7 @@ void main() {
 
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: link,
+      showWhenUnlinked: true,
       child: RenderSizedBox(const Size(1.0, 1.0)),
     );
     layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));

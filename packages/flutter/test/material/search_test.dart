@@ -321,6 +321,7 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
+      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -334,6 +335,7 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
+      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -355,6 +357,7 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
+      initialQuery: null,
     ));
 
     // runs while search fades in
@@ -786,7 +789,10 @@ void main() {
   testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading] and [buildActions].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
+      result: 'Result',
+      suggestions: 'Suggestions',
+    );
     final List<String> selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(
@@ -825,7 +831,10 @@ void main() {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
+      result: 'Result',
+      suggestions: 'Suggestions',
+    );
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[rootObserver],

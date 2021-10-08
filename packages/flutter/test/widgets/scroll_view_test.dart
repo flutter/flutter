@@ -415,6 +415,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
         padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
             height: 50,
@@ -447,6 +448,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context,int index) {
           return Container(
@@ -480,6 +482,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
         padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(
           (BuildContext context,int index) {
             return Container(
@@ -515,6 +518,7 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemBuilder: (BuildContext context,int index) {
@@ -550,6 +554,7 @@ void main() {
       child: GridView(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
             height: 50,
@@ -583,6 +588,7 @@ void main() {
       child: GridView.builder(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context, int index) {
           return Container(
@@ -617,6 +623,7 @@ void main() {
       child: GridView.count(
         padding: EdgeInsets.zero,
         crossAxisCount: 2,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
             height: 50,
@@ -650,6 +657,7 @@ void main() {
       child: GridView.extent(
         padding: EdgeInsets.zero,
         maxCrossAxisExtent: 300,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
             height: 50,
@@ -683,6 +691,7 @@ void main() {
       child: GridView.custom(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(
           (BuildContext context,int index) {
             return Container(
@@ -736,7 +745,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     final Viewport viewport = tester.widget(find.byType(Viewport));
     expect(viewport.offset.pixels, equals(2400.0));
@@ -888,17 +897,18 @@ void main() {
   });
 
   testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
-    const CustomScrollView view = CustomScrollView();
+    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
   testWidgets('Vertical ListViews are primary by default', (WidgetTester tester) async {
-    final ListView view = ListView();
+    final ListView view = ListView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
   testWidgets('Vertical GridViews are primary by default', (WidgetTester tester) async {
     final GridView view = GridView.count(
+      scrollDirection: Axis.vertical,
       crossAxisCount: 1,
     );
     expect(view.primary, isTrue);
@@ -925,6 +935,7 @@ void main() {
   testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
     final CustomScrollView view = CustomScrollView(
       controller: ScrollController(),
+      scrollDirection: Axis.vertical,
     );
     expect(view.primary, isFalse);
   });
@@ -932,6 +943,7 @@ void main() {
   testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
     final ListView view = ListView(
       controller: ScrollController(),
+      scrollDirection: Axis.vertical,
     );
     expect(view.primary, isFalse);
   });
@@ -939,6 +951,7 @@ void main() {
   testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
     final GridView view = GridView.count(
       controller: ScrollController(),
+      scrollDirection: Axis.vertical,
       crossAxisCount: 1,
     );
     expect(view.primary, isFalse);
@@ -1030,7 +1043,7 @@ void main() {
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
-    final ListView view = ListView();
+    final ListView view = ListView(scrollDirection: Axis.vertical);
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
@@ -1051,6 +1064,7 @@ void main() {
           },
           child: ListView(
             primary: true,
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -1071,6 +1085,7 @@ void main() {
           },
           child: ListView(
             primary: false,
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -1092,6 +1107,7 @@ void main() {
           child: ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -1113,6 +1129,7 @@ void main() {
           child: ListView(
             primary: true,
             physics: const ScrollPhysics(),
+            children: const <Widget>[],
           ),
         ),
       ),

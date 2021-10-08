@@ -163,6 +163,7 @@ void main() {
                       Directionality(
                         textDirection: TextDirection.ltr,
                         child: ListBody(
+                          mainAxis: Axis.vertical,
                           children: children,
                         ),
                       ),

@@ -18,6 +18,7 @@ void main() {
               child: Column(
                 children: const <Widget>[
                   MainProgression(
+                    releaseState: null,
                     stateFilePath: './testPath',
                   ),
                 ],
@@ -61,6 +62,7 @@ void main() {
               child: Column(
                 children: const <Widget>[
                   MainProgression(
+                    releaseState: null,
                     stateFilePath: './testPath',
                   ),
                 ],

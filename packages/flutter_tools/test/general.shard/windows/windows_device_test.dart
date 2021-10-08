@@ -73,10 +73,10 @@ void main() {
   testWithoutContext('WindowsDevices does not list devices if the workflow is unsupported', () async {
     expect(await WindowsDevices(
       windowsWorkflow: WindowsWorkflow(
-        featureFlags: TestFeatureFlags(),
+        featureFlags: TestFeatureFlags(isWindowsEnabled: false),
         platform: FakePlatform(operatingSystem: 'windows'),
       ),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
       operatingSystemUtils: FakeOperatingSystemUtils(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),

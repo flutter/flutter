@@ -274,7 +274,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
+    final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
         .trim().split('\n');
     final List<String> results = <String>[];
     for (final String line in output) {
@@ -327,7 +327,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // Restarting `adb` helps with keeping device connections alive. When `adb`
     // runs non-stop for too long it loses connections to devices. There may be
     // a better method, but so far that's the best one I've found.
-    await exec(adbPath, <String>['kill-server']);
+    await exec(adbPath, <String>['kill-server'], canFail: false);
   }
 }
 
@@ -555,6 +555,7 @@ class AndroidDevice extends Device {
       adbPath,
       <String>['-s', deviceId, ...arguments],
       environment: environment,
+      canFail: false,
       printStdout: !silent,
       printStderr: !silent,
     );

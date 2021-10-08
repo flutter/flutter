@@ -101,15 +101,19 @@ const Feature flutterMacOSDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
 );
 
@@ -121,15 +125,19 @@ const Feature flutterLinuxDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
 );
 
@@ -141,15 +149,19 @@ const Feature flutterWindowsDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
 );
 
@@ -205,6 +217,7 @@ const Feature flutterFuchsiaFeature = Feature(
   environmentOverride: 'FLUTTER_FUCHSIA',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
 );
 
@@ -214,9 +227,19 @@ const Feature flutterCustomDevicesFeature = Feature(
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: false,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: false,
+    enabledByDefault: false,
   )
 );
 
@@ -231,9 +254,15 @@ const Feature singleWidgetReload = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: false,
+    enabledByDefault: false,
   ),
 );
 
@@ -243,9 +272,11 @@ const Feature windowsUwpEmbedding = Feature(
   configSetting: 'enable-windows-uwp-desktop',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
   ),
 );
 

@@ -36,7 +36,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -80,7 +82,9 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -128,7 +132,9 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -175,7 +181,9 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -205,7 +213,9 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(),
+        platform: FakePlatform(
+          environment: const <String, String>{},
+        ),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -238,7 +248,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -275,7 +287,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -312,7 +326,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -349,7 +365,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -385,7 +403,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -423,7 +443,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -463,7 +485,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -509,7 +533,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -594,7 +620,9 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(),
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -636,7 +664,7 @@ void main() {
     ]);
 
     final Pub pub = Pub(
-      platform: FakePlatform(),
+      platform: FakePlatform(environment: const <String, String>{}),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
@@ -746,7 +774,7 @@ void main() {
     ]);
 
     final Pub pub = Pub(
-      platform: FakePlatform(),
+      platform: FakePlatform(environment: const <String, String>{}),
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -1029,6 +1057,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       platform: FakePlatform(
+        operatingSystem: 'linux', // so that the command executed is consistent
         environment: <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo()

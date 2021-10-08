@@ -474,6 +474,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       };
     } else {
       details = DragEndDetails(
+        velocity: Velocity.zero,
         primaryVelocity: 0.0,
       );
       debugReport = () {

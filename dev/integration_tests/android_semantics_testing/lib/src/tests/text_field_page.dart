@@ -32,12 +32,14 @@ class _TextFieldPageState extends State<TextFieldPage> {
           TextField(
             key: normalTextFieldKey,
             controller: _normalController,
+            autofocus: false,
           ),
           const Spacer(),
           TextField(
             key: passwordTextFieldKey,
             controller: _passwordController,
             obscureText: true,
+            autofocus: false,
           ),
         ],
       ),

@@ -27,7 +27,9 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform();
+final FakePlatform linux = FakePlatform(
+  operatingSystem: 'linux',
+);
 
 void main() {
   testWithoutContext('default configuration', () async {
@@ -106,7 +108,7 @@ void main() {
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(),
+        featureFlags: TestFeatureFlags(isMacOSEnabled: false),
         platform: macOS,
       ),
     );

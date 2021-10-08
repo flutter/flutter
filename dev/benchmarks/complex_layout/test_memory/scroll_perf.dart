@@ -28,6 +28,7 @@ Future<void> main() async {
     },
     behavior: HitTestBehavior.opaque,
     child: const IgnorePointer(
+      ignoring: true,
       child: ComplexLayoutApp(),
     ),
   ));

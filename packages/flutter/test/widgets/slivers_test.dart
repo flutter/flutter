@@ -665,6 +665,7 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(_boilerPlate(
         const SliverOffstage(
+          offstage: true,
           sliver: SliverToBoxAdapter(
             child: Text('a'),
           ),
@@ -762,6 +763,7 @@ void main() {
             ),
           ),
           opacity: 0.0,
+          alwaysIncludeSemantics: false,
         ),
       ));
 
@@ -794,6 +796,7 @@ void main() {
             ),
           ),
           opacity: 0.1,
+          alwaysIncludeSemantics: false,
         ),
       ));
 
@@ -827,6 +830,7 @@ void main() {
       final List<String> events = <String>[];
       await tester.pumpWidget(_boilerPlate(
         SliverIgnorePointer(
+          ignoring: true,
           ignoringSemantics: false,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
@@ -870,6 +874,7 @@ void main() {
       final List<String> events = <String>[];
       await tester.pumpWidget(_boilerPlate(
         SliverIgnorePointer(
+          ignoring: true,
           ignoringSemantics: true,
           sliver: SliverToBoxAdapter(
             child: GestureDetector(

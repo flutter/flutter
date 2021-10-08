@@ -176,6 +176,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         rect: markerRect,
         label: 'TOP OVERFLOWED BY ${_formatPixels(overflow.top)} PIXELS',
         labelOffset: markerRect.topCenter + const Offset(0.0, _indicatorLabelPaddingPixels),
+        rotation: 0.0,
         side: _OverflowSide.top,
       ));
     }
@@ -191,6 +192,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         label: 'BOTTOM OVERFLOWED BY ${_formatPixels(overflow.bottom)} PIXELS',
         labelOffset: markerRect.bottomCenter -
             const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
+        rotation: 0.0,
         side: _OverflowSide.bottom,
       ));
     }

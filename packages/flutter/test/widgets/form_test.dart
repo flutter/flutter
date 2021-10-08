@@ -14,7 +14,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -53,7 +53,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -91,7 +91,7 @@ void main() {
     Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -147,7 +147,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -194,7 +194,7 @@ void main() {
       Widget builder() {
         return MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(),
+            data: const MediaQueryData(devicePixelRatio: 1.0),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -241,7 +241,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -289,7 +289,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -334,7 +334,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -381,7 +381,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -433,7 +433,7 @@ void main() {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(),
+              data: const MediaQueryData(devicePixelRatio: 1.0),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -533,7 +533,7 @@ void main() {
     Widget builder(bool remove) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -588,7 +588,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -624,7 +624,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -740,7 +740,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -773,7 +773,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(),
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -813,7 +813,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Form(
@@ -832,7 +832,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: FormField<String>(
@@ -856,7 +856,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -894,7 +894,7 @@ void main() {
     Widget builder({required bool autovalidate}) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -937,7 +937,7 @@ void main() {
     Widget builder({required bool autovalidate}) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(

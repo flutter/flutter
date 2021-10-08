@@ -1095,6 +1095,7 @@ void main() {
             behavior: const NoScrollbarBehavior(),
             child: Scrollbar(
               key: key2,
+              notificationPredicate: null,
               child: SingleChildScrollView(
                 key: outerKey,
                 child: SizedBox(
@@ -1104,6 +1105,7 @@ void main() {
                     children: <Widget>[
                       Scrollbar(
                         key: key1,
+                        notificationPredicate: null,
                         child: SizedBox(
                           height: 300.0,
                           width: double.infinity,

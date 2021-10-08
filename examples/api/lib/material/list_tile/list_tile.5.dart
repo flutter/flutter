@@ -47,6 +47,7 @@ class _ArticleDescription extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(
+          flex: 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -72,6 +73,7 @@ class _ArticleDescription extends StatelessWidget {
           ),
         ),
         Expanded(
+          flex: 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,

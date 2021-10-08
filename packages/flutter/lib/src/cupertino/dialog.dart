@@ -351,6 +351,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
+        isActionSheet: false,
         children: actions,
       );
     }
@@ -1516,6 +1517,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: titleContentGroup,
         ),
@@ -2232,7 +2234,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void performLayout() {
-    size = _performLayout(constraints: constraints);
+    size = _performLayout(constraints: constraints, dry: false);
   }
 
   Size _performLayout({required BoxConstraints constraints, bool dry = false}) {
@@ -2257,6 +2259,8 @@ class _RenderCupertinoDialogActions extends RenderBox
         final BoxConstraints perButtonConstraints = BoxConstraints(
           minWidth: (constraints.minWidth - dividerThickness) / 2.0,
           maxWidth: (constraints.maxWidth - dividerThickness) / 2.0,
+          minHeight: 0.0,
+          maxHeight: double.infinity,
         );
 
         // Layout the 2 buttons.

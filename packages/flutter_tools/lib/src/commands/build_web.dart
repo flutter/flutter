@@ -29,7 +29,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
-    addNativeNullAssertions();
+    addNativeNullAssertions(hide: false);
     argParser.addFlag('csp',
       defaultsTo: false,
       negatable: false,

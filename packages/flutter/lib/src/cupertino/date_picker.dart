@@ -583,7 +583,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     meridiemController = FixedExtentScrollController(initialItem: selectedAmPm);
     hourController = FixedExtentScrollController(initialItem: initialDateTime.hour);
     minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute ~/ widget.minuteInterval);
-    dateController = FixedExtentScrollController();
+    dateController = FixedExtentScrollController(initialItem: 0);
 
     PaintingBinding.instance!.systemFonts.addListener(_handleSystemFontsChange);
   }
@@ -740,6 +740,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       initialDateTime.month,
       initialDateTime.day + selectedDayFromInitial,
       _selectedHour(meridiemIndex, hourIndex),
+      0,
     );
 
     // The end value of the range is exclusive, i.e. [rangeStart, rangeEnd).

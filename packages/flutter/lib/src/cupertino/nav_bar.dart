@@ -43,7 +43,8 @@ const Color _kDefaultNavBarBorderColor = Color(0x4D000000);
 const Border _kDefaultNavBarBorder = Border(
   bottom: BorderSide(
     color: _kDefaultNavBarBorderColor,
-    width: 0.0, // 0.0 means one physical pixel
+    width: 0.0, // One physical pixel.
+    style: BorderStyle.solid,
   ),
 );
 
@@ -152,6 +153,7 @@ Widget _wrapWithBackground({
     }
     result = AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
+      sized: true,
       child: result,
     );
   }
@@ -958,6 +960,7 @@ class _PersistentNavigationBar extends StatelessWidget {
       leading: leading,
       middle: middle,
       trailing: components.trailing,
+      centerMiddle: true,
       middleSpacing: 6.0,
     );
 
@@ -1353,6 +1356,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
                 _backChevron ?? const _BackChevron(),

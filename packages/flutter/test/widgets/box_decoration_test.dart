@@ -248,11 +248,15 @@ Future<void> main() async {
       ..drrect(
         outer: RRect.fromLTRBAndCorners(
           350.0, 200.0, 450.0, 300.0,
+          topLeft: Radius.zero,
           topRight: const Radius.circular(10.0),
+          bottomRight: Radius.zero,
+          bottomLeft: Radius.zero,
         ),
         inner: RRect.fromLTRBAndCorners(
           360.0, 210.0, 440.0, 290.0,
           topLeft: const Radius.circular(-10.0),
+          topRight: Radius.zero,
           bottomRight: const Radius.circular(-10.0),
           bottomLeft: const Radius.circular(-10.0),
         ),
@@ -350,7 +354,7 @@ Future<void> main() async {
             key: key,
             width: 100.0,
             height: 50.0,
-            decoration: BoxDecoration(border: border, borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle, borderRadius: const BorderRadius.all(Radius.circular(20.0))),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -393,7 +397,7 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -453,7 +457,7 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);
@@ -501,7 +505,7 @@ Future<void> main() async {
             key: key,
             width: width,
             height: height,
-            decoration: BoxDecoration(border: border,borderRadius: BorderRadius.circular(radius)),
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius)),
           ),
           onTap: () {
             itemsTapped.add(1);

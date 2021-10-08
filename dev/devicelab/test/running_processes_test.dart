@@ -61,7 +61,7 @@ Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
           ),
           RunningProcessInfo(
             '49',
-            DateTime(2019, 3, 9, 20, 13),
+            DateTime(2019, 3, 9, 20, 13, 00),
             '/usr/sbin/syslogd',
           ),
         ]));

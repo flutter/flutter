@@ -635,6 +635,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     final bool enabled = await askForBool(
       'enabled',
       description: 'Should the device be enabled?',
+      defaultsTo: true,
     );
 
     final String targetStr = await askForString(
@@ -673,6 +674,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'remote device has a static IP address and you have a way of '
         'specifying the "--observatory-host=<ip>" engine option, you might prefer '
         'not using port forwarding.',
+      defaultsTo: true,
     );
 
     final String screenshotCommand = await askForString(
@@ -700,8 +702,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
       // host-platform specific, filled out later
       pingCommand: const <String>[],
+      pingSuccessRegex: null,
 
-      postBuildCommand: const <String>[],
+      postBuildCommand: null,
 
       // just install to /tmp/${appName} by default
       installCommand: <String>[

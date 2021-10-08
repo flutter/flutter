@@ -230,7 +230,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(_widget(selectedIndex: 0));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -248,6 +248,7 @@ void main() {
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isSelected: false,
         hasTapAction: true,
       ),
     );
@@ -260,6 +261,7 @@ void main() {
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isSelected: false,
         hasTapAction: true,
       ),
     );
@@ -295,7 +297,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(_widget(selectedIndex: 0));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -313,6 +315,7 @@ void main() {
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isSelected: false,
         hasTapAction: true,
       ),
     );
@@ -325,6 +328,7 @@ void main() {
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isSelected: false,
         hasTapAction: true,
       ),
     );

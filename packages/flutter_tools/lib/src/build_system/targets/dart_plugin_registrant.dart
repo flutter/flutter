@@ -51,6 +51,7 @@ class DartPluginRegistrantTarget extends Target {
       packageConfig,
       mainFileUriString,
       mainFile,
+      throwOnPluginPubspecError: false,
     );
   }
 

@@ -446,7 +446,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(),
+              child: Stack(children: const <Widget>[]),
             ),
           ),
           AutomaticKeepAlive(

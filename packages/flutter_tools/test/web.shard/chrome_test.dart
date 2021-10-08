@@ -541,6 +541,8 @@ void main() {
     await expectToolExitLater(
       chromiumLauncher.launch(
         'example_url',
+        skipCheck: false,
+        headless: false,
       ),
       contains('Unable to connect to Chrome debug port:'),
     );

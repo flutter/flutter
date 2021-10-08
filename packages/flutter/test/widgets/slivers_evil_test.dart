@@ -83,9 +83,11 @@ void main() {
             behavior: const TestBehavior(),
             child: Scrollbar(
               child: Scrollable(
+                axisDirection: AxisDirection.down,
                 physics: const TestScrollPhysics(),
                 viewportBuilder: (BuildContext context, ViewportOffset offset) {
                   return Viewport(
+                    axisDirection: AxisDirection.down,
                     anchor: 0.25,
                     offset: offset,
                     center: centerKey,

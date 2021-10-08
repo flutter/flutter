@@ -337,6 +337,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       return materialBanner;
 
     materialBanner = SafeArea(
+      top: true,
       child: materialBanner,
     );
 

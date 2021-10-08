@@ -17,7 +17,7 @@ import '../src/common.dart';
 import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
-final Platform testPlatform = FakePlatform();
+final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {

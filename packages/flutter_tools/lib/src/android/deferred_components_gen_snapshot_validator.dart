@@ -279,6 +279,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
           loadingUnits.add(
               LoadingUnit(
                 id: loadingUnitDataMap!['id'] as int,
+                path: null,
                 libraries: libraries,
               ));
         }

@@ -2990,11 +2990,13 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
+          settings: null,
         ),
       );
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
+          settings: null,
         ),
       );
       await tester.pumpAndSettle();
@@ -3024,6 +3026,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
+          settings: null,
         ),
       );
       await tester.pumpAndSettle();
@@ -3120,6 +3123,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('initial-pageless1'),
+          settings: null,
         ),
       ).then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
@@ -3137,6 +3141,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
+          settings: null,
         ),
       ).then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
@@ -3144,6 +3149,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
+          settings: null,
         ),
       ).then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
@@ -3162,6 +3168,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
+          settings: null,
         ),
       ).then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();
@@ -3232,6 +3239,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('initial-pageless1'),
+          settings: null,
         ),
       ).then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
@@ -3253,6 +3261,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
+          settings: null,
         ),
       ).then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
@@ -3260,6 +3269,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless2'),
+          settings: null,
         ),
       ).then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
@@ -3282,6 +3292,7 @@ void main() {
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('third-pageless1'),
+          settings: null,
         ),
       ).then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();

@@ -115,6 +115,7 @@ class ModalBarrier extends StatelessWidget {
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
             child: MouseRegion(
               cursor: SystemMouseCursors.basic,
+              opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: color == null ? null : ColoredBox(

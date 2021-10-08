@@ -233,7 +233,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(devicePixelRatio: 1.0),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -383,11 +383,12 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(),
+                controller: controller = ScrollController(initialScrollOffset: 0),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                   ? SliverPersistentHeader(
                     pinned: true,
+                    floating: false,
                     delegate: _TestSliverPersistentHeaderDelegate(
                       minExtent: 50,
                       maxExtent: 50,
@@ -445,11 +446,12 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(),
+                controller: controller = ScrollController(initialScrollOffset: 0),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                     ? SliverPersistentHeader(
                       pinned: true,
+                      floating: false,
                       delegate: _TestSliverPersistentHeaderDelegate(
                         minExtent: 50,
                         maxExtent: 50,

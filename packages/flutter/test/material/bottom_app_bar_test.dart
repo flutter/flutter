@@ -172,7 +172,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: BottomAppBar(),
+          bottomNavigationBar: BottomAppBar(
+            shape: null,
+          ),
         ),
       ),
     );
@@ -192,7 +194,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: ShapeListener(BottomAppBar()),
+          bottomNavigationBar: ShapeListener(BottomAppBar(
+            shape: null,
+          )),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             child: Icon(Icons.add),
@@ -350,11 +354,12 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: BottomAppBar(
-            shape: RectangularNotch(),
-            notchMargin: 0.0,
-            child: SizedBox(height: 100.0),
-          ),
+          bottomNavigationBar:
+              BottomAppBar(
+                shape: RectangularNotch(),
+                notchMargin: 0.0,
+                child: SizedBox(height: 100.0),
+              ),
         ),
       ),
     );

@@ -32,7 +32,7 @@ void main() {
   testWidgets('cursor has expected width, height, and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -68,7 +68,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -121,7 +121,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -345,8 +345,10 @@ void main() {
         controller: controller,
         focusNode: FocusNode(),
         style: const TextStyle(fontSize: 20.0),
+        maxLines: 1,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
+        cursorOpacityAnimates: false,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
         textAlign: TextAlign.left,
@@ -463,7 +465,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -558,7 +560,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -615,7 +617,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -660,7 +662,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -727,7 +729,7 @@ void main() {
     controller.text = text;
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(),
+        data: const MediaQueryData(devicePixelRatio: 1.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(

@@ -39,6 +39,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return RangeSlider(
       values: _currentRangeValues,
+      min: 0,
       max: 100,
       divisions: 5,
       labels: RangeLabels(

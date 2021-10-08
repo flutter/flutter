@@ -161,11 +161,13 @@ void main() {
     List<Widget> children = const <Widget> [
       AutofillGroup(
         key: group1,
+        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
       AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
       AutofillGroup(
         key: group3,
+        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
     ];
@@ -196,6 +198,7 @@ void main() {
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
+          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -215,6 +218,7 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
+          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -234,6 +238,7 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
+          onDisposeAction: AutofillContextAction.commit,
           child: placeholder,
         ),
       ];

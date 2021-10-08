@@ -495,6 +495,7 @@ class IosProject extends XcodeBasedProject {
         'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       },
       printStatusWhenWriting: false,
+      overwriteExisting: true,
     );
   }
 }

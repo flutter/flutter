@@ -360,6 +360,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: width,
       maxWidth: width,
+      minHeight: 0.0,
       maxHeight: maxHeight,
     );
   }
@@ -869,7 +870,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.value,
     this.hint,
     this.disabledHint,
-    required this.onChanged,
+    this.onChanged,
     this.onTap,
     this.elevation = 8,
     this.style,
@@ -1517,7 +1518,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     T? value,
     Widget? hint,
     Widget? disabledHint,
-    required this.onChanged,
+    this.onChanged,
     VoidCallback? onTap,
     int elevation = 8,
     TextStyle? style,

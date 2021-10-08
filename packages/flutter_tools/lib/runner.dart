@@ -229,7 +229,7 @@ Future<String> _doctorText() async {
     );
 
     final Doctor doctor = Doctor(logger: logger);
-    await doctor.diagnose(showColor: false);
+    await doctor.diagnose(verbose: true, showColor: false);
 
     return logger.statusText;
   } on Exception catch (error, trace) {

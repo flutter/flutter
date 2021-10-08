@@ -346,6 +346,7 @@ void main() {
           width: 100.0,
           height: 10.0,
           child: FittedBox(
+            fit: BoxFit.contain,
             child: SizedBox(
               width: 50.0,
               height: 50.0,
@@ -451,6 +452,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: FittedBox(
+            fit: BoxFit.contain,
             alignment: FractionalOffset.center,
             child: SizedBox(
               width: 1000.0,

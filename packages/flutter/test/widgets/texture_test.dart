@@ -94,7 +94,7 @@ void main() {
 
   testWidgets('Texture with FilterQuality.low', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const Center(child: Texture(textureId: 1)),
+        const Center(child: Texture(textureId: 1, filterQuality: FilterQuality.low)),
     );
 
     final Texture texture = tester.firstWidget(find.byType(Texture));

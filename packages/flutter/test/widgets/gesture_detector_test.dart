@@ -515,8 +515,10 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(forcePressStart, 0);
@@ -526,8 +528,10 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -537,23 +541,31 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.6,
       pressureMin: 0,
+      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.7,
       pressureMin: 0,
+      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.2,
       pressureMin: 0,
+      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -563,8 +575,10 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.9,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -681,8 +695,10 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(forcePressStart, 0);
@@ -697,8 +713,10 @@ void main() {
     // Failed attempt to trigger the force press.
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
+      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
+      pressureMax: 1,
     ));
 
     expect(horizontalDragStart, 1);
@@ -766,6 +784,7 @@ void main() {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
         key: key,
+        gestures: const <Type, GestureRecognizerFactory>{},
         semantics: _EmptySemanticsGestureDelegate(),
         excludeFromSemantics: true,
         child: Container(),

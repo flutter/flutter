@@ -69,6 +69,7 @@ void main() {
           BuildInfo.debug,
           startPaused: true,
         ),
+        enableObservatory: false,
       ), throwsAssertionError);
 
       expect(() => installHook(
@@ -78,6 +79,7 @@ void main() {
           startPaused: true,
           hostVmServicePort: 123,
         ),
+        enableObservatory: false,
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;

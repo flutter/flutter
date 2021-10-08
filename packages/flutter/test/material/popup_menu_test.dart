@@ -438,6 +438,7 @@ void main() {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(
+                      enabled: true,
                       value: 1,
                       child: Text('Tap me please!', key: childKey),
                     ),

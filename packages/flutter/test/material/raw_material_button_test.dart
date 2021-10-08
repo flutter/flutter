@@ -236,6 +236,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -456,7 +457,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }),
+      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -466,7 +467,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () { wasPressed = true; }),
+      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -475,7 +476,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(),
+      buildFrame(onPressed: null, onLongPress: null),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);

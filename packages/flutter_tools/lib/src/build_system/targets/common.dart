@@ -154,6 +154,7 @@ class KernelSnapshot extends Target {
       processManager: environment.processManager,
       artifacts: environment.artifacts,
       fileSystemRoots: <String>[],
+      fileSystemScheme: null,
     );
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
@@ -241,6 +242,7 @@ abstract class AotElfBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,

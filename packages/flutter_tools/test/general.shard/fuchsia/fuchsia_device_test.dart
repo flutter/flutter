@@ -91,7 +91,7 @@ void main() {
     testWithoutContext('lists nothing when workflow cannot list devices', () async {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(canListDevices: false);
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         fuchsiaSdk: null,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -102,10 +102,10 @@ void main() {
     });
 
     testWithoutContext('can parse ffx output for single device', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false);
+      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false, canListDevices: true);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(environment: <String, String>{}),
+        platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{},),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -118,10 +118,10 @@ void main() {
     });
 
     testWithoutContext('can parse device-finder output for single device', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
+      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: true, canListDevices: true);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devFinderDevices: '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'}),
+        platform: FakePlatform(operatingSystem: 'linux', environment: <String, String>{'FUCHSIA_DISABLED_ffx_discovery': '1'},),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -134,13 +134,13 @@ void main() {
     });
 
     testWithoutContext('can parse ffx output for multiple devices', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false);
+      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false, canListDevices: true);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices:
         '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel\n'
         '2001:0db8:85a3:0000:0000:8a2e:0370:7335 foo-bar-fiz-buzz'
       );
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -155,13 +155,13 @@ void main() {
     });
 
     testWithoutContext('can parse device-finder output for multiple devices', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
+      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: true, canListDevices: true);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devFinderDevices:
         '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel\n'
         '2001:0db8:85a3:0000:0000:8a2e:0370:7335 foo-bar-fiz-buzz'
       );
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -179,7 +179,7 @@ void main() {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: false, canListDevices: false);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: 'junk', devFinderDevices: 'junk');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -191,10 +191,10 @@ void main() {
     });
 
     testWithoutContext('can parse junk output from device-finder', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
+      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(shouldUseDeviceFinder: true, canListDevices: true);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: 'junk', devFinderDevices: 'junk');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
-        platform: FakePlatform(),
+        platform: FakePlatform(operatingSystem: 'linux'),
         fuchsiaSdk: fuchsiaSdk,
         fuchsiaWorkflow: fuchsiaWorkflow,
         logger: BufferLogger.test(),
@@ -254,7 +254,7 @@ void main() {
 
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
       FuchsiaSdk: () => FakeFuchsiaSdk(),
       ProcessManager: () => processManager,
     });
@@ -479,7 +479,9 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       expect(device.supportsScreenshot, true);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(),
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+      ),
     });
 
     testUsingContext('is not supported on Windows', () {
@@ -525,6 +527,7 @@ void main() {
         environment: <String, String>{
           'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
         },
+        operatingSystem: 'linux',
       ),
     });
 
@@ -571,6 +574,7 @@ void main() {
         environment: <String, String>{
           'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
         },
+        operatingSystem: 'linux',
       ),
     });
 
@@ -618,6 +622,7 @@ void main() {
         environment: <String, String>{
           'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
         },
+        operatingSystem: 'linux',
       ),
     }, testOn: 'posix');
 
@@ -659,6 +664,7 @@ void main() {
         environment: <String, String>{
           'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
         },
+        operatingSystem: 'linux',
       ),
     });
   });
@@ -724,7 +730,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1', uiIsolate: fakeIsolate),
+        FlutterView(id: '1', uiIsolate: null),
         // wrong name.
         FlutterView(
           id: '2',
@@ -750,7 +756,7 @@ void main() {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
         // no ui isolate.
-        FlutterView(id: '1', uiIsolate: fakeIsolate),
+        FlutterView(id: '1', uiIsolate: null),
         // wrong name.
         FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
            ...fakeIsolate.toJson(),
@@ -764,7 +770,7 @@ void main() {
     testUsingContext('can handle non flutter view', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
-        FlutterView(id: '1', uiIsolate: fakeIsolate), // no ui isolate.
+        FlutterView(id: '1', uiIsolate: null), // no ui isolate.
       ], expectedIsolateName);
 
       expect(uri, throwsException);
@@ -779,7 +785,7 @@ void main() {
     final CachedArtifacts artifacts = CachedArtifacts(
       cache: cache,
       fileSystem: fileSystem,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'linux'),
       operatingSystemUtils: globals.os,
     );
     expect(artifacts.getArtifactPath(
@@ -827,7 +833,7 @@ void main() {
       expect(await device.sdkNameAndVersion, equals('Fuchsia'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
-      FuchsiaArtifacts: () => FuchsiaArtifacts(),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
       FuchsiaSdk: () => FakeFuchsiaSdk(),
     });
 

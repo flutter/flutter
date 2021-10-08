@@ -89,6 +89,7 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
         ExpansionPanelList(
           children: <ExpansionPanel>[
             ExpansionPanel(
+              canTapOnHeader: false,
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return MergeSemantics(
                   key: widget.headerKey,
@@ -461,18 +462,21 @@ void main() {
           return Text(isExpanded ? 'B' : 'A');
         },
         body: const SizedBox(height: 100.0),
+        isExpanded: false,
       ),
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'D' : 'C');
         },
         body: const SizedBox(height: 100.0),
+        isExpanded: false,
       ),
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'F' : 'E');
         },
         body: const SizedBox(height: 100.0),
+        isExpanded: false,
       ),
     ];
 
@@ -920,6 +924,7 @@ void main() {
           return const Text('Collapsed', key: collapsedKey);
         },
         body: const SizedBox(height: 100.0),
+        isExpanded: false,
       ),
     ];
 
@@ -1005,6 +1010,7 @@ void main() {
         },
         canTapOnHeader: true,
         body: const SizedBox(height: 100.0),
+        isExpanded: false,
       ),
     ];
 

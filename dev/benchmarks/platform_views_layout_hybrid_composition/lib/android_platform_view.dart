@@ -38,6 +38,7 @@ class AndroidPlatformView extends StatelessWidget {
           id: params.id,
           viewType: viewType,
           layoutDirection: TextDirection.ltr,
+          creationParams: null,
           creationParamsCodec: const StandardMessageCodec(),
         )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)

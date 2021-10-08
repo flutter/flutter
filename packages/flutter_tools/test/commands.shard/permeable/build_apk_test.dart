@@ -340,6 +340,7 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
+        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.
@@ -386,6 +387,7 @@ void main() {
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
+        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.

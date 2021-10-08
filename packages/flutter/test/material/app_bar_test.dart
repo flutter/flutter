@@ -654,7 +654,11 @@ void main() {
   });
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
-    await tester.pumpWidget(buildSliverAppBarApp());
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      expandedHeight: null,
+    ));
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
@@ -688,6 +692,7 @@ void main() {
   testWidgets('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
 
     await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
       pinned: true,
       expandedHeight: 128.0,
     ));
@@ -753,6 +758,7 @@ void main() {
   testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
+      pinned: false,
       snap: true,
       expandedHeight: 128.0,
     ));
@@ -921,6 +927,8 @@ void main() {
     const double collapsedAppBarHeight = 200.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
       collapsedHeight: collapsedAppBarHeight,
       expandedHeight: expandedAppBarHeight,
     ));
@@ -1065,6 +1073,7 @@ void main() {
           child: MediaQuery(
             data: topPadding100,
             child: Scaffold(
+              primary: true,
               appBar: AppBar(
                 title: const Text('title'),
               ),
@@ -1116,6 +1125,7 @@ void main() {
           child: MediaQuery(
             data: topPadding100,
             child: Scaffold(
+              primary: true,
               appBar: AppBar(
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(200.0),
@@ -1167,6 +1177,7 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
             child: Scaffold(
+              primary: true,
               body: Column(
                 children: <Widget>[
                   AppBar(
@@ -1429,6 +1440,7 @@ void main() {
                 height: 50.0,
                 padding: const EdgeInsets.all(4.0),
                 child: const Placeholder(
+                  strokeWidth: 2.0,
                   color: Color(0xFFFFFFFF),
                 ),
               ),
@@ -1460,6 +1472,7 @@ void main() {
                 height: 50.0,
                 padding: const EdgeInsets.all(4.0),
                 child: const Placeholder(
+                  strokeWidth: 2.0,
                   color: Color(0xFFFFFFFF),
                 ),
               ),
@@ -2060,6 +2073,7 @@ void main() {
                 slivers: <Widget>[
                   SliverAppBar(
                     expandedHeight: appBarHeight,
+                    pinned: false,
                     floating: true,
                     snap: snap,
                     actions: <Widget>[
@@ -2362,6 +2376,8 @@ void main() {
     const double toolbarHeight = 100.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
       toolbarHeight: toolbarHeight,
     ));
 
@@ -2382,6 +2398,8 @@ void main() {
     const double collapsedHeight = 150.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
       toolbarHeight: toolbarHeight,
       collapsedHeight: collapsedHeight,
     ));
@@ -2400,6 +2418,8 @@ void main() {
     const double collapsedHeight = 56.0;
 
     await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
       collapsedHeight: collapsedHeight,
     ));
 
@@ -2478,7 +2498,10 @@ void main() {
   });
 
   testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(buildSliverAppBarApp());
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+    ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);

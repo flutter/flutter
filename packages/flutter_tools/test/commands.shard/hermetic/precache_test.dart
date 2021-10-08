@@ -74,7 +74,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
@@ -103,7 +103,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isMacOSEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
@@ -132,7 +132,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
@@ -161,7 +161,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
@@ -175,7 +175,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(),
+      featureFlags: TestFeatureFlags(isWebEnabled: false),
       platform: FakePlatform(environment: <String, String>{}),
     );
 

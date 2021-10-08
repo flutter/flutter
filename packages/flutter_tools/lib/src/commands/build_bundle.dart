@@ -131,6 +131,7 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
+      manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
     );

@@ -707,7 +707,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 mixin WidgetInspectorService {
   /// Ring of cached JSON values to prevent JSON from being garbage
   /// collected before it can be requested over the Observatory protocol.
-  final List<String?> _serializeRing = List<String?>.filled(20, null);
+  final List<String?> _serializeRing = List<String?>.filled(20, null, growable: false);
   int _serializeRingIndex = 0;
 
   /// The current [WidgetInspectorService].
@@ -925,6 +925,7 @@ mixin WidgetInspectorService {
         groupName: _consoleObjectGroup,
         subtreeDepth: 5,
         includeProperties: true,
+        expandPropertyValues: true,
         maxDescendentsTruncatableNode: 5,
         service: this,
       ),
@@ -933,6 +934,7 @@ mixin WidgetInspectorService {
     errorJson['errorsSinceReload'] = _errorsSinceReload;
     if (_errorsSinceReload == 0) {
       errorJson['renderedErrorText'] = TextTreeRenderer(
+        wrapWidth: FlutterError.wrapWidth,
         wrapWidthProperties: FlutterError.wrapWidth,
         maxDescendentsTruncatableNode: 5,
       ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
@@ -963,7 +965,7 @@ mixin WidgetInspectorService {
     bool enabled = false;
     assert(() {
       // TODO(kenz): add support for structured errors on the web.
-      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb); // ignore: avoid_redundant_argument_values
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
       return true;
     }());
     return enabled;
@@ -1637,7 +1639,7 @@ mixin WidgetInspectorService {
   List<Object> _getChildrenDetailsSubtree(String? diagnosticsNodeId, String groupName) {
     final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
     // With this value of minDepth we only expand one extra level of important nodes.
-    final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
+    final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
@@ -1745,6 +1747,7 @@ mixin WidgetInspectorService {
       root,
       InspectorSerializationDelegate(
         groupName: groupName,
+        summaryTree: false,
         subtreeDepth: subtreeDepth,
         includeProperties: true,
         service: this,

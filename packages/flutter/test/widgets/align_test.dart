@@ -16,6 +16,7 @@ void main() {
 
     await tester.pumpWidget(
       Align(
+        alignment: Alignment.center,
         child: Container(),
       ),
     );
@@ -92,6 +93,7 @@ void main() {
       SingleChildScrollView(
         child: Align(
           key: alignKey,
+          alignment: Alignment.center,
           child: const SizedBox(
             width: 10.0,
             height: 10.0,
@@ -137,6 +139,7 @@ void main() {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const <Widget>[
             Align(
+              alignment: Alignment.center,
               heightFactor: 0.5,
               child: SizedBox(
                 height: 100.0,

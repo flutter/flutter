@@ -32,6 +32,7 @@ void main() {
           '/smuggle-it',
           'lib/route.dart',
         ],
+        canFail: false,
       );
     });
     section('TEST WHETHER `flutter run --route` WORKS');

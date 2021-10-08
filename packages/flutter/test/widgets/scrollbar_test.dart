@@ -259,6 +259,7 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
+    const double margin = 0;
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
@@ -268,6 +269,7 @@ void main() {
         axisDirection = AxisDirection.right;
 
       painter = _buildPainter(
+        crossAxisMargin: margin,
         scrollMetrics: startingMetrics,
         scrollbarOrientation: scrollbarOrientation,
       );
@@ -317,11 +319,14 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
+    const double margin = 0;
     Rect rect;
 
     // Vertical scroll with TextDirection.ltr
     painter = _buildPainter(
+      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
+      textDirection: TextDirection.ltr,
     );
     painter.update(
       startingMetrics.copyWith(axisDirection: AxisDirection.down),
@@ -336,6 +341,7 @@ void main() {
 
     // Vertical scroll with TextDirection.rtl
     painter = _buildPainter(
+      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
       textDirection: TextDirection.rtl,
     );
@@ -352,6 +358,7 @@ void main() {
 
     // Horizontal scroll
     painter = _buildPainter(
+      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
     );
     painter.update(

@@ -27,7 +27,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(),
+              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             child: Center(
               child: Container(
@@ -85,7 +85,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(),
+              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
             ),
             child: Center(
               child: Container(

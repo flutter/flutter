@@ -48,7 +48,7 @@ void main() {
 
   setUp(() {
     httpServer = FakeHttpServer();
-    linux = FakePlatform(environment: <String, String>{});
+    linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
@@ -741,6 +741,7 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
+        nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
       enableDds: false,

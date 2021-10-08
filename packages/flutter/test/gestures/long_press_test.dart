@@ -527,6 +527,7 @@ void main() {
     const PointerDownEvent touchDown = PointerDownEvent(
       pointer: 5,
       position: Offset(10, 10),
+      kind: PointerDeviceKind.touch,
     );
 
     // Touch events shouldn't be recognized.

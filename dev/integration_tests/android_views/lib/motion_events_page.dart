@@ -227,7 +227,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.value();
+    return Future<dynamic>.value(null);
   }
 
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
@@ -240,7 +240,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.value();
+    return Future<dynamic>.value(null);
   }
 
   Widget buildEventTile(BuildContext context, int index) {

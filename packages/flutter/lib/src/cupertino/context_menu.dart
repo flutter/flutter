@@ -344,6 +344,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // it expands. This may be solvable by adding a widget to Scaffold that's
     // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
+      opaque: false,
       builder: (BuildContext context) {
         return _DecoyChild(
           beginRect: childRect,
@@ -1169,23 +1170,33 @@ class _ContextMenuSheet extends StatelessWidget {
       case _ContextMenuLocation.center:
         return _orientation == Orientation.portrait
           ? <Widget>[
-            const Spacer(),
+            const Spacer(
+              flex: 1,
+            ),
             menu,
-            const Spacer(),
+            const Spacer(
+              flex: 1,
+            ),
           ]
         : <Widget>[
             menu,
-            const Spacer(),
+            const Spacer(
+              flex: 1,
+            ),
           ];
       case _ContextMenuLocation.right:
         return <Widget>[
-          const Spacer(),
+          const Spacer(
+            flex: 1,
+          ),
           menu,
         ];
       case _ContextMenuLocation.left:
         return <Widget>[
           menu,
-          const Spacer(),
+          const Spacer(
+            flex: 1,
+          ),
         ];
     }
   }

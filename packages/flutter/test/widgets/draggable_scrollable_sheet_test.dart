@@ -81,6 +81,7 @@ void main() {
     const Key key = ValueKey<String>('container');
     await tester.pumpWidget(_boilerplate(
       null,
+      maxChildSize: 1.0,
       initialChildSize: .25,
       itemExtent: 25.0,
       containerKey: key,
