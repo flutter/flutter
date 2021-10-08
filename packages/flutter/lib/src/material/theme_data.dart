@@ -219,9 +219,8 @@ class ThemeData with Diagnosticable {
   ///  * [ThemeData.light], which creates a light blue theme.
   ///  * [ThemeData.dark], which creates dark theme with a teal secondary [ColorScheme] color.
   factory ThemeData({
+    // Color
     ColorScheme? colorScheme,
-
-    // Colors
     MaterialColor? primarySwatch,
     Brightness? brightness,
     Color? primaryColor,
@@ -303,48 +302,48 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     IconThemeData? accentIconTheme,
-    // Configuration
-    TargetPlatform? platform,
-    VisualDensity? visualDensity,
-    InteractiveInkFeatureFactory? splashFactory,
-    MaterialTapTargetSize? materialTapTargetSize,
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-    InputDecorationTheme? inputDecorationTheme,
-    PageTransitionsTheme? pageTransitionsTheme,
-    NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     // Component themes
-    BottomAppBarTheme? bottomAppBarTheme, // TODO: Normalize
-    TabBarTheme? tabBarTheme, // TODO: Normalize
-    CardTheme? cardTheme, // TODO: Normalize
-    AppBarTheme? appBarTheme, // TODO: Normalize
-    DialogTheme? dialogTheme, // TODO: Normalize
+    AppBarTheme? appBarTheme, // TODO: create ☂️ bug
+    MaterialBannerThemeData? bannerTheme, // TODO: create ☂️ bug?
+    BottomAppBarTheme? bottomAppBarTheme, // TODO: create ☂️ bug
+    BottomNavigationBarThemeData? bottomNavigationBarTheme,
+    BottomSheetThemeData? bottomSheetTheme,
+    ButtonBarThemeData? buttonBarTheme,
     ButtonThemeData? buttonTheme,
-    ToggleButtonsThemeData? toggleButtonsTheme,
-    SliderThemeData? sliderTheme,
-    TooltipThemeData? tooltipTheme,
+    CardTheme? cardTheme, // TODO: create ☂️ bug
+    CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
-    ScrollbarThemeData? scrollbarTheme,
+    DataTableThemeData? dataTableTheme,
+    DialogTheme? dialogTheme, // TODO: create ☂️ bug
+    DividerThemeData? dividerTheme,
+    DrawerThemeData? drawerTheme,
+    ElevatedButtonThemeData? elevatedButtonTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
-    SnackBarThemeData? snackBarTheme,
-    BottomSheetThemeData? bottomSheetTheme,
-    PopupMenuThemeData? popupMenuTheme,
-    MaterialBannerThemeData? bannerTheme,
-    DividerThemeData? dividerTheme,
-    ButtonBarThemeData? buttonBarTheme,
-    BottomNavigationBarThemeData? bottomNavigationBarTheme,
-    TimePickerThemeData? timePickerTheme,
-    TextButtonThemeData? textButtonTheme,
-    ElevatedButtonThemeData? elevatedButtonTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
-    TextSelectionThemeData? textSelectionTheme,
-    DataTableThemeData? dataTableTheme,
-    CheckboxThemeData? checkboxTheme,
-    RadioThemeData? radioTheme,
-    SwitchThemeData? switchTheme,
+    PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
-    DrawerThemeData? drawerTheme,
+    RadioThemeData? radioTheme,
+    ScrollbarThemeData? scrollbarTheme,
+    SliderThemeData? sliderTheme,
+    SnackBarThemeData? snackBarTheme,
+    SwitchThemeData? switchTheme,
+    TabBarTheme? tabBarTheme, // TODO: create ☂️ bug
+    TextButtonThemeData? textButtonTheme,
+    TextSelectionThemeData? textSelectionTheme,
+    TimePickerThemeData? timePickerTheme,
+    ToggleButtonsThemeData? toggleButtonsTheme,
+    TooltipThemeData? tooltipTheme,
+    // Other configuration
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    InputDecorationTheme? inputDecorationTheme,
+    InteractiveInkFeatureFactory? splashFactory,
+    MaterialTapTargetSize? materialTapTargetSize,
+    NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    PageTransitionsTheme? pageTransitionsTheme,
+    TargetPlatform? platform,
+    VisualDensity? visualDensity,
     // Flags
     @Deprecated(
       'This "fix" is now enabled by default. '
