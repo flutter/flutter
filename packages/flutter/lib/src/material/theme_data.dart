@@ -281,7 +281,7 @@ class ThemeData with Diagnosticable {
     Color? hintColor,
     Color? errorColor,
     Color? toggleableActiveColor,
-    // Typography & Iconography
+    // Typography & iconography
     Typography? typography,
     String? fontFamily,
     TextTheme? textTheme,
@@ -338,23 +338,23 @@ class ThemeData with Diagnosticable {
     // Other configuration
     AndroidOverscrollIndicator? androidOverscrollIndicator,
     bool? applyElevationOverlayColor,
-    InputDecorationTheme? inputDecorationTheme,
-    InteractiveInkFeatureFactory? splashFactory,
-    MaterialTapTargetSize? materialTapTargetSize,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    PageTransitionsTheme? pageTransitionsTheme,
-    TargetPlatform? platform,
-    VisualDensity? visualDensity,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    InputDecorationTheme? inputDecorationTheme,
+    MaterialTapTargetSize? materialTapTargetSize,
+    PageTransitionsTheme? pageTransitionsTheme,
+    TargetPlatform? platform,
+    InteractiveInkFeatureFactory? splashFactory,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
+    VisualDensity? visualDensity,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
