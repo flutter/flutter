@@ -3247,14 +3247,14 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> children, DiagnosticsNode owner) {
-    return service._filterChildren(children, this);
+  List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+    return service._filterChildren(nodes, this);
   }
 
   @override
-  List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> properties, DiagnosticsNode owner) {
+  List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
     final bool createdByLocalProject = _nodesCreatedByLocalProject.contains(owner);
-    return properties.where((DiagnosticsNode node) {
+    return nodes.where((DiagnosticsNode node) {
       return !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info);
     }).toList();
   }

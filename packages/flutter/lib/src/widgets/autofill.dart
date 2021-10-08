@@ -129,7 +129,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String tag) => _clients[tag];
+  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
 
   @override
   Iterable<AutofillClient> get autofillClients {

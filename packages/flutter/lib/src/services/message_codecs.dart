@@ -123,10 +123,10 @@ class JSONMethodCodec implements MethodCodec {
   const JSONMethodCodec();
 
   @override
-  ByteData encodeMethodCall(MethodCall call) {
+  ByteData encodeMethodCall(MethodCall methodCall) {
     return const JSONMessageCodec().encodeMessage(<String, Object?>{
-      'method': call.method,
-      'args': call.arguments,
+      'method': methodCall.method,
+      'args': methodCall.arguments,
     })!;
   }
 
@@ -555,10 +555,10 @@ class StandardMethodCodec implements MethodCodec {
   final StandardMessageCodec messageCodec;
 
   @override
-  ByteData encodeMethodCall(MethodCall call) {
+  ByteData encodeMethodCall(MethodCall methodCall) {
     final WriteBuffer buffer = WriteBuffer();
-    messageCodec.writeValue(buffer, call.method);
-    messageCodec.writeValue(buffer, call.arguments);
+    messageCodec.writeValue(buffer, methodCall.method);
+    messageCodec.writeValue(buffer, methodCall.arguments);
     return buffer.done();
   }
 
