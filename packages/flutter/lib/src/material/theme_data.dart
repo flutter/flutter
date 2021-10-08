@@ -219,9 +219,11 @@ class ThemeData with Diagnosticable {
   ///  * [ThemeData.light], which creates a light blue theme.
   ///  * [ThemeData.dark], which creates dark theme with a teal secondary [ColorScheme] color.
   factory ThemeData({
-    Brightness? brightness,
-    VisualDensity? visualDensity,
+    ColorScheme? colorScheme,
+
+    // Colors
     MaterialColor? primarySwatch,
+    Brightness? brightness,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
     Color? primaryColorLight,
@@ -250,7 +252,6 @@ class ThemeData with Diagnosticable {
     Color? hoverColor,
     Color? highlightColor,
     Color? splashColor,
-    InteractiveInkFeatureFactory? splashFactory,
     Color? selectedRowColor,
     Color? unselectedWidgetColor,
     Color? disabledColor,
@@ -259,8 +260,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.3.0-0.2.pre.',
     )
     Color? buttonColor,
-    ButtonThemeData? buttonTheme,
-    ToggleButtonsThemeData? toggleButtonsTheme,
     Color? secondaryHeaderColor,
     @Deprecated(
       'Use TextSelectionThemeData.selectionColor instead. '
@@ -283,6 +282,8 @@ class ThemeData with Diagnosticable {
     Color? hintColor,
     Color? errorColor,
     Color? toggleableActiveColor,
+    // Typography & Iconography
+    Typography? typography,
     String? fontFamily,
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
@@ -293,7 +294,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     TextTheme? accentTextTheme,
-    InputDecorationTheme? inputDecorationTheme,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
     @Deprecated(
@@ -303,25 +303,30 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     IconThemeData? accentIconTheme,
-    SliderThemeData? sliderTheme,
-    TabBarTheme? tabBarTheme,
-    TooltipThemeData? tooltipTheme,
-    CardTheme? cardTheme,
-    ChipThemeData? chipTheme,
+    // Configuration
     TargetPlatform? platform,
+    VisualDensity? visualDensity,
+    InteractiveInkFeatureFactory? splashFactory,
     MaterialTapTargetSize? materialTapTargetSize,
-    bool? applyElevationOverlayColor,
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    InputDecorationTheme? inputDecorationTheme,
     PageTransitionsTheme? pageTransitionsTheme,
-    AppBarTheme? appBarTheme,
+    NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
+    // Component themes
+    BottomAppBarTheme? bottomAppBarTheme, // TODO: Normalize
+    TabBarTheme? tabBarTheme, // TODO: Normalize
+    CardTheme? cardTheme, // TODO: Normalize
+    AppBarTheme? appBarTheme, // TODO: Normalize
+    DialogTheme? dialogTheme, // TODO: Normalize
+    ButtonThemeData? buttonTheme,
+    ToggleButtonsThemeData? toggleButtonsTheme,
+    SliderThemeData? sliderTheme,
+    TooltipThemeData? tooltipTheme,
+    ChipThemeData? chipTheme,
     ScrollbarThemeData? scrollbarTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
-    ColorScheme? colorScheme,
-    DialogTheme? dialogTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
-    Typography? typography,
-    NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     SnackBarThemeData? snackBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     PopupMenuThemeData? popupMenuTheme,
@@ -340,6 +345,7 @@ class ThemeData with Diagnosticable {
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     DrawerThemeData? drawerTheme,
+    // Flags
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -350,7 +356,7 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v1.23.0-4.0.pre.',
     )
     bool? useTextSelectionTheme,
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    bool? applyElevationOverlayColor,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
