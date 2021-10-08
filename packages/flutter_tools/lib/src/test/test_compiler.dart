@@ -81,7 +81,7 @@ class TestCompiler {
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
-      return Future<String>.value(null);
+      return Future<String>.value();
     }
     compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;

@@ -538,7 +538,7 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => _FakeDeviceManager(<Device>[
-        FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
     });
   });
@@ -576,7 +576,7 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.web),
+      FakeDevice('ephemeral', 'ephemeral'),
     ]),
   });
 
@@ -600,7 +600,7 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
   });
 

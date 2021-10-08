@@ -136,6 +136,6 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
   void testSetImage(ui.Image image) {
-    setImage(ImageInfo(image: image, scale: 1.0));
+    setImage(ImageInfo(image: image));
   }
 }

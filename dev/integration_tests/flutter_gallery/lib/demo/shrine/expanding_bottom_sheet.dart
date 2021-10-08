@@ -171,7 +171,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       ).animate(
         CurvedAnimation(
           parent: _controller.view,
-          curve: const Interval(0.434, 1.0, curve: Curves.linear), // not used
+          curve: const Interval(0.434, 1.0), // not used
           // only the reverseCurve will be used
           reverseCurve: Interval(0.434, 1.0, curve: Curves.fastOutSlowIn.flipped),
         ),
@@ -448,7 +448,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     );
 
     final Animation<double> opacity = CurvedAnimation(
-      curve: const Interval(0.33, 1.0, curve: Curves.linear),
+      curve: const Interval(0.33, 1.0),
       parent: animation,
     );
 

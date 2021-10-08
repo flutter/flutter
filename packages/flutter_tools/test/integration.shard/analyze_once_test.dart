@@ -266,7 +266,6 @@ int analyze() {}
         'missing_return',
       ],
       exitMessageContains: '1 issue found.',
-      exitCode: 0,
     );
   });
 
@@ -283,7 +282,6 @@ int analyze() {}
         'missing_return',
       ],
       exitMessageContains: '1 issue found.',
-      exitCode: 0,
     );
   });
 

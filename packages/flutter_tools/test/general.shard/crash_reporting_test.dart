@@ -36,7 +36,7 @@ void main() {
     fs = MemoryFileSystem.test();
     testUsage = TestUsage();
 
-    platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
+    platform = FakePlatform(environment: <String, String>{});
     operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fs,
       logger: logger,
@@ -290,7 +290,6 @@ void main() {
       });
 
       final Platform environmentPlatform = FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{
           'HOME': '/',
           'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',

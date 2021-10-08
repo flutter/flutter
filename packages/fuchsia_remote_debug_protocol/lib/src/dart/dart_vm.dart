@@ -46,7 +46,6 @@ Future<vms.VmService> _waitAndConnect(
       final vms.VmService service = vms.VmService(
         controller.stream,
         socket.add,
-        log: null,
         disposeHandler: () => socket.close(),
         streamClosed: streamClosedCompleter.future
       );

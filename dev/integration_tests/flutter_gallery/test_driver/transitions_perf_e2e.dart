@@ -31,7 +31,7 @@ void main([List<String> args = const <String>[]]) {
       await tester.pumpAndSettle();
       final int id = tester.getSemantics(find.bySemanticsLabel('Material')).id;
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics, semanticsEnabled: true);
+    }, skip: !withSemantics);
 
     testWidgets(
       'all demos',

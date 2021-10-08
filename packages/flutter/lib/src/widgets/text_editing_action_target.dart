@@ -620,7 +620,6 @@ abstract class TextEditingActionTarget {
 
     final TextPosition nextPosition = TextPosition(
       offset: textEditingValue.text.length,
-      affinity: TextAffinity.downstream,
     );
     setSelection(textEditingValue.selection.expandTo(nextPosition, true), cause);
   }
@@ -884,7 +883,6 @@ abstract class TextEditingActionTarget {
     } else {
       nextSelection = textEditingValue.selection.extendTo(TextPosition(
         offset: selectedLine.baseOffset,
-        affinity: TextAffinity.downstream,
       ));
     }
 
@@ -1168,7 +1166,6 @@ abstract class TextEditingActionTarget {
     );
     final TextSelection nextSelection = TextSelection.fromPosition(TextPosition(
       offset: selectedLine.baseOffset,
-      affinity: TextAffinity.downstream,
     ));
 
     setSelection(nextSelection, cause);
@@ -1429,7 +1426,6 @@ abstract class TextEditingActionTarget {
   void moveSelectionToEnd(SelectionChangedCause cause) {
     final TextPosition nextPosition = TextPosition(
       offset: textEditingValue.text.length,
-      affinity: TextAffinity.downstream,
     );
     setSelection(TextSelection.fromPosition(nextPosition), cause);
   }

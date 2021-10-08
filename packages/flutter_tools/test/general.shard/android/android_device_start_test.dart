@@ -64,7 +64,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app.apk')..createSync();
@@ -130,7 +130,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app.apk')..createSync();
@@ -168,7 +168,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app.apk')..createSync();
