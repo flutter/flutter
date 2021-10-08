@@ -212,7 +212,6 @@ targets:
 
   - name: Linux build_tests_1_2
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -237,7 +236,6 @@ targets:
 
   - name: Linux build_tests_2_2
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -509,8 +507,6 @@ targets:
 
   - name: Linux gradle_java8_compile_test
     recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
     properties:
       caches: >-
         [
@@ -687,7 +683,6 @@ targets:
 
   - name: Linux plugin_dependencies_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -713,7 +708,6 @@ targets:
 
   - name: Linux plugin_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -787,7 +781,6 @@ targets:
 
   - name: Linux tool_integration_tests_1_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -817,7 +810,6 @@ targets:
 
   - name: Linux tool_integration_tests_2_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -847,7 +839,6 @@ targets:
 
   - name: Linux tool_integration_tests_3_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -877,7 +868,6 @@ targets:
 
   - name: Linux tool_integration_tests_4_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1739,7 +1729,6 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
-    bringup: true
     presubmit: true
     properties:
       dependencies: >-
@@ -1833,7 +1822,6 @@ targets:
 
   - name: Mac build_tests_1_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1858,7 +1846,6 @@ targets:
 
   - name: Mac build_tests_2_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1883,7 +1870,6 @@ targets:
 
   - name: Mac build_tests_3_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -1908,7 +1894,6 @@ targets:
 
   - name: Mac build_tests_4_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -2047,7 +2032,6 @@ targets:
 
   - name: Mac gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2073,7 +2057,6 @@ targets:
 
   - name: Mac gradle_plugin_fat_apk_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2125,7 +2108,6 @@ targets:
 
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2152,7 +2134,6 @@ targets:
 
   - name: Mac module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2179,7 +2160,6 @@ targets:
 
   - name: Mac module_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2232,7 +2212,6 @@ targets:
 
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2286,7 +2265,6 @@ targets:
 
   - name: Mac plugin_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -2313,7 +2291,6 @@ targets:
 
   - name: Mac tool_integration_tests_1_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -2343,7 +2320,6 @@ targets:
 
   - name: Mac tool_integration_tests_2_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -2373,7 +2349,6 @@ targets:
 
   - name: Mac tool_integration_tests_3_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -2403,7 +2378,6 @@ targets:
 
   - name: Mac tool_integration_tests_4_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3446,7 +3420,6 @@ targets:
 
   - name: Windows build_tests_1_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3470,7 +3443,6 @@ targets:
 
   - name: Windows build_tests_2_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3494,7 +3466,6 @@ targets:
 
   - name: Windows build_tests_3_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3775,7 +3746,6 @@ targets:
 
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -3801,7 +3771,6 @@ targets:
 
   - name: Windows plugin_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       caches: >-
@@ -3827,7 +3796,6 @@ targets:
 
   - name: Windows tool_integration_tests_1_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3856,7 +3824,6 @@ targets:
 
   - name: Windows tool_integration_tests_2_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3885,7 +3852,6 @@ targets:
 
   - name: Windows tool_integration_tests_3_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3914,7 +3880,6 @@ targets:
 
   - name: Windows tool_integration_tests_4_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3943,7 +3908,6 @@ targets:
 
   - name: Windows tool_integration_tests_5_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
