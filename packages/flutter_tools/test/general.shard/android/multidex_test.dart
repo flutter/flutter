@@ -14,10 +14,9 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-
   testUsingContext('ensureMultidexUtilsExists returns when exists', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File utilsFile = directory.childDirectory('android')
+    final File applicationFile = directory.childDirectory('android')
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -25,21 +24,51 @@ void main() {
       .childDirectory('io')
       .childDirectory('flutter')
       .childDirectory('app')
-      .childFile('FlutterMultidexSupportUtils.java');
-    utilsFile.createSync(recursive: true);
-    utilsFile.writeAsStringSync('hello', flush: true);
-    expect(utilsFile.readAsStringSync(), 'hello');
+      .childFile('FlutterMultiDexApplication.java');
+    applicationFile.createSync(recursive: true);
+    applicationFile.writeAsStringSync('hello', flush: true);
+    expect(applicationFile.readAsStringSync(), 'hello');
 
-    ensureMultidexUtilsExists(directory);
+    ensureMultiDexApplicationExists(directory);
 
     // File should remain untouched
-    expect(utilsFile.readAsStringSync(), 'hello');
+    expect(applicationFile.readAsStringSync(), 'hello');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('ensureMultidexUtilsExists generates when does not exist', () async {
+  testUsingContext('ensureMultiDexApplicationExists generates when does not exist', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('java')
+      .childDirectory('io')
+      .childDirectory('flutter')
+      .childDirectory('app')
+      .childFile('FlutterMultiDexApplication.java');
+
+    ensureMultiDexApplicationExists(directory);
+
+    final String contents = applicationFile.readAsStringSync();
+    expect(contents.contains('FlutterMultiDexApplication'), true);
+    expect(contents.contains('MultiDex.install(this);'), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('multiDexApplicationExists false when does not exist', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    expect(multiDexApplicationExists(directory), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('multiDexApplicationExists true when does exist', () async {
     final Directory directory = globals.fs.currentDirectory;
     final File utilsFile = directory.childDirectory('android')
       .childDirectory('app')
@@ -49,39 +78,110 @@ void main() {
       .childDirectory('io')
       .childDirectory('flutter')
       .childDirectory('app')
-      .childFile('FlutterMultidexSupportUtils.java');
-
-    ensureMultidexUtilsExists(directory);
-
-    expect(utilsFile.readAsStringSync().contains('FlutterMultidexSupportUtils'), true);
-    expect(utilsFile.readAsStringSync().contains('public static void installMultidexSupport(Context context)'), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('multidexUtilsExists false when does not exist', () async {
-    final Directory directory = globals.fs.currentDirectory;
-    expect(multidexUtilsExists(directory), false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('ensureMultidexUtilsExists true when does exist', () async {
-    final Directory directory = globals.fs.currentDirectory;
-    final File utilsFile = directory.childDirectory('android')
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('java')
-      .childDirectory('io')
-      .childDirectory('flutter')
-      .childDirectory('app')
-      .childFile('FlutterMultidexSupportUtils.java');
+      .childFile('FlutterMultiDexApplication.java');
     utilsFile.createSync(recursive: true);
 
-    expect(multidexUtilsExists(directory), true);
+    expect(multiDexApplicationExists(directory), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('androidManifestHasNameVariable true with valid manifest', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    applicationFile.createSync(recursive: true);
+    applicationFile.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+</manifest>
+''', flush: true);
+    expect(androidManifestHasNameVariable(directory), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('androidManifestHasNameVariable false with no android:name attribute', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    applicationFile.createSync(recursive: true);
+    applicationFile.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+''', flush: true);
+    expect(androidManifestHasNameVariable(directory), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('androidManifestHasNameVariable false with incorrect android:name attribute', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    applicationFile.createSync(recursive: true);
+    applicationFile.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:name="io.flutter.app.FlutterApplication"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+''', flush: true);
+    expect(androidManifestHasNameVariable(directory), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('androidManifestHasNameVariable false with invalid xml manifest', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    applicationFile.createSync(recursive: true);
+    applicationFile.writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.multidexapp">
+   <application
+        android:label="multidextest2"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+    </application>
+''', flush: true);
+    expect(androidManifestHasNameVariable(directory), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('androidManifestHasNameVariable false with no manifest file', () async {
+    final Directory directory = globals.fs.currentDirectory;
+    expect(androidManifestHasNameVariable(directory), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

@@ -92,28 +92,57 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
     if (multidexEnabled) {
       globals.printStatus(
-        'Multidex support is required for your android app to build since the number of methods has exceeded 64k. Flutter tool can add multidex support. '
-        'The following files will be added by flutter:\n',
+        'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
+        "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
         indent: 4
       );
-      globals.printStatus(
-        'android/app/src/main/java/io/flutter/app/FlutterMultidexSupportUtils.java\n',
-        indent: 8
-      );
-      globals.printStatus(
-        "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.",
-        indent: 4
-      );
-      final String selection = await globals.terminal.promptForCharInput(
-        <String>['y', 'n'],
-        logger: globals.logger,
-        prompt: 'Do you want to continue with adding multidex support for Android?',
-        defaultChoiceIndex: 0,
-        displayAcceptedCharacters: true,
-      );
-      if (selection == 'y') {
-        ensureMultidexUtilsExists(project.directory);
-        return GradleBuildStatus.retry;
+      if (!androidManifestHasNameVariable(project.directory)) {
+        globals.printStatus(
+          r'Your `android/app/src/main/AndroidManifest.xml` does not contain `android:name="${applicationName}"` '
+          'under the `application` element. This may be due to creating your project with an old version of Flutter. '
+          'Add the `android:name="\${applicationName}"` attribute to your AndroidManifest.xml to enable Flutter\'s multidex support:\n',
+          indent: 4
+        );
+        globals.printStatus(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  ...
+  <application
+    ...
+    android:name="${applicationName}"
+    ...>
+''',
+          indent: 8
+        );
+        globals.printStatus(
+          'You may also roll your own multidex support by following the guide at: https://developer.android.com/studio/build/multidex\n',
+          indent: 4
+        );
+        return GradleBuildStatus.exit;
+      }
+      if (!multiDexApplicationExists(project.directory)) {
+        globals.printStatus(
+          'Flutter tool can add multidex support. The following file will be added by flutter:\n',
+          indent: 4
+        );
+        globals.printStatus(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java\n',
+          indent: 8
+        );
+        final String selection = await globals.terminal.promptForCharInput(
+          <String>['y', 'n'],
+          logger: globals.logger,
+          prompt: 'Do you want to continue with adding multidex support for Android?',
+          defaultChoiceIndex: 0,
+          displayAcceptedCharacters: true,
+        );
+        if (selection == 'y') {
+          ensureMultiDexApplicationExists(project.directory);
+          globals.printStatus(
+            'Multidex enabled. Retrying build.\n',
+            indent: 0
+          );
+          return GradleBuildStatus.retry;
+        }
       }
     } else {
       globals.printStatus(
