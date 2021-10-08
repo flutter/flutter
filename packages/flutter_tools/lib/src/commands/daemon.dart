@@ -309,9 +309,7 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           // ignore: avoid_print
           print(message.message);
-        } else if (message.level == 'warning') {
-          globals.stdio.stderrWrite('${message.message}\n');
-        } else if (message.level == 'error') {
+        } else if (message.level == 'error' || message.level == 'warning') {
           globals.stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
             globals.stdio.stderrWrite(

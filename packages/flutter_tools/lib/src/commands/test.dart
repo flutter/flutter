@@ -198,6 +198,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'This flag is ignored if "--start-paused" or coverage are requested, as '
               'the VM service will be enabled in those cases regardless.'
       )
+      ..addFlag('fatal-log-output',
+        defaultsTo: false,
+        hide: !verboseHelp,
+        help: 'Causes the test run to fail if errors or warnings are sent to the log during the run.'
+      )
       ..addOption('reporter',
         abbr: 'r',
         defaultsTo: 'compact',
@@ -429,6 +434,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
+    final bool fatalLogOutput = boolArg('fatal-log-output');
+    if (fatalLogOutput) {
+      globals.logger.clearHadErrorOutput();
+      globals.logger.clearHadWarningOutput();
+    }
     final int result = await testRunner.runTests(
       testWrapper,
       _testFiles,
@@ -455,6 +465,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
     );
+
+    if (fatalLogOutput) {
+      if (globals.logger.hadErrorOutput || globals.logger.hadWarningOutput) {
+        return throwToolExit(
+            'Test logger received ${globals.logger.hadErrorOutput ? 'error' : 'warning'} output '
+                'during the test run, and --fatal-logger-output is enabled.'
+        );
+      }
+    }
 
     if (collector != null) {
       final bool collectionResult = await collector.collectCoverageData(

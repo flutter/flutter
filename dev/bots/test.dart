@@ -1642,6 +1642,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    '--fatal-log-output',
     ...options,
     ...tags,
     ...flutterTestArgs,

@@ -43,8 +43,14 @@ abstract class Logger {
   /// If true, then [printError] has been called at least once for this logger.
   bool get hadErrorOutput;
 
+  /// Clears the [hadErrorOutput] flag.
+  void clearHadErrorOutput();
+
   /// If true, then [printWarning] has been called at least once for this logger.
   bool get hadWarningOutput;
+
+  /// Clears the [hadWarningOutput] flag.
+  void clearHadWarningOutput();
 
   /// Returns the terminal attached to this logger.
   Terminal get terminal;
@@ -210,7 +216,13 @@ class DelegatingLogger implements Logger {
   bool get hadErrorOutput => _delegate.hadErrorOutput;
 
   @override
+  void clearHadErrorOutput() => _delegate.clearHadErrorOutput();
+
+  @override
   bool get hadWarningOutput => _delegate.hadWarningOutput;
+
+  @override
+  void clearHadWarningOutput() => _delegate.clearHadWarningOutput();
 
   @override
   Terminal get terminal => _delegate.terminal;
@@ -366,7 +378,13 @@ class StdoutLogger extends Logger {
   bool get hadErrorOutput => _hadErrorOutput;
 
   @override
+  void clearHadErrorOutput() => _hadErrorOutput = false;
+
+  @override
   bool get hadWarningOutput => _hadWarningOutput;
+
+  @override
+  void clearHadWarningOutput() => _hadWarningOutput = false;
 
   @override
   void printError(
@@ -623,7 +641,13 @@ class BufferLogger extends Logger {
   bool get hadErrorOutput => _hadErrorOutput;
 
   @override
+  void clearHadErrorOutput() => _hadErrorOutput = false;
+
+  @override
   bool get hadWarningOutput => _hadWarningOutput;
+
+  @override
+  void clearHadWarningOutput() => _hadWarningOutput = false;
 
   @override
   void printError(

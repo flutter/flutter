@@ -567,7 +567,13 @@ class StreamLogger extends Logger {
   bool get hadErrorOutput => _hadErrorOutput;
 
   @override
+  void clearHadErrorOutput() => _hadErrorOutput = false;
+
+  @override
   bool get hadWarningOutput => _hadWarningOutput;
+
+  @override
+  void clearHadWarningOutput() => _hadWarningOutput = false;
 
   @override
   void printError(
