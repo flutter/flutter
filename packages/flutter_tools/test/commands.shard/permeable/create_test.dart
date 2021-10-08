@@ -1370,7 +1370,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name', 'my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1386,7 +1386,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=app', '--offline', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1402,7 +1402,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=objc', '--project-name', 'my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1427,7 +1427,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name', 'my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1444,6 +1444,38 @@ void main() {
       botDetector: globals.botDetector,
       platform: globals.platform,
     ),
+  });
+
+  testUsingContext('display name is Title Case for swift iOS plugin.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=plugin', '--no-pub', '--org', 'com.foo.bar', '--platforms=ios', '--ios-language=swift', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
+  testUsingContext('display name is Title Case for objc iOS plugin.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=plugin', '--no-pub', '--org', 'com.foo.bar', '--platforms=ios', '--ios-language=objc', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
+    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
   });
 
   testUsingContext('has correct content and formatting with macOS app template', () async {
