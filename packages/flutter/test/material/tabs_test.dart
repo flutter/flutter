@@ -1028,10 +1028,10 @@ void main() {
       length: 3,
       animate: false,
     );
-    final List<String> tabs = ['A', 'B', 'C'];
+    final List<String> tabs = <String>['A', 'B', 'C'];
     await tester.pumpWidget(boilerplate(
       child: Column(
-        children: [
+        children: <Widget>[
           TabBar(
             tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
             controller: tabController,

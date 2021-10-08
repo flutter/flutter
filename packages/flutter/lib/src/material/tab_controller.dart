@@ -124,7 +124,7 @@ class TabController extends ChangeNotifier {
        _animationController = animationController;
 
 
-  /// Creates a new [TabController] with `index`, `previousIndex` `length`, and
+  /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
   /// `animate` if they are non-null.
   ///
   /// This method is used by [DefaultTabController].
@@ -197,7 +197,7 @@ class TabController extends ChangeNotifier {
   }
 
   /// Determines whether tab changes will be animated in the [TabController] and
-  /// [TabBarView]. Defaults to `true` unless specified.
+  /// [TabBarView]. Defaults to `true`.
   bool animate;
 
   /// The index of the currently selected tab.
@@ -360,7 +360,7 @@ class DefaultTabController extends StatefulWidget {
   /// Whether to animate tab transitions or not.
   ///
   /// Defaults to `true` and will skip animating the [DefaultTabController] and
-  /// [TabBarView] if set to `false`, changing the state instantaneously
+  /// [TabBarView] if set to `false`, changing the state instantly
   /// instead.
   final bool animate;
 
