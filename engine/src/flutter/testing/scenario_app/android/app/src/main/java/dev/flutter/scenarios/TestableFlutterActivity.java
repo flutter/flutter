@@ -15,7 +15,8 @@ public abstract class TestableFlutterActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    super.configureFlutterEngine(flutterEngine);
+    // Do not call super. We have no plugins to register, and the automatic
+    // registration will fail and print a scary exception in the logs.
     flutterEngine
         .getDartExecutor()
         .setMessageHandler("take_screenshot", (byteBuffer, binaryReply) -> notifyFlutterRendered());

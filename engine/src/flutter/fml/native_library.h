@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FML_NATIVE_LIBRARY_H_
 #define FLUTTER_FML_NATIVE_LIBRARY_H_
 
+#include <optional>
+
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -19,8 +21,10 @@ class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {
  public:
 #if OS_WIN
   using Handle = HMODULE;
+  using SymbolHandle = FARPROC;
 #else   // OS_WIN
   using Handle = void*;
+  using SymbolHandle = void*;
 #endif  // OS_WIN
 
   static fml::RefPtr<NativeLibrary> Create(const char* path);
@@ -31,7 +35,22 @@ class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {
 
   static fml::RefPtr<NativeLibrary> CreateForCurrentProcess();
 
-  const uint8_t* ResolveSymbol(const char* symbol);
+  template <typename T>
+  const std::optional<T> ResolveFunction(const char* symbol) {
+    auto* resolved_symbol = Resolve(symbol);
+    if (!resolved_symbol) {
+      return std::nullopt;
+    }
+    return std::optional<T>(reinterpret_cast<T>(resolved_symbol));
+  }
+
+  const uint8_t* ResolveSymbol(const char* symbol) {
+    auto* resolved_symbol = reinterpret_cast<const uint8_t*>(Resolve(symbol));
+    if (resolved_symbol == nullptr) {
+      FML_DLOG(INFO) << "Could not resolve symbol in library: " << symbol;
+    }
+    return resolved_symbol;
+  }
 
  private:
   Handle handle_ = nullptr;
@@ -44,6 +63,7 @@ class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {
   ~NativeLibrary();
 
   Handle GetHandle() const;
+  SymbolHandle Resolve(const char* symbol) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(NativeLibrary);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(NativeLibrary);
