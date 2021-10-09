@@ -350,7 +350,7 @@ class ListTileTheme extends InheritedTheme {
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.dense] property instead.
-  bool get dense => _data != null ? (_data!.dense ?? false) : _dense;
+  bool? get dense => _data != null ? _data!.dense : _dense;
 
   /// Overrides the default value of [ListTile.shape].
   ///
@@ -362,7 +362,7 @@ class ListTileTheme extends InheritedTheme {
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.style] property instead.
-  ListTileStyle get style => _data != null ? (_data!.style ?? ListTileStyle.list) : _style;
+  ListTileStyle? get style => _data != null ? _data!.style : _style;
 
   /// Overrides the default value of [ListTile.selectedColor].
   ///
