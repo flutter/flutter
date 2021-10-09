@@ -428,7 +428,7 @@ class ListTileTheme extends InheritedTheme {
   /// encloses the given context.
   ///
   /// If there is no enclosing [ListTileTheme] widget, then
-  /// [ThemeData.listTileTheme] is used (see [ThemeData.of]).
+  /// [ThemeData.listTileTheme] is used (see [Theme.of]).
   ///
   /// Typical usage is as follows:
   ///
