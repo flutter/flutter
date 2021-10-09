@@ -1151,50 +1151,48 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Stepper(
-                  currentStep: index,
-                  onStepTapped: (int i) {
-                    setState(() {
-                      index = i;
-                    });                    
-                  },
-                  steps: const <Step>[
-                    Step(
-                      // label, subtitle are nullable arguments
-                      title: Text('Step 1 Title'),
-                      content: Text('Step 1 Content'),
-                    ),
-                    Step(
-                      title: Text('Step 2 Title'),
-                      content: Text('Step 2 Content'),
-                      label: Text('Step 2 Label'),
-                    ),
-                    Step(
-                      title: Text('Step 3 Title'),
-                      content: Text('Step 3 Content'),
-                      subtitle: Text('Step 3 Subtitle'),
-                      label: Text('Step 3 Label'),
-                    ),
-                    Step(
-                      title: Text('Step 4 Title'),
-                      content: Text('Step 4 Content'),
-                      subtitle: Text('Step 4 Subtitle'),
-                    ),
-                  ],
-                ); 
-              }
-            ),
-          ),
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return Stepper(
+              currentStep: index,
+              onStepTapped: (int i) {
+                setState(() {
+                  index = i;
+                });
+              },
+              steps: const <Step>[
+                Step(
+                  // label, subtitle are nullable arguments
+                  title: Text('Step 1 Title'),
+                  content: Text('Step 1 Content'),
+                ),
+                Step(
+                  title: Text('Step 2 Title'),
+                  content: Text('Step 2 Content'),
+                  label: Text('Step 2 Label'),
+                ),
+                Step(
+                  title: Text('Step 3 Title'),
+                  content: Text('Step 3 Content'),
+                  subtitle: Text('Step 3 Subtitle'),
+                  label: Text('Step 3 Label'),
+                ),
+                Step(
+                  title: Text('Step 4 Title'),
+                  content: Text('Step 4 Content'),
+                  subtitle: Text('Step 4 Subtitle'),
+                ),
+              ],
+            );
+          }),
         ),
-      );
-      // Tap to Step3 Label then, index become 2 from 0
-      await tester.tap(find.text('Step 3 Label'));
-      expect(index, 2);
-      // Tap to Step2 Label then, index become 1 from 2
-      await tester.tap(find.text('Step 2 Label'));
-      expect(index, 1);
+      ),
+    );
+    // Tap to Step3 Label then, index become 2 from 0
+    await tester.tap(find.text('Step 3 Label'));
+    expect(index, 2);
+    // Tap to Step2 Label then, index become 1 from 2
+    await tester.tap(find.text('Step 2 Label'));
+    expect(index, 1);
   });
 }
 
