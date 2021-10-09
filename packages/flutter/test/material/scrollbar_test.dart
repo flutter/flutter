@@ -1296,7 +1296,7 @@ void main() {
     expect(scrollController.offset, scrollAmount * 2);
     expect(tapCount, 0);
 
-    // Tap on the track to validate the scroll view receives a click.
+    // Tap on the thumb to validate the scroll view receives a click.
     await tester.tapAt(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
     expect(tapCount, 1);
