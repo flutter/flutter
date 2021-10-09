@@ -247,7 +247,6 @@ void main() {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
                   child: Column(
                     children: rows,
                   ),

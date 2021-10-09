@@ -217,7 +217,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad}
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
   ///
@@ -634,7 +634,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
-      isEnabled: true,
     );
   }
 }
@@ -827,7 +826,6 @@ class InputChip extends StatelessWidget
       onPressed: onPressed,
       pressElevation: pressElevation,
       selected: selected,
-      tapEnabled: true,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       tooltip: tooltip,
@@ -1013,7 +1011,6 @@ class ChoiceChip extends StatelessWidget
       pressElevation: pressElevation,
       selected: selected,
       showCheckmark: false,
-      onDeleted: null,
       tooltip: tooltip,
       side: side,
       shape: shape,
@@ -1398,7 +1395,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       padding: padding,
       visualDensity: visualDensity,
       labelPadding: labelPadding,
-      isEnabled: true,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -1997,7 +1993,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(offset),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == offset);
         return child!.hitTest(result, position: offset);
       },
@@ -2447,7 +2443,6 @@ class _RenderChip extends RenderBox {
       final Size updatedSize = layoutChild(
         label!,
         BoxConstraints(
-          minWidth: 0.0,
           maxWidth: maxWidth,
           minHeight: rawSize.height,
           maxHeight: size.height,
@@ -2465,7 +2460,6 @@ class _RenderChip extends RenderBox {
       BoxConstraints(
         minHeight: rawSize.height,
         maxHeight: size.height,
-        minWidth: 0.0,
         maxWidth: size.width,
       ),
     );
@@ -2535,7 +2529,7 @@ class _RenderChip extends RenderBox {
       return result.addWithRawTransform(
         transform: MatrixUtils.forceToPoint(center),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? position) {
+        hitTest: (BoxHitTestResult result, Offset position) {
           assert(position == center);
           return hitTestChild.hitTest(result, position: center);
         },
@@ -2937,7 +2931,6 @@ class _UnconstrainedInkSplashFactory extends InteractiveInkFeatureFactory {
       referenceBox: referenceBox,
       position: position,
       color: color,
-      containedInkWell: false,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
       customBorder: customBorder,
@@ -2960,22 +2953,22 @@ bool _hitIsOnDeleteIcon({
   final EdgeInsets resolvedPadding = padding.resolve(textDirection);
   final Size deflatedSize = resolvedPadding.deflateSize(chipSize);
   final Offset adjustedPosition = tapPosition - Offset(resolvedPadding.left, resolvedPadding.top);
-  // The delete button hit area should be at least the width of the delete button,
-  // but, if there's room, up to 24 pixels from the center of the delete icon
-  // (corresponding to part of a 48x48 square that Material would prefer for touch
-  // targets), but no more than half of the overall size of the chip when the chip is
-  // small.
+  // The delete button hit area should be at least the width of the delete
+  // button, but, if there's room, up to 24 pixels from the center of the delete
+  // icon (corresponding to part of a 48x48 square that Material would prefer
+  // for touch targets), but no more than approximately half of the overall size
+  // of the chip when the chip is small.
   //
   // This isn't affected by materialTapTargetSize because it only applies to the
-  // width of the tappable region within the chip, not outside of the chip, which is
-  // handled elsewhere. Also because delete buttons aren't specified to be used on
-  // touch devices, only desktop devices.
-  final double accessibleDeleteButtonWidth = math.max(
-    deleteButtonSize.width,
-    math.min(
-      deflatedSize.width * 0.5,
-      24.0 + deleteButtonSize.width / 2.0,
-    ),
+  // width of the tappable region within the chip, not outside of the chip,
+  // which is handled elsewhere. Also because delete buttons aren't specified to
+  // be used on touch devices, only desktop devices.
+
+  // Max out at not quite half, so that tests that tap on the center of a small
+  // chip will still hit the chip, not the delete button.
+  final double accessibleDeleteButtonWidth = math.min(
+    deflatedSize.width * 0.499,
+    math.max(deleteButtonSize.width, 24.0 + deleteButtonSize.width / 2.0),
   );
   switch (textDirection) {
     case TextDirection.ltr:

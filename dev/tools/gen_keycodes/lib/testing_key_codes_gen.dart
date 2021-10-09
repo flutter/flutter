@@ -23,7 +23,7 @@ class KeyCodesCcGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entry.usbHidCode, digits: 8)};''');
+constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entry.usbHidCode)};''');
     }
     return lines.sortedJoin().trimRight();
   }

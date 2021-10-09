@@ -87,7 +87,6 @@ void main() {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[ deviceFinder.path, 'list', '-full' ],
-          exitCode: 0,
           stdout: 'device1\ndevice2',
         ),
       ]);
@@ -114,7 +113,6 @@ void main() {
             '-timeout',
             '2000ms',
           ],
-          exitCode: 0,
           stdout: 'device1',
         ),
       ]);

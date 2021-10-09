@@ -508,11 +508,9 @@ void main() {
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,

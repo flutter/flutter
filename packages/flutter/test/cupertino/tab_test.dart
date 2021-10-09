@@ -179,7 +179,6 @@ void main() {
         home: CupertinoTabView(
           navigatorKey: key,
           builder: (BuildContext context) => const Text('first route'),
-          onUnknownRoute: null,
         ),
       ),
     );

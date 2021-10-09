@@ -500,7 +500,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(5),
+        const BorderRadius.all(Radius.circular(5)),
       );
       expect(
         decoration.border!.bottom.color.value,
@@ -526,7 +526,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(5),
+        const BorderRadius.all(Radius.circular(5)),
       );
       expect(
         decoration.border!.bottom.color.value,
@@ -1764,7 +1764,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
@@ -1848,7 +1848,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -2337,7 +2337,6 @@ void main() {
         home: Center(
           child: CupertinoTextField(
             controller: controller,
-            maxLines: 1,
           ),
         ),
       ),
@@ -2440,7 +2439,7 @@ void main() {
       // First tap moved the cursor to the beginning of the second word.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -2485,7 +2484,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
@@ -2553,7 +2552,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pumpAndSettle();
@@ -3573,7 +3572,6 @@ void main() {
           debugShowCheckedModeBanner: false,
           home: CupertinoPageScaffold(
             child: Align(
-              alignment: Alignment.center,
               child: SizedBox(
                 width: 200,
                 height: 200,
@@ -3639,7 +3637,6 @@ void main() {
           debugShowCheckedModeBanner: false,
           home: CupertinoPageScaffold(
             child: Align(
-              alignment: Alignment.center,
               child: SizedBox(
                 width: 200,
                 height: 200,
@@ -3710,7 +3707,6 @@ void main() {
           debugShowCheckedModeBanner: false,
           home: CupertinoPageScaffold(
             child: Align(
-              alignment: Alignment.center,
               child: SizedBox(
                 width: 200,
                 height: 200,
@@ -3829,7 +3825,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -3876,7 +3871,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -3924,7 +3918,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -3972,7 +3965,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -4022,7 +4014,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -4074,7 +4065,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -4128,7 +4118,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -4182,7 +4171,6 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                alignment: Alignment.center,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
@@ -4424,9 +4412,7 @@ void main() {
         ).first,
       ),
       matchesSemantics(
-        isEnabled: false,
         hasEnabledState: true,
-        hasTapAction: false,
       ),
     );
   });
@@ -4500,7 +4486,6 @@ void main() {
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                     toolbarOptions: const ToolbarOptions(selectAll: true),
                     selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
-                    selectionWidthStyle: ui.BoxWidthStyle.tight,
                     maxLines: 3,
                   ),
                 ],

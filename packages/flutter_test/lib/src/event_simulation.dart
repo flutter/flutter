@@ -757,7 +757,7 @@ class KeyEventSimulator {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
+        return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
       });
     }
     switch (_transitMode) {
@@ -848,7 +848,7 @@ class KeyEventSimulator {
     Future<bool> _simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, isDown: true, physicalKey: physicalKey, character: character);
+        return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
       });
     }
     switch (_transitMode) {

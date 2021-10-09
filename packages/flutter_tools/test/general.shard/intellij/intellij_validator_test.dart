@@ -21,7 +21,6 @@ final Platform macPlatform = FakePlatform(
   environment: <String, String>{'HOME': '/foo/bar'}
 );
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'HOME': '/foo/bar'
   },

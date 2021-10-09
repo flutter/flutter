@@ -354,7 +354,7 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       OperatingSystemUtils: () => osUtils,
     });
 
@@ -369,9 +369,7 @@ void main() {
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
-      Platform: () => FakePlatform(
-        operatingSystem: 'linux',
-      ),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {

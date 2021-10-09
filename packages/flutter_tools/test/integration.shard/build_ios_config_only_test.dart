@@ -33,8 +33,9 @@ void main() {
       '--no-codesign',
     ], workingDirectory: workingDirectory);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of flutter build ios:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
 
     expect(result.exitCode, 0);
 

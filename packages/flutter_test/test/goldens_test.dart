@@ -162,7 +162,7 @@ void main() {
               ..writeAsBytesSync(_kExpectedPngBytes);
             fs.currentDirectory = fix('/foo/bar');
             comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
-            final bool success = await doComparison('golden.png');
+            final bool success = await doComparison();
             expect(success, isTrue);
           });
 

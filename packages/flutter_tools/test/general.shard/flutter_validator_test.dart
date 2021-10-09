@@ -40,7 +40,6 @@ void main() {
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(
-        operatingSystem: 'linux',
         localeName: 'en_US.UTF-8',
         environment: <String, String>{},
       ),
