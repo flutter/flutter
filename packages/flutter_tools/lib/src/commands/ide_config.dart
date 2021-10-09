@@ -252,7 +252,7 @@ class IdeConfigCommand extends FlutterCommand {
       _templateDirectory,
       null,
       fileSystem: globals.fs,
-      templateManifest: null,
+      templateManifest: <Uri>{},
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
