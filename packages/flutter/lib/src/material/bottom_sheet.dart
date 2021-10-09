@@ -215,14 +215,22 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     bool isClosing = false;
