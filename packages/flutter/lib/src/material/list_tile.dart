@@ -101,66 +101,47 @@ class ListTileThemeData with Diagnosticable {
     this.enableFeedback,
   });
 
-  /// If true then [ListTile]s will have the vertically dense layout.
+  /// Overrides the default value of [ListTile.dense].
   final bool? dense;
 
-  /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the [ListTile]'s shape.
-  /// {@endtemplate}
+  /// Overrides the default value of [ListTile.shape].
   final ShapeBorder? shape;
 
-  /// If specified, [style] defines the font used for [ListTile] titles.
+  /// Overrides the default value of [ListTile.style].
   final ListTileStyle? style;
 
-  /// If specified, the color used for icons and text when a [ListTile] is selected.
+  /// Overrides the default value of [ListTile.selectedColor].
   final Color? selectedColor;
 
-  /// If specified, the icon color used for enabled [ListTile]s that are not selected.
+  /// Overrides the default value of [ListTile.iconColor].
   final Color? iconColor;
 
-  /// If specified, the text color used for enabled [ListTile]s that are not selected.
+  /// Overrides the default value of [ListTile.textColor].
   final Color? textColor;
 
-  /// The tile's internal padding.
-  ///
-  /// Insets a [ListTile]'s contents: its [ListTile.leading], [ListTile.title],
-  /// [ListTile.subtitle], and [ListTile.trailing] widgets.
+  /// Overrides the default value of [ListTile.contentPadding].
   final EdgeInsetsGeometry? contentPadding;
 
-  /// If specified, defines the background color for `ListTile` when
-  /// [ListTile.selected] is false.
-  ///
-  /// If [ListTile.tileColor] is provided, [tileColor] is ignored.
+  /// Overrides the default value of [ListTile.tileColor].
   final Color? tileColor;
 
-  /// If specified, defines the background color for `ListTile` when
-  /// [ListTile.selected] is true.
-  ///
-  /// If [ListTile.selectedTileColor] is provided, [selectedTileColor] is ignored.
+  /// Overrides the default value of [ListTile.selectedTileColor].
   final Color? selectedTileColor;
 
-  /// The horizontal gap between the titles and the leading/trailing widgets.
-  ///
-  /// If specified, overrides the default value of [ListTile.horizontalTitleGap].
+  /// Overrides the default value of [ListTile.horizontalTitleGap].
   final double? horizontalTitleGap;
 
-  /// The minimum padding on the top and bottom of the title and subtitle widgets.
-  ///
-  /// If specified, overrides the default value of [ListTile.minVerticalPadding].
+  /// Overrides the default value of [ListTile.minVerticalPadding].
   final double? minVerticalPadding;
 
-  /// The minimum width allocated for the [ListTile.leading] widget.
-  ///
-  /// If specified, overrides the default value of [ListTile.minLeadingWidth].
+  /// Overrides the default value of [ListTile.minLeadingWidth].
   final double? minLeadingWidth;
 
-  /// If specified, defines the feedback property for `ListTile`.
-  ///
-  /// If [ListTile.enableFeedback] is provided, [enableFeedback] is ignored.
+  /// Overrides the default value of [ListTile.enableFeedback].
   final bool? enableFeedback;
 
   /// Creates a copy of this object with the given fields replaced with the
-  /// non-null parameter values.
+  /// new values.
   ListTileThemeData copyWith({
     bool? dense,
     ShapeBorder? shape,
@@ -284,12 +265,12 @@ class ListTileThemeData with Diagnosticable {
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
 // ignore: avoid_implementing_value_types
-class ListTileTheme extends InheritedTheme implements ListTileThemeData {
+class ListTileTheme extends InheritedTheme {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
   const ListTileTheme({
     Key? key,
-    this.data,
+    ListTileThemeData? data,
     bool dense = false,
     ShapeBorder? shape,
     ListTileStyle style = ListTileStyle.list,
@@ -317,6 +298,7 @@ class ListTileTheme extends InheritedTheme implements ListTileThemeData {
           horizontalTitleGap ??
           minVerticalPadding ??
           minLeadingWidth) == null),
+       _data = data,
        _dense = dense,
        _shape = shape,
        _style = style,
@@ -332,9 +314,7 @@ class ListTileTheme extends InheritedTheme implements ListTileThemeData {
        _minLeadingWidth = minLeadingWidth,
        super(key: key, child: child);
 
-  /// The configuration of this theme.
-  final ListTileThemeData? data;
-
+  final ListTileThemeData? _data;
   final bool _dense;
   final ShapeBorder? _shape;
   final ListTileStyle _style;
@@ -349,55 +329,101 @@ class ListTileTheme extends InheritedTheme implements ListTileThemeData {
   final double? _minLeadingWidth;
   final bool? _enableFeedback;
 
-  @override
-  bool get dense => data != null ? (data!.dense ?? false) : _dense;
+  /// The configuration of this theme.
+  ListTileThemeData get data {
+    return _data ?? ListTileThemeData(
+      shape: _shape,
+      selectedColor: _selectedColor,
+      iconColor: _iconColor,
+      textColor: _textColor,
+      contentPadding: _contentPadding,
+      tileColor: _tileColor,
+      selectedTileColor: _selectedTileColor,
+      enableFeedback: _enableFeedback,
+      horizontalTitleGap: _horizontalTitleGap,
+      minVerticalPadding: _minVerticalPadding,
+      minLeadingWidth: _minLeadingWidth,
+    );
+  }
 
-  @override
-  ShapeBorder? get shape => data != null ? data!.shape : _shape;
+  /// Overrides the default value of [ListTile.dense].
+  ///
+  /// This property is obsolete: please use [data.dense] instead.
+  bool get dense => _data != null ? (_data!.dense ?? false) : _dense;
 
-  @override
-  ListTileStyle get style => data != null ? (data!.style ?? ListTileStyle.list) : _style;
+  /// Overrides the default value of [ListTile.shape].
+  ///
+  /// This property is obsolete: please use [data.shape] instead.
+  ShapeBorder? get shape => _data != null ? _data!.shape : _shape;
 
-  @override
-  Color? get selectedColor => data != null ? data!.selectedColor : _selectedColor;
+  /// Overrides the default value of [ListTile.style].
+  ///
+  /// This property is obsolete: please use [data.style] instead.
+  ListTileStyle get style => _data != null ? (_data!.style ?? ListTileStyle.list) : _style;
 
-  @override
-  Color? get iconColor => data != null ? data!.iconColor : _iconColor;
+  /// Overrides the default value of [ListTile.selectedColor].
+  ///
+  /// This property is obsolete: please use [data.selectedColor] instead.
+  Color? get selectedColor => _data != null ? _data!.selectedColor : _selectedColor;
 
-  @override
-  Color? get textColor => data != null ? data!.textColor : _textColor;
+  /// Overrides the default value of [ListTile.iconColor].
+  ///
+  /// This property is obsolete: please use [data.iconColor] instead.
+  Color? get iconColor => _data != null ? _data!.iconColor : _iconColor;
 
-  @override
-  EdgeInsetsGeometry? get contentPadding => data != null ? data!.contentPadding : _contentPadding;
+  /// Overrides the default value of [ListTile.textColor].
+  ///
+  /// This property is obsolete: please use [data.textColor] instead.
+  Color? get textColor => _data != null ? _data!.textColor : _textColor;
 
-  @override
-  Color? get tileColor => data != null ? data!.tileColor : _tileColor;
+  /// Overrides the default value of [ListTile.contentPadding].
+  ///
+  /// This property is obsolete: please use [data.contentPadding] instead.
+  EdgeInsetsGeometry? get contentPadding => _data != null ? _data!.contentPadding : _contentPadding;
 
-  @override
-  Color? get selectedTileColor => data != null ? data!.selectedTileColor : _selectedTileColor;
+  /// Overrides the default value of [ListTile.tileColor].
+  ///
+  /// This property is obsolete: please use [data.tileColor] instead.
+  Color? get tileColor => _data != null ? _data!.tileColor : _tileColor;
 
-  @override
-  double? get horizontalTitleGap => data != null ? data!.horizontalTitleGap : _horizontalTitleGap;
+  /// Overrides the default value of [ListTile.selectedTileColor].
+  ///
+  /// This property is obsolete: please use [data.selectedTileColor] instead.
+  Color? get selectedTileColor => _data != null ? _data!.selectedTileColor : _selectedTileColor;
 
-  @override
-  double? get minVerticalPadding => data != null ? data!.minVerticalPadding : _minVerticalPadding;
+  /// Overrides the default value of [ListTile.horizontalTitleGap].
+  ///
+  /// This property is obsolete: please use [data.horizontalTitleGap] instead.
+  double? get horizontalTitleGap => _data != null ? _data!.horizontalTitleGap : _horizontalTitleGap;
 
-  @override
-  double? get minLeadingWidth => data != null ? data!.minLeadingWidth : _minLeadingWidth;
+  /// Overrides the default value of [ListTile.minVerticalPadding].
+  ///
+  /// This property is obsolete: please use [data.minVerticalPadding] instead.
+  double? get minVerticalPadding => _data != null ? _data!.minVerticalPadding : _minVerticalPadding;
 
-  @override
-  bool? get enableFeedback => data != null ? data!.enableFeedback : _enableFeedback;
+  /// Overrides the default value of [ListTile.minLeadingWidth].
+  ///
+  /// This property is obsolete: please use [data.minLeadingWidth] instead.
+  double? get minLeadingWidth => _data != null ? _data!.minLeadingWidth : _minLeadingWidth;
+
+  /// Overrides the default value of [ListTile.enableFeedback].
+  ///
+  /// This property is obsolete: please use [data.enableFeedback] instead.
+  bool? get enableFeedback => _data != null ? _data!.enableFeedback : _enableFeedback;
 
   /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ListTileTheme] widget, then
+  /// [ThemeData.listTileTheme] is used (see [ThemeData.of]).
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ListTileTheme theme = ListTileTheme.of(context);
+  /// ListTileThemeData theme = ListTileTheme.of(context);
   /// ```
-  static ListTileTheme of(BuildContext context) {
+  static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
-    return result ?? const ListTileTheme(child: SizedBox());
+    return result?.data ?? Theme.of(context).listTileTheme;
   }
 
   /// Creates a list tile theme that controls the color and style parameters for
@@ -424,7 +450,7 @@ class ListTileTheme extends InheritedTheme implements ListTileThemeData {
     assert(child != null);
     return Builder(
       builder: (BuildContext context) {
-        final ListTileTheme parent = ListTileTheme.of(context);
+        final ListTileThemeData parent = ListTileTheme.of(context);
         return ListTileTheme(
           key: key,
           data: ListTileThemeData(
@@ -446,26 +472,6 @@ class ListTileTheme extends InheritedTheme implements ListTileThemeData {
         );
       },
     );
-  }
-
-  @override
-  ListTileThemeData copyWith({
-    bool? dense,
-    ShapeBorder? shape,
-    ListTileStyle? style,
-    Color? selectedColor,
-    Color? iconColor,
-    Color? textColor,
-    EdgeInsetsGeometry? contentPadding,
-    Color? tileColor,
-    Color? selectedTileColor,
-    double? horizontalTitleGap,
-    double? minVerticalPadding,
-    double? minLeadingWidth,
-    bool? enableFeedback,
-  }) {
-    assert(false);
-    return const ListTileThemeData();
   }
 
   @override
@@ -762,6 +768,10 @@ class ListTile extends StatelessWidget {
     this.dense,
     this.visualDensity,
     this.shape,
+    this.style,
+    this.selectedColor,
+    this.iconColor,
+    this.textColor,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
@@ -859,13 +869,59 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// The tile's shape.
-  ///
   /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
   ///
-  /// If this property is null then [ListTileTheme.shape] is used.
-  /// If that's null then a rectangular [Border] will be used.
+  /// If this property is null then [ListTileThemeData.shape] is used. If that
+  /// is also null then a rectangular [Border] will be used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
   final ShapeBorder? shape;
+
+  /// Defines the color used for icons and text when the list tile is selected.
+  ///
+  /// If this property is null then [ListTileThemeData.selectedcolor]
+  /// is used. If that is also null then [ColorScheme.primary] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final Color? selectedColor;
+
+  /// Defines the default color for [leading] and [trailing] icons.
+  ///
+  /// If this property is null then [ListTileThemeData.iconColor] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final Color? iconColor;
+
+  /// Defines the default color for the [title] and [subtitle].
+  ///
+  /// If this property is null then [ListTileThemeData.textColor] is used. If that
+  /// is also null then [ColorScheme.primary] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final Color? textColor;
+
+  /// Defines the font used for the [title].
+  ///
+  /// If this property is null then [ListTileThemeData.style] is used. If that
+  /// is also null then [ListTileStyle.list] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileStyle? style;
 
   /// The tile's internal padding.
   ///
@@ -1016,10 +1072,10 @@ class ListTile extends StatelessWidget {
       return theme.disabledColor;
 
     if (selected) {
-      return tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
+      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
     if (color != null)
       return color;
 
@@ -1038,10 +1094,10 @@ class ListTile extends StatelessWidget {
       return theme.disabledColor;
 
     if (selected) {
-      return tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
+      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    return tileTheme.textColor ?? theme.listTileTheme.textColor ?? defaultColor;
+    return textColor ?? tileTheme.textColor ?? theme.listTileTheme.textColor ?? defaultColor;
   }
 
   bool _isDenseLayout(ThemeData theme, ListTileThemeData tileTheme) {
@@ -1049,33 +1105,33 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle style;
-    switch(tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
+    final TextStyle textStyle;
+    switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
-        style = theme.textTheme.bodyText1!;
+        textStyle = theme.textTheme.bodyText1!;
         break;
       case ListTileStyle.list:
-        style = theme.textTheme.subtitle1!;
+        textStyle = theme.textTheme.subtitle1!;
         break;
     }
-    final Color? color = _textColor(theme, tileTheme, style.color);
+    final Color? color = _textColor(theme, tileTheme, textStyle.color);
     return _isDenseLayout(theme, tileTheme)
-      ? style.copyWith(fontSize: 13.0, color: color)
-      : style.copyWith(color: color);
+      ? textStyle.copyWith(fontSize: 13.0, color: color)
+      : textStyle.copyWith(color: color);
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle style = theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.textTheme.bodyText2!;
     final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
     return _isDenseLayout(theme, tileTheme)
-      ? style.copyWith(color: color, fontSize: 12.0)
-      : style.copyWith(color: color);
+      ? textStyle.copyWith(color: color, fontSize: 12.0)
+      : textStyle.copyWith(color: color);
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle style = theme.textTheme.bodyText2!;
-    final Color? color = _textColor(theme, tileTheme, style.color);
-    return style.copyWith(color: color);
+    final TextStyle textStyle = theme.textTheme.bodyText2!;
+    final Color? color = _textColor(theme, tileTheme, textStyle.color);
+    return textStyle.copyWith(color: color);
   }
 
   Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme) {

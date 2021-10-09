@@ -1796,7 +1796,7 @@ void main() {
   });
 
   testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
-    late ListTileTheme theme;
+    late ListTileThemeData theme;
     bool isSelected = false;
 
     await tester.pumpWidget(
