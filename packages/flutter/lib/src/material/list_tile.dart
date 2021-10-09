@@ -898,7 +898,7 @@ class ListTile extends StatelessWidget {
 
   /// Defines the color used for icons and text when the list tile is selected.
   ///
-  /// If this property is null then [ListTileThemeData.selectedcolor]
+  /// If this property is null then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
   /// See also:
