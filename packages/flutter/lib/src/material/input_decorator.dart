@@ -2334,7 +2334,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget helperError = _HelperError(
-      textAlign: textAlign,
+      textAlign: decoration!.errorAlign ?? textAlign,
       helperText: decoration!.helperText,
       helperStyle: _getHelperStyle(themeData),
       helperMaxLines: decoration!.helperMaxLines,
@@ -2520,6 +2520,7 @@ class InputDecoration {
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
+    this.errorAlign,
     this.errorMaxLines,
     this.floatingLabelBehavior,
     this.isCollapsed = false,
@@ -2585,6 +2586,7 @@ class InputDecoration {
        hintMaxLines = null,
        errorText = null,
        errorStyle = null,
+       errorAlign = null,
        errorMaxLines = null,
        isDense = false,
        contentPadding = EdgeInsets.zero,
@@ -2740,6 +2742,9 @@ class InputDecoration {
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
   final String? errorText;
+
+  /// Alignment for the error text.
+  final TextAlign? errorAlign;
 
   /// The style to use for the [errorText].
   ///
@@ -3290,6 +3295,7 @@ class InputDecoration {
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
+    TextAlign? errorAlign,
     FloatingLabelBehavior? floatingLabelBehavior,
     bool? isCollapsed,
     bool? isDense,
@@ -3337,6 +3343,7 @@ class InputDecoration {
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
+      errorAlign: errorAlign ?? this.errorAlign,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       isCollapsed: isCollapsed ?? this.isCollapsed,
@@ -3386,6 +3393,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
+      errorAlign: errorAlign ?? theme.errorAlign,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       isCollapsed: isCollapsed,
       isDense: isDense ?? theme.isDense,
@@ -3432,6 +3440,7 @@ class InputDecoration {
         && other.errorMaxLines == errorMaxLines
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.isDense == isDense
+        && other.errorAlign == errorAlign
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
         && other.prefixIcon == prefixIcon
@@ -3483,6 +3492,7 @@ class InputDecoration {
       errorMaxLines,
       floatingLabelBehavior,
       isDense,
+      errorAlign,
       contentPadding,
       isCollapsed,
       filled,
@@ -3591,6 +3601,7 @@ class InputDecorationTheme with Diagnosticable {
     this.helperMaxLines,
     this.hintStyle,
     this.errorStyle,
+    this.errorAlign = TextAlign.left,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.isDense = false,
@@ -3667,6 +3678,10 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? errorStyle;
+
+  /// Text Alignment for the [errorText] 
+  /// the alignment defaults to [TextAlign.left] 
+  final TextAlign? errorAlign;
 
   /// The maximum number of lines the [InputDecoration.errorText] can occupy.
   ///
@@ -3949,6 +3964,7 @@ class InputDecorationTheme with Diagnosticable {
     int? helperMaxLines,
     TextStyle? hintStyle,
     TextStyle? errorStyle,
+    TextAlign? errorAlign,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
     bool? isDense,
@@ -3978,6 +3994,7 @@ class InputDecorationTheme with Diagnosticable {
       hintStyle: hintStyle ?? this.hintStyle,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      errorAlign: errorAlign ?? this.errorAlign,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
@@ -4012,6 +4029,7 @@ class InputDecorationTheme with Diagnosticable {
       errorMaxLines,
       floatingLabelBehavior,
       isDense,
+      errorAlign,
       contentPadding,
       isCollapsed,
       prefixStyle,
@@ -4047,6 +4065,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.isDense == isDense
+        && other.errorAlign == errorAlign
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
         && other.prefixStyle == prefixStyle
@@ -4081,6 +4100,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
+    properties.add(DiagnosticsProperty<TextAlign>('errorAlign', errorAlign, defaultValue: defaultTheme.errorAlign));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
     properties.add(DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
