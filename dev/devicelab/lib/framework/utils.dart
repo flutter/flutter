@@ -21,22 +21,14 @@ String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
 String? get localEngine {
-  // Use two distinct `defaultValue`s to determine whether a 'localEngine'
-  // declaration exists in the environment.
-  const bool isDefined =
-      String.fromEnvironment('localEngine', defaultValue: 'a') ==
-          String.fromEnvironment('localEngine', defaultValue: 'b');
+  const bool isDefined = bool.hasEnvironment('localEngine');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
 String? get localEngineSrcPath {
-  // Use two distinct `defaultValue`s to determine whether a
-  // 'localEngineSrcPath' declaration exists in the environment.
-  const bool isDefined =
-      String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
-          String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
+  const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
