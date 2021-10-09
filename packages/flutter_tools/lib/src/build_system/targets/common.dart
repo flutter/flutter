@@ -193,8 +193,20 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
+        break;
     }
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(

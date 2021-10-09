@@ -593,8 +593,6 @@ List<String> _timelineStreamsToString(List<TimelineStream> streams) {
       case TimelineStream.gc: return 'GC';
       case TimelineStream.isolate: return 'Isolate';
       case TimelineStream.vm: return 'VM';
-      default:
-        throw 'Unknown timeline stream $stream';
     }
   }).toList();
 }

@@ -850,7 +850,10 @@ class PubspecYaml {
             }
             endOfDevDependencies = output.length;
             break;
-          default:
+          case Section.builders:
+          case Section.dependencyOverrides:
+          case Section.header:
+          case Section.other:
             // In other sections, pass everything through in its original form.
             output.add(data.line);
             if (data.lockLine != null) {

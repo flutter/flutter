@@ -281,7 +281,6 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
       case CalculationState.calculating:
         return 'In Progress';
       case CalculationState.idle:
-      default:
         return 'Idle';
     }
   }
