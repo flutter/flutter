@@ -92,7 +92,7 @@ mixin CreateFinderFactory {
       case 'String':
         return find.byKey(ValueKey<String>(arguments.keyValue as String));
       default:
-        throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
+        throw UnimplementedError('Unsupported ByValueKey type: ${arguments.keyValueType}');
     }
   }
 
@@ -194,8 +194,10 @@ mixin CommandHandlerFactory {
 
   Future<Result> _enterText(Command command) async {
     if (!_testTextInput.isRegistered) {
-      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
-            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+      throw StateError(
+        'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
+        'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.',
+      );
     }
     final EnterText enterTextCommand = command as EnterText;
     _testTextInput.enterText(enterTextCommand.text);
