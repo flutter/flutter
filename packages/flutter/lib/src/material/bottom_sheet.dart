@@ -218,7 +218,7 @@ class _BottomSheetState extends State<BottomSheet> {
     assert(
       widget.enableDrag && widget.animationController != null,
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
-      "Use 'BottomSheet.createAnimationController' for creating one.",
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway)
       return;
@@ -229,7 +229,7 @@ class _BottomSheetState extends State<BottomSheet> {
     assert(
       widget.enableDrag && widget.animationController != null,
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
-      "Use 'BottomSheet.createAnimationController' for creating one.",
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
     if (_dismissUnderway)
       return;
