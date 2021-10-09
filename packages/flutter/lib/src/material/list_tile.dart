@@ -883,7 +883,7 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// {@template flutter.material.ListTile.tileColor}
+  /// {@template flutter.material.ListTile.shape}
   /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
   /// {@endtemplate}
   ///
