@@ -192,25 +192,44 @@ class ChromeInstaller {
             ..createSync(recursive: true)
             ..writeAsBytesSync(data);
         } else {
-          io.Directory(path.join(versionDir.path, filename)).create(
-              recursive: true);
+          io.Directory(path.join(versionDir.path, filename))
+              .create(recursive: true);
         }
       }
 
       stopwatch.stop();
-      print('INFO: The unzip took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
+      print(
+          'INFO: The unzip took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
     } else {
+      // We have to unzip into a temporary directory and then copy the files
+      // out because our tests expect the files to be direct children of the
+      // version directory. However, the zip file contains a top-level directory
+      // named e.g. 'chrome-linux'. We need to copy the files out of that
+      // directory and into the version directory.
+      final io.Directory tmpDir = await io.Directory.systemTemp.createTemp();
+      final io.Directory unzipDir = io.Platform.isLinux ? tmpDir : versionDir;
       final io.ProcessResult unzipResult =
           await io.Process.run('unzip', <String>[
         downloadedFile.path,
         '-d',
-        versionDir.path,
+        unzipDir.path,
       ]);
       if (unzipResult.exitCode != 0) {
         throw BrowserInstallerException(
             'Failed to unzip the downloaded Chrome archive ${downloadedFile.path}.\n'
             'With the version path ${versionDir.path}\n'
             'The unzip process exited with code ${unzipResult.exitCode}.');
+      }
+      // For Linux, we need to copy over the files out of the chrome-linux
+      // sub directory.
+      if (io.Platform.isLinux) {
+        final io.Directory chromeLinuxDir =
+            await tmpDir.list().single as io.Directory;
+        await for (final io.FileSystemEntity entity in chromeLinuxDir.list()) {
+          await entity
+              .rename(path.join(versionDir.path, path.basename(entity.path)));
+        }
+        await tmpDir.delete(recursive: true);
       }
     }
 
@@ -226,8 +245,8 @@ class ChromeInstaller {
 Future<String> fetchLatestChromeVersion() async {
   final Client client = Client();
   try {
-    final Response response = await client.get(
-        Uri.parse('https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media'));
+    final Response response = await client.get(Uri.parse(
+        'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media'));
     if (response.statusCode != 200) {
       throw BrowserInstallerException(
           'Failed to fetch latest Chrome version. Server returned status code ${response.statusCode}');
