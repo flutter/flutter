@@ -27,13 +27,12 @@ analyzer:
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
-    # allow having TODO/HACK comments in the code
+    # allow having TODO comments in the code
     todo: ignore
-    hack: ignore
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
-    # TODO(https://github.com/flutter/flutter/issues/74381):
+    # TODO(ianh): https://github.com/flutter/flutter/issues/74381
     # Clean up existing unnecessary imports, and remove line to ignore.
     unnecessary_import: ignore
     # Turned off until null-safe rollout is complete.
@@ -92,12 +91,12 @@ linter:
     - avoid_unnecessary_containers
     - avoid_unused_constructor_parameters
     - avoid_void_async
-    # - avoid_web_libraries_in_flutter # not yet tested
+    # - avoid_web_libraries_in_flutter # we use web libraries in web-specific code, and our tests prevent us from using them elsewhere
     - await_only_futures
     - camel_case_extensions
     - camel_case_types
     - cancel_subscriptions
-    # - cascade_invocations # not yet tested
+    # - cascade_invocations # doesn't match the typical style of this repo
     - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
@@ -105,9 +104,9 @@ linter:
     - control_flow_in_finally
     # - curly_braces_in_flow_control_structures # not required by flutter style
     - deprecated_consistency
-    # - diagnostic_describe_all_properties # not yet tested
+    # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
-    # - do_not_use_environment # we do this commonly
+    # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
@@ -125,7 +124,7 @@ linter:
     - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
-    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
+    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     # - no_default_cases # too many false positives
