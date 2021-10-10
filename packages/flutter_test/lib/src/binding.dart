@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
@@ -27,6 +26,7 @@ import 'test_async_utils.dart';
 import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
+import 'window.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].

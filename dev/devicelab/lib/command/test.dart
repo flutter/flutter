@@ -4,7 +4,7 @@
 
 import 'package:args/command_runner.dart';
 
-import 'package:flutter_devicelab/framework/runner.dart';
+import '../framework/runner.dart';
 
 class TestCommand extends Command<void> {
   TestCommand() {
