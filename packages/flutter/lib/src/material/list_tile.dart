@@ -273,7 +273,7 @@ class ListTileTheme extends InheritedTheme {
     ListTileThemeData? data,
     bool dense = false,
     ShapeBorder? shape,
-    ListTileStyle style = ListTileStyle.list,
+    ListTileStyle? style,
     Color? selectedColor,
     Color? iconColor,
     Color? textColor,
@@ -317,7 +317,7 @@ class ListTileTheme extends InheritedTheme {
   final ListTileThemeData? _data;
   final bool _dense;
   final ShapeBorder? _shape;
-  final ListTileStyle _style;
+  final ListTileStyle? _style;
   final Color? _selectedColor;
   final Color? _iconColor;
   final Color? _textColor;
