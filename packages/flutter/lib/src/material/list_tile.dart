@@ -271,7 +271,7 @@ class ListTileTheme extends InheritedTheme {
   const ListTileTheme({
     Key? key,
     ListTileThemeData? data,
-    bool dense = false,
+    bool? dense,
     ShapeBorder? shape,
     ListTileStyle? style,
     Color? selectedColor,
@@ -315,7 +315,7 @@ class ListTileTheme extends InheritedTheme {
        super(key: key, child: child);
 
   final ListTileThemeData? _data;
-  final bool _dense;
+  final bool? _dense;
   final ShapeBorder? _shape;
   final ListTileStyle? _style;
   final Color? _selectedColor;
