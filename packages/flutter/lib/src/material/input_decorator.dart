@@ -3679,8 +3679,8 @@ class InputDecorationTheme with Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle? errorStyle;
 
-  /// Text Alignment for the [errorText] 
-  /// the alignment defaults to [TextAlign.left] 
+  /// Text Alignment for the [errorText]
+  /// the alignment defaults to [TextAlign.left]
   final TextAlign? errorAlign;
 
   /// The maximum number of lines the [InputDecoration.errorText] can occupy.
