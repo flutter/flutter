@@ -42,8 +42,8 @@ class MyStatelessWidget extends StatelessWidget {
               backgroundColor: Colors.green,
               actions: <Widget>[
                 TextButton(
-                  child: Text('DISMISS'),
                   onPressed: null,
+                  child: Text('DISMISS'),
                 ),
               ],
             ),
