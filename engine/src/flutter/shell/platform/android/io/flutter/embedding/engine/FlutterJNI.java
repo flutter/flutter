@@ -238,7 +238,7 @@ public class FlutterJNI {
 
   // TODO(mattcarroll): add javadocs
   public static native void nativeOnVsync(
-      long frameTimeNanos, long frameTargetTimeNanos, long cookie);
+      long frameDelayNanos, long refreshPeriodNanos, long cookie);
 
   // TODO(mattcarroll): add javadocs
   @NonNull

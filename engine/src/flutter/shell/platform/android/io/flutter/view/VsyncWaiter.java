@@ -21,6 +21,7 @@ public class VsyncWaiter {
   }
 
   private final float fps;
+  private final long refreshPeriodNanos;
 
   private final FlutterJNI.AsyncWaitForVsyncDelegate asyncWaitForVsyncDelegate =
       new FlutterJNI.AsyncWaitForVsyncDelegate() {
@@ -31,9 +32,11 @@ public class VsyncWaiter {
                   new Choreographer.FrameCallback() {
                     @Override
                     public void doFrame(long frameTimeNanos) {
-                      long refreshPeriodNanos = (long) (1000000000.0 / fps);
-                      FlutterJNI.nativeOnVsync(
-                          frameTimeNanos, frameTimeNanos + refreshPeriodNanos, cookie);
+                      long delay = System.nanoTime() - frameTimeNanos;
+                      if (delay < 0) {
+                        delay = 0;
+                      }
+                      FlutterJNI.nativeOnVsync(delay, refreshPeriodNanos, cookie);
                     }
                   });
         }
@@ -41,6 +44,7 @@ public class VsyncWaiter {
 
   private VsyncWaiter(float fps) {
     this.fps = fps;
+    refreshPeriodNanos = (long) (1000000000.0 / fps);
   }
 
   public void init() {

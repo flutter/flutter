@@ -28,8 +28,8 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
 
   static void OnNativeVsync(JNIEnv* env,
                             jclass jcaller,
-                            jlong frameTimeNanos,
-                            jlong frameTargetTimeNanos,
+                            jlong frameDelayNanos,
+                            jlong refreshPeriodNanos,
                             jlong java_baton);
 
   static void ConsumePendingCallback(jlong java_baton,
