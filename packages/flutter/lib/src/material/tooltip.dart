@@ -315,6 +315,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool preferBelow;
   late bool excludeFromSemantics;
   late AnimationController _controller;
+  late bool _hide;
   OverlayEntry? _entry;
   Timer? _dismissTimer;
   Timer? _showTimer;
@@ -350,6 +351,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _hide = TooltipDisable.existsInContext(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -504,6 +511,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static final Set<_TooltipState> _mouseIn = <_TooltipState>{};
 
   void _handleMouseEnter() {
+    if(_hide)
+      return;
     _showTooltip();
   }
 
@@ -623,9 +632,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (_tooltipMessage.isEmpty) {
-      return widget.child ?? const SizedBox();
-    }
+    /*if (_tooltipMessage.isEmpty || (widget.hide ?? false)) {
+      return Semantics(child: widget.child ?? const SizedBox(), label: _tooltipMessage,);
+    }*/
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
@@ -817,3 +826,40 @@ class _TooltipOverlay extends StatelessWidget {
     );
   }
 }
+
+class _TooltipDisableScope extends InheritedWidget {
+  const _TooltipDisableScope({
+    Key? key,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  static _TooltipDisableScope of(BuildContext context) {
+    final _TooltipDisableScope? result =
+        context.dependOnInheritedWidgetOfExactType<_TooltipDisableScope>();
+    assert(result != null, 'No _TooltipDisableScope found in context');
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(_TooltipDisableScope old) {
+    return false;
+  }
+}
+
+class TooltipDisable extends StatelessWidget {
+  const TooltipDisable({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  static bool existsInContext(BuildContext context) {
+    final _TooltipDisableScope? disable = context.dependOnInheritedWidgetOfExactType<_TooltipDisableScope>();
+    print(disable);
+    return disable != null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _TooltipDisableScope(child: child);
+  }
+}
+
