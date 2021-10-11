@@ -63,7 +63,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return const SizedBox(
         height: 200.0,
-        child: const Text('BottomSheet'),
+        child:  Text('BottomSheet'),
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -99,7 +99,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return const SizedBox(
         height: 200.0,
-        child: const Text('BottomSheet'),
+        child: Text('BottomSheet'),
       );
     },
     enableDrag: false
@@ -136,7 +136,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return const SizedBox(
         height: 200.0,
-        child: const Text('BottomSheet'),
+        child: Text('BottomSheet'),
       );
     },
      enableDrag: true
