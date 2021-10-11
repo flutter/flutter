@@ -1,4 +1,4 @@
-Signature: 25afaa5b5af2c27919ff0f6ac5ae6bdf
+Signature: ae085c509ca2a201a221abd5021375ed
 
 UNUSED LICENSES:
 
@@ -3010,6 +3010,7 @@ FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
 FILE: ../../../third_party/skia/gm/crbug_1174354.cpp
 FILE: ../../../third_party/skia/gm/crbug_1177833.cpp
 FILE: ../../../third_party/skia/gm/crop_imagefilter.cpp
+FILE: ../../../third_party/skia/gm/hardstop_gradients_many.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
