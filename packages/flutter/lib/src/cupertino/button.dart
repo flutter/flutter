@@ -71,6 +71,26 @@ class CupertinoButton extends StatefulWidget {
        _filled = true,
        super(key: key);
 
+  /// Creates an iOS-style button for [CupertinoNavigationBar].
+  ///
+  /// The padding is set to zero to allow for proper positioning.
+  const CupertinoButton.bar({
+    Key? key,
+    required this.child,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.pressedOpacity = 0.4,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.alignment = Alignment.center,
+    required this.onPressed,
+  }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
+       assert(alignment != null),
+       color = null,
+       padding = EdgeInsets.zero,
+       minSize = 0.0,
+       _filled = false,
+       super(key: key);
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.

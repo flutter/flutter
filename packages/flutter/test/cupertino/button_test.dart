@@ -48,6 +48,22 @@ void main() {
     );
   });
 
+  testWidgets('Bar Button has appropriate size', (WidgetTester tester) async {
+    const double minSize = 10.0;
+    await tester.pumpWidget(
+      boilerplate(child: const CupertinoButton.bar(
+        onPressed: null,
+        child: Text('X', style: testStyle),
+      )),
+    );
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    expect(
+      buttonBox.size,
+      // 10px character is equal to 10.0px minimum.
+      const Size.square(minSize),
+    );
+  });
+
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
