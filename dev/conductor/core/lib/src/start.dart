@@ -123,6 +123,12 @@ class StartCommand extends Command<void> {
   @override
   Future<void> run() async {
     final ArgResults argumentResults = argResults!;
+    if (!platform.isMacOS && !platform.isLinux) {
+      throw ConductorException(
+        'Error! This tool is only supported on macOS and Linux',
+      );
+    }
+
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
       argumentResults,
@@ -174,9 +180,11 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
+    final File stateFile = checkouts.fileSystem.file(
+      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
+    );
 
     final StartContext context = StartContext(
-      argResults: argResults!,
       candidateBranch: candidateBranch,
       checkouts: checkouts,
       dartRevision: dartRevision,
@@ -188,14 +196,13 @@ class StartCommand extends Command<void> {
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
       incrementLetter: incrementLetter,
-      platform: platform,
       processManager: processManager,
       releaseChannel: releaseChannel,
+      stateFile: stateFile,
       stdio: stdio,
     );
     return context.run();
   }
-
 }
 
 /// Context for starting a new release.
@@ -203,7 +210,6 @@ class StartCommand extends Command<void> {
 /// This is a frontend-agnostic implementation.
 class StartContext {
   StartContext({
-    required this.argResults,
     required this.candidateBranch,
     required this.checkouts,
     required this.dartRevision,
@@ -215,13 +221,12 @@ class StartContext {
     required this.frameworkUpstream,
     required this.flutterRoot,
     required this.incrementLetter,
-    required this.platform,
     required this.processManager,
     required this.releaseChannel,
+    required this.stateFile,
     required this.stdio,
   }) : git = Git(processManager);
 
-  final ArgResults argResults;
   final String candidateBranch;
   final Checkouts checkouts;
   final String? dartRevision;
@@ -234,9 +239,9 @@ class StartContext {
   final Directory flutterRoot;
   final String incrementLetter;
   final Git git;
-  final Platform platform;
   final ProcessManager processManager;
   final String releaseChannel;
+  final File stateFile;
   final Stdio stdio;
 
   /// Git revision for the currently running Conductor.
@@ -260,18 +265,9 @@ class StartContext {
   String? _conductorVersion;
 
   Future<void> run() async {
-    if (!platform.isMacOS && !platform.isLinux) {
-      throw ConductorException(
-        'Error! This tool is only supported on macOS and Linux',
-      );
-    }
-
-    final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argResults, platform.environment),
-    );
     if (stateFile.existsSync()) {
       throw ConductorException(
-          'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
+          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
