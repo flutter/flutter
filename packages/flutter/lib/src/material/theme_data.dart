@@ -1398,7 +1398,6 @@ class ThemeData with Diagnosticable {
   ///
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
-    Brightness? brightness,
     VisualDensity? visualDensity,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
@@ -1584,7 +1583,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme ?? this.appBarTheme,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
-      colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
+      colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
@@ -1798,6 +1797,8 @@ class ThemeData with Diagnosticable {
         && other.cardColor == cardColor
         && other.shadowColor == shadowColor
         && other.dividerColor == dividerColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
         && other.highlightColor == highlightColor
         && other.splashColor == splashColor
         && other.splashFactory == splashFactory
@@ -1962,7 +1963,6 @@ class ThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
@@ -2025,7 +2025,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
