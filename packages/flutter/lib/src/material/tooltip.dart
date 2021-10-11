@@ -632,9 +632,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    /*if (_tooltipMessage.isEmpty || (widget.hide ?? false)) {
-      return Semantics(child: widget.child ?? const SizedBox(), label: _tooltipMessage,);
-    }*/
+    if (_tooltipMessage.isEmpty) {
+      return widget.child ?? const SizedBox();
+    }
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
@@ -833,13 +833,6 @@ class _TooltipDisableScope extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-  static _TooltipDisableScope of(BuildContext context) {
-    final _TooltipDisableScope? result =
-        context.dependOnInheritedWidgetOfExactType<_TooltipDisableScope>();
-    assert(result != null, 'No _TooltipDisableScope found in context');
-    return result!;
-  }
-
   @override
   bool updateShouldNotify(_TooltipDisableScope old) {
     return false;
@@ -853,7 +846,6 @@ class TooltipDisable extends StatelessWidget {
 
   static bool existsInContext(BuildContext context) {
     final _TooltipDisableScope? disable = context.dependOnInheritedWidgetOfExactType<_TooltipDisableScope>();
-    print(disable);
     return disable != null;
   }
 
