@@ -15,10 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 
 ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
-
-extension on ByteData {
-  double get scale => getFloat64(0);
-}
+double scaleOf(ByteData data) => data.getFloat64(0);
 
 const String testManifest = '''
 {
@@ -89,9 +86,8 @@ class TestAssetImage extends AssetImage {
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
-      final ByteData testData = data;
-      final ui.Image image = images[testData.scale]!;
-      assert(image != null, 'Expected ${testData.scale} to have a key in $images');
+      final ui.Image image = images[scaleOf(data)]!;
+      assert(image != null, 'Expected ${scaleOf(data)} to have a key in $images');
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     return FakeImageStreamCompleter(
@@ -108,7 +104,6 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
     data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: EdgeInsets.zero,
     ),
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),

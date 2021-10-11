@@ -23,7 +23,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -1135,7 +1135,7 @@ class EmulatorDomain extends Domain {
   }
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
-    final String name = _getStringArg(args, 'name', required: false);
+    final String name = _getStringArg(args, 'name');
     final CreateEmulatorResult res = await emulators.createEmulator(name: name);
     return <String, dynamic>{
       'success': res.success,

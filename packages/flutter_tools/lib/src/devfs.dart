@@ -639,7 +639,7 @@ class DevFS {
     }
     final CompilerOutput? compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     // Only update the last compiled time if we successfully compiled.
     _previousCompiled = lastCompiled;

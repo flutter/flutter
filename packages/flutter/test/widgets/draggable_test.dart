@@ -3063,7 +3063,6 @@ void main() {
         home: Column(
           children: const <Widget>[
             Draggable<int>(
-              hitTestBehavior: hitTestBehavior,
               feedback: SizedBox(height: 50.0, child: Text('Draggable')),
               child: SizedBox(height: 50.0, child: Text('Target')),
             ),
@@ -3103,7 +3102,7 @@ void main() {
     expect(const LongPressDraggable<int>(child: widget1, feedback: widget2), isA<Draggable<int>>());
     expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).child, widget1);
     expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).feedback, widget2);
-    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.child).dragAnchor, DragAnchor.child);
+    expect(const LongPressDraggable<int>(child: widget1, feedback: widget2).dragAnchor, DragAnchor.child);
     expect(const LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchor: DragAnchor.pointer).dragAnchor, DragAnchor.pointer);
     expect(LongPressDraggable<int>(child: widget1, feedback: widget2, dragAnchorStrategy: dummyStrategy).dragAnchorStrategy, dummyStrategy);
   });

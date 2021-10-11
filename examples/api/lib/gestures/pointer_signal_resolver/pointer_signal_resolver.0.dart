@@ -116,7 +116,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           Align(
             alignment: Alignment.topLeft,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Switch(
                   value: useResolver,

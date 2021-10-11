@@ -290,8 +290,7 @@ void main() {
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
     final TabBarTheme tabBarTheme = TabBarTheme(
       indicator: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        shape: BoxShape.rectangle,
+        border: Border.all(),
       ),
     );
 

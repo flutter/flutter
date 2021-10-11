@@ -156,7 +156,6 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
   );
 
   testWidgets('RaisedButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -350,7 +349,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
@@ -360,7 +359,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, true);
@@ -369,7 +368,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(),
     );
     raisedButton = find.byType(RaisedButton);
     expect(tester.widget<RaisedButton>(raisedButton).enabled, false);

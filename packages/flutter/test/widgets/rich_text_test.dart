@@ -26,23 +26,15 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           label: 'root',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'one',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'two',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'three',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
       ],
     ));

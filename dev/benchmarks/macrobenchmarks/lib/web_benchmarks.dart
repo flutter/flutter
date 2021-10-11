@@ -31,7 +31,7 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 /// List of all benchmarks that run in the devicelab.
 ///

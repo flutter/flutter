@@ -686,21 +686,21 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ScrollbarPainter old) {
+  bool shouldRepaint(ScrollbarPainter oldDelegate) {
     // Should repaint if any properties changed.
-    return color != old.color
-        || trackColor != old.trackColor
-        || trackBorderColor != old.trackBorderColor
-        || textDirection != old.textDirection
-        || thickness != old.thickness
-        || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
-        || mainAxisMargin != old.mainAxisMargin
-        || crossAxisMargin != old.crossAxisMargin
-        || radius != old.radius
-        || minLength != old.minLength
-        || padding != old.padding
-        || minOverscrollLength != old.minOverscrollLength
-        || scrollbarOrientation != old.scrollbarOrientation;
+    return color != oldDelegate.color
+        || trackColor != oldDelegate.trackColor
+        || trackBorderColor != oldDelegate.trackBorderColor
+        || textDirection != oldDelegate.textDirection
+        || thickness != oldDelegate.thickness
+        || fadeoutOpacityAnimation != oldDelegate.fadeoutOpacityAnimation
+        || mainAxisMargin != oldDelegate.mainAxisMargin
+        || crossAxisMargin != oldDelegate.crossAxisMargin
+        || radius != oldDelegate.radius
+        || minLength != oldDelegate.minLength
+        || padding != oldDelegate.padding
+        || minOverscrollLength != oldDelegate.minOverscrollLength
+        || scrollbarOrientation != oldDelegate.scrollbarOrientation;
   }
 
   @override

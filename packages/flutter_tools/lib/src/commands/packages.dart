@@ -305,10 +305,11 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
     List<String> rest = argResults.rest;
     final bool isHelp = rest.contains('-h') || rest.contains('--help');
     String target;
-    if (rest.length == 1 && (rest[0].contains('/') || rest[0].contains(r'\'))) {
-      // HACK: Supporting flutter specific behavior where you can pass a
-      //       folder to the command.
-      target = findProjectRoot(globals.fs, rest[0]);
+    if (rest.length == 1 && (rest.single.contains('/') || rest.single.contains(r'\'))) {
+      // For historical reasons, if there is one argument to the command and it contains
+      // a multiple-component path (i.e. contains a slash) then we use that to determine
+      // to which project we're applying the command.
+      target = findProjectRoot(globals.fs, rest.single);
       rest = <String>[];
     } else {
       target = findProjectRoot(globals.fs);
