@@ -335,6 +335,8 @@ source_set("uwptool_utils") {
   ]
 
   deps = [ ":string_conversion" ]
+
+  defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
 }
 
 # Command-line tool used by the flutter tool that serves a similar purpose to
@@ -356,4 +358,6 @@ executable("uwptool") {
     ":uwptool_utils",
     "//flutter/fml:command_line",
   ]
+
+  defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
 }
