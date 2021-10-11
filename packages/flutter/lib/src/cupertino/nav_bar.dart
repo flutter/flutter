@@ -1116,7 +1116,7 @@ class _NavigationBarStaticComponents {
         child: Padding(
         padding: EdgeInsetsDirectional.only(
           start: padding?.start ?? _kNavBarEdgePadding,
-        ),
+          ),
         child: IconTheme.merge(
           data: const IconThemeData(
             size: 32.0,
