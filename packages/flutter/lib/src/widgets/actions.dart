@@ -160,6 +160,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   Action<T>? _currentCallingAction;
+  // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
   void _updateCallingAction(Action<T>? value) {
     _currentCallingAction = value;
   }

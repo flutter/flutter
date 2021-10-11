@@ -329,15 +329,9 @@ class SkiaGoldClient {
       final Uri requestForImage = Uri.parse(
         'https://flutter-gold.skia.org/img/images/$imageHash.png',
       );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
-        final io.HttpClientResponse response = await request.close();
-        await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
-
-      } catch(e) {
-        rethrow;
-      }
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+      final io.HttpClientResponse response = await request.close();
+      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
     },
       SkiaGoldHttpOverrides(),
     );

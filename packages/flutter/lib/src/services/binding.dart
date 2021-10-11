@@ -319,6 +319,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
   ///     [SystemUiMode] to have visible when the application is running.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
@@ -387,7 +388,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         try {
           response = await handler(data);
         } catch (exception, stack) {
-
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,

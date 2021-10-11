@@ -175,6 +175,7 @@ abstract class Route<T> {
     }
   }
 
+  // ignore: use_setters_to_change_properties, (setters can't be private)
   void _updateRestorationId(String? restorationId) {
     _restorationScopeId.value = restorationId;
   }
