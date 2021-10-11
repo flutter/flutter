@@ -84,7 +84,8 @@ void main() {
       androidProject
         ..pluginRegistrantHost = androidDirectory.childDirectory('app')
         ..hostAppGradleRoot = androidDirectory
-        ..exists = false;
+        ..exists = false
+        ..embeddingVersion = AndroidEmbeddingVersion.v2;
 
       webProject = FakeWebProject();
       flutterProject.web = webProject;
@@ -922,7 +923,6 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         final File manifest = fs.file('AndroidManifest.xml');
         androidProject.appManifestFile = manifest;
-
         await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

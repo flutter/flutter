@@ -566,7 +566,9 @@ class _PackagesViewState extends State<_PackagesView> {
                     );
                   },
                 );
-              default:
+              case ConnectionState.none:
+              case ConnectionState.active:
+              case ConnectionState.waiting:
                 return Material(
                     color: Theme.of(context).cardColor,
                     child: Column(

@@ -360,7 +360,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 24.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 32.0;
     }
   }
@@ -372,7 +374,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return const EdgeInsets.symmetric(horizontal: 8.0);
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return const EdgeInsets.symmetric(horizontal: 16.0);
     }
   }
@@ -384,7 +388,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 10.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 14.0;
     }
   }

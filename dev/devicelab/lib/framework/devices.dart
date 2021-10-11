@@ -74,8 +74,6 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fake:
         print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
-      default:
-        throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
   }
 

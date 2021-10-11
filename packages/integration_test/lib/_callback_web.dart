@@ -125,7 +125,7 @@ class WebCallbackManager implements CallbackManager {
             'message': Response.webDriverCommand(data: data).toJson(),
           };
           break;
-        default:
+        case WebDriverCommandType.ack:
           throw UnimplementedError('${command.type} is not implemented');
       }
     } else {

@@ -2466,7 +2466,12 @@ class RenderFittedBox extends RenderProxyBox {
     switch (fit) {
       case BoxFit.scaleDown:
         return true;
-      default:
+      case BoxFit.contain:
+      case BoxFit.cover:
+      case BoxFit.fill:
+      case BoxFit.fitHeight:
+      case BoxFit.fitWidth:
+      case BoxFit.none:
         return false;
     }
   }
@@ -2551,7 +2556,12 @@ class RenderFittedBox extends RenderProxyBox {
           final BoxConstraints sizeConstraints = constraints.loosen();
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
           return constraints.constrain(unconstrainedSize);
-        default:
+        case BoxFit.contain:
+        case BoxFit.cover:
+        case BoxFit.fill:
+        case BoxFit.fitHeight:
+        case BoxFit.fitWidth:
+        case BoxFit.none:
           return constraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
       }
     } else {
@@ -2569,7 +2579,12 @@ class RenderFittedBox extends RenderProxyBox {
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           size = constraints.constrain(unconstrainedSize);
           break;
-        default:
+        case BoxFit.contain:
+        case BoxFit.cover:
+        case BoxFit.fill:
+        case BoxFit.fitHeight:
+        case BoxFit.fitWidth:
+        case BoxFit.none:
           size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           break;
       }

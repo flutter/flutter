@@ -91,10 +91,8 @@ class FlutterCommandResult {
         return 'fail';
       case ExitStatus.killed:
         return 'killed';
-      default:
-        assert(false);
-        return null;
     }
+    return null; // dead code, remove with null safety migration
   }
 }
 
