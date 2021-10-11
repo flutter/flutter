@@ -114,9 +114,6 @@ class StartCommand extends Command<void> {
   final ProcessManager processManager;
   final Stdio stdio;
 
-  /// Git revision for the currently running Conductor.
-  late final String conductorVersion;
-
   @override
   String get name => 'start';
 
@@ -125,15 +122,58 @@ class StartCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final Git git = Git(processManager);
-    conductorVersion = (await git.getOutput(
+    final StartContext context = StartContext(
+      argResults: argResults!,
+      checkouts: checkouts,
+      flutterRoot: flutterRoot,
+      platform: platform,
+      processManager: processManager,
+      stdio: stdio,
+    );
+    return context.run();
+  }
+
+}
+
+class StartContext {
+  StartContext({
+    required this.argResults,
+    required this.checkouts,
+    required this.flutterRoot,
+    required this.platform,
+    required this.processManager,
+    required this.stdio,
+  }) : git = Git(processManager);
+
+  final ArgResults argResults;
+  final Checkouts checkouts;
+  final Directory flutterRoot;
+  final Git git;
+  final Platform platform;
+  final ProcessManager processManager;
+  final Stdio stdio;
+
+  /// Git revision for the currently running Conductor.
+  Future<String> get conductorVersion async {
+    if (_conductorVersion != null) {
+      return Future<String>.value(_conductorVersion);
+    }
+    _conductorVersion = (await git.getOutput(
       <String>['rev-parse', 'HEAD'],
       'look up the current revision.',
       workingDirectory: flutterRoot.path,
     )).trim();
+    if (_conductorVersion == null || _conductorVersion!.isEmpty) {
+      throw ConductorException(
+        'Failed to determine the git revision of the Flutter SDK\n'
+        'Working directory: ${flutterRoot.path}'
+      );
+    }
+    return _conductorVersion!;
+  }
+  String? _conductorVersion;
 
-    assert(conductorVersion.isNotEmpty);
-    final ArgResults argumentResults = argResults!;
+  Future<void> run() async {
     if (!platform.isMacOS && !platform.isLinux) {
       throw ConductorException(
         'Error! This tool is only supported on macOS and Linux',
@@ -141,62 +181,62 @@ class StartCommand extends Command<void> {
     }
 
     final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
+      getValueFromEnvOrArgs(kStateOption, argResults, platform.environment),
     );
     if (stateFile.existsSync()) {
       throw ConductorException(
-          'Error! A persistent state file already found at ${argResults![kStateOption]}.\n\n'
+          'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final String frameworkMirror = getValueFromEnvOrArgs(
       kFrameworkMirrorOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final String engineMirror = getValueFromEnvOrArgs(
       kEngineMirrorOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final String candidateBranch = getValueFromEnvOrArgs(
       kCandidateOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final String releaseChannel = getValueFromEnvOrArgs(
       kReleaseOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
     final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
       kFrameworkCherrypicksOption,
-      argumentResults,
+      argResults,
       platform.environment,
     );
     final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
       kEngineCherrypicksOption,
-      argumentResults,
+      argResults,
       platform.environment,
     );
     final String? dartRevision = getValueFromEnvOrArgs(
       kDartRevisionOption,
-      argumentResults,
+      argResults,
       platform.environment,
       allowNull: true,
     );
     final String incrementLetter = getValueFromEnvOrArgs(
       kIncrementOption,
-      argumentResults,
+      argResults,
       platform.environment,
     )!;
 
@@ -349,7 +389,7 @@ class StartCommand extends Command<void> {
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 
-    state.conductorVersion = conductorVersion;
+    state.conductorVersion = await conductorVersion;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 

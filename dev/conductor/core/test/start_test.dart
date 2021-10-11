@@ -236,12 +236,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 
@@ -420,12 +420,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 
