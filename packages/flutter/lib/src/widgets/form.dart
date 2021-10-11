@@ -48,6 +48,7 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
+    this.onSaved,
     AutovalidateMode? autovalidateMode,
   }) : assert(child != null),
        assert(autovalidate != null),
@@ -97,6 +98,10 @@ class Form extends StatefulWidget {
   /// In addition to this callback being invoked, all the form fields themselves
   /// will rebuild.
   final VoidCallback? onChanged;
+
+  /// Called when the form is saved via [FormState.save], after all
+  /// the form fields have called their [FormField.onSaved] methods.
+  final VoidCallback? onSaved;
 
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
@@ -181,6 +186,7 @@ class FormState extends State<Form> {
   void save() {
     for (final FormFieldState<dynamic> field in _fields)
       field.save();
+    widget.onSaved?.call();
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
