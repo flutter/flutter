@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,9 +39,16 @@ void main() {
       ),
     );
 
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
 
-    expect(tester.takeException(), isNotNull);
+    expect(error, isNotNull);
+    FlutterError.onError = handler;
   });
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
