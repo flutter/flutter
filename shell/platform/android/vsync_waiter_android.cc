@@ -41,15 +41,15 @@ void VsyncWaiterAndroid::AwaitVSync() {
 // static
 void VsyncWaiterAndroid::OnNativeVsync(JNIEnv* env,
                                        jclass jcaller,
-                                       jlong frameTimeNanos,
-                                       jlong frameTargetTimeNanos,
+                                       jlong frameDelayNanos,
+                                       jlong refreshPeriodNanos,
                                        jlong java_baton) {
   TRACE_EVENT0("flutter", "VSYNC");
 
-  auto frame_time = fml::TimePoint::FromEpochDelta(
-      fml::TimeDelta::FromNanoseconds(frameTimeNanos));
-  auto target_time = fml::TimePoint::FromEpochDelta(
-      fml::TimeDelta::FromNanoseconds(frameTargetTimeNanos));
+  auto frame_time =
+      fml::TimePoint::Now() - fml::TimeDelta::FromNanoseconds(frameDelayNanos);
+  auto target_time =
+      frame_time + fml::TimeDelta::FromNanoseconds(refreshPeriodNanos);
 
   ConsumePendingCallback(java_baton, frame_time, target_time);
 }
