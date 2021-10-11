@@ -122,12 +122,75 @@ class StartCommand extends Command<void> {
 
   @override
   Future<void> run() async {
+    final ArgResults argumentResults = argResults!;
+    final String frameworkUpstream = getValueFromEnvOrArgs(
+      kFrameworkUpstreamOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String frameworkMirror = getValueFromEnvOrArgs(
+      kFrameworkMirrorOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String engineUpstream = getValueFromEnvOrArgs(
+      kEngineUpstreamOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String engineMirror = getValueFromEnvOrArgs(
+      kEngineMirrorOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String candidateBranch = getValueFromEnvOrArgs(
+      kCandidateOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String releaseChannel = getValueFromEnvOrArgs(
+      kReleaseOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
+      kFrameworkCherrypicksOption,
+      argumentResults,
+      platform.environment,
+    );
+    final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
+      kEngineCherrypicksOption,
+      argumentResults,
+      platform.environment,
+    );
+    final String? dartRevision = getValueFromEnvOrArgs(
+      kDartRevisionOption,
+      argumentResults,
+      platform.environment,
+      allowNull: true,
+    );
+    final String incrementLetter = getValueFromEnvOrArgs(
+      kIncrementOption,
+      argumentResults,
+      platform.environment,
+    )!;
+
     final StartContext context = StartContext(
       argResults: argResults!,
+      candidateBranch: candidateBranch,
       checkouts: checkouts,
+      dartRevision: dartRevision,
+      engineCherrypickRevisions: engineCherrypickRevisions,
+      engineMirror: engineMirror,
+      engineUpstream: engineUpstream,
       flutterRoot: flutterRoot,
+      frameworkCherrypickRevisions: frameworkCherrypickRevisions,
+      frameworkMirror: frameworkMirror,
+      frameworkUpstream: frameworkUpstream,
+      incrementLetter: incrementLetter,
       platform: platform,
       processManager: processManager,
+      releaseChannel: releaseChannel,
       stdio: stdio,
     );
     return context.run();
@@ -135,22 +198,45 @@ class StartCommand extends Command<void> {
 
 }
 
+/// Context for starting a new release.
+///
+/// This is a frontend-agnostic implementation.
 class StartContext {
   StartContext({
     required this.argResults,
+    required this.candidateBranch,
     required this.checkouts,
+    required this.dartRevision,
+    required this.engineCherrypickRevisions,
+    required this.engineMirror,
+    required this.engineUpstream,
+    required this.frameworkCherrypickRevisions,
+    required this.frameworkMirror,
+    required this.frameworkUpstream,
     required this.flutterRoot,
+    required this.incrementLetter,
     required this.platform,
     required this.processManager,
+    required this.releaseChannel,
     required this.stdio,
   }) : git = Git(processManager);
 
   final ArgResults argResults;
+  final String candidateBranch;
   final Checkouts checkouts;
+  final String? dartRevision;
+  final List<String> engineCherrypickRevisions;
+  final String engineMirror;
+  final String engineUpstream;
+  final List<String> frameworkCherrypickRevisions;
+  final String frameworkMirror;
+  final String frameworkUpstream;
   final Directory flutterRoot;
+  final String incrementLetter;
   final Git git;
   final Platform platform;
   final ProcessManager processManager;
+  final String releaseChannel;
   final Stdio stdio;
 
   /// Git revision for the currently running Conductor.
@@ -188,58 +274,6 @@ class StartContext {
           'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
-    final String frameworkUpstream = getValueFromEnvOrArgs(
-      kFrameworkUpstreamOption,
-      argResults,
-      platform.environment,
-    )!;
-    final String frameworkMirror = getValueFromEnvOrArgs(
-      kFrameworkMirrorOption,
-      argResults,
-      platform.environment,
-    )!;
-    final String engineUpstream = getValueFromEnvOrArgs(
-      kEngineUpstreamOption,
-      argResults,
-      platform.environment,
-    )!;
-    final String engineMirror = getValueFromEnvOrArgs(
-      kEngineMirrorOption,
-      argResults,
-      platform.environment,
-    )!;
-    final String candidateBranch = getValueFromEnvOrArgs(
-      kCandidateOption,
-      argResults,
-      platform.environment,
-    )!;
-    final String releaseChannel = getValueFromEnvOrArgs(
-      kReleaseOption,
-      argResults,
-      platform.environment,
-    )!;
-    final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
-      kFrameworkCherrypicksOption,
-      argResults,
-      platform.environment,
-    );
-    final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
-      kEngineCherrypicksOption,
-      argResults,
-      platform.environment,
-    );
-    final String? dartRevision = getValueFromEnvOrArgs(
-      kDartRevisionOption,
-      argResults,
-      platform.environment,
-      allowNull: true,
-    );
-    final String incrementLetter = getValueFromEnvOrArgs(
-      kIncrementOption,
-      argResults,
-      platform.environment,
-    )!;
-
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
@@ -273,8 +307,8 @@ class StartContext {
     final String workingBranchName = 'cherrypicks-$candidateBranch';
     await engine.newBranch(workingBranchName);
 
-    if (dartRevision != null && dartRevision.isNotEmpty) {
-      await engine.updateDartRevision(dartRevision);
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
     final List<pb.Cherrypick> engineCherrypicks = (await _sortCherrypicks(
