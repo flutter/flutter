@@ -1637,6 +1637,7 @@ targets:
 
   - name: Linux_android routing_test
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/91630
     presubmit: false
     timeout: 60
     properties:
