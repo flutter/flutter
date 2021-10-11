@@ -34,6 +34,22 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  testWidgets('Leading still in center with custom widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Align(
+          child: CupertinoNavigationBar(
+              leading: Text('Cheetah'),
+              middle: Text('Title'),
+          ),
+        ),
+      ),
+    );
+
+    // Expect the middle of the title to be exactly in the middle of the screen.
+    expect(tester.getCenter(find.text('Cheetah')).dy, 300.0);
+  });
+
   testWidgets('Middle still in center with back button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
