@@ -4,11 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
-import 'package:flutter_gallery/demo/shrine/shopping_cart.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import 'colors.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
+import 'shopping_cart.dart';
 
 // These curves define the emphasized easing curve.
 const Cubic _kAccelerateCurve = Cubic(0.548, 0.0, 0.757, 0.464);

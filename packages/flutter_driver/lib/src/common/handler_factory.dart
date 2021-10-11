@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/extension/wait_conditions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../driver_extension.dart';
+import '../extension/wait_conditions.dart';
 import 'diagnostics_tree.dart';
 import 'error.dart';
 import 'find.dart';
