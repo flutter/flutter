@@ -316,7 +316,7 @@ def GetPythonDependencies():
   _ForceLazyModulesToLoad()
   module_paths = (m.__file__ for m in sys.modules.values()
                   if m is not None and hasattr(m, '__file__'))
-  abs_module_paths = map(os.path.abspath, module_paths)
+  abs_module_paths = map(os.path.abspath, filter(lambda p: p is not None, module_paths))
 
   assert os.path.isabs(DIR_SOURCE_ROOT)
   non_system_module_paths = [
