@@ -148,7 +148,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
           return vms.Success();
         } else {
           // Failed to resume due to another reason. Fail hard.
-          throw e;
+          throw e; // ignore: only_throw_errors, proxying the error from upstream.
         }
       });
     }

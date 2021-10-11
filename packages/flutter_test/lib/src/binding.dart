@@ -14,7 +14,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+import 'package:test_api/expect.dart' show fail;
+import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -1005,11 +1006,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
@@ -1573,11 +1574,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
