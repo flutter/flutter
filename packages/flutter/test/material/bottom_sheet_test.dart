@@ -61,7 +61,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: const Text('BottomSheet'),
       );
@@ -97,7 +97,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: const Text('BottomSheet'),
       );
@@ -134,7 +134,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
+      return SizedBox(
         height: 200.0,
         child: const Text('BottomSheet'),
       );
