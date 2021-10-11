@@ -33,10 +33,16 @@ Directory createResolvedTempDirectorySync(String prefix) {
   return fileSystem.directory(tempDirectory.resolveSymbolicLinksSync());
 }
 
-void writeFile(String path, String content) {
-  fileSystem.file(path)
+void writeFile(String path, String content, {bool writeFutureModifiedDate = false}) {
+  final File file = fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content);
+    // Some integration tests on Windows to not see this file as being modified
+    // recently enough for the hot reload to pick this change up unless the
+    // modified time is written in the future.
+    if (writeFutureModifiedDate) {
+      file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
+    }
 }
 
 void writeBytesFile(String path, List<int> content) {
