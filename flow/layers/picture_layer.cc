@@ -42,6 +42,10 @@ void PictureLayer::Diff(DiffContext* context, const Layer* old_layer) {
 #endif
   }
   context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context->SetTransform(
+      RasterCache::GetIntegralTransCTM(context->GetTransform()));
+#endif
   context->AddLayerBounds(picture()->cullRect());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
@@ -51,6 +55,7 @@ bool PictureLayer::Compare(DiffContext::Statistics& statistics,
                            const PictureLayer* l2) {
   const auto& pic1 = l1->picture_.skia_object();
   const auto& pic2 = l2->picture_.skia_object();
+
   if (pic1.get() == pic2.get()) {
     statistics.AddSameInstancePicture();
     return true;

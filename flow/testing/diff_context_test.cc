@@ -66,6 +66,17 @@ std::shared_ptr<ContainerLayer> DiffContextTest::CreateContainerLayer(
   return res;
 }
 
+std::shared_ptr<OpacityLayer> DiffContextTest::CreateOpacityLater(
+    std::initializer_list<std::shared_ptr<Layer>> layers,
+    SkAlpha alpha,
+    const SkPoint& offset) {
+  auto res = std::make_shared<OpacityLayer>(alpha, offset);
+  for (const auto& l : layers) {
+    res->Add(l);
+  }
+  return res;
+}
+
 #endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 }  // namespace testing

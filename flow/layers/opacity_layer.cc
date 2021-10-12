@@ -24,6 +24,10 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
   context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context->SetTransform(
+      RasterCache::GetIntegralTransCTM(context->GetTransform()));
+#endif
   DiffChildren(context, prev);
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
