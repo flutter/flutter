@@ -335,6 +335,7 @@ class ListTileTheme extends InheritedTheme {
   ListTileThemeData get data {
     return _data ?? ListTileThemeData(
       shape: _shape,
+      style: _style,
       selectedColor: _selectedColor,
       iconColor: _iconColor,
       textColor: _textColor,
@@ -439,6 +440,7 @@ class ListTileTheme extends InheritedTheme {
   /// ```
   static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
+    print("FOUND $result");
     return result?.data ?? Theme.of(context).listTileTheme;
   }
 
@@ -513,24 +515,7 @@ class ListTileTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(ListTileTheme oldWidget) {
-    if (data != null) {
-      return data != oldWidget.data;
-    }
-    return dense != oldWidget.dense
-        || shape != oldWidget.shape
-        || style != oldWidget.style
-        || selectedColor != oldWidget.selectedColor
-        || iconColor != oldWidget.iconColor
-        || textColor != oldWidget.textColor
-        || contentPadding != oldWidget.contentPadding
-        || tileColor != oldWidget.tileColor
-        || selectedTileColor != oldWidget.selectedTileColor
-        || enableFeedback != oldWidget.enableFeedback
-        || horizontalTitleGap != oldWidget.horizontalTitleGap
-        || minVerticalPadding != oldWidget.minVerticalPadding
-        || minLeadingWidth != oldWidget.minLeadingWidth;
-  }
+  bool updateShouldNotify(ListTileTheme oldWidget) => data != oldWidget.data;
 }
 
 /// A single fixed-height row that typically contains some text as well as
@@ -1124,6 +1109,7 @@ class ListTile extends StatelessWidget {
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
     final TextStyle textStyle;
+    print(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list);
     switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
         textStyle = theme.textTheme.bodyText1!;
