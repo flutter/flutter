@@ -61,9 +61,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       @Nullable ByteBuffer message,
       @Nullable BinaryMessenger.BinaryReply callback) {
     Log.v(TAG, "Sending message with callback over channel '" + channel + "'");
-    int replyId = 0;
+    int replyId = nextReplyId++;
     if (callback != null) {
-      replyId = nextReplyId++;
       pendingReplies.put(replyId, callback);
     }
     if (message == null) {

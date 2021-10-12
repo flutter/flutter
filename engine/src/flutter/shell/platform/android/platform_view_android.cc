@@ -227,9 +227,8 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
 // |PlatformView|
 void PlatformViewAndroid::HandlePlatformMessage(
     std::unique_ptr<flutter::PlatformMessage> message) {
-  int response_id = 0;
+  int response_id = next_response_id_++;
   if (auto response = message->response()) {
-    response_id = next_response_id_++;
     pending_responses_[response_id] = response;
   }
   // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
