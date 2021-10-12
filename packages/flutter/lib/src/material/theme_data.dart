@@ -1398,6 +1398,7 @@ class ThemeData with Diagnosticable {
   ///
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
+    Brightness? brightness,
     VisualDensity? visualDensity,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
@@ -1583,7 +1584,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme ?? this.appBarTheme,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
-      colorScheme: colorScheme ?? this.colorScheme,
+      colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
