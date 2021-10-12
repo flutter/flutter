@@ -2447,7 +2447,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+  testWidgets('AppBar with EndDrawer does have leading', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(),
@@ -2461,7 +2461,7 @@ void main() {
 
     final Finder appBarFinder = find.byType(NavigationToolbar);
     NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
-    expect(getAppBarWidget(appBarFinder).leading, null);
+    expect(getAppBarWidget(appBarFinder).leading, isNot(null));
   });
 
   testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
