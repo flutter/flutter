@@ -112,6 +112,7 @@ linter:
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
+    - eol_at_end_of_file
     - exhaustive_cases
     - file_names
     - flutter_style_todos
@@ -162,6 +163,7 @@ linter:
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
+    # - prefer_final_parameters # we should enable this one day (see also parameter_assignments)
     - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
     - prefer_function_declarations_over_variables
@@ -178,6 +180,7 @@ linter:
     - prefer_iterable_whereType
     # - prefer_mixin # Has false positives, see https://github.com/dart-lang/linter/issues/3018
     - prefer_null_aware_operators
+    # - prefer_null_aware_method_calls # "call()" is confusing to people new to the language since it's not documented anywhere
     - prefer_relative_imports
     - prefer_single_quotes
     - prefer_spread_collections
@@ -186,6 +189,7 @@ linter:
     - provide_deprecation_message
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
+    # - require_trailing_commas # blocked on https://github.com/dart-lang/sdk/issues/47441
     - sized_box_for_whitespace
     - slash_for_doc_comments
     - sort_child_properties_last
@@ -201,6 +205,7 @@ linter:
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_const
+    - unnecessary_constructor_name
     # - unnecessary_final # conflicts with prefer_final_locals
     - unnecessary_getters_setters
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
@@ -218,6 +223,7 @@ linter:
     - unnecessary_this
     - unrelated_type_equality_checks
     # - unsafe_html # not yet tested
+    - use_build_context_synchronously
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
     # - use_if_null_to_convert_nulls_to_bools # not yet tested
