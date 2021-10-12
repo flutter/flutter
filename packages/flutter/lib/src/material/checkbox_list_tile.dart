@@ -214,7 +214,7 @@ class CheckboxListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
+  /// If this property is null then its value is based on [ListTileThemeData.dense].
   final bool? dense;
 
   /// Whether to render icons and text in the [activeColor].
@@ -252,7 +252,7 @@ class CheckboxListTile extends StatelessWidget {
   /// If tristate is false (the default), [value] must not be null.
   final bool tristate;
 
-  /// {@macro flutter.material.ListTileTheme.shape}
+  /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.

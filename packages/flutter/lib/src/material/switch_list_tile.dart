@@ -291,7 +291,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
+  /// If this property is null then its value is based on [ListTileThemeData.dense].
   final bool? dense;
 
   /// The tile's internal padding.
@@ -323,7 +323,7 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.material.ListTileTheme.shape}
+  /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
