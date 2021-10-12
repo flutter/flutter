@@ -197,10 +197,8 @@ class GoogleChromeDevice extends ChromiumDevice {
   @override
   String get name => 'Chrome';
 
-  String? _sdkNameAndVersion;
-
   @override
-  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _computeSdkNameAndVersion();
+  late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
 
   Future<String> _computeSdkNameAndVersion() async {
     if (!isSupported()) {
@@ -267,8 +265,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   }
 
   @override
-  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _getSdkNameAndVersion();
-  String? _sdkNameAndVersion;
+  late final Future<String> sdkNameAndVersion = _getSdkNameAndVersion();
 
   Future<String> _getSdkNameAndVersion() async {
     if (_processManager.canRun('reg')) {
@@ -296,6 +293,9 @@ class WebDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required FeatureFlags featureFlags,
   }) : _featureFlags = featureFlags,
+       _webServerDevice = WebServerDevice(
+         logger: logger,
+       ),
        super('Chrome') {
     final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
@@ -332,13 +332,10 @@ class WebDevices extends PollingDeviceDiscovery {
         fileSystem: fileSystem,
       );
     }
-    _webServerDevice = WebServerDevice(
-      logger: logger,
-    );
   }
 
   late final GoogleChromeDevice _chromeDevice;
-  late final WebServerDevice _webServerDevice;
+  final WebServerDevice _webServerDevice;
   MicrosoftEdgeDevice? _edgeDevice;
   final FeatureFlags _featureFlags;
 
@@ -350,13 +347,14 @@ class WebDevices extends PollingDeviceDiscovery {
     if (!_featureFlags.isWebEnabled) {
       return <Device>[];
     }
+    final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
       if (WebServerDevice.showWebServerDevice)
         _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
-      if (await _edgeDevice?._meetsVersionConstraint() ?? false)
-        _edgeDevice!,
+      if (edgeDevice != null && await edgeDevice._meetsVersionConstraint())
+        edgeDevice,
     ];
   }
 
