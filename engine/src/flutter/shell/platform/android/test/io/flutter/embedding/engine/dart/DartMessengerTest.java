@@ -4,7 +4,10 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -123,5 +126,17 @@ public class DartMessengerTest {
     messenger.send(channel, null, callback);
     messenger.handlePlatformMessageResponse(1, message);
     assertEquals(0, byteBuffers[0].limit());
+  }
+
+  @Test
+  public void replyIdIncrementsOnNullReply() {
+    /// Setup test.
+    final FlutterJNI fakeFlutterJni = mock(FlutterJNI.class);
+    final DartMessenger messenger = new DartMessenger(fakeFlutterJni);
+    final String channel = "foobar";
+    messenger.send(channel, null, null);
+    verify(fakeFlutterJni, times(1)).dispatchEmptyPlatformMessage(eq("foobar"), eq(1));
+    messenger.send(channel, null, null);
+    verify(fakeFlutterJni, times(1)).dispatchEmptyPlatformMessage(eq("foobar"), eq(2));
   }
 }
