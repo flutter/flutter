@@ -67,6 +67,7 @@ class FlatlandConnection final {
   void OnNextFrameBegin(
       fuchsia::ui::composition::OnNextFrameBeginValues values);
   void OnFramePresented(fuchsia::scenic::scheduling::FramePresentedInfo info);
+  void DoPresent();
 
   fuchsia::ui::composition::FlatlandPtr flatland_;
 
@@ -77,6 +78,7 @@ class FlatlandConnection final {
 
   on_frame_presented_event on_frame_presented_callback_;
   uint32_t present_credits_ = 1;
+  bool present_pending_ = false;
 
   // This struct contains state that is accessed from both from the UI thread
   // (in AwaitVsync) and the raster thread (in OnNextFrameBegin). You should
