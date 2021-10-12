@@ -20,7 +20,6 @@ void main() {
                 child: Column(
                   children: const <Widget>[
                     ConductorStatus(
-                      releaseState: null,
                       stateFilePath: testPath,
                     ),
                   ],
