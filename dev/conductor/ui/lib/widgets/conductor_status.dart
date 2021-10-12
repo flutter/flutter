@@ -6,7 +6,7 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
-/// Display the current conductor state
+/// Displays the current conductor state.
 class ConductorStatus extends StatefulWidget {
   const ConductorStatus({
     Key? key,
@@ -129,6 +129,7 @@ class ConductorStatusState extends State<ConductorStatus> {
   }
 }
 
+/// Displays explanations for each status type as a tooltip.
 class StatusTooltip extends StatefulWidget {
   const StatusTooltip({
     Key? key,
@@ -141,7 +142,6 @@ class StatusTooltip extends StatefulWidget {
   State<StatusTooltip> createState() => _StatusTooltipState();
 }
 
-/// Displays explanations for each status type as a tooltip
 class _StatusTooltipState extends State<StatusTooltip> {
   @override
   Widget build(BuildContext context) {
@@ -167,7 +167,9 @@ ABANDONED: The cherrypick will NOT be applied in this release.''',
   }
 }
 
-/// Shows the engine and framework cherrypicks' SHA in two separate tables with their corresponding status.
+/// Widget for showing the engine and framework cherrypicks applied to the current release.
+///
+/// Shows the cherrypicks' SHA and status in two separate table DataRow cells.
 class CherrypickTable extends StatefulWidget {
   const CherrypickTable({
     Key? key,
