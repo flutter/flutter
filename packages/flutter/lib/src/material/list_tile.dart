@@ -440,7 +440,6 @@ class ListTileTheme extends InheritedTheme {
   /// ```
   static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
-    print("FOUND $result");
     return result?.data ?? Theme.of(context).listTileTheme;
   }
 
@@ -1109,7 +1108,6 @@ class ListTile extends StatelessWidget {
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
     final TextStyle textStyle;
-    print(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list);
     switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
         textStyle = theme.textTheme.bodyText1!;
