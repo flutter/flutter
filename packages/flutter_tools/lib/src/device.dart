@@ -575,7 +575,7 @@ abstract class Device {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
-    required Map<String, Object?> platformArgs,
+    Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String? userIdentifier,

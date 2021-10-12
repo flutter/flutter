@@ -541,7 +541,7 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, dynamic> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
