@@ -226,8 +226,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
   /// in a [Scaffold] that also has a [Drawer], the [Scaffold] will fill this
   /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
-  /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
-  /// will use a [BackButton] that calls [Navigator.maybePop].
+  /// there's only [Scaffold.endDrawer] and the parent [Navigator] can go back,
+  /// the [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
   /// {@endtemplate}
   ///
   /// {@tool snippet}
