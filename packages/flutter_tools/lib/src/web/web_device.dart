@@ -140,7 +140,7 @@ abstract class ChromiumDevice extends Device {
         debugPort: debuggingOptions.webBrowserDebugPort,
       );
     }
-    _logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': launchChrome});
+    _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
@@ -465,7 +465,7 @@ class WebServerDevice extends Device {
       'The web-server device requires the Dart Debug Chrome extension for debugging. '
       'Consider using the Chrome or Edge devices for an improved development workflow.'
     );
-    _logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
+    _logger.sendEvent('app.webLaunchUrl', <String, Object?>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
