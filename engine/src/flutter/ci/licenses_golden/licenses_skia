@@ -1,4 +1,4 @@
-Signature: 7f333bfda4d26cda2af119f4cf20bbf3
+Signature: 6413700a8fa5c1723e9f91be7a269baa
 
 UNUSED LICENSES:
 
@@ -723,6 +723,9 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/gpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
+FILE: ../../../third_party/skia/experimental/webgpu-bazel/WORKSPACE
+FILE: ../../../third_party/skia/experimental/webgpu-bazel/example/index.html
+FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
@@ -2956,6 +2959,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
+FILE: ../../../third_party/skia/experimental/graphite/src/GpuWorkSubmission.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
@@ -2983,6 +2987,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/Rect.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
@@ -3006,6 +3011,7 @@ FILE: ../../../third_party/skia/experimental/lowp-basic/lowp_experiments.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/bindings.h
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/extension.cpp
+FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/bindings.cpp
 FILE: ../../../third_party/skia/gm/composecolorfilter.cpp
 FILE: ../../../third_party/skia/gm/crbug_1167277.cpp
 FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
