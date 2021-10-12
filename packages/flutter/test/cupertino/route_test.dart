@@ -156,7 +156,7 @@ void main() {
     // Also shows the previous page's title next to the back button.
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
     // 2 paddings + 1 ahem character at font size 34.0.
-    expect(tester.getTopLeft(find.text('An iPod')).dx, 4.0 + 34.0 + 6.0); 
+    expect(tester.getTopLeft(find.text('An iPod')).dx, 4.0 + 34.0 + 6.0);
   });
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
