@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
+import 'tooltip_visibility.dart';
 
 /// A material design tooltip.
 ///
@@ -828,60 +829,5 @@ class _TooltipOverlay extends StatelessWidget {
         child: result,
       ),
     );
-  }
-}
-
-class _TooltipVisibilityScope extends InheritedWidget {
-  const _TooltipVisibilityScope({
-    Key? key,
-    required Widget child,
-    required this.visible,
-  }) : super(key: key, child: child);
-
-  final bool visible;
-
-  @override
-  bool updateShouldNotify(_TooltipVisibilityScope old) {
-    return old.visible != visible;
-  }
-}
-
-/// Overrides the visibility of descendant [Tooltip] widgets.
-///
-/// If disabled, the descendant [Tooltip] widgets will not display a tooltip
-/// when tapped, long-pressed, hovered by the mouse, or when
-/// `ensureTooltipVisible` is called. This only visually disables tooltips and
-/// semantics information will not be lost.
-class TooltipVisibility extends StatelessWidget {
-  /// Creates a widget that configures the visibility of [Tooltip].
-  ///
-  /// Both arguments must not be null.
-  const TooltipVisibility({
-    Key? key,
-    required this.child,
-    required this.visible,
-  }) : super(key: key);
-
-  /// The widget below this widget in the tree.
-  ///
-  /// The entire app can be wrapped in this widget to globally control [Tooltip]
-  /// visibility.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// Determines the visibility of [Tooltip] widets that inherit from this widget.
-  final bool visible;
-
-  /// The [visible] of the closest instance of this class that encloses the
-  /// given context. Defaults to `true` if none are found.
-  static bool of(BuildContext context) {
-    final _TooltipVisibilityScope? visibility = context.dependOnInheritedWidgetOfExactType<_TooltipVisibilityScope>();
-    return visibility?.visible ?? true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _TooltipVisibilityScope(child: child, visible: visible,);
   }
 }
