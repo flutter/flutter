@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_DIFF_CONTEXT_H_
 
 #include <map>
+#include <optional>
 #include <vector>
 #include "flutter/flow/paint_region.h"
 #include "flutter/fml/logging.h"
@@ -77,8 +78,11 @@ class DiffContext {
   // Returns transform matrix for current subtree
   const SkMatrix& GetTransform() const { return state_.transform; }
 
+  // Overrides transform matrix for current subtree
+  void SetTransform(const SkMatrix& transform);
+
   // Return cull rect for current subtree (in local coordinates)
-  const SkRect& GetCullRect() const { return state_.cull_rect; }
+  SkRect GetCullRect() const;
 
   // Sets the dirty flag on current subtree;
   //
@@ -174,8 +178,18 @@ class DiffContext {
     State();
 
     bool dirty;
-    SkRect cull_rect;
+    SkRect cull_rect;  // in screen coordinates
+
+    // In order to replicate paint process closely, we need both the original
+    // transform, and the overriden transform (set for layers that need to paint
+    // on integer coordinates). The reason for this is that during paint the
+    // transform matrix is overriden only after layer passes the cull check
+    // first (with original transform). So to cull layer we use transform, but
+    // to get paint coordinates we use transform_override. Child layers are
+    // painted after transform override, so if set we use transform_override as
+    // base when diffing child layers.
     SkMatrix transform;
+    std::optional<SkMatrix> transform_override;
     size_t rect_index_;
   };
 

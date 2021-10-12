@@ -5,6 +5,7 @@
 #include "flutter/flow/layers/opacity_layer.h"
 
 #include "flutter/flow/layers/clip_rect_layer.h"
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -426,6 +427,28 @@ TEST_F(OpacityLayerTest, CullRectIsTransformed) {
   EXPECT_EQ(mockLayer->parent_cull_rect().fLeft, -20);
   EXPECT_EQ(mockLayer->parent_cull_rect().fTop, -20);
 }
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+using OpacityLayerDiffTest = DiffContextTest;
+
+TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
+  auto picture =
+      CreatePictureLayer(CreatePicture(SkRect::MakeLTRB(10, 10, 60, 60), 1));
+  auto layer = CreateOpacityLater({picture}, 128, SkPoint::Make(0.5, 0.5));
+
+  MockLayerTree tree1;
+  tree1.root()->Add(layer);
+
+  auto damage = DiffLayerTree(tree1, MockLayerTree());
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
+#else
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
+#endif
+}
+
+#endif
 
 }  // namespace testing
 }  // namespace flutter
