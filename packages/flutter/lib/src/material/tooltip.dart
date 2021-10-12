@@ -315,7 +315,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool preferBelow;
   late bool excludeFromSemantics;
   late AnimationController _controller;
-  late bool _hide;
+  late bool _visible;
   OverlayEntry? _entry;
   Timer? _dismissTimer;
   Timer? _showTimer;
@@ -356,7 +356,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
-    _hide = TooltipDisable.existsInContext(context);
+    _visible = TooltipVisibility.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -511,7 +511,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static final Set<_TooltipState> _mouseIn = <_TooltipState>{};
 
   void _handleMouseEnter() {
-    if(_hide)
+    if(!_visible)
       return;
     _showTooltip();
   }
@@ -827,30 +827,39 @@ class _TooltipOverlay extends StatelessWidget {
   }
 }
 
-class _TooltipDisableScope extends InheritedWidget {
-  const _TooltipDisableScope({
+class _TooltipVisibilityScope extends InheritedWidget {
+  const _TooltipVisibilityScope({
     Key? key,
     required Widget child,
+    required this.visible,
   }) : super(key: key, child: child);
 
+  final bool visible;
+
   @override
-  bool updateShouldNotify(_TooltipDisableScope old) {
+  bool updateShouldNotify(_TooltipVisibilityScope old) {
     return false;
   }
 }
 
-class TooltipDisable extends StatelessWidget {
-  const TooltipDisable({Key? key, required this.child}) : super(key: key);
+class TooltipVisibility extends StatelessWidget {
+  const TooltipVisibility({
+    Key? key,
+    required this.child,
+    required this.visible,
+  }) : super(key: key);
 
   final Widget child;
 
-  static bool existsInContext(BuildContext context) {
-    final _TooltipDisableScope? disable = context.dependOnInheritedWidgetOfExactType<_TooltipDisableScope>();
-    return disable != null;
+  final bool visible;
+
+  static bool of(BuildContext context) {
+    final _TooltipVisibilityScope? visibility = context.dependOnInheritedWidgetOfExactType<_TooltipVisibilityScope>();
+    return visibility?.visible ?? true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return _TooltipDisableScope(child: child);
+    return _TooltipVisibilityScope(child: child, visible: visible,);
   }
 }
