@@ -144,7 +144,8 @@ class IconButton extends StatelessWidget {
 
   /// The size of the icon inside the button.
   ///
-  /// If null, takes the value from IconTheme.of(context).size, which defaults to 24.0.
+  /// If null, takes the value from IconTheme.of(context).size if it's non-null,
+  /// else will fall back to 24.0.
   ///
   /// The size given here is passed down to the widget in the [icon] property
   /// via an [IconTheme]. Setting the size here instead of in, for example, the
@@ -318,19 +319,20 @@ class IconButton extends StatelessWidget {
       minHeight: _kMinButtonSize,
     );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
+    final double effectiveIconSize = iconSize ?? theme.iconTheme.size ?? 24.0;
 
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
       child: Padding(
         padding: padding,
         child: SizedBox(
-          height: iconSize ?? IconTheme.of(context).size!,
-          width: iconSize ?? IconTheme.of(context).size!,
+          height: effectiveIconSize,
+          width: effectiveIconSize,
           child: Align(
             alignment: alignment,
             child: IconTheme.merge(
               data: IconThemeData(
-                size: iconSize ?? IconTheme.of(context).size!,
+                size: effectiveIconSize,
                 color: currentColor,
               ),
               child: icon,
