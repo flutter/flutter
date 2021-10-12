@@ -71,59 +71,53 @@ class ConductorStatusState extends State<ConductorStatus> {
   @override
   Widget build(BuildContext context) {
     late final Map<String, Object> currentStatus;
-    if (widget.releaseState != null) {
+    if (widget.releaseState == null) {
+      return SelectableText('No persistent state file found at ${widget.stateFilePath}');
+    } else {
       currentStatus = presentStateDesktop(widget.releaseState!);
     }
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (widget.releaseState == null) ...<Widget>[
-          SelectableText('No persistent state file found at ${widget.stateFilePath}')
-        ] else ...<Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Table(
-                columnWidths: const <int, TableColumnWidth>{
-                  0: FixedColumnWidth(200.0),
-                  1: FixedColumnWidth(400.0),
-                },
-                children: <TableRow>[
-                  for (String headerElement in ConductorStatus.headerElements)
-                    TableRow(
-                      children: <Widget>[
-                        Text('$headerElement:'),
-                        SelectableText((currentStatus[headerElement] == null || currentStatus[headerElement] == '')
-                            ? 'Unknown'
-                            : currentStatus[headerElement]! as String),
-                      ],
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20.0),
-              Wrap(
-                runAlignment: WrapAlignment.start,
-                crossAxisAlignment: WrapCrossAlignment.start,
-                children: <Widget>[
-                  Column(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Table(
+              columnWidths: const <int, TableColumnWidth>{
+                0: FixedColumnWidth(200.0),
+                1: FixedColumnWidth(400.0),
+              },
+              children: <TableRow>[
+                for (String headerElement in ConductorStatus.headerElements)
+                  TableRow(
                     children: <Widget>[
-                      CherrypickTable(engineOrFramework: 'engine', currentStatus: currentStatus),
+                      Text('$headerElement:'),
+                      SelectableText((currentStatus[headerElement] == null || currentStatus[headerElement] == '')
+                          ? 'Unknown'
+                          : currentStatus[headerElement]! as String),
                     ],
                   ),
-                  const SizedBox(width: 20.0),
-                  Column(
-                    children: <Widget>[
-                      CherrypickTable(engineOrFramework: 'framework', currentStatus: currentStatus),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          )
-        ],
+              ],
+            ),
+            const SizedBox(height: 20.0),
+            Wrap(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    CherrypickTable(engineOrFramework: 'engine', currentStatus: currentStatus),
+                  ],
+                ),
+                const SizedBox(width: 20.0),
+                Column(
+                  children: <Widget>[
+                    CherrypickTable(engineOrFramework: 'framework', currentStatus: currentStatus),
+                  ],
+                ),
+              ],
+            )
+          ],
+        )
       ],
     );
   }
