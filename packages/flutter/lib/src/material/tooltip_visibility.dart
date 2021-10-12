@@ -55,6 +55,9 @@ class TooltipVisibility extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TooltipVisibilityScope(child: child, visible: visible,);
+    return _TooltipVisibilityScope(
+      child: child,
+      visible: visible,
+    );
   }
 }
