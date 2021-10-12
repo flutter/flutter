@@ -22,7 +22,6 @@ class ProtocolDiscovery {
     required this.ipv6,
     required Logger logger,
   }) : _logger = logger,
-       _uriStreamController = _BufferedStreamController<Uri>(),
        assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
@@ -64,7 +63,7 @@ class ProtocolDiscovery {
   final Duration throttleDuration;
 
   StreamSubscription<String>? _deviceLogSubscription;
-  _BufferedStreamController<Uri> _uriStreamController;
+  final _BufferedStreamController<Uri> _uriStreamController = _BufferedStreamController<Uri>();
 
   /// The discovered service URL.
   ///
