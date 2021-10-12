@@ -7,12 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
-import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import '../common.dart';
+import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 

@@ -148,7 +148,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
           return vms.Success();
         } else {
           // Failed to resume due to another reason. Fail hard.
-          throw e;
+          throw e; // ignore: only_throw_errors, proxying the error from upstream.
         }
       });
     }
@@ -593,8 +593,6 @@ List<String> _timelineStreamsToString(List<TimelineStream> streams) {
       case TimelineStream.gc: return 'GC';
       case TimelineStream.isolate: return 'Isolate';
       case TimelineStream.vm: return 'VM';
-      default:
-        throw 'Unknown timeline stream $stream';
     }
   }).toList();
 }

@@ -109,7 +109,7 @@ void main() {
           Uri.parse('/foo/bar/'),
         );
         TestAsyncUtils.verifyAllScopesClosed();
-        throw 'unexpectedly did not throw';
+        fail('unexpectedly did not throw');
       } on FlutterError catch (e) {
         final List<String> lines = e.message.split('\n');
         expectSync(lines[0], 'Asynchronous call to guarded function leaked.');

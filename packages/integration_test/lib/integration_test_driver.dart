@@ -10,9 +10,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
-
-import 'package:integration_test/common.dart';
 import 'package:path/path.dart' as path;
+
+import 'common.dart';
 
 /// Flutter Driver test output directory.
 ///

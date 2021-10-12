@@ -598,8 +598,6 @@ String xcodeBuildActionToString(XcodeBuildAction action) {
         return 'build';
       case XcodeBuildAction.archive:
         return 'archive';
-      default:
-        throw UnsupportedError('Unknown Xcode build action');
     }
 }
 

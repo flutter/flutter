@@ -70,8 +70,10 @@ void _setTestMode(_TestMode? mode) {
     case _TestMode.useCanvasTextLayout:
       useCanvasText = true;
       break;
-    default:
+    case _TestMode.useCanvasKit:
+    case null:
       // Keep as null.
+      break;
   }
   js_util.callMethod(
     html.window,

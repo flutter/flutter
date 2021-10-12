@@ -287,7 +287,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         });
         break;
 
-      default:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
         return;
     }
   }

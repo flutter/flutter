@@ -195,8 +195,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        child: child,
         borderRadius: itemBorderRadius,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);

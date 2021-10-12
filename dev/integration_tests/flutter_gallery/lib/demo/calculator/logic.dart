@@ -257,8 +257,6 @@ class CalcExpression {
       case ExpressionState.NumberWithPoint:
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
-      default:
-        return null;
     }
   }
 
