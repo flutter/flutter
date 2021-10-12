@@ -315,7 +315,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool preferBelow;
   late bool excludeFromSemantics;
   late AnimationController _controller;
-  late bool _visible;
   OverlayEntry? _entry;
   Timer? _dismissTimer;
   Timer? _showTimer;
@@ -328,6 +327,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool enableFeedback;
   late bool _isConcealed;
   late bool _forceRemoval;
+  late bool _visible;
 
   /// The plain text message for this tooltip.
   ///
@@ -436,6 +436,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _showTooltip({ bool immediately = false }) {
+    if(!_visible)
+      return;
     _dismissTimer?.cancel();
     _dismissTimer = null;
     if (immediately) {
@@ -486,6 +488,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   ///
   /// Returns `false` when the tooltip was already visible.
   bool ensureTooltipVisible() {
+    if(!_visible)
+      return false;
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -511,8 +515,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static final Set<_TooltipState> _mouseIn = <_TooltipState>{};
 
   void _handleMouseEnter() {
-    if(!_visible)
-      return;
     _showTooltip();
   }
 
