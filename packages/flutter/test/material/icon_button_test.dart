@@ -75,7 +75,24 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
-  testWidgets('when null, iconSize is overridden IconTheme.of(context).size', (WidgetTester tester) async {
+  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(size: null),
+            child: IconButton(
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(24.0, 24.0));
+  });
+
+  testWidgets('when null, iconSize is overridden by IconTheme.of(context).size', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: IconTheme(

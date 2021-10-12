@@ -319,7 +319,7 @@ class IconButton extends StatelessWidget {
       minHeight: _kMinButtonSize,
     );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
-    final double effectiveIconSize = iconSize ?? theme.iconTheme.size ?? 24.0;
+    final double effectiveIconSize = iconSize ?? IconTheme.of(context).size ?? 24.0;
 
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
