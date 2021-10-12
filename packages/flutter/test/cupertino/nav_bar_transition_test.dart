@@ -718,6 +718,7 @@ void main() {
     expect(flying(tester, find.text('Page 1')), findsOneWidget);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')), 0.9004602432250977);
+
     // The middle widget doesn't move.
     expect(
       tester.getCenter(flying(tester, find.text('Page 1'))),
