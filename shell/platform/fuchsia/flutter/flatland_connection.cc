@@ -37,13 +37,20 @@ FlatlandConnection::~FlatlandConnection() = default;
 
 // This method is called from the raster thread.
 void FlatlandConnection::Present() {
-  // TODO(fxbug.dev/64201): Consider a more complex presentation loop that
-  // accumulates Present calls until OnNextFrameBegin.
-  if (present_credits_ == 0)
-    return;
+  if (present_credits_ > 0) {
+    DoPresent();
+  } else {
+    present_pending_ = true;
+  }
+}
 
+// This method is called from the raster thread.
+void FlatlandConnection::DoPresent() {
+  FML_CHECK(present_credits_ > 0);
   --present_credits_;
+
   fuchsia::ui::composition::PresentArgs present_args;
+  // TODO(fxbug.dev/64201): compute a better presentation time;
   present_args.set_requested_presentation_time(0);
   present_args.set_acquire_fences(std::move(acquire_fences_));
   present_args.set_release_fences(std::move(previous_present_release_fences_));
@@ -100,7 +107,12 @@ void FlatlandConnection::OnNextFrameBegin(
     fuchsia::ui::composition::OnNextFrameBeginValues values) {
   present_credits_ += values.additional_present_credits();
 
-  {
+  if (present_pending_ && present_credits_ > 0) {
+    DoPresent();
+    present_pending_ = false;
+  }
+
+  if (present_credits_ > 0) {
     std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
     if (threadsafe_state_.fire_callback_) {
       fml::TimePoint now = fml::TimePoint::Now();
