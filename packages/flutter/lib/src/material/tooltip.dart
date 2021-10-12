@@ -436,8 +436,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _showTooltip({ bool immediately = false }) {
-    if(!_visible)
-      return;
     _dismissTimer?.cancel();
     _dismissTimer = null;
     if (immediately) {
@@ -676,27 +674,31 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
     enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
-    Widget result = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
-      excludeFromSemantics: true,
-      child: Semantics(
-        label: excludeFromSemantics
-            ? null
-            : _tooltipMessage,
-        child: widget.child,
-      ),
+    Widget result = Semantics(
+      label: excludeFromSemantics
+          ? null
+          : _tooltipMessage,
+      child: widget.child,
     );
 
-    // Only check for hovering if there is a mouse connected.
-    if (_mouseIsConnected) {
-      result = MouseRegion(
-        onEnter: (_) => _handleMouseEnter(),
-        onExit: (_) => _handleMouseExit(),
+    //Only check for gestures if tooltip should be visible
+    if(_visible){
+      result = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
+        _handlePress : null,
+        onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+        excludeFromSemantics: true,
         child: result,
       );
+      // Only check for hovering if there is a mouse connected.
+      if (_mouseIsConnected) {
+        result = MouseRegion(
+          onEnter: (_) => _handleMouseEnter(),
+          onExit: (_) => _handleMouseExit(),
+          child: result,
+        );
+      }
     }
 
     return result;
