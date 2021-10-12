@@ -22,10 +22,10 @@ void main() {
     expect(() => ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
     expect(
       ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
-      const ShapeDecoration(shape: CircleBorder(side: BorderSide.none)),
+      const ShapeDecoration(shape: CircleBorder()),
     );
     expect(
-      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, borderRadius: BorderRadiusDirectional.circular(100.0))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(borderRadius: BorderRadiusDirectional.circular(100.0))),
       ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(100.0))),
     );
     expect(
@@ -33,11 +33,11 @@ void main() {
       const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: colorG))),
     );
     expect(
-      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: colorR))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(border: Border.all(color: colorR))),
       ShapeDecoration(shape: Border.all(color: colorR)),
     );
     expect(
-      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.rectangle, border: BorderDirectional(start: BorderSide()))),
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(border: BorderDirectional(start: BorderSide()))),
       const ShapeDecoration(shape: BorderDirectional(start: BorderSide())),
     );
   });
@@ -98,7 +98,7 @@ void main() {
   });
 
   test('ShapeDecoration.getClipPath', () {
-    const ShapeDecoration decoration = ShapeDecoration(shape: CircleBorder(side: BorderSide.none));
+    const ShapeDecoration decoration = ShapeDecoration(shape: CircleBorder());
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
@@ -122,7 +122,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(ImageInfo(image: image, scale: 1.0)),
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
     );
   }
 }

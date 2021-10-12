@@ -196,6 +196,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   @override
   bool get isRepaintBoundary => true;
 
+  Offset get anchor => _anchor;
   Offset _anchor;
   set anchor(Offset value) {
     if (value == _anchor) {
@@ -205,6 +206,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  bool get isAbove => _isAbove;
   bool _isAbove;
   set isAbove(bool value) {
     if (_isAbove == value) {
@@ -896,7 +898,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test list children.
-    // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;

@@ -142,25 +142,25 @@ abstract class RawKeyEventData with Diagnosticable {
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which control key was pressed.
-  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier, side: KeyboardSide.any);
+  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier);
 
   /// Returns true if a SHIFT modifier key was pressed at the time of this
   /// event, regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which shift key was pressed.
-  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.any);
+  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier);
 
   /// Returns true if a ALT modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which alt key was pressed.
-  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier, side: KeyboardSide.any);
+  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier);
 
   /// Returns true if a META modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which meta key was pressed.
-  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
+  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier);
 
   /// Returns a map of modifier keys that were pressed at the time of this
   /// event, and the keyboard side or sides that the key was on.

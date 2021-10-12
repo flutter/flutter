@@ -12,16 +12,16 @@ void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
-          Image(image: FileImage(File('test'), scale: 1.0))
+          Image(image: FileImage(File('test')))
       ));
-      expect(find.image(FileImage(File('test'), scale: 1.0)), findsOneWidget);
+      expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
-          ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'), scale: 1.0)),)
+          ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))),)
       ));
-      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'), scale: 1.0)), findsOneWidget);
+      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))), findsOneWidget);
     });
   });
 
@@ -79,7 +79,7 @@ void main() {
           ),
         )));
 
-        expect(find.text('test', findRichText: false), findsNothing);
+        expect(find.text('test'), findsNothing);
       });
 
       testWidgets(
@@ -120,7 +120,7 @@ void main() {
           ),
         )));
 
-        expect(find.text('test3', findRichText: false), findsOneWidget);
+        expect(find.text('test3'), findsOneWidget);
       });
     });
   });
@@ -234,7 +234,7 @@ void main() {
         )),
       );
       expect(find.byType(GestureDetector), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: Alignment.center);
+      final Finder hitTestable = find.byType(GestureDetector).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });

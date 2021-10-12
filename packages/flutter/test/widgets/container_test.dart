@@ -119,7 +119,7 @@ void main() {
     );
 
     expect(
-      box.toStringDeep(minLevel: DiagnosticLevel.debug),
+      box.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderPadding#00000 relayoutBoundary=up1\n'
         ' │ creator: Padding ← Container ← Align ← [root]\n'
@@ -518,10 +518,10 @@ void main() {
   });
 
   testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(Container(
-      clipBehavior: Clip.none,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1),
+    await tester.pumpWidget(
+      Container(
+        decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
     ));
@@ -535,8 +535,8 @@ void main() {
   testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
     );
@@ -636,13 +636,12 @@ void main() {
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(30)),
         color: Colors.red,
-        boxShadow: const <BoxShadow>[
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.blue,
-            offset: Offset.zero,
             spreadRadius: 10,
             blurRadius: 20.0,
           ),

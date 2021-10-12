@@ -147,7 +147,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
 /// and [ExpansionPanelList.radio].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
 /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.0.dart **
@@ -185,7 +185,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
   /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0.dart **

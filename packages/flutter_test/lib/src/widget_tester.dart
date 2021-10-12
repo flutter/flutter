@@ -416,7 +416,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-    print(kDebugWarning);
+    debugPrint(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -620,7 +620,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(() {
       final TestWidgetsFlutterBinding widgetsBinding = binding;
       return widgetsBinding is LiveTestWidgetsFlutterBinding &&
-              widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+             widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     }());
 
     dynamic caughtException;
@@ -632,7 +632,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     await idle();
 
     if (caughtException != null) {
-      throw caughtException as Object;
+      throw caughtException as Object; // ignore: only_throw_errors, rethrowing caught exception.
     }
   }
 
@@ -650,10 +650,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
           binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-        throw 'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
-              'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
-              'cannot be used, because it has no way to know if the application has '
-              'stopped registering new frames.';
+        test_package.fail(
+          'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
+          'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
+          'cannot be used, because it has no way to know if the application has '
+          'stopped registering new frames.',
+        );
       }
       return true;
     }());
@@ -841,9 +843,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         final Widget widget = element.widget;
         if (widget is Tooltip) {
-          final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
+          final String message = widget.message ?? widget.richMessage!.toPlainText();
+          final Iterable<Element> matches = find.byTooltip(message).evaluate();
           if (matches.length == 1) {
-            printToConsole("  find.byTooltip('${widget.message}')");
+            printToConsole("  find.byTooltip('$message')");
             continue;
           }
         }

@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 void main() {
   test('TextPainter caret test', () {
@@ -42,7 +42,7 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
-    painter.text = TextSpan(text: null, children: children);
+    painter.text = TextSpan(children: children);
     painter.layout();
 
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
@@ -53,7 +53,7 @@ void main() {
     expect(caretOffset.dx, painter.width);
 
     children = <TextSpan>[];
-    painter.text = TextSpan(text: null, children: children);
+    painter.text = TextSpan(children: children);
     painter.layout();
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
@@ -759,7 +759,7 @@ void main() {
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
-    final TextPainter painter = TextPainter(textHeightBehavior: null)
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.textHeightBehavior = const TextHeightBehavior();
@@ -907,7 +907,6 @@ void main() {
         ..textHeightBehavior = const TextHeightBehavior(
             applyHeightToFirstAscent: false,
             applyHeightToLastDescent: false,
-            leadingDistribution: TextLeadingDistribution.proportional,
           )
         ..layout();
 
@@ -954,9 +953,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 1),
       ).first.toRect();
 
-      painter.textHeightBehavior = const TextHeightBehavior(
-        leadingDistribution: TextLeadingDistribution.proportional,
-      );
+      painter.textHeightBehavior = const TextHeightBehavior();
       painter.layout();
 
       final Rect newGlyphBox = painter.getBoxesForSelection(

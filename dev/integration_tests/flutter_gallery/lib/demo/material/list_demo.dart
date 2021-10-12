@@ -219,7 +219,7 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
         break;
-      default:
+      case null:
         break;
     }
 

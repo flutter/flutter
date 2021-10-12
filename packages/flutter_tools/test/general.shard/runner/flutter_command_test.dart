@@ -55,7 +55,7 @@ void main() {
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
       expect(cache.artifacts, isEmpty);
@@ -723,5 +723,6 @@ class FakePub extends Fake implements Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   }) async { }
 }

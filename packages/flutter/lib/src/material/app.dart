@@ -948,7 +948,6 @@ class _MaterialAppState extends State<MaterialApp> {
         result = GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
-          divisions: 2,
           subdivisions: 1,
           child: result,
         );

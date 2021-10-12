@@ -116,7 +116,7 @@ class CutCornersBorder extends OutlineInputBorder {
           canvas.drawPath(path, paint);
           break;
         }
-        default:
+        case null:
           break;
       }
     }

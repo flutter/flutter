@@ -498,23 +498,10 @@ class FloatingHeaderSnapConfiguration {
   /// Creates an object that specifies how a floating header is to be "snapped"
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
-    @Deprecated(
-      'Specify SliverPersistentHeaderDelegate.vsync instead. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
   }) : assert(curve != null),
        assert(duration != null);
-
-  /// The [TickerProvider] for the [AnimationController] that causes a floating
-  /// header to snap in or out of view.
-  @Deprecated(
-    'Specify SliverPersistentHeaderDelegate.vsync instead. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final TickerProvider? vsync;
 
   /// The snap animation curve.
   final Curve curve;
