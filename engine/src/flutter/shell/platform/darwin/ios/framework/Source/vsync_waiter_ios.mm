@@ -76,7 +76,14 @@ void VsyncWaiterIOS::AwaitVSync() {
 
   CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
-  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
+
+  CFTimeInterval duration;
+  if (@available(iOS 10.0, *)) {
+    duration = link.targetTimestamp - link.timestamp;
+  } else {
+    duration = link.duration;
+  }
+  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
