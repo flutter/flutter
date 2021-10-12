@@ -500,7 +500,7 @@ class FloatingLabelAlignment {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'FloatingLabelAlignment')}(x: $x)';
+    return '${objectRuntimeType(this, 'FloatingLabelAlignment')}(x: ${x.toStringAsFixed(1)})';
   }
 
   @override
