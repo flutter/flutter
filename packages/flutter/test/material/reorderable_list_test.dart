@@ -1520,10 +1520,10 @@ void main() {
 
   testWidgets('ReorderableListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     expect(() => ReorderableListView(
-      children: const <Widget>[],
       itemExtent: 30,
       prototypeItem: const SizedBox(),
       onReorder: (int fromIndex, int toIndex) { },
+      children: const <Widget>[],
     ), throwsAssertionError);
   });
 
