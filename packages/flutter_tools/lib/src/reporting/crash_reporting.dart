@@ -47,7 +47,7 @@ class CrashDetails {
   });
 
   final String command;
-  final Object? error;
+  final Object error;
   final StackTrace stackTrace;
   final String doctorText;
 }
@@ -144,7 +144,7 @@ class CrashReportSender {
   ///
   /// The report is populated from data in [error] and [stackTrace].
   Future<void> sendReport({
-    required Object? error,
+    required Object error,
     required StackTrace stackTrace,
     required String Function() getFlutterVersion,
     required String command,

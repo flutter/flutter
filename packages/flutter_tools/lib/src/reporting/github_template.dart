@@ -41,7 +41,7 @@ class GitHubTemplateCreator {
   }
 
   /// Restricts exception object strings to contain only information about tool internals.
-  static String sanitizedCrashException(Object? error) {
+  static String sanitizedCrashException(Object error) {
     if (error is ProcessException) {
       // Suppress args.
       return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
@@ -80,7 +80,7 @@ class GitHubTemplateCreator {
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
       String command,
-      Object? error,
+      Object error,
       StackTrace stackTrace,
       String doctorText
     ) async {
