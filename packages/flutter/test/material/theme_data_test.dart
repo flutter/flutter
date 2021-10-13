@@ -640,4 +640,101 @@ void main() {
     expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
   });
+
+  testWidgets('ThemeData diagnostics include all properties', (WidgetTester tester) async {
+    // List of properties must match the properties in ThemeData.hashCode()
+    final Set<String> expectedPropertyNames = <String>{
+      'visualDensity',
+      'primaryColor',
+      'primaryColorBrightness',
+      'primaryColorLight',
+      'primaryColorDark',
+      'canvasColor',
+      'shadowColor',
+      'accentColor',
+      'accentColorBrightness',
+      'scaffoldBackgroundColor',
+      'bottomAppBarColor',
+      'cardColor',
+      'dividerColor',
+      'focusColor',
+      'hoverColor',
+      'highlightColor',
+      'splashColor',
+      'splashFactory',
+      'selectedRowColor',
+      'unselectedWidgetColor',
+      'disabledColor',
+      'buttonTheme',
+      'buttonColor',
+      'toggleButtonsTheme',
+      'secondaryHeaderColor',
+      'textSelectionColor',
+      'cursorColor',
+      'textSelectionHandleColor',
+      'backgroundColor',
+      'dialogBackgroundColor',
+      'indicatorColor',
+      'hintColor',
+      'errorColor',
+      'toggleableActiveColor',
+      'textTheme',
+      'primaryTextTheme',
+      'accentTextTheme',
+      'inputDecorationTheme',
+      'iconTheme',
+      'primaryIconTheme',
+      'accentIconTheme',
+      'sliderTheme',
+      'tabBarTheme',
+      'tooltipTheme',
+      'cardTheme',
+      'chipTheme',
+      'platform',
+      'materialTapTargetSize',
+      'applyElevationOverlayColor',
+      'pageTransitionsTheme',
+      'appBarTheme',
+      'scrollbarTheme',
+      'bottomAppBarTheme',
+      'colorScheme',
+      'dialogTheme',
+      'floatingActionButtonTheme',
+      'navigationBarTheme',
+      'navigationRailTheme',
+      'typography',
+      'cupertinoOverrideTheme',
+      'snackBarTheme',
+      'bottomSheetTheme',
+      'popupMenuTheme',
+      'bannerTheme',
+      'dividerTheme',
+      'buttonBarTheme',
+      'bottomNavigationBarTheme',
+      'timePickerTheme',
+      'textButtonTheme',
+      'elevatedButtonTheme',
+      'outlinedButtonTheme',
+      'textSelectionTheme',
+      'dataTableTheme',
+      'checkboxTheme',
+      'radioTheme',
+      'switchTheme',
+      'progressIndicatorTheme',
+      'drawerTheme',
+      'listTileTheme',
+      'fixTextFieldOutlineLabel',
+      'useTextSelectionTheme',
+      'androidOverscrollIndicator',
+    };
+
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    ThemeData.light().debugFillProperties(properties);
+    final Set<String> propertyNames = properties.properties
+      .map((final DiagnosticsNode node) => node.name)
+      .whereType<String>()
+      .toSet();
+
+    expect(propertyNames, expectedPropertyNames);
+  });
 }
