@@ -117,8 +117,8 @@ def can_use_prebuilt_dart(args):
 
 def to_gn_args(args):
     if args.simulator:
-        if args.target_os == 'android':
-            raise Exception('--simulator is not supported on Android')
+        if args.target_os != 'ios':
+            raise Exception('--simulator is only supported for iOS')
 
     runtime_mode = args.runtime_mode
 
@@ -182,6 +182,7 @@ def to_gn_args(args):
       # The GN arg is not available in the windows toolchain.
       gn_args['enable_lto'] = enable_lto
 
+    gn_args['use_ios_simulator'] = False
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
