@@ -437,7 +437,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       final DismissUpdateDetails details = DismissUpdateDetails(
           direction: _dismissDirection,
           reached: _dismissThresholdReached,
-          previousReached: oldDismissThresholdReached
+          previousReached: oldDismissThresholdReached,
       );
       widget.onUpdate!(details);
     }
