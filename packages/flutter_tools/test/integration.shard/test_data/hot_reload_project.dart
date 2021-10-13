@@ -95,6 +95,10 @@ class HotReloadProject extends Project {
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }
