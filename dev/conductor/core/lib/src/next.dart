@@ -4,12 +4,12 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting, visibleForOverriding;
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
 import './repository.dart';
-import './state.dart';
+import './state.dart' as stateImport;
 import './stdio.dart';
 
 const String kStateOption = 'state-file';
@@ -21,7 +21,7 @@ class NextCommand extends Command<void> {
   NextCommand({
     required this.checkouts,
   }) {
-    final String defaultPath = defaultStateFilePath(checkouts.platform);
+    final String defaultPath = stateImport.defaultStateFilePath(checkouts.platform);
     argParser.addOption(
       kStateOption,
       defaultsTo: defaultPath,
@@ -86,7 +86,7 @@ class NextContext {
       );
     }
 
-    final pb.ConductorState state = _readStateFromFile(stateFile);
+    final pb.ConductorState state = readStateFromFile(stateFile);
 
     switch (state.currentPhase) {
       case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
@@ -116,7 +116,7 @@ class NextContext {
           ));
         }
 
-        if (!requiresEnginePR(state)) {
+        if (!stateImport.requiresEnginePR(state)) {
           stdio.printStatus(
               'This release has no engine cherrypicks. No Engine PR is necessary.\n',
           );
@@ -149,7 +149,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -175,7 +175,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -284,7 +284,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -319,7 +319,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -354,7 +354,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -377,7 +377,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            _writeStateToFile(stateFile, state, stdio.logs);
+            writeStateToFile(stateFile, state, stdio.logs);
             return;
           }
         }
@@ -385,17 +385,18 @@ class NextContext {
       case pb.ReleasePhase.RELEASE_COMPLETED:
         throw ConductorException('This release is finished.');
     }
-    final ReleasePhase nextPhase = getNextPhase(state.currentPhase);
+    final ReleasePhase nextPhase = stateImport.getNextPhase(state.currentPhase);
     stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');
     state.currentPhase = nextPhase;
-    stdio.printStatus(phaseInstructions(state));
+    stdio.printStatus(stateImport.phaseInstructions(state));
 
-    _writeStateToFile(stateFile, state, stdio.logs);
+    writeStateToFile(stateFile, state, stdio.logs);
   }
 
   /// Persist the state to a file.
-  void _writeStateToFile(File file, pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    writeStateToFile(file, state, logs);
+  @visibleForOverriding
+  void writeStateToFile(File file, pb.ConductorState state, [List<String> logs = const <String>[]]) {
+    stateImport.writeStateToFile(file, state, logs);
   }
 
   @visibleForTesting
@@ -415,5 +416,6 @@ class NextContext {
   }
 
   /// Read the state from a file.
-  pb.ConductorState _readStateFromFile(File file) => readStateFromFile(file);
+  @visibleForOverriding
+  pb.ConductorState readStateFromFile(File file) => stateImport.readStateFromFile(file);
 }
