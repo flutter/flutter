@@ -485,7 +485,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// Shows the tooltip if it is not already visible.
   ///
-  /// Returns `false` when the tooltip was already visible.
+  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
+  /// was already visible.
   bool ensureTooltipVisible() {
     if(!_visible)
       return false;
@@ -682,7 +683,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
 
-    //Only check for gestures if tooltip should be visible
+    //Only check for gestures if tooltip should be visible.
     if(_visible){
       result = GestureDetector(
         behavior: HitTestBehavior.opaque,
