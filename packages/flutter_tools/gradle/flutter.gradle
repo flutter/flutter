@@ -33,11 +33,18 @@ buildscript {
     }
 }
 
-android {
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
+class FlutterExtension {
+    /** Sets the compileSdkVersion used by default in Flutter apps. */
+    static int compileSdkVersion = 30
+
+    /** Sets the minSdkVersion used by default in Flutter apps. */
+    static int minSdkVersion = 16
+
+    /** Sets the targetSdkVersion used by default in Flutter apps. */
+    static int targetSdkVersion = 31
+
+    String source
+    String target
 }
 
 apply plugin: FlutterPlugin
@@ -915,11 +922,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
     }
-}
-
-class FlutterExtension {
-    String source
-    String target
 }
 
 abstract class BaseFlutterTask extends DefaultTask {
