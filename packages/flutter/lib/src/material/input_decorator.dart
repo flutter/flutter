@@ -2147,15 +2147,31 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
 
-  // The base style for the inline label or hint when they're displayed "inline",
+  // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineStyle(ThemeData themeData) {
+  TextStyle _getInlineLabelStyle(ThemeData themeData) {
     final TextStyle defaultStyle = TextStyle(
       color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
     );
 
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
+
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .merge(defaultStyle)
+      .merge(style);
+  }
+  
+  // The base style for the inline hint when they're displayed "inline",
+  // i.e. when they appear in place of the empty text field.
+  TextStyle _getInlineHintStyle(ThemeData themeData) {
+    final TextStyle defaultStyle = TextStyle(
+      color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
+    );
+
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.hintStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
     return themeData.textTheme.subtitle1!
       .merge(widget.baseStyle)
@@ -2240,10 +2256,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inlineStyle = _getInlineStyle(themeData);
+    final TextStyle inlineStyle = _getInlineLabelStyle(themeData);
     final TextBaseline textBaseline = inlineStyle.textBaseline!;
 
-    final TextStyle hintStyle = inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.hintStyle, materialState));
+    final TextStyle hintStyle = _getInlineHintStyle(themeData);
     final Widget? hint = decoration!.hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
