@@ -2164,28 +2164,26 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
-
-    if (style == null) {
+    TextStyle getFallbackTextStyle() {
       final Color color = decoration!.errorText != null
         ? decoration!.errorStyle?.color ?? themeData.errorColor
         : _getActiveColor(themeData);
-      final TextStyle style = themeData.textTheme.subtitle1!.merge(widget.baseStyle);
+
+      return TextStyle(color: decoration!.enabled ? color : themeData.disabledColor)
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
+    }
+
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
+
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .merge(getFallbackTextStyle())
+      .merge(style)
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Setting TextStyle.height to 1 ensures that the label's height will equal
       // its font size.
-      return themeData.fixTextFieldOutlineLabel
-        ? style
-          .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-          .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle)
-        : style
-          .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-          .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
-    }
-    return style
-      .copyWith(height: themeData.fixTextFieldOutlineLabel ? 1 : null)
-      .merge(widget.baseStyle);
+      .copyWith(height: themeData.fixTextFieldOutlineLabel ? 1 : null);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
