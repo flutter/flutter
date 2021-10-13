@@ -1395,9 +1395,10 @@ typedef struct {
   /// `switches.h` engine source file.
   const char* const* command_line_argv;
   /// The callback invoked by the engine in order to give the embedder the
-  /// chance to respond to platform messages from the Dart application. The
-  /// callback will be invoked on the thread on which the `FlutterEngineRun`
-  /// call is made.
+  /// chance to respond to platform messages from the Dart application.
+  /// The callback will be invoked on the thread on which the `FlutterEngineRun`
+  /// call is made. The second parameter, `user_data`, is supplied when
+  /// `FlutterEngineRun` or `FlutterEngineInitialize` is called.
   FlutterPlatformMessageCallback platform_message_callback;
   /// The VM snapshot data buffer used in AOT operation. This buffer must be
   /// mapped in as read-only. For more information refer to the documentation on
