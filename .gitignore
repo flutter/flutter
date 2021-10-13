@@ -61,7 +61,7 @@ unlinked_spec.ds
 
 # Android related
 **/android/**/gradle-wrapper.jar
-**/android/.gradle
+.gradle/
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat
