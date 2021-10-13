@@ -147,7 +147,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
             defaultChoiceIndex: 0,
           );
         } on StateError catch(e) {
-          globals.printStatus(
+          globals.printError(
             e.message,
             indent: 0
           );
