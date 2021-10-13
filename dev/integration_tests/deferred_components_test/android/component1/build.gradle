@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 apply plugin: "com.android.dynamic-feature"
 
 android {
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 30
 
     sourceSets {
         applicationVariants.all { variant ->
@@ -33,8 +33,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 16
+        targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
