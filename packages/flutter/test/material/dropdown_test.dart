@@ -3536,7 +3536,8 @@ void main() {
               value: 'One',
               items: const <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
-                  child: Text('One'), value: 'One'
+                  value: 'One',
+                  child: Text('One')
                 ),
               ],
               onChanged: (_) { },

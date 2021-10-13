@@ -28,6 +28,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
@@ -320,6 +321,7 @@ class ThemeData with Diagnosticable {
     DrawerThemeData? drawerTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
@@ -490,6 +492,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     drawerTheme ??= const DrawerThemeData();
+    listTileTheme ??= const ListTileThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
@@ -553,6 +556,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: drawerTheme,
       elevatedButtonTheme: elevatedButtonTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      listTileTheme: listTileTheme,
       navigationBarTheme: navigationBarTheme,
       navigationRailTheme: navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme,
@@ -692,6 +696,7 @@ class ThemeData with Diagnosticable {
     required this.drawerTheme,
     required this.elevatedButtonTheme,
     required this.floatingActionButtonTheme,
+    required this.listTileTheme,
     required this.navigationBarTheme,
     required this.navigationRailTheme,
     required this.outlinedButtonTheme,
@@ -1121,6 +1126,9 @@ class ThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the appearance of [ListTile] widgets.
+  final ListTileThemeData listTileTheme;
+
   /// A theme for customizing the background color, text style, and icon themes
   /// of a [NavigationBar].
   final NavigationBarThemeData navigationBarTheme;
@@ -1444,6 +1452,7 @@ class ThemeData with Diagnosticable {
     DrawerThemeData? drawerTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    ListTileThemeData? listTileTheme,
     NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     OutlinedButtonThemeData? outlinedButtonTheme,
@@ -1541,6 +1550,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: drawerTheme ?? this.drawerTheme,
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      listTileTheme: listTileTheme ?? this.listTileTheme,
       navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
@@ -1702,6 +1712,7 @@ class ThemeData with Diagnosticable {
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
+      listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
@@ -1799,6 +1810,7 @@ class ThemeData with Diagnosticable {
         && other.drawerTheme == drawerTheme
         && other.elevatedButtonTheme == elevatedButtonTheme
         && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.listTileTheme == listTileTheme
         && other.navigationBarTheme == navigationBarTheme
         && other.navigationRailTheme == navigationRailTheme
         && other.outlinedButtonTheme == outlinedButtonTheme
@@ -1893,6 +1905,7 @@ class ThemeData with Diagnosticable {
       drawerTheme,
       elevatedButtonTheme,
       floatingActionButtonTheme,
+      listTileTheme,
       navigationBarTheme,
       navigationRailTheme,
       outlinedButtonTheme,
@@ -1986,6 +1999,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));

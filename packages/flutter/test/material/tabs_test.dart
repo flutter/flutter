@@ -3789,12 +3789,12 @@ void main() {
               tabs: <Widget>[
                 Tab(
                   icon: Icon(Icons.check,size: 40),
-                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
                   height: 85,
+                  child: Text('1 - OK',style: TextStyle(fontSize: 25),),
                 ), // icon and child
                 Tab(
-                  child: Text('2 - OK',style: TextStyle(fontSize: 25),),
                   height: 85,
+                  child: Text('2 - OK',style: TextStyle(fontSize: 25),),
                 ), // child
                 Tab(
                   icon: Icon(Icons.done,size: 40),

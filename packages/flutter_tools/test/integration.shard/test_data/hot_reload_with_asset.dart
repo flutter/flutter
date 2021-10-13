@@ -55,6 +55,10 @@ class MyApp extends StatelessWidget {
       'LOADED DATA',
       'SECOND DATA',
     );
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }

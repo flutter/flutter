@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -25,10 +22,10 @@ import '../version.dart';
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
   GitHubTemplateCreator({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required FlutterProjectFactory flutterProjectFactory,
-    @required HttpClient client,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required FlutterProjectFactory flutterProjectFactory,
+    required HttpClient client,
   }) : _fileSystem = fileSystem,
       _logger = logger,
       _flutterProjectFactory = flutterProjectFactory,
@@ -44,7 +41,7 @@ class GitHubTemplateCreator {
   }
 
   /// Restricts exception object strings to contain only information about tool internals.
-  static String sanitizedCrashException(dynamic error) {
+  static String sanitizedCrashException(Object error) {
     if (error is ProcessException) {
       // Suppress args.
       return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
@@ -83,7 +80,7 @@ class GitHubTemplateCreator {
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
       String command,
-      dynamic error,
+      Object error,
       StackTrace stackTrace,
       String doctorText
     ) async {
@@ -131,13 +128,14 @@ ${_projectMetadataInformation()}
       return exception.toString();
     }
     try {
-      final FlutterManifest manifest = project?.manifest;
+      final FlutterManifest manifest = project.manifest;
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
+      final FlutterProjectType? projectType = metadata.projectType;
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${flutterProjectTypeToString(metadata.projectType)}')
+        ..writeln('**Type**: ${projectType == null ? 'malformed' : flutterProjectTypeToString(projectType)}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')
@@ -175,7 +173,7 @@ ${_projectMetadataInformation()}
   ///
   /// See https://github.blog/2011-11-10-git-io-github-url-shortener.
   Future<String> _shortURL(String fullURL) async {
-    String url;
+    String? url;
     try {
       _logger.printTrace('Attempting git.io shortener: $fullURL');
       final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');

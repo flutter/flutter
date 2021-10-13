@@ -38,12 +38,12 @@ class MyStatelessWidget extends StatelessWidget {
         backgroundColor: Color(0xFFE0E0E0),
         actions: <Widget>[
           TextButton(
-            child: Text('OPEN'),
             onPressed: null,
+            child: Text('OPEN'),
           ),
           TextButton(
-            child: Text('DISMISS'),
             onPressed: null,
+            child: Text('DISMISS'),
           ),
         ],
       ),

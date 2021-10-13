@@ -795,6 +795,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           assert(debugIsFlipped == isHourRegionFlipped);
         },
+        looping: true,
+        selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(24, (int index) {
           final int hour = isHourRegionFlipped ? (index + 12) % 24 : index;
           final int displayHour = widget.use24hFormat ? hour : (hour + 11) % 12 + 1;
@@ -808,8 +810,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        looping: true,
-        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -835,6 +835,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         backgroundColor: widget.backgroundColor,
         squeeze: _kSqueeze,
         onSelectedItemChanged: _onSelectedItemChange,
+        looping: true,
+        selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
           final int minute = index * widget.minuteInterval;
 
@@ -858,8 +860,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        looping: true,
-        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -889,6 +889,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           assert(selectedAmPm == 0 || selectedAmPm == 1);
           _onSelectedItemChange(index);
         },
+        selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(2, (int index) {
           return itemPositioningBuilder(
             context,
@@ -900,7 +901,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -1172,6 +1172,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           if (_isCurrentDateValid)
             widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
         },
+        looping: true,
+        selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(31, (int index) {
           final int day = index + 1;
           return itemPositioningBuilder(
@@ -1182,8 +1184,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        looping: true,
-        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -1213,6 +1213,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           if (_isCurrentDateValid)
             widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
         },
+        looping: true,
+        selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(12, (int index) {
           final int month = index + 1;
           final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
@@ -1226,8 +1228,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             ),
           );
         }),
-        looping: true,
-        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -1782,6 +1782,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           );
         });
       },
+      selectionOverlay: selectionOverlay,
       children: List<Widget>.generate(24, (int index) {
         final String label = localizations.timerPickerHourLabel(index) ?? '';
         final String semanticsLabel = textDirectionFactor == 1
@@ -1794,7 +1795,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerHour(index), additionalPadding),
         );
       }),
-      selectionOverlay: selectionOverlay,
     );
   }
 
@@ -1847,6 +1847,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           );
         });
       },
+      selectionOverlay: selectionOverlay,
       children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
         final int minute = index * widget.minuteInterval;
         final String label = localizations.timerPickerMinuteLabel(minute) ?? '';
@@ -1860,7 +1861,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerMinute(minute), additionalPadding),
         );
       }),
-      selectionOverlay: selectionOverlay,
     );
   }
 
@@ -1913,6 +1913,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           );
         });
       },
+      selectionOverlay: selectionOverlay,
       children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
         final int second = index * widget.secondInterval;
         final String label = localizations.timerPickerSecondLabel(second) ?? '';
@@ -1926,7 +1927,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildPickerNumberLabel(localizations.timerPickerSecond(second), additionalPadding),
         );
       }),
-      selectionOverlay: selectionOverlay,
     );
   }
 
