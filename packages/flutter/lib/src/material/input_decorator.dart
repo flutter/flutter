@@ -2162,7 +2162,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(defaultStyle)
       .merge(style);
   }
-  
+
   // The base style for the inline hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineHintStyle(ThemeData themeData) {
