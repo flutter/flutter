@@ -58,7 +58,11 @@ buildscript {
     }
 }
 
-/** Some apps don't set these compile options. */
+/**
+ * Some apps don't set default compile options.
+ * Apps can change these values in android/app/build.gradle.
+ * This just ensures that default values are set.
+ */
 android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
