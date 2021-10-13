@@ -224,7 +224,7 @@ void main() {
               return FadeTransition(
                 key: fadeTransitionKey,
                 opacity: fadeAnimation,
-                child: child,
+                child: child!,
               );
             },
             child: child,

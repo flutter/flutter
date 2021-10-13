@@ -1304,7 +1304,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
           if (_isExtendedFloatingActionButton(_previousChild))
             FadeTransition(
               opacity: _previousScaleAnimation,
-              child: _previousChild,
+              child: _previousChild!,
             )
           else
             ScaleTransition(
@@ -1319,7 +1319,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
             scale: _extendedCurrentScaleAnimation,
             child: FadeTransition(
               opacity: _currentScaleAnimation,
-              child: widget.child,
+              child: widget.child!,
             ),
           )
         else

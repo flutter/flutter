@@ -1698,7 +1698,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// inclusive. The [curve] and [duration] arguments must not be null.
   const AnimatedOpacity({
     Key? key,
-    this.child,
+    required this.child,
     required this.opacity,
     Curve curve = Curves.linear,
     required Duration duration,
@@ -1710,7 +1710,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  final Widget child;
 
   /// The target opacity.
   ///

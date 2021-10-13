@@ -1000,7 +1000,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     final Expanded sheet = Expanded(
       child: AnimatedBuilder(
         animation: _sheetController,
-        builder: _buildSheetAnimation,
+        builder: (BuildContext context, Widget? child) => _buildSheetAnimation(context, child!),
         child: _ContextMenuSheet(
           key: widget.sheetGlobalKey,
           actions: widget.actions!,
@@ -1023,7 +1023,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   // Build the animation for the _ContextMenuSheet.
-  Widget _buildSheetAnimation(BuildContext context, Widget? child) {
+  Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
       alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
       scale: _sheetScaleAnimation.value,

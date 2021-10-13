@@ -327,7 +327,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               controller: _controller,
               child: FadeTransition(
                 opacity: _frontOpacity,
-                child: widget.frontLayer,
+                child: widget.frontLayer!,
               ),
             ),
           ),

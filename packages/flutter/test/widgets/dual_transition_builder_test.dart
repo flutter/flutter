@@ -32,7 +32,7 @@ void main() {
         ) {
           return FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
-            child: child,
+            child: child!,
           );
         },
         child: Container(
@@ -102,7 +102,7 @@ void main() {
           ) {
             return FadeTransition(
               opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
-              child: child,
+              child: child!,
             );
           },
           child: const _StatefulTestWidget(name: 'Foo'),
@@ -163,7 +163,7 @@ void main() {
         ) {
           return FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
-            child: child,
+            child: child!,
           );
         },
         child: Container(
@@ -228,7 +228,7 @@ void main() {
         ) {
           return FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
-            child: child,
+            child: child!,
           );
         },
         child: Container(

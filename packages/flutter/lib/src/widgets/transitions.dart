@@ -491,7 +491,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? child,
+    required Widget child,
   }) : assert(opacity != null),
        super(key: key, child: child);
 

@@ -549,7 +549,7 @@ class _HeroFlight {
             child: RepaintBoundary(
               child: FadeTransition(
                 opacity: _heroOpacity,
-                child: child,
+                child: child!,
               ),
             ),
           ),

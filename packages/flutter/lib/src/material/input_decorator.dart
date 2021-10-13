@@ -443,7 +443,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         children: <Widget>[
           FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
-            child: _helper,
+            child: _helper!,
           ),
           _buildError(),
         ],
@@ -456,7 +456,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
           _buildHelper(),
           FadeTransition(
             opacity: _controller,
-            child: _error,
+            child: _error!,
           ),
         ],
       );
@@ -1782,15 +1782,15 @@ class _Decorator extends RenderObjectWidget {
 class _AffixText extends StatelessWidget {
   const _AffixText({
     required this.labelIsFloating,
-    this.text,
+    required this.text,
     this.style,
-    this.child,
+    required this.child,
   });
 
   final bool labelIsFloating;
-  final String? text;
+  final String text;
   final TextStyle? style;
-  final Widget? child;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -1800,7 +1800,7 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style)),
+        child: Text(text, style: style),
       ),
     );
   }
@@ -2261,17 +2261,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget? prefix = decoration!.prefix == null && decoration!.prefixText == null ? null :
       _AffixText(
         labelIsFloating: widget._labelShouldWithdraw,
-        text: decoration!.prefixText,
+        text: decoration!.prefixText!,
         style: decoration!.prefixStyle ?? hintStyle,
-        child: decoration!.prefix,
+        child: decoration!.prefix!,
       );
 
     final Widget? suffix = decoration!.suffix == null && decoration!.suffixText == null ? null :
       _AffixText(
         labelIsFloating: widget._labelShouldWithdraw,
-        text: decoration!.suffixText,
+        text: decoration!.suffixText!,
         style: decoration!.suffixStyle ?? hintStyle,
-        child: decoration!.suffix,
+        child: decoration!.suffix!,
       );
 
     final Color activeColor = _getActiveColor(themeData);
