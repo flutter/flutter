@@ -365,7 +365,7 @@ class IconButton extends StatelessWidget {
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
           Material.defaultSplashRadius,
-          ((iconSize ?? IconTheme.of(context).size!) + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
         child: result,

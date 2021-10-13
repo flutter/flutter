@@ -76,11 +76,13 @@ void main() {
   });
 
   testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
             data: const IconThemeData(size: null),
             child: IconButton(
+              focusNode: focusNode,
               onPressed: mockOnPressedFunction.handler,
               icon: const Icon(Icons.link),
             ),
@@ -113,7 +115,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-            data: const IconThemeData(size: 24.0),
+            data: const IconThemeData(size: 30.0),
             child: IconButton(
               iconSize: 10.0,
               onPressed: mockOnPressedFunction.handler,
