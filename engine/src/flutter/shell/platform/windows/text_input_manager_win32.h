@@ -77,6 +77,12 @@ class TextInputManagerWin32 {
   // be committed in the composing region when composition is ended.
   std::optional<std::u16string> GetResultString() const;
 
+  /// Aborts IME composing.
+  ///
+  /// Aborts composing, closes the candidates window, and clears the contents
+  /// of the composing string.
+  void AbortComposing();
+
  private:
   // Returns either the composing string or result string based on the value of
   // the |type| parameter.

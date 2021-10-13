@@ -55,6 +55,9 @@ class FlutterWindowWinUWP : public WindowBindingHandler {
   // |WindowBindingHandler|
   void OnCursorRectUpdated(const Rect& rect) override;
 
+  // |FlutterWindowBindingHandler|
+  void OnResetImeComposing() override;
+
   // |WindowBindingHandler|
   void OnWindowResized() override;
 

@@ -133,6 +133,11 @@ void FlutterWindowWinUWP::OnCursorRectUpdated(const Rect& rect) {
   // TODO(cbracken): Implement IMM candidate window positioning.
 }
 
+void FlutterWindowWinUWP::OnResetImeComposing() {
+  // TODO(cbracken): Cancel composing, close the candidates view, and clear the
+  // composing text.
+}
+
 void FlutterWindowWinUWP::OnWindowResized() {}
 
 FlutterWindowWinUWP::~FlutterWindowWinUWP() {}

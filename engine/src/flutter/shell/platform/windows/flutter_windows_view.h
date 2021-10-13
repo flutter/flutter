@@ -161,6 +161,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |TextInputPluginDelegate|
   void OnCursorRectUpdated(const Rect& rect) override;
 
+  // |TextInputPluginDelegate|
+  void OnResetImeComposing() override;
+
  protected:
   // Called to create the keyboard hook handlers.
   //

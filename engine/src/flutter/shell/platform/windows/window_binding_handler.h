@@ -91,6 +91,10 @@ class WindowBindingHandler {
   virtual bool OnBitmapSurfaceUpdated(const void* allocation,
                                       size_t row_bytes,
                                       size_t height) = 0;
+
+  // Invoked when the app ends IME composing, such when the active text input
+  // client is cleared.
+  virtual void OnResetImeComposing() = 0;
 };
 
 }  // namespace flutter

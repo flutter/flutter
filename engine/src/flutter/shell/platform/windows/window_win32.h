@@ -161,6 +161,10 @@ class WindowWin32 {
                     WPARAM const wparam,
                     LPARAM const lparam);
 
+  // Called when the app ends IME composing, such as when the text input client
+  // is cleared or changed.
+  virtual void AbortImeComposing();
+
   // Called when the cursor rect has been updated.
   //
   // |rect| is in Win32 window coordinates.

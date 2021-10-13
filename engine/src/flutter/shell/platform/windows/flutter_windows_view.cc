@@ -252,6 +252,10 @@ void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
   binding_handler_->OnCursorRectUpdated(rect);
 }
 
+void FlutterWindowsView::OnResetImeComposing() {
+  binding_handler_->OnResetImeComposing();
+}
+
 void FlutterWindowsView::InitializeKeyboard() {
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
 #ifdef WINUWP

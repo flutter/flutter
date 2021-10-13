@@ -232,6 +232,10 @@ void FlutterWindowWin32::OnCursorRectUpdated(const Rect& rect) {
   UpdateCursorRect(Rect(origin, size));
 }
 
+void FlutterWindowWin32::OnResetImeComposing() {
+  AbortImeComposing();
+}
+
 bool FlutterWindowWin32::OnBitmapSurfaceUpdated(const void* allocation,
                                                 size_t row_bytes,
                                                 size_t height) {

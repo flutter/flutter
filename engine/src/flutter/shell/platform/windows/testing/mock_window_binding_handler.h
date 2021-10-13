@@ -32,6 +32,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD0(GetPhysicalWindowBounds, PhysicalWindowBounds());
   MOCK_METHOD1(UpdateFlutterCursor, void(const std::string& cursor_name));
   MOCK_METHOD1(OnCursorRectUpdated, void(const Rect& rect));
+  MOCK_METHOD0(OnResetImeComposing, void());
   MOCK_METHOD3(OnBitmapSurfaceUpdated,
                bool(const void* allocation, size_t row_bytes, size_t height));
 };

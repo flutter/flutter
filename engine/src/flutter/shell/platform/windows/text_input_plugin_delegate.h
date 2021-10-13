@@ -15,6 +15,9 @@ class TextInputPluginDelegate {
   // Notifies the delegate of the updated the cursor rect in Flutter root view
   // coordinates.
   virtual void OnCursorRectUpdated(const Rect& rect) = 0;
+
+  // Notifies the delegate that the system IME composing state should be reset.
+  virtual void OnResetImeComposing() = 0;
 };
 
 }  // namespace flutter
