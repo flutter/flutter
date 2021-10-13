@@ -7,6 +7,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
@@ -35,7 +36,7 @@ Future<void> main() async {
     section('Run platform unit tests');
 
     final Device device = await devices.workingDevice;
-    if (!await runXcodeTests(projectDirectory, device.deviceId, 'native_ui_tests_ios')) {
+    if (!await runXcodeTests(path.join(projectDirectory, 'ios'), 'id=${device.deviceId}', 'native_ui_tests_ios')) {
       return TaskResult.failure('Platform unit tests failed');
     }
 

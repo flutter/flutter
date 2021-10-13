@@ -241,7 +241,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    dragStartBehavior: DragStartBehavior.start,
                     value: value,
                     onChanged: (bool newValue) {
                       setState(() {
@@ -1600,7 +1599,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(active: false, useOverlay: false));
+    await tester.pumpWidget(buildSwitch(useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 
@@ -1630,7 +1629,7 @@ void main() {
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
     );
 
-    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.pumpWidget(buildSwitch());
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 

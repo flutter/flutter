@@ -19,15 +19,15 @@ void main() {
           subtitle: const Text('Subtitle'),
           trailing: const Icon(Icons.thumb_up),
         ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.green[500],
-          ),
-        ),
         footer: GridTileBar(
           key: footerKey,
           title: const Text('Footer'),
           backgroundColor: Colors.black38,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.green[500],
+          ),
         ),
       ),
     ));

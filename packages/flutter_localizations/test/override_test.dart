@@ -241,7 +241,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <FooMaterialLocalizationsDelegate>[
-          const FooMaterialLocalizationsDelegate(supportedLanguage: 'en'),
+          const FooMaterialLocalizationsDelegate(),
         ],
         // supportedLocales not specified, so all locales resolve to 'en'
         buildContent: (BuildContext context) {

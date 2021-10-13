@@ -215,6 +215,10 @@ void main() {
     }
     expect(result.exitCode, 0);
   });
+
+  testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
+    return _testFile('flutter_gold', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
 }
 
 Future<void> _testFile(

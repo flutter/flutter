@@ -108,8 +108,6 @@ Future<void> main(List<String> args) async {
       _FuchsiaDoctorCommand(), // If attach fails the tool will attempt to run doctor.
     ],
     verbose: verbose,
-    muteCommandLogging: false,
-    verboseHelp: false,
     overrides: <Type, Generator>{
       FeatureFlags: () => const _FuchsiaFeatureFlags(),
       DeviceManager: () => _FuchsiaDeviceManager(),

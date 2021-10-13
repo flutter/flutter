@@ -117,7 +117,7 @@ class UserMessages {
       'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
-  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
+  String androidSdkBuildToolsOutdated(int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String get androidMissingCmdTools => 'cmdline-tools component is missing\n'

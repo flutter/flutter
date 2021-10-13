@@ -466,7 +466,7 @@ class ThreePointCubic extends Curve {
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to use a [Curve2D] to modify the position of a widget
 /// so that it can follow an arbitrary path.
 ///
@@ -889,7 +889,7 @@ class CatmullRomCurve extends Curve {
       // and (1, 1), respectively.
       <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)],
       tension: tension,
-    ).generateSamples(start: 0.0, end: 1.0, tolerance: 1e-12).toList();
+    ).generateSamples(tolerance: 1e-12).toList();
   }
 
   /// A static accumulator for assertion failures. Not used in release mode.

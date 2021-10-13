@@ -28,6 +28,8 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'list_tile.dart';
+import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
@@ -317,6 +319,7 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     Typography? typography,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
@@ -338,6 +341,7 @@ class ThemeData with Diagnosticable {
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     DrawerThemeData? drawerTheme,
+    ListTileThemeData? listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -462,6 +466,7 @@ class ThemeData with Diagnosticable {
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
@@ -482,6 +487,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     drawerTheme ??= const DrawerThemeData();
+    listTileTheme ??= const ListTileThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
@@ -543,6 +549,7 @@ class ThemeData with Diagnosticable {
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      navigationBarTheme: navigationBarTheme,
       navigationRailTheme: navigationRailTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
@@ -564,6 +571,7 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme,
       progressIndicatorTheme: progressIndicatorTheme,
       drawerTheme: drawerTheme,
+      listTileTheme: listTileTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
       androidOverscrollIndicator: androidOverscrollIndicator,
@@ -677,6 +685,7 @@ class ThemeData with Diagnosticable {
     required this.colorScheme,
     required this.dialogTheme,
     required this.floatingActionButtonTheme,
+    required this.navigationBarTheme,
     required this.navigationRailTheme,
     required this.typography,
     required this.cupertinoOverrideTheme,
@@ -698,6 +707,7 @@ class ThemeData with Diagnosticable {
     required this.switchTheme,
     required this.progressIndicatorTheme,
     required this.drawerTheme,
+    required this.listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -763,6 +773,7 @@ class ThemeData with Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(navigationBarTheme != null),
        assert(navigationRailTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
@@ -783,6 +794,7 @@ class ThemeData with Diagnosticable {
        assert(switchTheme != null),
        assert(progressIndicatorTheme != null),
        assert(drawerTheme != null),
+       assert(listTileTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1269,6 +1281,10 @@ class ThemeData with Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the background color, text style, and icon themes
+  /// of a [NavigationBar].
+  final NavigationBarThemeData navigationBarTheme;
+
   /// A theme for customizing the background color, elevation, text style, and
   /// icon themes of a [NavigationRail].
   final NavigationRailThemeData navigationRailTheme;
@@ -1345,6 +1361,9 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [Drawer] widgets.
   final DrawerThemeData drawerTheme;
+
+  /// A theme for customizing the appearance of [ListTile] widgets.
+  final ListTileThemeData listTileTheme;
 
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
@@ -1485,6 +1504,7 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
     FloatingActionButtonThemeData? floatingActionButtonTheme,
+    NavigationBarThemeData? navigationBarTheme,
     NavigationRailThemeData? navigationRailTheme,
     Typography? typography,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
@@ -1506,6 +1526,7 @@ class ThemeData with Diagnosticable {
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     DrawerThemeData? drawerTheme,
+    ListTileThemeData? listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -1576,6 +1597,7 @@ class ThemeData with Diagnosticable {
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      navigationBarTheme: navigationBarTheme ?? this.navigationBarTheme,
       navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
@@ -1597,6 +1619,7 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme ?? this.switchTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
+      listTileTheme: listTileTheme ?? this.listTileTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
@@ -1737,6 +1760,7 @@ class ThemeData with Diagnosticable {
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t)!,
+      navigationBarTheme: NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
@@ -1758,6 +1782,7 @@ class ThemeData with Diagnosticable {
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
+      listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
       androidOverscrollIndicator: t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
@@ -1826,6 +1851,7 @@ class ThemeData with Diagnosticable {
         && other.colorScheme == colorScheme
         && other.dialogTheme == dialogTheme
         && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.navigationBarTheme == navigationBarTheme
         && other.navigationRailTheme == navigationRailTheme
         && other.typography == typography
         && other.cupertinoOverrideTheme == cupertinoOverrideTheme
@@ -1847,6 +1873,7 @@ class ThemeData with Diagnosticable {
         && other.switchTheme == switchTheme
         && other.progressIndicatorTheme == progressIndicatorTheme
         && other.drawerTheme == drawerTheme
+        && other.listTileTheme == listTileTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme
         && other.androidOverscrollIndicator == androidOverscrollIndicator;
@@ -1914,6 +1941,7 @@ class ThemeData with Diagnosticable {
       colorScheme,
       dialogTheme,
       floatingActionButtonTheme,
+      navigationBarTheme,
       navigationRailTheme,
       typography,
       cupertinoOverrideTheme,
@@ -1935,6 +1963,7 @@ class ThemeData with Diagnosticable {
       switchTheme,
       progressIndicatorTheme,
       drawerTheme,
+      listTileTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
       androidOverscrollIndicator,
@@ -1999,6 +2028,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
@@ -2021,6 +2051,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }

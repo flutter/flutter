@@ -52,7 +52,7 @@ void main() {
   });
 
   test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
-    const TextTheme noBodyText1TextTheme = TextTheme(bodyText1: null);
+    const TextTheme noBodyText1TextTheme = TextTheme();
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
@@ -324,8 +324,9 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
+      navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(platform: TargetPlatform.android),
+      typography: Typography.material2018(),
       cupertinoOverrideTheme: null,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
@@ -345,6 +346,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
@@ -420,6 +422,7 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
+      navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.white),
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
@@ -441,6 +444,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -497,6 +501,7 @@ void main() {
       colorScheme: otherTheme.colorScheme,
       dialogTheme: otherTheme.dialogTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
+      navigationBarTheme: otherTheme.navigationBarTheme,
       navigationRailTheme: otherTheme.navigationRailTheme,
       typography: otherTheme.typography,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
@@ -518,6 +523,7 @@ void main() {
       switchTheme: otherTheme.switchTheme,
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       drawerTheme: otherTheme.drawerTheme,
+      listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -571,6 +577,7 @@ void main() {
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
+    expect(themeDataCopy.navigationBarTheme, equals(otherTheme.navigationBarTheme));
     expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.typography, equals(otherTheme.typography));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
@@ -592,6 +599,7 @@ void main() {
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
+    expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 

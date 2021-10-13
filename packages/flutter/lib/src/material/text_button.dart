@@ -50,7 +50,7 @@ import 'theme_data.dart';
 /// If the [onPressed] and [onLongPress] callbacks are null, then this
 /// button will be disabled, it will not react to touch.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to render a disabled TextButton, an enabled TextButton
 /// and lastly a TextButton with gradient background.
 ///
@@ -70,6 +70,8 @@ class TextButton extends ButtonStyleButton {
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -79,6 +81,8 @@ class TextButton extends ButtonStyleButton {
     key: key,
     onPressed: onPressed,
     onLongPress: onLongPress,
+    onHover: onHover,
+    onFocusChange: onFocusChange,
     style: style,
     focusNode: focusNode,
     autofocus: autofocus,
@@ -97,6 +101,8 @@ class TextButton extends ButtonStyleButton {
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool? autofocus,
@@ -280,7 +286,6 @@ class TextButton extends ButtonStyleButton {
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
       maximumSize: Size.infinite,
-      side: null,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,
@@ -362,6 +367,8 @@ class _TextButtonWithIcon extends TextButton {
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool? autofocus,
@@ -374,6 +381,8 @@ class _TextButtonWithIcon extends TextButton {
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,
+         onHover: onHover,
+         onFocusChange: onFocusChange,
          style: style,
          focusNode: focusNode,
          autofocus: autofocus ?? false,

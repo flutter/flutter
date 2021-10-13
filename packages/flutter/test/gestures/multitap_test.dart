@@ -86,7 +86,7 @@ void main() {
     tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
 
 
-    final TestPointer touchPointer5 = TestPointer(5, PointerDeviceKind.touch);
+    final TestPointer touchPointer5 = TestPointer(5);
     final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
@@ -102,7 +102,7 @@ void main() {
     // Mouse down should be ignored by the recognizer.
     expect(log, isEmpty);
 
-    final TestPointer touchPointer7 = TestPointer(7, PointerDeviceKind.touch);
+    final TestPointer touchPointer7 = TestPointer(7);
     final PointerDownEvent down7 = touchPointer7.down(const Offset(15.0, 15.0));
     tap.addPointer(down7);
     tester.closeArena(7);

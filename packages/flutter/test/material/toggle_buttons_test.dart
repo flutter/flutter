@@ -620,7 +620,6 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
-            onPressed: null,
             children: <Widget>[
               Row(children: const <Widget>[
                 Text('First child'),
@@ -709,7 +708,6 @@ void main() {
           child: ToggleButtons(
             fillColor: selectedFillColor,
             isSelected: const <bool>[false, true],
-            onPressed: null,
             children: const <Widget>[
               Text('First child'),
               Text('Second child'),
@@ -773,7 +771,6 @@ void main() {
           child: ToggleButtons(
             fillColor: MaterialStateColor.resolveWith(getFillColor),
             isSelected: const <bool>[false, true],
-            onPressed: null,
             children: const <Widget>[
               Text('First child'),
               Text('Second child'),
@@ -1492,7 +1489,6 @@ void main() {
           child: boilerplate(
             child: ToggleButtons(
               direction: Axis.vertical,
-              verticalDirection: VerticalDirection.down,
               isSelected: const <bool>[false, true, false],
               onPressed: (int index) {},
               children: const <Widget>[
