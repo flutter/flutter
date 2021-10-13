@@ -2150,15 +2150,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineStyle(ThemeData themeData) {
+    final TextStyle defaultStyle = TextStyle(
+      color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
+    );
+
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
-    if (style == null) {
-      return themeData.textTheme.subtitle1!.merge(widget.baseStyle)
-        .copyWith(color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor);
-    }
-
-    return themeData.textTheme.subtitle1!.merge(style.merge(widget.baseStyle));
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .merge(defaultStyle)
+      .merge(style);
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
