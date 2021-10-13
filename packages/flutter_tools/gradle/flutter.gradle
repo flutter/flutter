@@ -34,13 +34,13 @@ buildscript {
 }
 
 class FlutterExtension {
-    /** Sets the compileSdkVersion used by default in Flutter apps. */
+    /** Sets the compileSdkVersion used by default in Flutter app projects. */
     static int compileSdkVersion = 30
 
-    /** Sets the minSdkVersion used by default in Flutter apps. */
+    /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
 
-    /** Sets the targetSdkVersion used by default in Flutter apps. */
+    /** Sets the targetSdkVersion used by default in Flutter app projects. */
     static int targetSdkVersion = 31
 
     String source
