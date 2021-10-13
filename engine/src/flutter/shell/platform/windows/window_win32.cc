@@ -195,6 +195,10 @@ void WindowWin32::OnImeRequest(UINT const message,
   // https://github.com/flutter/flutter/issues/74547
 }
 
+void WindowWin32::AbortImeComposing() {
+  text_input_manager_.AbortComposing();
+}
+
 void WindowWin32::UpdateCursorRect(const Rect& rect) {
   text_input_manager_.UpdateCaretRect(rect);
 }
@@ -554,6 +558,7 @@ HWND WindowWin32::GetWindowHandle() {
 
 void WindowWin32::Destroy() {
   if (window_handle_) {
+    text_input_manager_.SetWindowHandle(nullptr);
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
   }

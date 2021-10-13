@@ -89,6 +89,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void OnCursorRectUpdated(const Rect& rect) override;
 
+  // |FlutterWindowBindingHandler|
+  void OnResetImeComposing() override;
+
   // |WindowWin32|
   void OnScroll(double delta_x,
                 double delta_y,
