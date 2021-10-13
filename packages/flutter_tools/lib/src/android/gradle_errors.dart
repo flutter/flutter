@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -73,7 +74,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
-  multidexErrorHandler
+  multidexErrorHandler,
 ];
 
 // Multidex error message.
@@ -108,11 +109,19 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
   ...
   <application
     ...
-    android:name="${applicationName}"
+    android:name=''',
+          indent: 8,
+          newline: false,
+          color: TerminalColor.grey,
+        );
+        globals.printStatus(r'"${applicationName}"', color: TerminalColor.green, newline: true);
+        globals.printStatus(r'''
     ...>
 ''',
-          indent: 8
+          indent: 8,
+          color: TerminalColor.grey,
         );
+
         globals.printStatus(
           'You may also roll your own multidex support by following the guide at: https://developer.android.com/studio/build/multidex\n',
           indent: 4
@@ -128,12 +137,21 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java\n',
           indent: 8
         );
-        final String selection = await globals.terminal.promptForCharInput(
-          <String>['y', 'n'],
-          logger: globals.logger,
-          prompt: 'Do you want to continue with adding multidex support for Android?',
-          defaultChoiceIndex: 0,
-        );
+        String selection = 'n';
+        // Default to 'no' if no interactive terminal.
+        try {
+          selection = await globals.terminal.promptForCharInput(
+            <String>['y', 'n'],
+            logger: globals.logger,
+            prompt: 'Do you want to continue with adding multidex support for Android?',
+            defaultChoiceIndex: 0,
+          );
+        } on StateError catch(e) {
+          globals.printStatus(
+            e.message,
+            indent: 0
+          );
+        }
         if (selection == 'y') {
           ensureMultiDexApplicationExists(project.directory);
           globals.printStatus(

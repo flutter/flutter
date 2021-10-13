@@ -223,7 +223,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android {
                 defaultConfig {
                     multiDexEnabled true
-                    manifestPlaceholders = [applicationName:"io.flutter.app.FlutterMultiDexApplication"]
+                    manifestPlaceholders = [applicationName: "io.flutter.app.FlutterMultiDexApplication"]
                 }
                 buildTypes {
                     release {
@@ -242,7 +242,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android {
                 defaultConfig {
                     // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders = [applicationName:baseApplicationName]
+                    manifestPlaceholders = [applicationName: baseApplicationName]
                 }
             }
         }

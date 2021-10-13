@@ -39,7 +39,7 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.exitCode, 0);
-    expect(result.stdout.toString(), contains('build/app/outputs/flutter-apk'));
+    expect(result.stdout.toString(), contains('app-debug.apk'));
   });
 
   testWithoutContext('simple build apk without FlutterMultiDexApplication fails', () async {
