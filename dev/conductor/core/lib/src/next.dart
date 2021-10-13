@@ -9,7 +9,7 @@ import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart';
 import './repository.dart';
-import './state.dart' as stateImport;
+import './state.dart' as state_import;
 import './stdio.dart';
 
 const String kStateOption = 'state-file';
@@ -21,7 +21,7 @@ class NextCommand extends Command<void> {
   NextCommand({
     required this.checkouts,
   }) {
-    final String defaultPath = stateImport.defaultStateFilePath(checkouts.platform);
+    final String defaultPath = state_import.defaultStateFilePath(checkouts.platform);
     argParser.addOption(
       kStateOption,
       defaultsTo: defaultPath,
@@ -116,7 +116,7 @@ class NextContext {
           ));
         }
 
-        if (!stateImport.requiresEnginePR(state)) {
+        if (!state_import.requiresEnginePR(state)) {
           stdio.printStatus(
               'This release has no engine cherrypicks. No Engine PR is necessary.\n',
           );
@@ -385,10 +385,10 @@ class NextContext {
       case pb.ReleasePhase.RELEASE_COMPLETED:
         throw ConductorException('This release is finished.');
     }
-    final ReleasePhase nextPhase = stateImport.getNextPhase(state.currentPhase);
+    final ReleasePhase nextPhase = state_import.getNextPhase(state.currentPhase);
     stdio.printStatus('\nUpdating phase from ${state.currentPhase} to $nextPhase...\n');
     state.currentPhase = nextPhase;
-    stdio.printStatus(stateImport.phaseInstructions(state));
+    stdio.printStatus(state_import.phaseInstructions(state));
 
     writeStateToFile(stateFile, state, stdio.logs);
   }
@@ -396,7 +396,7 @@ class NextContext {
   /// Persist the state to a file.
   @visibleForOverriding
   void writeStateToFile(File file, pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    stateImport.writeStateToFile(file, state, logs);
+    state_import.writeStateToFile(file, state, logs);
   }
 
   @visibleForTesting
@@ -417,5 +417,5 @@ class NextContext {
 
   /// Read the state from a file.
   @visibleForOverriding
-  pb.ConductorState readStateFromFile(File file) => stateImport.readStateFromFile(file);
+  pb.ConductorState readStateFromFile(File file) => state_import.readStateFromFile(file);
 }
