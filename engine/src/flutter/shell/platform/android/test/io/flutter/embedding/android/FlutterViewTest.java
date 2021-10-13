@@ -20,9 +20,11 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
+import android.os.Build;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
@@ -399,6 +401,7 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(minSdk = 23, maxSdk = 29)
   public void systemInsetHandlesFullscreenNavbarRight() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
@@ -432,6 +435,9 @@ public class FlutterViewTest {
     when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
     when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
     when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
+    }
 
     flutterView.onApplyWindowInsets(windowInsets);
 
@@ -446,6 +452,58 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(minSdk = 20, maxSdk = 22)
+  public void systemInsetHandlesFullscreenNavbarRightBelowSDK23() {
+    RuntimeEnvironment.setQualifiers("+land");
+    FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
+    ShadowDisplay display =
+        Shadows.shadowOf(
+            ((WindowManager)
+                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay());
+    display.setRotation(3);
+    assertEquals(0, flutterView.getSystemUiVisibility());
+    when(flutterView.getWindowSystemUiVisibility())
+        .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    when(flutterView.getContext()).thenReturn(RuntimeEnvironment.systemContext);
+
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    // When we attach a new FlutterView to the engine without any system insets,
+    // the viewport metrics default to 0.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
+
+    // Then we simulate the system applying a window inset.
+    WindowInsets windowInsets = mock(WindowInsets.class);
+    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
+    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
+    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
+    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
+    }
+
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
+    // Top padding is removed due to full screen.
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
+    // Bottom padding is removed due to hide navigation.
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    // Right padding is zero because the rotation is 270deg under SDK 23
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingRight);
+    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
+  }
+
+  @Test
+  @Config(minSdk = 23, maxSdk = 29)
   public void systemInsetHandlesFullscreenNavbarLeft() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
@@ -479,6 +537,9 @@ public class FlutterViewTest {
     when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
     when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
     when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
+    }
 
     flutterView.onApplyWindowInsets(windowInsets);
 
@@ -684,6 +745,11 @@ public class FlutterViewTest {
 
     final Image mockImage = mock(Image.class);
     when(mockImage.getPlanes()).thenReturn(new Plane[0]);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      final HardwareBuffer mockHardwareBuffer = mock(HardwareBuffer.class);
+      when(mockHardwareBuffer.getUsage()).thenReturn(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+      when(mockImage.getHardwareBuffer()).thenReturn(mockHardwareBuffer);
+    }
     // Mock no latest image on the second time
     when(mockReader.acquireLatestImage())
         .thenReturn(mockImage)
