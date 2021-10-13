@@ -302,6 +302,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         androidManifestHasNameVariable(project.directory)) {
       command.add('-Pmultidex-enabled=true');
       ensureMultiDexApplicationExists(project.directory);
+      _logger.printStatus('Building with Flutter multidex support enabled.');
     }
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final String baseApplicationName =

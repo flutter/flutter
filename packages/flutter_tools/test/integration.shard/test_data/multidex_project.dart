@@ -69,30 +69,20 @@ class MultidexProject extends Project {
 
   @override
   final String main = r'''
-  import 'dart:async';
-
   import 'package:flutter/material.dart';
 
-  Future<void> main() async {
-    while (true) {
-      runApp(new MyApp());
-      await Future.delayed(const Duration(milliseconds: 50));
-    }
+  void main() {
+    runApp(MyApp());
   }
 
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
-      topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return new MaterialApp(
         title: 'Flutter Demo',
         home: new Container(),
       );
     }
-  }
-
-  topLevelFunction() {
-    print("topLevelFunction"); // TOP LEVEL BREAKPOINT
   }
   ''';
 
