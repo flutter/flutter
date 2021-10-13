@@ -54,6 +54,8 @@ void main() {
       '--debug',
     ], workingDirectory: tempDir.path);
 
+    expect(result.stderr.toString(), contains('Cannot fit requested classes in a single dex file'));
+    expect(result.stderr.toString(), contains('The number of method references in a .dex file cannot exceed 64K.'));
     expect(result.exitCode, 1);
   });
 }
