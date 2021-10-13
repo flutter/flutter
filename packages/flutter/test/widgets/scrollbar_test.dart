@@ -2073,6 +2073,7 @@ void main() {
       );
     }
     final ScrollbarPainter painter = createPainter();
+    expect(painter.shouldRepaint(createPainter()), false);
     expect(painter.shouldRepaint(createPainter(color: const Color(0xFFFFFFFF))), true);
     expect(painter.shouldRepaint(createPainter(fadeoutOpacityAnimation: kAlwaysDismissedAnimation)), true);
     expect(painter.shouldRepaint(createPainter(trackColor: const Color(0xFFFFFFFF))), true);
