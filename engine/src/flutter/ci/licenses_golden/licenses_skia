@@ -1,4 +1,4 @@
-Signature: 42735299c988e8522607f82d0d20513c
+Signature: 2cf291ebe5bf136ce6afc2a3dc37f404
 
 UNUSED LICENSES:
 
@@ -3067,7 +3067,7 @@ FILE: ../../../third_party/skia/src/gpu/geometry/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTypesPriv.mm
-FILE: ../../../third_party/skia/src/gpu/tessellate/TessTypes.h
+FILE: ../../../third_party/skia/src/gpu/ops/FillPathFlags.h
 FILE: ../../../third_party/skia/src/gpu/v2/Device.cpp
 FILE: ../../../third_party/skia/src/gpu/v2/Device_v2.h
 FILE: ../../../third_party/skia/src/gpu/v2/SurfaceDrawContext.cpp
@@ -4120,6 +4120,10 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/MSKPBench.cpp
 FILE: ../../../third_party/skia/bench/MSKPBench.h
 FILE: ../../../third_party/skia/experimental/graphite/include/private/MtlTypesPriv.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlUtils.mm
