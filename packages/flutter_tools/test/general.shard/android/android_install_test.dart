@@ -56,7 +56,7 @@ void main() {
     androidSdk ??= FakeAndroidSdk();
     return AndroidDevice('1234',
       logger: logger,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),
       processManager: processManager ?? FakeProcessManager.any(),

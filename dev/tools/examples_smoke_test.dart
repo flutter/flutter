@@ -50,7 +50,7 @@ Future<void> cleanUp(File integrationTest) async {
   try {
     await integrationTest.delete();
     // Delete the integration_test directory if it is empty.
-    await integrationTest.parent.delete(recursive: false);
+    await integrationTest.parent.delete();
   } on FileSystemException {
     // Ignore, there might be other files in there preventing it from
     // being removed, or it might not exist.
@@ -205,7 +205,6 @@ Future<String> runCommand(
     process = await processManager.start(
       cmd,
       workingDirectory: workingDirectory.absolute.path,
-      includeParentEnvironment: true,
       environment: environment,
     );
     process.stdout.listen(

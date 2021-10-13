@@ -86,8 +86,6 @@ void main() {
         ),
       ),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),
@@ -110,8 +108,6 @@ void main() {
         ),
       ),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),
@@ -130,8 +126,6 @@ void main() {
     layout(
       RenderInvalidIntrinsics(),
       constraints: const BoxConstraints(
-        minWidth: 0.0,
-        minHeight: 0.0,
         maxWidth: 1000.0,
         maxHeight: 1000.0,
       ),

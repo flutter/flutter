@@ -359,7 +359,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       duration: duration,
       curve: curve,
       alignmentPolicy: alignmentPolicy,
-      targetRenderObject: null,
     );
   }
 

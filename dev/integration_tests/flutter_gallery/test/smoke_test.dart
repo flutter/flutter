@@ -162,7 +162,7 @@ Future<void> smokeGallery(WidgetTester tester) async {
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
     for (final GalleryDemo demo in kGalleryCategoryToDemos[category]!) {
-      await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
+      await Scrollable.ensureVisible(tester.element(find.text(demo.title)));
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');
     }

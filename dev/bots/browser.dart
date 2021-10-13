@@ -94,8 +94,6 @@ class AppServer {
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
-      windowHeight: 1024,
-      windowWidth: 1024,
     ), onError: chromeErrorCompleter.complete);
     return AppServer._(server, chrome, chromeErrorCompleter.future);
   }

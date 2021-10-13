@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+import 'package:test_api/expect.dart' show fail;
+import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -27,6 +27,7 @@ import 'test_async_utils.dart';
 import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
+import 'window.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -1005,11 +1006,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
@@ -1173,7 +1174,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
-    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
+    _clock = fakeAsync.getClock(DateTime.utc(2015));
     late Future<void> testBodyResult;
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
@@ -1573,11 +1574,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 

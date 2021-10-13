@@ -91,7 +91,6 @@ class WebDriverService extends DriverService {
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final Future<int> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: false,
       route: route,
     );
 
@@ -318,9 +317,8 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
           'args': <String>['--disable-fullscreen']
         },
       };
-    default:
-      throw UnsupportedError('Browser $browser not supported.');
   }
+  throw UnsupportedError('Browser $browser not supported.'); // dead code; remove with null safety migration
 }
 
 /// Converts [browserName] string to [Browser]
@@ -333,5 +331,5 @@ Browser _browserNameToEnum(String browserName) {
     case 'ios-safari': return Browser.iosSafari;
     case 'safari': return Browser.safari;
   }
-  throw UnsupportedError('Browser $browserName not supported');
+  throw UnsupportedError('Browser $browserName not supported'); // dead code; remove with null safety migration
 }

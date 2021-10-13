@@ -32,7 +32,6 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 10000),
-      lowerBound: 0,
       upperBound: colorList.length + 1.0,
     )..repeat();
   }

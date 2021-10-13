@@ -7,12 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
-import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import '../common.dart';
+import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 
@@ -21,22 +21,14 @@ String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
 String? get localEngine {
-  // Use two distinct `defaultValue`s to determine whether a 'localEngine'
-  // declaration exists in the environment.
-  const bool isDefined =
-      String.fromEnvironment('localEngine', defaultValue: 'a') ==
-          String.fromEnvironment('localEngine', defaultValue: 'b');
+  const bool isDefined = bool.hasEnvironment('localEngine');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
 String? get localEngineSrcPath {
-  // Use two distinct `defaultValue`s to determine whether a
-  // 'localEngineSrcPath' declaration exists in the environment.
-  const bool isDefined =
-      String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
-          String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
+  const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
@@ -224,7 +216,7 @@ Future<String> getDartVersion() async {
 
 Future<String?> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return Future<String?>.value(null);
+    return Future<String?>.value();
   }
 
   return inDirectory<String>(flutterDirectory, () {

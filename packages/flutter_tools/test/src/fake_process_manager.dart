@@ -368,11 +368,6 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: Duration.zero,
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
-      outputFollowsExit: false,
     );
   }
 

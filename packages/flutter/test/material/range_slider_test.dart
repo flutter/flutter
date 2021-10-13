@@ -134,7 +134,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0.0,
                     max: 100.0,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -193,7 +192,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -340,7 +338,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -387,7 +384,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -534,7 +530,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -587,7 +582,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -740,7 +734,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -793,7 +786,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     divisions: 10,
                     onChanged: (RangeValues newValues) {
@@ -848,7 +840,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     onChanged: (RangeValues newValues) {
                       setState(() {
@@ -903,7 +894,6 @@ void main() {
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     onChanged: (RangeValues newValues) {
                       setState(() {
@@ -1702,7 +1692,6 @@ void main() {
             child: Material(
               child: RangeSlider(
                 values: const RangeValues(10.0, 12.0),
-                min: 0.0,
                 max: 100.0,
                 onChanged: (RangeValues v) { },
               ),
@@ -1757,11 +1746,7 @@ void main() {
       inactiveColor: Colors.grey,
       labels: const RangeLabels('lowerValue', 'upperValue'),
       max: 100.0,
-      min: 0.0,
       onChanged: null,
-      onChangeEnd: null,
-      onChangeStart: null,
-      semanticFormatterCallback: null,
       values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 

@@ -10,7 +10,6 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals_null_migrated.dart' as globals;
@@ -79,7 +78,7 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(clock: const SystemClock(), workingDirectory: _commandRunner.workingDirectory),
+        : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
       verifyOnly: boolArg('verify-only'),
     );
   }

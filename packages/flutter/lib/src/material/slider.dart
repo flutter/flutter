@@ -947,7 +947,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // (0,0).
   Rect get _trackRect => _sliderTheme.trackShape!.getPreferredRect(
     parentBox: this,
-    offset: Offset.zero,
     sliderTheme: _sliderTheme,
     isDiscrete: false,
   );
