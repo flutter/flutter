@@ -107,9 +107,6 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
-  ///
-  /// The [builder], [initialChildSize], [minChildSize], [maxChildSize] and
-  /// [expand] parameters must not be null.
   const DraggableScrollableSheet({
     Key? key,
     this.initialChildSize = 0.5,
@@ -119,15 +116,10 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snap = false,
     this.snapSizes,
     required this.builder,
-  })  : assert(initialChildSize != null),
-        assert(minChildSize != null),
-        assert(maxChildSize != null),
-        assert(minChildSize >= 0.0),
+  })  : assert(minChildSize >= 0.0),
         assert(maxChildSize <= 1.0),
         assert(minChildSize <= initialChildSize),
         assert(initialChildSize <= maxChildSize),
-        assert(expand != null),
-        assert(builder != null),
         super(key: key);
 
   /// The initial fractional value of the parent container's height to use when
@@ -227,25 +219,20 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
   ///
-  /// All parameters are required. The [minExtent] must be >= 0.  The [maxExtent]
-  /// must be <= 1.0.  The [extent] must be between [minExtent] and [maxExtent].
+  /// The [minExtent] must be >= 0.  The [maxExtent] must be <= 1.0. The
+  /// [extent] must be between [minExtent] and [maxExtent].
   DraggableScrollableNotification({
     required this.extent,
     required this.minExtent,
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  }) : assert(extent != null),
-       assert(initialExtent != null),
-       assert(minExtent != null),
-       assert(maxExtent != null),
-       assert(0.0 <= minExtent),
+  }) : assert(0.0 <= minExtent),
        assert(maxExtent <= 1.0),
        assert(minExtent <= extent),
        assert(minExtent <= initialExtent),
        assert(extent <= maxExtent),
-       assert(initialExtent <= maxExtent),
-       assert(context != null);
+       assert(initialExtent <= maxExtent);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -282,8 +269,7 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
 ///
 /// The ScrollPosition knows the number of pixels a user wants to move the sheet.
 ///
-/// The [currentExtent] will never be null.
-/// The [availablePixels] will never be null, but may be `double.infinity`.
+/// The [availablePixels] may be `double.infinity`.
 class _DraggableSheetExtent {
   _DraggableSheetExtent({
     required this.minExtent,
@@ -294,10 +280,7 @@ class _DraggableSheetExtent {
     required this.onExtentChanged,
     ValueNotifier<double>? currentExtent,
     bool? hasChanged,
-  })  : assert(minExtent != null),
-        assert(maxExtent != null),
-        assert(initialExtent != null),
-        assert(minExtent >= 0),
+  })  : assert(minExtent >= 0),
         assert(maxExtent <= 1),
         assert(minExtent <= initialExtent),
         assert(initialExtent <= maxExtent),
@@ -323,7 +306,6 @@ class _DraggableSheetExtent {
   bool get isAtMax => maxExtent <= _currentExtent.value;
 
   set currentExtent(double value) {
-    assert(value != null);
     hasChanged = true;
     _currentExtent.value = value.clamp(minExtent, maxExtent);
   }
@@ -545,8 +527,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String? debugLabel,
     required this.extent,
-  }) : assert(extent != null),
-       super(
+  }) : super(
          debugLabel: debugLabel,
          initialScrollOffset: initialScrollOffset,
        );
@@ -745,8 +726,6 @@ class _DraggableScrollableSheetScrollPosition
 class DraggableScrollableActuator extends StatelessWidget {
   /// Creates a widget that can notify descendent [DraggableScrollableSheet]s
   /// to reset to their initial position.
-  ///
-  /// The [child] parameter is required.
   DraggableScrollableActuator({
     Key? key,
     required this.child,
@@ -754,8 +733,6 @@ class DraggableScrollableActuator extends StatelessWidget {
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
   /// [reset] method is applied to a context that includes it.
-  ///
-  /// Must not be null.
   final Widget child;
 
   final _ResetNotifier _notifier = _ResetNotifier();
@@ -804,8 +781,6 @@ class _ResetNotifier extends ChangeNotifier {
 class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// Creates an [InheritedNotifier] that the [DraggableScrollableSheet] will
   /// listen to for an indication that it should change its extent.
-  ///
-  /// The [child] and [notifier] properties must not be null.
   const _InheritedResetNotifier({
     Key? key,
     required Widget child,
