@@ -304,18 +304,18 @@ class ThemeData with Diagnosticable {
     )
     IconThemeData? accentIconTheme,
     // COMPONENT THEMES
-    AppBarTheme? appBarTheme, // TODO: create ☂️ bug
-    MaterialBannerThemeData? bannerTheme, // TODO: create ☂️ bug?
-    BottomAppBarTheme? bottomAppBarTheme, // TODO: create ☂️ bug
+    AppBarTheme? appBarTheme,
+    MaterialBannerThemeData? bannerTheme,
+    BottomAppBarTheme? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonBarThemeData? buttonBarTheme,
     ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme, // TODO: create ☂️ bug
+    CardTheme? cardTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
-    DialogTheme? dialogTheme, // TODO: create ☂️ bug
+    DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
@@ -329,7 +329,7 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    TabBarTheme? tabBarTheme, // TODO: create ☂️ bug
+    TabBarTheme? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -602,14 +602,14 @@ class ThemeData with Diagnosticable {
     required this.primaryColorLight,
     required this.primaryColorDark,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
+      'Use colorScheme.secondary instead. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     required this.accentColor,
     @Deprecated(
-      'Use colorScheme.secondary instead. '
+      'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
@@ -825,7 +825,7 @@ class ThemeData with Diagnosticable {
   // the class and in the lerp() method.
 
   /// COLORS
-  
+
   /// A set of thirteen colors that can be used to configure the
   /// color properties of most components.
   ///
@@ -933,9 +933,9 @@ class ThemeData with Diagnosticable {
   /// indicate an item in a menu is selected.
   final Color highlightColor;
 
-  /// The color of ink splashes. 
-  /// 
-  /// See also: 
+  /// The color of ink splashes.
+  ///
+  /// See also:
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color splashColor;
 
@@ -1007,7 +1007,7 @@ class ThemeData with Diagnosticable {
   final Color toggleableActiveColor;
 
   /// TYPOGRAPHY & ICONOGRAPHY
-  
+
   /// The color and geometry [TextTheme] values used to configure [textTheme].
   final Typography typography;
 
@@ -1061,7 +1061,7 @@ class ThemeData with Diagnosticable {
   final IconThemeData accentIconTheme;
 
   /// COMPONENT THEMES
-  
+
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
@@ -1071,7 +1071,7 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
-  
+
   /// A theme for customizing the appearance and layout of [BottomNavigationBar]
   /// widgets.
   final BottomNavigationBarThemeData bottomNavigationBarTheme;
@@ -1142,7 +1142,7 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [Radio] widgets.
   final RadioThemeData radioTheme;
- 
+
   /// The colors and shapes used to render [Slider].
   ///
   /// This is the value returned from [SliderTheme.of].
@@ -1153,7 +1153,7 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [Switch] widgets.
   final SwitchThemeData switchTheme;
-  
+
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
@@ -1292,7 +1292,7 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
   final ScrollbarThemeData scrollbarTheme;
-  
+
   /// Defines the appearance of ink splashes produces by [InkWell]
   /// and [InkResponse].
   ///
@@ -1407,7 +1407,7 @@ class ThemeData with Diagnosticable {
     Color? hintColor,
     Color? errorColor,
     Color? toggleableActiveColor,
-    // TYPOGRAPHY& ICONOGRAPHY
+    // TYPOGRAPHY & ICONOGRAPHY
     Typography? typography,
     TextTheme? textTheme,
     TextTheme? primaryTextTheme,
@@ -1741,7 +1741,7 @@ class ThemeData with Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return other is ThemeData
-        // COLORS 
+        // COLORS
         && other.colorScheme == colorScheme
         && other.primaryColor == primaryColor
         && other.primaryColorBrightness == primaryColorBrightness
@@ -1835,7 +1835,7 @@ class ThemeData with Diagnosticable {
     // are in the exact same order as in operator == and in the raw constructor
     // and in the order of fields in the class and in the lerp() method.
     final List<Object?> values = <Object?>[
-      // COLORS 
+      // COLORS
       colorScheme,
       primaryColor,
       primaryColorBrightness,
