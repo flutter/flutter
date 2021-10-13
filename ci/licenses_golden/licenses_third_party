@@ -1,4 +1,4 @@
-Signature: 54dcf784ac6819534ce6d1938e91ba91
+Signature: e6b6835a3b03ab861233c24c4aeff12f
 
 UNUSED LICENSES:
 
@@ -10517,7 +10517,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/objectpool_
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/persistent_handles.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/ports.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/timeline_page.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/view_footer.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/sample_profile/sample_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.js
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/allocation_profile.dart
@@ -10536,7 +10535,6 @@ FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/objectpoo
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/persistent_handles.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/ports.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/timeline_page.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/view_footer.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/sample_profile/sample_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/web/timeline.js
 FILE: ../../../third_party/dart/runtime/vm/atomic_test.cc
