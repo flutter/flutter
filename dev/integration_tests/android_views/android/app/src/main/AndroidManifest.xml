@@ -21,7 +21,7 @@ found in the LICENSE file. -->
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" android:exported="true" />
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>

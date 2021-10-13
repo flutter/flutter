@@ -27,16 +27,6 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
-    }
-}
-
 /** For apps only. Provides the flutter extension used in app/build.gradle. */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
@@ -56,6 +46,24 @@ class FlutterExtension {
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+    }
+}
+
+/** Some apps don't set these compile options. */
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 apply plugin: FlutterPlugin
