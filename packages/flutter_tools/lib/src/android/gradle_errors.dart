@@ -95,14 +95,14 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       globals.printStatus(
         'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
         "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
-        indent: 4
+        indent: 4,
       );
       if (!androidManifestHasNameVariable(project.directory)) {
         globals.printStatus(
           r'Your `android/app/src/main/AndroidManifest.xml` does not contain `android:name="${applicationName}"` '
           'under the `application` element. This may be due to creating your project with an old version of Flutter. '
           'Add the `android:name="\${applicationName}"` attribute to your AndroidManifest.xml to enable Flutter\'s multidex support:\n',
-          indent: 4
+          indent: 4,
         );
         globals.printStatus(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -124,18 +124,18 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
 
         globals.printStatus(
           'You may also roll your own multidex support by following the guide at: https://developer.android.com/studio/build/multidex\n',
-          indent: 4
+          indent: 4,
         );
         return GradleBuildStatus.exit;
       }
       if (!multiDexApplicationExists(project.directory)) {
         globals.printStatus(
           'Flutter tool can add multidex support. The following file will be added by flutter:\n',
-          indent: 4
+          indent: 4,
         );
         globals.printStatus(
           'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java\n',
-          indent: 8
+          indent: 8,
         );
         String selection = 'n';
         // Default to 'no' if no interactive terminal.
@@ -149,14 +149,14 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
         } on StateError catch(e) {
           globals.printError(
             e.message,
-            indent: 0
+            indent: 0,
           );
         }
         if (selection == 'y') {
           ensureMultiDexApplicationExists(project.directory);
           globals.printStatus(
             'Multidex enabled. Retrying build.\n',
-            indent: 0
+            indent: 0,
           );
           return GradleBuildStatus.retry;
         }
@@ -164,7 +164,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     } else {
       globals.printStatus(
         'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
-        indent: 4
+        indent: 4,
       );
     }
     return GradleBuildStatus.exit;
@@ -188,7 +188,7 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     globals.printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
-      indent: 4
+      indent: 4,
     );
     return GradleBuildStatus.exit;
   },
