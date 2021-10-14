@@ -2198,12 +2198,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     return themeData.textTheme.subtitle1!
       .merge(widget.baseStyle)
-      .merge(getFallbackTextStyle())
-      .merge(style)
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Setting TextStyle.height to 1 ensures that the label's height will equal
       // its font size.
-      .copyWith(height: themeData.fixTextFieldOutlineLabel ? 1 : null);
+      .copyWith(height: themeData.fixTextFieldOutlineLabel ? 1 : null)
+      .merge(getFallbackTextStyle())
+      .merge(style);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
