@@ -73,8 +73,12 @@ class OutOfProcessDapTestServer extends DapTestServer {
     this._process,
     Logger? logger,
   ) {
-    // Treat anything written to stderr as the DAP crashing and fail the test.
-    _process.stderr.transform(utf8.decoder).listen((String error) {
+    // Treat anything written to stderr as the DAP crashing and fail the test
+    // unless it's "Waiting for another flutter command to release the startup lock".
+    _process.stderr
+        .transform(utf8.decoder)
+        .where((String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
+        .listen((String error) {
       logger?.call(error);
       throw error;
     });
