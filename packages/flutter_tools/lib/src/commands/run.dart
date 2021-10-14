@@ -249,7 +249,6 @@ class RunCommand extends RunCommandBase {
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
-    addMultidexOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -501,7 +500,6 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,
-        multidexEnabled: boolArg('multidex'),
       );
     } else if (webMode) {
       return webRunnerFactory.createWebRunner(
