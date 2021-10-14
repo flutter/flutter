@@ -13,7 +13,9 @@ import 'browser_detection.dart';
 import 'util.dart';
 
 Object? get _jsImageDecodeFunction => js_util.getProperty(
+  // ignore: implicit_dynamic_function
   js_util.getProperty(
+    // ignore: implicit_dynamic_function
     js_util.getProperty(html.window, 'Image') as Object,
     'prototype',
   ) as Object,

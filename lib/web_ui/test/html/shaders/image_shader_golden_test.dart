@@ -145,6 +145,7 @@ HtmlImage createTestImage() {
   ctx.fillRect(width2, width2, width2, width2);
   ctx.fill();
   final html.ImageElement imageElement = html.ImageElement();
+  // ignore: implicit_dynamic_function
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]) as String;
   return HtmlImage(imageElement, width, height);
 }
