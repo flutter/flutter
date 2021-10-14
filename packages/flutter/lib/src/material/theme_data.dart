@@ -28,7 +28,6 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
-import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
@@ -492,7 +491,6 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     drawerTheme ??= const DrawerThemeData();
-    listTileTheme ??= const ListTileThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
