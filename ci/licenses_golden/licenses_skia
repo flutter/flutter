@@ -1,4 +1,4 @@
-Signature: fc2b261fb44e48c83f00f4ab4eb98b2a
+Signature: a0c09fe3c7a6a07b1ff5b54e718334e7
 
 UNUSED LICENSES:
 
@@ -4142,6 +4142,7 @@ FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/ColorFilters.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Font.cpp
+FILE: ../../../third_party/skia/modules/androidkit/src/FontChainAdapter.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Gradients.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Image.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/ImageFilter.cpp
