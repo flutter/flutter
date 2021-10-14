@@ -45,6 +45,15 @@ enum ScrollbarOrientation {
   bottom,
 }
 
+/// Doc
+enum InfiniteScrollBehavior {
+  /// Doc
+  chunk,
+
+  /// Doc
+  continuous,
+}
+
 /// Paints a scrollbar's track and thumb.
 ///
 /// The size of the scrollbar along its scroll direction is typically
@@ -90,6 +99,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
+    InfiniteScrollBehavior infiniteBehavior = InfiniteScrollBehavior.chunk,
   }) : assert(color != null),
        assert(radius == null || shape == null),
        assert(thickness != null),
@@ -102,6 +112,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
+       assert(infiniteBehavior != null),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
@@ -114,7 +125,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
        _scrollbarOrientation = scrollbarOrientation,
-       _minOverscrollLength = minOverscrollLength ?? minLength {
+       _minOverscrollLength = minOverscrollLength ?? minLength,
+       _infiniteBehavior = infiniteBehavior {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -313,6 +325,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// Doc
+  InfiniteScrollBehavior get infiniteBehavior => _infiniteBehavior;
+  InfiniteScrollBehavior _infiniteBehavior;
+  set infiniteBehavior(InfiniteScrollBehavior value) {
+    assert(value != null);
+    if (infiniteBehavior == value)
+      return;
+
+    _infiniteBehavior = value;
+    notifyListeners();
+  }
+
   /// {@template flutter.widgets.Scrollbar.scrollbarOrientation}
   /// Dictates the orientation of the scrollbar.
   ///
@@ -358,6 +382,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _thumbRect;
   Rect? _trackRect;
   late double _thumbOffset;
+  // InfiniteScroll
+  // The assumed depth of the scroll view.
+  double _infiniteDepth = _infiniteLeadingExtent;
+  // The amount of assumed leading distance following the _infiniteDepth.
+  static const double _infiniteLeadingExtent = 10000;
 
   /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
   /// show and redraw itself based on these new metrics.
@@ -564,21 +593,53 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
-    final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
+    late double scrollableExtent;
+    if (_lastMetrics!.maxScrollExtent.isFinite) {
+      scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
+    } else {
+      // If we have an infinitely long scroll view, we pretend it isn't by keeping
+      // track of the last known depth, and adding on more 'extent' based on the
+      // InfiniteScrollBehavior.
+      scrollableExtent = _infiniteDepth - _lastMetrics!.minScrollExtent;
+    }
     final double thumbMovableExtent = _trackExtent - _thumbExtent();
-
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
   }
 
   // Converts between a scroll position and the corresponding position in the
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
-    final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
-
+    late double scrollableExtent;
+    if (metrics.maxScrollExtent.isFinite) {
+      scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+    } else {
+      // If we have an infinitely long scroll view, we pretend it isn't by keeping
+      // track of the last known depth, and adding on more 'extent' based on the
+      // InfiniteScrollBehavior.
+      // Update the greatest know depth.
+      switch (infiniteBehavior) {
+        case InfiniteScrollBehavior.chunk:
+          if (_infiniteDepth < metrics.pixels) {
+            _infiniteDepth = metrics.pixels;
+          }
+          break;
+        case InfiniteScrollBehavior.continuous:
+          if (_infiniteDepth - metrics.pixels < _infiniteLeadingExtent) {
+            _infiniteDepth = metrics.pixels + _infiniteLeadingExtent;
+          }
+          break;
+      }
+      scrollableExtent = _infiniteDepth - metrics.minScrollExtent;
+    }
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
-      : 0;
+        ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+        : 0;
 
+    if (fractionPast > 0.99 && infiniteBehavior == InfiniteScrollBehavior.chunk) {
+      // If we are loading extent in chunks, add on when we reach the end of
+      // the current 'extent'.
+      _infiniteDepth += _infiniteLeadingExtent / 2;
+    }
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);
   }
 
@@ -598,11 +659,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
     _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
-
-    // Do not paint a scrollbar if the scroll view is infinitely long.
-    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
-    if (_lastMetrics!.maxScrollExtent.isInfinite)
-      return;
 
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
@@ -701,7 +757,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || padding != oldDelegate.padding
         || minLength != oldDelegate.minLength
         || minOverscrollLength != oldDelegate.minOverscrollLength
-        || scrollbarOrientation != oldDelegate.scrollbarOrientation;
+        || scrollbarOrientation != oldDelegate.scrollbarOrientation
+        || infiniteBehavior != oldDelegate.infiniteBehavior;
   }
 
   @override
@@ -731,10 +788,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// The [notificationPredicate] allows the ability to customize which
 /// [ScrollNotification]s the Scrollbar should listen to.
 ///
-/// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
-/// painted. In this case, the scrollbar cannot accurately represent the
-/// relative location of the visible area, or calculate the accurate delta to
-/// apply when  dragging on the thumb or tapping on the track.
+/// If the child [ScrollView] is infinitely long, the [RawScrollbar] will maintain a
+/// position relative to the know scroll offset. In this case, the scrollbar
+/// cannot accurately represent the relative location of the visible area, or
+/// calculate the accurate delta to apply when  dragging on the thumb or tapping
+/// on the track. In order to paint, the scrollbar will assume 1000 pixels ahead
+/// of itself, with the addition of the current scroll behind it. How the
+/// scrollbar adjusts in real-time to this calculation can be configured with
+/// [infiniteBehavior]. By default the scrollbar uses
+/// [InfiniteScrollBehavior.continuous] always assuming a fixed pixel distance
+/// ahead of the scrollbar thumb. [InfiniteScrollBehavior.chunk], will only
+/// assume more distance when it reached the end of the current approximated
+/// extent, as if more content had been appended or loaded as the end was
+/// reached.
 ///
 /// ### Interaction
 ///
@@ -836,7 +902,8 @@ class RawScrollbar extends StatefulWidget {
     this.interactive,
     this.scrollbarOrientation,
     this.mainAxisMargin = 0.0,
-    this.crossAxisMargin = 0.0
+    this.crossAxisMargin = 0.0,
+    this.infiniteBehavior,
   }) : assert(child != null),
        assert(minThumbLength != null),
        assert(minThumbLength >= 0),
@@ -1116,6 +1183,9 @@ class RawScrollbar extends StatefulWidget {
   /// Must not be null and defaults to 0.
   final double crossAxisMargin;
 
+  /// Doc
+  final InfiniteScrollBehavior? infiniteBehavior;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1192,7 +1262,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
-      crossAxisMargin: widget.crossAxisMargin
+      crossAxisMargin: widget.crossAxisMargin,
+      infiniteBehavior: widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous,
     );
   }
 
@@ -1324,7 +1395,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
-      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;
+      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
+      ..infiniteBehavior = widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous;
   }
 
   @override
