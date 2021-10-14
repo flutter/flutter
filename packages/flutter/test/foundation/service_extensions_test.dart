@@ -448,23 +448,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{'enabled': 'true'});
+    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfilePaintsEnabled, true);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfilePaintsEnabled, true);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{'enabled': 'false'});
+    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectPaints', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfilePaintsEnabled, false);
 
@@ -477,23 +477,23 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{'enabled': 'true'});
+    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{'enabled': 'true'});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileLayoutsEnabled, true);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(debugProfileLayoutsEnabled, true);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{'enabled': 'false'});
+    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{'enabled': 'false'});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
-    result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
+    result = await binding.testExtension('profileRenderObjectLayouts', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileLayoutsEnabled, false);
 
