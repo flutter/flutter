@@ -23,6 +23,7 @@ import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
+import 'text_editing_delta.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -467,6 +468,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
+    this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -476,7 +478,8 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null);
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -622,6 +625,7 @@ class TextInputConfiguration {
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
     AutofillConfiguration? autofillConfiguration,
+    bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
       inputType: inputType ?? this.inputType,
@@ -636,8 +640,35 @@ class TextInputConfiguration {
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
+      enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
   }
+
+  /// Whether to enable that the engine sends text input updates to the
+  /// framework as [TextEditingDelta]'s or as one [TextEditingValue].
+  ///
+  /// Enabling this flag results in granular text updates being received from the
+  /// platform's text input control.
+  ///
+  /// When this is enabled:
+  ///  * You must implement [DeltaTextInputClient] and not [TextInputClient] to
+  ///    receive granular updates from the platform's text input.
+  ///  * Platform text input updates will come through
+  ///    [DeltaTextInputClient.updateEditingValueWithDeltas].
+  ///  * If [TextInputClient] is implemented with this property enabled then
+  ///    you will experience unexpected behavior as [TextInputClient] does not implement
+  ///    a delta channel.
+  ///
+  /// When this is disabled:
+  ///  * If [DeltaTextInputClient] is implemented then updates for the
+  ///    editing state will continue to come through the
+  ///    [DeltaTextInputClient.updateEditingValue] channel.
+  ///  * If [TextInputClient] is implemented then updates for the editing
+  ///    state will come through [TextInputClient.updateEditingValue].
+  ///
+  /// Defaults to false. Cannot be null.
+  final bool enableDeltaModel;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
@@ -655,6 +686,7 @@ class TextInputConfiguration {
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofill != null) 'autofill': autofill,
+      'enableDeltaModel' : enableDeltaModel,
     };
   }
 }
@@ -741,9 +773,38 @@ class TextEditingValue {
   final String text;
 
   /// The range of text that is currently selected.
+  ///
+  /// When [selection] is a [TextSelection] that has the same non-negative
+  /// `baseOffset` and `extentOffset`, the [selection] property represents the
+  /// caret position.
+  ///
+  /// If the current [selection] has a negative `baseOffset` or `extentOffset`,
+  /// then the text currently does not have a selection or a caret location, and
+  /// most text editing operations that rely on the current selection (for
+  /// instance, insert a character at the caret location) will do nothing.
   final TextSelection selection;
 
   /// The range of text that is still being composed.
+  ///
+  /// Composing regions are created by input methods (IMEs) to indicate the text
+  /// within a certain range is provisional. For instance, the Android Gboard
+  /// app's English keyboard puts the current word under the caret into a
+  /// composing region to indicate the word is subject to autocorrect or
+  /// prediction changes.
+  ///
+  /// Composing regions can also be used for performing multistage input, which
+  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// ideographic symbols. As an example, many CJK keyboards require the user to
+  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// iOS, the default software keyboards do not have a dedicated view to show
+  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// field, inside of a composing region.
+  ///
+  /// The composing region should typically only be changed by the IME, or the
+  /// user via interacting with the IME.
+  ///
+  /// If the range represented by this property is [TextRange.empty], then the
+  /// text is not currently being composed.
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
@@ -926,10 +987,15 @@ mixin TextSelectionDelegate {
 
 /// An interface to receive information from [TextInput].
 ///
+/// If [TextInputConfiguration.enableDeltaModel] is set to true,
+/// [DeltaTextInputClient] must be implemented instead of this class.
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
 ///  * [EditableText], a [TextInputClient] implementation.
+///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
+///    granular information from the platform's text input.
 abstract class TextInputClient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -987,6 +1053,36 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+}
+
+/// An interface to receive granular information from [TextInput].
+///
+/// See also:
+///
+///  * [TextInput.attach]
+///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
+///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
+abstract class DeltaTextInputClient extends TextInputClient {
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// Here is an example of what implementation of this method could look like:
+  /// {@tool snippet}
+  /// @override
+  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///   TextEditingValue newValue = _previousValue;
+  ///   for (final TextEditingDelta delta in textEditingDeltas) {
+  ///     newValue = delta.apply(newValue);
+  ///   }
+  ///   _localValue = newValue;
+  /// }
+  /// {@end-tool}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
 /// An interface for interacting with a text input control.
@@ -1446,6 +1542,19 @@ class TextInput {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+
+        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));

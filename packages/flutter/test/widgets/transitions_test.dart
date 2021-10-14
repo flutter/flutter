@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Rect;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -22,12 +23,9 @@ void main() {
       begin: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         border: Border.all(
-          color: const Color(0xFF000000),
-          style: BorderStyle.solid,
           width: 4.0,
         ),
         borderRadius: BorderRadius.zero,
-        shape: BoxShape.rectangle,
         boxShadow: const <BoxShadow> [BoxShadow(
           color: Color(0x66000000),
           blurRadius: 10.0,
@@ -38,11 +36,8 @@ void main() {
         color: const Color(0xFF000000),
         border: Border.all(
           color: const Color(0xFF202020),
-          style: BorderStyle.solid,
-          width: 1.0,
         ),
-        borderRadius: BorderRadius.circular(10.0),
-        shape: BoxShape.rectangle,
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         // No shadow.
       ),
     );
@@ -84,7 +79,7 @@ void main() {
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF101010));
-      expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
+      expect(actualDecoration.borderRadius, const BorderRadius.all(Radius.circular(5.0)));
       expect(actualDecoration.shape, BoxShape.rectangle);
       expect(actualDecoration.boxShadow![0].blurRadius, 5.0);
       expect(actualDecoration.boxShadow![0].spreadRadius, 2.0);
@@ -174,6 +169,52 @@ void main() {
     expect(actualAlignment, const Alignment(0.0, 0.5));
   });
 
+  testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<Rect?> rectTween = RectTween(
+      begin: const Rect.fromLTWH(0, 0, 30, 40),
+      end: const Rect.fromLTWH(100, 200, 100, 200),
+    ).animate(controller);
+    final Widget widget = Directionality(
+      textDirection: TextDirection.rtl,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: <Widget>[
+          RelativePositionedTransition(
+            size: const Size(200, 300),
+            rect: rectTween,
+            child: const Placeholder(),
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final Positioned actualPositioned = tester.widget(find.byType(Positioned));
+    final RenderBox renderBox = tester.renderObject(find.byType(Placeholder));
+
+    Rect actualRect = Rect.fromLTRB(
+      actualPositioned.left!,
+      actualPositioned.top!,
+      actualPositioned.right ?? 0.0,
+      actualPositioned.bottom ?? 0.0,
+    );
+    expect(actualRect, equals(const Rect.fromLTRB(0, 0, 170, 260)));
+    expect(renderBox.size, equals(const Size(630, 340)));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualRect = Rect.fromLTRB(
+      actualPositioned.left!,
+      actualPositioned.top!,
+      actualPositioned.right ?? 0.0,
+      actualPositioned.bottom ?? 0.0,
+    );
+    expect(actualRect, equals(const Rect.fromLTWH(0, 0, 170, 260)));
+    expect(renderBox.size, equals(const Size(665, 420)));
+  });
+
   testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Alignment> alignmentTween = AlignmentTween(
@@ -202,7 +243,6 @@ void main() {
     final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
-        axis: Axis.vertical,
         sizeFactor: animation,
         child: const Text('Ready'),
       ),

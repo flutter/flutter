@@ -24,12 +24,10 @@ import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
 
 const String linuxFlutterRoot = '/flutter';
 const String windowsFlutterRoot = r'C:\flutter';
@@ -164,7 +162,6 @@ const String defaultConfigLinux2 = r'''
 ''';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': linuxFlutterRoot,
     'HOME': '/',
@@ -235,6 +232,8 @@ class FakeTerminal implements Terminal {
       displayAcceptedCharacters: displayAcceptedCharacters
     );
 
+  @override
+  bool get singleCharMode => terminal.singleCharMode;
   @override
   set singleCharMode(bool value) => terminal.singleCharMode = value;
 
@@ -462,9 +461,7 @@ void main() {
     testUsingContext(
       'custom-devices add command fails when feature is not enabled',
       () async {
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          featureEnabled: false
-        );
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner();
         expect(
           runner.run(const <String>['custom-devices', 'add']),
           throwsToolExit(message: featureNotEnabledMessage),
@@ -555,7 +552,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -644,7 +641,7 @@ void main() {
                 '-w', '1',
                 '192.168.178.1'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -733,7 +730,7 @@ void main() {
                 '-w', '1',
                 '::1'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -826,7 +823,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: <String>[],
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -906,7 +903,7 @@ void main() {
                 '-w', '1',
                 'testhostname'
               ],
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1230,7 +1227,7 @@ void main() {
                 'testhostname'
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-              postBuildCommand: null,
+              postBuildCommand: const <String>[],
               installCommand: const <String>[
                 'scp',
                 '-r',

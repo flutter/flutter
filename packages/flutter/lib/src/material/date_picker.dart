@@ -113,7 +113,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -874,7 +874,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample --template=stateful_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1310,7 +1310,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
-        shape = const RoundedRectangleBorder(borderRadius: BorderRadius.zero);
+        shape = const RoundedRectangleBorder();
         elevation = 0;
         break;
 
@@ -1654,7 +1654,10 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
       case TargetPlatform.fuchsia:
         HapticFeedback.vibrate();
         break;
-      default:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
   }
@@ -2271,7 +2274,7 @@ class _MonthItemState extends State<_MonthItem> {
       // border.
       itemStyle = textTheme.bodyText2?.apply(color: colorScheme.primary);
       decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary, width: 1),
+        border: Border.all(color: colorScheme.primary),
         shape: BoxShape.circle,
       );
     }

@@ -634,7 +634,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
   }
 }
 
-TargetPlatform? getTargetPlatformForName(String platform) {
+TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
     case 'android':
       return TargetPlatform.android;
@@ -669,8 +669,7 @@ TargetPlatform? getTargetPlatformForName(String platform) {
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
-  assert(platform != null);
-  return null;
+  throw Exception('Unsupported platform name "$platform"');
 }
 
 AndroidArch getAndroidArchForName(String platform) {
@@ -719,7 +718,19 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
       return 'arm64';
     case TargetPlatform.fuchsia_x64:
       return 'x64';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+    case TargetPlatform.darwin:
+    case TargetPlatform.ios:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       throw UnsupportedError('Unexpected Fuchsia platform $targetPlatform');
   }
 }
@@ -964,7 +975,17 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
       return 'x64';
     case TargetPlatform.linux_arm64:
       return 'arm64';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.ios:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
       throw UnsupportedError('Unexpected target platform $platform');
   }
 }

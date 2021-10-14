@@ -109,7 +109,7 @@ void main() {
           Uri.parse('/foo/bar/'),
         );
         TestAsyncUtils.verifyAllScopesClosed();
-        throw 'unexpectedly did not throw';
+        fail('unexpectedly did not throw');
       } on FlutterError catch (e) {
         final List<String> lines = e.message.split('\n');
         expectSync(lines[0], 'Asynchronous call to guarded function leaked.');
@@ -162,7 +162,7 @@ void main() {
               ..writeAsBytesSync(_kExpectedPngBytes);
             fs.currentDirectory = fix('/foo/bar');
             comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
-            final bool success = await doComparison('golden.png');
+            final bool success = await doComparison();
             expect(success, isTrue);
           });
 

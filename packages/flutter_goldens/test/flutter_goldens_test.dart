@@ -8,18 +8,19 @@
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
 
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
+
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
 import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -40,17 +41,6 @@ const List<int> _kFailPngBytes =
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84,
   120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
   0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
-
-Future<void> testWithOutput(String name, Future<void> Function() body, String expectedOutput) async {
-  test(name, () async {
-    final StringBuffer output = StringBuffer();
-    void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
-      output.write(line);
-    }
-    await runZoned<Future<void>>(body, zoneSpecification: ZoneSpecification(print: _recordPrint));
-    expect(output.toString(), expectedOutput);
-  });
-}
 
 void main() {
   late MemoryFileSystem fs;
@@ -210,7 +200,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () {
+    test('Creates traceID correctly', () async {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -232,10 +222,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
       );
 
       // Browser
@@ -260,10 +249,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('e9d5c296c48e7126808520e9cc191243'),
       );
 
       // Locally - should defer to luci traceID
@@ -283,10 +271,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 
@@ -572,7 +559,6 @@ void main() {
 
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.expectationForTestValues['flutter.new_golden_test.1'] = '';
         fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
       });
@@ -586,32 +572,6 @@ void main() {
           isTrue,
         );
       });
-
-      testWithOutput('passes non-existent baseline for new test, null expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. '
-         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-         'Validate image output found at flutter/test/library/'
-      );
-
-      testWithOutput('passes non-existent baseline for new test, empty expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.2'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2. '
-        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-        'Validate image output found at flutter/test/library/'
-      );
 
       test('compare properly awaits validation & output before failing.', () async {
         final Completer<bool> completer = Completer<bool>();
@@ -716,17 +676,17 @@ class FakeProcessManager extends Fake implements ProcessManager {
     workingDirectories.add(workingDirectory);
     final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
     if (result == null && fallbackProcessResult == null) {
-      // Throwing here might gobble up the exception message if a test fails.
-      print('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
+      printOnFailure('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
       fail('See above.');
     }
     return result ?? fallbackProcessResult!;
   }
 }
 
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
-  Object? getExpectationForTestThrowable;
+  Exception? getExpectationForTestThrowable;
   @override
   Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {

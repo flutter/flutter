@@ -19,7 +19,6 @@ void main() {
         child: GridView.count(
           dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children: const <Widget>[],
         ),
       ),
     );

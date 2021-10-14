@@ -62,7 +62,7 @@ void main() {
     expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
 
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 
   testWithoutContext('simple build appbundle all targets succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
@@ -105,7 +105,7 @@ void main() {
     expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
 
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 
   testWithoutContext('simple build appbundle no-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
@@ -151,7 +151,7 @@ void main() {
     expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
 
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 
   testWithoutContext('simple build appbundle mismatched golden no-validate-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
@@ -198,7 +198,7 @@ void main() {
     expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
 
     expect(result.exitCode, 0);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 
   testWithoutContext('simple build appbundle missing android dynamic feature module fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(NoAndroidDynamicFeatureModuleDeferredComponentsConfig());

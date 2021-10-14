@@ -51,7 +51,6 @@ void main() {
     const DialogTheme(
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
-      shape: null,
       alignment: Alignment.bottomLeft,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),

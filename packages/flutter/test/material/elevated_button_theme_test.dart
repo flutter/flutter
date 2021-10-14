@@ -33,7 +33,7 @@ void main() {
     expect(material.color, colorScheme.primary);
     expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -178,7 +178,7 @@ void main() {
     });
 
     testWidgets('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), themeStyle: null, overallStyle: style));
+      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });

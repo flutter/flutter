@@ -151,7 +151,6 @@ Future<void> run(List<String> args) async {
         ),
       ),
       watcher: collector,
-      ipv6: false,
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),

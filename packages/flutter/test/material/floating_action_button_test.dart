@@ -909,7 +909,7 @@ void main() {
         isFocusable: true,
       ),
     );
-  }, semanticsEnabled: true);
+  });
 
   testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xcafefeed);

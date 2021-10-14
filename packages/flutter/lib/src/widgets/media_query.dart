@@ -255,7 +255,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing

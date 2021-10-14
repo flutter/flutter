@@ -5,7 +5,6 @@
 library component1;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 
 class LogoScreen extends StatelessWidget {
@@ -17,14 +16,14 @@ class LogoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     print(_testSentinel);
     return Container(
+      padding: const EdgeInsets.all(25),
+      color: Colors.blue,
       child: Column(
         children: <Widget>[
-            const Text('DeferredWidget', key: Key('DeferredWidget')),
-            Image.asset('customassets/flutter_logo.png', key: const Key('DeferredImage')),
-          ]
-        ),
-        padding: const EdgeInsets.all(25),
-        color: Colors.blue,
-      );
-   }
+          const Text('DeferredWidget', key: Key('DeferredWidget')),
+          Image.asset('customassets/flutter_logo.png', key: const Key('DeferredImage')),
+        ],
+      ),
+    );
+  }
 }

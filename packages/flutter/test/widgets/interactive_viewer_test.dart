@@ -68,14 +68,12 @@ void main() {
     testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 10.0;
-      const double minScale = 0.8;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),
@@ -201,6 +199,42 @@ void main() {
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
     });
 
+    testWidgets('child has no dimensions', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                scaleEnabled: false,
+                transformationController: transformationController,
+                child: const SizedBox(width: 0.0, height: 0.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Interacting throws an error because the child has no size.
+      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      final TestGesture gesture = await tester.startGesture(childOffset);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childInterior);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(tester.takeException(), isAssertionError);
+    });
+
     testWidgets('no boundary', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double minScale = 0.8;
@@ -210,7 +244,6 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(double.infinity),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),
@@ -342,14 +375,12 @@ void main() {
     testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
-      const double minScale = 0.8;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                minScale: minScale,
                 transformationController: transformationController,
                 child: const SizedBox(width: 200.0, height: 200.0),
               ),

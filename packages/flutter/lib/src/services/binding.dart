@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -114,7 +113,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.

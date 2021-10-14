@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer' show Flow, Timeline;
+import 'dart:developer' show Flow, Timeline, TimelineTask;
 import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
@@ -851,7 +851,7 @@ mixin SchedulerBinding on BindingBase {
       return;
 
     _warmUpFrame = true;
-    Timeline.startSync('Warm-up frame');
+    final TimelineTask timelineTask = TimelineTask()..start('Warm-up frame');
     final bool hadScheduledFrame = _hasScheduledFrame;
     // We use timers here to ensure that microtasks flush in between.
     Timer.run(() {
@@ -879,7 +879,7 @@ mixin SchedulerBinding on BindingBase {
     // scheduled frame has finished.
     lockEvents(() async {
       await endOfFrame;
-      Timeline.finishSync();
+      timelineTask.finish();
     });
   }
 
@@ -996,6 +996,8 @@ mixin SchedulerBinding on BindingBase {
     handleDrawFrame();
   }
 
+  final TimelineTask? _frameTimelineTask = kReleaseMode ? null : TimelineTask();
+
   /// Called by the engine to prepare the framework to produce a new frame.
   ///
   /// This function calls all the transient frame callbacks registered by
@@ -1020,7 +1022,7 @@ mixin SchedulerBinding on BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration? rawTimeStamp) {
-    Timeline.startSync('Frame', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    _frameTimelineTask?.start('Frame', arguments: timelineArgumentsIndicatingLandmarkEvent);
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
@@ -1047,7 +1049,7 @@ mixin SchedulerBinding on BindingBase {
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      _frameTimelineTask?.start('Animate', arguments: timelineArgumentsIndicatingLandmarkEvent);
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
@@ -1072,7 +1074,7 @@ mixin SchedulerBinding on BindingBase {
   /// useful when working with frame callbacks.
   void handleDrawFrame() {
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
-    Timeline.finishSync(); // end the "Animate" phase
+    _frameTimelineTask?.finish(); // end the "Animate" phase
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
@@ -1088,7 +1090,7 @@ mixin SchedulerBinding on BindingBase {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
-      Timeline.finishSync(); // end the Frame
+      _frameTimelineTask?.finish(); // end the Frame
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner!.length);

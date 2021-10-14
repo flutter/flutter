@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dds/dds.dart' as dds;
 import 'package:file/memory.dart';
@@ -406,7 +405,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
     expect(result.code, 1);
     expect((globals.flutterUsage as TestUsage).events, contains(
@@ -415,6 +414,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -436,7 +436,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice._devFS = null;
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
     expect(result.fatal, false);
     expect(result.code, 1);
     expect(result.message, contains('Device initialization has not completed.'));
@@ -459,7 +459,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice.reportError = vm_service.RPCError('something bad happened', kIsolateReloadBarred, '');
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
     expect(result.code, kIsolateReloadBarred);
     expect(result.message, contains('Unable to hot reload application due to an unrecoverable error'));
@@ -470,6 +470,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -506,7 +507,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
     expect(result.fatal, true);
     expect(result.code, 1);
 
@@ -516,6 +517,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -559,9 +561,9 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 0);
+    flutterDevice.report =  UpdateFSReport(success: true);
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
 
     expect(result.code, 0);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -619,7 +621,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
 
     expect(globals.fs.file(globals.fs.path.join('lib', 'main.dart')), isNot(exists));
     expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
@@ -683,7 +685,7 @@ void main() {
     await futureAppStart.future;
     flutterDevice.report =  UpdateFSReport(success: true, invalidatedSourcesCount: 1);
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
 
     expect(result.fatal, false);
     expect(result.message, contains('Reload rejected: Failed to hot reload')); // contains error message from reload report.
@@ -742,7 +744,7 @@ void main() {
     ));
     await futureAppStart.future;
 
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
     expect(result.fatal, false);
     expect(result.code, 0);
 
@@ -797,7 +799,7 @@ void main() {
         },
       ),
     ]);
-    final FakeDelegateFlutterDevice flutterDevice =  FakeDelegateFlutterDevice(
+    final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
       device,
       BuildInfo.debug,
       FakeResidentCompiler(),
@@ -827,7 +829,7 @@ void main() {
     ));
 
     await futureAppStart.future;
-    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    final OperationResult result = await residentRunner.restart();
 
     expect(result.fatal, false);
     expect(result.code, 0);
@@ -838,7 +840,7 @@ void main() {
     expect(event.parameters.fastReassemble, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
     Usage: () => TestUsage(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
@@ -1117,6 +1119,7 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: true,
+        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1423,7 +1426,7 @@ void main() {
       devtoolsHandler: createNoOpHandler,
     );
 
-    final Future<int> result = residentRunner.attach(enableDevTools: false);
+    final Future<int> result = residentRunner.attach();
     expect(await result, 0);
   }));
 
@@ -1682,7 +1685,7 @@ void main() {
         nullSafetyMode: NullSafetyMode.unsound,
       ),
       target: null,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -1713,7 +1716,7 @@ void main() {
         extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
       ),
       target: null,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
@@ -1733,7 +1736,7 @@ void main() {
 
   testUsingContext('FlutterDevice passes flutter-widget-cache flag when feature is enabled', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.android_arm);
+    final FakeDevice device = FakeDevice();
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
       device,
@@ -1757,7 +1760,7 @@ void main() {
 
    testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.android_arm);
+    final FakeDevice device = FakeDevice();
 
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
@@ -1781,7 +1784,7 @@ void main() {
 
    testUsingContext('FlutterDevice passes initializeFromDill parameter if specified', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.android_arm);
+    final FakeDevice device = FakeDevice();
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
       device,
@@ -2054,7 +2057,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Uri testUri;
   UpdateFSReport report = UpdateFSReport(
     success: true,
-    syncedBytes: 0,
     invalidatedSourcesCount: 1,
   );
   Object reportError;
@@ -2192,6 +2194,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     @required String projectRootPath,
     @required FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
@@ -2220,6 +2223,9 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String sdkNameAndVersion = 'Android',

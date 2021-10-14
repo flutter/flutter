@@ -4,12 +4,13 @@
 
 import 'dart:io' show Process, Directory;
 
-import 'package:flutter_devicelab/framework/devices.dart' as adb;
-import 'package:flutter_devicelab/framework/framework.dart' show TaskFunction;
-import 'package:flutter_devicelab/framework/task_result.dart' show TaskResult;
-import 'package:flutter_devicelab/framework/utils.dart' as utils;
-import 'package:flutter_devicelab/microbenchmarks.dart' as microbenchmarks;
 import 'package:path/path.dart' as path;
+
+import '../framework/devices.dart' as adb;
+import '../framework/framework.dart' show TaskFunction;
+import '../framework/task_result.dart' show TaskResult;
+import '../framework/utils.dart' as utils;
+import '../microbenchmarks.dart' as microbenchmarks;
 
 TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
   return () async {

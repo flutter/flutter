@@ -216,7 +216,6 @@ void main() {
   testWidgets('Null dialog shape', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
-      shape: null,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -1257,9 +1256,7 @@ void main() {
     );
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           child: Placeholder(),
         ),
@@ -1283,9 +1280,7 @@ void main() {
     // Test with no padding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: null,
           child: Placeholder(),
@@ -1298,9 +1293,7 @@ void main() {
     // Test with an insetPadding
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          viewInsets: EdgeInsets.zero,
-        ),
+        data: MediaQueryData(),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
           child: Placeholder(),
@@ -1317,54 +1310,6 @@ void main() {
         screenRect.bottom - 40.0,
       ),
     );
-  });
-
-  testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: Text('Title'),
-                          content: Text('Y'),
-                          actions: <Widget>[],
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, isNot(includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    )));
-
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-
-    expect(semantics, includesNodeWith(
-      label: 'Title',
-      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-    ));
-
-    semantics.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
@@ -1400,7 +1345,6 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1569,7 +1513,6 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 5,
-                          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                           label: 'title',
                           textDirection: TextDirection.ltr,
                         ),
