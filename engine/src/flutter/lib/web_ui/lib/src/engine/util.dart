@@ -422,8 +422,20 @@ const Set<String> _genericFontFamilies = <String>{
 ///
 /// For iOS, default to -apple-system, where it should be available, otherwise
 /// default to Arial. BlinkMacSystemFont is used for Chrome on iOS.
-final String _fallbackFontFamily =
-    isMacOrIOS ? '-apple-system, BlinkMacSystemFont' : 'Arial';
+String get _fallbackFontFamily {
+  if (isIOS15) {
+    // Remove the "-apple-system" fallback font because it causes a crash in
+    // iOS 15.
+    //
+    // See github issue: https://github.com/flutter/flutter/issues/90705
+    // See webkit bug: https://bugs.webkit.org/show_bug.cgi?id=231686
+    return 'BlinkMacSystemFont';
+  }
+  if (isMacOrIOS) {
+    return '-apple-system, BlinkMacSystemFont';
+  }
+  return 'Arial';
+}
 
 /// Create a font-family string appropriate for CSS.
 ///
