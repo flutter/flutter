@@ -175,9 +175,9 @@ class PaintingContext extends ClipContext {
   /// into the layer subtree associated with this painting context. Otherwise,
   /// the child will be painted into the current PictureLayer for this context.
   void paintChild(RenderObject child, Offset offset) {
+    if (!kReleaseMode && debugProfilePaintsEnabled)
+      Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
     assert(() {
-      if (debugProfilePaintsEnabled)
-        Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
       debugOnProfilePaint?.call(child);
       return true;
     }());
@@ -189,11 +189,8 @@ class PaintingContext extends ClipContext {
       child._paintWithContext(this, offset);
     }
 
-    assert(() {
-      if (debugProfilePaintsEnabled)
-        Timeline.finishSync();
-      return true;
-    }());
+    if (!kReleaseMode && debugProfilePaintsEnabled)
+      Timeline.finishSync();
   }
 
   void _compositeChild(RenderObject child, Offset offset) {

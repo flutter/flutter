@@ -28,6 +28,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
@@ -491,6 +492,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     drawerTheme ??= const DrawerThemeData();
+    listTileTheme ??= const ListTileThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
@@ -892,8 +894,13 @@ class ThemeData with Diagnosticable {
   )
   final Brightness accentColorBrightness;
 
-  /// The default color of [MaterialType.canvas] [Material].
-  final Color canvasColor;
+  /// The focus color used indicate that a component has the input focus.
+  final Color focusColor;
+
+  /// The hover color used to indicate when a pointer is hovering over a
+  /// component.
+  final Color hoverColor;
+
 
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
@@ -905,6 +912,10 @@ class ThemeData with Diagnosticable {
   /// opacity. The [applyElevationOverlayColor] property turns the elevation
   /// overlay on or off for dark themes.
   final Color shadowColor;
+
+  /// The default color of [MaterialType.canvas] [Material].
+  final Color canvasColor;
+
 
   /// The default color of the [Material] that underlies the [Scaffold]. The
   /// background color for a typical material app or a page within the app.
@@ -924,13 +935,6 @@ class ThemeData with Diagnosticable {
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
   final Color dividerColor;
-
-  /// The focus color used indicate that a component has the input focus.
-  final Color focusColor;
-
-  /// The hover color used to indicate when a pointer is hovering over a
-  /// component.
-  final Color hoverColor;
 
   /// The highlight color used during ink splash animations or to
   /// indicate an item in a menu is selected.
@@ -1675,6 +1679,7 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
+      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
       cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t)!,
@@ -1758,7 +1763,8 @@ class ThemeData with Diagnosticable {
         && other.primaryColorDark == primaryColorDark
         && other.accentColor == accentColor
         && other.accentColorBrightness == accentColorBrightness
-        // TODO(plg): Add focusColor, hoverColor, https://github.com/flutter/flutter/issues/91587
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
         && other.shadowColor == shadowColor
         // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
         && other.canvasColor == canvasColor
@@ -1853,7 +1859,8 @@ class ThemeData with Diagnosticable {
       primaryColorDark,
       accentColor,
       accentColorBrightness,
-      // TODO(plg): Add focusColor, hoverColor, https://github.com/flutter/flutter/issues/91587
+      focusColor,
+      hoverColor,
       shadowColor,
       // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       canvasColor,
@@ -1958,6 +1965,7 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.debug));
