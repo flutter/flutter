@@ -1,4 +1,4 @@
-Signature: 2466fb1815ba3ba53e864c095ad390a5
+Signature: fc2b261fb44e48c83f00f4ab4eb98b2a
 
 UNUSED LICENSES:
 
@@ -4061,7 +4061,6 @@ FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrThreadSafeCache.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrAATriangulator.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrAATriangulator.h
-FILE: ../../../third_party/skia/src/gpu/geometry/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockOpTarget.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasPathOp.h
@@ -4074,6 +4073,7 @@ FILE: ../../../third_party/skia/src/gpu/ops/SmallPathShapeData.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/MiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/VectorXform.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/WangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
