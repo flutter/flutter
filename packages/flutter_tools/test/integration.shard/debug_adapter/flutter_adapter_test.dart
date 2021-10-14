@@ -7,6 +7,7 @@
 import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:pedantic/pedantic.dart';
 
 import '../../src/common.dart';
 import '../test_data/basic_project.dart';
@@ -37,16 +38,19 @@ void main() {
     final BasicProject _project = BasicProject();
     await _project.setUpIn(tempDir);
 
+    // Once the "topLevelFunction" output arrives, we can terminate the app.
+    unawaited(
+      dap.client.outputEvents
+          .firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction'))
+          .whenComplete(() => dap.client.terminate()),
+    );
+
     final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
       launch: () => dap.client
           .launch(
             cwd: _project.dir.path,
             toolArgs: <String>['-d', 'flutter-tester'],
-          )
-          // After the launch, wait a short period and send a terminate request
-          // as Flutter apps will continue to run forever.
-          .whenComplete(() => Future<void>.delayed(const Duration(milliseconds: 100)))
-          .whenComplete(() => dap.client.terminate()),
+          ),
     );
 
     final String output = _uniqueOutputLines(outputEvents);
@@ -64,17 +68,20 @@ void main() {
     final BasicProject _project = BasicProject();
     await _project.setUpIn(tempDir);
 
+    // Once the "topLevelFunction" output arrives, we can terminate the app.
+    unawaited(
+      dap.client.outputEvents
+          .firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction'))
+          .whenComplete(() => dap.client.terminate()),
+    );
+
     final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
       launch: () => dap.client
           .launch(
             cwd: _project.dir.path,
             noDebug: true,
             toolArgs: <String>['-d', 'flutter-tester'],
-          )
-          // After the launch, wait a short period and send a terminate request
-          // as Flutter apps will continue to run forever.
-          .whenComplete(() => Future<void>.delayed(const Duration(milliseconds: 100)))
-          .whenComplete(() => dap.client.terminate()),
+          ),
     );
 
     final String output = _uniqueOutputLines(outputEvents);
@@ -96,11 +103,7 @@ void main() {
           .launch(
             cwd: _project.dir.path,
             toolArgs: <String>['-d', 'flutter-tester'],
-          )
-          // After the launch, wait a short period and send a terminate request
-          // as Flutter apps will continue to run forever.
-          .whenComplete(() => Future<void>.delayed(const Duration(milliseconds: 100)))
-          .whenComplete(() => dap.client.terminate()),
+          ),
     );
 
     final String output = _uniqueOutputLines(outputEvents);

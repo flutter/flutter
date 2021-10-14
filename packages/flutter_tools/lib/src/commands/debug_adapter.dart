@@ -38,6 +38,9 @@ class DebugAdapterCommand extends FlutterCommand {
   final String description = 'Run a Debug Adapter Protocol (DAP) server to communicate with devices.';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   final bool hidden;
 
   @override
