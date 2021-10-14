@@ -113,7 +113,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.

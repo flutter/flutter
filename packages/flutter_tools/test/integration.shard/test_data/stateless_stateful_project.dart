@@ -74,6 +74,10 @@ class HotReloadProject extends Project {
 
   void toggleState() {
     stateful = !stateful;
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), getCode(stateful));
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      getCode(stateful),
+      writeFutureModifiedDate: true,
+    );
   }
 }

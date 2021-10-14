@@ -25,8 +25,7 @@ Future<void> main() async {
     throw Exception('The conductor only supports MacOS and Linux desktop');
   }
   final File _stateFile = _fs.file(_stateFilePath);
-  final pb.ConductorState? state =
-      _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
+  final pb.ConductorState? state = _stateFile.existsSync() ? readStateFromFile(_stateFile) : null;
 
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp(state));
@@ -44,7 +43,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-// TODO(Yugue): Add theming, https://github.com/flutter/flutter/issues/90982.
       home: Scaffold(
         appBar: AppBar(
           title: const Text(_title),
@@ -53,12 +51,11 @@ class MyApp extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               const SelectableText(
                 'Desktop app for managing a release of the Flutter SDK, currently in development',
               ),
-              const SizedBox(height: 20.0),
+              const SizedBox(height: 10.0),
               MainProgression(
                 releaseState: state,
                 stateFilePath: _stateFilePath,

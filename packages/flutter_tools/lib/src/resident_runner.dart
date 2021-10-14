@@ -560,7 +560,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -1101,6 +1101,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
+  /// True if the shared Dart plugin registry (which is different than the one
+  /// used for web) should be generated during source generation.
+  bool get generateDartPluginRegistry => true;
+
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
   //
@@ -1152,7 +1156,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
@@ -1463,9 +1467,19 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }
 
 /// Redirects terminal commands to the correct resident runner methods.
@@ -1603,7 +1617,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        final OperationResult result = await residentRunner.restart();
         if (result.fatal) {
           throwToolExit(result.message);
         }

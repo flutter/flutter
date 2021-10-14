@@ -41,7 +41,6 @@ final Platform macosPlatform = FakePlatform(
   }
 );
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
@@ -96,6 +95,8 @@ void main() {
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
         '-sdk', 'iphoneos',
+        '-destination',
+        'generic/platform=iOS',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
         '-archivePath', '/build/ios/archive/Runner',

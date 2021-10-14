@@ -85,7 +85,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
 /// cursor at the end of the input.
@@ -916,7 +916,7 @@ class EditableText extends StatefulWidget {
   /// and selection, one can add a listener to its [controller] with
   /// [TextEditingController.addListener].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
@@ -2006,9 +2006,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    final ValueChanged<String>? onSubmitted = widget.onSubmitted;
+    if (onSubmitted == null) {
+      return;
+    }
+
     // Invoke optional callback with the user's submitted content.
     try {
-      widget.onSubmitted?.call(_value.text);
+      onSubmitted(_value.text);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -2016,6 +2021,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         library: 'widgets',
         context: ErrorDescription('while calling onSubmitted for $action'),
       ));
+    }
+
+    // If `shouldUnfocus` is true, the text field should no longer be focused
+    // after the microtask queue is drained. But in case the developer cancelled
+    // the focus change in the `onSubmitted` callback by focusing this input
+    // field again, reset the soft keyboard.
+    // See https://github.com/flutter/flutter/issues/84240.
+    //
+    // `_restartConnectionIfNeeded` creates a new TextInputConnection to replace
+    // the current one. This on iOS switches to a new input view and on Android
+    // restarts the input method, and in both cases the soft keyboard will be
+    // reset.
+    if (shouldUnfocus) {
+      _scheduleRestartConnection();
     }
   }
 
@@ -2159,6 +2178,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textAlign: widget.textAlign,
         )
         ..setEditingState(localValue);
+        _lastKnownRemoteTextEditingValue = localValue;
     } else {
       _textInputConnection!.show();
     }
@@ -2180,6 +2200,47 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.controller.clearComposing();
     }
   }
+
+  bool _restartConnectionScheduled = false;
+  void _scheduleRestartConnection() {
+    if (_restartConnectionScheduled) {
+      return;
+    }
+    _restartConnectionScheduled = true;
+    scheduleMicrotask(_restartConnectionIfNeeded);
+  }
+  // Discards the current [TextInputConnection] and establishes a new one.
+  //
+  // This method is rarely needed. This is currently used to reset the input
+  // type when the "submit" text input action is triggered and the developer
+  // puts the focus back to this input field..
+  void _restartConnectionIfNeeded() {
+    _restartConnectionScheduled = false;
+    if (!_hasInputConnection || !_shouldCreateInputConnection) {
+      return;
+    }
+    _textInputConnection!.close();
+    _textInputConnection = null;
+    _lastKnownRemoteTextEditingValue = null;
+
+    final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
+    final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
+      ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+    _textInputConnection = newConnection;
+
+    final TextStyle style = widget.style;
+    newConnection
+      ..setStyle(
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        textDirection: _textDirection,
+        textAlign: widget.textAlign,
+      )
+      ..setEditingState(_value);
+    _lastKnownRemoteTextEditingValue = _value;
+  }
+
 
   @override
   void connectionClosed() {
@@ -2746,9 +2807,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
-        scrollBehavior: widget.scrollBehavior ??
-            // Remove scrollbars if only single line
-            (_isMultiline ? null : ScrollConfiguration.of(context).copyWith(scrollbars: false)),
+        // If a ScrollBehavior is not provided, only apply scrollbars when
+        // multiline. The overscroll indicator should not be applied in
+        // either case, glowing or stretching.
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+            scrollbars: _isMultiline,
+            overscroll: false,
+        ),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

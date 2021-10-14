@@ -90,7 +90,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
           case Thumb.end:
             thumbPath = _leftTriangle(size, center);
             break;
-          default:
+          case null:
             break;
         }
         break;
@@ -102,11 +102,11 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
           case Thumb.end:
             thumbPath = _rightTriangle(size, center);
             break;
-          default:
+          case null:
             break;
         }
         break;
-      default:
+      case null:
         break;
     }
     canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
@@ -284,7 +284,6 @@ class _SlidersState extends State<_Sliders> {
               Slider.adaptive(
                 label: _continuousValue.toStringAsFixed(6),
                 value: _continuousValue,
-                min: 0.0,
                 max: 100.0,
                 onChanged: (double value) {
                   setState(() {
@@ -307,7 +306,6 @@ class _SlidersState extends State<_Sliders> {
             children: <Widget>[
               Slider.adaptive(
                 value: _discreteValue,
-                min: 0.0,
                 max: 200.0,
                 divisions: 5,
                 label: '${_discreteValue.round()}',
@@ -338,7 +336,6 @@ class _SlidersState extends State<_Sliders> {
                 ),
                 child: Slider(
                   value: _discreteCustomValue,
-                  min: 0.0,
                   max: 200.0,
                   divisions: 5,
                   semanticFormatterCallback: (double value) => value.round().toString(),
@@ -381,7 +378,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
             children: <Widget>[
               RangeSlider(
                 values: _continuousValues,
-                min: 0.0,
                 max: 100.0,
                 onChanged: (RangeValues values) {
                   setState(() {
@@ -404,7 +400,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
             children: <Widget>[
               RangeSlider(
                 values: _discreteValues,
-                min: 0.0,
                 max: 200.0,
                 divisions: 5,
                 labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
@@ -433,7 +428,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 ),
                 child: RangeSlider(
                   values: _discreteCustomValues,
-                  min: 0.0,
                   max: 200.0,
                   divisions: 5,
                   labels: RangeLabels('${_discreteCustomValues.start.round()}', '${_discreteCustomValues.end.round()}'),

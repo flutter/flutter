@@ -17,7 +17,7 @@ import 'framework.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// These two images have two [ColorFilter]s applied with different [BlendMode]s,
 /// one with red color and [BlendMode.modulate] another with a grey color and [BlendMode.saturation].
 ///

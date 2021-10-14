@@ -100,7 +100,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
         return const Offset(_kHandleSize, 0);
       case TextSelectionHandleType.right:
         return Offset.zero;
-      default:
+      case TextSelectionHandleType.collapsed:
         return const Offset(_kHandleSize / 2, -4);
     }
   }

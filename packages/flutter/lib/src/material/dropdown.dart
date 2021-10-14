@@ -195,8 +195,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        child: child,
         borderRadius: itemBorderRadius,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
@@ -360,7 +360,6 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: width,
       maxWidth: width,
-      minHeight: 0.0,
       maxHeight: maxHeight,
     );
   }
@@ -812,7 +811,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
 /// "Two", "Free", or "Four".
@@ -870,7 +869,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.value,
     this.hint,
     this.disabledHint,
-    this.onChanged,
+    required this.onChanged,
     this.onTap,
     this.elevation = 8,
     this.style,
@@ -968,7 +967,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// from the list corresponds to the [DropdownMenuItem] of the same index
   /// in [items].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
   ///
@@ -993,7 +992,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// To use a separate text style for selected item when it's displayed within
   /// the dropdown button, consider using [selectedItemBuilder].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
   ///
@@ -1518,7 +1517,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     T? value,
     Widget? hint,
     Widget? disabledHint,
-    this.onChanged,
+    required this.onChanged,
     VoidCallback? onTap,
     int elevation = 8,
     TextStyle? style,

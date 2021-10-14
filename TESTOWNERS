@@ -34,6 +34,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__start_up.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/flutter_gallery__start_up_delayed.dart @dnfield @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_hybrid.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_with_semantics.dart @zanderso @flutter/engine
@@ -175,6 +176,7 @@
 /dev/devicelab/bin/tasks/native_ui_tests_ios.dart @jmagman @flutter/engine
 /dev/devicelab/bin/tasks/native_ui_tests_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web

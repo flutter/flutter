@@ -136,7 +136,7 @@ class PageStorageBucket {
 /// you should give each of them unique [PageStorageKey]s, or set some of their
 /// `keepScrollOffset` false to prevent saving.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample shows how to explicitly use a [PageStorage] to
 /// store the states of its children pages. Each page includes a scrollable
 /// list, whose position is preserved when switching between the tabs thanks to

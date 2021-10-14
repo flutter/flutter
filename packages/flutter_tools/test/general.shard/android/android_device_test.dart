@@ -56,7 +56,7 @@ void main() {
     );
     final AndroidDevice linuxDevice = setUpAndroidDevice(
       processManager: FakeProcessManager.list(commands.toList()),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     );
     final AndroidDevice macOsDevice = setUpAndroidDevice(
       processManager: FakeProcessManager.list(commands.toList()),
@@ -469,7 +469,7 @@ AndroidDevice setUpAndroidDevice({
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
     logger: BufferLogger.test(),
-    platform: platform ?? FakePlatform(operatingSystem: 'linux'),
+    platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     processManager: processManager ?? FakeProcessManager.any(),
