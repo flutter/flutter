@@ -752,11 +752,16 @@ void main() {
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     ThemeData.light().debugFillProperties(properties);
-    final Set<String> propertyNames = properties.properties
+    final List<String> propertyNameList = properties.properties
       .map((final DiagnosticsNode node) => node.name)
       .whereType<String>()
-      .toSet();
+      .toList();
+    final Set<String> propertyNames = propertyNameList.toSet();
 
+    // Ensure there are no duplicates.
+    expect(propertyNameList.length, propertyNames.length);
+
+    // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
 }
