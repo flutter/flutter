@@ -245,8 +245,30 @@ void main() {
     expect(expanded.maxHeight, equals(double.infinity));
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
+  test('copyWith, ==, hashCode basics', () {
+    expect(ThemeData(), ThemeData().copyWith());
+    expect(ThemeData().hashCode, ThemeData().copyWith().hashCode);
+  });
 
+  test('== and hashCode include focusColor and hoverColor', () {
+    // regression test for https://github.com/flutter/flutter/issues/91587
+
+    // Focus color and hover color are used in the default button theme, so
+    // use an empty one to ensure that just focus and hover colors are tested.
+    const ButtonThemeData buttonTheme = ButtonThemeData();
+
+    final ThemeData focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
+    expect(focusColorBlack != focusColorWhite, true);
+    expect(focusColorBlack.hashCode != focusColorWhite.hashCode, true);
+
+    final ThemeData hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
+    expect(hoverColorBlack != hoverColorWhite, true);
+    expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
+  });
+
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -641,7 +663,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 
-  testWidgets('ThemeData diagnostics include all properties', (WidgetTester tester) async {
+  test('ThemeData diagnostics include all properties', () {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       'visualDensity',
