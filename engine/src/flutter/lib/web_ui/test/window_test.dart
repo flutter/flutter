@@ -445,6 +445,7 @@ void testMain() {
 }
 
 void jsSetUrlStrategy(dynamic strategy) {
+  // ignore: implicit_dynamic_function
   js_util.callMethod(
     html.window,
     '_flutter_web_set_location_strategy',
