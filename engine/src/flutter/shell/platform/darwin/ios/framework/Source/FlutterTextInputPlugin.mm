@@ -896,6 +896,30 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   return _textInputClient != 0;
 }
 
+#pragma mark - UIResponderStandardEditActions Overrides
+
+- (void)cut:(id)sender {
+  [UIPasteboard generalPasteboard].string = [self textInRange:_selectedTextRange];
+  [self replaceRange:_selectedTextRange withText:@""];
+}
+
+- (void)copy:(id)sender {
+  [UIPasteboard generalPasteboard].string = [self textInRange:_selectedTextRange];
+}
+
+- (void)paste:(id)sender {
+  [self insertText:[UIPasteboard generalPasteboard].string];
+}
+
+- (void)delete:(id)sender {
+  [self replaceRange:_selectedTextRange withText:@""];
+}
+
+- (void)selectAll:(id)sender {
+  [self setSelectedTextRange:[self textRangeFromPosition:[self beginningOfDocument]
+                                              toPosition:[self endOfDocument]]];
+}
+
 #pragma mark - UITextInput Overrides
 
 - (id<UITextInputTokenizer>)tokenizer {
