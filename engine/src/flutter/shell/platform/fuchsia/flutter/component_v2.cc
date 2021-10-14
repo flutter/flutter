@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "component.h"
+#include "component_v2.h"
 
 #include <dlfcn.h>
 #include <fuchsia/mem/cpp/fidl.h>
@@ -59,18 +59,15 @@ std::string DebugLabelForUrl(const std::string& url) {
 
 }  // namespace
 
-void Component::ParseProgramMetadata(
-    const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
+void ComponentV2::ParseProgramMetadata(
+    const fuchsia::data::Dictionary& program_metadata,
     std::string* data_path,
     std::string* assets_path) {
-  if (!program_metadata.has_value()) {
-    return;
-  }
-  for (const auto& pg : *program_metadata) {
-    if (pg.key.compare(kDataKey) == 0) {
-      *data_path = "pkg/" + pg.value;
-    } else if (pg.key.compare(kAssetsKey) == 0) {
-      *assets_path = "pkg/" + pg.value;
+  for (const auto& entry : program_metadata.entries()) {
+    if (entry.key.compare(kDataKey) == 0 && entry.value != nullptr) {
+      *data_path = "pkg/" + entry.value->str();
+    } else if (entry.key.compare(kAssetsKey) == 0 && entry.value != nullptr) {
+      *assets_path = "pkg/" + entry.value->str();
     }
   }
 
@@ -80,21 +77,20 @@ void Component::ParseProgramMetadata(
   }
 }
 
-ActiveComponent Component::Create(
+ActiveComponentV2 ComponentV2::Create(
     TerminationCallback termination_callback,
-    fuchsia::sys::Package package,
-    fuchsia::sys::StartupInfo startup_info,
+    fuchsia::component::runner::ComponentStartInfo start_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-    fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
+    fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
+        controller) {
   auto thread = std::make_unique<fml::Thread>();
-  std::unique_ptr<Component> component;
+  std::unique_ptr<ComponentV2> component;
 
   fml::AutoResetWaitableEvent latch;
   thread->GetTaskRunner()->PostTask([&]() mutable {
-    component.reset(new Component(std::move(termination_callback),
-                                  std::move(package), std::move(startup_info),
-                                  runner_incoming_services,
-                                  std::move(controller)));
+    component.reset(
+        new ComponentV2(std::move(termination_callback), std::move(start_info),
+                        runner_incoming_services, std::move(controller)));
     latch.Signal();
   });
 
@@ -103,68 +99,81 @@ ActiveComponent Component::Create(
           .component = std::move(component)};
 }
 
-Component::Component(
+ComponentV2::ComponentV2(
     TerminationCallback termination_callback,
-    fuchsia::sys::Package package,
-    fuchsia::sys::StartupInfo startup_info,
+    fuchsia::component::runner::ComponentStartInfo start_info,
     std::shared_ptr<sys::ServiceDirectory> runner_incoming_services,
-    fidl::InterfaceRequest<fuchsia::sys::ComponentController>
+    fidl::InterfaceRequest<fuchsia::component::runner::ComponentController>
         component_controller_request)
     : termination_callback_(std::move(termination_callback)),
-      debug_label_(DebugLabelForUrl(startup_info.launch_info.url)),
+      debug_label_(DebugLabelForUrl(start_info.resolved_url())),
       component_controller_(this),
       outgoing_dir_(new vfs::PseudoDir()),
+      runtime_dir_(new vfs::PseudoDir()),
       runner_incoming_services_(runner_incoming_services),
       weak_factory_(this) {
-  component_controller_.set_error_handler(
-      [this](zx_status_t status) { Kill(); });
+  component_controller_.set_error_handler([this](zx_status_t status) {
+    FML_LOG(ERROR) << "ComponentController binding error for component("
+                   << debug_label_ << "): " << zx_status_get_string(status);
+    KillWithEpitaph(
+        zx_status_t(fuchsia::component::Error::INSTANCE_CANNOT_START));
+  });
 
   FML_DCHECK(fdio_ns_.is_valid());
-  // LaunchInfo::url non-optional.
-  auto& launch_info = startup_info.launch_info;
 
-  // LaunchInfo::arguments optional.
-  if (auto& arguments = launch_info.arguments) {
-    settings_.dart_entrypoint_args = arguments.value();
-  }
+  // TODO(fxb/50694): Dart launch arguments.
+  FML_LOG(WARNING) << "program() arguments are currently ignored (fxb/50694).";
 
   // Determine where data and assets are stored within /pkg.
   std::string data_path;
   std::string assets_path;
-  ParseProgramMetadata(startup_info.program_metadata, &data_path, &assets_path);
+  ParseProgramMetadata(start_info.program(), &data_path, &assets_path);
 
   if (data_path.empty()) {
     FML_DLOG(ERROR) << "Could not find a /pkg/data directory for "
-                    << package.resolved_url;
+                    << start_info.resolved_url();
     return;
   }
 
   // Setup /tmp to be mapped to the process-local memfs.
   dart_utils::RunnerTemp::SetupComponent(fdio_ns_.get());
 
-  // LaunchInfo::flat_namespace optional.
-  for (size_t i = 0; i < startup_info.flat_namespace.paths.size(); ++i) {
-    const auto& path = startup_info.flat_namespace.paths.at(i);
-    if (path == kTmpPath) {
-      continue;
-    }
+  // ComponentStartInfo::ns (optional)
+  if (start_info.has_ns()) {
+    for (auto& entry : *start_info.mutable_ns()) {
+      // /tmp/ is mapped separately to the process-level memfs, so we ignore it
+      // here.
+      const auto& path = entry.path();
+      if (path == kTmpPath) {
+        continue;
+      }
 
-    zx::channel dir;
-    if (path == kServiceRootPath) {
-      svc_ = std::make_unique<sys::ServiceDirectory>(
-          std::move(startup_info.flat_namespace.directories.at(i)));
-      dir = svc_->CloneChannel().TakeChannel();
-    } else {
-      dir = std::move(startup_info.flat_namespace.directories.at(i));
-    }
+      // We should never receive namespace entries without a directory, but we
+      // check it anyways to avoid crashing if we do.
+      if (!entry.has_directory()) {
+        FML_DLOG(ERROR) << "Namespace entry at path (" << path
+                        << ") has no directory.";
+        continue;
+      }
 
-    zx_handle_t dir_handle = dir.release();
-    if (fdio_ns_bind(fdio_ns_.get(), path.data(), dir_handle) != ZX_OK) {
-      FML_DLOG(ERROR) << "Could not bind path to namespace: " << path;
-      zx_handle_close(dir_handle);
+      zx::channel dir;
+      if (path == kServiceRootPath) {
+        svc_ = std::make_unique<sys::ServiceDirectory>(
+            std::move(*entry.mutable_directory()));
+        dir = svc_->CloneChannel().TakeChannel();
+      } else {
+        dir = entry.mutable_directory()->TakeChannel();
+      }
+
+      zx_handle_t dir_handle = dir.release();
+      if (fdio_ns_bind(fdio_ns_.get(), path.data(), dir_handle) != ZX_OK) {
+        FML_DLOG(ERROR) << "Could not bind path to namespace: " << path;
+        zx_handle_close(dir_handle);
+      }
     }
   }
 
+  // Open the data and assets directories inside our namespace.
   {
     fml::UniqueFD ns_fd(fdio_ns_opendir(fdio_ns_.get()));
     FML_DCHECK(ns_fd.is_valid());
@@ -180,16 +189,20 @@ Component::Component(
     FML_DCHECK(component_data_directory_.is_valid());
   }
 
-  // TODO: LaunchInfo::out.
+  // ComponentStartInfo::runtime_dir (optional).
+  if (start_info.has_runtime_dir()) {
+    runtime_dir_->Serve(fuchsia::io::OPEN_RIGHT_READABLE |
+                            fuchsia::io::OPEN_RIGHT_WRITABLE |
+                            fuchsia::io::OPEN_FLAG_DIRECTORY,
+                        start_info.mutable_runtime_dir()->TakeChannel());
+  }
 
-  // TODO: LaunchInfo::err.
-
-  // LaunchInfo::service_request optional.
-  if (launch_info.directory_request) {
+  // ComponentStartInfo::outgoing_dir (optional).
+  if (start_info.has_outgoing_dir()) {
     outgoing_dir_->Serve(fuchsia::io::OPEN_RIGHT_READABLE |
                              fuchsia::io::OPEN_RIGHT_WRITABLE |
                              fuchsia::io::OPEN_FLAG_DIRECTORY,
-                         std::move(launch_info.directory_request));
+                         start_info.mutable_outgoing_dir()->TakeChannel());
   }
 
   directory_request_ = directory_ptr_.NewRequest();
@@ -215,9 +228,9 @@ Component::Component(
       [this](zx_status_t status, std::unique_ptr<fuchsia::io::NodeInfo> info) {
         cloned_directory_ptr_.Unbind();
         if (status != ZX_OK) {
-          FML_LOG(ERROR) << "could not bind out directory for flutter app("
-                         << debug_label_
-                         << "): " << zx_status_get_string(status);
+          FML_LOG(ERROR)
+              << "could not bind out directory for flutter component("
+              << debug_label_ << "): " << zx_status_get_string(status);
           return;
         }
         const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
@@ -241,7 +254,13 @@ Component::Component(
   cloned_directory_ptr_.set_error_handler(
       [this](zx_status_t status) { cloned_directory_ptr_.Unbind(); });
 
-  // TODO: LaunchInfo::additional_services optional.
+  // TODO(fxb/50694): Close handles from ComponentStartInfo::numbered_handles
+  // since we're not using them. See documentation from ComponentController:
+  // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.component.runner/component_runner.fidl;l=97;drc=e3b39f2b57e720770773b857feca4f770ee0619e
+
+  // TODO(fxb/50694): There's an OnPublishDiagnostics event we may want to
+  // fire for diagnostics. See documentation from ComponentController:
+  // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.component.runner/component_runner.fidl;l=181;drc=e3b39f2b57e720770773b857feca4f770ee0619e
 
   // All launch arguments have been read. Perform service binding and
   // final settings configuration. The next call will be to create a view
@@ -254,7 +273,6 @@ Component::Component(
                 this, fidl::InterfaceRequest<fuchsia::ui::app::ViewProvider>(
                           std::move(channel)));
           }));
-
   outgoing_dir_->AddEntry("svc", std::move(composed_service_dir));
 
   // Setup the component controller binding.
@@ -421,7 +439,7 @@ Component::Component(
 #endif  // defined(__aarch64__)
 
   auto platform_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  const std::string component_url = package.resolved_url;
+  const std::string component_url = start_info.resolved_url();
   settings_.unhandled_exception_callback = [weak = weak_factory_.GetWeakPtr(),
                                             platform_task_runner,
                                             runner_incoming_services,
@@ -433,7 +451,7 @@ Component::Component(
       // happening on the UI thread. If the Component dtor and thread
       // termination happen (on the platform thread) between the previous
       // line and the next line, a crash will occur since we'll be posting
-      // to a dead thread. See Runner::OnComponentTerminate() in
+      // to a dead thread. See Runner::OnComponentV2Terminate() in
       // runner.cc.
       platform_task_runner->PostTask([weak, runner_incoming_services,
                                       component_url, error, stack_trace]() {
@@ -458,26 +476,50 @@ Component::Component(
   };
 }
 
-Component::~Component() = default;
+ComponentV2::~ComponentV2() = default;
 
-const std::string& Component::GetDebugLabel() const {
+const std::string& ComponentV2::GetDebugLabel() const {
   return debug_label_;
 }
 
-void Component::Kill() {
-  component_controller_.events().OnTerminated(
-      last_return_code_.second, fuchsia::sys::TerminationReason::EXITED);
+void ComponentV2::Kill() {
+  FML_VLOG(-1) << "ComponentController: received Kill";
+
+  // From the documentation for ComponentController, ZX_OK should be sent when
+  // the ComponentController receives a termination request.
+  //
+  // TODO(fxb/50694): How should we communicate the return code of the process
+  // with the epitaph? Should we avoid sending ZX_OK if the return code is not
+  // 0?
+  //
+  // CF v1 logic for reference (the OnTerminated event no longer exists):
+  //   component_controller_.events().OnTerminated(
+  //       last_return_code_.second, fuchsia::sys::TerminationReason::EXITED);
+
+  KillWithEpitaph(ZX_OK);
+
+  // WARNING: Don't do anything past this point as this instance may have been
+  // collected.
+}
+
+void ComponentV2::KillWithEpitaph(zx_status_t epitaph_status) {
+  component_controller_.set_error_handler(nullptr);
+  component_controller_.Close(epitaph_status);
 
   termination_callback_(this);
   // WARNING: Don't do anything past this point as this instance may have been
   // collected.
 }
 
-void Component::Detach() {
-  component_controller_.set_error_handler(nullptr);
+void ComponentV2::Stop() {
+  FML_VLOG(-1) << "ComponentController v2: received Stop";
+
+  // TODO(fxb/50694): Any other cleanup logic we should do that's appropriate
+  // for Stop but not for Kill?
+  KillWithEpitaph(ZX_OK);
 }
 
-void Component::OnEngineTerminate(const Engine* shell_holder) {
+void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
   auto found = std::find_if(shell_holders_.begin(), shell_holders_.end(),
                             [shell_holder](const auto& holder) {
                               return holder.get() == shell_holder;
@@ -488,7 +530,7 @@ void Component::OnEngineTerminate(const Engine* shell_holder) {
   }
 
   // We may launch multiple shell in this component. However, we will
-  // terminate when the last shell goes away. The error code return to the
+  // terminate when the last shell goes away. The error code returned to the
   // component controller will be the last isolate that had an error.
   auto return_code = shell_holder->GetEngineReturnCode();
   if (return_code.has_value()) {
@@ -504,7 +546,7 @@ void Component::OnEngineTerminate(const Engine* shell_holder) {
   }
 }
 
-void Component::CreateView(
+void ComponentV2::CreateView(
     zx::eventpair token,
     fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> /*incoming_services*/,
     fidl::InterfaceHandle<
@@ -514,7 +556,7 @@ void Component::CreateView(
                         std::move(view_ref_pair.view_ref));
 }
 
-void Component::CreateViewWithViewRef(
+void ComponentV2::CreateViewWithViewRef(
     zx::eventpair view_token,
     fuchsia::ui::views::ViewRefControl control_ref,
     fuchsia::ui::views::ViewRef view_ref) {
@@ -542,7 +584,7 @@ void Component::CreateViewWithViewRef(
       ));
 }
 
-void Component::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
+void ComponentV2::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
   if (!svc_) {
     FML_DLOG(ERROR)
         << "Component incoming services was invalid when attempting to "
@@ -566,7 +608,7 @@ void Component::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
 }
 
 #if !defined(DART_PRODUCT)
-void Component::WriteProfileToTrace() const {
+void ComponentV2::WriteProfileToTrace() const {
   for (const auto& engine : shell_holders_) {
     engine->WriteProfileToTrace();
   }

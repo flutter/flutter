@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V1_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V1_H_
 
 #include <array>
 #include <memory>
@@ -30,13 +30,13 @@
 
 namespace flutter_runner {
 
-class Component;
+class ComponentV1;
 
-struct ActiveComponent {
+struct ActiveComponentV1 {
   std::unique_ptr<fml::Thread> platform_thread;
-  std::unique_ptr<Component> component;
+  std::unique_ptr<ComponentV1> component;
 
-  ActiveComponent& operator=(ActiveComponent&& other) noexcept {
+  ActiveComponentV1& operator=(ActiveComponentV1&& other) noexcept {
     if (this != &other) {
       this->platform_thread.reset(other.platform_thread.release());
       this->component.reset(other.component.release());
@@ -44,21 +44,21 @@ struct ActiveComponent {
     return *this;
   }
 
-  ~ActiveComponent() = default;
+  ~ActiveComponentV1() = default;
 };
 
-// Represents an instance of a Flutter component that contains one of more
+// Represents an instance of a CF v1 Flutter component that contains one or more
 // Flutter engine instances.
-class Component final : public Engine::Delegate,
-                        public fuchsia::sys::ComponentController,
-                        public fuchsia::ui::app::ViewProvider {
+class ComponentV1 final : public Engine::Delegate,
+                          public fuchsia::sys::ComponentController,
+                          public fuchsia::ui::app::ViewProvider {
  public:
-  using TerminationCallback = fit::function<void(const Component*)>;
+  using TerminationCallback = fit::function<void(const ComponentV1*)>;
 
   // Creates a dedicated thread to run the component and creates the
   // component on it. The component can be accessed only on this thread.
   // This is a synchronous operation.
-  static ActiveComponent Create(
+  static ActiveComponentV1 Create(
       TerminationCallback termination_callback,
       fuchsia::sys::Package package,
       fuchsia::sys::StartupInfo startup_info,
@@ -67,7 +67,7 @@ class Component final : public Engine::Delegate,
 
   // Must be called on the same thread returned from the create call. The thread
   // may be collected after.
-  ~Component();
+  ~ComponentV1();
 
   static void ParseProgramMetadata(
       const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
@@ -101,9 +101,9 @@ class Component final : public Engine::Delegate,
   fml::RefPtr<flutter::DartSnapshot> isolate_snapshot_;
   std::set<std::unique_ptr<Engine>> shell_holders_;
   std::pair<bool, uint32_t> last_return_code_;
-  fml::WeakPtrFactory<Component> weak_factory_;
+  fml::WeakPtrFactory<ComponentV1> weak_factory_;
 
-  Component(
+  ComponentV1(
       TerminationCallback termination_callback,
       fuchsia::sys::Package package,
       fuchsia::sys::StartupInfo startup_info,
@@ -134,9 +134,9 @@ class Component final : public Engine::Delegate,
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Component);
+  FML_DISALLOW_COPY_AND_ASSIGN(ComponentV1);
 };
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V1_H_
