@@ -57,8 +57,6 @@ import 'transitions.dart';
 ///
 /// Default [proxyDecorator] can overriden to customize an item when it is being dragged.
 ///
-/// {@tool snippet}
-///
 /// Item's background color and shadow color customized compared to default behavior
 /// when item is being dragged.
 ///
@@ -80,8 +78,6 @@ import 'transitions.dart';
 ///   );
 /// }
 /// ```
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [ReorderableList], a widget list that allows the user to reorder
