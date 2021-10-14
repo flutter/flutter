@@ -125,7 +125,7 @@ void main() {
     ]);
   });
 
-  testWidgets("ListTileTheme backwards compatibility constructor", (WidgetTester tester) async {
+  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
     late ListTileThemeData theme;
 
     await tester.pumpWidget(
@@ -139,8 +139,8 @@ void main() {
             iconColor: const Color(0x00000002),
             textColor: const Color(0x00000003),
             contentPadding: const EdgeInsets.all(100),
-            tileColor: Color(0x00000004),
-            selectedTileColor: Color(0x00000005),
+            tileColor: const Color(0x00000004),
+            selectedTileColor: const Color(0x00000005),
             horizontalTitleGap: 200,
             minVerticalPadding: 300,
             minLeadingWidth: 400,
@@ -149,7 +149,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   theme = ListTileTheme.of(context);
-                  return Placeholder();
+                  return const Placeholder();
                 },
               ),
             ),
