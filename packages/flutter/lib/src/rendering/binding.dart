@@ -153,7 +153,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
-
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
@@ -164,7 +163,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
-
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
         callback: (Map<String, String> parameters) async {
@@ -175,8 +173,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
-
-      // Expose the ability to send [RenderObject] paints as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileRenderObjectPaints',
         getter: () async => debugProfilePaintsEnabled,
@@ -185,8 +181,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
             debugProfilePaintsEnabled = value;
         },
       );
-
-      // Expose the ability to send [RenderObject] layouts as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileRenderObjectLayouts',
         getter: () async => debugProfileLayoutsEnabled,
