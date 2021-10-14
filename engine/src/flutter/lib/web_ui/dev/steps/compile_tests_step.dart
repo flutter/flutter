@@ -136,6 +136,8 @@ Future<bool> compileUnitTest(FilePath input, { required bool forCanvasKit }) asy
   }
 
   final List<String> arguments = <String>[
+    'compile',
+    'js',
     '--no-minify',
     '--disable-inlining',
     '--enable-asserts',
@@ -155,7 +157,7 @@ Future<bool> compileUnitTest(FilePath input, { required bool forCanvasKit }) asy
   ];
 
   final int exitCode = await runProcess(
-    environment.dart2jsExecutable,
+    environment.dartExecutable,
     arguments,
     workingDirectory: environment.webUiRootDir.path,
   );
@@ -196,8 +198,10 @@ Future<void> buildHostPage() async {
   }
 
   final int exitCode = await runProcess(
-    environment.dart2jsExecutable,
+    environment.dartExecutable,
     <String>[
+      'compile',
+      'js',
       hostDartPath,
       '-o',
       '$hostDartPath.js',
