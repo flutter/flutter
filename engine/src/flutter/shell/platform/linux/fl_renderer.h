@@ -187,18 +187,6 @@ gboolean fl_renderer_clear_current(FlRenderer* renderer, GError** error);
 guint32 fl_renderer_get_fbo(FlRenderer* renderer);
 
 /**
- * fl_renderer_present:
- * @renderer: an #FlRenderer.
- * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
- *
- * Presents the current frame.
- *
- * Returns %TRUE if successful.
- */
-gboolean fl_renderer_present(FlRenderer* renderer, GError** error);
-
-/**
  * fl_renderer_create_backing_store:
  * @renderer: an #FlRenderer.
  * @config: backing store config.

@@ -121,10 +121,6 @@ guint32 fl_renderer_get_fbo(FlRenderer* self) {
   return 0;
 }
 
-gboolean fl_renderer_present(FlRenderer* self, GError** error) {
-  return TRUE;
-}
-
 gboolean fl_renderer_create_backing_store(
     FlRenderer* self,
     const FlutterBackingStoreConfig* config,
