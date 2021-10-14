@@ -65,6 +65,7 @@ class DriveCommand extends RunCommandBase {
     // to prevent a local network permission dialog on iOS 14+,
     // which cannot be accepted or dismissed in a CI environment.
     addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
+    addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -251,6 +252,8 @@ class DriveCommand extends RunCommandBase {
             'trace-startup': traceStartup,
           if (web)
             '--no-launch-chrome': true,
+          if (boolArg('multidex'))
+            'multidex': true,
         }
       );
     } else {

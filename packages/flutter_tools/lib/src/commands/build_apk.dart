@@ -35,6 +35,7 @@ class BuildApkCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    addMultidexOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
@@ -99,9 +100,11 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
+    globals.terminal.usesTerminalUi = true;
     await androidBuilder.buildApk(
       project: FlutterProject.current(),
       target: targetFile,

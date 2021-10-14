@@ -215,6 +215,38 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
+        if (project.hasProperty("multidex-enabled") &&
+            project.property("multidex-enabled").toBoolean() &&
+            project.android.defaultConfig.minSdkVersion <= 20) {
+            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_multidex_keepfile.txt")
+            project.android {
+                defaultConfig {
+                    multiDexEnabled true
+                    manifestPlaceholders = [applicationName: "io.flutter.app.FlutterMultiDexApplication"]
+                }
+                buildTypes {
+                    release {
+                        multiDexKeepFile project.file(flutterMultidexKeepfile)
+                    }
+                }
+            }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
+            }
+        } else {
+            String baseApplicationName = "android.app.Application"
+            if (project.hasProperty("base-application-name")) {
+                baseApplicationName = project.property("base-application-name")
+            }
+            project.android {
+                defaultConfig {
+                    // Setting to android.app.Application is the same as omitting the attribute.
+                    manifestPlaceholders = [applicationName: baseApplicationName]
+                }
+            }
+        }
+
         if (useLocalEngine()) {
             // This is required to pass the local engine to flutter build aot.
             String engineOutPath = project.property('local-engine-out')

@@ -304,6 +304,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.fastStart = false,
+    this.multidexEnabled = false,
   });
 
   // The build info containing the mode and flavor.
@@ -321,6 +322,9 @@ class AndroidBuildInfo {
 
   /// Whether to bootstrap an empty application.
   final bool fastStart;
+
+  /// Whether to enable multidex support for apps with more than 64k methods.
+  final bool multidexEnabled;
 }
 
 /// A summary of the compilation strategy used for Dart.

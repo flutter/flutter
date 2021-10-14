@@ -56,6 +56,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -101,6 +102,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -142,6 +144,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -156,6 +159,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -205,6 +209,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -243,6 +248,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -288,6 +294,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -329,6 +336,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -388,6 +396,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -402,6 +411,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -450,6 +460,7 @@ void main() {
               String line,
               FlutterProject project,
               bool usesAndroidX,
+                bool multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -488,6 +499,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -580,6 +592,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -765,6 +778,7 @@ void main() {
           '-Plocal-engine-out=out/android_arm',
           '-Ptarget-platform=android-arm',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -838,6 +852,7 @@ void main() {
           '-Plocal-engine-out=out/android_arm64',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -911,6 +926,7 @@ void main() {
           '-Plocal-engine-out=out/android_x86',
           '-Ptarget-platform=android-x86',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -984,6 +1000,7 @@ void main() {
           '-Plocal-engine-out=out/android_x64',
           '-Ptarget-platform=android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1056,6 +1073,7 @@ void main() {
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
