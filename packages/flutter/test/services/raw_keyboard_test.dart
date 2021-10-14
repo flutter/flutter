@@ -2545,8 +2545,6 @@ void main() {
   });
 }
 
-
-
 Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
   FlutterError.onError = onError;
