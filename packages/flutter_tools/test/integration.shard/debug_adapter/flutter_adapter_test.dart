@@ -19,6 +19,7 @@ import 'test_support.dart';
 void main() {
   Directory tempDir;
   /*late*/ DapTestSession dap;
+  final String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
@@ -56,7 +57,7 @@ void main() {
     final String output = _uniqueOutputLines(outputEvents);
 
     expectLines(output, <Object>[
-      'Launching lib/main.dart on Flutter test device in debug mode...',
+      'Launching $relativeMainPath on Flutter test device in debug mode...',
       startsWith('Connecting to VM Service at'),
       'topLevelFunction',
       '',
@@ -87,7 +88,7 @@ void main() {
     final String output = _uniqueOutputLines(outputEvents);
 
     expectLines(output, <Object>[
-      'Launching lib/main.dart on Flutter test device in debug mode...',
+      'Launching $relativeMainPath on Flutter test device in debug mode...',
       'topLevelFunction',
       '',
       startsWith('Exited'),
