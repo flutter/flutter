@@ -345,7 +345,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
-          customBorder: resolvedShape!.copyWith(side: resolvedSide),
+          customBorder: resolvedShape.copyWith(side: resolvedSide),
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedForegroundColor),
             child: Padding(
