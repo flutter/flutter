@@ -238,8 +238,12 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
+        debugProfileLayoutsEnabled ||
         debugProfilePaintsEnabled ||
-        debugOnProfilePaint != null) {
+        debugOnProfilePaint != null ||
+        debugDisableClipLayers ||
+        debugDisablePhysicalShapeLayers ||
+        debugDisableOpacityLayers) {
       throw FlutterError(reason);
     }
     return true;

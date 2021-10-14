@@ -234,4 +234,28 @@ void main() {
     expect(opacityLayer.offset, const Offset(40, 40));
     debugDisableOpacityLayers = false;
   });
+
+  test('debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set', () {
+    debugProfileLayoutsEnabled = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugProfileLayoutsEnabled = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set', () {
+    debugDisableClipLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisableClipLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set', () {
+    debugDisablePhysicalShapeLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisablePhysicalShapeLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set', () {
+    debugDisableOpacityLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisableOpacityLayers = false;
+  });
 }
