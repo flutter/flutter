@@ -661,6 +661,7 @@ class ThemeData with Diagnosticable {
     required this.errorColor,
     required this.toggleableActiveColor,
     // TYPOGRAPHY & ICONOGRAPHY
+    required this.typography,
     required this.textTheme,
     required this.primaryTextTheme,
     @Deprecated(
@@ -712,7 +713,6 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
-    required this.typography,
     // OTHER CONFIGURATION
     required this.androidOverscrollIndicator,
     required this.applyElevationOverlayColor,
@@ -1679,7 +1679,6 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
-      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
       cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t)!,
