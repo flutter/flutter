@@ -106,6 +106,7 @@ class Profiler {
     _checkBenchmarkMode();
 
     final OnBenchmark? onBenchmark =
+        // ignore: implicit_dynamic_function
         js_util.getProperty(html.window, '_flutter_internal_on_benchmark') as OnBenchmark?;
     if (onBenchmark != null) {
       onBenchmark(name, value);

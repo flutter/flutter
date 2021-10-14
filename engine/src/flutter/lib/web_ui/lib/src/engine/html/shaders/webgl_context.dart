@@ -81,6 +81,7 @@ class GlContext {
       double left, double top) {
     // Actual size of canvas may be larger than viewport size. Use
     // source/destination to draw part of the image data.
+    // ignore: implicit_dynamic_function
     js_util.callMethod(context, 'drawImage',
         <dynamic>[_canvas, 0, 0, _widthInPixels, _heightInPixels,
           left, top, _widthInPixels, _heightInPixels]);
@@ -111,8 +112,11 @@ class GlContext {
     if (shader == null) {
       throw Exception(error);
     }
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'shaderSource', <dynamic>[shader, source]);
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'compileShader', <dynamic>[shader]);
+    // ignore: implicit_dynamic_function
     final bool shaderStatus = js_util.callMethod(
       glContext,
       'getShaderParameter',
@@ -123,16 +127,19 @@ class GlContext {
     }
     return shader;
   }
-
   Object createProgram() =>
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'createProgram', const <dynamic>[]) as Object;
 
   void attachShader(Object? program, Object shader) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'attachShader', <dynamic>[program, shader]);
   }
 
   void linkProgram(Object program) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'linkProgram', <dynamic>[program]);
+    // ignore: implicit_dynamic_function
     final bool programStatus = js_util.callMethod(
       glContext,
       'getProgramParameter',
@@ -144,6 +151,7 @@ class GlContext {
   }
 
   void useProgram(GlProgram program) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'useProgram', <dynamic>[program.program]);
   }
 
@@ -151,6 +159,7 @@ class GlContext {
       js_util.callMethod(glContext, 'createBuffer', const <dynamic>[]);
 
   void bindArrayBuffer(Object? buffer) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bindBuffer', <dynamic>[kArrayBuffer, buffer]);
   }
 
@@ -158,16 +167,19 @@ class GlContext {
       js_util.callMethod(glContext, 'createVertexArray', const <dynamic>[]);
 
   void bindVertexArray(Object vertexObjectArray) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bindVertexArray',
         <dynamic>[vertexObjectArray]);
   }
 
   void unbindVertexArray() {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bindVertexArray',
         <dynamic>[null]);
   }
 
   void bindElementArrayBuffer(Object? buffer) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bindBuffer', <dynamic>[kElementArrayBuffer, buffer]);
   }
 
@@ -178,10 +190,12 @@ class GlContext {
       js_util.callMethod(glContext, 'generateMipmap', <dynamic>[target]);
 
   void bindTexture(dynamic target, Object? buffer) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bindTexture', <dynamic>[target, buffer]);
   }
 
   void activeTexture(int textureUnit) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'activeTexture', <dynamic>[textureUnit]);
   }
 
@@ -189,9 +203,11 @@ class GlContext {
       dynamic format, dynamic dataType,
       dynamic pixels, {int? width, int? height, int border = 0}) {
     if (width == null) {
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'texImage2D', <dynamic>[
         target, level, internalFormat, format, dataType, pixels]);
     } else {
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'texImage2D', <dynamic>[
         target, level, internalFormat, width, height, border, format, dataType,
         pixels]);
@@ -199,33 +215,40 @@ class GlContext {
   }
 
   void texParameteri(dynamic target, dynamic parameterName, dynamic value) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'texParameteri', <dynamic>[
       target, parameterName, value]);
   }
 
   void deleteBuffer(Object buffer) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'deleteBuffer', <dynamic>[buffer]);
   }
 
   void bufferData(TypedData? data, dynamic type) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bufferData', <dynamic>[kArrayBuffer, data, type]);
   }
 
   void bufferElementData(TypedData? data, dynamic type) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'bufferData', <dynamic>[kElementArrayBuffer, data, type]);
   }
 
   void enableVertexAttribArray(dynamic index) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'enableVertexAttribArray', <dynamic>[index]);
   }
 
   /// Clear background.
   void clear() {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'clear', <dynamic>[kColorBufferBit]);
   }
 
   /// Destroys gl context.
   void dispose() {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(
       _getExtension('WEBGL_lose_context') as Object,
       'loseContext',
@@ -234,28 +257,34 @@ class GlContext {
   }
 
   void deleteProgram(Object program) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'deleteProgram', <dynamic>[program]);
   }
 
   void deleteShader(Object shader) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'deleteShader', <dynamic>[shader]);
   }
 
   dynamic _getExtension(String extensionName) =>
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'getExtension', <dynamic>[extensionName]);
 
   void drawTriangles(int triangleCount, ui.VertexMode vertexMode) {
     final dynamic mode = _triangleTypeFromMode(vertexMode);
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'drawArrays', <dynamic>[mode, 0, triangleCount]);
   }
 
   void drawElements(dynamic type, int indexCount, dynamic indexType) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'drawElements', <dynamic>[type, indexCount, indexType, 0]);
   }
 
   /// Sets affine transformation from normalized device coordinates
   /// to window coordinates
   void viewport(double x, double y, double width, double height) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'viewport', <dynamic>[x, y, width, height]);
   }
 
@@ -271,76 +300,100 @@ class GlContext {
   }
 
   Object? _createShader(String shaderType) => js_util.callMethod(
+      // ignore: implicit_dynamic_function
       glContext, 'createShader', <dynamic>[js_util.getProperty(glContext, shaderType)]);
 
   /// Error state of gl context.
+  // ignore: implicit_dynamic_function
   dynamic get error => js_util.callMethod(glContext, 'getError', const <dynamic>[]);
 
   /// Shader compiler error, if this returns [kFalse], to get details use
   /// [getShaderInfoLog].
   dynamic get compileStatus =>
+      // ignore: implicit_dynamic_function
       _kCompileStatus ??= js_util.getProperty(glContext, 'COMPILE_STATUS');
 
   dynamic get kArrayBuffer =>
+      // ignore: implicit_dynamic_function
       _kArrayBuffer ??= js_util.getProperty(glContext, 'ARRAY_BUFFER');
 
   dynamic get kElementArrayBuffer =>
+      // ignore: implicit_dynamic_function
       _kElementArrayBuffer ??= js_util.getProperty(glContext,
           'ELEMENT_ARRAY_BUFFER');
 
   dynamic get kLinkStatus =>
+      // ignore: implicit_dynamic_function
       _kLinkStatus ??= js_util.getProperty(glContext, 'LINK_STATUS');
 
+  // ignore: implicit_dynamic_function
   dynamic get kFloat => _kFloat ??= js_util.getProperty(glContext, 'FLOAT');
 
+  // ignore: implicit_dynamic_function
   dynamic get kRGBA => _kRGBA ??= js_util.getProperty(glContext, 'RGBA');
 
   dynamic get kUnsignedByte =>
+      // ignore: implicit_dynamic_function
       _kUnsignedByte ??= js_util.getProperty(glContext, 'UNSIGNED_BYTE');
 
   dynamic get kUnsignedShort =>
+      // ignore: implicit_dynamic_function
       _kUnsignedShort ??= js_util.getProperty(glContext, 'UNSIGNED_SHORT');
 
   dynamic get kStaticDraw =>
+      // ignore: implicit_dynamic_function
       _kStaticDraw ??= js_util.getProperty(glContext, 'STATIC_DRAW');
 
   dynamic get kTriangles =>
+      // ignore: implicit_dynamic_function
       _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLES');
 
   dynamic get kTriangleFan =>
+      // ignore: implicit_dynamic_function
       _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLE_FAN');
 
   dynamic get kTriangleStrip =>
+      // ignore: implicit_dynamic_function
       _kTriangles ??= js_util.getProperty(glContext, 'TRIANGLE_STRIP');
 
   dynamic get kColorBufferBit =>
+      // ignore: implicit_dynamic_function
       _kColorBufferBit ??= js_util.getProperty(glContext, 'COLOR_BUFFER_BIT');
 
   dynamic get kTexture2D =>
+      // ignore: implicit_dynamic_function
       _kTexture2D ??= js_util.getProperty(glContext, 'TEXTURE_2D');
 
   int get kTexture0 =>
+      // ignore: implicit_dynamic_function
       _kTexture0 ??= js_util.getProperty(glContext, 'TEXTURE0') as int;
 
   dynamic get kTextureWrapS =>
+      // ignore: implicit_dynamic_function
       _kTextureWrapS ??= js_util.getProperty(glContext, 'TEXTURE_WRAP_S');
 
   dynamic get kTextureWrapT =>
+      // ignore: implicit_dynamic_function
       _kTextureWrapT ??= js_util.getProperty(glContext, 'TEXTURE_WRAP_T');
 
   dynamic get kRepeat =>
+      // ignore: implicit_dynamic_function
       _kRepeat ??= js_util.getProperty(glContext, 'REPEAT');
 
   dynamic get kClampToEdge =>
+      // ignore: implicit_dynamic_function
       _kClampToEdge ??= js_util.getProperty(glContext, 'CLAMP_TO_EDGE');
 
   dynamic get kMirroredRepeat =>
+      // ignore: implicit_dynamic_function
       _kMirroredRepeat ??= js_util.getProperty(glContext, 'MIRRORED_REPEAT');
 
   dynamic get kLinear =>
+      // ignore: implicit_dynamic_function
       _kLinear ??= js_util.getProperty(glContext, 'LINEAR');
 
   dynamic get kTextureMinFilter =>
+      // ignore: implicit_dynamic_function
       _kTextureMinFilter ??= js_util.getProperty(glContext,
           'TEXTURE_MIN_FILTER');
 
@@ -375,41 +428,49 @@ class GlContext {
 
   /// Sets float uniform value.
   void setUniform1f(Object uniform, double value) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'uniform1f', <dynamic>[uniform, value]);
   }
 
   /// Sets vec2 uniform values.
   void setUniform2f(Object uniform, double value1, double value2) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(glContext, 'uniform2f', <dynamic>[uniform, value1, value2]);
   }
 
   /// Sets vec4 uniform values.
   void setUniform4f(Object uniform, double value1, double value2, double value3,
       double value4) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(
         glContext, 'uniform4f', <dynamic>[uniform, value1, value2, value3, value4]);
   }
 
   /// Sets mat4 uniform values.
   void setUniformMatrix4fv(Object uniform, bool transpose, Float32List value) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(
         glContext, 'uniformMatrix4fv', <dynamic>[uniform, transpose, value]);
   }
 
   /// Shader compile error log.
   dynamic getShaderInfoLog(Object glShader) {
+    // ignore: implicit_dynamic_function
     return js_util.callMethod(glContext, 'getShaderInfoLog', <dynamic>[glShader]);
   }
 
   ///  Errors that occurred during failed linking or validation of program
   ///  objects. Typically called after [linkProgram].
   String? getProgramInfoLog(Object glProgram) {
+    // ignore: implicit_dynamic_function
     return js_util.callMethod(glContext, 'getProgramInfoLog', <dynamic>[glProgram]) as String?;
   }
 
   int? get drawingBufferWidth =>
+      // ignore: implicit_dynamic_function
       js_util.getProperty(glContext, 'drawingBufferWidth') as int?;
   int? get drawingBufferHeight =>
+      // ignore: implicit_dynamic_function
       js_util.getProperty(glContext, 'drawingBufferWidth') as int?;
 
   /// Reads gl contents as image data.
@@ -423,6 +484,7 @@ class GlContext {
         browserEngine == BrowserEngine.firefox) {
       final Uint8List pixels =
       Uint8List(bufferWidth * bufferHeight * kBytesPerPixel);
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
       return html.ImageData(
@@ -430,6 +492,7 @@ class GlContext {
     } else {
       final Uint8ClampedList pixels =
       Uint8ClampedList(bufferWidth * bufferHeight * kBytesPerPixel);
+      // ignore: implicit_dynamic_function
       js_util.callMethod(glContext, 'readPixels',
           <dynamic>[0, 0, bufferWidth, bufferHeight, kRGBA, kUnsignedByte, pixels]);
       return html.ImageData(pixels, bufferWidth, bufferHeight);
@@ -444,6 +507,7 @@ class GlContext {
     // allocation.
     if (_canvas != null &&
         js_util.hasProperty(_canvas!, 'transferToImageBitmap')) {
+      // ignore: implicit_dynamic_function
       js_util.callMethod(_canvas!, 'getContext', <dynamic>['webgl2']);
       final Object? imageBitmap = js_util.callMethod(_canvas!, 'transferToImageBitmap',
           <dynamic>[]);

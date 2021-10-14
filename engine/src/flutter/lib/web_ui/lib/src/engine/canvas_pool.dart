@@ -207,6 +207,7 @@ class CanvasPool extends _SaveStackTracking {
 
   html.CanvasElement? _allocCanvas(int width, int height) {
     final dynamic canvas =
+      // ignore: implicit_dynamic_function
       js_util.callMethod(html.document, 'createElement', <dynamic>['CANVAS']);
     if (canvas != null) {
       try {

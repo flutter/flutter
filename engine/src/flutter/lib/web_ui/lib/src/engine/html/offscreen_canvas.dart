@@ -64,6 +64,7 @@ class OffScreenCanvas {
   void transferImage(Object targetContext) {
     // Actual size of canvas may be larger than viewport size. Use
     // source/destination to draw part of the image data.
+    // ignore: implicit_dynamic_function
     js_util.callMethod(targetContext, 'drawImage',
         <dynamic>[offScreenCanvas ?? canvasElement!, 0, 0, width, height,
           0, 0, width, height]);
@@ -77,6 +78,7 @@ class OffScreenCanvas {
         final html.FileReader fileReader = html.FileReader();
         fileReader.onLoad.listen((html.ProgressEvent event) {
           completer.complete(
+            // ignore: implicit_dynamic_function
             js_util.getProperty(js_util.getProperty(event, 'target') as Object, 'result') as String,
           );
         });
@@ -90,6 +92,7 @@ class OffScreenCanvas {
 
   /// Draws an image to canvas for both offscreen canvas canvas context2d.
   void drawImage(Object image, int x, int y, int width, int height) {
+    // ignore: implicit_dynamic_function
     js_util.callMethod(
         getContext2d()!, 'drawImage', <dynamic>[image, x, y, width, height]);
   }
