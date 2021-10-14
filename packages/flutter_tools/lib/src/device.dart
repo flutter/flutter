@@ -468,7 +468,7 @@ abstract class Device {
   /// The ID returned matches that in the output of `flutter emulators`. Fetching
   /// this name may require connecting to the device and if an error occurs null
   /// will be returned.
-  Future<String> get emulatorId;
+  Future<String?> get emulatorId;
 
   /// Whether this device can run the provided [buildMode].
   ///
@@ -574,7 +574,7 @@ abstract class Device {
     covariant ApplicationPackage package, {
     String mainPath,
     String route,
-    DebuggingOptions debuggingOptions,
+    required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
