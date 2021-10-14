@@ -1413,9 +1413,11 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/meta/vmservi
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unittest.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.cc
