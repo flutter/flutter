@@ -215,7 +215,7 @@ class Dismissible extends StatefulWidget {
   ///
   /// If [onUpdate] is not null, then it will be invoked for every pointer event
   /// to dispatch the latest state of the drag. For example, this callback
-  /// can be used to for example change the color of the background widget 
+  /// can be used to for example change the color of the background widget
   /// depending on whether the dismiss threshold is currently reached.
   final DismissUpdateCallback? onUpdate;
 
