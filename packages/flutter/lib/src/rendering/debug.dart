@@ -238,6 +238,7 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
+        debugProfilePaintsEnabled ||
         debugOnProfilePaint != null) {
       throw FlutterError(reason);
     }
