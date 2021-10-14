@@ -175,6 +175,26 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
+
+      // Expose the ability to send [RenderObject] paints as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileRenderObjectPaints',
+        getter: () async => debugProfilePaintsEnabled,
+        setter: (bool value) async {
+          if (debugProfilePaintsEnabled != value)
+            debugProfilePaintsEnabled = value;
+        },
+      );
+
+      // Expose the ability to send [RenderObject] layouts as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileRenderObjectLayouts',
+        getter: () async => debugProfileLayoutsEnabled,
+        setter: (bool value) async {
+          if (debugProfileLayoutsEnabled != value)
+            debugProfileLayoutsEnabled = value;
+        },
+      );
     }
   }
 
