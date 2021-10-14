@@ -227,6 +227,18 @@ bool get isMacOrIOS =>
     operatingSystem == OperatingSystem.iOs ||
     operatingSystem == OperatingSystem.macOs;
 
+/// Detect iOS 15.
+bool get isIOS15 {
+  if (debugIsIOS15 != null) {
+    return debugIsIOS15!;
+  }
+  return operatingSystem == OperatingSystem.iOs &&
+      html.window.navigator.userAgent.contains('OS 15_');
+}
+
+/// Use in tests to simulate the detection of iOS 15.
+bool? debugIsIOS15;
+
 int? _cachedWebGLVersion;
 
 /// The highest WebGL version supported by the current browser, or -1 if WebGL
