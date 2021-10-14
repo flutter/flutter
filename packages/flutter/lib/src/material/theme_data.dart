@@ -219,9 +219,9 @@ class ThemeData with Diagnosticable {
   ///  * [ThemeData.light], which creates a light blue theme.
   ///  * [ThemeData.dark], which creates dark theme with a teal secondary [ColorScheme] color.
   factory ThemeData({
-    Brightness? brightness, // TODO(hansmuller): Remove this https://github.com/flutter/flutter/issues/91772
-    MaterialColor? primarySwatch,
+    Brightness? brightness, // TODO(hansmuller): Deprecate this https://github.com/flutter/flutter/issues/91772
     // COLORS
+    MaterialColor? primarySwatch,
     ColorScheme? colorScheme,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
