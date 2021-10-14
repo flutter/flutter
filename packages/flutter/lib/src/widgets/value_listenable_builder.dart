@@ -18,7 +18,7 @@ import 'framework.dart';
 ///    a [ValueListenable] changes value.
 typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
-/// Decides whether to call the [builder] of the [ValueListenableBuilder] to
+/// Decides whether to call the builder of the [ValueListenableBuilder] to
 /// rebuild the widget.
 ///
 /// The [ValueListenable<T>] values before and after an update are provided
