@@ -8716,7 +8716,8 @@ void main() {
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
-    expect(invoked, isTrue);
+    // On the web, enter doesn't activate any controls except for buttons.
+    expect(invoked, kIsWeb ? isFalse : isTrue);
   });
 }
 
