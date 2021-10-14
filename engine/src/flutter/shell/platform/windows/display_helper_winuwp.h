@@ -68,11 +68,12 @@ class DisplayHelperWinUWP {
   // Is current context is executing on a large screen device.
   bool large_screen_device_ = false;
 
-  // Current X overscan compensation factor.
-  float render_target_x_offset_ = 1.0f;
-
-  // Current Y overscan compensation factor.
-  float render_target_y_offset_ = 1.0f;
+  // Current overscan compensation factors.
+  //
+  // The default value is no offset from the window's top-left, used when
+  // large_screen_device_ is false (normal desktop).
+  float render_target_x_offset_ = 0.0f;
+  float render_target_y_offset_ = 0.0f;
 };
 }  // namespace flutter
 
