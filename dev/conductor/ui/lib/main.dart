@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
               const SelectableText(
                 'Desktop app for managing a release of the Flutter SDK, currently in development',
               ),
-              const SizedBox(height: 20.0),
+              const SizedBox(height: 10.0),
               MainProgression(
                 releaseState: state,
                 stateFilePath: _stateFilePath,

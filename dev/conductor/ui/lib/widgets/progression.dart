@@ -37,7 +37,7 @@ class MainProgression extends StatefulWidget {
 class MainProgressionState extends State<MainProgression> {
   int _completedStep = 0;
 
-  // Move forward the stepper to the next step of the release.
+  /// Move forward the stepper to the next step of the release.
   void nextStep() {
     if (_completedStep < MainProgression._stepTitles.length - 1) {
       setState(() {
@@ -74,6 +74,7 @@ class MainProgressionState extends State<MainProgression> {
               releaseState: widget.releaseState,
               stateFilePath: widget.stateFilePath,
             ),
+            const SizedBox(height: 20.0),
             Stepper(
               controlsBuilder: (BuildContext context, ControlsDetails details) => Row(),
               physics: const ScrollPhysics(),
