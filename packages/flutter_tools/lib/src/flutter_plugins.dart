@@ -19,6 +19,7 @@ import 'cache.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
+import 'entrypoint_parser.dart';
 import 'features.dart';
 import 'globals_null_migrated.dart' as globals;
 import 'platform_plugins.dart';
@@ -736,13 +737,16 @@ $_dartPluginRegisterWith
 typedef _UnaryFunction = dynamic Function(List<String> args);
 typedef _NullaryFunction = dynamic Function();
 
-void main(List<String> args) {
-  if (entrypoint.main is _UnaryFunction) {
-    (entrypoint.main as _UnaryFunction)(args);
+{{#dartEntrypoints}}
+@pragma('vm:entry-point')
+void {{name}}(List<String> args) {
+  if (entrypoint.{{name}} is _UnaryFunction) {
+    (entrypoint.{{name}} as _UnaryFunction)(args);
   } else {
-    (entrypoint.main as _NullaryFunction)();
+    (entrypoint.{{name}} as _NullaryFunction)();
   }
 }
+{{/dartEntrypoints}}
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1282,8 +1286,22 @@ Future<void> generateMainDartWithPluginRegistrant(
     packageConfig.packageOf(mainFile.absolute.uri),
     Cache.flutterRoot!,
   );
+
+  late String dartMainContent;
+  try {
+    dartMainContent = mainFile.readAsStringSync();
+  } on FileSystemException catch (error) {
+    globals.printError(
+      'Unable to read file ${mainFile.path}, received error: $error.\n'
+      'Please verify that this file exist.'
+    );
+    rethrow;
+  }
+
+  final Iterable<String> dartEntrypoints = getDartEntrypoints(dartMainContent);
   final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
+    'dartEntrypoints': dartEntrypoints.map((String name) => <String, String>{'name': name}),
     'dartLanguageVersion': entrypointVersion.toString(),
     AndroidPlugin.kConfigKey: <Object?>[],
     IOSPlugin.kConfigKey: <Object?>[],
