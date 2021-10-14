@@ -3,7 +3,7 @@
 This package contains the localizations used by the Flutter framework
 itself.
 
-See the [localization README](./lib/src/README.md) for more detailed
+See the [localization README](./lib/src/l10n/README.md) for more detailed
 information about the localizations themselves.
 
 ## Adding a new string to localizations
@@ -41,7 +41,7 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
    ```
 
-   There is a [localization README](./lib/src/README.md) file with further
+   There is a [localization README](./lib/src/l10n/README.md) file with further
    information in the `lib/src/l10n/` directory.
 
 5. If you are a Google employee, you should then also follow the instructions
@@ -68,7 +68,7 @@ existing string in the MaterialLocalizations objects, follow these steps:
    Leave them as they were generated, and they will be picked up for
    translation.
 
-   There is a [localization README](./lib/src/README.md) file with further
+   There is a [localization README](./lib/src/l10n/README.md) file with further
    information in the `lib/src/l10n/` directory.
 
 3. If you are a Google employee, you should then also follow the instructions
