@@ -1293,7 +1293,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   } on FileSystemException catch (error) {
     globals.printError(
       'Unable to read file ${mainFile.path}, received error: $error.\n'
-      'Please verify that this file exist.'
+      'Please verify that this file exists.'
     );
     rethrow;
   }
