@@ -5,9 +5,9 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:io';
 
 import '../debug_adapters/server.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// This command will start up a Debug Adapter that communicates using the Debug
@@ -43,8 +43,10 @@ class DebugAdapterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final DapServer server = DapServer(
-      stdin,
-      stdout.nonBlocking,
+      globals.stdio.stdin,
+      globals.stdio.stdout.nonBlocking,
+      fileSystem: globals.fs,
+      platform: globals.platform,
       ipv6: ipv6,
       enableDds: enableDds,
     );

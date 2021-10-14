@@ -3,22 +3,26 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
-import 'package:dds/dap.dart';
-import 'package:path/path.dart' as path;
+import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/platform.dart';
 import '../cache.dart';
+import '../convert.dart';
 import 'flutter_adapter_args.dart';
+import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
 class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
     with PidTracker, PackageConfigUtils {
   FlutterDebugAdapter(
     ByteStreamServerChannel channel, {
+    required this.fileSystem,
+    required this.platform,
     bool ipv6 = false,
     bool enableDds = true,
     bool enableAuthCodes = true,
@@ -31,6 +35,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           logger: logger,
         );
 
+  @override
+  FileSystem fileSystem;
+  Platform platform;
   Process? _process;
 
   @override
@@ -151,7 +158,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
-    final String flutterToolPath = path.join(Cache.flutterRoot!, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String flutterToolPath = fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
     // "debug"/"noDebug" refers to the DAP "debug" mode and not the Flutter
     // debug mode (vs Profile/Release). It is possible for the user to "Run"
@@ -185,10 +192,10 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     // is done as it will not be necessary.
     final String? possibleRoot = program == null
         ? args.cwd
-        : path.isAbsolute(program)
-            ? path.dirname(program)
-            : path.dirname(
-                path.normalize(path.join(args.cwd ?? '', args.program)));
+        : fileSystem.path.isAbsolute(program)
+            ? fileSystem.path.dirname(program)
+            : fileSystem.path.dirname(
+                fileSystem.path.normalize(fileSystem.path.join(args.cwd ?? '', args.program)));
     if (possibleRoot != null) {
       final File? packageConfig = findPackageConfigFile(possibleRoot);
       if (packageConfig != null) {

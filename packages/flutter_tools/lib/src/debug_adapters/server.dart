@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:dds/dap.dart' hide DapServer;
 
+import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../debug_adapters/flutter_adapter.dart';
 import '../debug_adapters/flutter_adapter_args.dart';
 
@@ -21,12 +23,16 @@ class DapServer {
   DapServer(
     Stream<List<int>> _input,
     StreamSink<List<int>> _output, {
+    required FileSystem fileSystem,
+    required Platform platform,
     this.ipv6 = false,
     this.enableDds = true,
     this.enableAuthCodes = true,
     this.logger,
   }) : channel = ByteStreamServerChannel(_input, _output, logger) {
     adapter = FlutterDebugAdapter(channel,
+        fileSystem: fileSystem,
+        platform: platform,
         ipv6: ipv6,
         enableDds: enableDds,
         enableAuthCodes: enableAuthCodes,
