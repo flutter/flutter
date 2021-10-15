@@ -2342,6 +2342,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   Rect? _currentCaretRect;
+  // ignore: use_setters_to_change_properties, (this is used as a callback, can't be a setter)
   void _handleCaretChanged(Rect caretRect) {
     _currentCaretRect = caretRect;
   }
