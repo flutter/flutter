@@ -484,7 +484,7 @@ enum FloatingLabelBehavior {
 ///
 ///  * [InputDecoration.floatingLabelAlignment] which defines the alignment for
 ///    [InputDecoration.label] or [InputDecoration.labelText]
-///  * [FloatingLabelBehaviour] which defines the behaviour of the floating label.
+///  * [FloatingLabelBehavior] which defines the behaviour of the floating label.
 @immutable
 class FloatingLabelAlignment {
   const FloatingLabelAlignment._({
