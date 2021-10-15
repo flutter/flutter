@@ -290,8 +290,7 @@ void main() {
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
     final TabBarTheme tabBarTheme = TabBarTheme(
       indicator: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        shape: BoxShape.rectangle,
+        border: Border.all(),
       ),
     );
 
@@ -304,9 +303,9 @@ void main() {
   });
 
   testWidgets('Tab bar theme - beveled rect indicator', (WidgetTester tester) async {
-    final TabBarTheme tabBarTheme = TabBarTheme(
+    const TabBarTheme tabBarTheme = TabBarTheme(
       indicator: ShapeDecoration(
-        shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
         color: Colors.black,
       ),
     );

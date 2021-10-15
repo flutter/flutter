@@ -185,9 +185,8 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.title != null) ||
         items.every((BottomNavigationBarItem item) => item.label != null),
-        'Every item must have a non-null title or label',
+        'Every item must have a non-null label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
@@ -247,13 +246,13 @@ class BottomNavigationBar extends StatefulWidget {
   final double iconSize;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title].
+  /// [BottomNavigationBarItem.label].
   ///
   /// If null then the [ThemeData.primaryColor] is used.
   final Color? selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title]s.
+  /// [BottomNavigationBarItem.label]s.
   ///
   /// If null then the [ThemeData.unselectedWidgetColor]'s color is used.
   final Color? unselectedItemColor;
@@ -578,14 +577,12 @@ class _Tile extends StatelessWidget {
       return Align(
         heightFactor: 1,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[icon, const SizedBox(width: 8), label],
         ),
       );
     }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, label],
@@ -694,7 +691,7 @@ class _Label extends StatelessWidget {
           ),
         ),
         alignment: Alignment.bottomCenter,
-        child: item.title ?? Text(item.label!),
+        child: Text(item.label!),
       ),
     );
 

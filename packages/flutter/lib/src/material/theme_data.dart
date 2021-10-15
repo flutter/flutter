@@ -28,6 +28,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'list_tile.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
@@ -340,6 +341,7 @@ class ThemeData with Diagnosticable {
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     DrawerThemeData? drawerTheme,
+    ListTileThemeData? listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -485,6 +487,7 @@ class ThemeData with Diagnosticable {
     switchTheme ??= const SwitchThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     drawerTheme ??= const DrawerThemeData();
+    listTileTheme ??= const ListTileThemeData();
 
     fixTextFieldOutlineLabel ??= true;
     useTextSelectionTheme ??= true;
@@ -568,6 +571,7 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme,
       progressIndicatorTheme: progressIndicatorTheme,
       drawerTheme: drawerTheme,
+      listTileTheme: listTileTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
       androidOverscrollIndicator: androidOverscrollIndicator,
@@ -703,6 +707,7 @@ class ThemeData with Diagnosticable {
     required this.switchTheme,
     required this.progressIndicatorTheme,
     required this.drawerTheme,
+    required this.listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -789,6 +794,7 @@ class ThemeData with Diagnosticable {
        assert(switchTheme != null),
        assert(progressIndicatorTheme != null),
        assert(drawerTheme != null),
+       assert(listTileTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1356,6 +1362,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [Drawer] widgets.
   final DrawerThemeData drawerTheme;
 
+  /// A theme for customizing the appearance of [ListTile] widgets.
+  final ListTileThemeData listTileTheme;
+
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1517,6 +1526,7 @@ class ThemeData with Diagnosticable {
     SwitchThemeData? switchTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     DrawerThemeData? drawerTheme,
+    ListTileThemeData? listTileTheme,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
@@ -1609,6 +1619,7 @@ class ThemeData with Diagnosticable {
       switchTheme: switchTheme ?? this.switchTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
+      listTileTheme: listTileTheme ?? this.listTileTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
@@ -1715,8 +1726,8 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
-      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
+      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
       cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t)!,
@@ -1764,13 +1775,14 @@ class ThemeData with Diagnosticable {
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t)!,
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
-      textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
+      textSelectionTheme: TextSelectionThemeData.lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
+      listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
       androidOverscrollIndicator: t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
@@ -1790,14 +1802,16 @@ class ThemeData with Diagnosticable {
         && other.primaryColorBrightness == primaryColorBrightness
         && other.primaryColorLight == primaryColorLight
         && other.primaryColorDark == primaryColorDark
+        && other.canvasColor == canvasColor
+        && other.shadowColor == shadowColor
         && other.accentColor == accentColor
         && other.accentColorBrightness == accentColorBrightness
-        && other.canvasColor == canvasColor
         && other.scaffoldBackgroundColor == scaffoldBackgroundColor
         && other.bottomAppBarColor == bottomAppBarColor
         && other.cardColor == cardColor
-        && other.shadowColor == shadowColor
         && other.dividerColor == dividerColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
         && other.highlightColor == highlightColor
         && other.splashColor == splashColor
         && other.splashFactory == splashFactory
@@ -1861,6 +1875,7 @@ class ThemeData with Diagnosticable {
         && other.switchTheme == switchTheme
         && other.progressIndicatorTheme == progressIndicatorTheme
         && other.drawerTheme == drawerTheme
+        && other.listTileTheme == listTileTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme
         && other.androidOverscrollIndicator == androidOverscrollIndicator;
@@ -1877,10 +1892,10 @@ class ThemeData with Diagnosticable {
       primaryColorBrightness,
       primaryColorLight,
       primaryColorDark,
-      accentColor,
-      accentColorBrightness,
       canvasColor,
       shadowColor,
+      accentColor,
+      accentColorBrightness,
       scaffoldBackgroundColor,
       bottomAppBarColor,
       cardColor,
@@ -1896,7 +1911,6 @@ class ThemeData with Diagnosticable {
       buttonTheme,
       buttonColor,
       toggleButtonsTheme,
-      toggleableActiveColor,
       secondaryHeaderColor,
       textSelectionColor,
       cursorColor,
@@ -1906,6 +1920,7 @@ class ThemeData with Diagnosticable {
       indicatorColor,
       hintColor,
       errorColor,
+      toggleableActiveColor,
       textTheme,
       primaryTextTheme,
       accentTextTheme,
@@ -1950,6 +1965,7 @@ class ThemeData with Diagnosticable {
       switchTheme,
       progressIndicatorTheme,
       drawerTheme,
+      listTileTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
       androidOverscrollIndicator,
@@ -1961,10 +1977,12 @@ class ThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
@@ -1977,6 +1995,7 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.debug));
@@ -2009,13 +2028,13 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<ScrollbarThemeData>('ScrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonTheme', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationBarThemeData>('navigationBarTheme', navigationBarTheme, defaultValue: defaultData.navigationBarTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailTheme', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
@@ -2025,7 +2044,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextSelectionThemeData>('textSelectionTheme', textSelectionTheme, defaultValue: defaultData.textSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextButtonThemeData>('textButtonTheme', textButtonTheme, defaultValue: defaultData.textButtonTheme, level: DiagnosticLevel.debug));
@@ -2037,6 +2055,9 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ListTileThemeData>('listTileTheme', listTileTheme, defaultValue: defaultData.listTileTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, defaultValue: true, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('useTextSelectionTheme', useTextSelectionTheme, defaultValue: true, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }

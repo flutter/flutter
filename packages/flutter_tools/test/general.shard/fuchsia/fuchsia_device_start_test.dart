@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_dev_finder.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
@@ -354,7 +353,7 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       OperatingSystemUtils: () => osUtils,
     });
 
@@ -369,9 +368,7 @@ void main() {
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
-      Platform: () => FakePlatform(
-        operatingSystem: 'linux',
-      ),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {
@@ -748,18 +745,6 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
   }
 }
 
-class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
-  @override
-  Future<List<String>> list({ Duration timeout }) async {
-    return <String>['192.168.11.999 scare-cable-device-finder'];
-  }
-
-  @override
-  Future<String> resolve(String deviceName) async {
-    return '192.168.11.999';
-  }
-}
-
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
   Future<List<String>> list({Duration timeout}) async {
@@ -776,11 +761,9 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
     FuchsiaPM pm,
     FuchsiaKernelCompiler compiler,
-    FuchsiaDevFinder devFinder,
     FuchsiaFfx ffx,
   }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
-       fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder(),
        fuchsiaFfx = ffx ?? FakeFuchsiaFfx();
 
   @override
@@ -788,9 +771,6 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
 
   @override
   final FuchsiaKernelCompiler fuchsiaKernelCompiler;
-
-  @override
-  final FuchsiaDevFinder fuchsiaDevFinder;
 
   @override
   final FuchsiaFfx fuchsiaFfx;

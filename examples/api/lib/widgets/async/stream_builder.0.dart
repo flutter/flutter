@@ -82,9 +82,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
-                      child: CircularProgressIndicator(),
                       width: 60,
                       height: 60,
+                      child: CircularProgressIndicator(),
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 16),
@@ -123,7 +123,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: children,
             );
           },

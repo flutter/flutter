@@ -71,9 +71,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           } else {
             children = const <Widget>[
               SizedBox(
-                child: CircularProgressIndicator(),
                 width: 60,
                 height: 60,
+                child: CircularProgressIndicator(),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 16),
@@ -84,7 +84,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: children,
             ),
           );

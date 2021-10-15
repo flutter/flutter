@@ -109,6 +109,36 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
+      registerBoolServiceExtension(
+        name: 'debugDisableClipLayers',
+        getter: () async => debugDisableClipLayers,
+        setter: (bool value) {
+          if (debugDisableClipLayers == value)
+            return Future<void>.value();
+          debugDisableClipLayers = value;
+          return _forceRepaint();
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'debugDisablePhysicalShapeLayers',
+        getter: () async => debugDisablePhysicalShapeLayers,
+        setter: (bool value) {
+          if (debugDisablePhysicalShapeLayers == value)
+            return Future<void>.value();
+          debugDisablePhysicalShapeLayers = value;
+          return _forceRepaint();
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'debugDisableOpacityLayers',
+        getter: () async => debugDisableOpacityLayers,
+        setter: (bool value) {
+          if (debugDisableOpacityLayers == value)
+            return Future<void>.value();
+          debugDisableOpacityLayers = value;
+          return _forceRepaint();
+        },
+      );
       return true;
     }());
 
@@ -123,18 +153,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           };
         },
       );
-
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
         callback: (Map<String, String> parameters) async {
           final String data = RendererBinding.instance?.renderView.debugSemantics
-            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
+            ?.toStringDeep() ?? 'Semantics not collected.';
           return <String, Object>{
             'data': data,
           };
         },
       );
-
       registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
         callback: (Map<String, String> parameters) async {
@@ -143,6 +171,22 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return <String, Object>{
             'data': data,
           };
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'profileRenderObjectPaints',
+        getter: () async => debugProfilePaintsEnabled,
+        setter: (bool value) async {
+          if (debugProfilePaintsEnabled != value)
+            debugProfilePaintsEnabled = value;
+        },
+      );
+      registerBoolServiceExtension(
+        name: 'profileRenderObjectLayouts',
+        getter: () async => debugProfileLayoutsEnabled,
+        setter: (bool value) async {
+          if (debugProfileLayoutsEnabled != value)
+            debugProfileLayoutsEnabled = value;
         },
       );
     }

@@ -429,7 +429,7 @@ Future<void> main() async {
     semantics.dispose();
   });
 
-  testWidgets('Title of items should be nullable', (WidgetTester tester) async {
+  testWidgets('Label of items should be nullable', (WidgetTester tester) async {
     final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
     final List<int> itemsTapped = <int>[];
 

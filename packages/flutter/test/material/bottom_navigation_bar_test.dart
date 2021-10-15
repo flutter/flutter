@@ -28,11 +28,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
+                label: 'AC',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
+                label: 'Alarm',
               ),
             ],
             onTap: (int index) {
@@ -290,7 +290,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - all labels', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
@@ -304,7 +303,6 @@ void main() {
             showSelectedLabels: true,
             showUnselectedLabels: true,
             selectedFontSize: selectedFontSize,
-            unselectedFontSize: unselectedFontSize,
             selectedIconTheme: selectedIconTheme,
             unselectedIconTheme: unselectedIconTheme,
             items: const <BottomNavigationBarItem>[
@@ -333,7 +331,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - selected labels only', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
@@ -347,7 +344,6 @@ void main() {
               showSelectedLabels: true,
               showUnselectedLabels: false,
               selectedFontSize: selectedFontSize,
-              unselectedFontSize: unselectedFontSize,
               selectedIconTheme: selectedIconTheme,
               unselectedIconTheme: unselectedIconTheme,
               items: const <BottomNavigationBarItem>[
@@ -375,7 +371,6 @@ void main() {
 
   testWidgets('Padding is calculated properly on items - no labels', (WidgetTester tester) async {
     const double selectedFontSize = 16.0;
-    const double unselectedFontSize = 12.0;
     const double selectedIconSize = 36.0;
     const double unselectedIconSize = 20.0;
     const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
@@ -389,7 +384,6 @@ void main() {
               showSelectedLabels: false,
               showUnselectedLabels: false,
               selectedFontSize: selectedFontSize,
-              unselectedFontSize: unselectedFontSize,
               selectedIconTheme: selectedIconTheme,
               unselectedIconTheme: unselectedIconTheme,
               items: const <BottomNavigationBarItem>[
@@ -1037,11 +1031,11 @@ void main() {
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  title: Text('A'),
+                  label: 'A',
                   icon: Icon(Icons.ac_unit),
                 ),
                 BottomNavigationBarItem(
-                  title: Text('B'),
+                  label: 'B',
                   icon: Icon(Icons.battery_alert),
                 ),
               ],
@@ -1052,7 +1046,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(66.0));
+    expect(box.size.height, equals(56.0));
   });
 
   testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
@@ -1222,9 +1216,9 @@ void main() {
     expect(find.byTooltip('C'), findsNothing);
   });
 
-  testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
-    final Text longTextA = Text(''.padLeft(100, 'A'));
-    final Text longTextB = Text(''.padLeft(100, 'B'));
+  testWidgets('BottomNavigationBar limits width of tiles with long labels', (WidgetTester tester) async {
+    final String longTextA = List<String>.generate(100, (int index) => 'A').toString();
+    final String longTextB = List<String>.generate(100, (int index) => 'B').toString();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1232,11 +1226,11 @@ void main() {
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                title: longTextA,
+                label: longTextA,
                 icon: const Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
-                title: longTextB,
+                label: longTextB,
                 icon: const Icon(Icons.battery_alert),
               ),
             ],
@@ -1248,9 +1242,9 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(kBottomNavigationBarHeight));
 
-    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA.data!));
+    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA));
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
-    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data!));
+    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
   });
 
@@ -1385,15 +1379,15 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('AC'),
+              label: 'AC',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Alarm'),
+              label: 'Alarm',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.hot_tub),
-              title: Text('Hot Tub'),
+              label: 'Hot Tub',
             ),
           ],
         ),
@@ -1439,15 +1433,15 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('AC'),
+              label: 'AC',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Alarm'),
+              label: 'Alarm',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.hot_tub),
-              title: Text('Hot Tub'),
+              label: 'Hot Tub',
             ),
           ],
         ),
@@ -1492,7 +1486,6 @@ void main() {
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            currentIndex: 0,
             items: List<BottomNavigationBarItem>.generate(itemCount, (int itemIndex) {
               return BottomNavigationBarItem(
                 icon: const Icon(Icons.android),
@@ -1633,7 +1626,7 @@ void main() {
     }
   });
 
-  testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar item label should not be nullable', (WidgetTester tester) async {
     expect(() {
       MaterialApp(
         home: Scaffold(
@@ -1739,11 +1732,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Red'),
+              label: 'Red',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Green'),
+              label: 'Green',
             ),
           ],
         ),
@@ -1782,11 +1775,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Red'),
+              label: 'Red',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              title: Text('Green'),
+              label: 'Green',
             ),
           ],
         ),
@@ -1824,8 +1817,8 @@ void main() {
             child: BottomNavigationBar(
               mouseCursor: SystemMouseCursors.text,
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'AC'),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Alarm'),
               ],
             ),
           ),
@@ -1849,8 +1842,8 @@ void main() {
             cursor: SystemMouseCursors.forbidden,
             child: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'AC'),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Alarm'),
               ],
             ),
           ),
@@ -1882,8 +1875,8 @@ void main() {
             child: BottomNavigationBar(
               enableFeedback: enableFeedback,
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'AC'),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Alarm'),
               ],
             ),
           ),
@@ -2022,9 +2015,7 @@ void main() {
 
   testWidgets('BottomNavigationBar default layout', (WidgetTester tester) async {
     final Key icon0 = UniqueKey();
-    final Key title0 = UniqueKey();
     final Key icon1 = UniqueKey();
-    final Key title1 = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2032,15 +2023,14 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon0, width: 200, height: 10),
-                    title: SizedBox(key: title0, width: 200, height: 10),
+                    label: 'Title0',
                   ),
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon1, width: 200, height: 10),
-                    title: SizedBox(key: title1, width: 200, height: 10),
+                    label: 'Title1',
                   ),
                 ],
               ),
@@ -2055,25 +2045,24 @@ void main() {
     // The height of the navigation bar is kBottomNavigationBarHeight = 56
     // The top of the navigation bar is 600 - 56 = 544
     // The top and bottom of the selected item is defined by its centered icon/label column:
-    //   top = 544 - (56 - (10 + 10)) / 2 = 562
+    //   top = 544 + ((56 - (10 + 10)) / 2) = 562
     //   bottom = top + 10 + 10 = 582
-    expect(tester.getRect(find.byKey(icon0)).top, 562);
-    expect(tester.getRect(find.byKey(title0)).bottom, 582);
+    expect(tester.getRect(find.byKey(icon0)).top, 560.0);
+    expect(tester.getRect(find.text('Title0')).bottom, 584.0);
 
-    // The items are horizontal padded according to
-    // MainAxisAlignment.spaceBetween Left/right padding is 800 - (200
-    // * 4) / 4 = 100. The layout of the unselected item's title is
-    // slightly different; not checking that here.
-    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(100, 572, 300, 582));
-    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(100, 562, 300, 572));
-    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(500, 562, 700, 572));
+    // The items are padded horizontally according to
+    // MainAxisAlignment.spaceAround. Left/right padding is:
+    // 800 - (200 * 2) / 4 = 100
+    // The layout of the unselected item's label is slightly different; not
+    // checking that here.
+    expect(tester.getRect(find.text('Title0')), const Rect.fromLTRB(158.0, 570.0, 242.0, 584.0));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(100.0, 560.0, 300.0, 570.0));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(500.0, 560.0, 700.0, 570.0));
   });
 
   testWidgets('BottomNavigationBar centered landscape layout', (WidgetTester tester) async {
     final Key icon0 = UniqueKey();
-    final Key title0 = UniqueKey();
     final Key icon1 = UniqueKey();
-    final Key title1 = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2081,16 +2070,15 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon0, width: 200, height: 10),
-                    title: SizedBox(key: title0, width: 200, height: 10),
+                    label: 'Title0',
                   ),
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon1, width: 200, height: 10),
-                    title: SizedBox(key: title1, width: 200, height: 10),
+                    label: 'Title1',
                   ),
                 ],
               ),
@@ -2103,22 +2091,23 @@ void main() {
     expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
     expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
 
-    // The items are laid out as in the default case, within width=600
+    // The items are laid out as in the default case, within width = 600
     // (the "portrait" width) and the result is centered with the
-    // landscape width=800.  So item 0's left edges are (800 - 600) / 2 +
-    // (600 - 400) / 4 = 150.  Item 1's right edge is 800 - 150 =
-    // 650. The layout of the unselected item's title is slightly
-    // different; not checking that here.
-    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(150.0, 572.0, 350.0, 582.0));
-    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(150, 562, 350, 572));
-    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(450, 562, 650, 572));
+    // landscape width = 800.
+    // So item 0's left edges are:
+    // ((800 - 600) / 2) + ((600 - 400) / 4) = 150.
+    // Item 1's right edge is:
+    // 800 - 150 = 650
+    // The layout of the unselected item's label is slightly different; not
+    // checking that here.
+    expect(tester.getRect(find.text('Title0')), const Rect.fromLTRB(208.0, 570.0, 292.0, 584.0));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(150.0, 560.0, 350.0, 570.0));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(450.0, 560.0, 650.0, 570.0));
   });
 
   testWidgets('BottomNavigationBar linear landscape layout', (WidgetTester tester) async {
     final Key icon0 = UniqueKey();
-    final Key title0 = UniqueKey();
     final Key icon1 = UniqueKey();
-    final Key title1 = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2126,16 +2115,15 @@ void main() {
           builder: (BuildContext context) {
             return Scaffold(
               bottomNavigationBar: BottomNavigationBar(
-                currentIndex: 0,
                 landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon0, width: 100, height: 20),
-                    title: SizedBox(key: title0, width: 100, height: 20),
+                    label: 'Title0',
                   ),
                   BottomNavigationBarItem(
                     icon: SizedBox(key: icon1, width: 100, height: 20),
-                    title: SizedBox(key: title1, width: 100, height: 20),
+                    label: 'Title1',
                   ),
                 ],
               ),
@@ -2149,12 +2137,12 @@ void main() {
     expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
 
     // The items are laid out as in the default case except each
-    // item's icon/title is arranged in a row, with 8 pixels in
-    // between the icon and title.  The layout of the unselected
-    // item's title is slightly different; not checking that here.
-    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(204, 562, 304, 582));
-    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(96, 562, 196, 582));
-    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(496, 562, 596, 582));
+    // item's icon/label is arranged in a row, with 8 pixels in
+    // between the icon and label.  The layout of the unselected
+    // item's label is slightly different; not checking that here.
+    expect(tester.getRect(find.text('Title0')), const Rect.fromLTRB(212.0, 565.0, 296.0, 579.0));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(104.0, 562.0, 204.0, 582.0));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(504.0, 562.0, 604.0, 582.0));
   });
 }
 

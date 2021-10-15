@@ -278,6 +278,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   Widget build(BuildContext context) {
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
+    assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
     final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(
@@ -289,7 +290,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
-                perspective: _kDefaultPerspective,
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
                 magnification: widget.magnification,

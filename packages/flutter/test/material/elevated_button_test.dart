@@ -41,7 +41,7 @@ void main() {
     expect(material.color, colorScheme.primary);
     expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -67,7 +67,7 @@ void main() {
     expect(material.color, colorScheme.primary);
     expect(material.elevation, 8);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -106,7 +106,7 @@ void main() {
     expect(material.color, colorScheme.primary);
     expect(material.elevation, 2);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.textStyle!.color, colorScheme.onPrimary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -137,7 +137,7 @@ void main() {
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -183,7 +183,6 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
   );
 
 
@@ -358,7 +357,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     elevatedButton = find.byType(ElevatedButton);
     expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
@@ -368,7 +367,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     elevatedButton = find.byType(ElevatedButton);
     expect(tester.widget<ElevatedButton>(elevatedButton).enabled, true);
@@ -377,7 +376,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(),
     );
     elevatedButton = find.byType(ElevatedButton);
     expect(tester.widget<ElevatedButton>(elevatedButton).enabled, false);
@@ -1203,9 +1202,9 @@ void main() {
         home: Center(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(width: 4, color: borderColor),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+                side: BorderSide(width: 4, color: borderColor),
               ),
             ),
             onPressed: () { },

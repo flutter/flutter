@@ -898,7 +898,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     // Hit test list children.
-    // The x, y parameters have the top left of the node's box as the origin.
     RenderBox? child = lastChild;
     while (child != null) {
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;

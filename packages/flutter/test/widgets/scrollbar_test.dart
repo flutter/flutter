@@ -259,7 +259,6 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
@@ -269,7 +268,6 @@ void main() {
         axisDirection = AxisDirection.right;
 
       painter = _buildPainter(
-        crossAxisMargin: margin,
         scrollMetrics: startingMetrics,
         scrollbarOrientation: scrollbarOrientation,
       );
@@ -319,14 +317,11 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
     Rect rect;
 
     // Vertical scroll with TextDirection.ltr
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
-      textDirection: TextDirection.ltr,
     );
     painter.update(
       startingMetrics.copyWith(axisDirection: AxisDirection.down),
@@ -341,7 +336,6 @@ void main() {
 
     // Vertical scroll with TextDirection.rtl
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
       textDirection: TextDirection.rtl,
     );
@@ -358,7 +352,6 @@ void main() {
 
     // Horizontal scroll
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
     );
     painter.update(
@@ -2043,5 +2036,57 @@ void main() {
     expect(depths.length, 2);
     expect(depths[0], 1);
     expect(depths[1], 0);
+  });
+
+  test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
+    ScrollbarPainter createPainter({
+      Color color = const Color(0xFF000000),
+      Animation<double> fadeoutOpacityAnimation = kAlwaysCompleteAnimation,
+      Color trackColor = const Color(0x00000000),
+      Color trackBorderColor = const Color(0x00000000),
+      TextDirection textDirection = TextDirection.ltr,
+      double thickness = _kThickness,
+      EdgeInsets padding = EdgeInsets.zero,
+      double mainAxisMargin = 0.0,
+      double crossAxisMargin = 0.0,
+      Radius? radius,
+      OutlinedBorder? shape,
+      double minLength = _kMinThumbExtent,
+      double? minOverscrollLength,
+      ScrollbarOrientation scrollbarOrientation = ScrollbarOrientation.top,
+    }) {
+      return ScrollbarPainter(
+        color: color,
+        fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+        trackColor: trackColor,
+        trackBorderColor: trackBorderColor,
+        textDirection: textDirection,
+        thickness: thickness,
+        padding: padding,
+        mainAxisMargin: mainAxisMargin,
+        crossAxisMargin: crossAxisMargin,
+        radius: radius,
+        shape: shape,
+        minLength: minLength,
+        minOverscrollLength: minOverscrollLength,
+        scrollbarOrientation: scrollbarOrientation,
+      );
+    }
+    final ScrollbarPainter painter = createPainter();
+    expect(painter.shouldRepaint(createPainter()), false);
+    expect(painter.shouldRepaint(createPainter(color: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(fadeoutOpacityAnimation: kAlwaysDismissedAnimation)), true);
+    expect(painter.shouldRepaint(createPainter(trackColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(trackBorderColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(textDirection: TextDirection.rtl)), true);
+    expect(painter.shouldRepaint(createPainter(thickness: _kThickness + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(padding: const EdgeInsets.all(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(mainAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(crossAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(radius: const Radius.circular(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(shape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
+    expect(painter.shouldRepaint(createPainter(minLength: _kMinThumbExtent + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(minOverscrollLength: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
   });
 }

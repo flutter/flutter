@@ -196,7 +196,7 @@ class KernelCompiler {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<String> fileSystemRoots,
-    required String fileSystemScheme,
+    String? fileSystemScheme,
     @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
@@ -210,7 +210,7 @@ class KernelCompiler {
   final Artifacts _artifacts;
   final ProcessManager _processManager;
   final Logger _logger;
-  final String _fileSystemScheme;
+  final String? _fileSystemScheme;
   final List<String> _fileSystemRoots;
   final StdoutHandler _stdoutHandler;
 
@@ -908,7 +908,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput?> _reject() async {
     if (!_compileRequestNeedsConfirmation) {
-      return Future<CompilerOutput?>.value(null);
+      return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
     _server?.stdin.writeln('reject');

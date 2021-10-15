@@ -45,6 +45,16 @@ class IMobileDevice {
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;
 
+  /// Create an [IMobileDevice] for testing.
+  factory IMobileDevice.test({ required ProcessManager processManager }) {
+    return IMobileDevice(
+      artifacts: Artifacts.test(),
+      cache: Cache.test(processManager: processManager),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+  }
+
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
   final MapEntry<String, String> _dyLdLibEntry;
@@ -93,7 +103,7 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
-  required String targetOverride,
+  String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   DarwinArch? activeArch,
   bool codesign = true,
@@ -189,8 +199,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       ) ?? <String, String>{};
 
   if (codesign && environmentType == EnvironmentType.physical) {
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
       buildSettings: buildSettings,
+      platform: globals.platform,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
@@ -597,8 +608,6 @@ String xcodeBuildActionToString(XcodeBuildAction action) {
         return 'build';
       case XcodeBuildAction.archive:
         return 'archive';
-      default:
-        throw UnsupportedError('Unknown Xcode build action');
     }
 }
 

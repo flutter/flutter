@@ -46,9 +46,9 @@ class Calculator {
       final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
       final int n = result.length;
       onResultListener('Decoded $n results');
-    } catch (e, stack) {
-      print('Invalid JSON file: $e');
-      print(stack);
+    } on FormatException catch (e, stack) {
+      debugPrint('Invalid JSON file: $e');
+      debugPrint('$stack');
     }
   }
 
@@ -281,7 +281,6 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
       case CalculationState.calculating:
         return 'In Progress';
       case CalculationState.idle:
-      default:
         return 'Idle';
     }
   }

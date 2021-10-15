@@ -288,6 +288,7 @@ void main() {
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
         expect(versionInfo['build_number'],'3');
+        expect(versionInfo['package_name'],'test');
       });
     });
 

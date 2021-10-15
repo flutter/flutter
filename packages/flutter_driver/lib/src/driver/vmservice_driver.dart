@@ -50,7 +50,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       // TODO(awdavies): Use something other than print. On fuchsia
       // `stderr`/`stdout` appear to have issues working correctly.
       driverLog = (String source, String message) {
-        print('$source: $message');
+        print('$source: $message'); // ignore: avoid_print
       };
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
@@ -148,7 +148,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
           return vms.Success();
         } else {
           // Failed to resume due to another reason. Fail hard.
-          throw e;
+          throw e; // ignore: only_throw_errors, proxying the error from upstream.
         }
       });
     }
@@ -556,7 +556,6 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
       final vms.VmService service = vms.VmService(
         controller.stream,
         socket.add,
-        log: null,
         disposeHandler: () => socket!.close(),
         streamClosed: streamClosedCompleter.future
       );
@@ -565,6 +564,8 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
       await service.getVersion();
       return service;
     } catch (e) {
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       await socket?.close();
       if (attempts > 5) {
         _log('It is taking an unusually long time to connect to the VM...');
@@ -594,8 +595,6 @@ List<String> _timelineStreamsToString(List<TimelineStream> streams) {
       case TimelineStream.gc: return 'GC';
       case TimelineStream.isolate: return 'Isolate';
       case TimelineStream.vm: return 'VM';
-      default:
-        throw 'Unknown timeline stream $stream';
     }
   }).toList();
 }
