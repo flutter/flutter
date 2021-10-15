@@ -394,7 +394,7 @@ class WebServerDevice extends Device {
   void clearLogs() { }
 
   @override
-  Future<String> get emulatorId => null;
+  Future<String> get emulatorId async => null;
 
   DeviceLogReader _logReader;
 

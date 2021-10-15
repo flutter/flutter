@@ -15,7 +15,7 @@ void main() {
   });
 
   test('TextTheme copyWith apply, merge basics with Typography.black', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018();
     expect(typography.black, equals(typography.black.copyWith()));
     expect(typography.black, equals(typography.black.apply()));
     expect(typography.black, equals(typography.black.merge(null)));
@@ -27,7 +27,7 @@ void main() {
   });
 
   test('TextTheme copyWith', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018();
     final TextTheme whiteCopy = typography.black.copyWith(
       headline1: typography.white.headline1,
       headline2: typography.white.headline2,
@@ -84,7 +84,7 @@ void main() {
       TextDecoration.lineThrough,
     ]);
 
-    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018();
     final TextTheme theme = typography.black.apply(
       fontFamily: fontFamily,
       displayColor: displayColor,
@@ -130,7 +130,7 @@ void main() {
   });
 
   test('TextTheme apply fontSizeFactor fontSizeDelta', () {
-    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018();
     final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
     final TextTheme sizeTheme = baseTheme.apply(
       fontSizeFactor: 2.0,

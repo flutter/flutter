@@ -119,7 +119,6 @@ class PubDependencies extends ArtifactSet {
     await _pub().get(
       context: PubContext.pubGet,
       directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
-      generateSyntheticPackage: false,
     );
   }
 }

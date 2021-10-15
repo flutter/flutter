@@ -499,7 +499,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
           invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, pointerCount: _pointerQueue.length)));
         } else {
-          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: Velocity.zero, pointerCount: _pointerQueue.length)));
+          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(pointerCount: _pointerQueue.length)));
         }
       }
       _state = _ScaleState.accepted;

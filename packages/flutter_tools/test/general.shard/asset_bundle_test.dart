@@ -419,7 +419,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('does not track wildcard directories from dependencies', () async {
@@ -461,7 +461,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('reports package that causes asset bundle error when it is '
@@ -495,7 +495,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('does not report package that causes asset bundle error '
@@ -518,7 +518,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('does not include material design assets if uses-material-design: true is '
@@ -556,7 +556,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('does not include assets in project directories as asset variants', () async {
@@ -589,7 +589,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 
   testUsingContext('deferred and regular assets are included in manifest alphabetically', () async {
@@ -626,6 +626,6 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
+    Platform: () => FakePlatform(),
   });
 }

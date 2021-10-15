@@ -295,7 +295,6 @@ class SystemChannels {
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -321,7 +320,6 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -352,7 +350,6 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -378,7 +375,6 @@ class SystemChannels {
   ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for localization.

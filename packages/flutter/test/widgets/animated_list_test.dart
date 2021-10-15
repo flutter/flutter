@@ -54,7 +54,7 @@ void main() {
     expect(find.text('removing item'), findsOneWidget);
     expect(find.text('item 2'), findsNothing);
 
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('removing item'), findsNothing);
   });
 
@@ -105,7 +105,6 @@ void main() {
                 itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return SizeTransition(
                     key: ValueKey<int>(index),
-                    axis: Axis.vertical,
                     sizeFactor: animation,
                     child: SizedBox(
                       height: 100.0,
@@ -185,7 +184,6 @@ void main() {
       Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
           key: ValueKey<int>(item),
-          axis: Axis.vertical,
           sizeFactor: animation,
           child: SizedBox(
             height: 100.0,

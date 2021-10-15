@@ -19,11 +19,10 @@ import '../../src/fakes.dart';
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: false),
+      featureFlags: TestFeatureFlags(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -37,7 +36,7 @@ void main() {
       chromiumLauncher: null,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       processManager: FakeProcessManager.any(),
     );
 
@@ -114,7 +113,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -130,7 +128,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager:  FakeProcessManager.any(),
@@ -147,7 +144,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: processManager,
@@ -164,7 +160,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.any(),
@@ -181,7 +176,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.any(),
@@ -206,7 +200,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: processManager,
@@ -280,7 +273,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
-      operatingSystemUtils: null,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
@@ -339,7 +332,6 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{}
       ),
       processManager: FakeProcessManager.empty(),

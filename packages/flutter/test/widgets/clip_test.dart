@@ -395,7 +395,6 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: ClipRect(
-                clipBehavior: Clip.hardEdge,
                 child: Container(
                   color: Colors.blue,
                 ),
@@ -529,9 +528,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipPath(
-                    clipper: ShapeBorderClipper(
+                    clipper: const ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
                     child: Container(
@@ -576,7 +575,7 @@ void main() {
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalModel(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                   color: Colors.red,
                   clipBehavior: clipBehavior,
                   child: Container(
@@ -640,7 +639,7 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalModel(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                     color: Colors.red,
                     child: Container(
                       color: Colors.white,
@@ -681,9 +680,9 @@ void main() {
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalShape(
-                  clipper: ShapeBorderClipper(
+                  clipper: const ShapeBorderClipper(
                     shape: BeveledRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
                     ),
                   ),
                   clipBehavior: clipBehavior,
@@ -747,9 +746,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalShape(
-                    clipper: ShapeBorderClipper(
+                    clipper: const ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
                     color: Colors.red,

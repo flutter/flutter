@@ -1,0 +1,6 @@
+# codesign_integration_test takes longer than the default timeout which is 30s
+# since it has to clone both the engine and framework repos, and that test is running
+# asynchronously. The async function is being awaited more than 30s which counts as inactivity
+# The default timeout needs to be extended to accomodate codesign_integration_test
+
+timeout: 5m

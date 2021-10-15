@@ -51,7 +51,7 @@ enum AutofillContextAction {
 /// autofillable input fields in an [AutofillGroup], so the user input of the
 /// [Form] can be saved for future autofill by the platform.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
 /// `AutofillGroup`s.
 ///
@@ -129,7 +129,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String tag) => _clients[tag];
+  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
 
   @override
   Iterable<AutofillClient> get autofillClients {
@@ -195,7 +195,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
         TextInput.finishAutofillContext(shouldSave: false);
         break;
       case AutofillContextAction.commit:
-        TextInput.finishAutofillContext(shouldSave: true);
+        TextInput.finishAutofillContext();
         break;
     }
   }

@@ -773,9 +773,38 @@ class TextEditingValue {
   final String text;
 
   /// The range of text that is currently selected.
+  ///
+  /// When [selection] is a [TextSelection] that has the same non-negative
+  /// `baseOffset` and `extentOffset`, the [selection] property represents the
+  /// caret position.
+  ///
+  /// If the current [selection] has a negative `baseOffset` or `extentOffset`,
+  /// then the text currently does not have a selection or a caret location, and
+  /// most text editing operations that rely on the current selection (for
+  /// instance, insert a character at the caret location) will do nothing.
   final TextSelection selection;
 
   /// The range of text that is still being composed.
+  ///
+  /// Composing regions are created by input methods (IMEs) to indicate the text
+  /// within a certain range is provisional. For instance, the Android Gboard
+  /// app's English keyboard puts the current word under the caret into a
+  /// composing region to indicate the word is subject to autocorrect or
+  /// prediction changes.
+  ///
+  /// Composing regions can also be used for performing multistage input, which
+  /// is typically used by IMEs designed for phoetic keyboard to enter
+  /// ideographic symbols. As an example, many CJK keyboards require the user to
+  /// enter a latin alphabet sequence and then convert it to CJK characters. On
+  /// iOS, the default software keyboards do not have a dedicated view to show
+  /// the unfinished latin sequence, so it's displayed directly in the text
+  /// field, inside of a composing region.
+  ///
+  /// The composing region should typically only be changed by the IME, or the
+  /// user via interacting with the IME.
+  ///
+  /// If the range represented by this property is [TextRange.empty], then the
+  /// text is not currently being composed.
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
