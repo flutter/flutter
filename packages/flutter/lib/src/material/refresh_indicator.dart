@@ -307,8 +307,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     if(widget.isRefreshing){
       if(_mode == _RefreshIndicatorMode.refresh)
         return;
-      if(_mode != null)
+      if(_mode != null) {
         await _dismiss(_RefreshIndicatorMode.canceled);
+        if(!widget.isRefreshing)
+          return;
+      }
       if(_mode == null)
         show();
     }
