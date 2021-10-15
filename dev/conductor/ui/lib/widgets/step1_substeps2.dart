@@ -164,21 +164,13 @@ class CheckboxListTileInputState extends State<CheckboxListTileInput> {
   @override
   Widget build(BuildContext context) {
     return CheckboxListTile(
-      key: Key('CheckBox${Step1Substeps.substepTitles[widget.index]}'),
-      value: widget.substepChecked[widget.index],
-      onChanged: (bool? newValue) {
-        widget.onSubstepPress(widget.index);
-      },
+      key: const Key('CheckBox'),
+      value: false,
+      onChanged: (bool? newValue) {},
       title: TextFormField(
-        key: Key(Step1Substeps.substepTitles[widget.index]),
-        decoration: InputDecoration(labelText: Step1Substeps.substepTitles[widget.index], hintText: widget.hintText),
-        onChanged: (String data) {
-          widget.setReleaseData(Step1Substeps.substepTitles[widget.index], data);
-        },
+        key: const Key('inputForm'),
+        decoration: InputDecoration(labelText: 'Input Form', hintText: 'placeholder'),
       ),
-      controlAffinity: ListTileControlAffinity.leading,
-      activeColor: Colors.grey,
-      // selected: widget.substepChecked[widget.index],
     );
   }
 }
@@ -215,8 +207,7 @@ class CheckboxListTileDropdownState extends State<CheckboxListTileDropdown> {
       onChanged: (bool? newValue) {
         widget.onSubstepPress(widget.index);
       },
-      title: Text(Step1Substeps.substepTitles[widget.index]),
-      subtitle: DropdownButton<String>(
+      title: DropdownButton<String>(
         key: Key(Step1Substeps.substepTitles[widget.index]),
         value: Step1Substeps.releaseData[Step1Substeps.substepTitles[widget.index]],
         icon: const Icon(Icons.arrow_downward),
