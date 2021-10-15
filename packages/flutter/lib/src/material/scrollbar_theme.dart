@@ -42,6 +42,7 @@ class ScrollbarThemeData with Diagnosticable {
     this.mainAxisMargin,
     this.minThumbLength,
     this.interactive,
+    this.infiniteBehavior,
   });
 
   /// Overrides the default value of [Scrollbar.thickness] in all
@@ -118,6 +119,9 @@ class ScrollbarThemeData with Diagnosticable {
   ///    overscrolled.
   final double? minThumbLength;
 
+  /// Doc
+  final InfiniteScrollBehavior? infiniteBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ScrollbarThemeData copyWith({
@@ -132,6 +136,7 @@ class ScrollbarThemeData with Diagnosticable {
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
+    InfiniteScrollBehavior? infiniteBehavior,
   }) {
     return ScrollbarThemeData(
       thickness: thickness ?? this.thickness,
@@ -145,6 +150,7 @@ class ScrollbarThemeData with Diagnosticable {
       crossAxisMargin: crossAxisMargin ?? this.crossAxisMargin,
       mainAxisMargin: mainAxisMargin ?? this.mainAxisMargin,
       minThumbLength: minThumbLength ?? this.minThumbLength,
+      infiniteBehavior: infiniteBehavior ?? this.infiniteBehavior,
     );
   }
 
@@ -167,6 +173,7 @@ class ScrollbarThemeData with Diagnosticable {
       crossAxisMargin: lerpDouble(a?.crossAxisMargin, b?.crossAxisMargin, t),
       mainAxisMargin: lerpDouble(a?.mainAxisMargin, b?.mainAxisMargin, t),
       minThumbLength: lerpDouble(a?.minThumbLength, b?.minThumbLength, t),
+      infiniteBehavior: t< 0.5 ? a?.infiniteBehavior : b?.infiniteBehavior,
     );
   }
 
@@ -184,6 +191,7 @@ class ScrollbarThemeData with Diagnosticable {
       crossAxisMargin,
       mainAxisMargin,
       minThumbLength,
+      infiniteBehavior,
     );
   }
 
@@ -204,7 +212,8 @@ class ScrollbarThemeData with Diagnosticable {
       && other.trackBorderColor == trackBorderColor
       && other.crossAxisMargin == crossAxisMargin
       && other.mainAxisMargin == mainAxisMargin
-      && other.minThumbLength == minThumbLength;
+      && other.minThumbLength == minThumbLength
+      && other.infiniteBehavior == infiniteBehavior;
   }
 
   @override
@@ -221,6 +230,7 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('crossAxisMargin', crossAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('mainAxisMargin', mainAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('minThumbLength', minThumbLength, defaultValue: null));
+    properties.add(DiagnosticsProperty<InfiniteScrollBehavior>('infiniteBehavior', infiniteBehavior, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(

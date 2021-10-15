@@ -84,6 +84,7 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.infiniteBehavior,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -135,6 +136,9 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
 
+  /// Doc
+  final InfiniteScrollBehavior? infiniteBehavior;
+
   @override
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -147,6 +151,7 @@ class Scrollbar extends StatelessWidget {
         controller: controller,
         notificationPredicate: notificationPredicate,
         scrollbarOrientation: scrollbarOrientation,
+        infiniteBehavior: infiniteBehavior,
         child: child,
       );
     }
@@ -160,6 +165,7 @@ class Scrollbar extends StatelessWidget {
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
+      infiniteBehavior: infiniteBehavior,
       child: child,
     );
   }
@@ -178,6 +184,7 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
     ScrollbarOrientation? scrollbarOrientation,
+    InfiniteScrollBehavior? infiniteBehavior,
   }) : super(
          key: key,
          child: child,
@@ -191,6 +198,7 @@ class _MaterialScrollbar extends RawScrollbar {
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
          interactive: interactive,
          scrollbarOrientation: scrollbarOrientation,
+         infiniteBehavior: infiniteBehavior,
        );
 
   final bool? showTrackOnHover;
@@ -348,7 +356,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding
-      ..scrollbarOrientation = widget.scrollbarOrientation;
+      ..scrollbarOrientation = widget.scrollbarOrientation
+      ..infiniteBehavior = widget.infiniteBehavior ?? _scrollbarTheme.infiniteBehavior ?? InfiniteScrollBehavior.continuous;
   }
 
   @override

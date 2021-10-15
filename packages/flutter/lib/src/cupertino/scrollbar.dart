@@ -79,6 +79,7 @@ class CupertinoScrollbar extends RawScrollbar {
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     ScrollbarOrientation? scrollbarOrientation,
+    InfiniteScrollBehavior? infiniteBehavior,
   }) : assert(thickness != null),
        assert(thickness < double.infinity),
        assert(thicknessWhileDragging != null),
@@ -97,6 +98,7 @@ class CupertinoScrollbar extends RawScrollbar {
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
          scrollbarOrientation: scrollbarOrientation,
+         infiniteBehavior: infiniteBehavior,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
@@ -167,7 +169,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..padding = MediaQuery.of(context).padding
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
-      ..scrollbarOrientation = widget.scrollbarOrientation;
+      ..scrollbarOrientation = widget.scrollbarOrientation
+      ..infiniteBehavior = widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous;
   }
 
   double _pressStartAxisPosition = 0.0;
