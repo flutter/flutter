@@ -1922,11 +1922,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     // Since the viewport is shrinkwrapped, we know that any negative overscroll
     // into the potentially infinite mainAxisExtent will overflow the end of
     // the viewport.
-    if (correctedOffset < 0.0) {
-      _hasVisualOverflow = true;
-    } else {
-      _hasVisualOverflow = false;
-    }
+    _hasVisualOverflow = correctedOffset < 0.0;
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
