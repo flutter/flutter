@@ -1792,7 +1792,6 @@ class ThemeData with Diagnosticable {
         && other.textTheme == textTheme
         && other.primaryTextTheme == primaryTextTheme
         && other.accentTextTheme == accentTextTheme
-        && other.inputDecorationTheme == inputDecorationTheme
         && other.iconTheme == iconTheme
         && other.primaryIconTheme == primaryIconTheme
         && other.accentIconTheme == accentIconTheme
@@ -1888,7 +1887,6 @@ class ThemeData with Diagnosticable {
       textTheme,
       primaryTextTheme,
       accentTextTheme,
-      inputDecorationTheme,
       iconTheme,
       primaryIconTheme,
       accentIconTheme,
