@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,8 +19,8 @@ void main() {
   testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
-        child: Text('X', style: testStyle),
         onPressed: null,
+        child: Text('X', style: testStyle),
       )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
@@ -35,9 +35,9 @@ void main() {
     const double minSize = 60.0;
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
-        child: Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
+        child: Text('X', style: testStyle),
       )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
@@ -51,8 +51,8 @@ void main() {
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
-        child: Text('XXXX', style: testStyle),
         onPressed: null,
+        child: Text('XXXX', style: testStyle),
       )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
@@ -130,9 +130,9 @@ void main() {
 
   testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
-      child: Text('X', style: testStyle),
       onPressed: null,
       color: Color(0xFFFFFFFF),
+      child: Text('X', style: testStyle),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -144,9 +144,9 @@ void main() {
 
   testWidgets('Custom padding', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
-      child: Text('X', style: testStyle),
       onPressed: null,
       padding: EdgeInsets.all(100.0),
+      child: Text('X', style: testStyle),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -185,13 +185,49 @@ void main() {
 
   testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
-      child: Text('Tap me'),
       onPressed: null,
+      child: Text('Tap me'),
     )));
     expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
     await tester.tap(find.byType(CupertinoButton));
     // Still doesn't animate.
     expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+  });
+
+  testWidgets('Enabled button animates', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(child: CupertinoButton(
+      child: const Text('Tap me'),
+      onPressed: () { },
+    )));
+
+    await tester.tap(find.byType(CupertinoButton));
+    // Enter animation.
+    await tester.pump();
+    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.403, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.400, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.650, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.894, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.988, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
   });
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
@@ -267,28 +303,28 @@ void main() {
 
   testWidgets('Can specify colors', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
-      child: const Text('Skeuomorph me'),
       color: const Color(0x000000FF),
       disabledColor: const Color(0x0000FF00),
       onPressed: () { },
+      child: const Text('Skeuomorph me'),
     )));
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
-        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration as BoxDecoration;
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
+    ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x000000FF));
 
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
-      child: Text('Skeuomorph me'),
       color: Color(0x000000FF),
       disabledColor: Color(0x0000FF00),
       onPressed: null,
+      child: Text('Skeuomorph me'),
     )));
 
     boxDecoration = tester.widget<DecoratedBox>(
-        find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration as BoxDecoration;
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
+    ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
@@ -308,16 +344,16 @@ void main() {
       MediaQuery(
         data: const MediaQueryData(platformBrightness: Brightness.dark),
         child: boilerplate(child: CupertinoButton(
-          child: const Text('Skeuomorph me'),
           color: bgColor,
           disabledColor: inactive,
           onPressed: () { },
+          child: const Text('Skeuomorph me'),
         )),
       ),
     );
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
-      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
     ).decoration as BoxDecoration;
 
     expect(boxDecoration.color!.value, 0xFF654321);
@@ -326,16 +362,16 @@ void main() {
       MediaQuery(
         data: const MediaQueryData(platformBrightness: Brightness.light),
         child: boilerplate(child: const CupertinoButton(
-          child: Text('Skeuomorph me'),
           color: bgColor,
           disabledColor: inactive,
           onPressed: null,
+          child: Text('Skeuomorph me'),
         )),
       ),
     );
 
     boxDecoration = tester.widget<DecoratedBox>(
-      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me'),
     ).decoration as BoxDecoration;
 
     // Disabled color.

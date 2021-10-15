@@ -186,8 +186,8 @@ class BorderSide {
     }
   }
 
-  /// Whether the two given [BorderSide]s can be merged using [new
-  /// BorderSide.merge].
+  /// Whether the two given [BorderSide]s can be merged using
+  /// [BorderSide.merge].
   ///
   /// Two sides can be merged if one or both are zero-width with
   /// [BorderStyle.none], or if they both have the same color and style.
@@ -566,7 +566,7 @@ class _CompoundBorder extends ShapeBorder {
   @override
   ShapeBorder scale(double t) {
     return _CompoundBorder(
-      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList()
+      borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList(),
     );
   }
 

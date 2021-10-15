@@ -10,14 +10,15 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -37,7 +38,7 @@ void main() {
   Platform linux;
   PackageConfig packages;
   Platform windows;
-  MockHttpServer mockHttpServer;
+  FakeHttpServer httpServer;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -46,12 +47,12 @@ void main() {
   });
 
   setUp(() {
-    mockHttpServer = MockHttpServer();
+    httpServer = FakeHttpServer();
     linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -209,6 +210,19 @@ void main() {
     expect(await response.readAsString(), htmlContent);
   }));
 
+  test('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
+    final Directory webDir = globals.fs.currentDirectory.childDirectory('web')
+      ..createSync();
+    webDir.childFile('index.html').writeAsStringSync(htmlContent);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(await response.readAsString(), htmlContent.replaceAll(kBaseHrefPlaceholder, '/'));
+  }));
+
   test('does not serve outside the base path', () => testbed.run(() async {
     webAssetServer.basePath = 'base/path';
 
@@ -232,7 +246,7 @@ void main() {
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
     final WebAssetServer webAssetServer = WebAssetServer(
-      mockHttpServer,
+      httpServer,
       packages,
       InternetAddress.loopbackIPv4,
       null,
@@ -251,7 +265,7 @@ void main() {
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
     final WebAssetServer webAssetServer = WebAssetServer(
-      mockHttpServer,
+      httpServer,
       packages,
       InternetAddress.loopbackIPv4,
       null,
@@ -272,7 +286,7 @@ void main() {
 
     expect(
       () => WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -292,7 +306,7 @@ void main() {
 
     expect(
       () => WebAssetServer(
-        mockHttpServer,
+        httpServer,
         packages,
         InternetAddress.loopbackIPv4,
         null,
@@ -588,7 +602,7 @@ void main() {
   test('calling dispose closes the http server', () => testbed.run(() async {
     await webAssetServer.dispose();
 
-    verify(mockHttpServer.close()).called(1);
+    expect(httpServer.closed, true);
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
@@ -599,15 +613,8 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
+    final ResidentCompiler residentCompiler = FakeResidentCompiler()
+      ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -639,13 +646,13 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -717,15 +724,8 @@ void main() {
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
+    final ResidentCompiler residentCompiler = FakeResidentCompiler()
+      ..output = const CompilerOutput('a', 0, <Uri>[]);
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -762,13 +762,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
+      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -832,16 +832,6 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
-
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
@@ -876,16 +866,6 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -929,16 +909,6 @@ void main() {
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -1015,7 +985,7 @@ void main() {
     expect(response.statusCode, 404);
   }));
 
-  test('WebAssetServer strips leading base href off off asset requests', () => testbed.run(() async {
+  test('WebAssetServer strips leading base href off of asset requests', () => testbed.run(() async {
     const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory
       .childDirectory('web')
@@ -1023,7 +993,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync(htmlContent);
     final WebAssetServer webAssetServer = WebAssetServer(
-      MockHttpServer(),
+      FakeHttpServer(),
       PackageConfig.empty,
       InternetAddress.anyIPv4,
       <String, String>{},
@@ -1049,16 +1019,6 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packageConfig: anyNamed('packageConfig'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
@@ -1095,5 +1055,29 @@ void main() {
   }));
 }
 
-class MockHttpServer extends Mock implements HttpServer {}
-class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class FakeHttpServer extends Fake implements HttpServer {
+  bool closed = false;
+
+  @override
+  Future<void> close({bool force = false}) async {
+    closed = true;
+  }
+}
+
+class FakeResidentCompiler extends Fake implements ResidentCompiler {
+  CompilerOutput output;
+
+  @override
+  void addFileSystemRoot(String root) { }
+
+  @override
+  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {
+    String outputPath,
+    PackageConfig packageConfig,
+    String projectRootPath,
+    FileSystem fs,
+    bool suppressErrors = false,
+  }) async {
+    return output;
+  }
+}

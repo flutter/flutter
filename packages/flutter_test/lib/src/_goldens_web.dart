@@ -18,7 +18,7 @@ class LocalFileComparator extends GoldenFileComparator {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 
-   @override
+  @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
@@ -64,7 +64,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
       method: 'POST',
       sendData: json.encode(<String, Object>{
         'testUri': testUri.toString(),
-        'key': key.toString(),
+        'key': key,
         'width': width.round(),
         'height': height.round(),
       }),

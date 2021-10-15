@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
@@ -31,8 +29,8 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
+    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
     final String androidPluginClass = androidPlugin.pluginClass;
     final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -69,12 +67,12 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
-    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
-    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
-    final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
-    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
+    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
+    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
+    final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     final String androidPluginClass = androidPlugin.pluginClass;
     final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -118,12 +116,12 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
-    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
-    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
-    final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
-    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
+    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
+    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
+    final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     final String androidPluginClass = androidPlugin.pluginClass;
     final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -159,9 +157,9 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
-    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
-    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+    final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
+    final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
 
     expect(linuxPlugin.pluginClass, isNull);
     expect(macOSPlugin.pluginClass, isNull);
@@ -220,11 +218,117 @@ void main() {
     );
 
     expect(plugin.platforms, <String, PluginPlatform>{});
+    expect(plugin.defaultPackagePlatforms, <String, String>{
+      'linux': 'sample_package_linux',
+      'macos': 'sample_package_macos',
+      'windows': 'sample_package_windows',
+    });
+    expect(plugin.pluginDartClassPlatforms, <String, String>{});
+  });
+
+  testWithoutContext('Desktop plugin parsing allows a dartPluginClass field', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' linux:\n'
+      '  dartPluginClass: LinuxClass\n'
+      ' macos:\n'
+      '  dartPluginClass: MacOSClass\n'
+      ' windows:\n'
+      '  dartPluginClass: WindowsClass\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.pluginDartClassPlatforms, <String, String>{
+      'linux': 'LinuxClass',
+      'macos': 'MacOSClass',
+      'windows': 'WindowsClass',
+    });
+  });
+
+  testWithoutContext('Windows allows supported mode lists', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n'
+      '  supportedVariants:\n'
+      '    - win32\n'
+      '    - uwp\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
+      PluginPlatformVariant.win32,
+      PluginPlatformVariant.winuwp,
+    ]);
+  });
+
+  testWithoutContext('Windows assumes win32 when no variants are given', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
+      PluginPlatformVariant.win32,
+    ]);
+  });
+
+  testWithoutContext('Windows ignores unknown variants', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' windows:\n'
+      '  pluginClass: WinSamplePlugin\n'
+      '  supportedVariants:\n'
+      '    - not_yet_invented_variant\n'
+      '    - uwp\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final Plugin plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      const <String>[],
+      fileSystem: fileSystem,
+    );
+
+    final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{
+      PluginPlatformVariant.winuwp,
+    });
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final YamlMap pluginYaml = loadYaml('') as YamlMap;
+    final YamlMap? pluginYaml = loadYaml('') as YamlMap?;
 
     expect(
       () => Plugin.fromYaml(

@@ -12,7 +12,7 @@ import '../cache.dart';
 import '../features.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -59,6 +59,9 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   String get description => 'Build the Fuchsia target (Experimental).';
 
   @override
+  bool get supported => globals.platform.isLinux || globals.platform.isMacOS;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (!featureFlags.isFuchsiaEnabled) {
       throwToolExit(
@@ -68,7 +71,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     }
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
-    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
+    if (!supported) {
       throwToolExit('"build fuchsia" is only supported on Linux and MacOS hosts.');
     }
     if (!flutterProject.fuchsia.existsSync()) {

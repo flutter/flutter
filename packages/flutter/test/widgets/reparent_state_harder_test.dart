@@ -128,7 +128,7 @@ void main() {
       a: KeyedSubtree(
         key: keyA,
         child: RekeyableDummyStatefulWidgetWrapper(
-          initialKey: keyC
+          initialKey: keyC,
         ),
       ),
       b: KeyedSubtree(
@@ -142,15 +142,15 @@ void main() {
                     return LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
                         return RekeyableDummyStatefulWidgetWrapper(
-                          initialKey: keyD
+                          initialKey: keyD,
                         );
-                      }
+                      },
                     );
-                  }
+                  },
                 );
-              }
+              },
             );
-          }
+          },
         ),
       ),
     ));

@@ -238,12 +238,12 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
        assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
-         'disable Hero transition on this navigation bar.'
+         'disable Hero transition on this navigation bar.',
        ),
        assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
-         'transition due to transitionBetweenRoutes = false.'
+         'transition due to transitionBetweenRoutes = false.',
        ),
        super(key: key);
 
@@ -407,9 +407,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   }
 
   @override
-  _CupertinoNavigationBarState createState() {
-    return _CupertinoNavigationBarState();
-  }
+  State<CupertinoNavigationBar> createState() => _CupertinoNavigationBarState();
 }
 
 // A state class exists for the nav bar so that the keys of its sub-components
@@ -574,7 +572,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
-         'true.'
+         'true.',
        ),
        super(key: key);
 
@@ -668,7 +666,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final bool stretch;
 
   @override
-  _CupertinoSliverNavigationBarState createState() => _CupertinoSliverNavigationBarState();
+  State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
 }
 
 // A state class exists for the nav bar so that the keys of its sub-components
@@ -1078,9 +1076,9 @@ class _NavigationBarStaticComponents {
       route.fullscreenDialog
     ) {
       leadingContent = CupertinoButton(
-        child: const Text('Close'),
         padding: EdgeInsets.zero,
         onPressed: () { route.navigator!.maybePop(); },
+        child: const Text('Close'),
       );
     }
 
@@ -1320,6 +1318,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     }
 
     return CupertinoButton(
+      padding: EdgeInsets.zero,
       child: Semantics(
         container: true,
         excludeSemantics: true,
@@ -1347,7 +1346,6 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
           ),
         ),
       ),
-      padding: EdgeInsets.zero,
       onPressed: () {
         if (onPressed != null) {
           onPressed!();

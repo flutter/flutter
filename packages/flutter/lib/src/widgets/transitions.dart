@@ -133,7 +133,7 @@ abstract class AnimatedWidget extends StatefulWidget {
 
   /// Subclasses typically do not override this method.
   @override
-  _AnimatedState createState() => _AnimatedState();
+  State<AnimatedWidget> createState() => _AnimatedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -356,6 +356,7 @@ class ScaleTransition extends AnimatedWidget {
     Key? key,
     required Animation<double> scale,
     this.alignment = Alignment.center,
+    this.filterQuality,
     this.child,
   }) : assert(scale != null),
        super(key: key, listenable: scale);
@@ -373,6 +374,11 @@ class ScaleTransition extends AnimatedWidget {
   /// an alignment of (0.0, 1.0).
   final Alignment alignment;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  final FilterQuality? filterQuality;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -380,12 +386,10 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scaleValue = scale.value;
-    final Matrix4 transform = Matrix4.identity()
-      ..scale(scaleValue, scaleValue, 1.0);
-    return Transform(
-      transform: transform,
+    return Transform.scale(
+      scale: scale.value,
       alignment: alignment,
+      filterQuality: filterQuality,
       child: child,
     );
   }
@@ -449,6 +453,7 @@ class RotationTransition extends AnimatedWidget {
     Key? key,
     required Animation<double> turns,
     this.alignment = Alignment.center,
+    this.filterQuality,
     this.child,
   }) : assert(turns != null),
        super(key: key, listenable: turns);
@@ -466,6 +471,11 @@ class RotationTransition extends AnimatedWidget {
   /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
   final Alignment alignment;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  final FilterQuality? filterQuality;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -473,11 +483,10 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double turnsValue = turns.value;
-    final Matrix4 transform = Matrix4.rotationZ(turnsValue * math.pi * 2.0);
-    return Transform(
-      transform: transform,
+    return Transform.rotate(
+      angle: turns.value * math.pi * 2.0,
       alignment: alignment,
+      filterQuality: filterQuality,
       child: child,
     );
   }
@@ -1198,6 +1207,48 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// [Curves.decelerate]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// The following code implements the [AlignTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// // Using `late final` for [lazy initialization](https://dart.dev/null-safety/understanding-null-safety#lazy-initialization).
+/// late final AnimationController _controller = AnimationController(
+///   duration: const Duration(seconds: 2),
+///   vsync: this,
+/// )..repeat(reverse: true);
+/// late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
+///   begin: Alignment.bottomLeft,
+///   end: Alignment.center,
+/// ).animate(
+///  CurvedAnimation(
+///    parent: _controller,
+///    curve: Curves.decelerate,
+///  ),
+/// );
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///    return Container(
+///      color: Colors.white,
+///      child: AlignTransition(
+///        alignment: _animation,
+///        child: const Padding(
+///          padding: EdgeInsets.all(8),
+///          child: FlutterLogo(size: 150.0),
+///        ),
+///      ),
+///    );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

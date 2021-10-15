@@ -29,7 +29,7 @@ void main() {
     Future<void> expectScriptResult(
         List<String> testNames,
         int expectedExitCode,
-        {String deviceId}
+        {String? deviceId}
       ) async {
       final ProcessResult result = await runScript(testNames, <String>[
         if (deviceId != null) ...<String>['-d', deviceId],

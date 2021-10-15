@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../framework/adb.dart';
+import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
@@ -18,7 +18,7 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/in
 const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
 const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
 
-TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
+TaskFunction createHotModeTest({String? deviceIdOverride, Map<String, String>? environment}) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
     flutterDirectory.path, 'packages/flutter/lib/src/widgets/framework.dart',
@@ -33,13 +33,13 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
+      '--hot', '-d', deviceIdOverride!, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
     ];
     int hotReloadCount = 0;
-    Map<String, dynamic> smallReloadData;
-    Map<String, dynamic> mediumReloadData;
-    Map<String, dynamic> largeReloadData;
-    Map<String, dynamic> freshRestartReloadsData;
+    late Map<String, dynamic> smallReloadData;
+    late Map<String, dynamic> mediumReloadData;
+    late Map<String, dynamic> largeReloadData;
+    late Map<String, dynamic> freshRestartReloadsData;
 
 
     await inDirectory<void>(flutterDirectory, () async {
@@ -95,7 +95,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
             if (hotReloadCount == 2) {
               // Trigger a framework invalidation (370 libraries) without modifying the source
               flutterFrameworkSource.writeAsStringSync(
-                flutterFrameworkSource.readAsStringSync() + '\n'
+                '${flutterFrameworkSource.readAsStringSync()}\n'
               );
               process.stdin.writeln('r');
               hotReloadCount += 1;
@@ -149,24 +149,43 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
 
     return TaskResult.success(
       <String, dynamic> {
+        // ignore: avoid_dynamic_calls
         'hotReloadInitialDevFSSyncMilliseconds': smallReloadData['hotReloadInitialDevFSSyncMilliseconds'][0],
+        // ignore: avoid_dynamic_calls
         'hotRestartMillisecondsToFrame': smallReloadData['hotRestartMillisecondsToFrame'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadMillisecondsToFrame' : smallReloadData['hotReloadMillisecondsToFrame'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMilliseconds': smallReloadData['hotReloadDevFSSyncMilliseconds'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMilliseconds': smallReloadData['hotReloadFlutterReassembleMilliseconds'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMilliseconds': smallReloadData['hotReloadVMReloadMilliseconds'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadMillisecondsToFrameAfterChange' : smallReloadData['hotReloadMillisecondsToFrame'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMillisecondsAfterChange': smallReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMillisecondsAfterChange': smallReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMillisecondsAfterChange': smallReloadData['hotReloadVMReloadMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds' : freshRestartReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
+        // ignore: avoid_dynamic_calls
         'hotReloadMillisecondsToFrameAfterMediumChange' : mediumReloadData['hotReloadMillisecondsToFrame'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMillisecondsAfterMediumChange': mediumReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMillisecondsAfterMediumChange': mediumReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMillisecondsAfterMediumChange': mediumReloadData['hotReloadVMReloadMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadMillisecondsToFrameAfterLargeChange' : largeReloadData['hotReloadMillisecondsToFrame'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMillisecondsAfterLargeChange': largeReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMillisecondsAfterLargeChange': largeReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMillisecondsAfterLargeChange': largeReloadData['hotReloadVMReloadMilliseconds'][1],
       },
       benchmarkScoreKeys: <String>[
@@ -194,9 +213,9 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
   };
 }
 
-Future<Map<String, Object>> captureReloadData(
+Future<Map<String, dynamic>> captureReloadData(
   List<String> options,
-  Map<String, String> environment,
+  Map<String, String>? environment,
   File benchmarkFile,
   void Function(String, Process) onLine,
 ) async {

@@ -8,7 +8,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 
-/// A psuedo-filesystem stored in memory.
+/// A pseudo-filesystem stored in memory.
 ///
 /// To support output to arbitrary multi-root file schemes, the frontend server
 /// will output web sources, sourcemaps, and metadata to concatenated single files

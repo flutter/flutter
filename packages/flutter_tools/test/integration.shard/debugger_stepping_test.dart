@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:io';
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -51,5 +53,5 @@ void main() {
     }
 
     await _flutter.stop();
-  });
+  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/87481
 }

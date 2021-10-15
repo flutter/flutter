@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,19 +12,19 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_fuchsia.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/testbed.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 // Defined globally for fakes to use.
 FileSystem fileSystem;
@@ -110,9 +111,10 @@ void main() {
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
+      final bool supported = BuildFuchsiaCommand(verboseHelp: false).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        throwsToolExit(),
+        supported ? throwsToolExit() : throwsA(isA<UsageException>()),
       );
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,

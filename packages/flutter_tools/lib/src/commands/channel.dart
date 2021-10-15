@@ -6,7 +6,7 @@
 
 import '../base/common.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -96,7 +96,7 @@ class ChannelCommand extends FlutterCommand {
       // only print non-missing channels
       if (availableChannels[i]) {
         String currentIndicator = ' ';
-        if (officialChannels[i] == currentChannel){
+        if (officialChannels[i] == currentChannel) {
           currentIndicator = '*';
         }
         globals.printStatus('$currentIndicator ${officialChannels[i]}');
@@ -112,6 +112,11 @@ class ChannelCommand extends FlutterCommand {
           globals.printStatus('  $branch');
         }
       }
+    }
+
+    if (currentChannel == 'unknown') {
+      globals.printStatus('');
+      globals.printStatus('Currently not on an official channel.');
     }
   }
 

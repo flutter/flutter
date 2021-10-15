@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal, Process, ProcessStartMode, ProcessResult, systemEncoding;
@@ -22,7 +20,7 @@ typedef VoidCallback = void Function();
 @immutable
 class FakeCommand {
   const FakeCommand({
-    @required this.command,
+    required this.command,
     this.workingDirectory,
     this.environment,
     this.encoding,
@@ -46,7 +44,7 @@ class FakeCommand {
   /// be considered correct.
   ///
   /// If this is null, the working directory is ignored.
-  final String workingDirectory;
+  final String? workingDirectory;
 
   /// The environment that must be matched for this [FakeCommand] to be considered correct.
   ///
@@ -54,13 +52,13 @@ class FakeCommand {
   ///
   /// Otherwise, each key in this environment must be present and must have a
   /// value that matches the one given here for the [FakeCommand] to match.
-  final Map<String, String> environment;
+  final Map<String, String>? environment;
 
   /// The stdout and stderr encoding that must be matched for this [FakeCommand]
   /// to be considered correct.
   ///
   /// If this is null, then the encodings are ignored.
-  final Encoding encoding;
+  final Encoding? encoding;
 
   /// The time to allow to elapse before returning the [exitCode], if this command
   /// is "executed".
@@ -71,7 +69,7 @@ class FakeCommand {
 
   /// A callback that is run after [duration] expires but before the [exitCode]
   /// (and output) are passed back.
-  final VoidCallback onRun;
+  final VoidCallback? onRun;
 
   /// The process' exit code.
   ///
@@ -92,19 +90,19 @@ class FakeCommand {
 
   /// If provided, allows the command completion to be blocked until the future
   /// resolves.
-  final Completer<void> completer;
+  final Completer<void>? completer;
 
   /// An optional stdin sink that will be exposed through the resulting
   /// [FakeProcess].
-  final IOSink stdin;
+  final IOSink? stdin;
 
   /// If provided, this exception will be thrown when the fake command is run.
-  final dynamic exception;
+  final Object? exception;
 
   void _matches(
     List<String> command,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     Encoding encoding,
   ) {
     expect(command, equals(this.command));
@@ -126,7 +124,7 @@ class _FakeProcess implements io.Process {
     Duration duration,
     this.pid,
     this._stderr,
-    this.stdin,
+    IOSink? stdin,
     this._stdout,
     this._completer,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
@@ -135,6 +133,7 @@ class _FakeProcess implements io.Process {
         }
         return _exitCode;
       }),
+      stdin = stdin ?? IOSink(StreamController<List<int>>().sink),
       stderr = _stderr == null
         ? const Stream<List<int>>.empty()
         : Stream<List<int>>.value(utf8.encode(_stderr)),
@@ -143,7 +142,7 @@ class _FakeProcess implements io.Process {
         : Stream<List<int>>.value(utf8.encode(_stdout));
 
   final int _exitCode;
-  final Completer<void> _completer;
+  final Completer<void>? _completer;
 
   @override
   final Future<int> exitCode;
@@ -192,6 +191,7 @@ abstract class FakeProcessManager implements ProcessManager {
   /// last command and verify its execution is successful, to ensure that all
   /// the specified commands are actually called.
   factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
+  factory FakeProcessManager.empty() => _SequenceProcessManager(<FakeCommand>[]);
 
   FakeProcessManager._();
 
@@ -221,8 +221,8 @@ abstract class FakeProcessManager implements ProcessManager {
   @protected
   FakeCommand findCommand(
     List<String> command,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     Encoding encoding,
   );
 
@@ -230,17 +230,17 @@ abstract class FakeProcessManager implements ProcessManager {
 
   _FakeProcess _runCommand(
     List<String> command,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     Encoding encoding,
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
     if (fakeCommand.exception != null) {
-      throw fakeCommand.exception;
+      throw fakeCommand.exception!;
     }
     if (fakeCommand.onRun != null) {
-      fakeCommand.onRun();
+      fakeCommand.onRun!();
     }
     return _FakeProcess(
       fakeCommand.exitCode,
@@ -256,8 +256,8 @@ abstract class FakeProcessManager implements ProcessManager {
   @override
   Future<io.Process> start(
     List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
@@ -275,8 +275,8 @@ abstract class FakeProcessManager implements ProcessManager {
   @override
   Future<io.ProcessResult> run(
     List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     Encoding stdoutEncoding = io.systemEncoding,
@@ -295,8 +295,8 @@ abstract class FakeProcessManager implements ProcessManager {
   @override
   io.ProcessResult runSync(
     List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     Encoding stdoutEncoding = io.systemEncoding, // actual encoder is ignored
@@ -313,18 +313,20 @@ abstract class FakeProcessManager implements ProcessManager {
 
   /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) => !excludedExecutables.contains(executable);
+  bool canRun(dynamic executable, {String? workingDirectory}) => !excludedExecutables.contains(executable);
 
   Set<String> excludedExecutables = <String>{};
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     // Killing a fake process has no effect unless it has an attached completer.
-    final _FakeProcess fakeProcess = _fakeRunningProcesses[pid];
+    final _FakeProcess? fakeProcess = _fakeRunningProcesses[pid];
     if (fakeProcess == null) {
       return false;
     }
-    fakeProcess._completer.complete();
+    if (fakeProcess._completer != null) {
+      fakeProcess._completer!.complete();
+    }
     return true;
   }
 }
@@ -335,8 +337,8 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   @override
   FakeCommand findCommand(
     List<String> command,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     Encoding encoding,
   ) {
     return FakeCommand(
@@ -369,8 +371,8 @@ class _SequenceProcessManager extends FakeProcessManager {
   @override
   FakeCommand findCommand(
     List<String> command,
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     Encoding encoding,
   ) {
     expect(_commands, isNotEmpty,

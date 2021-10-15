@@ -527,7 +527,7 @@ void main() {
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
     expect(errorMessage, startsWith(
       '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
-      'The following assertion was thrown building Stepper('
+      'The following assertion was thrown building Stepper(',
     ));
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
@@ -536,7 +536,7 @@ void main() {
       'Steppers must not be nested.\n'
       'The material specification advises that one should avoid\n'
       'embedding steppers within steppers.\n'
-      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
     ));
   });
 
@@ -668,7 +668,7 @@ void main() {
                 steps: const <Step>[
                   Step(
                     title: Text(longText),
-                    content: Text('Text content')
+                    content: Text('Text content'),
                   ),
                 ],
               ),
@@ -695,7 +695,7 @@ void main() {
                   Step(
                     title: Text('Regular title'),
                     subtitle: Text(longText),
-                    content: Text('Text content')
+                    content: Text('Text content'),
                   ),
                 ],
               ),
@@ -730,7 +730,7 @@ void main() {
 
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
 
@@ -788,7 +788,7 @@ void main() {
 
     Material buttonMaterial(String label) {
       return tester.widget<Material>(
-        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
     }
 
@@ -887,4 +887,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(circleFillColor(), dark.background);
   });
+
+  testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+     const double elevation = 4.0;
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               elevation: elevation,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content'),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, elevation);
+   });
+
+   testWidgets('Stepper with default elevation', (WidgetTester tester) async {
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, 2.0);
+   });
 }

@@ -63,7 +63,7 @@ void main() {
     expect(
       start.toString(),
       equals(
-        'FlutterLogoDecoration(textColor: Color(0xffd4f144), style: stacked)'
+        'FlutterLogoDecoration(textColor: Color(0xffd4f144), style: stacked)',
       ),
     );
     expect(

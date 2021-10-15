@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/web/bootstrap.dart';
 import 'package:package_config/package_config.dart';
 
@@ -21,6 +19,15 @@ void main() {
     expect(result, contains('mapperEl.src = "mapper.js";'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
+  });
+
+test('generateBootstrapScript includes loading indicator', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+    );
+    expect(result, contains('"flutter-loader"'));
+    expect(result, contains('"indeterminate"'));
   });
 
   test('generateMainModule embeds urls correctly', () {

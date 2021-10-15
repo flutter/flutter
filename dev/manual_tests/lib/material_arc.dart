@@ -45,12 +45,12 @@ class _IgnoreDrag extends Drag {
 
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
-    Animation<double> repaint,
-    this.arc,
+    Animation<double>? repaint,
+    required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
-  final Animation<double> _repaint;
+  final Animation<double>? _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
     final Paint paint = Paint()
@@ -69,7 +69,7 @@ class _PointDemoPainter extends CustomPainter {
     final Paint paint = Paint();
 
     if (arc.center != null)
-      drawPoint(canvas, arc.center, Colors.grey.shade400);
+      drawPoint(canvas, arc.center!, Colors.grey.shade400);
 
     paint
       ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
@@ -77,23 +77,23 @@ class _PointDemoPainter extends CustomPainter {
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
     if (arc.center != null && arc.radius != null)
-      canvas.drawCircle(arc.center, arc.radius, paint);
+      canvas.drawCircle(arc.center!, arc.radius!, paint);
     else
-      canvas.drawLine(arc.begin, arc.end, paint);
+      canvas.drawLine(arc.begin!, arc.end!, paint);
 
-    drawPoint(canvas, arc.begin, Colors.green);
-    drawPoint(canvas, arc.end, Colors.red);
+    drawPoint(canvas, arc.begin!, Colors.green);
+    drawPoint(canvas, arc.end!, Colors.red);
 
     paint
       ..color = Colors.green
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(arc.lerp(_repaint.value), _kPointRadius, paint);
+    canvas.drawCircle(arc.lerp(_repaint!.value), _kPointRadius, paint);
   }
 
   @override
   bool hitTest(Offset position) {
-    return (arc.begin - position).distanceSquared < _kTargetSlop
-        || (arc.end - position).distanceSquared < _kTargetSlop;
+    return (arc.begin! - position).distanceSquared < _kTargetSlop
+        || (arc.end! - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -101,7 +101,7 @@ class _PointDemoPainter extends CustomPainter {
 }
 
 class _PointDemo extends StatefulWidget {
-  const _PointDemo({ Key key, this.controller }) : super(key: key);
+  const _PointDemo({ Key? key, required this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -112,11 +112,11 @@ class _PointDemo extends StatefulWidget {
 class _PointDemoState extends State<_PointDemo> {
   final GlobalKey _painterKey = GlobalKey();
 
-  CurvedAnimation _animation;
-  _DragTarget _dragTarget;
-  Size _screenSize;
-  Offset _begin;
-  Offset _end;
+  CurvedAnimation? _animation;
+  _DragTarget? _dragTarget;
+  Size? _screenSize;
+  Offset? _begin;
+  Offset? _end;
 
   @override
   void initState() {
@@ -135,9 +135,9 @@ class _PointDemoState extends State<_PointDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
-    final double startOffset = (box.localToGlobal(_begin) - position).distanceSquared;
-    final double endOffset = (box.localToGlobal(_end) - position).distanceSquared;
+    final RenderBox? box = _painterKey.currentContext!.findRenderObject() as RenderBox?;
+    final double startOffset = (box!.localToGlobal(_begin!) - position).distanceSquared;
+    final double endOffset = (box.localToGlobal(_end!) - position).distanceSquared;
     setState(() {
       if (startOffset < endOffset && startOffset < _kTargetSlop)
         _dragTarget = _DragTarget.start;
@@ -151,15 +151,15 @@ class _PointDemoState extends State<_PointDemo> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    switch (_dragTarget) {
+    switch (_dragTarget!) {
       case _DragTarget.start:
         setState(() {
-          _begin = _begin + details.delta;
+          _begin = _begin! + details.delta;
         });
         break;
       case _DragTarget.end:
         setState(() {
-          _end = _end + details.delta;
+          _end = _end! + details.delta;
         });
         break;
     }
@@ -210,7 +210,7 @@ class _PointDemoState extends State<_PointDemo> {
               child: Text(
                 'Tap the refresh button to run the animation. Drag the green '
                 "and red points to change the animation's path.",
-                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
+                style: Theme.of(context).textTheme.caption?.copyWith(fontSize: 16.0),
               ),
             ),
           ),
@@ -222,8 +222,8 @@ class _PointDemoState extends State<_PointDemo> {
 
 class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
-    Animation<double> repaint,
-    this.arc,
+    required Animation<double> repaint,
+    required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;
@@ -252,15 +252,15 @@ class _RectangleDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRect(canvas, arc.begin, Colors.green);
-    drawRect(canvas, arc.end, Colors.red);
+    drawRect(canvas, arc.begin!, Colors.green);
+    drawRect(canvas, arc.end!, Colors.red);
     drawRect(canvas, arc.lerp(_repaint.value), Colors.blue);
   }
 
   @override
   bool hitTest(Offset position) {
-    return (arc.begin.center - position).distanceSquared < _kTargetSlop
-        || (arc.end.center - position).distanceSquared < _kTargetSlop;
+    return (arc.begin!.center - position).distanceSquared < _kTargetSlop
+        || (arc.end!.center - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -268,7 +268,7 @@ class _RectangleDemoPainter extends CustomPainter {
 }
 
 class _RectangleDemo extends StatefulWidget {
-  const _RectangleDemo({ Key key, this.controller }) : super(key: key);
+  const _RectangleDemo({ Key? key, required this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -279,17 +279,11 @@ class _RectangleDemo extends StatefulWidget {
 class _RectangleDemoState extends State<_RectangleDemo> {
   final GlobalKey _painterKey = GlobalKey();
 
-  CurvedAnimation _animation;
-  _DragTarget _dragTarget;
-  Size _screenSize;
-  Rect _begin;
-  Rect _end;
-
-  @override
-  void initState() {
-    super.initState();
-    _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
-  }
+  late final CurvedAnimation _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
+  _DragTarget? _dragTarget;
+  Size? _screenSize;
+  Rect? _begin;
+  Rect? _end;
 
   @override
   void dispose() {
@@ -302,9 +296,9 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
-    final double startOffset = (box.localToGlobal(_begin.center) - position).distanceSquared;
-    final double endOffset = (box.localToGlobal(_end.center) - position).distanceSquared;
+    final RenderBox? box = _painterKey.currentContext?.findRenderObject() as RenderBox?;
+    final double startOffset = (box!.localToGlobal(_begin!.center) - position).distanceSquared;
+    final double endOffset = (box.localToGlobal(_end!.center) - position).distanceSquared;
     setState(() {
       if (startOffset < endOffset && startOffset < _kTargetSlop)
         _dragTarget = _DragTarget.start;
@@ -317,15 +311,15 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    switch (_dragTarget) {
+    switch (_dragTarget!) {
       case _DragTarget.start:
         setState(() {
-          _begin = _begin.shift(details.delta);
+          _begin = _begin?.shift(details.delta);
         });
         break;
       case _DragTarget.end:
         setState(() {
-          _end = _end.shift(details.delta);
+          _end = _end?.shift(details.delta);
         });
         break;
     }
@@ -382,7 +376,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
               child: Text(
                 'Tap the refresh button to run the animation. Drag the rectangles '
                 "to change the animation's path.",
-                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
+                style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16.0),
               ),
             ),
           ),
@@ -406,37 +400,31 @@ class _ArcDemo {
 }
 
 class AnimationDemo extends StatefulWidget {
-  const AnimationDemo({ Key key }) : super(key: key);
+  const AnimationDemo({ Key? key }) : super(key: key);
 
   @override
-  _AnimationDemoState createState() => _AnimationDemoState();
+  State<AnimationDemo> createState() => _AnimationDemoState();
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
-  List<_ArcDemo> _allDemos;
-
-  @override
-  void initState() {
-    super.initState();
-    _allDemos = <_ArcDemo>[
-      _ArcDemo('POINT', (_ArcDemo demo) {
-        return _PointDemo(
-          key: demo.key,
-          controller: demo.controller,
-        );
-      }, this),
-      _ArcDemo('RECTANGLE', (_ArcDemo demo) {
-        return _RectangleDemo(
-          key: demo.key,
-          controller: demo.controller,
-        );
-      }, this),
-    ];
-  }
+  late final List<_ArcDemo> _allDemos = <_ArcDemo>[
+    _ArcDemo('POINT', (_ArcDemo demo) {
+      return _PointDemo(
+        key: demo.key,
+        controller: demo.controller,
+      );
+    }, this),
+    _ArcDemo('RECTANGLE', (_ArcDemo demo) {
+      return _RectangleDemo(
+        key: demo.key,
+        controller: demo.controller,
+      );
+    }, this),
+  ];
 
   Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
-    if (demo.key.currentState != null && demo.key.currentState.mounted)
+    if (demo.key.currentState != null && demo.key.currentState!.mounted)
       demo.controller.reverse();
   }
 
@@ -456,7 +444,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
             return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
-                _play(_allDemos[DefaultTabController.of(context).index]);
+                _play(_allDemos[DefaultTabController.of(context)!.index]);
               },
             );
           },

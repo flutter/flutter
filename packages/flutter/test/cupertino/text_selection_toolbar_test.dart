@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
@@ -180,7 +180,7 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
@@ -229,7 +229,7 @@ void main() {
     await tester.pump();
     toolbarY = tester.getTopLeft(_findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -262,5 +262,5 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

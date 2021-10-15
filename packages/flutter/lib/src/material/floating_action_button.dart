@@ -25,15 +25,26 @@ const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
   height: 40.0,
 );
 
-const BoxConstraints _kExtendedSizeConstraints = BoxConstraints(
-  minHeight: 48.0,
-  maxHeight: 48.0,
+const BoxConstraints _kLargeSizeConstraints = BoxConstraints.tightFor(
+  width: 96.0,
+  height: 96.0,
+);
+
+const BoxConstraints _kExtendedSizeConstraints = BoxConstraints.tightFor(
+  height: 48.0,
 );
 
 class _DefaultHeroTag {
   const _DefaultHeroTag();
   @override
   String toString() => '<default FloatingActionButton tag>';
+}
+
+enum _FloatingActionButtonType {
+  regular,
+  small,
+  large,
+  extended,
 }
 
 /// A material design floating action button.
@@ -147,6 +158,7 @@ class FloatingActionButton extends StatelessWidget {
     this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
+    this.enableFeedback,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -156,7 +168,107 @@ class FloatingActionButton extends StatelessWidget {
        assert(clipBehavior != null),
        assert(isExtended != null),
        assert(autofocus != null),
-       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
+       _extendedLabel = null,
+       extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
+       super(key: key);
+
+  /// Creates a small circular floating action button.
+  ///
+  /// This constructor overrides the default size constraints of the floating
+  /// action button.
+  ///
+  /// The [clipBehavior] and [autofocus] arguments must not be null.
+  /// Additionally, [elevation], [focusElevation], [hoverElevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
+  const FloatingActionButton.small({
+    Key? key,
+    this.child,
+    this.tooltip,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.focusColor,
+    this.hoverColor,
+    this.splashColor,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation,
+    this.focusElevation,
+    this.hoverElevation,
+    this.highlightElevation,
+    this.disabledElevation,
+    required this.onPressed,
+    this.mouseCursor,
+    this.shape,
+    this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
+    this.materialTapTargetSize,
+    this.enableFeedback,
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(focusElevation == null || focusElevation >= 0.0),
+       assert(hoverElevation == null || hoverElevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       _floatingActionButtonType = _FloatingActionButtonType.small,
+       mini = true,
+       isExtended = false,
+       _extendedLabel = null,
+       extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
+       super(key: key);
+
+  /// Creates a large circular floating action button.
+  ///
+  /// This constructor overrides the default size constraints of the floating
+  /// action button.
+  ///
+  /// The [clipBehavior] and [autofocus] arguments must not be null.
+  /// Additionally, [elevation], [focusElevation], [hoverElevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
+  const FloatingActionButton.large({
+    Key? key,
+    this.child,
+    this.tooltip,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.focusColor,
+    this.hoverColor,
+    this.splashColor,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation,
+    this.focusElevation,
+    this.hoverElevation,
+    this.highlightElevation,
+    this.disabledElevation,
+    required this.onPressed,
+    this.mouseCursor,
+    this.shape,
+    this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
+    this.materialTapTargetSize,
+    this.enableFeedback,
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(focusElevation == null || focusElevation >= 0.0),
+       assert(hoverElevation == null || hoverElevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       _floatingActionButtonType = _FloatingActionButtonType.large,
+       mini = false,
+       isExtended = false,
+       _extendedLabel = null,
+       extendedIconLabelSpacing = null,
+       extendedPadding = null,
+       extendedTextStyle = null,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
@@ -165,7 +277,7 @@ class FloatingActionButton extends StatelessWidget {
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
-  FloatingActionButton.extended({
+  const FloatingActionButton.extended({
     Key? key,
     this.tooltip,
     this.foregroundColor,
@@ -187,8 +299,12 @@ class FloatingActionButton extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.extendedIconLabelSpacing,
+    this.extendedPadding,
+    this.extendedTextStyle,
     Widget? icon,
     required Widget label,
+    this.enableFeedback,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -197,30 +313,10 @@ class FloatingActionButton extends StatelessWidget {
        assert(isExtended != null),
        assert(clipBehavior != null),
        assert(autofocus != null),
-       _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,
-       child = _ChildOverflowBox(
-         child: Row(
-           mainAxisSize: MainAxisSize.min,
-           children: icon == null
-             ? <Widget>[
-                 const SizedBox(width: 20.0),
-                 label,
-                 const SizedBox(width: 20.0),
-               ]
-             : !isExtended ? <Widget>[
-               const SizedBox(width: 20.0),
-               icon,
-               const SizedBox(width: 20.0),
-           ] : <Widget>[
-                 const SizedBox(width: 16.0),
-                 icon,
-                 const SizedBox(width: 8.0),
-                 label,
-                 const SizedBox(width: 20.0),
-               ],
-         ),
-       ),
+       _floatingActionButtonType = _FloatingActionButtonType.extended,
+       child = icon,
+       _extendedLabel = label,
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -409,7 +505,45 @@ class FloatingActionButton extends StatelessWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize? materialTapTargetSize;
 
-  final BoxConstraints _sizeConstraints;
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// If null, [FloatingActionButtonThemeData.enableFeedback] is used.
+  /// If both are null, then default value is true.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
+
+  /// The spacing between the icon and the label for an extended
+  /// [FloatingActionButton].
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedIconLabelSpacing] is used.
+  /// If that is also null, the default is 8.0.
+  final double? extendedIconLabelSpacing;
+
+  /// The padding for an extended [FloatingActionButton]'s content.
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedPadding] is used. If that
+  /// is also null, the default is
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 20.0)` if an icon is
+  /// provided, and `EdgeInsetsDirectional.only(start: 20.0, end: 20.0)` if not.
+  final EdgeInsetsGeometry? extendedPadding;
+
+  /// The text style for an extended [FloatingActionButton]'s label.
+  ///
+  /// If null, [FloatingActionButtonThemeData.extendedTextStyle] is used. If
+  /// that is also null, then [TextTheme.button] with a letter spacing of 1.2
+  /// is used.
+  final TextStyle? extendedTextStyle;
+
+  final _FloatingActionButtonType _floatingActionButtonType;
+
+  final Widget? _extendedLabel;
 
   static const double _defaultElevation = 6;
   static const double _defaultFocusElevation = 6;
@@ -455,13 +589,56 @@ class FloatingActionButton extends StatelessWidget {
       ?? _defaultHighlightElevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    final TextStyle textStyle = theme.textTheme.button!.copyWith(
-      color: foregroundColor,
-      letterSpacing: 1.2,
-    );
+    final bool enableFeedback = this.enableFeedback
+      ?? floatingActionButtonTheme.enableFeedback ?? true;
+    final TextStyle extendedTextStyle = (this.extendedTextStyle
+        ?? floatingActionButtonTheme.extendedTextStyle
+        ?? theme.textTheme.button!.copyWith(letterSpacing: 1.2)).copyWith(color: foregroundColor);
     final ShapeBorder shape = this.shape
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
+
+    BoxConstraints sizeConstraints;
+    Widget? resolvedChild = child;
+    switch(_floatingActionButtonType) {
+      case _FloatingActionButtonType.regular:
+        sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? _kSizeConstraints;
+        break;
+      case _FloatingActionButtonType.small:
+        sizeConstraints = floatingActionButtonTheme.smallSizeConstraints ?? _kMiniSizeConstraints;
+        break;
+      case _FloatingActionButtonType.large:
+        sizeConstraints = floatingActionButtonTheme.largeSizeConstraints ?? _kLargeSizeConstraints;
+        // The large FAB uses a larger icon.
+        resolvedChild = child != null ? IconTheme.merge(
+          data: const IconThemeData(size: 36.0),
+          child: child!,
+        ) : child;
+        break;
+      case _FloatingActionButtonType.extended:
+        sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? _kExtendedSizeConstraints;
+        final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
+        final EdgeInsetsGeometry padding = extendedPadding
+            ?? floatingActionButtonTheme.extendedPadding
+            ?? EdgeInsetsDirectional.only(start: child != null && isExtended ? 16.0 : 20.0, end: 20.0);
+        resolvedChild = _ChildOverflowBox(
+          child: Padding(
+            padding: padding,
+            child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (child != null)
+                    child!,
+                  if (child != null && isExtended)
+                    SizedBox(width: iconLabelSpacing),
+                  if (isExtended)
+                    _extendedLabel!,
+                ],
+            ),
+          ),
+        );
+        break;
+    }
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
@@ -471,18 +648,19 @@ class FloatingActionButton extends StatelessWidget {
       hoverElevation: hoverElevation,
       highlightElevation: highlightElevation,
       disabledElevation: disabledElevation,
-      constraints: _sizeConstraints,
+      constraints: sizeConstraints,
       materialTapTargetSize: materialTapTargetSize,
       fillColor: backgroundColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
       splashColor: splashColor,
-      textStyle: textStyle,
+      textStyle: extendedTextStyle,
       shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      child: child,
+      enableFeedback: enableFeedback,
+      child: resolvedChild,
     );
 
     if (tooltip != null) {

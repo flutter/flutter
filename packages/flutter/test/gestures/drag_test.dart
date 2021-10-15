@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
@@ -179,6 +179,225 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
+  });
+
+  testGesture('Should reject mouse drag when configured to ignore mouse pointers - Horizontal', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
+      PointerDeviceKind.touch,
+    }) ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double? updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    final TestPointer pointer = TestPointer(5, PointerDeviceKind.mouse);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(down);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.up());
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+  });
+
+  testGesture('Should reject mouse drag when configured to ignore mouse pointers - Vertical', (GestureTester tester) {
+    final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{
+      PointerDeviceKind.touch,
+    })..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double? updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    final TestPointer pointer = TestPointer(5, PointerDeviceKind.mouse);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(down);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(25.0, 20.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(25.0, 20.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.up());
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+  });
+
+  testGesture('DragGestureRecognizer.onStart behavior test', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
+
+    Duration? startTimestamp;
+    Offset? positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      startTimestamp = details.sourceTimeStamp;
+      positionAtOnStart = details.globalPosition;
+    };
+
+    Duration? updatedTimestamp;
+    Offset? updateDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedTimestamp = details.sourceTimeStamp;
+      updateDelta = details.delta;
+    };
+
+    // No competing, dragStartBehavior == DragStartBehavior.down
+    final TestPointer pointer = TestPointer(5);
+    PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 100));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(down);
+    // The only horizontal drag gesture win the arena when the pointer down.
+    expect(startTimestamp, const Duration(milliseconds: 100));
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 200)));
+    expect(updatedTimestamp, const Duration(milliseconds: 200));
+    expect(updateDelta, const Offset(10.0, 0.0));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
+    expect(updatedTimestamp, const Duration(milliseconds: 300));
+    expect(updateDelta, Offset.zero);
+    tester.route(pointer.up());
+
+    // No competing, dragStartBehavior == DragStartBehavior.start
+    // When there are no other gestures competing with this gesture in the arena,
+    // there's no difference in behavior between the two settings.
+    drag.dragStartBehavior = DragStartBehavior.start;
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 400));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    expect(startTimestamp, const Duration(milliseconds: 400));
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 500)));
+    expect(updatedTimestamp, const Duration(milliseconds: 500));
+    tester.route(pointer.up());
+
+    // With competing, dragStartBehavior == DragStartBehavior.start
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
+      ..onStart = (_) {};
+    addTearDown(() => competingDrag.dispose);
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    // The pointer down event do not trigger anything.
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 700)));
+    expect(startTimestamp, const Duration(milliseconds: 700));
+    // Using the position of the pointer at the time this gesture recognizer won the arena.
+    expect(positionAtOnStart, const Offset(30.0, 10.0));
+    expect(updatedTimestamp, isNull); // Do not trigger an update event.
+    tester.route(pointer.up());
+
+    // With competing, dragStartBehavior == DragStartBehavior.down
+    drag.dragStartBehavior = DragStartBehavior.down;
+    startTimestamp = null;
+    positionAtOnStart = null;
+    updatedTimestamp = null;
+    updateDelta = null;
+
+    down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 800));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    expect(startTimestamp, isNull);
+    expect(positionAtOnStart, isNull);
+    expect(updatedTimestamp, isNull);
+
+    tester.route(pointer.move(const Offset(30.0, 10.0), timeStamp: const Duration(milliseconds: 900)));
+    expect(startTimestamp, const Duration(milliseconds: 900));
+    // Using the position of the first detected down event for the pointer.
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updatedTimestamp, const Duration(milliseconds: 900)); // Also, trigger an update event.
+    expect(updateDelta, const Offset(20.0, 0.0));
+    tester.route(pointer.up());
   });
 
   testGesture('Should report original timestamps', (GestureTester tester) {
@@ -1221,4 +1440,48 @@ void main() {
       logs.clear();
     },
   );
+
+  testGesture('Does not crash when one of the 2 pointers wins by default and is then released', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/82784
+
+    bool didStartDrag = false;
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) { didStartDrag = true; }
+      ..onEnd = (DragEndDetails details) {} // Crash triggers at onEnd.
+      ..dragStartBehavior = DragStartBehavior.down;
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () {};
+    final TapGestureRecognizer tap2 = TapGestureRecognizer()..onTap = () {};
+
+    // The pointer1 is caught by drag and tap.
+    final TestPointer pointer1 = TestPointer(5);
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    drag.addPointer(down1);
+    tap.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(down1);
+
+    // The pointer2 is caught by drag and tap2.
+    final TestPointer pointer2 = TestPointer(6);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 10.0));
+    drag.addPointer(down2);
+    tap2.addPointer(down2);
+    tester.closeArena(pointer2.pointer);
+    tester.route(down2);
+
+    // The tap is disposed, leaving drag the default winner.
+    tap.dispose();
+
+    // Wait for microtasks to finish, during which drag claims victory.
+    tester.async.flushMicrotasks();
+    expect(didStartDrag, true);
+
+    // The pointer1 is released, leaving pointer2 drag's only pointer.
+    tester.route(pointer1.up());
+
+    drag.dispose();
+
+    // Passes if no crashes here.
+
+    tap2.dispose();
+  });
 }

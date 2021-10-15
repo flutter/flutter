@@ -5,8 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:process_runner/process_runner.dart';
 import 'package:path/path.dart' as path;
+import 'package:process_runner/process_runner.dart';
 
 // This program enables testing of private interfaces in the flutter package.
 //

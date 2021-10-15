@@ -15,9 +15,9 @@ class AndroidPlatformView extends StatelessWidget {
   /// native view.
   /// `viewType` identifies the type of Android view to create.
   const AndroidPlatformView({
-    Key key,
+    Key? key,
     this.onPlatformViewCreated,
-    @required this.viewType,
+    required this.viewType,
   })  : assert(viewType != null),
         super(key: key);
 
@@ -29,7 +29,7 @@ class AndroidPlatformView extends StatelessWidget {
   /// Callback to invoke after the platform view has been created.
   ///
   /// May be null.
-  final PlatformViewCreatedCallback onPlatformViewCreated;
+  final PlatformViewCreatedCallback? onPlatformViewCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class AndroidPlatformView extends StatelessWidget {
           )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
         if (onPlatformViewCreated != null) {
-          controller.addOnPlatformViewCreatedListener(onPlatformViewCreated);
+          controller.addOnPlatformViewCreatedListener(onPlatformViewCreated!);
         }
         return controller..create();
       },

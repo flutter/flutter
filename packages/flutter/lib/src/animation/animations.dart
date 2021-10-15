@@ -408,6 +408,9 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// animation is used to animate.
   AnimationStatus? _curveDirection;
 
+  /// True if this CurvedAnimation has been disposed.
+  bool isDisposed = false;
+
   void _updateCurveDirection(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
@@ -427,6 +430,12 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
+  /// Cleans up any listeners added by this CurvedAnimation.
+  void dispose() {
+    isDisposed = true;
+    parent.removeStatusListener(_updateCurveDirection);
+  }
+
   @override
   double get value {
     final Curve? activeCurve = _useForwardCurve ? curve : reverseCurve;
@@ -443,7 +452,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
             'Invalid curve endpoint at $t.\n'
             'Curves must map 0.0 to near zero and 1.0 to near one but '
             '${activeCurve.runtimeType} mapped $t to $transformedValue, which '
-            'is near $roundedTransformedValue.'
+            'is near $roundedTransformedValue.',
           );
         }
         return true;
@@ -589,6 +598,8 @@ class TrainHoppingAnimation extends Animation<double>
     _currentTrain = null;
     _nextTrain?.removeListener(_valueChangeHandler);
     _nextTrain = null;
+    clearListeners();
+    clearStatusListeners();
     super.dispose();
   }
 

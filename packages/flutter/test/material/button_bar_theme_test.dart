@@ -120,7 +120,7 @@ void main() {
           builder: (BuildContext context) {
             capturedContext = context;
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -146,7 +146,7 @@ void main() {
                 },
               ),
             );
-          }
+          },
         ),
       ),
     );

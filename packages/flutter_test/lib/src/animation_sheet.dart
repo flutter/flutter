@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -22,10 +23,8 @@ import 'package:flutter/widgets.dart';
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
-///  * Adjust the size of the test viewport to the [sheetSize] (see the
-///    documentation of [sheetSize] for more information).
-///  * Pump a frame that renders [display], which shows all recorded frames in an
-///    animation sheet, and can be matched against the golden test.
+///  * Acquire the output image with [collate] and compare against the golden
+///    file.
 ///
 /// {@tool snippet}
 /// The following example shows how to record an animation sheet of an [InkWell]
@@ -67,16 +66,9 @@ import 'package:flutter/widgets.dart';
 ///     recording: true,
 ///   ), const Duration(seconds: 1));
 ///
-///   // Adjust view port size
-///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
-///
-///   // Display
-///   final Widget display = await animationSheet.display();
-///   await tester.pumpWidget(display);
-///
 ///   // Compare against golden file
 ///   await expectLater(
-///     find.byWidget(display),
+///     animationSheet.collate(800),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
 ///   );
 /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
@@ -91,13 +83,36 @@ class AnimationSheetBuilder {
   ///
   /// The [frameSize] is a tight constraint for the child to be recorded, and must not
   /// be null.
-  AnimationSheetBuilder({required this.frameSize}) : assert(frameSize != null);
+  ///
+  /// The [allLayers] controls whether to record elements drawn out of the subtree,
+  /// and defaults to false.
+  AnimationSheetBuilder({
+    required this.frameSize,
+    this.allLayers = false,
+  }) : assert(!kIsWeb), // Does not support Web. See [AnimationSheetBuilder].
+       assert(frameSize != null);
 
   /// The size of the child to be recorded.
   ///
   /// This size is applied as a tight layout constraint for the child, and is
   /// fixed throughout the building session.
   final Size frameSize;
+
+  /// Whether the captured image comes from the entire tree, or only the
+  /// subtree of [record].
+  ///
+  /// If [allLayers] is false, then the [record] widget will capture the image
+  /// composited by its subtree.  If [allLayers] is true, then the [record] will
+  /// capture the entire tree composited and clipped by [record]'s region.
+  ///
+  /// The two modes are identical if there is nothing in front of [record].
+  /// But in rare cases, what needs to be captured has to be rendered out of
+  /// [record]'s subtree in its front. By setting [allLayers] to true, [record]
+  /// captures everything within its region even if drawn outside of its
+  /// subtree.
+  ///
+  /// Defaults to false.
+  final bool allLayers;
 
   final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
   Future<List<ui.Image>> get _frames async {
@@ -119,11 +134,11 @@ class AnimationSheetBuilder {
   /// The returned widget wraps `child` in a box with a fixed size specified by
   /// [frameSize]. The `key` is also applied to the returned widget.
   ///
-  /// The `recording` defaults to true, which means the painted result of each
-  /// frame will be stored and later available for [display]. If `recording` is
-  /// false, then frames are not recorded. This is useful during the setup phase
-  /// that shouldn't be recorded; if the target widget isn't wrapped in [record]
-  /// during the setup phase, the states will be lost when it starts recording.
+  /// The frame is only recorded if the `recording` argument is true, or during
+  /// a procedure that is wrapped within [recording]. In either case, the
+  /// painted result of each frame will be stored and later available for
+  /// [display]. If neither condition is met, the frames are not recorded, which
+  /// is useful during setup phases.
   ///
   /// The `child` must not be null.
   ///
@@ -138,9 +153,10 @@ class AnimationSheetBuilder {
     assert(child != null);
     return _AnimationSheetRecorder(
       key: key,
-      child: child,
       size: frameSize,
+      allLayers: allLayers,
       handleRecorded: recording ? _recordedFrames.add : null,
+      child: child,
     );
   }
 
@@ -159,6 +175,81 @@ class AnimationSheetBuilder {
   /// The `key` is applied to the root widget.
   ///
   /// This method can only be called if at least one frame has been recorded.
+  ///
+  /// The [display] is the legacy way of acquiring the output for comparison.
+  /// It is not recommended because it requires more boilerplate, and produces
+  /// a much large image than necessary: each pixel is rendered in 3x3 pixels
+  /// without higher definition. Use [collate] instead.
+  ///
+  /// Using this way includes the following steps:
+  ///
+  ///  * Create an instance of this class.
+  ///  * Pump frames that render the target widget wrapped in [record]. Every frame
+  ///    that has `recording` being true will be recorded.
+  ///  * Adjust the size of the test viewport to the [sheetSize] (see the
+  ///    documentation of [sheetSize] for more information).
+  ///  * Pump a frame that renders [display], which shows all recorded frames in an
+  ///    animation sheet, and can be matched against the golden test.
+  ///
+  /// {@tool snippet}
+  /// The following example shows how to record an animation sheet of an [InkWell]
+  /// being pressed then released.
+  ///
+  /// ```dart
+  /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
+  ///   // Create instance
+  ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
+  ///
+  ///   final Widget target = Material(
+  ///     child: Directionality(
+  ///       textDirection: TextDirection.ltr,
+  ///       child: InkWell(
+  ///         splashColor: Colors.blue,
+  ///         onTap: () {},
+  ///       ),
+  ///     ),
+  ///   );
+  ///
+  ///   // Optional: setup before recording (`recording` is false)
+  ///   await tester.pumpWidget(animationSheet.record(
+  ///     target,
+  ///     recording: false,
+  ///   ));
+  ///
+  ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+  ///
+  ///   // Start recording (`recording` is true)
+  ///   await tester.pumpFrames(animationSheet.record(
+  ///     target,
+  ///     recording: true,
+  ///   ), const Duration(seconds: 1));
+  ///
+  ///   await gesture.up();
+  ///
+  ///   await tester.pumpFrames(animationSheet.record(
+  ///     target,
+  ///     recording: true,
+  ///   ), const Duration(seconds: 1));
+  ///
+  ///   // Adjust view port size
+  ///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
+  ///
+  ///   // Display
+  ///   final Widget display = await animationSheet.display();
+  ///   await tester.pumpWidget(display);
+  ///
+  ///   // Compare against golden file
+  ///   await expectLater(
+  ///     find.byWidget(display),
+  ///     matchesGoldenFile('inkwell.press.animation.png'),
+  ///   );
+  /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
+  /// ```
+  /// {@end-tool}
+  @Deprecated(
+    'Use AnimationSheetBuilder.collate instead. '
+    'This feature was deprecated after v2.3.0-13.0.pre.',
+  )
   Future<Widget> display({Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
@@ -174,6 +265,19 @@ class AnimationSheetBuilder {
         filterQuality: ui.FilterQuality.none,
       )).toList(),
     );
+  }
+
+  /// Returns an result image by putting all frames together in a table.
+  ///
+  /// This method returns a table of captured frames, `cellsPerRow` images
+  /// per row, from left to right, top to bottom.
+  ///
+  /// An example of using this method can be found at [AnimationSheetBuilder].
+  Future<ui.Image> collate(int cellsPerRow) async {
+    final List<ui.Image> frames = await _frames;
+    assert(frames.isNotEmpty,
+      'No frames are collected. Have you forgot to set `recording` to true?');
+    return _collateFrames(frames, frameSize, cellsPerRow);
   }
 
   /// Returns the smallest size that can contain all recorded frames.
@@ -194,6 +298,10 @@ class AnimationSheetBuilder {
   /// The `maxWidth` defaults to the width of the default viewport, 800.0.
   ///
   /// This method can only be called if at least one frame has been recorded.
+  @Deprecated(
+    'The `sheetSize` is only useful for `display`, which should be migrated to `collate`. '
+    'This feature was deprecated after v2.3.0-13.0.pre.',
+  )
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
     final int cellsPerRow = (maxWidth / frameSize.width).floor();
@@ -213,12 +321,14 @@ class _AnimationSheetRecorder extends StatefulWidget {
     this.handleRecorded,
     required this.child,
     required this.size,
+    required this.allLayers,
     Key? key,
   }) : super(key: key);
 
   final _RecordedHandler? handleRecorded;
   final Widget child;
   final Size size;
+  final bool allLayers;
 
   @override
   State<StatefulWidget> createState() => _AnimationSheetRecorderState();
@@ -229,8 +339,12 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
-    final RenderRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    widget.handleRecorded!(boundary.toImage());
+    final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
+    if (widget.allLayers) {
+      widget.handleRecorded!(boundary.allLayersToImage());
+    } else {
+      widget.handleRecorded!(boundary.toImage());
+    }
   }
 
   @override
@@ -239,7 +353,7 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
       alignment: Alignment.topLeft,
       child: SizedBox.fromSize(
         size: widget.size,
-        child: RepaintBoundary(
+        child: _RootableRepaintBoundary(
           key: boundaryKey,
           child: _PostFrameCallbacker(
             callback: widget.handleRecorded == null ? null : _record,
@@ -311,6 +425,27 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
+Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cellsPerRow) async {
+  final int rowNum = (frames.length / cellsPerRow).ceil();
+
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(
+    recorder,
+    Rect.fromLTWH(0, 0, frameSize.width * cellsPerRow, frameSize.height * rowNum),
+  );
+  for (int i = 0; i < frames.length; i += 1) {
+    canvas.drawImage(
+      frames[i],
+      Offset(frameSize.width * (i % cellsPerRow), frameSize.height * (i / cellsPerRow).floor()),
+      Paint(),
+    );
+  }
+  return recorder.endRecording().toImage(
+    (frameSize.width * cellsPerRow).toInt(),
+    (frameSize.height * rowNum).toInt(),
+  );
+}
+
 // Layout children in a grid of fixed-sized cells.
 //
 // The sheet fills up as much space as the parent allows. The cells are
@@ -350,4 +485,34 @@ class _CellSheet extends StatelessWidget {
       );
     });
   }
+}
+
+class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
+  // Like [toImage], but captures an image of all layers (composited by
+  // RenderView and its children) clipped by the region of this object.
+  Future<ui.Image> allLayersToImage() {
+    final TransformLayer rootLayer = _rootLayer();
+    final Matrix4 rootTransform = (rootLayer.transform ?? Matrix4.identity()).clone();
+    final Matrix4 transform = rootTransform.multiplied(getTransformTo(null));
+    final Rect rect = MatrixUtils.transformRect(transform, Offset.zero & size);
+    // The scale was used to fit the actual device. Revert it since the target
+    // is the logical display. Take transform[0] as the scale.
+    return rootLayer.toImage(rect, pixelRatio: 1 / transform[0]);
+  }
+
+  TransformLayer _rootLayer() {
+    Layer layer = this.layer!;
+    while (layer.parent != null)
+      layer = layer.parent!;
+    return layer as TransformLayer;
+  }
+}
+
+// A [RepaintBoundary], except that its render object has a `fullscreenToImage` method.
+class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
+  /// Creates a widget that isolates repaints.
+  const _RootableRepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);
+
+  @override
+  _RenderRootableRepaintBoundary createRenderObject(BuildContext context) => _RenderRootableRepaintBoundary();
 }

@@ -42,12 +42,14 @@ class PointerEventResampler {
   bool _isTracked = false;
   bool _isDown = false;
   int _pointerIdentifier = 0;
+  int _hasButtons = 0;
 
   PointerEvent _toHoverEvent(
     PointerEvent event,
     Offset position,
     Offset delta,
     Duration timeStamp,
+    int buttons,
   ) {
     return PointerHoverEvent(
       timeStamp: timeStamp,
@@ -79,6 +81,7 @@ class PointerEventResampler {
     Offset delta,
     int pointerIdentifier,
     Duration timeStamp,
+    int buttons,
   ) {
     return PointerMoveEvent(
       timeStamp: timeStamp,
@@ -87,7 +90,7 @@ class PointerEventResampler {
       device: event.device,
       position: position,
       delta: delta,
-      buttons: event.buttons,
+      buttons: buttons,
       obscured: event.obscured,
       pressure: event.pressure,
       pressureMin: event.pressureMin,
@@ -113,9 +116,12 @@ class PointerEventResampler {
     int pointerIdentifier,
     Duration timeStamp,
     bool isDown,
+    int buttons,
   ) {
-    return isDown ? _toMoveEvent(event, position, delta, pointerIdentifier, timeStamp)
-                  : _toHoverEvent(event, position, delta, timeStamp);
+    return isDown
+        ? _toMoveEvent(
+            event, position, delta, pointerIdentifier, timeStamp, buttons)
+        : _toHoverEvent(event, position, delta, timeStamp, buttons);
   }
 
   Offset _positionAt(Duration sampleTime) {
@@ -163,9 +169,9 @@ class PointerEventResampler {
   }
 
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
-      Duration sampleTime,
-      Duration nextSampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    Duration nextSampleTime,
+    HandleEventCallback callback,
   ) {
     Duration endTime = sampleTime;
     // Scan queued events to determine end time.
@@ -205,10 +211,12 @@ class PointerEventResampler {
 
       final bool wasTracked = _isTracked;
       final bool wasDown = _isDown;
+      final int hadButtons = _hasButtons;
 
       // Update pointer state.
       _isTracked = event is! PointerRemovedEvent;
       _isDown = event.down;
+      _hasButtons = event.buttons;
 
       // Position at `sampleTime`.
       final Offset position = _positionAt(sampleTime);
@@ -232,10 +240,11 @@ class PointerEventResampler {
         // Add synthetics `move` or `hover` event if position has changed.
         // Note: Devices without `hover` events are expected to always have
         // `add` and `down` events with the same position and this logic will
-        // therefor never produce `hover` events.
+        // therefore never produce `hover` events.
         if (position != _position) {
           final Offset delta = position - _position;
-          callback(_toMoveOrHoverEvent(event, position, delta, _pointerIdentifier, sampleTime, wasDown));
+          callback(_toMoveOrHoverEvent(event, position, delta,
+              _pointerIdentifier, sampleTime, wasDown, hadButtons));
           _position = position;
         }
         callback(event.copyWith(
@@ -251,8 +260,8 @@ class PointerEventResampler {
   }
 
   void _samplePointerPosition(
-      Duration sampleTime,
-      HandleEventCallback callback,
+    Duration sampleTime,
+    HandleEventCallback callback,
   ) {
     // Position at `sampleTime`.
     final Offset position = _positionAt(sampleTime);
@@ -261,7 +270,8 @@ class PointerEventResampler {
     final PointerEvent? next = _next;
     if (position != _position && next != null) {
       final Offset delta = position - _position;
-      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier, sampleTime, _isDown));
+      callback(_toMoveOrHoverEvent(next, position, delta, _pointerIdentifier,
+          sampleTime, _isDown, _hasButtons));
       _position = position;
     }
   }

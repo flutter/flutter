@@ -143,6 +143,7 @@ function upgrade_flutter () (
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
       VERBOSITY="--verbosity=normal"
     fi
+
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
     if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then

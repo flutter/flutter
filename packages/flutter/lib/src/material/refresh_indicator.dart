@@ -253,7 +253,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
         end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
       ).chain(CurveTween(
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
       )),
     );
     super.didChangeDependencies();
@@ -269,7 +269,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
           end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
         ).chain(CurveTween(
-            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
         )),
       );
     }
@@ -448,7 +448,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               FlutterError.reportError(FlutterErrorDetails(
                 exception: FlutterError(
                   'The onRefresh callback returned null.\n'
-                  'The RefreshIndicator onRefresh callback must return a Future.'
+                  'The RefreshIndicator onRefresh callback must return a Future.',
                 ),
                 context: ErrorDescription('when calling onRefresh'),
                 library: 'material library',

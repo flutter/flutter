@@ -6,12 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
@@ -39,7 +38,7 @@ class NewGalleryChromeRunTest {
   /// Runs the test.
   Future<TaskResult> run() async {
     final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('temp');
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
     final Directory galleryDir =
         Directory(path.join(galleryParentDir.path, 'gallery'));
 

@@ -81,6 +81,10 @@ abstract class Terminal {
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
 
+  /// When we have a choice of styles (e.g. animated spinners), this selects the
+  /// style to use.
+  int get preferredStyle;
+
   /// Whether we are interacting with the flutter tool via the terminal.
   ///
   /// If not set, defaults to false.
@@ -110,6 +114,9 @@ abstract class Terminal {
   set singleCharMode(bool value);
 
   /// Return keystrokes from the console.
+  ///
+  /// This is a single-subscription stream. This stream may be closed before
+  /// the application exits.
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
@@ -143,12 +150,15 @@ class AnsiTerminal implements Terminal {
   AnsiTerminal({
     required io.Stdio stdio,
     required Platform platform,
+    DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
   })
     : _stdio = stdio,
-      _platform = platform;
+      _platform = platform,
+      _now = now ?? DateTime(1);
 
   final io.Stdio _stdio;
   final Platform _platform;
+  final DateTime _now;
 
   static const String bold = '\u001B[1m';
   static const String resetAll = '\u001B[0m';
@@ -186,6 +196,15 @@ class AnsiTerminal implements Terminal {
   @override
   bool get supportsEmoji => !_platform.isWindows
     || _platform.environment.containsKey('WT_SESSION');
+
+  @override
+  int get preferredStyle {
+    const int workdays = DateTime.friday;
+    if (_now.weekday <= workdays) {
+      return _now.weekday - 1;
+    }
+    return _now.hour + workdays;
+  }
 
   final RegExp _boldControls = RegExp(
     '(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})',
@@ -354,6 +373,9 @@ class _TestTerminal implements Terminal {
 
   @override
   final bool supportsEmoji;
+
+  @override
+  int get preferredStyle => 0;
 
   @override
   bool get stdinHasTerminal => false;

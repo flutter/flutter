@@ -77,8 +77,7 @@ void main() {
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
-  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (
-      WidgetTester tester) async {
+  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
@@ -109,7 +108,7 @@ void main() {
       '   This leaves the canvas in an inconsistent state and will probably\n'
       '   result in a broken display.\n'
       '   You must pair each call to save()/saveLayer() with a later\n'
-      '   matching call to restore().\n'
+      '   matching call to restore().\n',
     ));
 
     canvas.saveCountDelta = -1;
@@ -122,7 +121,7 @@ void main() {
       '   This leaves the canvas in an inconsistent state and will result\n'
       '   in a broken display.\n'
       '   You should only call restore() if you first called save() or\n'
-      '   saveLayer().\n'
+      '   saveLayer().\n',
     ));
 
     canvas.saveCountDelta = 2;

@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import 'base/platform.dart';
-import 'doctor.dart';
+import 'doctor_validator.dart';
 
 /// A validator that displays configured HTTP_PROXY environment variables.
 ///
@@ -15,7 +11,7 @@ import 'doctor.dart';
 /// validated along with `NO_PROXY`.
 class ProxyValidator extends DoctorValidator {
   ProxyValidator({
-    @required Platform platform,
+    required Platform platform,
   })  : shouldShow = _getEnv('HTTP_PROXY', platform).isNotEmpty,
         _httpProxy = _getEnv('HTTP_PROXY', platform),
         _noProxy = _getEnv('NO_PROXY', platform),

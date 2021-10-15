@@ -71,8 +71,12 @@ class FlutterTesterTestDevice extends TestDevice {
   Process _process;
   HttpServer _server;
 
+  /// Starts the device.
+  ///
+  /// [entrypointPath] is the path to the entrypoint file which must be compiled
+  /// as a dill.
   @override
-  Future<StreamChannel<String>> start({@required String compiledEntrypointPath}) async {
+  Future<StreamChannel<String>> start(String entrypointPath) async {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
@@ -94,7 +98,7 @@ class FlutterTesterTestDevice extends TestDevice {
         //
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
-        '--observatory-port=${debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort: 0}',
+        '--observatory-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       ]
@@ -113,7 +117,7 @@ class FlutterTesterTestDevice extends TestDevice {
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
-      compiledEntrypointPath,
+      entrypointPath,
     ];
 
     // If the FLUTTER_TEST environment variable has been set, then pass it on
@@ -154,7 +158,7 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri forwardingUri;
-        if (!debuggingOptions.disableDds) {
+        if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
           final DartDevelopmentService dds = await startDds(detectedUri);
           forwardingUri = dds.uri;
@@ -167,6 +171,7 @@ class FlutterTesterTestDevice extends TestDevice {
         final Future<FlutterVmService> localVmService = connectToVmService(
           forwardingUri,
           compileExpression: compileExpression,
+          logger: logger,
         );
         unawaited(localVmService.then((FlutterVmService vmservice) {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');

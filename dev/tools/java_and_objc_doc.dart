@@ -25,8 +25,8 @@ Future<void> main(List<String> args) async {
 /// Fetches the zip archive at the specified url.
 ///
 /// Returns null if the archive fails to download after [maxTries] attempts.
-Future<Archive> fetchArchive(String url, int maxTries) async {
-  List<int> responseBytes;
+Future<Archive?> fetchArchive(String url, int maxTries) async {
+  List<int>? responseBytes;
   for (int i = 0; i < maxTries; i++) {
     final http.Response response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -37,7 +37,7 @@ Future<Archive> fetchArchive(String url, int maxTries) async {
 
     // On failure print a short snipped from the body in case it's helpful.
     final int bodyLength = min(1024, response.body.length);
-    stderr.writeln('Response status code ${response.statusCode}. Body: ' + response.body.substring(0, bodyLength));
+    stderr.writeln('Response status code ${response.statusCode}. Body: ${response.body.substring(0, bodyLength)}');
     sleep(const Duration(seconds: 1));
   }
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
@@ -45,7 +45,7 @@ Future<Archive> fetchArchive(String url, int maxTries) async {
 
 Future<void> generateDocs(String url, String docName, String checkFile) async {
   const int maxTries = 5;
-  final Archive archive = await fetchArchive(url, maxTries);
+  final Archive? archive = await fetchArchive(url, maxTries);
   if (archive == null) {
     stderr.writeln('Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
     exit(1);

@@ -12,8 +12,7 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
+@(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
@@ -74,11 +73,10 @@ import 'package:intl/intl.dart' as intl;
 abstract class @(class) {
   @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
-  static @(class)? of(BuildContext context) {
-    return Localizations.of<@(class)>(context, @(class));
+  static @(class)@(canBeNullable) of(BuildContext context) {
+    return Localizations.of<@(class)>(context, @(class))@(needsNullCheck);
   }
 
   static const LocalizationsDelegate<@(class)> delegate = _@(class)Delegate();
@@ -156,6 +154,46 @@ const String pluralMethodTemplate = '''
       locale: localeName,
 @(pluralLogicArgs),
     );
+  }''';
+
+const String pluralMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+@(dateFormatting)
+@(numberFormatting)
+    final String @(variable) = intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
+@(pluralLogicArgs),
+    );
+
+    return @(string);
+  }''';
+
+const String selectMethodTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+  }''';
+
+const String selectMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+    final String @(variable) = intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+
+    return @(string);
   }''';
 
 const String classFileTemplate = '''
@@ -265,15 +303,15 @@ case '@(languageCode)': {
 }''';
 
 const String languageCodeSwitchTemplate = '''
-@(comment)
-switch (locale.languageCode) {
-  @(switchClauses)
-}
+  @(comment)
+  switch (locale.languageCode) {
+    @(switchClauses)
+  }
 ''';
 
 const String allCodesLookupTemplate = '''
-// Lookup logic when language+script+country codes are specified.
-switch (locale.toString()) {
-  @(allCodesSwitchClauses)
-}
+  // Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    @(allCodesSwitchClauses)
+  }
 ''';

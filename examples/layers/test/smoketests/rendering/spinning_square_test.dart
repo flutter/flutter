@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
@@ -12,5 +13,6 @@ void main() {
   test('layers smoketest for rendering/spinning_square.dart', () {
     FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
     demo.main();
+    expect(SchedulerBinding.instance!.hasScheduledFrame, true);
   });
 }

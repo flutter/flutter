@@ -285,13 +285,13 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 /// Old name for [FilteringTextInputFormatter.deny].
 @Deprecated(
   'Use FilteringTextInputFormatter.deny instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.'
+  'This feature was deprecated after v1.20.0-1.0.pre.',
 )
 class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [FilteringTextInputFormatter.deny].
   @Deprecated(
     'Use FilteringTextInputFormatter.deny instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   BlacklistingTextInputFormatter(
     Pattern blacklistedPattern, {
@@ -301,14 +301,14 @@ class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [filterPattern].
   @Deprecated(
     'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   Pattern get blacklistedPattern => filterPattern;
 
   /// Old name for [FilteringTextInputFormatter.singleLineFormatter].
   @Deprecated(
     'Use FilteringTextInputFormatter.singleLineFormatter instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   static final BlacklistingTextInputFormatter singleLineFormatter
       = BlacklistingTextInputFormatter(RegExp(r'\n'));
@@ -317,13 +317,13 @@ class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
 /// Old name for [FilteringTextInputFormatter.allow].
 @Deprecated(
   'Use FilteringTextInputFormatter.allow instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.'
+  'This feature was deprecated after v1.20.0-1.0.pre.',
 )
 class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [FilteringTextInputFormatter.allow].
   @Deprecated(
     'Use FilteringTextInputFormatter.allow instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   WhitelistingTextInputFormatter(Pattern whitelistedPattern)
     : assert(whitelistedPattern != null),
@@ -332,14 +332,14 @@ class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
   /// Old name for [filterPattern].
   @Deprecated(
     'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   Pattern get whitelistedPattern => filterPattern;
 
   /// Old name for [FilteringTextInputFormatter.digitsOnly].
   @Deprecated(
     'Use FilteringTextInputFormatter.digitsOnly instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.'
+    'This feature was deprecated after v1.20.0-1.0.pre.',
   )
   static final WhitelistingTextInputFormatter digitsOnly
       = WhitelistingTextInputFormatter(RegExp(r'\d+'));
@@ -502,7 +502,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.enforced:
         // If already at the maximum and tried to enter even more, and has no
         // selection, keep the old value.
-        if (oldValue.text.characters.length == maxLength && !oldValue.selection.isValid) {
+        if (oldValue.text.characters.length == maxLength && oldValue.selection.isCollapsed) {
           return oldValue;
         }
 
@@ -540,13 +540,13 @@ TextEditingValue _selectionAwareTextManipulation(
     manipulatedText = substringManipulation(value.text);
   } else {
     final String beforeSelection = substringManipulation(
-      value.text.substring(0, selectionStartIndex)
+      value.text.substring(0, selectionStartIndex),
     );
     final String inSelection = substringManipulation(
-      value.text.substring(selectionStartIndex, selectionEndIndex)
+      value.text.substring(selectionStartIndex, selectionEndIndex),
     );
     final String afterSelection = substringManipulation(
-      value.text.substring(selectionEndIndex)
+      value.text.substring(selectionEndIndex),
     );
     manipulatedText = beforeSelection + inSelection + afterSelection;
     if (value.selection.baseOffset > value.selection.extentOffset) {

@@ -106,7 +106,7 @@ class ImageCache {
       return;
     TimelineTask? timelineTask;
     if (!kReleaseMode) {
-       timelineTask = TimelineTask()..start(
+      timelineTask = TimelineTask()..start(
         'ImageCache.setMaximumSize',
         arguments: <String, dynamic>{'value': value},
       );
@@ -250,7 +250,7 @@ class ImageCache {
     if (pendingImage != null) {
       if (!kReleaseMode) {
         Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-          'type': 'pending'
+          'type': 'pending',
         });
       }
       pendingImage.removeListener();
@@ -517,7 +517,7 @@ class ImageCache {
       image.dispose();
       _cache.remove(key);
       if (!kReleaseMode) {
-        finishArgs['evictedKeys'].add(key.toString());
+        (finishArgs['evictedKeys'] as List<String>).add(key.toString());
       }
     }
     if (!kReleaseMode) {

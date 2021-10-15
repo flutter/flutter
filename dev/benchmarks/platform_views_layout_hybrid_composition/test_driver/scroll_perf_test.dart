@@ -47,7 +47,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile(summaryName, pretty: true);
       summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
@@ -56,6 +55,6 @@ void main() {
       await driver.runUnsynchronized(() async {
         await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf_hybrid_composition');
       });
-    });
+    }, timeout: Timeout.none);
   });
 }

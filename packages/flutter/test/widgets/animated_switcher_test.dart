@@ -13,9 +13,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: containerOne, color: const Color(0x00000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: containerOne, color: const Color(0x00000000)),
       ),
     );
 
@@ -26,9 +26,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: containerTwo, color: const Color(0xff000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: containerTwo, color: const Color(0xff000000)),
       ),
     );
 
@@ -40,9 +40,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: containerThree, color: const Color(0xffff0000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: containerThree, color: const Color(0xffff0000)),
       ),
     );
 
@@ -63,9 +63,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: container1),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: container1),
       ),
     );
     expect(find.byKey(container1), findsOneWidget);
@@ -75,9 +75,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: container2),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: container2),
       ),
     );
     expect(find.byKey(container1), findsOneWidget);
@@ -87,9 +87,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: container3),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(key: container3),
       ),
     );
     expect(find.byKey(container1), findsOneWidget);
@@ -101,9 +101,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(color: const Color(0x00000000)),
       ),
     );
 
@@ -114,9 +114,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0xff000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(color: const Color(0xff000000)),
       ),
     );
 
@@ -142,9 +142,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0xff000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(color: const Color(0xff000000)),
       ),
     );
 
@@ -156,9 +156,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: Container(color: const Color(0x00000000)),
       ),
     );
 
@@ -198,8 +198,8 @@ void main() {
   testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
     await tester.pumpWidget(AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
-      child: Container(color: const Color(0xff000000)),
       switchInCurve: Curves.linear,
+      child: Container(color: const Color(0xff000000)),
     ));
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -221,9 +221,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
         switchInCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
+        child: Container(color: const Color(0x00000000)),
       ),
     );
 
@@ -252,10 +252,10 @@ void main() {
         textDirection: TextDirection.rtl,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 100),
-          child: Container(color: const Color(0x00000000)),
           switchInCurve: Curves.linear,
           layoutBuilder: newLayoutBuilder,
           transitionBuilder: newTransitionBuilder,
+          child: Container(color: const Color(0x00000000)),
         ),
       ),
     );
@@ -298,9 +298,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: StatefulTest(key: statefulOne),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: StatefulTest(key: statefulOne),
       ),
     );
 
@@ -312,9 +312,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: StatefulTest(key: statefulTwo),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: StatefulTest(key: statefulTwo),
       ),
     );
 
@@ -327,9 +327,9 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: StatefulTest(key: statefulThree),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
+        child: StatefulTest(key: statefulThree),
       ),
     );
 
@@ -352,9 +352,9 @@ void main() {
           textDirection: TextDirection.rtl,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 100),
-            child: child,
             switchInCurve: Curves.linear,
             switchOutCurve: Curves.linear,
+            child: child,
           ),
         ),
       );
@@ -392,10 +392,10 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
         child: Container(key: containerOne, color: const Color(0xFFFF0000)),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
-        layoutBuilder: newLayoutBuilder,
       ),
     );
 
@@ -404,10 +404,10 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: newLayoutBuilder,
         child: Container(key: containerTwo, color: const Color(0xFF00FF00)),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
-        layoutBuilder: newLayoutBuilder,
       ),
     );
 
@@ -416,10 +416,10 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(key: containerThree, color: const Color(0xFF0000FF)),
         switchInCurve: Curves.linear,
         switchOutCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
+        child: Container(key: containerThree, color: const Color(0xFF0000FF)),
       ),
     );
 
@@ -446,10 +446,10 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        child: Container(color: const Color(0x00000000)),
         switchInCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         transitionBuilder: newTransitionBuilder,
+        child: Container(color: const Color(0x00000000)),
       ),
     );
 

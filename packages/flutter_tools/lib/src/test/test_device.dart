@@ -4,30 +4,30 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 /// A remote device where tests can be executed on.
 ///
 /// Reusability of an instance across multiple runs is not guaranteed for all
 /// implementations.
+///
+/// Methods may throw [TestDeviceException] if a problem is encountered.
 abstract class TestDevice {
   /// Starts the test device with the provided entrypoint.
   ///
   /// Returns a channel that can be used to communicate with the test process.
-  Future<StreamChannel<String>> start({@required String compiledEntrypointPath});
+  ///
+  /// It is up to the device to determine if [entrypointPath] is a precompiled
+  /// or raw source file.
+  Future<StreamChannel<String>> start(String entrypointPath);
 
   /// Should complete with null if the observatory is not enabled.
   Future<Uri> get observatoryUri;
 
   /// Terminates the test device.
-  ///
-  /// A [TestDeviceException] can be thrown if it did not stop gracefully.
   Future<void> kill();
 
   /// Waits for the test device to stop.
-  ///
-  /// A [TestDeviceException] can be thrown if it did not stop gracefully.
   Future<void> get finished;
 }
 

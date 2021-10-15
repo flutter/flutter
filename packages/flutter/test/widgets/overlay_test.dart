@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -28,7 +28,7 @@ void main() {
             ),
             OverlayEntry(
               builder: (BuildContext context) => Container(),
-            )
+            ),
           ],
         ),
       ),
@@ -75,7 +75,7 @@ void main() {
         ' ╎     size: Size(800.0, 600.0)\n'
         ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌no offstage children\n'
+        ' └╌no offstage children\n',
       ),
     );
   });
@@ -192,7 +192,7 @@ void main() {
         builder: (BuildContext context) {
           buildOrder.add('New');
           return Container();
-        }
+        },
       ),
     );
     await tester.pump();
@@ -227,10 +227,10 @@ void main() {
     final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       below: base,
     );
@@ -272,10 +272,10 @@ void main() {
     final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       above: base,
     );
@@ -732,7 +732,7 @@ void main() {
               ));
             }
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -1036,6 +1036,7 @@ void main() {
 
     // By default, clipBehavior should be Clip.hardEdge
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    // ignore: avoid_dynamic_calls
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
@@ -1052,6 +1053,7 @@ void main() {
           ),
         ),
       );
+      // ignore: avoid_dynamic_calls
       expect(renderObject.clipBehavior, clip);
     }
   });

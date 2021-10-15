@@ -28,7 +28,7 @@ class _NoSplashFactory extends InteractiveInkFeatureFactory {
     return NoSplash(
       controller: controller,
       referenceBox: referenceBox,
-      color: color
+      color: color,
     );
   }
 }

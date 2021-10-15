@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-dynamic getRenderSegmentedControl(WidgetTester tester) {
+RenderBox getRenderSegmentedControl(WidgetTester tester) {
   return tester.allRenderObjects.firstWhere(
     (RenderObject currentObject) {
       return currentObject.toStringShort().contains('_RenderSegmentedControl');
     },
-  );
+  ) as RenderBox;
 }
 
 StatefulBuilder setupSimpleSegmentedControl() {
@@ -45,8 +48,41 @@ Widget boilerplate({ required Widget child }) {
   );
 }
 
+int getChildCount(WidgetTester tester) {
+  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList().length;
+}
+
+ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
+}
+
+Size getChildSize(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child]).size;
+}
+
+Color getBorderColor(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
+}
+
+int? getSelectedIndex(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
+}
+
 Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  return getRenderSegmentedControl(tester).backgroundColors[childIndex] as Color;
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).backgroundColors[childIndex] as Color;
 }
 
 void main() {
@@ -85,35 +121,37 @@ void main() {
   });
 
   testWidgets('Need at least 2 children', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with no children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
-    try {
-      children[0] = const Text('Child 1');
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
 
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
-            children: children,
+            children: const <int, Widget>{0: Text('Child 1')},
             onValueChanged: (int newValue) { },
           ),
         ),
-      );
-      fail('Should not be possible to create a segmented control with just one child');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children.length'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
+    );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
@@ -208,8 +246,8 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
@@ -217,12 +255,13 @@ void main() {
             groupValue: 2,
           ),
         ),
-      );
-      fail('Should not be possible to create segmented control in which '
-          'value is not the key of one of the children widgets');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children'));
-    }
+      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children'),
+      )),
+    );
   });
 
   testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
@@ -346,7 +385,7 @@ void main() {
     DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
+    expect(getBorderColor(tester), CupertinoColors.black);
     expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
     expect(iconTheme.data.color, CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen.color);
@@ -514,7 +553,7 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, 0);
+    expect(getSelectedIndex(tester), 0);
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
@@ -545,7 +584,7 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, null);
+    expect(getSelectedIndex(tester), null);
 
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
@@ -605,8 +644,7 @@ void main() {
       ),
     );
 
-    final RenderBox buttonBox = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(buttonBox.size.height, 400.0);
   });
@@ -637,8 +675,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     // Subtract the 16.0px from each side. Remaining width should be allocated
     // to each child equally.
@@ -646,12 +683,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
-    expect(childWidth,
-        getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
+    expect(childWidth, getSurroundingRect(tester, child: 0).width);
+    expect(childWidth, getSurroundingRect(tester, child: 1).width);
+    expect(childWidth, getSurroundingRect(tester, child: 2).width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -677,8 +711,7 @@ void main() {
       ),
     );
 
-    final RenderBox segmentedControl = tester.renderObject(
-        find.byKey(const ValueKey<String>('Segmented Control')));
+    final RenderBox segmentedControl = tester.renderObject(find.byKey(const ValueKey<String>('Segmented Control')));
 
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
@@ -700,8 +733,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('Child 1')).dx >
-        tester.getTopRight(find.text('Child 2')).dx, isTrue);
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
@@ -814,37 +846,38 @@ void main() {
     await tester.pump();
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                label: 'Child 1',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-              TestSemantics.rootChild(
-                label: 'Child 2',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isInMutuallyExclusiveGroup,
-                  SemanticsFlag.isSelected,
-                ],
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-              ),
-            ],
-          ),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              label: 'Child 1',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics.rootChild(
+              label: 'Child 2',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isInMutuallyExclusiveGroup,
+                SemanticsFlag.isSelected,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
@@ -877,7 +910,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width as double;
+    final double childWidth = getChildSize(tester, child: 0).width;
     final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
 
     // Tap just inside segment bounds
@@ -967,7 +1000,8 @@ void main() {
       await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
       expect(sharedValue, 1);
-  });
+    },
+  );
 
   testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -1361,13 +1395,13 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
+    expect(getChildCount(tester), 3);
 
     await tester.tap(find.text('B'));
 
     await tester.pump();
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 2);
+    expect(getChildCount(tester), 2);
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
@@ -1407,12 +1441,12 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
+    expect(getChildCount(tester), 3);
 
     await tester.tap(find.text('B'));
 
     await tester.pump();
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 2);
+    expect(getChildCount(tester), 2);
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));

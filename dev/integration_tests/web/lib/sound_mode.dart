@@ -8,7 +8,7 @@ import 'dart:html' as html;
 
 // Verify that web applications can be run in sound mode.
 void main() {
-  const isWeak = <int?>[] is List<int>;
+  const bool isWeak = <int?>[] is List<int>;
   String output;
   if (isWeak) {
     output = '--- TEST FAILED ---';
@@ -19,6 +19,6 @@ void main() {
   html.HttpRequest.request(
     '/test-result',
     method: 'POST',
-    sendData: '$output',
+    sendData: output,
   );
 }

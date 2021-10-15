@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
-import '../project.dart';
+import '../cmake_project.dart';
 
 // CMake's add_custom_command() should use VERBATIM to handle escaping of spaces
 // and special characters correctly.
@@ -51,8 +49,8 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
     final Iterable<RegExpMatch> matches = addCustomCommand.allMatches(originalProjectContents);
 
     for (final RegExpMatch match in matches) {
-      final String addCustomCommandOriginal = match.group(1);
-      if (addCustomCommandOriginal?.contains('VERBATIM') == false) {
+      final String? addCustomCommandOriginal = match.group(1);
+      if (addCustomCommandOriginal != null && addCustomCommandOriginal.contains('VERBATIM') == false) {
         final String addCustomCommandReplacement = '$addCustomCommandOriginal\n  VERBATIM';
         newProjectContents = newProjectContents.replaceAll(addCustomCommandOriginal, addCustomCommandReplacement);
       }
@@ -70,7 +68,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
     }
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.');
-      _cmakeFile.writeAsStringSync(newProjectContents.toString());
+      _cmakeFile.writeAsStringSync(newProjectContents);
     }
     return true;
   }

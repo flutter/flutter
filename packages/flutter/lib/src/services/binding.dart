@@ -4,6 +4,8 @@
 
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -12,6 +14,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
+import 'message_codec.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -28,16 +33,34 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
-    window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
+
+  /// The global singleton instance of [HardwareKeyboard], which can be used to
+  /// query keyboard states.
+  HardwareKeyboard get keyboard => _keyboard;
+  late final HardwareKeyboard _keyboard;
+
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
+  KeyEventManager get keyEventManager => _keyEventManager;
+  late final KeyEventManager _keyEventManager;
+
+  void _initKeyboard() {
+    _keyboard = HardwareKeyboard();
+    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    window.onKeyData = _keyEventManager.handleKeyData;
+    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
 
   /// The default instance of [BinaryMessenger].
   ///
@@ -47,13 +70,34 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late BinaryMessenger _defaultBinaryMessenger;
 
+  /// The low level buffering and dispatch mechanism for messages sent by
+  /// plugins on the engine side to their corresponding plugin code on
+  /// the framework side.
+  ///
+  /// This exposes the [dart:ui.channelBuffers] object. Bindings can override
+  /// this getter to intercept calls to the [ChannelBuffers] mechanism (for
+  /// example, for tests).
+  ///
+  /// In production, direct access to this object should not be necessary.
+  /// Messages are received and dispatched by the [defaultBinaryMessenger]. This
+  /// object is primarily used to send mock messages in tests, via the
+  /// [ChannelBuffers.push] method (simulating a plugin sending a message to the
+  /// framework).
+  ///
+  /// See also:
+  ///
+  ///  * [PlatformDispatcher.sendPlatformMessage], which is used for sending
+  ///    messages to plugins from the framework (the opposite of
+  ///    [channelBuffers]).
+  ///  * [platformDispatcher], the [PlatformDispatcher] singleton.
+  ui.ChannelBuffers get channelBuffers => ui.channelBuffers;
+
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
   }
-
 
   /// Called when the operating system notifies the application of a memory
   /// pressure situation.
@@ -104,7 +148,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      rawLicenses.complete(
+        kIsWeb
+            // NOTICES for web isn't compressed since we don't have access to
+            // dart:io on the client side and it's already compressed between
+            // the server and client.
+            ? rootBundle.loadString('NOTICES', cache: false)
+            : () async {
+              // The compressed version doesn't have a more common .gz extension
+              // because gradle for Android non-transparently manipulates .gz files.
+              final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
+              List<int> bytes = licenseBytes.buffer.asUint8List();
+              bytes = gzip.decode(bytes);
+              return utf8.decode(bytes);
+            }(),
+      );
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
@@ -117,7 +175,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
+    final String _licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
     final List<String> licenses = rawLicenses.split(_licenseSeparator);
     for (final String license in licenses) {
@@ -193,6 +251,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
+  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    // There is only one incoming method call currently possible.
+    assert(method == 'SystemChrome.systemUIChange');
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    if (_systemUiChangeCallback != null) {
+      await _systemUiChangeCallback!(args[0] as bool);
+    }
+  }
+
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
@@ -227,7 +295,31 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   RestorationManager createRestorationManager() {
     return RestorationManager();
   }
+
+  SystemUiChangeCallback? _systemUiChangeCallback;
+
+  /// Sets the callback for the `SystemChrome.systemUIChange` method call
+  /// received on the [SystemChannels.platform] channel.
+  ///
+  /// This is typically not called directly. System UI changes that this method
+  /// responds to are associated with [SystemUiMode]s, which are configured
+  /// using [SystemChrome]. Use [SystemChrome.setSystemUIChangeCallback] to configure
+  /// along with other SystemChrome settings.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
+  ///     [SystemUiMode] to have visible when the application is running.
+  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
+    _systemUiChangeCallback = callback;
+  }
+
 }
+
+/// Signature for listening to changes in the [SystemUiMode].
+///
+/// Set by [SystemChrome.setSystemUIChangeCallback].
+typedef SystemUiChangeCallback = Future<void> Function(bool systemOverlaysAreVisible);
 
 /// The default implementation of [BinaryMessenger].
 ///
@@ -237,17 +329,20 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 class _DefaultBinaryMessenger extends BinaryMessenger {
   const _DefaultBinaryMessenger._();
 
-  // Handlers for incoming messages from platform plugins.
-  // This is static so that this class can have a const constructor.
-  static final Map<String, MessageHandler> _handlers =
-      <String, MessageHandler>{};
+  @override
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData? message,
+    ui.PlatformMessageResponseCallback? callback,
+  ) async {
+    ui.channelBuffers.push(channel, message, (ByteData? data) {
+      if (callback != null)
+        callback(data);
+    });
+  }
 
-  // Mock handlers that intercept and respond to outgoing messages.
-  // This is static so that this class can have a const constructor.
-  static final Map<String, MessageHandler> _mockHandlers =
-      <String, MessageHandler>{};
-
-  Future<ByteData?> _sendPlatformMessage(String channel, ByteData? message) {
+  @override
+  Future<ByteData?> send(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
     // ui.PlatformDispatcher.instance is accessed directly instead of using
     // ServicesBinding.instance.platformDispatcher because this method might be
@@ -256,6 +351,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     // ui.PlatformDispatcher.instance because the PlatformDispatcher may be
     // dependency injected elsewhere with a different instance. However, static
     // access at this location seems to be the least bad option.
+    // TODO(ianh): Use ServicesBinding.instance once we have better diagnostics
+    // on that getter.
     ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
@@ -272,65 +369,26 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<void> handlePlatformMessage(
-    String channel,
-    ByteData? data,
-    ui.PlatformMessageResponseCallback? callback,
-  ) async {
-    ByteData? response;
-    try {
-      final MessageHandler? handler = _handlers[channel];
-      if (handler != null) {
-        response = await handler(data);
-      } else {
-        ui.channelBuffers.push(channel, data, callback!);
-        callback = null;
-      }
-    } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: ErrorDescription('during a platform message callback'),
-      ));
-    } finally {
-      if (callback != null) {
-        callback(response);
-      }
-    }
-  }
-
-  @override
-  Future<ByteData?>? send(String channel, ByteData? message) {
-    final MessageHandler? handler = _mockHandlers[channel];
-    if (handler != null)
-      return handler(message);
-    return _sendPlatformMessage(channel, message);
-  }
-
-  @override
   void setMessageHandler(String channel, MessageHandler? handler) {
     if (handler == null) {
-      _handlers.remove(channel);
+      ui.channelBuffers.clearListener(channel);
     } else {
-      _handlers[channel] = handler;
-      ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
-        await handlePlatformMessage(channel, data, callback);
+      ui.channelBuffers.setListener(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+        ByteData? response;
+        try {
+          response = await handler(data);
+        } catch (exception, stack) {
+
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'services library',
+            context: ErrorDescription('during a platform message callback'),
+          ));
+        } finally {
+          callback(response);
+        }
       });
     }
   }
-
-  @override
-  bool checkMessageHandler(String channel, MessageHandler? handler) => _handlers[channel] == handler;
-
-  @override
-  void setMockMessageHandler(String channel, MessageHandler? handler) {
-    if (handler == null)
-      _mockHandlers.remove(channel);
-    else
-      _mockHandlers[channel] = handler;
-  }
-
-  @override
-  bool checkMockMessageHandler(String channel, MessageHandler? handler) => _mockHandlers[channel] == handler;
 }

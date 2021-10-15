@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -15,9 +13,9 @@ import '../../src/common.dart';
 
 void main() {
   group('Signals', () {
-    Signals signals;
-    FakeProcessSignal fakeSignal;
-    ProcessSignal signalUnderTest;
+    late Signals signals;
+    late FakeProcessSignal fakeSignal;
+    late ProcessSignal signalUnderTest;
 
     setUp(() {
       signals = Signals.test();
@@ -58,7 +56,7 @@ void main() {
 
     testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
       final Completer<void> completer = Completer<void>();
-      Object token;
+      late Object token;
       Future<void> handle(ProcessSignal s) async {
         expect(s, signalUnderTest);
         expect(await signals.removeHandler(signalUnderTest, token), true);
@@ -73,7 +71,7 @@ void main() {
 
     testWithoutContext('signal handler error goes on error stream', () async {
       final Exception exn = Exception('Error');
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (ProcessSignal s) async {
         throw exn;
       });
 
@@ -95,7 +93,7 @@ void main() {
     testWithoutContext('removed signal handler does not run', () async {
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) {
+        (ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -124,7 +122,7 @@ void main() {
 
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) {
+        (ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -153,7 +151,7 @@ void main() {
         completer.complete();
       });
 
-      signals.addHandler(otherSignal, (ProcessSignal s) {
+      signals.addHandler(otherSignal, (ProcessSignal s) async {
         fail('Wrong signal!.');
       });
 

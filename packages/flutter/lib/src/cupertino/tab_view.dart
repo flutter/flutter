@@ -89,8 +89,9 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed] inside this tab view,
   /// the route name is looked up in this map. If the name is present,
-  /// the associated [WidgetBuilder] is used to construct a [CupertinoPageRoute]
-  /// that performs an appropriate transition to the new route.
+  /// the associated [widgets.WidgetBuilder] is used to construct a
+  /// [CupertinoPageRoute] that performs an appropriate transition to the new
+  /// route.
   ///
   /// If the tab view only has one page, then you can specify it using [builder] instead.
   ///
@@ -133,9 +134,7 @@ class CupertinoTabView extends StatefulWidget {
   final String? restorationScopeId;
 
   @override
-  _CupertinoTabViewState createState() {
-    return _CupertinoTabViewState();
-  }
+  State<CupertinoTabView> createState() => _CupertinoTabViewState();
 }
 
 class _CupertinoTabViewState extends State<CupertinoTabView> {
@@ -209,7 +208,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
           ' 3. Otherwise, onGenerateRoute is called. It should return a '
           'non-null value for any valid route not handled by "builder" and "routes".\n'
           ' 4. Finally if all else fails onUnknownRoute is called.\n'
-          'Unfortunately, onUnknownRoute was not set.'
+          'Unfortunately, onUnknownRoute was not set.',
         );
       }
       return true;
@@ -221,7 +220,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
+          'must never return null.',
         );
       }
       return true;

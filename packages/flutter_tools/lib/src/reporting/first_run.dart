@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 
 import '../convert.dart';
 import '../persistent_tool_state.dart';
@@ -46,7 +43,7 @@ const String _kFlutterFirstRunMessage = '''
 /// need to be displayed.
 class FirstRunMessenger {
   FirstRunMessenger({
-    @required PersistentToolState persistentToolState
+    required PersistentToolState persistentToolState
   }) : _persistentToolState = persistentToolState;
 
   final PersistentToolState _persistentToolState;
@@ -61,10 +58,10 @@ class FirstRunMessenger {
   /// that the license terms are not printed during a `flutter upgrade`, until the
   /// user manually runs the tool.
   bool shouldDisplayLicenseTerms() {
-    if (_persistentToolState.redisplayWelcomeMessage == false) {
+    if (_persistentToolState.shouldRedisplayWelcomeMessage == false) {
       return false;
     }
-    final String oldHash = _persistentToolState.lastActiveLicenseTerms;
+    final String? oldHash = _persistentToolState.lastActiveLicenseTermsHash;
     return oldHash != _currentHash;
   }
 

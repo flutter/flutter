@@ -6,15 +6,16 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../bundle.dart';
-import '../cache.dart';
+import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -23,7 +24,42 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+/// The name of the directory where Integration Tests are placed.
+///
+/// When there are test files specified for the test command that are part of
+/// this directory, *relative to the package root*, the files will be executed
+/// as Integration Tests.
+const String _kIntegrationTestDirectory = 'integration_test';
+
+/// A command to run tests.
+///
+/// This command has two modes of execution:
+///
+/// ## Unit / Widget Tests
+///
+/// These tests run in the Flutter Tester, which is a desktop-based Flutter
+/// embedder. In this mode, tests are quick to compile and run.
+///
+/// By default, if no flags are passed to the `flutter test` command, the Tool
+/// will recursively find all files within the `test/` directory that end with
+/// the `*_test.dart` suffix, and run them in a single invocation.
+///
+/// See:
+/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
+/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+///
+/// ## Integration Tests
+///
+/// These tests run in a connected Flutter Device, similar to `flutter run`. As
+/// a result, iteration is slower because device-based artifacts have to be
+/// built.
+///
+/// Integration tests should be placed in the `integration_test/` directory of
+/// your package. To run these tests, use `flutter test integration_test`.
+///
+/// See:
+/// - https://flutter.dev/docs/testing/integration-tests
+class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
@@ -36,6 +72,8 @@ class TestCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
     usesWebRendererOption();
+    usesDeviceUserOption();
+
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -108,7 +146,8 @@ class TestCommand extends FlutterCommand {
       ..addOption('concurrency',
         abbr: 'j',
         defaultsTo: math.max<int>(1, globals.platform.numberOfProcessors - 2).toString(),
-        help: 'The number of concurrent test processes to run.',
+        help: 'The number of concurrent test processes to run. This will be ignored '
+              'when running integration tests.',
         valueHelp: 'jobs',
       )
       ..addFlag('test-assets',
@@ -128,7 +167,7 @@ class TestCommand extends FlutterCommand {
         defaultsTo: 'tester',
         help: 'Selects the test backend.',
         allowedHelp: <String, String>{
-          'tester': 'Run tests using the default VM-based test environment.',
+          'tester': 'Run tests using the VM-based test environment.',
           'chrome': '(deprecated) Run tests using the Google Chrome web browser. '
                     'This value is intended for testing the Flutter framework '
                     'itself and may be removed at any time.',
@@ -186,9 +225,18 @@ class TestCommand extends FlutterCommand {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  @visibleForTesting
+  bool get isIntegrationTest => _isIntegrationTest;
+  bool _isIntegrationTest = false;
+
+  List<String> _testFiles = <String>[];
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{};
+    final Set<DevelopmentArtifact> results = _isIntegrationTest
+        // Use [DeviceBasedDevelopmentArtifacts].
+        ? await super.requiredArtifacts
+        : <DevelopmentArtifact>{};
     if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }
@@ -200,6 +248,44 @@ class TestCommand extends FlutterCommand {
 
   @override
   String get description => 'Run Flutter unit tests for the current project.';
+
+  @override
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {
+    _testFiles = argResults.rest.map<String>(globals.fs.path.absolute).toList();
+    if (_testFiles.isEmpty) {
+      // We don't scan the entire package, only the test/ subdirectory, so that
+      // files with names like "hit_test.dart" don't get run.
+      final Directory testDir = globals.fs.directory('test');
+      if (!testDir.existsSync()) {
+        throwToolExit('Test directory "${testDir.path}" not found.');
+      }
+      _testFiles = _findTests(testDir).toList();
+      if (_testFiles.isEmpty) {
+        throwToolExit(
+          'Test directory "${testDir.path}" does not appear to contain any test files.\n'
+          'Test files must be in that directory and end with the pattern "_test.dart".'
+        );
+      }
+    } else {
+      _testFiles = <String>[
+        for (String path in _testFiles)
+          if (globals.fs.isDirectorySync(path))
+            ..._findTests(globals.fs.directory(path))
+          else
+            globals.fs.path.normalize(globals.fs.path.absolute(path))
+      ];
+    }
+
+    // This needs to be set before [super.verifyThenRunCommand] so that the
+    // correct [requiredArtifacts] can be identified before [run] takes place.
+    _isIntegrationTest = _shouldRunAsIntegrationTests(globals.fs.currentDirectory.absolute.path, _testFiles);
+
+    globals.logger.printTrace(
+      'Found ${_testFiles.length} files which will be executed as '
+      '${_isIntegrationTest ? 'Integration' : 'Widget'} Tests.',
+    );
+    return super.verifyThenRunCommand(commandPath);
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -229,49 +315,34 @@ class TestCommand extends FlutterCommand {
       );
     }
 
-    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+    if (buildTestAssets) {
       await _buildTestAsset();
     }
 
-    List<String> files = argResults.rest.map<String>((String testPath) => globals.fs.path.absolute(testPath)).toList();
-
     final bool startPaused = boolArg('start-paused');
-    if (startPaused && files.length != 1) {
+    if (startPaused && _testFiles.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
         exitCode: 1,
       );
     }
 
-    final int jobs = int.tryParse(stringArg('concurrency'));
+    int jobs = int.tryParse(stringArg('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
     }
-
-    if (files.isEmpty) {
-      // We don't scan the entire package, only the test/ subdirectory, so that
-      // files with names like like "hit_test.dart" don't get run.
-      final Directory testDir = globals.fs.directory('test');
-      if (!testDir.existsSync()) {
-        throwToolExit('Test directory "${testDir.path}" not found.');
-      }
-      files = _findTests(testDir).toList();
-      if (files.isEmpty) {
-        throwToolExit(
-            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
-            'Test files must be in that directory and end with the pattern "_test.dart".'
+    if (_isIntegrationTest) {
+      if (argResults.wasParsed('concurrency')) {
+        globals.logger.printStatus(
+          '-j/--concurrency was parsed but will be ignored, this option is not '
+          'supported when running Integration Tests.',
         );
       }
-    } else {
-      files = <String>[
-        for (String path in files)
-          if (globals.fs.isDirectorySync(path))
-            ..._findTests(globals.fs.directory(path))
-          else
-            path,
-      ];
+      // Running with concurrency will result in deploying multiple test apps
+      // on the connected device concurrently, which is not supported.
+      jobs = 1;
     }
 
     final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
@@ -310,7 +381,7 @@ class TestCommand extends FlutterCommand {
 
     TestWatcher watcher;
     if (machine) {
-      watcher = EventPrinter(parent: collector);
+      watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
     }
@@ -319,13 +390,46 @@ class TestCommand extends FlutterCommand {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      disableDds: disableDds,
+      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
+      disablePortPublication: true,
+      enableDds: enableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
+    Device integrationTestDevice;
+    if (_isIntegrationTest) {
+      integrationTestDevice = await findTargetDevice();
+
+      // Disable reporting of test results to native test frameworks. This isn't
+      // needed as the Flutter Tool will be responsible for reporting results.
+      buildInfo.dartDefines.add('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false');
+
+      if (integrationTestDevice == null) {
+        throwToolExit(
+          'No devices are connected. '
+          'Ensure that `flutter doctor` shows at least one connected device',
+        );
+      }
+      if (integrationTestDevice.platformType == PlatformType.web) {
+        // TODO(jiahaog): Support web. https://github.com/flutter/flutter/pull/74236
+        throwToolExit('Web devices are not supported for integration tests yet.');
+      }
+
+      if (buildInfo.packageConfig['integration_test'] == null) {
+        throwToolExit(
+          'Error: cannot run without a dependency on "package:integration_test". '
+          'Ensure the following lines are present in your pubspec.yaml:'
+          '\n\n'
+          'dev_dependencies:\n'
+          '  integration_test:\n'
+          '    sdk: flutter\n',
+        );
+      }
+    }
+
     final int result = await testRunner.runTests(
       testWrapper,
-      files,
+      _testFiles,
       debuggingOptions: debuggingOptions,
       names: names,
       plainNames: plainNames,
@@ -346,6 +450,8 @@ class TestCommand extends FlutterCommand {
       runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
+      integrationTestDevice: integrationTestDevice,
+      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
     );
 
     if (collector != null) {
@@ -398,9 +504,36 @@ class TestCommand extends FlutterCommand {
   }
 }
 
+/// Searches [directory] and returns files that end with `_test.dart` as
+/// absolute paths.
 Iterable<String> _findTests(Directory directory) {
   return directory.listSync(recursive: true, followLinks: false)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
       globals.fs.isFileSync(entity.path))
       .map((FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
+}
+
+/// Returns true if there are files that are Integration Tests.
+///
+/// The [currentDirectory] and [testFiles] parameters here must be provided as
+/// absolute paths.
+///
+/// Throws an exception if there are both Integration Tests and Widget Tests
+/// found in [testFiles].
+bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles) {
+  final String integrationTestDirectory = globals.fs.path.join(currentDirectory, _kIntegrationTestDirectory);
+
+  if (testFiles.every((String absolutePath) => !absolutePath.startsWith(integrationTestDirectory))) {
+    return false;
+  }
+
+  if (testFiles.every((String absolutePath) => absolutePath.startsWith(integrationTestDirectory))) {
+    return true;
+  }
+
+  throwToolExit(
+    'Integration tests and unit tests cannot be run in a single invocation.'
+    ' Use separate invocations of `flutter test` to run integration tests'
+    ' and unit tests.'
+  );
 }

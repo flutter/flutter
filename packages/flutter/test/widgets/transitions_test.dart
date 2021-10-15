@@ -5,9 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
@@ -183,9 +182,9 @@ void main() {
     ).animate(controller);
     final Widget widget = AlignTransition(
       alignment: alignmentTween,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
       widthFactor: 0.3,
       heightFactor: 0.4,
+      child: const Text('Ready', textDirection: TextDirection.ltr),
     );
 
     await tester.pumpWidget(widget);
@@ -381,10 +380,10 @@ void main() {
                     child: Text('Fade In'),
                   ),
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
 
       await tester.pumpWidget(widget);

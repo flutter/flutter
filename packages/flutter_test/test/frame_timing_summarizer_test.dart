@@ -29,6 +29,9 @@ void main() {
           buildFinish: buildTimes[i],
           rasterStart: 500,
           rasterFinish: rasterTimes[i],
+          // Wall time should not be used in any profiling metrics.
+          // It is primarily to correlate with external tools' measurement.
+          rasterFinishWallTime: 0,
         ),
     ];
 

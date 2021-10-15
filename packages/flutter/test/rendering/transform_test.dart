@@ -145,8 +145,10 @@ void main() {
     expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, lessThan(10.0));
     expect(inner.globalToLocal(const Offset(25.0, 83.0)).dy, greaterThan(90.0));
     expect(inner.globalToLocal(const Offset(25.0, 83.0)).dy, lessThan(100.0));
-    expect(round(inner.globalToLocal(const Offset(25.0, 17.0))).dy,
-        equals(100 - round(inner.globalToLocal(const Offset(25.0, 83.0))).dy));
+    expect(
+      round(inner.globalToLocal(const Offset(25.0, 17.0))).dy,
+      equals(100 - round(inner.globalToLocal(const Offset(25.0, 83.0))).dy),
+    );
   });
 
   test('RenderTransform - perspective - localToGlobal', () {

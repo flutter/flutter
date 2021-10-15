@@ -11,7 +11,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
 import '../web/memory_fs.dart';
@@ -53,6 +53,8 @@ abstract class FlutterTestRunner {
     bool runSkipped = false,
     int shardIndex,
     int totalShards,
+    Device integrationTestDevice,
+    String integrationTestUserIdentifier,
   });
 }
 
@@ -87,6 +89,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     bool runSkipped = false,
     int shardIndex,
     int totalShards,
+    Device integrationTestDevice,
+    String integrationTestUserIdentifier,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -120,6 +124,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--total-shards=$totalShards',
       if (shardIndex != null)
         '--shard-index=$shardIndex',
+      '--chain-stack-traces',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
@@ -164,6 +169,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             logger: globals.logger,
             fileSystem: globals.fs,
             artifacts: globals.artifacts,
+            processManager: globals.processManager,
             chromiumLauncher: ChromiumLauncher(
               fileSystem: globals.fs,
               platform: globals.platform,
@@ -201,6 +207,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
+      integrationTestDevice: integrationTestDevice,
+      integrationTestUserIdentifier: integrationTestUserIdentifier,
     );
 
     try {

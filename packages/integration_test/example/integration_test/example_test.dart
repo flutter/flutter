@@ -11,8 +11,7 @@
 
 import 'package:integration_test/integration_test.dart';
 
-import '_example_test_io.dart' if (dart.library.html) '_example_test_web.dart'
-    as tests;
+import '_example_test_io.dart' if (dart.library.html) '_example_test_web.dart' as tests;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

@@ -34,7 +34,7 @@ import 'constants.dart';
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key? key }) : super(key: key);
 ///   @override
-///   _MyTabbedPageState createState() => _MyTabbedPageState();
+///   State<MyTabbedPage> createState() => _MyTabbedPageState();
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
@@ -119,10 +119,10 @@ import 'constants.dart';
 ///             ),
 ///           ),
 ///           body: TabBarView(
-///             children: tabs.map((Tab tab){
+///             children: tabs.map((Tab tab) {
 ///               return Center(
 ///                 child: Text(
-///                   tab.text! + ' Tab',
+///                   '${tab.text!} Tab',
 ///                   style: Theme.of(context).textTheme.headline5,
 ///                 ),
 ///               );
@@ -180,6 +180,9 @@ class TabController extends ChangeNotifier {
     required int? length,
     required int? previousIndex,
   }) {
+    if (index != null) {
+      _animationController!.value = index.toDouble();
+    }
     return TabController._(
       index: index ?? _index,
       length: length ?? this.length,
@@ -413,7 +416,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  _DefaultTabControllerState createState() => _DefaultTabControllerState();
+  State<DefaultTabController> createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {

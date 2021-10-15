@@ -127,8 +127,9 @@ void main() {
                   ),
                 ],
               );
-            }),
+            },
           ),
+        ),
       ),
     ));
 
@@ -154,8 +155,8 @@ void main() {
     final List<Widget> slivers = List<Widget>.generate(30, (int i) {
       final Widget child = MergeSemantics(
         child: SizedBox(
-          child: Text('Item $i'),
           height: 72.0,
+          child: Text('Item $i'),
         ),
       );
       children.add(child);
@@ -232,7 +233,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 394.3,
+      scrollPosition: 380.2,
       scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
@@ -281,7 +282,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 394.3,
+      scrollPosition: 380.2,
       scrollExtentMax: double.infinity,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
@@ -293,7 +294,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 788.6,
+      scrollPosition: 760.4,
       scrollExtentMax: double.infinity,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
@@ -308,8 +309,8 @@ void main() {
     semantics = SemanticsTester(tester);
 
     final List<Widget> children = List<Widget>.generate(80, (int i) => SizedBox(
-      child: Text('Item $i'),
       height: 40.0,
+      child: Text('Item $i'),
     ));
     await tester.pumpWidget(
       Directionality(
@@ -336,8 +337,8 @@ void main() {
         child: ListView(
           children: List<Widget>.generate(40, (int i) {
             return SizedBox(
-              child: Text('item $i'),
               height: 400.0,
+              child: Text('item $i'),
             );
           }),
         ),

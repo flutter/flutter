@@ -307,9 +307,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -622,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: Text('Button'),
             onPressed: null, // button is disabled
+            child: Text('Button'),
           ),
         ),
       ),
@@ -846,8 +846,8 @@ void main() {
     const double disabledElevation = 16;
 
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(
@@ -867,8 +867,8 @@ void main() {
 
   testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(

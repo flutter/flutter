@@ -21,10 +21,16 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 /// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
+/// The [RawKeyboardListener] is different from [KeyboardListener] in that
+/// [RawKeyboardListener] uses the legacy [RawKeyboard] API. Use
+/// [KeyboardListener] if possible.
+///
 /// See also:
 ///
 ///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
+///  * [KeyboardListener], a similar widget based on the newer
+///    [HardwareKeyboard] API.
 class RawKeyboardListener extends StatefulWidget {
   /// Creates a widget that receives raw keyboard events.
   ///
@@ -65,7 +71,7 @@ class RawKeyboardListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _RawKeyboardListenerState createState() => _RawKeyboardListenerState();
+  State<RawKeyboardListener> createState() => _RawKeyboardListenerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

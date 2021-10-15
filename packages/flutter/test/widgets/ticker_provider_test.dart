@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
@@ -114,10 +114,10 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
-        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
+        expect(error.toStringDeep().split('\n').take(13).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
             '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
             '   active Ticker.\n'
@@ -129,9 +129,8 @@ void main() {
             '   calling dispose() on the AnimationController itself. Otherwise,\n'
             '   the ticker will leak.\n'
             '   The offending ticker was:\n'
-            '     Ticker(created by _SingleTickerTestState#00000(lifecycle state:\n'
-            '     created))\n'
-            '     The stack trace when the Ticker was actually created was:'
+            '     Ticker(created by _SingleTickerTestState#00000)\n'
+            '     The stack trace when the Ticker was actually created was:',
         ));
         key.currentState!.controller.stop();
       }
@@ -155,10 +154,10 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
-        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
+        expect(error.toStringDeep().split('\n').take(13).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
           '   active Ticker.\n'
@@ -170,15 +169,14 @@ void main() {
           '   calling dispose() on the AnimationController itself. Otherwise,\n'
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
-          '     Ticker(created by _SingleTickerTestState#00000(lifecycle state:\n'
-          '     created))\n'
-          '     The stack trace when the Ticker was actually created was:'
+          '     Ticker(created by _SingleTickerTestState#00000)\n'
+          '     The stack trace when the Ticker was actually created was:',
         ));
         key.currentState!.controller.stop();
       }
     });
 
-    testWidgets('ProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
+    testWidgets('TickerProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
       final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
       final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -196,10 +194,10 @@ void main() {
           error.diagnostics[2].toStringDeep(),
           'Tickers used by AnimationControllers should be disposed by\n'
           'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n'
+          'the ticker will leak.\n',
         );
         expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
-        expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
+        expect(error.toStringDeep().split('\n').take(12).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
           '   disposed with an active Ticker.\n'
@@ -211,20 +209,28 @@ void main() {
           '   calling dispose() on the AnimationController itself. Otherwise,\n'
           '   the ticker will leak.\n'
           '   The offending ticker was:\n'
-          '     _WidgetTicker(created by\n'
-          '     _MultipleTickerTestState#00000(lifecycle state: created,\n'
-          '     tickers: tracking 0 tickers))'
+          '     _WidgetTicker(created by _MultipleTickerTestState#00000)',
         ));
         key.currentState!.controllers.first.stop();
       }
     });
+  });
+
+  testWidgets('SingleTickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+    await tester.pumpWidget(const _SingleTickerTest());
+    expect(tester.state<_SingleTickerTestState>(find.byType(_SingleTickerTest)).toStringCount, 0);
+  });
+
+  testWidgets('TickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+    await tester.pumpWidget(const _MultipleTickerTest());
+    expect(tester.state<_MultipleTickerTestState>(find.byType(_MultipleTickerTest)).toStringCount, 0);
   });
 }
 
 class BoringTickerTest extends StatefulWidget {
   const BoringTickerTest({ Key? key }) : super(key: key);
   @override
-  _BoringTickerTestState createState() => _BoringTickerTestState();
+  State<BoringTickerTest> createState() => _BoringTickerTestState();
 }
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
@@ -255,6 +261,14 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   Widget build(BuildContext context) {
     return Container();
   }
+
+  int toStringCount = 0;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    toStringCount += 1;
+    return super.toString(minLevel: minLevel);
+  }
 }
 
 class _MultipleTickerTest extends StatefulWidget {
@@ -278,6 +292,14 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+
+  int toStringCount = 0;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    toStringCount += 1;
+    return super.toString(minLevel: minLevel);
   }
 }
 

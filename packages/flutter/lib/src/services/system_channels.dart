@@ -32,10 +32,19 @@ class SystemChannels {
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routeUpdated`, which is called when current route has changed.
+  ///  * `selectSingleEntryHistory`, which enables a single-entry history mode.
   ///
-  ///  * `routeInformationUpdated`, which is called by the [Router] when the
-  ///    application navigate to a new location.
+  ///  * `selectMultiEntryHistory`, which enables a multiple-entry history mode.
+  ///
+  ///  * `routeInformationUpdated`, which is called when the application
+  ///    navigates to a new location, and which takes two arguments, `location`
+  ///    (a URL) and `state` (an object).
+  ///
+  ///  * `routeUpdated`, a deprecated API which can be called in the same
+  ///    situations as `routeInformationUpdated` but whose arguments are
+  ///    `routeName` (a URL) and `previousRouteName` (which is ignored).
+  ///
+  /// These APIs are exposed by the [SystemNavigator] class.
   ///
   /// See also:
   ///
@@ -91,7 +100,15 @@ class SystemChannels {
   ///  * `SystemChrome.setEnabledSystemUIOverlays`: Specifies the set of system
   ///    overlays to have visible when the application is running. The argument
   ///    is a [List] of values which are string representations of values of the
-  ///    [SystemUiOverlay] enum. See [SystemChrome.setEnabledSystemUIOverlays].
+  ///    [SystemUiOverlay] enum. See [SystemChrome.setEnabledSystemUIMode].
+  ///    [SystemUiOverlay]s can only be configured individually when using
+  ///    [SystemUiMode.manual].
+  ///
+  ///  * `SystemChrome.setEnabledSystemUIMode`: Specifies the [SystemUiMode] for
+  ///    the application. The optional `overlays` argument is a [List] of values
+  ///    which are string representations of values of the [SystemUiOverlay]
+  ///    enum when using [SystemUiMode.manual]. See
+  ///    [SystemChrome.setEnabledSystemUIMode].
   ///
   ///  * `SystemChrome.setSystemUIOverlayStyle`: Specifies whether system
   ///    overlays (e.g. the status bar on Android or iOS) should be `light` or
@@ -100,6 +117,15 @@ class SystemChannels {
   ///
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `SystemChrome.systemUIChange`: The user has changed the visibility of
+  ///    the system overlays. This is relevant when using [SystemUiMode]s
+  ///    through [SystemChrome.setEnabledSystemUIMode]. See
+  ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
+  ///    application state.
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
@@ -119,6 +145,11 @@ class SystemChannels {
   /// Messages received from the shell side specify the transaction to which
   /// they apply, so that stale messages referencing past transactions can be
   /// ignored.
+  ///
+  /// In debug builds, messages sent with a client ID of -1 are always accepted.
+  /// This allows tests to smuggle messages without having to mock the engine's
+  /// text handling (for example, allowing the engine to still handle the text
+  /// input messages in an integration test).
   ///
   /// The methods described below are wrapped in a more convenient form by the
   /// [TextInput] and [TextInputConnection] class.
@@ -152,9 +183,15 @@ class SystemChannels {
   /// is a transaction identifier. Calls for stale transactions should be ignored.
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
-  ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by
-  ///    [TextEditingValue.fromJSON].
+  ///    of the text control. The second argument is an object with seven keys,
+  ///    in the form expected by [TextEditingValue.fromJSON].
+  ///
+  ///  * `TextInputClient.updateEditingStateWithTag`: One or more text controls
+  ///    were autofilled by the platform's autofill service. The first argument
+  ///    (the client ID) is ignored, the second argument is a map of tags to
+  ///    objects in the form expected by [TextEditingValue.fromJSON]. See
+  ///    [AutofillScope.getAutofillClient] for details on the interpretation of
+  ///    the tag.
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -165,7 +202,8 @@ class SystemChannels {
   ///    one. The framework should call `TextInput.setClient` and
   ///    `TextInput.setEditingState` again with its most recent information. If
   ///    there is no existing state on the framework side, the call should
-  ///    fizzle.
+  ///    fizzle. (This call is made without a client ID; indeed, without any
+  ///    arguments at all.)
   ///
   ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
   ///    on the platform side. For example the application is moved to

@@ -66,10 +66,10 @@ bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
 /// Whether `key` corresponds to one of the plural variations of a key with
 /// the same prefix and suffix "Other".
 bool isPluralVariation(String key, Map<String, dynamic> bundle) {
-  final Match pluralMatch = kPluralRegexp.firstMatch(key);
+  final Match? pluralMatch = kPluralRegexp.firstMatch(key);
   if (pluralMatch == null)
     return false;
-  final String prefix = pluralMatch[1];
+  final String prefix = pluralMatch[1]!;
   return bundle.containsKey('${prefix}Other');
 }
 
@@ -83,7 +83,7 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
   for (final FileSystemEntity entity in localizationDir.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
-      final String localeString = filenamePattern.firstMatch(entityPath)[1];
+      final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
       final LocaleInfo locale = LocaleInfo.fromString(localeString);
 
       // Only look at top-level language locales

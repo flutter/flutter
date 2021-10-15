@@ -24,9 +24,6 @@ Future<dds.DartDevelopmentService> Function(
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
-  DartDevelopmentService({@required this.logger});
-
-  final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
   Uri get uri => _ddsInstance?.uri ?? _existingDdsUri;
@@ -39,8 +36,9 @@ class DartDevelopmentService {
     Uri observatoryUri,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes,
-  ) async {
+    bool disableServiceAuthCodes, {
+    @required Logger logger,
+  }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: (ipv6 ?

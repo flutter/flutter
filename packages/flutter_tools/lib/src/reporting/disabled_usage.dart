@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 part of reporting;
 
 class DisabledUsage implements Usage {
@@ -20,28 +18,28 @@ class DisabledUsage implements Usage {
   set enabled(bool value) { }
 
   @override
-  String get clientId => null;
+  String get clientId => '';
 
   @override
-  void sendCommand(String command, { Map<String, String> parameters }) { }
+  void sendCommand(String command, { CustomDimensions? parameters }) { }
 
   @override
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
+    String? label,
+    int? value,
+    CustomDimensions? parameters,
   }) { }
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, { String label }) { }
+  void sendTiming(String category, String variableName, Duration duration, { String? label }) { }
 
   @override
   void sendException(dynamic exception) { }
 
   @override
-  Stream<Map<String, dynamic>> get onSend => null;
+  Stream<Map<String, dynamic>> get onSend => const Stream<Map<String, dynamic>>.empty();
 
   @override
   Future<void> ensureAnalyticsSent() => Future<void>.value();

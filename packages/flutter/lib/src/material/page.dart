@@ -108,7 +108,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
       if (result == null) {
         throw FlutterError(
           'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.'
+          'Route builders must never return null.',
         );
       }
       return true;

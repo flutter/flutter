@@ -12,7 +12,7 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({Key key, this.name}) : super(key: key);
+  const DemoButton({Key? key, required this.name}) : super(key: key);
 
   final String name;
 
@@ -30,10 +30,10 @@ class DemoButton extends StatelessWidget {
 }
 
 class HoverDemo extends StatefulWidget {
-  const HoverDemo({Key key}) : super(key: key);
+  const HoverDemo({Key? key}) : super(key: key);
 
   @override
-  _HoverDemoState createState() => _HoverDemoState();
+  State<HoverDemo> createState() => _HoverDemoState();
 }
 
 class _HoverDemoState extends State<HoverDemo> {
@@ -42,12 +42,12 @@ class _HoverDemoState extends State<HoverDemo> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ButtonStyle overrideFocusColor = ButtonStyle(
       overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : null;
+        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : Colors.transparent;
       })
     );
 
     return DefaultTextStyle(
-      style: textTheme.headline4,
+      style: textTheme.headline4!,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),
@@ -65,13 +65,13 @@ class _HoverDemoState extends State<HoverDemo> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     TextButton(
                       onPressed: () => print('Button pressed.'),
-                      child: const Text('Button'),
                       style: overrideFocusColor,
+                      child: const Text('Button'),
                     ),
                     IconButton(
                       onPressed: () => print('Button pressed'),

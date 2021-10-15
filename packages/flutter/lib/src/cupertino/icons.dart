@@ -766,7 +766,7 @@ class CupertinoIcons {
   ///  * [time_solid], which is similar, but without dots on the clock face.
   static const IconData clock_solid = IconData(0xf4bf, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>clock</i> &#x2014; Cupertino icon for a circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
+  /// <i class='cupertino-icons md-36'>clock</i> &#x2014; Cupertino icon for a circle with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   /// This is the same icon as [clock] in cupertino_icons 1.0.0+.
   ///
   /// See also:
@@ -776,7 +776,7 @@ class CupertinoIcons {
   ///  * [clock_solid], which is similar, but filled in and with dots on the clock face.
   static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>clock_fill</i> &#x2014; Cupertino icon for a filled in circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
+  /// <i class='cupertino-icons md-36'>clock_fill</i> &#x2014; Cupertino icon for a filled in circle with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   /// This is the same icon as [clock_fill] and [clock_solid] in cupertino_icons 1.0.0+.
   ///
   /// See also:

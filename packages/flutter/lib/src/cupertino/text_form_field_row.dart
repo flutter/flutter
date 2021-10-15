@@ -144,6 +144,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextInputAction? textInputAction,
     TextStyle? style,
     StrutStyle? strutStyle,
+    TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
@@ -203,8 +204,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(
@@ -239,6 +239,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 textAlign: textAlign,
                 textAlignVertical: textAlignVertical,
                 textCapitalization: textCapitalization,
+                textDirection: textDirection,
                 autofocus: autofocus,
                 toolbarOptions: toolbarOptions,
                 readOnly: readOnly,
@@ -299,8 +300,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  _CupertinoTextFormFieldRowState createState() =>
-      _CupertinoTextFormFieldRowState();
+  FormFieldState<String> createState() => _CupertinoTextFormFieldRowState();
 }
 
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {

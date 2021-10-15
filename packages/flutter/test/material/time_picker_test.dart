@@ -12,40 +12,88 @@ import 'feedback_tester.dart';
 
 final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
 final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TimePickerDialog');
+final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == 'TimePickerDialog');
 
-class _TimePickerLauncher extends StatelessWidget {
+class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
     Key? key,
     required this.onChanged,
-    this.locale,
     this.entryMode = TimePickerEntryMode.dial,
+    this.restorationId,
   }) : super(key: key);
 
   final ValueChanged<TimeOfDay?> onChanged;
-  final Locale? locale;
   final TimePickerEntryMode entryMode;
+  final String? restorationId;
+
+  @override
+  _TimePickerLauncherState createState() => _TimePickerLauncherState();
+}
+
+class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  late final RestorableRouteFuture<TimeOfDay?> _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
+    onComplete: _selectTime,
+    onPresent: (NavigatorState navigator, Object? arguments) {
+      return navigator.restorablePush(
+        _timePickerRoute,
+        arguments: <String, int>{
+          'entryMode': widget.entryMode.index,
+        },
+      );
+    },
+  );
+
+  static Route<TimeOfDay> _timePickerRoute(
+    BuildContext context,
+    Object? arguments,
+  ) {
+    final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
+    final TimePickerEntryMode entryMode = TimePickerEntryMode.values[args['entryMode'] as int];
+    return DialogRoute<TimeOfDay>(
+      context: context,
+      builder: (BuildContext context) {
+        return TimePickerDialog(
+          restorationId: 'time_picker_dialog',
+          initialTime: const TimeOfDay(hour: 7, minute: 0),
+          initialEntryMode: entryMode,
+        );
+      },
+    );
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_restorableTimePickerRouteFuture, 'time_picker_route_future');
+  }
+
+  void _selectTime(TimeOfDay? newSelectedTime) {
+    widget.onChanged(newSelectedTime);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: locale,
-      home: Material(
-        child: Center(
-          child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    onChanged(await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 7, minute: 0),
-                      initialEntryMode: entryMode,
-                    ));
-                  },
-                );
-              }
-          ),
+    return Material(
+      child: Center(
+        child: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              child: const Text('X'),
+              onPressed: () async {
+                if (widget.restorationId == null) {
+                  widget.onChanged(await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    initialEntryMode: widget.entryMode,
+                  ));
+                } else {
+                  _restorableTimePickerRouteFuture.present();
+                }
+              },
+            );
+          },
         ),
       ),
     );
@@ -56,8 +104,17 @@ Future<Offset?> startPicker(
     WidgetTester tester,
     ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+      String? restorationId,
     }) async {
-  await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US'), entryMode: entryMode));
+  await tester.pumpWidget(MaterialApp(
+    restorationScopeId: 'app',
+    locale: const Locale('en', 'US'),
+    home: _TimePickerLauncher(
+      onChanged: onChanged,
+      entryMode: entryMode,
+      restorationId: restorationId,
+    ),
+  ));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return entryMode == TimePickerEntryMode.dial ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial'))) : null;
@@ -298,10 +355,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
   });
 
@@ -310,10 +371,14 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
     expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
   });
 
@@ -357,10 +422,16 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
-    expect(semantics.nodesWith(value: 'Select minutes 00'), hasLength(1),
-        reason: '00 appears once in the header');
-    expect(semantics.nodesWith(value: 'Select hours 07'), hasLength(1),
-        reason: '07 appears once in the header');
+    expect(
+      semantics.nodesWith(value: 'Select minutes 00'),
+      hasLength(1),
+      reason: '00 appears once in the header',
+    );
+    expect(
+      semantics.nodesWith(value: 'Select hours 07'),
+      hasLength(1),
+      reason: '07 appears once in the header',
+    );
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
 
@@ -428,7 +499,8 @@ void _tests() {
 
     // Ensure we preserve day period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
+    // ignore: avoid_dynamic_calls
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
       initialValue: '1',
@@ -493,7 +565,8 @@ void _tests() {
 
     // Ensure we preserve hour period as we roll over.
     final dynamic pickerState = tester.state(_timePickerDialog);
-    expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
+    // ignore: avoid_dynamic_calls
+    expect(pickerState.selectedTime.value, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(
       initialValue: '00',
@@ -658,26 +731,26 @@ void _tests() {
     const String confirmText = 'Custom OK';
     const String helperText = 'Custom Help';
     await tester.pumpWidget(MaterialApp(
-        home: Material(
-          child: Center(
-            child: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () async {
-                      await showTimePicker(
-                        context: context,
-                        initialTime: const TimeOfDay(hour: 7, minute: 0),
-                        cancelText: cancelText,
-                        confirmText: confirmText,
-                        helpText: helperText,
-                      );
-                    },
+      home: Material(
+        child: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    cancelText: cancelText,
+                    confirmText: confirmText,
+                    helpText: helperText,
                   );
-                }
-            ),
+                },
+              );
+            },
           ),
-        )
+        ),
+      ),
     ));
 
     // Open the picker.
@@ -796,6 +869,31 @@ void _testsInput() {
     const String helpText = 'help';
     await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, helpText: helpText);
     expect(find.text(helpText), findsOneWidget);
+  });
+
+  testWidgets('Hour label text is used - Input', (WidgetTester tester) async {
+    const String hourLabelText = 'Custom hour label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, hourLabelText: hourLabelText);
+    expect(find.text(hourLabelText), findsOneWidget);
+  });
+
+
+  testWidgets('Minute label text is used - Input', (WidgetTester tester) async {
+    const String minuteLabelText = 'Custom minute label';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, minuteLabelText: minuteLabelText);
+    expect(find.text(minuteLabelText), findsOneWidget);
+  });
+
+  testWidgets('Invalid error text is used - Input', (WidgetTester tester) async {
+    const String errorInvalidText = 'Custom validation error';
+    await mediaQueryBoilerplate(tester, true, entryMode: TimePickerEntryMode.input, errorInvalidText: errorInvalidText);
+    // Input invalid time (hour) to force validation error
+    await tester.enterText(find.byType(TextField).first, '88');
+    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TextButton).first));
+    // Tap the ok button to trigger the validation error with custom translation
+    await tester.tap(find.text(materialLocalizations.okButtonLabel));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text(errorInvalidText), findsOneWidget);
   });
 
   testWidgets('Can toggle to dial entry mode', (WidgetTester tester) async {
@@ -939,6 +1037,102 @@ void _testsInput() {
     expect(hourFieldTop, separatorTop);
     expect(minuteFieldTop, separatorTop);
   });
+
+  testWidgets('Time Picker state restoration test - dial mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    final Offset center = (await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    ))!;
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    await tester.restartAndRestore();
+    // Setting to PM adds 12 hours (18:45)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 18, minute: 45)));
+
+    // Test restoring from before PM was selected (6:45)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
+
+  testWidgets('Time Picker state restoration test - input mode', (WidgetTester tester) async {
+    TimeOfDay? result;
+    await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      entryMode: TimePickerEntryMode.input,
+      restorationId: 'restorable_time_picker',
+    );
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    await tester.restartAndRestore();
+
+    // Setting to PM adds 12 hours (21:12)
+    await tester.tap(find.text('PM'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 21, minute: 12)));
+
+    // Restoring from before PM was set (9:12)
+    await tester.restoreFrom(restorationData);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+  });
+
+  testWidgets('Time Picker state restoration test - switching modes', (WidgetTester tester) async {
+    TimeOfDay? result;
+    final Offset center = (await startPicker(
+      tester,
+      (TimeOfDay? time) { result = time; },
+      restorationId: 'restorable_time_picker',
+    ))!;
+
+    final TestRestorationData restorationData = await tester.getRestorationData();
+    // Switch to input mode from dial mode.
+    await tester.tap(find.byIcon(Icons.keyboard));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+
+    // Select time using input mode controls.
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
+
+    // Restoring from dial mode.
+    await tester.restoreFrom(restorationData);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.restartAndRestore();
+    await tester.tapAt(min45);
+    await tester.pump(const Duration(milliseconds: 50));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -965,6 +1159,9 @@ Future<void> mediaQueryBoilerplate(
   double textScaleFactor = 1.0,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
+  String? hourLabelText,
+  String? minuteLabelText,
+  String? errorInvalidText,
   bool accessibleNavigation = false,
 }) async {
   await tester.pumpWidget(
@@ -993,6 +1190,9 @@ Future<void> mediaQueryBoilerplate(
                         initialTime: initialTime,
                         initialEntryMode: entryMode,
                         helpText: helpText,
+                        hourLabelText: hourLabelText,
+                        minuteLabelText: minuteLabelText,
+                        errorInvalidText: errorInvalidText
                       );
                     },
                     child: const Text('X'),

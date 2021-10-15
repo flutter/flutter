@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -24,7 +23,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// these signal events were to handle them directly, it would cause issues
 /// such as multiple [Scrollable] widgets in the widget hierarchy responding
 /// to the same mouse wheel event. Using this class, these events will only
-/// be dispatched to the the first registered handler, which will in turn
+/// be dispatched to the first registered handler, which will in turn
 /// correspond to the widget that's deepest in the widget hierarchy.
 ///
 /// To use this class, objects should register their event handler like so:
@@ -61,15 +60,15 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///     Key? key,
 ///     required this.initialColor,
 ///     required this.useResolver,
-///     required this.child,
+///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final HSVColor initialColor;
 ///   final bool useResolver;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   @override
-///   _ColorChangerState createState() => _ColorChangerState();
+///   State<ColorChanger> createState() => _ColorChangerState();
 /// }
 ///
 /// class _ColorChangerState extends State<ColorChanger> {
@@ -77,7 +76,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 ///   void rotateColor() {
 ///     setState(() {
-///       color = color.withHue((color.hue + 6) % 360.0);
+///       color = color.withHue((color.hue + 3) % 360.0);
 ///     });
 ///   }
 ///
@@ -104,7 +103,13 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///             rotateColor();
 ///           }
 ///         },
-///         child: widget.child,
+///         child: Stack(
+///           fit: StackFit.expand,
+///           children: <Widget>[
+///             const AbsorbPointer(),
+///             if (widget.child != null) widget.child!,
+///           ],
+///         ),
 ///       ),
 ///     );
 ///   }
@@ -129,7 +134,6 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///             child: ColorChanger(
 ///               initialColor: const HSVColor.fromAHSV(1, 60.0, 1, 1),
 ///               useResolver: useResolver,
-///               child: const AbsorbPointer(),
 ///             ),
 ///           ),
 ///         ),
@@ -184,6 +188,7 @@ class PointerSignalResolver {
   ///
   /// This is called by the [GestureBinding] after the framework has finished
   /// dispatching the pointer signal event.
+  @pragma('vm:notify-debugger-on-exception')
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);
@@ -205,7 +210,7 @@ class PointerSignalResolver {
         stack: stack,
         library: 'gesture library',
         context: ErrorDescription('while resolving a PointerSignalEvent'),
-        informationCollector: collector
+        informationCollector: collector,
       ));
     }
     _firstRegisteredCallback = null;

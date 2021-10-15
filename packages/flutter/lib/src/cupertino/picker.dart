@@ -198,7 +198,7 @@ class CupertinoPicker extends StatefulWidget {
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
   /// which is a gray rounded rectangle overlay in iOS 14 style.
   /// This property can be set to null to remove the overlay.
-  final Widget selectionOverlay;
+  final Widget? selectionOverlay;
 
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
@@ -301,7 +301,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildSelectionOverlay(widget.selectionOverlay),
+          if (widget.selectionOverlay != null)
+            _buildSelectionOverlay(widget.selectionOverlay!),
         ],
       ),
     );
@@ -432,7 +433,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   late FixedExtentScrollController _controller;
   set controller(FixedExtentScrollController value) => _updateController(_controller, value);
 
-  // This method exists to allow controller to be non-null. It is only called with a null oldValue from construtor.
+  // This method exists to allow controller to be non-null. It is only called with a null oldValue from constructor.
   void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
     if (value == oldValue)
       return;
