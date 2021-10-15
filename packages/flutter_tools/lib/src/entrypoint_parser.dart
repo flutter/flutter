@@ -6,6 +6,7 @@ import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
 /// Parses the Dart entrypoints defined in the given content file.
@@ -37,12 +38,18 @@ class _EntrypointVisitor<T> extends RecursiveAstVisitor<T> {
     if (node.parent.parent == node.root &&
         node.name.name == 'pragma' &&
         node.arguments != null &&
-        node.arguments!.arguments.first.toString().substring(1, 15) == 'vm:entry-point' &&
-        node.endToken.next != null &&
-        node.endToken.next?.next != null &&
-        node.endToken.next!.next!.isIdentifier) {
-      final String entrypointName = node.endToken.next!.next!.toString();
-      entrypoints[entrypointName] = node.arguments!.toString();
+        node.arguments!.arguments.first.toString().substring(1, 15) == 'vm:entry-point') {
+
+      Token? currToken =  node.endToken.next;
+      while (currToken != null) {
+        final String maybeReturnExpression = currToken.toString();
+        if (maybeReturnExpression != '@' && currToken.next != null && currToken.next!.isIdentifier) {
+          final String entrypointName = currToken.next!.toString();
+          entrypoints[entrypointName] = node.arguments!.toString();
+          break;
+        }
+        currToken = currToken.next;
+      }
     }
     return super.visitAnnotation(node);
   }
