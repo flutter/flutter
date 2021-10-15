@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget _boilerplate(VoidCallback? onButtonPressed, {
+    DraggableScrollableController? controller,
     int itemCount = 100,
     double initialChildSize = .5,
     double maxChildSize = 1.0,
@@ -33,6 +34,7 @@ void main() {
             ),
             DraggableScrollableActuator(
               child: DraggableScrollableSheet(
+                controller: controller,
                 maxChildSize: maxChildSize,
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
@@ -695,5 +697,129 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
 
     expect(tester.takeException(), isNull);
+  });
+
+  for (final bool shouldAnimate in [true, false]) {
+    testWidgets('Can ${shouldAnimate ? 'animate' : 'jump'} to arbitrary positions', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(_boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+      // Use a local helper to animate so we can share code across a jumpTo test
+      // and an animateTo test.
+      void goTo(double size) => shouldAnimate ? controller.animateTo(size) : controller.jumpTo(size);
+      // If we're animating, pump will call three times:
+      //   (animation speed (200 ms) / pump duration (100 ms)) + 1 = 3.
+      final int expectedPumpCount = shouldAnimate ? 3 : 2;
+
+      goTo(.6);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.6, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+
+      goTo(.4);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.4, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 20'), findsNothing);
+      expect(find.text('Item 70'), findsNothing);
+
+      await tester.fling(find.text('Item 1'), Offset(0, -screenHeight), 100);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+
+      // Programmatic control does not affect the inner scrollable's position.
+      goTo(.8);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.8, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+    });
+  }
+
+  testWidgets('Can reset without snapping', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+    // Use a local helper to animate so we can share code across a jumpTo test
+    // and an animateTo test.
+    void goTo(double size) => shouldAnimate ? controller.animateTo(size) : controller.jumpTo(size);
+    // If we're animating, pump will call three times:
+    //   (animation speed (200 ms) / pump duration (100 ms)) + 1 = 3.
+    final int expectedPumpCount = shouldAnimate ? 3 : 2;
+
+    goTo(.6);
+    expect(await tester.pumpAndSettle(), expectedPumpCount);
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 20'), findsOneWidget);
+    expect(find.text('Item 70'), findsNothing);
+
+    goTo(.4);
+    expect(await tester.pumpAndSettle(), expectedPumpCount);
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.4, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 20'), findsNothing);
+    expect(find.text('Item 70'), findsNothing);
+
+    await tester.fling(find.text('Item 1'), Offset(0, -screenHeight), 100);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(1, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 20'), findsOneWidget);
+    expect(find.text('Item 70'), findsNothing);
+
+    // Programmatic control does not affect the inner scrollable's position.
+    goTo(.8);
+    expect(await tester.pumpAndSettle(), expectedPumpCount);
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.8, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 20'), findsOneWidget);
+    expect(find.text('Item 70'), findsNothing);
   });
 }
