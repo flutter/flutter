@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -35,10 +37,10 @@ BundleBuilder _defaultBundleBuilder() {
 /// device is not currently discoverable.
 class PreviewDevice extends Device {
   PreviewDevice({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _platform = platform,
        _processManager = processManager,
@@ -60,18 +62,18 @@ class PreviewDevice extends Device {
   Future<void> dispose() async { }
 
   @override
-  Future<String?> get emulatorId async => null;
+  Future<String> get emulatorId async => null;
 
   final DesktopLogReader _logReader = DesktopLogReader();
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({covariant ApplicationPackage? app, bool includePastLogs = false}) => _logReader;
+  FutureOr<DeviceLogReader> getLogReader({covariant ApplicationPackage app, bool includePastLogs = false}) => _logReader;
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage? app, {String? userIdentifier}) async => true;
+  Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String? userIdentifier}) async => false;
+  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async => false;
@@ -94,23 +96,24 @@ class PreviewDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'preview';
 
-  Process? _process;
+  Process _process;
+  Directory _assetDirectory;
 
   @override
   Future<LaunchResult> startApp(covariant ApplicationPackage package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    String mainPath,
+    String route,
+    @required DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String? userIdentifier,
+    String userIdentifier,
   }) async {
-    final Directory assetDirectory = _fileSystem.systemTempDirectory
+    _assetDirectory = _fileSystem.systemTempDirectory
       .createTempSync('flutter_preview.');
 
     // Build assets and perform initial compilation.
-    Status? status;
+    Status status;
     try {
       status = _logger.startProgress('Compiling application for preview...');
       await _bundleBuilderFactory().build(
@@ -121,32 +124,32 @@ class PreviewDevice extends Device {
       );
       copyDirectory(_fileSystem.directory(
         getAssetBuildDirectory()),
-        assetDirectory.childDirectory('data').childDirectory('flutter_assets'),
+        _assetDirectory.childDirectory('data').childDirectory('flutter_assets'),
       );
     } finally {
-      status?.stop();
+      status.stop();
     }
 
     // Merge with precompiled executable.
-    final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
-    copyDirectory(precompiledDirectory, assetDirectory);
+    final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot, 'artifacts_temp', 'Debug'));
+    copyDirectory(precompiledDirectory, _assetDirectory);
 
     final Process process = await _processManager.start(
       <String>[
-        assetDirectory.childFile('splash').path,
+        _assetDirectory.childFile('splash').path,
       ],
     );
     _process = process;
     _logReader.initializeProcess(process);
 
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader,
-      devicePort: debuggingOptions.deviceVmServicePort,
-      hostPort: debuggingOptions.hostVmServicePort,
+      devicePort: debuggingOptions?.deviceVmServicePort,
+      hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
+      final Uri observatoryUri = await observatoryDiscovery.uri;
       if (observatoryUri != null) {
         return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
@@ -163,8 +166,8 @@ class PreviewDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
-    return _process?.kill() == true;
+  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+    return _process?.kill();
   }
 
   @override
@@ -176,7 +179,7 @@ class PreviewDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
     return true;
   }
 
