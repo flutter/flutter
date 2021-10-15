@@ -17,9 +17,9 @@ void main() => run(interactive: true);
 void dream() => run(interactive: false);
 ''';
 
-    final Iterable<String> entrypoints = getDartEntrypoints(mainDartContent);
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isFalse);
-    expect(entrypoints, containsAll(<String>['main', 'dream']));
+    expect(entrypoints, equals(<String, String>{'main': "('vm:entry-point')", 'dream': "('vm:entry-point')"}));
   });
 
   testWithoutContext('Parses top level standard functions annotated with vm:entry-point', () {
@@ -35,9 +35,33 @@ void dream() {
 }
 ''';
 
-    final Iterable<String> entrypoints = getDartEntrypoints(mainDartContent);
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isFalse);
-    expect(entrypoints, containsAll(<String>['main', 'dream']));
+    expect(entrypoints, equals(<String, String>{'main': "('vm:entry-point')", 'dream': "('vm:entry-point')"}));
+  });
+
+  testWithoutContext('Parses top level functions annotated with vm:entry-point arguments', () {
+    const String mainDartContent = '''
+@pragma('vm:entry-point', !kReleaseMode)
+void main() {
+  run(interactive: true);
+}
+
+@pragma('vm:entry-point')
+void dream() {
+  run(interactive: false);
+}
+''';
+
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
+    expect(entrypoints.isEmpty, isFalse);
+    expect(entrypoints, equals(
+        <String, String>{
+          'main': "('vm:entry-point', !kReleaseMode)",
+          'dream': "('vm:entry-point')",
+        },
+      ),
+    );
   });
 
   testWithoutContext('Does not parse nested functions annotated with vm:entry-point', () {
@@ -47,7 +71,7 @@ class Foo {
   void main() => run(interactive: true);
 }
 ''';
-    final Iterable<String> entrypoints = getDartEntrypoints(mainDartContent);
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isTrue);
   });
 
@@ -57,9 +81,9 @@ class Foo {
 void main() => run(interactive: true);
 ''';
 
-    final Iterable<String> entrypoints = getDartEntrypoints(mainDartContent);
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isFalse);
-    expect(entrypoints, containsAll(<String>['main']));
+    expect(entrypoints, equals(<String, String>{'main': "('vm:entry-point')"}));
   });
 
   testWithoutContext('Ignores comments', () {
@@ -70,7 +94,7 @@ void main() => run(interactive: true);
 void dream() => run(interactive: false);
 ''';
 
-    final Iterable<String> entrypoints = getDartEntrypoints(mainDartContent);
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isTrue);
   });
 

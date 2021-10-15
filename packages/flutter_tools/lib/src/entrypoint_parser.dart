@@ -9,8 +9,13 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
 /// Parses the Dart entrypoints defined in the given content file.
-/// An entrypoint is either a top level main function or a function with a @pragma('vm:entry-point') annotation.
-Iterable<String> getDartEntrypoints(String content) {
+///
+/// An entrypoint is either a top level main function or a function with a
+/// @pragma('vm:entry-point') annotation.
+///
+/// Returns a map where the key is the entrypoint name and the value is the pragma
+/// annotation value.
+Map<String, String> getDartEntrypoints(String content) {
   final ParseStringResult parseResult = parseString(
     featureSet: FeatureSet.latestLanguageVersion(),
     content: content,
@@ -21,20 +26,23 @@ Iterable<String> getDartEntrypoints(String content) {
 }
 
 class _EntrypointVisitor<T> extends RecursiveAstVisitor<T> {
-  _EntrypointVisitor(this.parseResult) : entrypoints = <String>{};
+  _EntrypointVisitor(this.parseResult) : entrypoints = <String, String>{};
 
   final ParseStringResult parseResult;
-  final Set<String> entrypoints;
+  /// Maps entrypoint names to the pragma annotation.
+  final Map<String, String> entrypoints;
 
   @override
   T? visitAnnotation(Annotation node) {
     if (node.parent.parent == node.root &&
         node.name.name == 'pragma' &&
-        node.arguments?.toString() == "('vm:entry-point')" &&
+        node.arguments != null &&
+        node.arguments!.arguments.first.toString() == "'vm:entry-point'" &&
         node.endToken.next != null &&
         node.endToken.next?.next != null &&
         node.endToken.next!.next!.isIdentifier) {
-      entrypoints.add(node.endToken.next!.next!.toString());
+      final String entrypointName = node.endToken.next!.next!.toString();
+      entrypoints[entrypointName] = node.arguments!.toString();
     }
     return super.visitAnnotation(node);
   }
@@ -42,8 +50,8 @@ class _EntrypointVisitor<T> extends RecursiveAstVisitor<T> {
   @override
   T? visitFunctionDeclaration(FunctionDeclaration node) {
     // The main function doesn't need a vm:entry-point annotation.
-    if (node.parent == node.root && node.name.name == 'main') {
-      entrypoints.add('main');
+    if (node.parent == node.root && node.name.name == 'main' && !entrypoints.containsKey('main')) {
+      entrypoints['main'] = "('vm:entry-point')";
     }
     return super.visitFunctionDeclaration(node);
   }

@@ -769,6 +769,9 @@ void main() {
 
 @pragma('vm:entry-point')
 void dream() => run(interactive: false);
+
+@pragma('vm:entry-point', foobar)
+void dreamWithFlags() => run(interactive: false);
 ''');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
@@ -892,7 +895,16 @@ void dream() => run(interactive: false);
           '  } else {\n'
           '    (entrypoint.dream as _NullaryFunction)();\n'
           '  }\n'
-          '}\n',
+          '}\n'
+          "@pragma('vm:entry-point', foobar)\n"
+          'void dreamWithFlags(List<String> args) {\n'
+          '  if (entrypoint.dreamWithFlags is _UnaryFunction) {\n'
+          '    (entrypoint.dreamWithFlags as _UnaryFunction)(args);\n'
+          '  } else {\n'
+          '    (entrypoint.dreamWithFlags as _NullaryFunction)();\n'
+          '  }\n'
+          '}\n'
+          ,
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

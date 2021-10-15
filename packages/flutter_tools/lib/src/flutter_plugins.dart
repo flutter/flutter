@@ -738,7 +738,7 @@ typedef _UnaryFunction = dynamic Function(List<String> args);
 typedef _NullaryFunction = dynamic Function();
 
 {{#dartEntrypoints}}
-@pragma('vm:entry-point')
+@pragma{{pragma}}
 void {{name}}(List<String> args) {
   if (entrypoint.{{name}} is _UnaryFunction) {
     (entrypoint.{{name}} as _UnaryFunction)(args);
@@ -1298,10 +1298,17 @@ Future<void> generateMainDartWithPluginRegistrant(
     rethrow;
   }
 
-  final Iterable<String> dartEntrypoints = getDartEntrypoints(dartMainContent);
+  final Map<String, String> dartEntrypoints = getDartEntrypoints(dartMainContent);
   final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
-    'dartEntrypoints': dartEntrypoints.map((String name) => <String, String>{'name': name}),
+    'dartEntrypoints': dartEntrypoints
+      .entries
+      .map(
+        (MapEntry<String, String> entry) => <String, String> {
+          'name': entry.key,
+          'pragma': entry.value,
+        },
+      ),
     'dartLanguageVersion': entrypointVersion.toString(),
     AndroidPlugin.kConfigKey: <Object?>[],
     IOSPlugin.kConfigKey: <Object?>[],

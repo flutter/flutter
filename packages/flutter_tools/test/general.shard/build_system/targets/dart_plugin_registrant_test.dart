@@ -183,6 +183,11 @@ void main() {
 
       projectDir.childFile('.packages').createSync();
 
+      projectDir.childDirectory('lib')
+          .childFile('main.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(){}');
+
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
@@ -217,7 +222,10 @@ void main() {
 
       projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
-      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      projectDir.childDirectory('lib')
+          .childFile('main.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(){}');
 
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
@@ -275,6 +283,7 @@ void main() {
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
+          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'
@@ -356,7 +365,11 @@ void main() {
 
       projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
-      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      fileSystem
+          .directory('root')
+          .childFile('external.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(){}');
 
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
@@ -414,6 +427,7 @@ void main() {
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
+          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'
