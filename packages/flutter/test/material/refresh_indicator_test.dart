@@ -902,4 +902,186 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
+
+  testWidgets('RefreshIndicator shows on inital state if isRefreshing', (WidgetTester tester) async {
+    refreshCalled = false;
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          isRefreshing: true,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+
+    expect(refreshCalled, false);
+    handle.dispose();
+  });
+
+  testWidgets('RefreshIndicator shows and hides on isRefreshing', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool _isRefreshing = false;
+    late StateSetter setState;
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return RefreshIndicator(
+                onRefresh: refresh,
+                isRefreshing: _isRefreshing,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(
+                      height: 200.0,
+                      child: Text(item),
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    setState(() {
+      _isRefreshing = true;
+    });
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+
+    setState(() {
+      _isRefreshing = false;
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshIndicator hides on isRefreshing - fast switching', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool _isRefreshing = false;
+    late StateSetter setState;
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return RefreshIndicator(
+                onRefresh: refresh,
+                isRefreshing: _isRefreshing,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(
+                      height: 200.0,
+                      child: Text(item),
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    setState(() {
+      _isRefreshing = true;
+    });
+    await tester.pump();
+    setState(() {
+      _isRefreshing = false;
+    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshIndicator shows on isRefreshing - fast switching', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool _isRefreshing = true;
+    late StateSetter setState;
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return RefreshIndicator(
+                onRefresh: refresh,
+                isRefreshing: _isRefreshing,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(
+                      height: 200.0,
+                      child: Text(item),
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+
+    setState(() {
+      _isRefreshing = false;
+    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    setState(() {
+      _isRefreshing = true;
+    });
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+      label: 'Refresh',
+    ));
+
+    handle.dispose();
+  });
 }
