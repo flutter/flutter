@@ -1393,7 +1393,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (_pageController.page == _currentIndex!.toDouble())
       return Future<void>.value();
 
-    if(!_controller!.animate) {
+    if (!_controller!.animate) {
       _pageController.jumpToPage(_currentIndex!);
       return Future<void>.value();
     }
