@@ -1877,31 +1877,34 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Column(
-            children: <Widget>[
-              // Translucent boxes above and below the shrinkwrapped viewport
-              // make it easily discernible if the viewport is not being
-              // clipped properly.
-              Opacity(
-                opacity: 0.5,
-                child: Container(height: 100, color: const Color(0xFF00B0FF)),
-              ),
-              Container(
-                height: constrain ? 150 : null,
-                color: const Color(0xFFF44336),
-                child: ListView.builder(
-                  controller: controller,
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-                  itemCount: 10,
+          child: Container(
+            color: const Color(0xFF000000),
+            child: Column(
+              children: <Widget>[
+                // Translucent boxes above and below the shrinkwrapped viewport
+                // make it easily discernible if the viewport is not being
+                // clipped properly.
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
                 ),
-              ),
-              Opacity(
-                opacity: 0.5,
-                child: Container(height: 100, color: const Color(0xFF00B0FF)),
-              ),
-            ],
+                Container(
+                  height: constrain ? 150 : null,
+                  color: const Color(0xFFF44336),
+                  child: ListView.builder(
+                    controller: controller,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    itemCount: 10,
+                  ),
+                ),
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
+                ),
+              ],
+            ),
           ),
         ),
       );
