@@ -263,7 +263,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _scaleController = AnimationController(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
 
-    if(widget.isRefreshing)
+    if (widget.isRefreshing)
       show();
   }
 
@@ -296,26 +296,25 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       );
     }
 
-    if(oldWidget.isRefreshing != widget.isRefreshing){
+    if (oldWidget.isRefreshing != widget.isRefreshing)
       _reactToIsRefreshing();
-    }
   }
 
   Future<void> _reactToIsRefreshing() async {
-    if(!mounted)
+    if (!mounted)
       return;
-    if(widget.isRefreshing){
-      if(_mode == _RefreshIndicatorMode.refresh)
+    if (widget.isRefreshing) {
+      if (_mode == _RefreshIndicatorMode.refresh)
         return;
-      if(_mode != null) {
+      if (_mode != null) {
         await _dismiss(_RefreshIndicatorMode.canceled);
-        if(!widget.isRefreshing)
+        if (!widget.isRefreshing)
           return;
       }
-      if(_mode == null)
+      if (_mode == null)
         show();
     }
-    if(_mode == _RefreshIndicatorMode.refresh && !widget.isRefreshing)
+    if (_mode == _RefreshIndicatorMode.refresh && !widget.isRefreshing)
       _dismiss(_RefreshIndicatorMode.done);
   }
 
@@ -501,7 +500,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           final Future<void>? refreshResult;
           if (!widget.isRefreshing) {
             refreshResult = widget.onRefresh();
-          } else{
+          } else {
             refreshResult = null;
           }
           assert(() {
