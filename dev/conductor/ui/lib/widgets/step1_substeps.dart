@@ -123,6 +123,7 @@ class Step1SubstepsState extends State<Step1Substeps> {
         ),
         if (!substepChecked.contains(false) && !_nextStepPressed)
           ElevatedButton(
+            key: const Key('step1continue'),
             onPressed: () {
               onContinuePress();
               widget.nextStep();
@@ -178,7 +179,7 @@ class CheckboxListTileInputState extends State<CheckboxListTileInput> {
       ),
       controlAffinity: ListTileControlAffinity.leading,
       activeColor: Colors.grey,
-      // selected: widget.substepChecked[widget.index],
+      selected: widget.substepChecked[widget.index],
     );
   }
 }
