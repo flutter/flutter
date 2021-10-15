@@ -177,6 +177,9 @@ targets:
 
   - name: Linux Framework Smoke Tests
     recipe: engine/framework_smoke
+    enabled_branches:
+      - main
+      - master
     timeout: 60
     scheduler: luci
 
@@ -224,6 +227,9 @@ targets:
 
   - name: Linux Web Framework tests
     recipe: engine/web_engine_framework
+    enabled_branches:
+      - main
+      - master
     properties:
       add_recipes_cq: "true"
       framework: "true"
