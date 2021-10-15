@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../configuration.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
 import '../window.dart';
@@ -295,7 +296,7 @@ class Surface {
     _forceNewContext = false;
     _contextLost = false;
 
-    if (webGLVersion != -1 && !canvasKitForceCpuOnly) {
+    if (webGLVersion != -1 && !configuration.canvasKitForceCpuOnly) {
       final int glContext = canvasKit.GetWebGLContext(
         htmlCanvas,
         SkWebGLContextOptions(
@@ -328,7 +329,7 @@ class Surface {
     if (webGLVersion == -1) {
       return _makeSoftwareCanvasSurface(
           htmlCanvas!, 'WebGL support not detected');
-    } else if (canvasKitForceCpuOnly) {
+    } else if (configuration.canvasKitForceCpuOnly) {
       return _makeSoftwareCanvasSurface(
           htmlCanvas!, 'CPU rendering forced by application');
     } else if (_glContext == 0) {
