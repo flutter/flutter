@@ -37,7 +37,7 @@ class _EntrypointVisitor<T> extends RecursiveAstVisitor<T> {
     if (node.parent.parent == node.root &&
         node.name.name == 'pragma' &&
         node.arguments != null &&
-        node.arguments!.arguments.first.toString() == "'vm:entry-point'" &&
+        node.arguments!.arguments.first.toString().substring(1, 15) == 'vm:entry-point' &&
         node.endToken.next != null &&
         node.endToken.next?.next != null &&
         node.endToken.next!.next!.isIdentifier) {

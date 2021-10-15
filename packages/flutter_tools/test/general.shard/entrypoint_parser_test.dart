@@ -8,7 +8,7 @@ import '../src/common.dart';
 
 void main() {
 
-  testWithoutContext('Parses top level arrow functions annotated with vm:entry-point', () {
+  testWithoutContext('Parses top level arrow functions annotated with vm:entry-point (single quotes)', () {
     const String mainDartContent = '''
 @pragma('vm:entry-point')
 void main() => run(interactive: true);
@@ -19,7 +19,35 @@ void dream() => run(interactive: false);
 
     final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isFalse);
-    expect(entrypoints, equals(<String, String>{'main': "('vm:entry-point')", 'dream': "('vm:entry-point')"}));
+    expect(entrypoints,
+      equals(
+        <String, String>{
+          'main': "('vm:entry-point')",
+          'dream': "('vm:entry-point')",
+        },
+      ),
+    );
+  });
+
+  testWithoutContext('Parses top level arrow functions annotated with vm:entry-point (double quotes)', () {
+    const String mainDartContent = '''
+@pragma("vm:entry-point")
+void main() => run(interactive: true);
+
+@pragma("vm:entry-point")
+void dream() => run(interactive: false);
+''';
+
+    final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
+    expect(entrypoints.isEmpty, isFalse);
+    expect(entrypoints,
+      equals(
+        <String, String>{
+          'main': '("vm:entry-point")',
+          'dream': '("vm:entry-point")',
+        },
+      ),
+    );
   });
 
   testWithoutContext('Parses top level standard functions annotated with vm:entry-point', () {
@@ -37,7 +65,14 @@ void dream() {
 
     final Map<String, String> entrypoints = getDartEntrypoints(mainDartContent);
     expect(entrypoints.isEmpty, isFalse);
-    expect(entrypoints, equals(<String, String>{'main': "('vm:entry-point')", 'dream': "('vm:entry-point')"}));
+    expect(entrypoints,
+      equals(
+        <String, String>{
+          'main': "('vm:entry-point')",
+          'dream': "('vm:entry-point')",
+        },
+      ),
+    );
   });
 
   testWithoutContext('Parses top level functions annotated with vm:entry-point arguments', () {
