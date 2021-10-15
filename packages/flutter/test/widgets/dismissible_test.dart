@@ -1065,7 +1065,6 @@ void main() {
   testWidgets('onUpdate', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest(
       scrollDirection: Axis.horizontal,
-      dismissDirection: DismissDirection.horizontal,
     ));
     expect(dismissedItems, isEmpty);
 
@@ -1078,7 +1077,7 @@ void main() {
     expect(reportedDismissUpdatePreviousReached, true);
 
     // Unsuccessful dismiss, threshold has not been reached
-    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right, mechanism: rollbackElement);
+    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right);
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, equals(<int>[0]));
     expect(reportedDismissUpdateReachedDirection, DismissDirection.startToEnd);
@@ -1095,7 +1094,6 @@ void main() {
 
     await tester.pumpWidget(buildTest(
       scrollDirection: Axis.horizontal,
-      dismissDirection: DismissDirection.horizontal,
       confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
         return Future<bool>.value(false);
       },
