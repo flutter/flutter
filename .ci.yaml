@@ -10,7 +10,7 @@ enabled_branches:
   - dev
   - beta
   - stable
-  - flutter-2.5-candidate.5
+  - flutter-2.7-candidate.5
 
 platform_properties:
   linux:
