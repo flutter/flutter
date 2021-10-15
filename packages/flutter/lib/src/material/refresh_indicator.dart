@@ -123,6 +123,7 @@ class RefreshIndicator extends StatefulWidget {
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
     required this.onRefresh,
+    this.isRefreshing = false,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -174,6 +175,16 @@ class RefreshIndicator extends StatefulWidget {
   /// far enough to demonstrate that they want the app to refresh. The returned
   /// [Future] must complete when the refresh operation is finished.
   final RefreshCallback onRefresh;
+
+  /// This bool can be changed to show or hide the refresh indicator reactively.
+  /// Defaults to false and if set to true before [State.initState] will show
+  /// the refresh indicator as soon as it is built.
+  ///
+  /// Note that reactively showing the refresh indicator will not call [onRefresh]
+  /// or automatically hide the indicator after the returned [Future] completes.
+  /// If isRefreshing has been set to `true`, it must be set to `false` through
+  /// your own logic to hide the indicator and allow refreshing by dragging again.
+  final bool isRefreshing;
 
   /// The progress indicator's foreground color. The current theme's
   /// [ColorScheme.primary] by default.
@@ -251,6 +262,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
     _scaleController = AnimationController(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
+
+    if(widget.isRefreshing)
+      show();
   }
 
   @override
@@ -281,6 +295,25 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         )),
       );
     }
+
+    if(oldWidget.isRefreshing != widget.isRefreshing){
+      _reactToIsRefreshing();
+    }
+  }
+
+  Future<void> _reactToIsRefreshing() async {
+    if(!mounted)
+      return;
+    if(widget.isRefreshing){
+      if(_mode == _RefreshIndicatorMode.refresh)
+        return;
+      if(_mode != null)
+        await _dismiss(_RefreshIndicatorMode.canceled);
+      if(_mode == null)
+        show();
+    }
+    if(_mode == _RefreshIndicatorMode.refresh && !widget.isRefreshing)
+      _dismiss(_RefreshIndicatorMode.done);
   }
 
   @override
@@ -462,10 +495,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             // Show the indeterminate progress indicator.
             _mode = _RefreshIndicatorMode.refresh;
           });
-
-          final Future<void> refreshResult = widget.onRefresh();
+          final Future<void>? refreshResult;
+          if (!widget.isRefreshing) {
+            refreshResult = widget.onRefresh();
+          } else{
+            refreshResult = null;
+          }
           assert(() {
-            if (refreshResult == null)
+            if (!widget.isRefreshing && refreshResult == null)
               FlutterError.reportError(FlutterErrorDetails(
                 exception: FlutterError(
                   'The onRefresh callback returned null.\n'
@@ -479,7 +516,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           if (refreshResult == null)
             return;
           refreshResult.whenComplete(() {
-            if (mounted && _mode == _RefreshIndicatorMode.refresh) {
+            if (mounted && _mode == _RefreshIndicatorMode.refresh && !widget.isRefreshing) {
               completer.complete();
               _dismiss(_RefreshIndicatorMode.done);
             }
