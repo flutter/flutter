@@ -213,7 +213,7 @@ void testMain() {
 
       // Initialize all platform views to be used in the test.
       final List<int> platformViewIds = <int>[];
-      for (int i = 0; i < HtmlViewEmbedder.maximumSurfaces * 2; i++) {
+      for (int i = 0; i < configuration.canvasKitMaximumSurfaces * 2; i++) {
         ui.platformViewRegistry.registerViewFactory(
           'test-platform-view',
           (int viewId) => html.DivElement()..id = 'view-$i',
@@ -242,8 +242,8 @@ void testMain() {
       // Frame 1:
       //   Render: up to cache size platform views.
       //   Expect: main canvas plus platform view overlays.
-      renderTestScene(viewCount: HtmlViewEmbedder.maximumSurfaces);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces);
+      renderTestScene(viewCount: configuration.canvasKitMaximumSurfaces);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces);
 
       // Frame 2:
       //   Render: zero platform views.
@@ -256,15 +256,15 @@ void testMain() {
       //   Render: less than cache size platform views.
       //   Expect: overlays reused.
       await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: HtmlViewEmbedder.maximumSurfaces - 2);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces - 1);
+      renderTestScene(viewCount: configuration.canvasKitMaximumSurfaces - 2);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces - 1);
 
       // Frame 4:
       //   Render: more platform views than max cache size.
       //   Expect: main canvas, backup overlay, maximum overlays.
       await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: HtmlViewEmbedder.maximumSurfaces * 2);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces);
+      renderTestScene(viewCount: configuration.canvasKitMaximumSurfaces * 2);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces);
 
       // Frame 5:
       //   Render: zero platform views.
@@ -346,21 +346,21 @@ void testMain() {
       //   Render: Views 1-10
       //   Expect: main canvas plus platform view overlays; empty cache.
       renderTestScene(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces);
 
       // Frame 2:
       //   Render: Views 2-11
       //   Expect: main canvas plus platform view overlays; empty cache.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(<int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces);
 
       // Frame 3:
       //   Render: Views 3-12
       //   Expect: main canvas plus platform view overlays; empty cache.
       await Future<void>.delayed(Duration.zero);
       renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      expect(countCanvases(), HtmlViewEmbedder.maximumSurfaces);
+      expect(countCanvases(), configuration.canvasKitMaximumSurfaces);
 
       // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
     }, skip: isSafari);

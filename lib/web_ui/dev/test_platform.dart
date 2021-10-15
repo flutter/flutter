@@ -126,6 +126,9 @@ class BrowserPlatform extends PlatformPlugin {
         //  * Assets that are part of the engine sources, such as Ahem.ttf
         .add(_packageUrlHandler)
 
+        // Serves CanvasKit assets.
+        .add(_canvasKitHandler)
+
         // Serves files from the web_ui/build/ directory at the root (/) URL path.
         //
         // Includes:
@@ -310,6 +313,50 @@ class BrowserPlatform extends PlatformPlugin {
         write: write);
   }
 
+  /// Serves /canvaskit/* requests.
+  ///
+  /// The requested path is rewritten to look for CanvasKit assets under:
+  ///
+  ///     ENGINE_ROOT/src/third_party/web_dependencies/canvaskit
+  shelf.Response _canvasKitHandler(shelf.Request request) {
+    if (!request.url.path.startsWith('canvaskit/')) {
+      return shelf.Response.notFound('Not found.');
+    }
+
+    final String filePath = p.join(
+      env.environment.engineSrcDir.path,
+      'third_party',
+      'web_dependencies',
+      request.url.path,
+    );
+    final File fileInPackage = File(filePath);
+    if (!fileInPackage.existsSync()) {
+      return shelf.Response.notFound('File not found: ${request.url.path}');
+    }
+
+    final String extension = p.extension(filePath);
+    final String contentType;
+    switch (extension) {
+      case '.js':
+        contentType = 'text/javascript';
+        break;
+      case '.wasm':
+        contentType = 'application/wasm';
+        break;
+      default:
+        final String error = 'Failed to determine Content-Type for "${request.url.path}".';
+        stderr.writeln(error);
+        return shelf.Response.internalServerError(body: error);
+    }
+
+    return shelf.Response.ok(
+      fileInPackage.readAsBytesSync(),
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+      },
+    );
+  }
+
   /// Serves the HTML file that bootstraps the test.
   shelf.Response _testBootstrapHandler(shelf.Request request) {
     final String path = p.fromUri(request.url);
@@ -326,6 +373,11 @@ class BrowserPlatform extends PlatformPlugin {
         <html>
         <head>
           <title>${htmlEscape.convert(test)} Test</title>
+          <script>
+            window.flutterConfiguration = {
+              canvasKitBaseUrl: "/canvaskit/"
+            };
+          </script>
           $link
           <script src="packages/test/dart.js"></script>
         </head>

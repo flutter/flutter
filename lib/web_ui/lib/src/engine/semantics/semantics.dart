@@ -11,6 +11,7 @@ import 'package:ui/ui.dart' as ui;
 import '../../engine.dart'  show registerHotRestartListener;
 import '../alarm_clock.dart';
 import '../browser_detection.dart';
+import '../configuration.dart';
 import '../dom_renderer.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
@@ -24,22 +25,6 @@ import 'scrollable.dart';
 import 'semantics_helper.dart';
 import 'tappable.dart';
 import 'text_field.dart';
-
-/// Set this flag to `true` to cause the engine to visualize the semantics tree
-/// on the screen for debugging.
-///
-/// This only works in profile and release modes. Debug mode does not support
-/// passing compile-time constants.
-///
-/// Example:
-///
-/// ```
-/// flutter run -d chrome --profile --dart-define=FLUTTER_WEB_DEBUG_SHOW_SEMANTICS=true
-/// ```
-const bool debugShowSemanticsNodes = bool.fromEnvironment(
-  'FLUTTER_WEB_DEBUG_SHOW_SEMANTICS',
-  defaultValue: false,
-);
 
 /// Contains updates for the semantics tree.
 ///
@@ -291,7 +276,7 @@ class SemanticsObject {
     element.style.position = 'absolute';
 
     // The root node has some properties that other nodes do not.
-    if (id == 0 && !debugShowSemanticsNodes) {
+    if (id == 0 && !configuration.debugShowSemanticsNodes) {
       // Make all semantics transparent. We use `filter` instead of `opacity`
       // attribute because `filter` is stronger. `opacity` does not apply to
       // some elements, particularly on iOS, such as the slider thumb and track.
@@ -308,7 +293,7 @@ class SemanticsObject {
     // Make semantic elements visible for debugging by outlining them using a
     // green border. We do not use `border` attribute because it affects layout
     // (`outline` does not).
-    if (debugShowSemanticsNodes) {
+    if (configuration.debugShowSemanticsNodes) {
       element.style.outline = '1px solid green';
     }
   }

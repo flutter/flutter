@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show NullTreeSanitizer, platformViewManager;
+import '../configuration.dart';
 import '../html/path_to_svg_clip.dart';
 import '../platform_views/slots.dart';
 import '../util.dart';
@@ -27,19 +28,13 @@ class HtmlViewEmbedder {
 
   HtmlViewEmbedder._();
 
-  /// The maximum number of overlay surfaces that can be live at once.
-  static const int maximumSurfaces = int.fromEnvironment(
-    'FLUTTER_WEB_MAXIMUM_SURFACES',
-    defaultValue: 8,
-  );
-
   /// If `true`, overlay canvases are disabled.
   ///
   /// This causes all drawing to go to a single canvas, with all of the platform
   /// views rendered over top. This may result in incorrect rendering with
   /// platform views.
   static bool get disableOverlays =>
-      debugDisableOverlays || maximumSurfaces <= 1;
+      debugDisableOverlays || configuration.canvasKitMaximumSurfaces <= 1;
 
   /// Force the view embedder to disable overlays.
   ///
