@@ -11,6 +11,7 @@ import 'package:ui/ui.dart' as ui;
 import '../engine.dart' show buildMode, registerHotRestartListener;
 import 'browser_detection.dart';
 import 'canvaskit/initialization.dart';
+import 'configuration.dart';
 import 'host_node.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
@@ -294,7 +295,7 @@ class DomRenderer {
     setElementAttribute(
       bodyElement,
       'flt-renderer',
-      '${useCanvasKit ? 'canvaskit' : 'html'} (${flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
+      '${useCanvasKit ? 'canvaskit' : 'html'} (${FlutterConfiguration.flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
     );
     setElementAttribute(bodyElement, 'flt-build-mode', buildMode);
 
@@ -401,7 +402,7 @@ class DomRenderer {
 
     // When debugging semantics, make the scene semi-transparent so that the
     // semantics tree is visible.
-    if (debugShowSemanticsNodes) {
+    if (configuration.debugShowSemanticsNodes) {
       _sceneHostElement!.style.opacity = '0.3';
     }
 

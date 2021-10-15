@@ -37,6 +37,8 @@ import 'package:meta/meta.dart';
 
 import '../ui.dart' as ui;
 
+// ignore: unused_import
+import 'engine/configuration.dart';
 import 'engine/dom_renderer.dart';
 import 'engine/keyboard.dart';
 import 'engine/mouse_cursor.dart';
@@ -119,6 +121,8 @@ export 'engine/canvaskit/vertices.dart';
 export 'engine/clipboard.dart';
 
 export 'engine/color_filter.dart';
+
+export 'engine/configuration.dart';
 
 export 'engine/dom_renderer.dart';
 
