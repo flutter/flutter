@@ -176,13 +176,13 @@ class RefreshIndicator extends StatefulWidget {
   /// [Future] must complete when the refresh operation is finished.
   final RefreshCallback onRefresh;
 
-  /// This bool can be changed to show or hide the refresh indicator reactively.
+  /// This bool can be changed to show and hide the refresh indicator reactively.
   /// Defaults to false and if set to true before [State.initState] will show
   /// the refresh indicator as soon as it is built.
   ///
   /// Note that reactively showing the refresh indicator will not call [onRefresh]
   /// or automatically hide the indicator after the returned [Future] completes.
-  /// If isRefreshing has been set to `true`, it must be set to `false` through
+  /// If `isRefreshing` has been set to `true`, it must be set to `false` through
   /// your own logic to hide the indicator and allow refreshing by dragging again.
   final bool isRefreshing;
 
