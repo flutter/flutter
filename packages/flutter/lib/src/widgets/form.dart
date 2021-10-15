@@ -421,6 +421,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// the value should be set by a call to [didChange], which ensures that
   /// `setState` is called.
   @protected
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setValue(T? value) {
     _value = value;
   }

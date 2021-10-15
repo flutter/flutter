@@ -640,6 +640,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   /// Update the last known ScrollDirection when scrolling began.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void updateScrollStartDirection(ScrollDirection direction) {
     _lastStartedScrollDirection = direction;
   }

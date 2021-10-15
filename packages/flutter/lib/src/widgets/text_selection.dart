@@ -1587,7 +1587,13 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
-    } catch (stacktrace) {
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking if the clipboard has strings'),
+      ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {

@@ -743,8 +743,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       DiagnosticsNode treeDump;
       try {
         treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
-        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
-        // Potentially everything is good enough without this case.
+        // We try to stringify the tree dump here (though we immediately discard the result) because
+        // we want to make sure that if it can't be serialised, we replace it with a message that
+        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
         treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
