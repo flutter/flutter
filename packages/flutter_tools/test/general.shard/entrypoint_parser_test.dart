@@ -99,7 +99,7 @@ void dream() {
     );
   });
 
-  testWithoutContext('Parses top level functions annotated with vm:entry-point and additional annotationd', () {
+  testWithoutContext('Parses top level functions annotated with vm:entry-point and additional annotations', () {
     const String mainDartContent = '''
 @SomeAnnotation("Random text")
 @pragma('vm:entry-point')
