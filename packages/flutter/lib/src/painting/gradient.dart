@@ -495,16 +495,17 @@ class LinearGradient extends Gradient {
         && other.begin == begin
         && other.end == end
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => hashValues(begin, end, tileMode, transform, hashList(colors), hashList(stops));
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode, $transform)';
   }
 }
 
@@ -757,6 +758,7 @@ class RadialGradient extends Gradient {
         && other.center == center
         && other.radius == radius
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops)
         && other.focal == focal
@@ -764,11 +766,11 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops), focal, focalRadius);
+  int get hashCode => hashValues(center, radius, tileMode, transform, hashList(colors), hashList(stops), focal, focalRadius);
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius, $transform)';
   }
 }
 
@@ -1005,15 +1007,16 @@ class SweepGradient extends Gradient {
         && other.startAngle == startAngle
         && other.endAngle == endAngle
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, transform, hashList(colors), hashList(stops));
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode, $transform)';
   }
 }
