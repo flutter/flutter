@@ -17,8 +17,6 @@ void main() {
     const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
     const String increment = 'y';
 
-    void emptyFunction() {}
-
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -27,7 +25,7 @@ void main() {
               child: ListView(
                 children: <Widget>[
                   Step1Substeps(
-                    nextStep: emptyFunction,
+                    nextStep: () {},
                   ),
                 ],
               ),
@@ -37,14 +35,12 @@ void main() {
       ),
     );
 
-    expect(Step1Substeps.releaseData, equals(<String, String>{'Release Channel': 'stable', 'Increment': 'm'}));
-
     await tester.enterText(find.byKey(const Key('Candidate Branch')), candidateBranch);
 
     /// Tests the Release Channel dropdown menu.
     await tester.tap(find.byKey(const Key('Release Channel')));
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
-    expect(Step1Substeps.releaseData['Release Channel'], equals('stable'));
+    expect(Step1Substeps.releaseData['Release Channel'], equals('-'));
     await tester.tap(find.text(releaseChannel).last);
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -57,7 +53,7 @@ void main() {
     /// Tests the Increment dropdown menu.
     await tester.tap(find.byKey(const Key('Increment')));
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
-    expect(Step1Substeps.releaseData['Increment'], equals('m'));
+    expect(Step1Substeps.releaseData['Increment'], equals('-'));
     await tester.tap(find.text(increment).last);
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
