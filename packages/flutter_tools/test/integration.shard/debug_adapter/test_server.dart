@@ -125,7 +125,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
       : flutterToolPath;
     final List<String> args = <String>[
       if (_runFromSource) flutterToolsEntryScript,
-      'debug_adapter',
+      'debug-adapter',
       ...?additionalArgs,
     ];
 

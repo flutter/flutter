@@ -10,8 +10,7 @@ import '../debug_adapters/server.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
-/// This command will start up a Debug Adapter that communicates using the Debug
-/// Adapter Protocol (DAP).
+/// This command will start up a Debug Adapter that communicates using the Debug Adapter Protocol (DAP).
 ///
 /// This is for use by editors and IDEs that have DAP clients to launch and
 /// debug Flutter apps/tests. It extends the standard Dart DAP implementation
@@ -26,16 +25,19 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({ bool verboseHelp = false}):hidden = !verboseHelp {
+  DebugAdapterCommand({ bool verboseHelp = false}) : hidden = !verboseHelp {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
   }
 
   @override
-  final String name = 'debug_adapter';
+  final String name = 'debug-adapter';
 
   @override
-  final String description = 'Run a Debug Adapter Protocol (DAP) server to communicate with devices.';
+  List<String> get aliases => const <String>['debug_adapter'];
+
+  @override
+  final String description = 'Run a Debug Adapter Protocol (DAP) server to communicate with the Flutter tool.';
 
   @override
   final String category = FlutterCommandCategory.tools;

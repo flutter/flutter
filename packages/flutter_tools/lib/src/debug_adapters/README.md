@@ -4,7 +4,7 @@ This document is Flutter-specific. For information on the standard Dart DAP impl
 
 Flutter includes support for debugging using [the Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) as an alternative to using the [VM Service](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md) directly, simplying the integration for new editors.
 
-The debug adapter is started with the `flutter debug_adapter` command and is intended to be consumed by DAP-compliant tools such as Flutter-specific extensions for editors, or configured by users whose editors include generic configurable DAP clients.
+The debug adapter is started with the `flutter debug-adapter` command and is intended to be consumed by DAP-compliant tools such as Flutter-specific extensions for editors, or configured by users whose editors include generic configurable DAP clients.
 
 Because in the DAP protocol the client speaks first, running this command from the terminal will result in no output (nor will the process terminate). This is expected behaviour.
 
@@ -14,22 +14,22 @@ For details on the standard DAP functionality, see [the Debug Adapter Protocol O
 
 Arguments common to both `launchRequest` and `attachRequest` are:
 
-- `bool? debugExternalPackageLibraries` - whether to enable debugging for packages that are not inside the current workspace
-- `bool? debugSdkLibraries` - whether to enable debugging for SDK libraries
-- `bool? evaluateGettersInDebugViews` - whether to evaluate getters in expression evaluation requests (inc. hovers/watch windows)
-- `bool? evaluateToStringInDebugViews` - whether to invoke `toString()` in expression evaluation requests (inc. hovers/watch windows)
-- `bool? sendLogsToClient` - used to proxy all VM Service traffic back to the client in custom `dart.log` events (has performance implications, intended for troubleshooting)
+- `bool? debugExternalPackageLibraries` - whether to enable debugging for packages that are not inside the current workspace (if not supplied, defaults to `true`)
+- `bool? debugSdkLibraries` - whether to enable debugging for SDK libraries (if not supplied, defaults to `true`)
+- `bool? evaluateGettersInDebugViews` - whether to evaluate getters in expression evaluation requests (inc. hovers/watch windows) (if not supplied, defaults to `false`)
+- `bool? evaluateToStringInDebugViews` - whether to invoke `toString()` in expression evaluation requests (inc. hovers/watch windows) (if not supplied, defaults to `false`)
+- `bool? sendLogsToClient` - used to proxy all VM Service traffic back to the client in custom `dart.log` events (has performance implications, intended for troubleshooting) (if not supplied, defaults to `false`)
 - `List<String>? additionalProjectPaths` - paths of any projects (outside of `cwd`) that are open in the users workspace
 - `String? cwd` - the working directory for the Dart process to be spawned in
 
 Arguments specific to `launchRequest` are:
 
 - `bool? noDebug` - whether to run in debug or noDebug mode (if not supplied, defaults to debug)
-- `String program` - the path of the Dart program to run
-- `List<String>? args` - arguments to be passed to the Dart program
-- `List<String>? toolArgs` - arguments for the Dart VM
+- `String program` - the path of the Flutter application to run
+- `List<String>? args` - arguments to be passed to the Flutter program
+- `List<String>? toolArgs` - arguments for the `flutter` tool
 - `String? console` - if set to `"terminal"` or `"externalTerminal"` will be run using the `runInTerminal` reverse-request; otherwise the debug adapter spawns the Dart process
-- `bool? enableAsserts` - whether to enable asserts (if not supplied, defaults to enabled)
+- `bool? enableAsserts` - whether to enable asserts (if not supplied, defaults to `true`)
 
 `attachRequest` is not currently supported, but will be documented here when it is.
 

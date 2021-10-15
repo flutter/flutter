@@ -11,8 +11,7 @@ import '../base/platform.dart';
 import '../debug_adapters/flutter_adapter.dart';
 import '../debug_adapters/flutter_adapter_args.dart';
 
-/// A DAP server that communicates over a [ByteStreamServerChannel], usually
-/// constructed from the processes stdin/stdout streams.
+/// A DAP server that communicates over a [ByteStreamServerChannel], usually constructed from the processes stdin/stdout streams.
 ///
 /// The server is intended to be single-use. It should live only for the
 /// duration of a single debug session in the editor, and terminate when the

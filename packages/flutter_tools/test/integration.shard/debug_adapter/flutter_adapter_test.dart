@@ -118,73 +118,73 @@ void main() {
     await _project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
-      await Future.wait(<Future<Object>>[
-        dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
-        dap.client.start(
-          launch: () => dap.client.launch(
-            cwd: _project.dir.path,
-            noDebug: true,
-            toolArgs: <String>['-d', 'flutter-tester'],
-          ),
+    await Future.wait(<Future<Object>>[
+      dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
+      dap.client.start(
+        launch: () => dap.client.launch(
+          cwd: _project.dir.path,
+          noDebug: true,
+          toolArgs: <String>['-d', 'flutter-tester'],
         ),
-      ], eagerError: true);
+      ),
+    ], eagerError: true);
 
-      // Capture the next two output events that we expect to be the Reload
-      // notification and then topLevelFunction being printed again.
-      final Future<List<String>> outputEventsFuture = dap.client.output
-          // But skip any topLevelFunctions that come before the reload.
-          .skipWhile((String output) => output.startsWith('topLevelFunction'))
-          .take(2)
-          .toList();
+    // Capture the next two output events that we expect to be the Reload
+    // notification and then topLevelFunction being printed again.
+    final Future<List<String>> outputEventsFuture = dap.client.output
+        // But skip any topLevelFunctions that come before the reload.
+        .skipWhile((String output) => output.startsWith('topLevelFunction'))
+        .take(2)
+        .toList();
 
-      await dap.client.hotReload();
+    await dap.client.hotReload();
 
-      expectLines(
-          (await outputEventsFuture).join(),
-          <Object>[
-            startsWith('Reloaded'),
-            'topLevelFunction',
-          ],
-      );
+    expectLines(
+        (await outputEventsFuture).join(),
+        <Object>[
+          startsWith('Reloaded'),
+          'topLevelFunction',
+        ],
+    );
 
-      await dap.client.terminate();
+    await dap.client.terminate();
   });
 
   testWithoutContext('can hot restart', () async {
     final BasicProject _project = BasicProject();
     await _project.setUpIn(tempDir);
 
-      // Launch the app and wait for it to print "topLevelFunction".
-      await Future.wait(<Future<Object>>[
-        dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
-        dap.client.start(
-          launch: () => dap.client.launch(
-            cwd: _project.dir.path,
-            noDebug: true,
-            toolArgs: <String>['-d', 'flutter-tester'],
-          ),
+    // Launch the app and wait for it to print "topLevelFunction".
+    await Future.wait(<Future<Object>>[
+      dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
+      dap.client.start(
+        launch: () => dap.client.launch(
+          cwd: _project.dir.path,
+          noDebug: true,
+          toolArgs: <String>['-d', 'flutter-tester'],
         ),
-      ], eagerError: true);
+      ),
+    ], eagerError: true);
 
-      // Capture the next two output events that we expect to be the Restart
-      // notification and then topLevelFunction being printed again.
-      final Future<List<String>> outputEventsFuture = dap.client.output
-          // But skip any topLevelFunctions that come before the restart.
-          .skipWhile((String output) => output.startsWith('topLevelFunction'))
-          .take(2)
-          .toList();
+    // Capture the next two output events that we expect to be the Restart
+    // notification and then topLevelFunction being printed again.
+    final Future<List<String>> outputEventsFuture = dap.client.output
+        // But skip any topLevelFunctions that come before the restart.
+        .skipWhile((String output) => output.startsWith('topLevelFunction'))
+        .take(2)
+        .toList();
 
-      await dap.client.hotRestart();
+    await dap.client.hotRestart();
 
-      expectLines(
-          (await outputEventsFuture).join(),
-          <Object>[
-            startsWith('Restarted application'),
-            'topLevelFunction',
-          ],
-      );
+    expectLines(
+        (await outputEventsFuture).join(),
+        <Object>[
+          startsWith('Restarted application'),
+          'topLevelFunction',
+        ],
+    );
 
-      await dap.client.terminate();
+    await dap.client.terminate();
   });
 }
 

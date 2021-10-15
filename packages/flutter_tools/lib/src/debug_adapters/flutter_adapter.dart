@@ -74,24 +74,21 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   bool get supportsRestartRequest => true;
 
-  /// Whether the VM Service closing should be used as a signal to terminate the
-  /// debug session.
+  /// Whether the VM Service closing should be used as a signal to terminate the debug session.
   ///
   /// Since we always have a process for Flutter (whether run or attach) we'll
   /// always use its termination instead, so this is always false.
   @override
   bool get terminateOnVmServiceClose => false;
 
-  /// Called by [attachRequest] to request that we actually connect to the app
-  /// to be debugged.
+  /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
     sendOutput('console', '\nAttach is not currently supported');
     handleSessionTerminate();
   }
 
-  /// [customRequest] handles any messages that do not match standard messages
-  /// in the spec.
+  /// [customRequest] handles any messages that do not match standard messages in the spec.
   ///
   /// This is used to allow a client/DA to have custom methods outside of the
   /// spec. It is up to the client/DA to negotiate which custom messages are
@@ -139,8 +136,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     }
   }
 
-  /// Called by [disconnectRequest] to request that we forcefully shut down the
-  /// app being run (or in the case of an attach, disconnect).
+  /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
   ///
   /// Client IDEs/editors should send a terminateRequest before a
   /// disconnectRequest to allow a graceful shutdown. This method must terminate
@@ -150,8 +146,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     terminatePids(ProcessSignal.sigkill);
   }
 
-  /// Called by [launchRequest] to request that we actually start the app to be
-  /// run/debugged.
+  /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
   ///
   /// For debugging, this should start paused, connect to the VM Service, set
   /// breakpoints, and resume.
@@ -224,8 +219,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     }
   }
 
-  /// restart is called by the client when the user invokes a restart (for
-  /// example with the button on the debug toolbar).
+  /// restart is called by the client when the user invokes a restart (for example with the button on the debug toolbar).
   ///
   /// For Flutter, we handle this ourselves be sending a Hot Restart request
   /// to the running app.
@@ -240,8 +234,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     sendResponse();
   }
 
-  /// Sends a request to the Flutter daemon that is running/attaching to the
-  /// app and waits for a response.
+  /// Sends a request to the Flutter daemon that is running/attaching to the app and waits for a response.
   ///
   /// If [failSilently] is `true` (the default) and there is no process, the
   /// message will be silently ignored (this is common during the application
@@ -279,16 +272,14 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     return completer.future;
   }
 
-  /// Called by [terminateRequest] to request that we gracefully shut down the
-  /// app being run (or in the case of an attach, disconnect).
+  /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
   @override
   Future<void> terminateImpl() async {
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
   }
 
-  /// Connects to the VM Service if the app.started event has fired, and a
-  /// VM Service URI is available.
+  /// Connects to the VM Service if the app.started event has fired, and a VM Service URI is available.
   void _connectDebuggerIfReady() {
     final Uri? serviceUri = _vmServiceUri;
     if (_receivedAppStarted && serviceUri != null) {
@@ -308,8 +299,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     _connectDebuggerIfReady();
   }
 
-  /// Handles the app.debugPort event from Flutter, connecting to the VM Service
-  /// if everything else is ready.
+  /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
   void _handleDebugPort(Map<String, Object?> params) {
     // When running in noDebug mode, Flutter may still provide us a VM Service
     // URI, but we will not connect it because we don't want to do any debugging.
@@ -327,8 +317,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     _connectDebuggerIfReady();
   }
 
-  /// Handles the Flutter process exiting, terminating the debug session if it
-  /// has not already begun terminating.
+  /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
   void _handleExitCode(int code) {
     final String codeSuffix = code == 0 ? '' : ' ($code)';
     logger?.call('Process exited ($code)');
@@ -351,8 +340,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     }
   }
 
-  /// Handles incoming JSON messages from `flutter run --machine` that are
-  /// responses to requests that we sent.
+  /// Handles incoming JSON messages from `flutter run --machine` that are responses to requests that we sent.
   void _handleJsonResponse(int id, Map<String, Object?> response) {
     final Completer<Object?>? handler = _flutterRequestCompleters.remove(id);
     if (handler == null) {
@@ -377,8 +365,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     sendOutput('stderr', utf8.decode(data));
   }
 
-  /// Handles stdout from the `flutter run --machine` process, decoding the
-  /// JSON and calling the appropriate handlers.
+  /// Handles stdout from the `flutter run --machine` process, decoding the JSON and calling the appropriate handlers.
   void _handleStdout(String data) {
     // Output intended for us to parse is JSON wrapped in brackets:
     // [{"event":"app.foo","params":{"bar":"baz"}}]
@@ -427,8 +414,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     }
   }
 
-  /// Performs a restart/reload by sending the `app.restart` message to the
-  /// `flutter run --machine` process.
+  /// Performs a restart/reload by sending the `app.restart` message to the `flutter run --machine` process.
   Future<void> _performRestart(
     bool fullRestart, [
     String? reason,

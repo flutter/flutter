@@ -14,7 +14,6 @@ mixin PackageConfigUtils {
   abstract FileSystem fileSystem;
 
   /// Find the `package_config.json` file for the program being launched.
-  ///
   File? findPackageConfigFile(String possibleRoot) {
     // TODO(dantup): Remove this once
     //   https://github.com/dart-lang/sdk/issues/45530 is done as it will not be
@@ -45,8 +44,7 @@ mixin PackageConfigUtils {
   }
 }
 
-/// A mixin for tracking additional PIDs that can be shut down at the end of a
-/// debug session.
+/// A mixin for tracking additional PIDs that can be shut down at the end of a debug session.
 ///
 /// Adapted from package:dds/src/dap/adapters/mixins.dart to use Flutter's
 /// dart:io wrappers.
