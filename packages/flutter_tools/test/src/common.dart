@@ -27,6 +27,9 @@ void tryToDelete(Directory directory) {
       directory.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
+    // We print this so that it's visible in the logs, to get an idea of how
+    // common this problem is, and if any patterns are ever noticed by anyone.
+    // ignore: avoid_print
     print('Failed to delete ${directory.path}: $error');
   }
 }

@@ -16,6 +16,7 @@ import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals_null_migrated.dart' as globals;
+import '../ios/code_signing.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -77,6 +78,9 @@ class CreateCommand extends CreateBase {
   @override
   final String description = 'Create a new Flutter project.\n\n'
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   String get invocation => '${runner.executableName} $name <output directory>';
@@ -231,6 +235,17 @@ class CreateCommand extends CreateBase {
     }
 
     final String dartSdk = globals.cache.dartSdkBuild;
+    final bool includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+    String developmentTeam;
+    if (includeIos) {
+      developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+        processManager: globals.processManager,
+        platform: globals.platform,
+        logger: globals.logger,
+        config: globals.config,
+        terminal: globals.terminal,
+      );
+    }
 
     final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
@@ -240,7 +255,8 @@ class CreateCommand extends CreateBase {
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      ios: featureFlags.isIOSEnabled && platforms.contains('ios'),
+      iosDevelopmentTeam: developmentTeam,
+      ios: includeIos,
       android: featureFlags.isAndroidEnabled && platforms.contains('android'),
       web: featureFlags.isWebEnabled && platforms.contains('web'),
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),

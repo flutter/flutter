@@ -9,10 +9,30 @@ import 'dart:ui' as ui;
 import 'js_url_strategy.dart';
 import 'utils.dart';
 
+/// Saves the current [UrlStrategy] to be accessed by [urlStrategy] or
+/// [setUrlStrategy].
+///
+/// This is particularly required for web plugins relying on valid URL
+/// encoding.
+//
+// Keep this in sync with the default url strategy in the web engine.
+// Find it at:
+// https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/window.dart#L360
+//
+UrlStrategy? _urlStrategy = const HashUrlStrategy();
+
+/// Returns the present [UrlStrategy] for handling the browser URL.
+///
+/// In case null is returned, the browser integration has been manually
+/// disabled by [setUrlStrategy].
+UrlStrategy? get urlStrategy => _urlStrategy;
+
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
 void setUrlStrategy(UrlStrategy? strategy) {
+  _urlStrategy = strategy;
+
   JsUrlStrategy? jsUrlStrategy;
   if (strategy != null) {
     jsUrlStrategy = convertToJsUrlStrategy(strategy);
@@ -285,6 +305,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   static const String _defaultSearch = '';
 
   html.Location get _location => html.window.location;
+
   html.History get _history => html.window.history;
 
   @override

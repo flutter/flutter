@@ -173,6 +173,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -184,6 +185,13 @@ class XcodeProjectInterpreter {
         ...<String>['-configuration', configuration],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
+      '-destination',
+      if (deviceId != null)
+        'id=$deviceId'
+      else if (buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=iOS'
+      else
+        'generic/platform=iOS Simulator',
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
@@ -351,14 +359,20 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 
 @immutable
 class XcodeProjectBuildContext {
-  const XcodeProjectBuildContext({this.scheme, this.configuration, this.environmentType = EnvironmentType.physical});
+  const XcodeProjectBuildContext({
+    this.scheme,
+    this.configuration,
+    this.environmentType = EnvironmentType.physical,
+    this.deviceId,
+  });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
+  final String? deviceId;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
 
   @override
   bool operator ==(Object other) {
@@ -368,6 +382,7 @@ class XcodeProjectBuildContext {
     return other is XcodeProjectBuildContext &&
         other.scheme == scheme &&
         other.configuration == configuration &&
+        other.deviceId == deviceId &&
         other.environmentType == environmentType;
   }
 }

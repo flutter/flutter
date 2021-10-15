@@ -56,7 +56,7 @@ void main() {
           'cherry-pick',
           '--no-commit',
           commit,
-        ], exitCode: 0),
+        ]),
         const FakeCommand(command: <String>[
           'git',
           'reset',

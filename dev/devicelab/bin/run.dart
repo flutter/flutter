@@ -239,7 +239,6 @@ final ArgParser _argParser = ArgParser()
   ..addMultiOption(
     'task',
     abbr: 't',
-    splitCommas: true,
     help: 'Either:\n'
         ' - the name of a task defined in manifest.yaml.\n'
         '   Example: complex_layout__start_up.\n'
@@ -362,13 +361,10 @@ final ArgParser _argParser = ArgParser()
   )
   ..addFlag(
     'silent',
-    negatable: true,
-    defaultsTo: false,
   )
   ..addMultiOption(
     'test',
     hide: true,
-    splitCommas: true,
     callback: (List<String> value) {
       if (value.isNotEmpty) {
         throw const FormatException(

@@ -91,10 +91,8 @@ class FlutterCommandResult {
         return 'fail';
       case ExitStatus.killed:
         return 'killed';
-      default:
-        assert(false);
-        return null;
     }
+    return null; // dead code, remove with null safety migration
   }
 }
 
@@ -120,6 +118,13 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+}
+
+/// flutter command categories for usage.
+class FlutterCommandCategory {
+  static const String sdk = 'Flutter SDK';
+  static const String project = 'Project';
+  static const String tools = 'Tools & Devices';
 }
 
 abstract class FlutterCommand extends Command<void> {

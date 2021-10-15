@@ -212,7 +212,7 @@ ArgResults _handleArguments(List<String> args) {
     ..addOption(_iconsClassPathOption,
         defaultsTo: _defaultIconsPath,
         help: 'Location of the material icons file')
-    ..addFlag(_dryRunOption, defaultsTo: false);
+    ..addFlag(_dryRunOption);
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
       print(argParser.usage);
@@ -289,7 +289,7 @@ String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join('');
+      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;

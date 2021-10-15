@@ -498,7 +498,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 OverlayEntry(
-                  opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 94.0),
                 ),
@@ -508,7 +507,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   builder: (BuildContext _) => createSubtree(width: 95.0),
                 ),
                 OverlayEntry(
-                  opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
                 ),
@@ -817,9 +815,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         elementA.toDiagnosticsNode().toJsonMap(
           InspectorSerializationDelegate(
             service: service,
-            summaryTree: false,
             includeProperties: true,
-            addAdditionalPropertiesCallback: null,
           ),
         ),
         isNotNull,
@@ -2931,7 +2927,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate delegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
           addAdditionalPropertiesCallback:
             (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
@@ -2960,7 +2955,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate emptyDelegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
           addAdditionalPropertiesCallback:
             (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
@@ -2970,9 +2964,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate defaultDelegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
-          addAdditionalPropertiesCallback: null,
         );
       expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
     });

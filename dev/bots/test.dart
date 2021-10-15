@@ -645,7 +645,7 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
-      .listSync(followLinks: false, recursive: false)
+      .listSync(followLinks: false)
       .whereType<Directory>()
       .where((Directory dir) => dir.path.endsWith('widgets') == false)
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
@@ -674,6 +674,7 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
   }
@@ -1214,7 +1215,7 @@ Future<void> _ensureChromeDriverIsRunning() async {
   final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
   final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
   final HttpClientResponse response = await request.close();
-  final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join('')) as Map<String, dynamic>;
+  final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join()) as Map<String, dynamic>;
   client.close();
   final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
   if (!webDriverReady) {

@@ -32,6 +32,9 @@ class DoctorCommand extends FlutterCommand {
   final String description = 'Show information about the installed tooling.';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults.wasParsed('check-for-remote-artifacts')) {

@@ -1020,7 +1020,7 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..onStart = (_) {};
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);

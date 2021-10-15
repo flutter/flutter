@@ -84,7 +84,8 @@ void main() {
       androidProject
         ..pluginRegistrantHost = androidDirectory.childDirectory('app')
         ..hostAppGradleRoot = androidDirectory
-        ..exists = false;
+        ..exists = false
+        ..embeddingVersion = AndroidEmbeddingVersion.v2;
 
       webProject = FakeWebProject();
       flutterProject.web = webProject;
@@ -119,7 +120,7 @@ void main() {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       systemClock = FakeSystemClock()
-        ..currentTime = DateTime(1970, 1, 1);
+        ..currentTime = DateTime(1970);
       flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
@@ -424,7 +425,7 @@ dependencies:
         final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         iosProject.testExists = true;
 
-        final DateTime dateCreated = DateTime(1970, 1, 1);
+        final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
         await refreshPluginsList(flutterProject);
@@ -922,7 +923,6 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         final File manifest = fs.file('AndroidManifest.xml');
         androidProject.appManifestFile = manifest;
-
         await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

@@ -140,7 +140,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// to allow further overriding, or to allow the [Intent] to propagate to
   /// parent widgets that also support this [Intent].
   ///
-  /// {@tool sample --template=freeform}
+  /// {@tool dartpad}
   /// This sample implements a custom text input field that handles the
   /// [DeleteTextIntent] intent, as well as a US telephone number input widget
   /// that consists of multiple text fields for area code, prefix and line
@@ -160,6 +160,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   Action<T>? _currentCallingAction;
+  // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
   void _updateCallingAction(Action<T>? value) {
     _currentCallingAction = value;
   }
@@ -386,7 +387,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// this widget. If you are using an [Action] outside of a widget context, then
 /// you must call removeListener yourself.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example shows how ActionListener handles adding and removing of
 /// the [listener] in the widget lifecycle.
 ///
@@ -580,7 +581,7 @@ class ActionDispatcher with Diagnosticable {
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example creates a custom [Action] subclass `ModifyAction` for modifying
 /// a model, and another, `SaveAction` for saving it.
 ///
@@ -1034,7 +1035,7 @@ class _ActionsMarker extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard when

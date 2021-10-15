@@ -2,31 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateless_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for FocusTraversalGroup
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample shows three rows of buttons, each grouped by a
-// [FocusTraversalGroup], each with different traversal order policies. Use tab
-// traversal to see the order they are traversed in.  The first row follows a
-// numerical order, the second follows a lexical order (ordered to traverse
-// right to left), and the third ignores the numerical order assigned to it and
-// traverses in widget order.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -40,9 +21,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 /// A button wrapper that adds either a numerical or lexical order, depending on
 /// the type of T.
@@ -90,7 +68,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
 
   void _handleOnPressed() {
     focusNode.requestFocus();
-    print('Button ${widget.name} pressed.');
+    debugPrint('Button ${widget.name} pressed.');
     debugDumpFocusTree();
   }
 
@@ -142,17 +120,10 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
@@ -214,8 +185,4 @@ class MyStatelessWidget extends StatelessWidget {
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

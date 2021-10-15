@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'input_border.dart';
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -96,6 +98,9 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// [Set] of [MaterialState]s, like [MaterialState.pressed],
 /// [MaterialState.focused] and [MaterialState.hovered].
 ///
+/// [MaterialStateColor] should only be used with widgets that document
+/// their support, like [TimePickerThemeData.dayPeriodColor].
+///
 /// To use a [MaterialStateColor], you can either:
 ///   1. Create a subclass of [MaterialStateColor] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateColor.resolveWith] and pass in a callback that
@@ -109,11 +114,6 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// [MaterialStateColor] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-///
-/// This class enables existing widget implementations with [Color]
-/// properties to be extended to also effectively support `MaterialStateProperty<Color>`
-/// property values. [MaterialStateColor] should only be used with widgets that document
-/// their support, like [TimePickerThemeData.dayPeriodColor].
 ///
 /// {@tool snippet}
 ///
@@ -190,7 +190,7 @@ class _MaterialStateColor extends MaterialStateColor {
 /// To use a [MaterialStateMouseCursor], you should create a subclass of
 /// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example defines a mouse cursor that resolves to
 /// [SystemMouseCursors.forbidden] when its widget is disabled.
 ///
@@ -284,7 +284,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// property values. [MaterialStateBorderSide] should only be used with widgets that document
 /// their support, like [ActionChip.side].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example defines a subclass of [MaterialStateBorderSide], that resolves
 /// to a red border side when its widget is selected.
 ///
@@ -365,7 +365,7 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 /// [OutlinedBorder] and implement [MaterialStateOutlinedBorder]'s abstract
 /// `resolve` method.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example defines a subclass of [RoundedRectangleBorder] and an
 /// implementation of [MaterialStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
@@ -391,6 +391,196 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
+
+/// Defines a [TextStyle] that is also a [MaterialStateProperty].
+///
+/// This class exists to enable widgets with [TextStyle] valued properties
+/// to also accept [MaterialStateProperty<TextStyle>] values. A material
+/// state text style property represents a text style which depends on
+/// a widget's "interactive state". This state is represented as a
+/// [Set] of [MaterialState]s, like [MaterialState.pressed],
+/// [MaterialState.focused] and [MaterialState.hovered].
+///
+/// [MaterialStateTextStyle] should only be used with widgets that document
+/// their support, like [InputDecoration.labelStyle].
+///
+/// To use a [MaterialStateTextStyle], you can either:
+///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
+///   2. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///
+/// If a [MaterialStateTextStyle] is used for a property or a parameter that doesn't
+/// support resolving [MaterialStateProperty<TextStyle>]s, then its default color
+/// value will be used for all states.
+///
+/// To define a `const` [MaterialStateTextStyle], you'll need to extend
+/// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
+/// to provide a `defaultValue` to the super constructor, so that we can know
+/// at compile-time what its default color is.
+abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const MaterialStateTextStyle();
+
+  /// Creates a [MaterialStateTextStyle] from a [MaterialPropertyResolver<TextStyle>]
+  /// callback function.
+  ///
+  /// If used as a regular text style, the style resolved in the default state (the
+  /// empty set of states) will be used.
+  ///
+  /// The given callback parameter must return a non-null text style in the default
+  /// state.
+  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
+      _MaterialStateTextStyle(callback);
+
+  /// Returns a [TextStyle] that's to be used when a Material component is in the
+  /// specified state.
+  @override
+  TextStyle resolve(Set<MaterialState> states);
+}
+
+/// A [MaterialStateTextStyle] created from a [MaterialPropertyResolver<TextStyle>]
+/// callback alone.
+///
+/// If used as a regular text style, the style resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateTextStyle.resolveWith].
+class _MaterialStateTextStyle extends MaterialStateTextStyle {
+  const _MaterialStateTextStyle(this._resolve);
+
+  final MaterialPropertyResolver<TextStyle> _resolve;
+
+  @override
+  TextStyle resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+/// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].
+///
+/// This class exists to enable widgets with [OutlineInputBorder] valued properties
+/// to also accept [MaterialStateProperty<OutlineInputBorder>] values. A material
+/// state input border property represents a text style which depends on
+/// a widget's "interactive state". This state is represented as a
+/// [Set] of [MaterialState]s, like [MaterialState.pressed],
+/// [MaterialState.focused] and [MaterialState.hovered].
+///
+/// [MaterialStateOutlineInputBorder] should only be used with widgets that document
+/// their support, like [InputDecoration.border].
+///
+/// To use a [MaterialStateOutlineInputBorder], you can either:
+///   1. Create a subclass of [MaterialStateOutlineInputBorder] and implement the abstract `resolve` method.
+///   2. Use [MaterialStateOutlineInputBorder.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///
+/// If a [MaterialStateOutlineInputBorder] is used for a property or a parameter that doesn't
+/// support resolving [MaterialStateProperty<OutlineInputBorder>]s, then its default color
+/// value will be used for all states.
+///
+/// To define a `const` [MaterialStateOutlineInputBorder], you'll need to extend
+/// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
+/// to provide a `defaultValue` to the super constructor, so that we can know
+/// at compile-time what its default color is.
+abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const MaterialStateOutlineInputBorder();
+
+  /// Creates a [MaterialStateOutlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
+  /// callback function.
+  ///
+  /// If used as a regular input border, the border resolved in the default state (the
+  /// empty set of states) will be used.
+  ///
+  /// The given callback parameter must return a non-null text style in the default
+  /// state.
+  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+      _MaterialStateOutlineInputBorder(callback);
+
+  /// Returns a [InputBorder] that's to be used when a Material component is in the
+  /// specified state.
+  @override
+  InputBorder resolve(Set<MaterialState> states);
+}
+
+/// A [MaterialStateOutlineInputBorder] created from a [MaterialPropertyResolver<OutlineInputBorder>]
+/// callback alone.
+///
+/// If used as a regular input border, the border resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateTextStyle.resolveWith].
+class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
+  const _MaterialStateOutlineInputBorder(this._resolve);
+
+  final MaterialPropertyResolver<InputBorder> _resolve;
+
+  @override
+  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+/// Defines a [UnderlineInputBorder] that is also a [MaterialStateProperty].
+///
+/// This class exists to enable widgets with [UnderlineInputBorder] valued properties
+/// to also accept [MaterialStateProperty<UnderlineInputBorder>] values. A material
+/// state input border property represents a text style which depends on
+/// a widget's "interactive state". This state is represented as a
+/// [Set] of [MaterialState]s, like [MaterialState.pressed],
+/// [MaterialState.focused] and [MaterialState.hovered].
+///
+/// [MaterialStateUnderlineInputBorder] should only be used with widgets that document
+/// their support, like [InputDecoration.border].
+///
+/// To use a [MaterialStateUnderlineInputBorder], you can either:
+///   1. Create a subclass of [MaterialStateUnderlineInputBorder] and implement the abstract `resolve` method.
+///   2. Use [MaterialStateUnderlineInputBorder.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///
+/// If a [MaterialStateUnderlineInputBorder] is used for a property or a parameter that doesn't
+/// support resolving [MaterialStateProperty<UnderlineInputBorder>]s, then its default color
+/// value will be used for all states.
+///
+/// To define a `const` [MaterialStateUnderlineInputBorder], you'll need to extend
+/// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
+/// to provide a `defaultValue` to the super constructor, so that we can know
+/// at compile-time what its default color is.
+abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const MaterialStateUnderlineInputBorder();
+
+  /// Creates a [MaterialStateUnderlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
+  /// callback function.
+  ///
+  /// If used as a regular ionput bortder, the border resolved in the default state (the
+  /// empty set of states) will be used.
+  ///
+  /// The given callback parameter must return a non-null text style in the default
+  /// state.
+  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+      _MaterialStateUnderlineInputBorder(callback);
+
+  /// Returns a [InputBorder] that's to be used when a Material component is in the
+  /// specified state.
+  @override
+  InputBorder resolve(Set<MaterialState> states);
+}
+
+/// A [MaterialStateUnderlineInputBorder] created from a [MaterialPropertyResolver<UnderlineInputBorder>]
+/// callback alone.
+///
+/// If used as a regular input border, the border resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateTextStyle.resolveWith].
+class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
+  const _MaterialStateUnderlineInputBorder(this._resolve);
+
+  final MaterialPropertyResolver<InputBorder> _resolve;
+
+  @override
+  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+}
+
 /// Interface for classes that [resolve] to a value of type `T` based
 /// on a widget's interactive "state", which is defined as a set
 /// of [MaterialState]s.
@@ -409,7 +599,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example shows how you can override the default text and icon
 /// color (the "foreground color") of a [TextButton] with a
 /// [MaterialStateProperty]. In this example, the button's text color

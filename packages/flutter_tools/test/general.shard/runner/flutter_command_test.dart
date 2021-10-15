@@ -55,7 +55,7 @@ void main() {
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
       expect(cache.artifacts, isEmpty);

@@ -85,7 +85,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
 /// cursor at the end of the input.
@@ -916,7 +916,7 @@ class EditableText extends StatefulWidget {
   /// and selection, one can add a listener to its [controller] with
   /// [TextEditingController.addListener].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
@@ -2342,6 +2342,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   Rect? _currentCaretRect;
+  // ignore: use_setters_to_change_properties, (this is used as a callback, can't be a setter)
   void _handleCaretChanged(Rect caretRect) {
     _currentCaretRect = caretRect;
   }
@@ -2711,7 +2712,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
-    } else {
+    } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
       // Hide only the toolbar but not the handles.
       _selectionOverlay?.hideToolbar();
     }
@@ -2807,9 +2808,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         physics: widget.scrollPhysics,
         dragStartBehavior: widget.dragStartBehavior,
         restorationId: widget.restorationId,
-        scrollBehavior: widget.scrollBehavior ??
-            // Remove scrollbars if only single line
-            (_isMultiline ? null : ScrollConfiguration.of(context).copyWith(scrollbars: false)),
+        // If a ScrollBehavior is not provided, only apply scrollbars when
+        // multiline. The overscroll indicator should not be applied in
+        // either case, glowing or stretching.
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+            scrollbars: _isMultiline,
+            overscroll: false,
+        ),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return CompositedTransformTarget(
             link: _toolbarLayerLink,

@@ -51,7 +51,6 @@ class DartPluginRegistrantTarget extends Target {
       packageConfig,
       mainFileUriString,
       mainFile,
-      throwOnPluginPubspecError: false,
     );
   }
 
@@ -66,6 +65,8 @@ class DartPluginRegistrantTarget extends Target {
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.
+    // Failing that, consider throwing if `targetPlatform` isn't set and finding
+    // all violations, as it's not consistently set here.
     return targetPlatform == TargetPlatform.fuchsia_arm64 ||
            targetPlatform == TargetPlatform.fuchsia_x64 ||
            targetPlatform == TargetPlatform.web_javascript;
