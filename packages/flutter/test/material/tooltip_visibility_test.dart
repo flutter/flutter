@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void _ensureTooltipVisible(GlobalKey key) {
-  // This function uses "as dynamic"to defeat the static analysis. In general
+  // This function uses "as dynamic" to defeat the static analysis. In general
   // you want to avoid using this style in your code, as it will cause the
   // analyzer to be unable to help you catch errors.
   //
@@ -217,21 +217,7 @@ Future<void> setWidgetForTooltipMode(WidgetTester tester, TooltipTriggerMode tri
   );
 }
 
-Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
-  final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip));
-  await tester.pump();
-  await tester.pump(kLongPressTimeout);
-  await gestureLongPress.up();
-  await tester.pump();
-}
-
 Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
   await tester.tap(tooltip);
   await tester.pump(const Duration(milliseconds: 10));
-}
-
-SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null)
-    return object.debugSemantics!;
-  return findDebugSemantics(object.parent! as RenderObject);
 }

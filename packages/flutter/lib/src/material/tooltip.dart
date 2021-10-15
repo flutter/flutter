@@ -355,7 +355,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
     _visible = TooltipVisibility.of(context);
   }
@@ -488,7 +488,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if(!_visible)
+    if (!_visible)
       return false;
     _showTimer?.cancel();
     _showTimer = null;
@@ -683,8 +683,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
 
-    //Only check for gestures if tooltip should be visible.
-    if(_visible){
+    // Only check for gestures if tooltip should be visible.
+    if (_visible) {
       result = GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
