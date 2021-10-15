@@ -477,25 +477,31 @@ enum FloatingLabelBehavior {
   always,
 }
 
-/// Defines the location of the floating label within the [InputDecorator].
+/// Defines the horizontal alignment of a floating label within an
+/// [InputDecorator].
 ///
 /// See also:
 ///
-/// * [InputDecoration.floatingLabelAlignment]
+///  * [InputDecoration.floatingLabelAlignment] which defines the alignment for
+///    [InputDecoration.label] or [InputDecoration.labelText]
+///  * [FloatingLabelBehaviour] which defines the behaviour of the floating label.
 @immutable
 class FloatingLabelAlignment {
   const FloatingLabelAlignment._({
     required this.x,
   }) : assert(x != null),
-        assert(x >= -1.0 && x <= 1.0);
+       assert(x >= -1.0 && x <= 1.0);
 
-  /// A value ranging from -1.0 to 1.0 that defines the leftmost and rightmost
-  /// locations of the decorator.
+  /// A value ranging from -1.0 to 1.0 inclusive, where -1.0 represents the
+  /// leftmost possible position, 1.0 represents the rightmost possible
+  /// position, and 0.0 represents the center position.
   final double x;
 
-  /// Aligns the floating label with the top-left location in the input decorator.
+  /// Aligns a floating label to the leftmost possible position on top of
+  /// an input decorator.
   static const FloatingLabelAlignment left = FloatingLabelAlignment._(x: -1.0);
-  /// Aligns the floating label with the top-center location in the input decorator.
+  /// Aligns a floating label to the center position on top of an input
+  /// decorator.
   static const FloatingLabelAlignment center = FloatingLabelAlignment._(x: 0.0);
 
   @override
@@ -504,7 +510,7 @@ class FloatingLabelAlignment {
   }
 
   @override
-  int get hashCode => hashList(<Object?>[x]);
+  int get hashCode => x.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -2931,19 +2937,30 @@ class InputDecoration {
   /// {@endtemplate}
   ///
   /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [floatingLabelAlignment] which defines where the floating label should
+  ///    be displayed.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// {@template flutter.material.inputDecoration.floatingLabelAlignment}
   /// Defines **where** the floating label should be displayed.
   ///
-  /// [FloatingLabelAlignment.left] aligns the floating label to the left on top
-  /// of the field.
+  /// [FloatingLabelAlignment.left] aligns the floating label to the leftmost
+  /// possible position, which is vertically adjacent to the label, on top of
+  /// the field.
   ///
   /// [FloatingLabelAlignment.center] aligns the floating label to the center on
   /// top of the field.
   /// {@endtemplate}
   ///
   /// If null, [InputDecorationTheme.floatingLabelAlignment] will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [floatingLabelBehavior] which defines how the floating label should be
+  ///    displayed.
   final FloatingLabelAlignment? floatingLabelAlignment;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -3864,6 +3881,7 @@ class InputDecorationTheme with Diagnosticable {
     this.constraints,
   }) : assert(isDense != null),
        assert(isCollapsed != null),
+       assert(floatingLabelAlignment != null),
        assert(filled != null),
        assert(alignLabelWithHint != null);
 
@@ -3954,6 +3972,8 @@ class InputDecorationTheme with Diagnosticable {
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelAlignment}
+  ///
+  /// Defaults to [FloatingLabelAlignment.left].
   final FloatingLabelAlignment floatingLabelAlignment;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
