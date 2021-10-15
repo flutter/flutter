@@ -182,12 +182,14 @@ def to_gn_args(args):
       # The GN arg is not available in the windows toolchain.
       gn_args['enable_lto'] = enable_lto
 
-    gn_args['use_ios_simulator'] = False
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
         gn_args['target_os'] = 'ios'
         gn_args['use_ios_simulator'] = args.simulator
+    elif args.target_os == 'mac':
+        gn_args['target_os'] = 'mac'
+        gn_args['use_ios_simulator'] = False
     elif args.target_os == 'fuchsia':
         gn_args['target_os'] = 'fuchsia'
     elif args.target_os == 'winuwp':
