@@ -208,6 +208,10 @@ targets:
     properties:
       add_recipes_cq: "true"
       gcs_goldens_bucket: flutter_logs
+      dependencies: >-
+        [
+          {"dependency": "goldctl"}
+        ]
     timeout: 60
     scheduler: luci
     runIf:
@@ -274,6 +278,10 @@ targets:
     recipe: web_engine
     properties:
       gcs_goldens_bucket: flutter_logs
+      dependencies: >-
+        [
+          {"dependency": "goldctl"}
+        ]
     timeout: 60
     scheduler: luci
     runIf:
