@@ -20,7 +20,6 @@ import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import java.io.FileNotFoundException;
@@ -365,8 +364,7 @@ public class PlatformPlugin {
       PlatformChannel.SystemChromeStyle systemChromeStyle) {
     Window window = activity.getWindow();
     View view = window.getDecorView();
-    WindowInsetsControllerCompat windowInsetsControllerCompat =
-        new WindowInsetsControllerCompat(window, view);
+    int flags = view.getSystemUiVisibility();
 
     // SYSTEM STATUS BAR -------------------------------------------------------------------
     // You can't change the color of the system status bar until SDK 21, and you can't change the
@@ -379,14 +377,11 @@ public class PlatformPlugin {
       if (systemChromeStyle.statusBarIconBrightness != null) {
         switch (systemChromeStyle.statusBarIconBrightness) {
           case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+            // View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            flags |= 0x2000;
             break;
           case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+            flags &= ~0x2000;
             break;
         }
       }
@@ -413,14 +408,11 @@ public class PlatformPlugin {
       if (systemChromeStyle.systemNavigationBarIconBrightness != null) {
         switch (systemChromeStyle.systemNavigationBarIconBrightness) {
           case DARK:
-            // Dark navigation bar icon brightness.
-            // Light navigation bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightNavigationBars(true);
+            // View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            flags |= 0x10;
             break;
           case LIGHT:
-            // Light navigation bar icon brightness.
-            // Dark navigation bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightNavigationBars(false);
+            flags &= ~0x10;
             break;
         }
       }
@@ -446,6 +438,7 @@ public class PlatformPlugin {
           systemChromeStyle.systemNavigationBarContrastEnforced);
     }
 
+    view.setSystemUiVisibility(flags);
     currentTheme = systemChromeStyle;
   }
 
