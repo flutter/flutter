@@ -496,7 +496,7 @@ class TextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar!.remove();
+    _toolbar?.remove();
     _toolbar = null;
   }
 
