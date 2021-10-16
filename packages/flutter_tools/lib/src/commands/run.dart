@@ -16,7 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -248,7 +248,7 @@ class RunCommand extends RunCommandBase {
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
-    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
+    addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -324,7 +324,7 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
-      // TODO(jonahwilliams): Off by default with investigating whether this
+      // TODO(zanderso): Off by default with investigating whether this
       // is slower for certain use cases.
       // See: https://github.com/flutter/flutter/issues/49499
       ..addFlag('fast-start',
@@ -342,6 +342,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   final String description = 'Run your Flutter app on an attached device.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   List<Device> devices;
   bool webMode = false;
@@ -560,7 +563,6 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
-          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

@@ -33,6 +33,7 @@ void main() {
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
+        '--verbose',
         '--platforms=ios',
         '-i',
         'objc',
@@ -191,11 +192,14 @@ void main() {
               // Skip bitcode stripping since we just checked that above.
             },
           );
+          printOnFailure('Output of xcode_backend.sh:');
+          printOnFailure(xcodeBackendResult.stdout.toString());
+          printOnFailure(xcodeBackendResult.stderr.toString());
 
           expect(xcodeBackendResult.exitCode, 0);
           expect(outputFlutterFrameworkBinary.existsSync(), isTrue);
           expect(outputAppFrameworkBinary.existsSync(), isTrue);
-        }, skip: !platform.isMacOS || buildMode != BuildMode.release);
+        }, skip: !platform.isMacOS || buildMode != BuildMode.release); // [intended] only makes sense on macos.
 
         testWithoutContext('validate obfuscation', () {
           final ProcessResult grepResult = processManager.runSync(<String>[
@@ -245,6 +249,7 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
-  }, skip: !platform.isMacOS, timeout: const Timeout(Duration(minutes: 5))
+  }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
+     timeout: const Timeout(Duration(minutes: 5))
   );
 }

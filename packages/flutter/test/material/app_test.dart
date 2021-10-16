@@ -11,7 +11,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -461,7 +460,7 @@ void main() {
     expect(dependentBuildCount, equals(4));
 
     // didChangeAccessibilityFeatures
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
     addTearDown(tester.binding.window.clearAccessibilityFeaturesTestValue);
 
     await tester.pump();
@@ -632,7 +631,6 @@ void main() {
         darkTheme: ThemeData(
           brightness: Brightness.dark,
         ),
-        themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -658,7 +656,6 @@ void main() {
         darkTheme: ThemeData(
           brightness: Brightness.dark,
         ),
-        themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -768,7 +765,7 @@ void main() {
 
   testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -795,7 +792,7 @@ void main() {
 
   testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -828,7 +825,7 @@ void main() {
 
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    tester.binding.window.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -1070,6 +1067,81 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
+  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior(),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Overscroll indicator can be set by theme', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      // The current default is glowing, setting via the theme should override.
+      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Overscroll indicator in MaterialScrollBehavior takes precedence over theme', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      // MaterialScrollBehavior.androidOverscrollIndicator takes precedence over theme.
+      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          )
+        ]
+      )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
   testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
@@ -1096,26 +1168,6 @@ class MockScrollBehavior extends ScrollBehavior {
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
-}
-
-class MockAccessibilityFeature implements AccessibilityFeatures {
-  @override
-  bool get accessibleNavigation => true;
-
-  @override
-  bool get boldText => true;
-
-  @override
-  bool get disableAnimations => true;
-
-  @override
-  bool get highContrast => true;
-
-  @override
-  bool get invertColors => true;
-
-  @override
-  bool get reduceMotion => true;
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

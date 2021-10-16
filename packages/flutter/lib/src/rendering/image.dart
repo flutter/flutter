@@ -182,7 +182,8 @@ class RenderImage extends RenderBox {
       value?.addListener(markNeedsPaint);
   }
 
-  /// Used to set the filterQuality of the image
+  /// Used to set the filterQuality of the image.
+  ///
   /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
   /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
@@ -271,7 +272,7 @@ class RenderImage extends RenderBox {
 
   /// Whether to invert the colors of the image.
   ///
-  /// inverting the colors of an image applies a new color filter to the paint.
+  /// Inverting the colors of an image applies a new color filter to the paint.
   /// If there is another specified color filter, the invert will be applied
   /// after it. This is primarily used for implementing smart invert on iOS.
   bool get invertColors => _invertColors;

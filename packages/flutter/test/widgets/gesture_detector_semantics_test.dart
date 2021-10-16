@@ -287,7 +287,6 @@ void main() {
         Center(
           child: RawGestureDetector(
             key: detectorKey,
-            gestures: const <Type, GestureRecognizerFactory>{},
             semantics: _TestSemanticsGestureDelegate(
               onTap: () { logs.add('tap'); },
               onLongPress: () { logs.add('longPress'); },

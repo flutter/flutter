@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/foundation.dart' show FlutterExceptionHandler;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -737,8 +741,7 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(platform: TargetPlatform.android),
-      cupertinoOverrideTheme: null,
+      typography: Typography.material2018(),
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
@@ -1915,7 +1918,6 @@ void main() {
           await tester.pumpWidget(
             MediaQuery(
               data: const MediaQueryData(
-                padding: EdgeInsets.zero,
                 viewPadding: EdgeInsets.all(20),
                 viewInsets: EdgeInsets.all(100),
               ),
@@ -2591,7 +2593,8 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
           Offset(-scaffoldWidth, 0.0), // drag to left gesture
         ];
         break;
-      default:
+      case DismissDirection.none:
+        break;
     }
   }
 

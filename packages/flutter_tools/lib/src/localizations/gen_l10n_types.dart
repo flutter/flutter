@@ -193,7 +193,8 @@ class Placeholder {
       example = _stringAttribute(resourceId, name, attributes, 'example'),
       type = _stringAttribute(resourceId, name, attributes, 'type') ?? 'Object',
       format = _stringAttribute(resourceId, name, attributes, 'format'),
-      optionalParameters = _optionalParameters(resourceId, name, attributes);
+      optionalParameters = _optionalParameters(resourceId, name, attributes),
+      isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
 
   final String resourceId;
   final String name;
@@ -201,6 +202,7 @@ class Placeholder {
   final String? type;
   final String? format;
   final List<OptionalParameter> optionalParameters;
+  final bool? isCustomDateFormat;
 
   bool get requiresFormatting => <String>['DateTime', 'double', 'num'].contains(type) || (type == 'int' && format != null);
   bool get isNumber => <String>['double', 'int', 'num'].contains(type);
@@ -226,6 +228,25 @@ class Placeholder {
       );
     }
     return value;
+  }
+
+  static bool? _boolAttribute(
+      String resourceId,
+      String name,
+      Map<String, Object?> attributes,
+      String attributeName,
+      ) {
+    final Object? value = attributes[attributeName];
+    if (value == null) {
+      return null;
+    }
+    if (value != 'true' && value != 'false') {
+      throw L10nException(
+        'The "$attributeName" value of the "$name" placeholder in message $resourceId '
+            'must be a boolean value.',
+      );
+    }
+    return value == 'true';
   }
 
   static List<OptionalParameter> _optionalParameters(

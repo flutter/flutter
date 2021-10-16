@@ -451,14 +451,14 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
@@ -476,14 +476,14 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
@@ -503,7 +503,7 @@ void main() {
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
         FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar'],
           stdin: stdin,
         ),
       );
@@ -512,7 +512,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(
@@ -529,7 +529,7 @@ void main() {
       Cache.flutterRoot = '';
       processManager.addCommand(
         FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/pub', 'upgrade', '-h'],
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h'],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
       );
@@ -538,7 +538,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(

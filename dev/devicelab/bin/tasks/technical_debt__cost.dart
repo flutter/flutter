@@ -58,7 +58,7 @@ Future<double> findCostsForFile(File file) async {
       total += deprecationCost;
     if (line.contains(legacyDeprecationPattern))
       total += legacyDeprecationCost;
-    if (isTest && line.contains('skip:'))
+    if (isTest && line.contains('skip:') && !line.contains('[intended]'))
       total += skipCost;
     if (isDart && isOptingOutOfNullSafety(line))
       total += fileNullSafetyMigrationCost;

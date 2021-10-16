@@ -106,6 +106,9 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
     if (!boolArg('current-package')) {

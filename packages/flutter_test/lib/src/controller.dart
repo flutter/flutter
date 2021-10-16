@@ -705,11 +705,9 @@ abstract class WidgetController {
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: startLocation,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: startLocation,
             pointer: pointer,
             buttons: buttons,

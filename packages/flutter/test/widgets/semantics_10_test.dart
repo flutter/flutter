@@ -92,7 +92,6 @@ class TestWidget extends SingleChildRenderObjectWidget {
 }
 
 class RenderTest extends RenderProxyBox {
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -107,6 +106,7 @@ class RenderTest extends RenderProxyBox {
 
   }
 
+  String get label => _label;
   String _label = '<>';
   set label(String value) {
     if (value == _label)
@@ -116,6 +116,7 @@ class RenderTest extends RenderProxyBox {
   }
 
 
+  bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
     if (_isSemanticBoundary == value)

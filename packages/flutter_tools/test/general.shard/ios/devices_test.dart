@@ -34,7 +34,7 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
-  final FakePlatform linuxPlatform = FakePlatform(operatingSystem: 'linux');
+  final FakePlatform linuxPlatform = FakePlatform();
   final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   group('IOSDevice', () {
@@ -76,7 +76,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       );
     });
 
@@ -92,7 +92,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -105,7 +105,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -118,7 +118,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -131,7 +131,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -144,7 +144,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       ).majorSdkVersion, 0);
     });
 
@@ -160,7 +160,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -178,7 +178,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -202,7 +202,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
-              interfaceType: IOSDeviceInterface.usb,
+              interfaceType: IOSDeviceConnectionInterface.usb,
             );
           },
           throwsAssertionError,
@@ -290,7 +290,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
-          interfaceType: IOSDeviceInterface.usb,
+          interfaceType: IOSDeviceConnectionInterface.usb,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -351,7 +351,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       );
 
       device2 = IOSDevice(
@@ -365,7 +365,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceInterface.usb,
+        interfaceType: IOSDeviceConnectionInterface.usb,
       );
     });
 

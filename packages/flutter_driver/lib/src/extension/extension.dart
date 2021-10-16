@@ -163,7 +163,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///
 ///   final int times;
 /// }
-///```
+/// ```
 ///
 /// ```dart
 /// class SomeCommandResult extends Result {

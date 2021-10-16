@@ -32,7 +32,7 @@ void main() {
 
     expect(await compute(test1Async, 0), 1);
     expect(compute(test2Async, 0), throwsException);
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
 
   test('compute closes all ports', () async {
     // Run a Dart script that calls compute().

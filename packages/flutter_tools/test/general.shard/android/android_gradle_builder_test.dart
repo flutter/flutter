@@ -407,7 +407,6 @@ void main() {
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.directory('android')
@@ -495,7 +494,6 @@ void main() {
           '-Pcode-size-directory=foo',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.directory('android')
@@ -655,7 +653,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
-        exitCode: 0,
       ));
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
@@ -773,7 +770,6 @@ void main() {
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -847,7 +843,6 @@ void main() {
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -921,7 +916,6 @@ void main() {
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -1128,7 +1122,6 @@ void main() {
           '-Ptarget-platform=android-arm',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -1213,7 +1206,6 @@ void main() {
           '-Ptarget-platform=android-arm64',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -1298,7 +1290,6 @@ void main() {
           '-Ptarget-platform=android-x86',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -1383,7 +1374,6 @@ void main() {
           '-Ptarget-platform=android-x64',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x64/flutter_embedding_release.pom')

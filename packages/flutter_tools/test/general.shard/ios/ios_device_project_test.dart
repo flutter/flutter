@@ -87,6 +87,6 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     iProxy: IProxy.test(logger: BufferLogger.test(), processManager: FakeProcessManager.any()),
-    interfaceType: IOSDeviceInterface.usb,
+    interfaceType: IOSDeviceConnectionInterface.usb,
   );
 }

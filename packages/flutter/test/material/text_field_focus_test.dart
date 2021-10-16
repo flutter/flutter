@@ -9,6 +9,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/87099
+  testWidgets('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Navigator(
+            pages: <Page<void>>[_APage(), _BPage()],
+            onPopPage: (Route<dynamic> route, dynamic result) {
+              return false;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -530,4 +548,20 @@ void main() {
     expect(focusNodeA.hasFocus, false);
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
+}
+
+class _APage extends Page<void> {
+  @override
+  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+    settings: this,
+    pageBuilder: (_, __, ___) => const TextField(autofocus: true),
+  );
+}
+
+class _BPage extends Page<void> {
+  @override
+  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+    settings: this,
+    pageBuilder: (_, __, ___) => const Text('B'),
+  );
 }

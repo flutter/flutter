@@ -380,7 +380,7 @@ void main() {
       canceledPressed = true;
     }
 
-    Widget builder(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
+    Widget builder(BuildContext context, ControlsDetails details) {
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(
@@ -388,13 +388,13 @@ void main() {
           child: Row(
             children: <Widget>[
               TextButton(
-                onPressed: onStepContinue,
+                onPressed: details.onStepContinue,
                 child: const Text('Let us continue!'),
               ),
               Container(
                 margin: const EdgeInsetsDirectional.only(start: 8.0),
                 child: TextButton(
-                  onPressed: onStepCancel,
+                  onPressed: details.onStepCancel,
                   child: const Text('Cancel This!'),
                 ),
               ),
@@ -448,6 +448,100 @@ void main() {
     expect(continuePressed, isTrue);
   });
 
+testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
+
+    int currentStep = 0;
+    void setContinue() {
+      currentStep += 1;
+    }
+
+    void setCanceled() {
+      currentStep -= 1;
+    }
+
+    Widget builder(BuildContext context, ControlsDetails details) {
+      // For the purposes of testing, only render something for the active
+      // step.
+      if (!details.isActive)
+        return Container();
+
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 48.0),
+          child: Row(
+            children: <Widget>[
+              TextButton(
+                onPressed: details.onStepContinue,
+                child: Text('Continue to ${details.stepIndex + 1}'),
+              ),
+              Container(
+                margin: const EdgeInsetsDirectional.only(start: 8.0),
+                child: TextButton(
+                  onPressed: details.onStepCancel,
+                  child: Text('Return to ${details.stepIndex - 1}'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  currentStep: currentStep,
+                  controlsBuilder: builder,
+                  onStepCancel: () => setState(setCanceled),
+                  onStepContinue: () => setState(setContinue),
+                  steps: const <Step>[
+                    Step(
+                      title: Text('A'),
+                      state: StepState.complete,
+                      content: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                      ),
+                    ),
+                    Step(
+                      title: Text('C'),
+                      content: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Never mind that there is no Step -1 or Step 2 -- actual build method
+    // implementations would make those checks.
+    expect(find.text('Return to -1'), findsNWidgets(1));
+    expect(find.text('Continue to 1'), findsNWidgets(1));
+    expect(find.text('Return to 0'), findsNWidgets(0));
+    expect(find.text('Continue to 2'), findsNWidgets(0));
+
+    await tester.tap(find.text('Continue to 1').first);
+    await tester.pumpAndSettle();
+
+    // Never mind that there is no Step -1 or Step 2 -- actual build method
+    // implementations would make those checks.
+    expect(find.text('Return to -1'), findsNWidgets(0));
+    expect(find.text('Continue to 1'), findsNWidgets(0));
+    expect(find.text('Return to 0'), findsNWidgets(1));
+    expect(find.text('Continue to 2'), findsNWidgets(1));
+  });
+
   testWidgets('Stepper error test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -489,7 +583,6 @@ void main() {
                 Step(
                   title: const Text('Step 2'),
                   content:  Stepper(
-                    type: StepperType.vertical,
                     steps: const <Step>[
                       Step(
                         title: Text('Nested step 1'),
@@ -608,8 +701,6 @@ void main() {
       MaterialApp(
         home: Material(
           child: Stepper(
-            currentStep: 0,
-            type: StepperType.vertical,
             steps: const <Step>[
               Step(
                 title: Text('Step 0'),
@@ -634,7 +725,6 @@ void main() {
       MaterialApp(
         home: Material(
           child: Stepper(
-            currentStep: 0,
             type: StepperType.horizontal,
             steps: const <Step>[
               Step(
@@ -872,7 +962,7 @@ void main() {
 
     // Light theme
     final ColorScheme light = ThemeData.light().colorScheme;
-    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.light));
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light));
     expect(circleFillColor(), light.primary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));
     await tester.pumpAndSettle();
@@ -880,7 +970,7 @@ void main() {
 
     // Dark theme
     final ColorScheme dark = ThemeData.dark().colorScheme;
-    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.dark));
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark));
     await tester.pumpAndSettle();
     expect(circleFillColor(), dark.secondary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.dark));
@@ -953,4 +1043,150 @@ void main() {
 
      expect(material.elevation, 2.0);
    });
+
+  testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
+    const Color untappedColor = Colors.blue;
+    const Color tappedColor = Colors.red;
+    int index = 0;
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            // Must break this out into its own widget purely to be able to call `setState()`
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Stepper(
+                  onStepTapped: (int i) => setState(() => index = i),
+                  currentStep: index,
+                  type: StepperType.horizontal,
+                  steps: const <Step>[
+                    Step(
+                      title: Text('Step 1'),
+                      content: _TappableColorWidget(
+                        key: Key('tappable-color'),
+                        tappedColor: tappedColor,
+                        untappedColor: untappedColor,
+                      ),
+                    ),
+                    Step(
+                      title: Text('Step 2'),
+                      content: Text('Step 2 Content'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Widget widget = buildFrame();
+    await tester.pumpWidget(widget);
+
+    // Set up a getter to examine the MacGuffin's color
+    Color getColor() => tester.widget<ColoredBox>(
+      find.descendant(of: find.byKey(const Key('tappable-color')), matching: find.byType(ColoredBox)),
+    ).color;
+
+    // We are on step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+    expect(getColor(), untappedColor);
+
+    await tester.tap(find.byKey(const Key('tap-me')));
+    await tester.pumpAndSettle();
+    expect(getColor(), tappedColor);
+
+    // Now flip to step 2
+    await tester.tap(find.text('Step 2'));
+    await tester.pumpAndSettle();
+
+    // Confirm that we did in fact flip to step 2
+    expect(find.text('Step 2 Content'), findsOneWidget);
+
+    // Now go back to step 1
+    await tester.tap(find.text('Step 1'));
+    await tester.pumpAndSettle();
+
+    // Confirm that we flipped back to step 1
+    expect(find.text('Step 2 Content'), findsNothing);
+
+    // The color should still be `tappedColor`
+    expect(getColor(), tappedColor);
+  });
+       testWidgets('Stepper custom margin', (WidgetTester tester) async {
+
+      const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
+        bottom: 20,
+        top: 20,
+      );
+
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               margin: margin,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+
+     final Stepper material = tester.firstWidget<Stepper>(
+       find.descendant(
+         of: find.byType(Material),
+         matching: find.byType(Stepper),
+       ),
+     );
+
+     expect(material.margin, equals(margin));
+   });
+}
+
+class _TappableColorWidget extends StatefulWidget {
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+
+  final Color tappedColor;
+  final Color untappedColor;
+
+  @override
+  State<StatefulWidget> createState() => _TappableColorWidgetState();
+}
+
+class _TappableColorWidgetState extends State<_TappableColorWidget> {
+
+  Color? color;
+
+  @override
+  void initState() {
+    super.initState();
+    color = widget.untappedColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState((){
+          color = widget.tappedColor;
+        });
+      },
+      child: Container(
+        key: const Key('tap-me'),
+        height: 50,
+        width: 50,
+        color: color,
+      ),
+    );
+  }
 }

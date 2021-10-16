@@ -101,9 +101,6 @@ enum HostArtifact {
   iproxy,
   /// The root of the sky_engine package.
   skyEnginePath,
-
-  /// The pub or pub.bat executable
-  pubExecutable,
 }
 
 // TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
@@ -263,11 +260,6 @@ String _hostArtifactToFileName(HostArtifact artifact, bool windows) {
     case HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
     case HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
-    case HostArtifact.pubExecutable:
-      if (windows) {
-        return 'pub.bat';
-      }
-      return 'pub';
   }
 }
 
@@ -405,9 +397,6 @@ class CachedArtifacts implements Artifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         final String path = _fileSystem.path.join(dartPackageDirectory.path,  _hostArtifactToFileName(artifact, _platform.isWindows));
         return _fileSystem.directory(path);
-      case HostArtifact.pubExecutable:
-        final String path = _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _hostArtifactToFileName(artifact, _platform.isWindows));
-        return _fileSystem.file(path);
       case HostArtifact.dart2jsSnapshot:
       case HostArtifact.dartdevcSnapshot:
       case HostArtifact.kernelWorkerSnapshot:
@@ -431,10 +420,12 @@ class CachedArtifacts implements Artifacts {
   }) {
     platform = _mapTargetPlatform(platform);
     switch (platform) {
+      case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform!, mode, environmentType);
@@ -449,7 +440,7 @@ class CachedArtifacts implements Artifacts {
         return _getFuchsiaArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      default: // could be null, but that can't be specified as a case.
+      case null:
         return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
     }
   }
@@ -479,7 +470,29 @@ class CachedArtifacts implements Artifacts {
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterFramework:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterPatchedSdkPath:
+      case Artifact.flutterTester:
+      case Artifact.flutterXcframework:
+      case Artifact.fontSubset:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformKernelDill:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -495,7 +508,27 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterFramework:
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem);
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterPatchedSdkPath:
+      case Artifact.flutterTester:
+      case Artifact.fontSubset:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformKernelDill:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -524,7 +557,26 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
         final String artifactFileName = _artifactToFileName(artifact, platform, mode)!;
         return _fileSystem.path.join(root, runtime, artifactFileName);
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterFramework:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterTester:
+      case Artifact.flutterXcframework:
+      case Artifact.fontSubset:
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -565,7 +617,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
       case Artifact.linuxHeaders:
-        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
         String platformDirName = _enginePlatformDirectoryName(platform);
@@ -597,7 +649,10 @@ class CachedArtifacts implements Artifacts {
                      .childDirectory('windows-uwp-x64-${getNameForBuildMode(mode ?? BuildMode.debug)}')
                      .childFile(_artifactToFileName(artifact, platform, mode)!)
                      .path;
-      default:
+      case Artifact.flutterFramework:
+      case Artifact.flutterXcframework:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
     }
   }
@@ -610,7 +665,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
-        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
         if (mode == BuildMode.debug || mode == null) {
@@ -791,9 +846,6 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         final String path = _fileSystem.path.join(dartPackageDirectory.path,  _hostArtifactToFileName(artifact, _platform.isWindows));
         return _fileSystem.directory(path);
-      case HostArtifact.pubExecutable:
-        final String path = _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin',  _hostArtifactToFileName(artifact, _platform.isWindows));
-        return _fileSystem.file(path);
       case HostArtifact.iosDeploy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform.isWindows);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);

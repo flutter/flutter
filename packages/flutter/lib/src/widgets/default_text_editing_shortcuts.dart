@@ -346,14 +346,16 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end): MoveSelectionRightByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home): MoveSelectionLeftByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionRightByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionLeftByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * End
-    //   * Home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
@@ -366,8 +368,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + shift + arrow left
     //   * Meta + shift + arrow right
     //   * Meta + shift + arrow up
-    //   * Shift + end
-    //   * Shift + home
     //   * Meta + delete
     //   * Meta + backspace
   };
@@ -454,8 +454,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionLeftTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionRightTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionUpTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end, shift: true): ExpandSelectionRightByLineTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home, shift: true): ExpandSelectionLeftByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionRightByLineTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionLeftByLineTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, control: true): CutSelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(),

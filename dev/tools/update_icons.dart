@@ -5,6 +5,7 @@
 // Regenerates the material icons file.
 // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
 
+import 'dart:collection';
 import 'dart:convert' show LineSplitter;
 import 'dart:io';
 
@@ -35,71 +36,42 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
   'share': <String>['share', 'ios_share'],
 };
 
-// Rewrite certain Flutter IDs (reserved keywords, numbers) using exact matching.
-const Map<String, String> identifierRewrites = <String, String>{
-  '1x': 'one_x',
-  '1x_mobiledata': 'one_x_mobiledata',
-  '360': 'threesixty',
-  '2d': 'twod',
-  '3d': 'threed',
-  '3d_rotation': 'threed_rotation',
-  '3p': 'three_p',
-  '6_ft': 'six_ft',
-  '6_ft_apart': 'six_ft_apart',
-  '3g': 'three_g',
-  '3g_mobiledata': 'three_g_mobiledata',
-  '4g': 'four_g',
-  '4g_mobiledata': 'four_g_mobiledata',
-  '4g_plus': 'four_g_plus',
-  '4g_plus_mobiledata': 'four_g_plus_mobiledata',
-  '5g': 'five_g',
-  '30fps': 'thirty_fps',
-  '30fps_select': 'thirty_fps_select',
-  '60fps': 'sixty_fps',
-  '60fps_select': 'sixty_fps_select',
-  '1k': 'one_k',
-  '2k': 'two_k',
-  '3k': 'three_k',
-  '4k': 'four_k',
-  '5k': 'five_k',
-  '6k': 'six_k',
-  '7k': 'seven_k',
-  '8k': 'eight_k',
-  '9k': 'nine_k',
-  '10k': 'ten_k',
-  '1k_plus': 'one_k_plus',
-  '2k_plus': 'two_k_plus',
-  '3k_plus': 'three_k_plus',
-  '4k_plus': 'four_k_plus',
-  '5k_plus': 'five_k_plus',
-  '6k_plus': 'six_k_plus',
-  '7k_plus': 'seven_k_plus',
-  '8k_plus': 'eight_k_plus',
-  '9k_plus': 'nine_k_plus',
-  '1mp': 'one_mp',
-  '2mp': 'two_mp',
-  '3mp': 'three_mp',
-  '4mp': 'four_mp',
-  '5mp': 'five_mp',
-  '6mp': 'six_mp',
-  '7mp': 'seven_mp',
-  '8mp': 'eight_mp',
-  '9mp': 'nine_mp',
-  '10mp': 'ten_mp',
-  '11mp': 'eleven_mp',
-  '12mp': 'twelve_mp',
-  '13mp': 'thirteen_mp',
-  '14mp': 'fourteen_mp',
-  '15mp': 'fifteen_mp',
-  '16mp': 'sixteen_mp',
-  '17mp': 'seventeen_mp',
-  '18mp': 'eighteen_mp',
-  '19mp': 'nineteen_mp',
-  '20mp': 'twenty_mp',
-  '21mp': 'twenty_one_mp',
-  '22mp': 'twenty_two_mp',
-  '23mp': 'twenty_three_mp',
-  '24mp': 'twenty_four_mp',
+// Rewrite certain Flutter IDs (numbers) using prefix matching.
+const Map<String, String> identifierPrefixRewrites = <String, String>{
+  '_1': 'one_',
+  '_2': 'two_',
+  '_3': 'three_',
+  '_4': 'four_',
+  '_5': 'five_',
+  '_6': 'six_',
+  '_7': 'seven_',
+  '_8': 'eight_',
+  '_9': 'nine_',
+  '_10': 'ten_',
+  '_11': 'eleven_',
+  '_12': 'twelve_',
+  '_13': 'thirteen_',
+  '_14': 'fourteen_',
+  '_15': 'fifteen_',
+  '_16': 'sixteen_',
+  '_17': 'seventeen_',
+  '_18': 'eighteen_',
+  '_19': 'nineteen_',
+  '_20': 'twenty_',
+  '_21': 'twenty_one_',
+  '_22': 'twenty_two_',
+  '_23': 'twenty_three_',
+  '_24': 'twenty_four_',
+  '_30': 'thirty_',
+  '_60': 'sixty_',
+  '_360': 'threesixty',
+  '_2d': 'twod',
+  '_3d': 'threed',
+  '_3d_rotation': 'threed_rotation',
+};
+
+// Rewrite certain Flutter IDs (reserved keywords) using exact matching.
+const Map<String, String> identifierExactRewrites = <String, String>{
   'class': 'class_',
   'new': 'new_',
   'switch': 'switch_',
@@ -208,33 +180,39 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap = stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
   _testIsMapSuperset(newTokenPairMap, oldTokenPairMap);
 
   final String iconClassFileData = iconClassFile.readAsStringSync();
 
   stderr.writeln('Generating icons file...');
-  final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
+  final String newIconData = _regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
     stdout.write(newIconData);
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
-    _overwriteOldCodepoints(newCodepointsFile, oldCodepointsFile);
+    _regenerateCodepointsFile(oldCodepointsFile, newTokenPairMap);
   }
 }
 
 ArgResults _handleArguments(List<String> args) {
   final ArgParser argParser = ArgParser()
-    ..addOption(_newCodepointsPathOption, defaultsTo: _defaultNewCodepointsPath, help: 'Location of the new codepoints directory')
-    ..addOption(_oldCodepointsPathOption, defaultsTo: _defaultOldCodepointsPath, help: 'Location of the existing codepoints directory')
-    ..addOption(_iconsClassPathOption, defaultsTo: _defaultIconsPath, help: 'Location of the material icons file')
-    ..addFlag(_dryRunOption, defaultsTo: false);
+    ..addOption(_newCodepointsPathOption,
+        defaultsTo: _defaultNewCodepointsPath,
+        help: 'Location of the new codepoints directory')
+    ..addOption(_oldCodepointsPathOption,
+        defaultsTo: _defaultOldCodepointsPath,
+        help: 'Location of the existing codepoints directory')
+    ..addOption(_iconsClassPathOption,
+        defaultsTo: _defaultIconsPath,
+        help: 'Location of the material icons file')
+    ..addFlag(_dryRunOption);
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
       print(argParser.usage);
@@ -244,12 +222,12 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-Map<String, String> stringToTokenPairMap(String codepointData) {
+Map<String, String> _stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
 
-  final Map<String, String> pairs = <String, String>{};
+  final Map<String, String> pairs = <String,String>{};
 
   for (final String line in cleanData) {
     final List<String> tokens = line.split(' ');
@@ -262,8 +240,10 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
-  final List<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry)).toList();
+String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
+  final List<_Icon> newIcons = tokenPairMap.entries
+      .map((MapEntry<String, String> entry) => _Icon(entry))
+      .toList();
   newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
@@ -280,15 +260,14 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
       final List<String> platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates styled icon declarations.
-        for (final String style in _Icon.styleSuffixes) {
+        for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final _Icon agnosticIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[0]}$style',
+                    (_Icon icon) => icon.id == '${ids[0]}$style',
                 orElse: () => throw ids[0]);
             final _Icon iOSIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[1]}$style',
+                    (_Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-
             platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon));
           } catch (e) {
             if (style == '') {
@@ -310,7 +289,7 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join('');
+      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -326,7 +305,7 @@ void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> o
 
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
     stderr.writeln('''
-Error: New codepoints file does not contain all the existing codepoints.\n
+Error: New codepoints file does not contain all ${oldCodepointsSet.length} existing codepoints.\n
         Missing: ${oldCodepointsSet.difference(newCodepointsSet)}
         ''',
     );
@@ -340,10 +319,13 @@ Error: New codepoints file does not contain all the existing codepoints.\n
   }
 }
 
-// Replace the old codepoints file with the new.
-void _overwriteOldCodepoints(File newCodepointsFile, File oldCodepointsFile) {
-  stderr.writeln('Copying new codepoints file to ${oldCodepointsFile.path}.\n');
-  newCodepointsFile.copySync(oldCodepointsFile.path);
+void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTokenPairMap) {
+  stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}.\n');
+
+  final StringBuffer buf = StringBuffer();
+  final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
+  sortedNewTokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
+  oldCodepointsFile.writeAsStringSync(buf.toString());
 }
 
 class _Icon {
@@ -352,44 +334,63 @@ class _Icon {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    if (id.endsWith('_outlined') && id != 'insert_chart_outlined') {
-      shortId = _replaceLast(id, '_outlined');
+    // Determine family and htmlSuffix.
+    if (id.endsWith('_gm_outlined')) {
+      family = 'GM';
       htmlSuffix = '-outlined';
-    } else if (id.endsWith('_rounded')) {
-      shortId = _replaceLast(id, '_rounded');
-      htmlSuffix = '-round';
-    } else if (id.endsWith('_sharp')) {
-      shortId = _replaceLast(id, '_sharp');
-      htmlSuffix = '-sharp';
+    } else if (id.endsWith('_gm_filled')) {
+      family = 'GM';
+      htmlSuffix = '-filled';
+    } else if (id.endsWith('_monoline_outlined')) {
+      family = 'Monoline';
+      htmlSuffix = '-outlined';
+    } else if (id.endsWith('_monoline_filled')) {
+      family = 'Monoline';
+      htmlSuffix = '-filled';
     } else {
-      shortId = id;
-      htmlSuffix = '';
-    }
-
-    flutterId = id;
-    for (final MapEntry<String, String> rewritePair in identifierRewrites.entries) {
-      if (shortId == rewritePair.key) {
-        flutterId = id.replaceFirst(rewritePair.key, identifierRewrites[rewritePair.key]!);
+      family = 'material';
+      if (id.endsWith('_outlined') && id != 'insert_chart_outlined') {
+        htmlSuffix = '-outlined';
+      } else if (id.endsWith('_rounded')) {
+        htmlSuffix = '-round';
+      } else if (id.endsWith('_sharp')) {
+        htmlSuffix = '-sharp';
+      } else {
+        htmlSuffix = '';
       }
     }
 
-    name = id.replaceAll('_', ' ');
+    shortId = _generateShortId(id);
+    flutterId = generateFlutterId(id);
   }
 
-  static const List<String> styleSuffixes = <String>['', '_outlined', '_rounded', '_sharp'];
+  static const List<String> _idSuffixes = <String>[
+    '_gm_outlined',
+    '_gm_filled',
+    '_monoline_outlined',
+    '_monoline_filled',
+    '_outlined',
+    '_rounded',
+    '_sharp'
+  ];
 
-  late String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  late String shortId;       // e.g. 5g
-  late String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  late String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
-  late String hexCodepoint;  // e.g. e547
+  late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  late String shortId; // e.g. 5g
+  late String flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  late String family; // e.g. material
+  late String hexCodepoint; // e.g. e547
+  late String htmlSuffix; // The suffix for the 'material-icons' HTML class.
 
-  // The suffix for the 'material-icons' HTML class.
-  late String htmlSuffix;
+  String get name => shortId.replaceAll('_', ' ').trim();
 
-  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
+  String get style => htmlSuffix == '' ? '' : ' (${htmlSuffix.replaceFirst('-', '')})';
 
-  String get dartDoc => '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; material icon named "$name"';
+  String get dartDoc =>
+      '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
+
+  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
+      ? ', matchTextDirection: true'
+      : '';
 
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
@@ -411,14 +412,52 @@ class _Icon {
 
   /// Analogous to [String.compareTo]
   int _compareTo(_Icon b) {
-    // Sort a regular icon before its variants.
     if (shortId == b.shortId) {
+      // Sort a regular icon before its variants.
       return id.length - b.id.length;
     }
     return shortId.compareTo(b.shortId);
   }
 
-  String _replaceLast(String string, String toReplace) {
+  static String _replaceLast(String string, String toReplace) {
     return string.replaceAll(RegExp('$toReplace\$'), '');
+  }
+
+  static String _generateShortId(String id) {
+    String shortId = id;
+    for (final String styleSuffix in _idSuffixes) {
+      if (styleSuffix == '_outlined' && id == 'insert_chart_outlined')
+        continue;
+      shortId = _replaceLast(shortId, styleSuffix);
+      if (shortId != id) {
+        break;
+      }
+    }
+    return shortId;
+  }
+
+  /// Given some icon's raw id, returns a valid Dart icon identifier
+  static String generateFlutterId(String id) {
+    String flutterId = id;
+    // Exact identifier rewrites.
+    for (final MapEntry<String, String> rewritePair
+    in identifierExactRewrites.entries) {
+      final String shortId = _Icon._generateShortId(id);
+      if (shortId == rewritePair.key) {
+        flutterId = id.replaceFirst(rewritePair.key, identifierExactRewrites[rewritePair.key]!);
+      }
+    }
+    // Prefix identifier rewrites.
+    for (final MapEntry<String, String> rewritePair
+    in identifierPrefixRewrites.entries) {
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, identifierPrefixRewrites[rewritePair.key]!);
+      }
+      // TODO(guidezpl): With the next icon update, this won't be necessary, remove it.
+      if (id.startsWith(rewritePair.key.replaceFirst('_', ''))) {
+        flutterId = id.replaceFirst(rewritePair.key.replaceFirst('_', ''), identifierPrefixRewrites[rewritePair.key]!);
+      }
+    }
+    return flutterId;
   }
 }

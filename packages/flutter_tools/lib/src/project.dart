@@ -163,36 +163,28 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject? _ios;
-  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
+  late final IosProject ios = IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject? _android;
-  AndroidProject get android => _android ??= AndroidProject._(this);
+  late final AndroidProject android = AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject? _web;
-  WebProject get web => _web ??= WebProject._(this);
+  late final WebProject web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  MacOSProject? _macos;
-  MacOSProject get macos => _macos ??= MacOSProject.fromFlutter(this);
+  late final MacOSProject macos = MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
-  LinuxProject? _linux;
-  LinuxProject get linux => _linux ??= LinuxProject.fromFlutter(this);
+  late final LinuxProject linux = LinuxProject.fromFlutter(this);
 
   /// The Windows sub project of this project.
-  WindowsProject? _windows;
-  WindowsProject get windows => _windows ??= WindowsProject.fromFlutter(this);
+  late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
   /// The Windows UWP sub project of this project.
-  WindowsUwpProject? _windowUwp;
-  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject.fromFlutter(this);
+  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
-  FuchsiaProject? _fuchsia;
-  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
+  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -226,6 +218,11 @@ class FlutterProject {
     .childDirectory('build')
     .childDirectory('generated')
     .childDirectory(manifest.appName);
+
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('generated_main.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -357,6 +354,7 @@ class FlutterProject {
         'version': buildName,
       if (buildNumber != null)
         'build_number': buildNumber,
+      'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
   }
@@ -414,8 +412,7 @@ class AndroidProject extends FlutterProjectPlatform {
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// Returns true if the current version of the Gradle plugin is supported.
-  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
-  bool? _isSupportedVersion;
+  late final bool isSupportedVersion = _computeSupportedVersion();
 
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
@@ -553,7 +550,6 @@ to migrate your project.
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 

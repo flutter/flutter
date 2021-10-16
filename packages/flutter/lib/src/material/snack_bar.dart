@@ -157,68 +157,19 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
-///     onPressed: () {
-///       ScaffoldMessenger.of(context).showSnackBar(
-///         SnackBar(
-///           content: const Text('Awesome Snackbar!'),
-///           action: SnackBarAction(
-///             label: 'Action',
-///             onPressed: () {
-///               // Code to execute.
-///             },
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// Here is an example of a customized [SnackBar]. It utilizes
 /// [behavior], [shape], [padding], [width], and [duration] to customize the
 /// location, appearance, and the duration for which the [SnackBar] is visible.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return ElevatedButton(
-///     child: const Text('Show Snackbar'),
-///     onPressed: () {
-///       ScaffoldMessenger.of(context).showSnackBar(
-///         SnackBar(
-///           action: SnackBarAction(
-///             label: 'Action',
-///             onPressed: () {
-///               // Code to execute.
-///             },
-///           ),
-///           content: const Text('Awesome SnackBar!'),
-///           duration: const Duration(milliseconds: 1500),
-///           width: 280.0, // Width of the SnackBar.
-///           padding: const EdgeInsets.symmetric(
-///             horizontal: 8.0,  // Inner padding for SnackBar content.
-///           ),
-///           behavior: SnackBarBehavior.floating,
-///           shape: RoundedRectangleBorder(
-///             borderRadius: BorderRadius.circular(10.0),
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -538,7 +489,6 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = Padding(
       padding: padding,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: Container(
@@ -577,7 +527,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
 
     snackBar = Material(
       shape: shape,

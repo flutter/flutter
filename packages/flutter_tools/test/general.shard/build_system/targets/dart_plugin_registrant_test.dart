@@ -11,6 +11,7 @@
 @Tags(<String>['no-shuffle'])
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -105,32 +106,25 @@ void main() {
     testWithoutContext('skipped based on environment.generateDartPluginRegistry',
         () async {
       final Environment environment = Environment.test(
-          fileSystem.currentDirectory,
-          artifacts: null,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: false,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+      );
 
       expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
       final Environment environment2 = Environment.test(
           fileSystem.currentDirectory,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: true,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+          generateDartPluginRegistry: true);
 
       expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
-
     testWithoutContext('skipped based on platform', () async {
       const Map<String, bool> canSkip = <String, bool>{
         'darwin-x64': false,
@@ -139,8 +133,8 @@ void main() {
         'windows-x64': false,
         'windows-uwp-x64': false,
         'web-javascript': true,
-        'ios': true,
-        'android': true,
+        'ios': false,
+        'android': false,
         'fuchsia-arm64': true,
         'fuchsia-x64': true,
       };
@@ -150,7 +144,7 @@ void main() {
           const DartPluginRegistrantTarget().canSkip(
             Environment.test(
               fileSystem.currentDirectory,
-              artifacts: null,
+              artifacts: Artifacts.test(),
               fileSystem: fileSystem,
               logger: BufferLogger.test(),
               processManager: FakeProcessManager.any(),
@@ -170,7 +164,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -204,7 +198,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -258,7 +252,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
@@ -295,7 +291,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -342,7 +338,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -395,7 +391,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'

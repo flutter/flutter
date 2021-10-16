@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -683,7 +687,7 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth, getSurroundingRect(tester, child: 0).width);
+    expect(childWidth, getSurroundingRect(tester).width);
     expect(childWidth, getSurroundingRect(tester, child: 1).width);
     expect(childWidth, getSurroundingRect(tester, child: 2).width);
   });
@@ -910,7 +914,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final double childWidth = getChildSize(tester, child: 0).width;
+    final double childWidth = getChildSize(tester).width;
     final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
 
     // Tap just inside segment bounds

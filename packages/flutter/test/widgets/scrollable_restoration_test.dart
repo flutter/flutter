@@ -446,7 +446,6 @@ void main() {
     expect(find.text('Tile 12'), findsNothing);
 
     final TestRestorationData initialData = await tester.getRestorationData();
-
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await gesture.moveBy(const Offset(0, -525));
     await tester.pump();
@@ -457,12 +456,12 @@ void main() {
     expect(find.text('Tile 11'), findsOneWidget);
     expect(find.text('Tile 12'), findsOneWidget);
 
-    // Restoration data hasn't changed and no frame is scheduled.
+    // Restoration data hasn't changed.
     expect(await tester.getRestorationData(), initialData);
-    expect(tester.binding.hasScheduledFrame, isFalse);
 
     // Restoration data changes with up event.
     await gesture.up();
+    await tester.pump();
     expect(await tester.getRestorationData(), isNot(initialData));
   });
 }

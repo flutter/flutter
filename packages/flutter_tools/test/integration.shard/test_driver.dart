@@ -79,6 +79,10 @@ abstract class FlutterTestDriver {
       lastTime = time;
     }
     if (_printDebugOutputToStdOut) {
+      // This is the one place in this file that can call print. It is gated by
+      // _printDebugOutputToStdOut which should not be set to true in CI; it is
+      // intended only for use in local debugging.
+      // ignore: avoid_print
       print('$time$_logPrefix$line');
     }
   }
@@ -235,8 +239,10 @@ abstract class FlutterTestDriver {
   /// an hour before setting the breakpoint. Would the code still eventually hit
   /// the breakpoint and stop?
   Future<void> breakAt(Uri uri, int line) async {
+    final String isolateId = await _getFlutterIsolateId();
+    final Future<Event> event = subscribeToPauseEvent(isolateId);
     await addBreakpoint(uri, line);
-    await waitForPause();
+    await waitForPauseEvent(isolateId, event);
   }
 
   Future<void> addBreakpoint(Uri uri, int line) async {
@@ -248,44 +254,64 @@ abstract class FlutterTestDriver {
     );
   }
 
-  // This method isn't racy. If the isolate is already paused,
-  // it will immediately return.
-  Future<Isolate> waitForPause() => waitForDebugEvent('Pause');
-  Future<Isolate> waitForResume() => waitForDebugEvent('Resume');
+  Future<Event> subscribeToPauseEvent(String isolateId) => subscribeToDebugEvent('Pause', isolateId);
+  Future<Event> subscribeToResumeEvent(String isolateId) => subscribeToDebugEvent('Resume', isolateId);
 
-  Future<Isolate> waitForDebugEvent(String kind) async {
+  Future<Isolate> waitForPauseEvent(String isolateId, Future<Event> event) =>
+      waitForDebugEvent('Pause', isolateId, event);
+  Future<Isolate> waitForResumeEvent(String isolateId, Future<Event> event) =>
+      waitForDebugEvent('Resume', isolateId, event);
+
+  Future<Isolate> waitForPause() async => subscribeAndWaitForDebugEvent('Pause', await _getFlutterIsolateId());
+  Future<Isolate> waitForResume() async => subscribeAndWaitForDebugEvent('Resume', await _getFlutterIsolateId());
+
+
+  Future<Isolate> subscribeAndWaitForDebugEvent(String kind, String isolateId) {
+    final Future<Event> event = subscribeToDebugEvent(kind, isolateId);
+    return waitForDebugEvent(kind, isolateId, event);
+  }
+
+  /// Subscribes to debug events containing [kind].
+  ///
+  /// Returns a future that completes when the [kind] event is received.
+  ///
+  /// Note that this method should be called before the command that triggers
+  /// the event to subscribe to the event in time, for example:
+  ///
+  /// ```
+  ///  var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
+  ///  ...                                             // Code that pauses the app.
+  ///  await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
+  /// ```
+  Future<Event> subscribeToDebugEvent(String kind, String isolateId) {
+    _debugPrint('Start listening for $kind events');
+
+    return _vmService.onDebugEvent
+      .where((Event event) {
+        return event.isolate.id == isolateId
+            && event.kind.startsWith(kind);
+      }).first;
+  }
+
+  /// Wait for the [event] if needed.
+  ///
+  /// Return immediately if the isolate is already in the desired state.
+  Future<Isolate> waitForDebugEvent(String kind, String isolateId, Future<Event> event) {
     return _timeoutWithMessages<Isolate>(
       () async {
-        final String flutterIsolate = await _getFlutterIsolateId();
-        final Completer<Event> pauseEvent = Completer<Event>();
-
-        // Start listening for events containing 'kind'.
-        final StreamSubscription<Event> pauseSubscription = _vmService.onDebugEvent
-          .where((Event event) {
-            return event.isolate.id == flutterIsolate
-                && event.kind.startsWith(kind);
-          })
-          .listen((Event event) {
-            if (!pauseEvent.isCompleted) {
-              pauseEvent.complete(event);
-            }
-          });
-
-        // But also check if the isolate was already at the stae we need (only after we've
-        // set up the subscription) to avoid races. If it was paused, we don't need to wait
-        // for the event.
-        final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
+        // But also check if the isolate was already at the state we need (only after we've
+        // set up the subscription) to avoid races. If it already in the desired state, we
+        // don't need to wait for the event.
+        final Isolate isolate = await _vmService.getIsolate(isolateId);
         if (isolate.pauseEvent.kind.startsWith(kind)) {
           _debugPrint('Isolate was already at "$kind" (${isolate.pauseEvent.kind}).');
+          event.ignore();
         } else {
           _debugPrint('Waiting for "$kind" event to arrive...');
-          await pauseEvent.future;
+          await event;
         }
 
-        // Cancel the subscription on either of the above.
-        await pauseSubscription.cancel();
-
-        return getFlutterIsolate();
+        return _vmService.getIsolate(isolateId);
       },
       task: 'Waiting for isolate to $kind',
     );
@@ -311,12 +337,17 @@ abstract class FlutterTestDriver {
 
   Future<Isolate> _resume(String step, bool waitForNextPause) async {
     assert(waitForNextPause != null);
+    final String isolateId = await _getFlutterIsolateId();
+
+    final Future<Event> resume = subscribeToResumeEvent(isolateId);
+    final Future<Event> pause = subscribeToPauseEvent(isolateId);
+
     await _timeoutWithMessages<dynamic>(
-      () async => _vmService.resume(await _getFlutterIsolateId(), step: step),
+      () async => _vmService.resume(isolateId, step: step),
       task: 'Resuming isolate (step=$step)',
     );
-    await waitForResume();
-    return waitForNextPause ? waitForPause() : null;
+    await waitForResumeEvent(isolateId, resume);
+    return waitForNextPause? waitForPauseEvent(isolateId, pause): null;
   }
 
   Future<ObjRef> evaluateInFrame(String expression) async {
@@ -582,7 +613,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);
           if (!startPaused) {
-            await resume(waitForNextPause: false);
+            await resume();
           }
         }
 
@@ -607,7 +638,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   Future<void> hotRestart({ bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
   Future<void> hotReload({ bool debounce = false, int debounceDurationOverrideMs }) =>
-      _restart(fullRestart: false, debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
+      _restart(debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
 
   Future<void> scheduleFrame() async {
     if (_currentRunningAppId == null) {
@@ -776,7 +807,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       if (beforeStart != null) {
         await beforeStart();
       }
-      await resume(waitForNextPause: false);
+      await resume();
     }
   }
 

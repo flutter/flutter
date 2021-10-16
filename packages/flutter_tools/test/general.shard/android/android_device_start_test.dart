@@ -64,7 +64,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app.apk')..createSync();
@@ -130,7 +130,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app.apk')..createSync();
@@ -168,7 +168,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app.apk')..createSync();
@@ -191,8 +191,6 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
     ));
-    // TODO(jonahwilliams): investigate why this doesn't work.
-    // This doesn't work with the current Android log reader implementation.
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'adb',
