@@ -1,4 +1,4 @@
-Signature: b83cec7bd2e13355475565be97727c94
+Signature: 66a8a9251e01ff9e40458c8d5ba48148
 
 UNUSED LICENSES:
 
@@ -2306,6 +2306,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Rect.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.h
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/Transform.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/Transform_graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
