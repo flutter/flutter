@@ -55,29 +55,6 @@ import 'transitions.dart';
 /// ```
 /// {@end-tool}
 ///
-/// Default [proxyDecorator] can overriden to customize an item when it is being dragged.
-///
-/// Item's background color and shadow color customized compared to default behavior
-/// when item is being dragged.
-///
-/// ```dart
-/// Widget myProxyDecorator(Widget child, int index, Animation<double> animation) {
-///   return AnimatedBuilder(
-///     animation: animation,
-///     builder: (BuildContext context, Widget? child) {
-///       final double animValue = Curves.easeInOut.transform(animation.value);
-///       final double elevation = lerpDouble(0, 6, animValue)!;
-///       return Material(
-///         elevation: elevation,
-///         color: Colors.blue,
-///         shadowColor: Colors.blue[300],
-///         child: child,
-///       );
-///     },
-///     child: child,
-///   );
-/// }
-/// ```
 /// See also:
 ///
 ///  * [ReorderableList], a widget list that allows the user to reorder

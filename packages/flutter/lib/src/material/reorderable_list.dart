@@ -31,9 +31,22 @@ import 'theme.dart';
 ///
 /// {@tool dartpad}
 ///
-///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.0.dart **
-///{@end-tool}
+/// {@end-tool}
+///
+/// Default [proxyDecorator] can overriden to customize an item when it is being dragged.
+/// {@tool snippet}
+///
+/// Here item's background color and shadow color customized compared to default behavior
+/// when item is being dragged.
+///
+/// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.1.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [proxyDecorator], A callback that allows an item to be customized when it is being dragged.
+///
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
   ///
