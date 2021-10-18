@@ -245,7 +245,7 @@ class TooltipThemeData with Diagnosticable {
 ///
 /// See also:
 ///
-///  * [TooltipVisibility], which can be used to visually disable tooltips.
+///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
 class TooltipTheme extends InheritedTheme {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
