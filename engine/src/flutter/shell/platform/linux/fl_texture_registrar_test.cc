@@ -19,6 +19,97 @@ static constexpr uint32_t BUFFER_HEIGHT = 4u;
 static constexpr uint32_t REAL_BUFFER_WIDTH = 2u;
 static constexpr uint32_t REAL_BUFFER_HEIGHT = 2u;
 
+G_DECLARE_FINAL_TYPE(FlMockTextureRegistrar,
+                     fl_mock_texture_registrar,
+                     FL,
+                     MOCK_TEXTURE_REGISTRAR,
+                     GObject)
+
+struct _FlMockTextureRegistrar {
+  GObject parent_instance;
+  FlTexture* texture;
+  gboolean frame_available;
+};
+
+static void fl_mock_texture_registrar_iface_init(
+    FlTextureRegistrarInterface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlMockTextureRegistrar,
+    fl_mock_texture_registrar,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE(fl_texture_registrar_get_type(),
+                          fl_mock_texture_registrar_iface_init))
+
+static void fl_mock_texture_registrar_dispose(GObject* object) {
+  FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(object);
+  g_clear_object(&self->texture);
+  G_OBJECT_CLASS(fl_mock_texture_registrar_parent_class)->dispose(object);
+}
+
+static void fl_mock_texture_registrar_class_init(
+    FlMockTextureRegistrarClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = fl_mock_texture_registrar_dispose;
+}
+
+static gboolean register_texture(FlTextureRegistrar* registrar,
+                                 FlTexture* texture) {
+  FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
+  if (self->texture != nullptr) {
+    return FALSE;
+  }
+  self->texture = FL_TEXTURE(g_object_ref(texture));
+  return TRUE;
+}
+
+static FlTexture* lookup_texture(FlTextureRegistrar* registrar,
+                                 int64_t texture_id) {
+  FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
+  if (self->texture != nullptr &&
+      fl_texture_get_texture_id(self->texture) == texture_id) {
+    return self->texture;
+  }
+  return nullptr;
+}
+
+static gboolean mark_texture_frame_available(FlTextureRegistrar* registrar,
+                                             FlTexture* texture) {
+  FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
+  if (lookup_texture(registrar, fl_texture_get_texture_id(texture)) ==
+      nullptr) {
+    return FALSE;
+  }
+  self->frame_available = TRUE;
+  return TRUE;
+}
+
+static gboolean unregister_texture(FlTextureRegistrar* registrar,
+                                   FlTexture* texture) {
+  FlMockTextureRegistrar* self = FL_MOCK_TEXTURE_REGISTRAR(registrar);
+  if (self->texture != texture) {
+    return FALSE;
+  }
+
+  g_clear_object(&self->texture);
+
+  return TRUE;
+}
+
+static void fl_mock_texture_registrar_iface_init(
+    FlTextureRegistrarInterface* iface) {
+  iface->register_texture = register_texture;
+  iface->lookup_texture = lookup_texture;
+  iface->mark_texture_frame_available = mark_texture_frame_available;
+  iface->unregister_texture = unregister_texture;
+}
+
+static void fl_mock_texture_registrar_init(FlMockTextureRegistrar* self) {}
+
+static FlMockTextureRegistrar* fl_mock_texture_registrar_new() {
+  return FL_MOCK_TEXTURE_REGISTRAR(
+      g_object_new(fl_mock_texture_registrar_get_type(), nullptr));
+}
+
 G_DECLARE_FINAL_TYPE(FlTestRegistrarTexture,
                      fl_test_registrar_texture,
                      FL,
@@ -64,6 +155,27 @@ static FlTestRegistrarTexture* fl_test_registrar_texture_new() {
       g_object_new(fl_test_registrar_texture_get_type(), nullptr));
 }
 
+// Checks can make a mock registrar.
+TEST(FlTextureRegistrarTest, MockRegistrar) {
+  g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
+  g_autoptr(FlMockTextureRegistrar) registrar = fl_mock_texture_registrar_new();
+  EXPECT_TRUE(FL_IS_MOCK_TEXTURE_REGISTRAR(registrar));
+
+  EXPECT_TRUE(fl_texture_registrar_register_texture(
+      FL_TEXTURE_REGISTRAR(registrar), texture));
+  EXPECT_EQ(registrar->texture, texture);
+  EXPECT_EQ(
+      fl_texture_registrar_lookup_texture(FL_TEXTURE_REGISTRAR(registrar),
+                                          fl_texture_get_texture_id(texture)),
+      texture);
+  EXPECT_TRUE(fl_texture_registrar_mark_texture_frame_available(
+      FL_TEXTURE_REGISTRAR(registrar), texture));
+  EXPECT_TRUE(registrar->frame_available);
+  EXPECT_TRUE(fl_texture_registrar_unregister_texture(
+      FL_TEXTURE_REGISTRAR(registrar), texture));
+  EXPECT_EQ(registrar->texture, nullptr);
+}
+
 // Test that registering a texture works.
 TEST(FlTextureRegistrarTest, RegisterTexture) {
   g_autoptr(FlEngine) engine = make_mock_engine();
@@ -86,20 +198,4 @@ TEST(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
   EXPECT_TRUE(fl_texture_registrar_register_texture(registrar, texture));
   EXPECT_TRUE(
       fl_texture_registrar_mark_texture_frame_available(registrar, texture));
-}
-
-// Test that populating an OpenGL texture works.
-TEST(FlTextureRegistrarTest, PopulateTexture) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
-  g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
-  EXPECT_TRUE(fl_texture_registrar_register_texture(registrar, texture));
-  FlutterOpenGLTexture opengl_texture;
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_texture_registrar_populate_gl_external_texture(
-      registrar, fl_texture_get_texture_id(texture), BUFFER_WIDTH,
-      BUFFER_HEIGHT, &opengl_texture, &error));
-  EXPECT_EQ(error, nullptr);
-  EXPECT_EQ(opengl_texture.width, REAL_BUFFER_WIDTH);
-  EXPECT_EQ(opengl_texture.height, REAL_BUFFER_HEIGHT);
 }

@@ -13,7 +13,13 @@
 #include "flutter/shell/platform/linux/fl_texture_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
 
-struct _FlTextureRegistrar {
+G_DECLARE_FINAL_TYPE(FlTextureRegistrarImpl,
+                     fl_texture_registrar_impl,
+                     FL,
+                     TEXTURE_REGISTRAR_IMPL,
+                     GObject)
+
+struct _FlTextureRegistrarImpl {
   GObject parent_instance;
 
   // Weak reference to the engine this texture registrar is created for.
@@ -27,11 +33,24 @@ struct _FlTextureRegistrar {
   GHashTable* textures;
 };
 
-G_DEFINE_TYPE(FlTextureRegistrar, fl_texture_registrar, G_TYPE_OBJECT)
+static void fl_texture_registrar_impl_iface_init(
+    FlTextureRegistrarInterface* iface);
+
+G_DEFINE_INTERFACE(FlTextureRegistrar, fl_texture_registrar, G_TYPE_OBJECT)
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlTextureRegistrarImpl,
+    fl_texture_registrar_impl,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE(fl_texture_registrar_get_type(),
+                          fl_texture_registrar_impl_iface_init))
+
+static void fl_texture_registrar_default_init(
+    FlTextureRegistrarInterface* iface) {}
 
 static void engine_weak_notify_cb(gpointer user_data,
                                   GObject* where_the_object_was) {
-  FlTextureRegistrar* self = FL_TEXTURE_REGISTRAR(user_data);
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(user_data);
   self->engine = nullptr;
 
   // Unregister any textures.
@@ -41,8 +60,8 @@ static void engine_weak_notify_cb(gpointer user_data,
   g_hash_table_remove_all(textures);
 }
 
-static void fl_texture_registrar_dispose(GObject* object) {
-  FlTextureRegistrar* self = FL_TEXTURE_REGISTRAR(object);
+static void fl_texture_registrar_impl_dispose(GObject* object) {
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(object);
 
   g_clear_pointer(&self->textures, g_hash_table_unref);
 
@@ -51,23 +70,17 @@ static void fl_texture_registrar_dispose(GObject* object) {
     self->engine = nullptr;
   }
 
-  G_OBJECT_CLASS(fl_texture_registrar_parent_class)->dispose(object);
+  G_OBJECT_CLASS(fl_texture_registrar_impl_parent_class)->dispose(object);
 }
 
-static void fl_texture_registrar_class_init(FlTextureRegistrarClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_texture_registrar_dispose;
+static void fl_texture_registrar_impl_class_init(
+    FlTextureRegistrarImplClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = fl_texture_registrar_impl_dispose;
 }
 
-static void fl_texture_registrar_init(FlTextureRegistrar* self) {
-  self->textures = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
-                                         g_object_unref);
-}
-
-G_MODULE_EXPORT gboolean
-fl_texture_registrar_register_texture(FlTextureRegistrar* self,
-                                      FlTexture* texture) {
-  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
-  g_return_val_if_fail(FL_IS_TEXTURE(texture), FALSE);
+static gboolean register_texture(FlTextureRegistrar* registrar,
+                                 FlTexture* texture) {
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
 
   if (FL_IS_TEXTURE_GL(texture) || FL_IS_PIXEL_BUFFER_TEXTURE(texture)) {
     g_hash_table_insert(self->textures,
@@ -86,17 +99,23 @@ fl_texture_registrar_register_texture(FlTextureRegistrar* self,
   }
 }
 
-G_MODULE_EXPORT gboolean
-fl_texture_registrar_mark_texture_frame_available(FlTextureRegistrar* self,
-                                                  FlTexture* texture) {
-  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
+static FlTexture* lookup_texture(FlTextureRegistrar* registrar,
+                                 int64_t texture_id) {
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
+  return reinterpret_cast<FlTexture*>(
+      g_hash_table_lookup(self->textures, GINT_TO_POINTER(texture_id)));
+}
+
+static gboolean mark_texture_frame_available(FlTextureRegistrar* registrar,
+                                             FlTexture* texture) {
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
 
   if (self->engine == nullptr) {
     return FALSE;
   }
 
-  if (fl_texture_registrar_get_texture(
-          self, fl_texture_get_texture_id(texture)) == nullptr) {
+  if (lookup_texture(registrar, fl_texture_get_texture_id(texture)) ==
+      nullptr) {
     g_warning("Unregistered texture %p", texture);
     return FALSE;
   }
@@ -105,36 +124,9 @@ fl_texture_registrar_mark_texture_frame_available(FlTextureRegistrar* self,
       self->engine, fl_texture_get_texture_id(texture));
 }
 
-gboolean fl_texture_registrar_populate_gl_external_texture(
-    FlTextureRegistrar* self,
-    int64_t texture_id,
-    uint32_t width,
-    uint32_t height,
-    FlutterOpenGLTexture* opengl_texture,
-    GError** error) {
-  FlTexture* texture = fl_texture_registrar_get_texture(self, texture_id);
-  if (texture == nullptr) {
-    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
-                "Unable to find texture %" G_GINT64_FORMAT, texture_id);
-    return FALSE;
-  }
-  if (FL_IS_TEXTURE_GL(texture)) {
-    return fl_texture_gl_populate(FL_TEXTURE_GL(texture), width, height,
-                                  opengl_texture, error);
-  } else if (FL_IS_PIXEL_BUFFER_TEXTURE(texture)) {
-    return fl_pixel_buffer_texture_populate(
-        FL_PIXEL_BUFFER_TEXTURE(texture), width, height, opengl_texture, error);
-  } else {
-    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
-                "Unsupported texture type %" G_GINT64_FORMAT, texture_id);
-    return FALSE;
-  }
-}
-
-G_MODULE_EXPORT gboolean
-fl_texture_registrar_unregister_texture(FlTextureRegistrar* self,
-                                        FlTexture* texture) {
-  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
+static gboolean unregister_texture(FlTextureRegistrar* registrar,
+                                   FlTexture* texture) {
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
 
   if (!g_hash_table_remove(
           self->textures,
@@ -151,18 +143,62 @@ fl_texture_registrar_unregister_texture(FlTextureRegistrar* self,
       self->engine, fl_texture_get_texture_id(texture));
 }
 
-FlTexture* fl_texture_registrar_get_texture(FlTextureRegistrar* registrar,
-                                            int64_t texture_id) {
-  return reinterpret_cast<FlTexture*>(
-      g_hash_table_lookup(registrar->textures, GINT_TO_POINTER(texture_id)));
+static void fl_texture_registrar_impl_iface_init(
+    FlTextureRegistrarInterface* iface) {
+  iface->register_texture = register_texture;
+  iface->lookup_texture = lookup_texture;
+  iface->mark_texture_frame_available = mark_texture_frame_available;
+  iface->unregister_texture = unregister_texture;
+}
+
+static void fl_texture_registrar_impl_init(FlTextureRegistrarImpl* self) {
+  self->textures = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
+                                         g_object_unref);
+}
+
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_register_texture(FlTextureRegistrar* self,
+                                      FlTexture* texture) {
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
+  g_return_val_if_fail(FL_IS_TEXTURE(texture), FALSE);
+
+  return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->register_texture(self, texture);
+}
+
+FlTexture* fl_texture_registrar_lookup_texture(FlTextureRegistrar* self,
+                                               int64_t texture_id) {
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), NULL);
+
+  return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->lookup_texture(self, texture_id);
+}
+
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_mark_texture_frame_available(FlTextureRegistrar* self,
+                                                  FlTexture* texture) {
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
+
+  return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->mark_texture_frame_available(
+      self, texture);
+}
+
+G_MODULE_EXPORT gboolean
+fl_texture_registrar_unregister_texture(FlTextureRegistrar* self,
+                                        FlTexture* texture) {
+  g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(self), FALSE);
+
+  return FL_TEXTURE_REGISTRAR_GET_IFACE(self)->unregister_texture(self,
+                                                                  texture);
 }
 
 FlTextureRegistrar* fl_texture_registrar_new(FlEngine* engine) {
-  FlTextureRegistrar* self = FL_TEXTURE_REGISTRAR(
-      g_object_new(fl_texture_registrar_get_type(), nullptr));
+  FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(
+      g_object_new(fl_texture_registrar_impl_get_type(), nullptr));
+
+  // Added to stop compiler complaining about an unused function.
+  FL_IS_TEXTURE_REGISTRAR_IMPL(self);
 
   self->engine = engine;
   g_object_weak_ref(G_OBJECT(engine), engine_weak_notify_cb, self);
 
-  return self;
+  return FL_TEXTURE_REGISTRAR(self);
 }

@@ -16,11 +16,26 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE(FlTextureRegistrar,
-                     fl_texture_registrar,
-                     FL,
-                     TEXTURE_REGISTRAR,
-                     GObject)
+G_DECLARE_INTERFACE(FlTextureRegistrar,
+                    fl_texture_registrar,
+                    FL,
+                    TEXTURE_REGISTRAR,
+                    GObject)
+
+struct _FlTextureRegistrarInterface {
+  GTypeInterface parent_iface;
+
+  gboolean (*register_texture)(FlTextureRegistrar* registrar,
+                               FlTexture* texture);
+
+  FlTexture* (*lookup_texture)(FlTextureRegistrar* registrar, int64_t id);
+
+  gboolean (*mark_texture_frame_available)(FlTextureRegistrar* registrar,
+                                           FlTexture* texture);
+
+  gboolean (*unregister_texture)(FlTextureRegistrar* registrar,
+                                 FlTexture* texture);
+};
 
 /**
  * FlTextureRegistrar:
