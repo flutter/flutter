@@ -6,7 +6,7 @@ import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
 import 'conductor_status.dart';
-import 'step1_substeps.dart';
+import 'initialize_release_substeps.dart';
 import 'substeps.dart';
 
 /// Displays the progression and each step of the release from the conductor.
@@ -86,7 +86,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
-                      Step1Substeps(nextStep: nextStep),
+                      InitializeReleaseSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
