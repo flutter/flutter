@@ -15,7 +15,6 @@ group("impeller") {
     "entity",
     "geometry",
     "image",
-    "primitives",
   ]
 }
 
@@ -32,6 +31,5 @@ executable("impeller_unittests") {
     "geometry:geometry_unittests",
     "image:image_unittests",
     "playground",
-    "primitives:primitives_unittests",
   ]
 }
