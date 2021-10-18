@@ -183,7 +183,7 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         await project.regeneratePlatformSpecificTooling();
-        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.warningText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
         final FlutterProject project = await aPluginProject();

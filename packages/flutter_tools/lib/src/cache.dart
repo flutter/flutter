@@ -322,7 +322,7 @@ class Cache {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
           // This needs to go to stderr to avoid cluttering up stdout if a
           // parent process is collecting stdout (e.g. when calling "flutter
-          // version --machine". It's not really a "warning" though, so print it
+          // version --machine"). It's not really a "warning" though, so print it
           // in grey. Also, make sure that it isn't counted as a warning for
           // Logger.warningsAreFatal.
           final bool oldWarnings = _logger.hadWarningOutput;

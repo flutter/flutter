@@ -68,7 +68,7 @@ Future<void> main(List<String> args) async {
           Cache.flutterRoot = oldRoot;
         }
         expect(logger.statusText, isEmpty);
-        expect(logger.errorText,
+        expect(logger.warningText,
             equals('Waiting for another flutter command to release the startup lock...\n'));
       });
     }

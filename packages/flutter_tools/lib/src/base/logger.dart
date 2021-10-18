@@ -899,7 +899,7 @@ class VerboseLogger extends DelegatingLogger {
         super.printStatus(prefix + terminal.bolden(indentMessage));
         break;
       case _LogType.trace:
-        super.printTrace(prefix + indentMessage);
+        super.printStatus(prefix + indentMessage);
         break;
     }
   }

@@ -311,7 +311,7 @@ flutter:
 
     await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
 
-    expect(testLogger.errorText, contains('Expected Error Text'));
+    expect(testLogger.warningText, contains('Expected Error Text'));
   });
 
   testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {

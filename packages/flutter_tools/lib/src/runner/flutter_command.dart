@@ -280,7 +280,7 @@ abstract class FlutterCommand extends Command<void> {
         defaultsTo: false,
         hide: !verboseHelp,
         help: 'Causes the command to fail if errors or warnings are sent to the log '
-            'during its execution. Implies --${FlutterOptions.kFatalLogWarnings}'
+            'during its execution. Implies "--${FlutterOptions.kFatalLogWarnings}".'
     );
     argParser.addFlag(FlutterOptions.kFatalLogWarnings,
         defaultsTo: false,

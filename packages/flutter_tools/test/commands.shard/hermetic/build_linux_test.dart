@@ -308,6 +308,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     );
     expect(testLogger.statusText, contains('STDOUT STUFF'));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
