@@ -247,7 +247,9 @@ abstract class TextSelectionControls {
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 
-  /// Call [TextSelectionDelegate]
+  /// Call [TextSelectionDelegate.captureTextFromCamera]
+  ///
+  ///
   Future<void> handleCaptureTextFromCamera(TextSelectionDelegate delegate) async {
     delegate.captureTextFromCamera(SelectionChangedCause.toolbar);
   }

@@ -1531,12 +1531,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TODO(luckysmg): Judge this device support OCR or not
   @override
-  bool get captureTextEnabled => Platform.isIOS && !widget.readOnly;
+  bool get captureTextEnabled => _isIOS15() && !widget.readOnly;
 
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
     });
+  }
+
+  bool _isIOS15(){
+    return Platform.isIOS && Platform.operatingSystemVersion.startsWith('15');
   }
 
   // Start TextEditingActionTarget.
