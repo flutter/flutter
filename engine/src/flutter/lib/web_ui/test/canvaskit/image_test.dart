@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -251,6 +252,32 @@ void testMain() {
           'Image source: encoded image bytes'
         );
       }
+    });
+
+    test('decodeImageFromPixels', () async {
+      Future<ui.Image> _testDecodeFromPixels(int width, int height) async {
+        final Completer<ui.Image> completer = Completer<ui.Image>();
+        ui.decodeImageFromPixels(
+          Uint8List.fromList(List<int>.filled(width * height * 4, 0, growable: false)),
+          width,
+          height,
+          ui.PixelFormat.rgba8888,
+          (ui.Image image) {
+            completer.complete(image);
+          },
+        );
+        return completer.future;
+      }
+
+      final ui.Image image1 = await _testDecodeFromPixels(10, 20);
+      expect(image1, isNotNull);
+      expect(image1.width, 10);
+      expect(image1.height, 20);
+
+      final ui.Image image2 = await _testDecodeFromPixels(40, 100);
+      expect(image2, isNotNull);
+      expect(image2.width, 40);
+      expect(image2.height, 100);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);

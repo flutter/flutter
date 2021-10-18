@@ -2118,9 +2118,9 @@ class SkImageInfo {
   external factory SkImageInfo({
     required int width,
     required int height,
-    SkAlphaType alphaType,
-    ColorSpace colorSpace,
-    SkColorType colorType,
+    required SkColorType colorType,
+    required SkAlphaType alphaType,
+    required ColorSpace colorSpace,
   });
   external SkAlphaType get alphaType;
   external ColorSpace get colorSpace;
