@@ -13,6 +13,7 @@ import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -126,9 +127,9 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
-    bool headless,
+    @required bool headless,
     String chromeBinary,
-    String browserName,
+    @required String browserName,
     bool androidEmulator,
     int driverPort,
     List<String> browserDimension,
@@ -142,14 +143,13 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(browser, headless, chromeBinary),
         spec: async_io.WebDriverSpec.Auto
       );
-    } on Exception catch (ex) {
+    } on SocketException catch (error) {
+      _logger.printTrace('$error');
       throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing.\n'
-        'Make sure you have the correct WebDriver Server running at $driverPort.\n'
-        'Make sure the WebDriver Server matches option --browser-name.\n'
-        'For more information see: '
+        'Unable to start a WebDriver session for web testing.\n'
+        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
-        '$ex'
       );
     }
 
@@ -331,5 +331,5 @@ Browser _browserNameToEnum(String browserName) {
     case 'ios-safari': return Browser.iosSafari;
     case 'safari': return Browser.safari;
   }
-  throw UnsupportedError('Browser $browserName not supported'); // dead code; remove with null safety migration
+  throw UnsupportedError('Browser $browserName not supported');
 }

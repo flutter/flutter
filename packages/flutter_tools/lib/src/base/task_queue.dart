@@ -89,7 +89,7 @@ class _TaskQueueItem<T> {
   Future<void> run() async {
     try {
       _completer.complete(await _closure());
-    } catch (e) { // ignore: avoid_catches_without_on_clauses
+    } catch (e) { // ignore: avoid_catches_without_on_clauses, forwards to Future
       _completer.completeError(e);
     } finally {
       onComplete?.call();

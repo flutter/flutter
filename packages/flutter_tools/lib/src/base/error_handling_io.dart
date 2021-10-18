@@ -348,7 +348,7 @@ class ErrorHandlingFile
           sink.writeFromSync(buffer, 0, chunkLength);
           bytes += chunkLength;
         }
-      } catch (err) { // ignore: avoid_catches_without_on_clauses
+      } catch (err) { // ignore: avoid_catches_without_on_clauses, rethrows
         ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
         rethrow;
       } finally {

@@ -65,8 +65,7 @@ class WebCallbackManager implements CallbackManager {
             'driver side');
       }
     } catch (exception) {
-      throw Exception('Web Driver Command failed: ${command.type} with '
-          'exception $exception');
+      throw Exception('Web Driver Command failed: ${command.type} with exception $exception');
     } finally {
       // Reset the completer.
       _driverCommandComplete = Completer<bool>();
