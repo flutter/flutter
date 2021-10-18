@@ -125,7 +125,7 @@ class PaintingContext extends ClipContext {
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      final OffsetLayer layer = OffsetLayer();
+      final OffsetLayer layer = _RepaintBoundaryLayer();
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
@@ -3990,4 +3990,28 @@ class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
         value,
         level: DiagnosticLevel.hidden,
       );
+}
+
+class _RepaintBoundaryLayer extends OffsetLayer {
+  _RepaintBoundaryLayer({ Offset offset = Offset.zero }) : super(offset: offset) {
+    super.append(_inner.layer!);
+  }
+
+  final LayerHandle<OffsetLayer> _inner = LayerHandle<OffsetLayer>(OffsetLayer());
+
+  @override
+  void append(Layer child) {
+    _inner.layer!.append(child);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _inner.layer = null;
+  }
+
+  @override
+  void removeAllChildren() {
+    _inner.layer!.removeAllChildren();
+  }
 }
