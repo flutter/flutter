@@ -354,7 +354,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final Object? error = response['error'];
     final Object? result = response['result'];
     if (error != null) {
-      handler.completeError(error);
+      handler.completeError(DebugAdapterException('$error'));
     } else {
       handler.complete(result);
     }
@@ -384,32 +384,45 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     // general output printed by the user.
     final String outputCategory = _receivedAppStarted ? 'stdout' : 'console';
 
+      // Output in stdout can include both user output (eg. print) and Flutter
+      // daemon output. Since it's not uncommon for users to print JSON while
+      // debugging, we must try to detect which messages are likely Flutter
+      // messages as reliably as possible, as trying to process users output
+      // as a Flutter message may result in an unhandled error that will
+      // terminate the debug adater in a way that does not provide feedback
+      // because the standard crash violates the DAP protocol.
+    Object? jsonData;
     try {
-      final Object? jsonData = jsonDecode(data);
-      if (jsonData is List &&
-          jsonData.length == 1 &&
-          jsonData.first is Map<String, Object?>) {
-        final Map<String, Object?> firstItem =
-            jsonData.first as Map<String, Object?>;
-        final Object? event = firstItem['event'];
-        final Object? params = firstItem['params'];
-        final Object? id = firstItem['id'];
-        if (event is String && params is Map<String, Object?>?) {
-          _handleJsonEvent(event, params);
-          return;
-        } else if (id is int) {
-          _handleJsonResponse(id, firstItem);
-          return;
-        }
-        // Otherwise, pass it through as it's likely the users.
-        sendOutput(outputCategory, data);
-      }
-      // This catches exceptions trying to handle the JSON because "flutter run"
-      // daemon output can include both Flutter daemon messages and user strings
-      // printed with `print()`. If the user prints something that _looks_ like
-      // a Flutter event, it will fall into the code above and may fail to parse
-      // in which case, we should assume it was user-printed.
-    } catch (error) { // ignore: avoid_catches_without_on_clauses
+      jsonData = jsonDecode(data);
+    } on FormatException {
+      // If the output wasn't valid JSON, it was standard stdout that should
+      // be passed through to the user.
+      sendOutput(outputCategory, data);
+      return;
+    }
+
+    final Map<String, Object?>? payload = jsonData is List &&
+            jsonData.length == 1 &&
+            jsonData.first is Map<String, Object?>
+        ? jsonData.first as Map<String, Object?>
+        : null;
+
+    if (payload == null) {
+      // JSON didn't match expected format for Flutter responses, so treat as
+      // standard user output.
+      sendOutput(outputCategory, data);
+      return;
+    }
+
+    final Object? event = payload['event'];
+    final Object? params = payload['params'];
+    final Object? id = payload['id'];
+    if (event is String && params is Map<String, Object?>?) {
+      _handleJsonEvent(event, params);
+    } else if (id is int && _flutterRequestCompleters.containsKey(id)) {
+      _handleJsonResponse(id, payload);
+    } else {
+      // If it wasn't processed above,
       sendOutput(outputCategory, data);
     }
   }
@@ -430,9 +443,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
         'reason': reason,
         'debounce': true,
       });
-      // This catches all exceptions to report them in standard DAP OutputEvents
-      // for the user to see in the Debug Console.
-    } catch (error) { // ignore: avoid_catches_without_on_clauses
+    } on DebugAdapterException catch (error) {
       final String action = fullRestart ? 'Hot Restart' : 'Hot Reload';
       sendOutput('console', 'Failed to $action: $error');
     }
