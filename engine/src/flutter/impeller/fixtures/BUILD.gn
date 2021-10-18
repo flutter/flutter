@@ -5,7 +5,17 @@
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
-test_fixtures("fixtures") {
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_shaders("shader_fixtures") {
+  name = "shader_fixtures"
+  shaders = [
+    "box_fade.vert",
+    "box_fade.frag",
+  ]
+}
+
+test_fixtures("file_fixtures") {
   fixtures = [
     "sample.vert",
     "types.h",
@@ -14,5 +24,14 @@ test_fixtures("fixtures") {
     "boston.jpg",
     "embarcadero.jpg",
     "kalimba.jpg",
+  ]
+}
+
+group("fixtures") {
+  testonly = true
+
+  deps = [
+    ":file_fixtures",
+    ":shader_fixtures",
   ]
 }

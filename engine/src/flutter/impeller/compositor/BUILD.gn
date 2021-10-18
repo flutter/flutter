@@ -87,12 +87,14 @@ source_set("compositor_unittests") {
   testonly = true
 
   sources = [
+    "compositor_unittests.mm",
     "device_buffer_unittests.mm",
     "host_buffer_unittests.mm",
   ]
 
   deps = [
     ":compositor",
+    "../fixtures",
     "../playground",
     "//flutter/testing:testing_lib",
   ]
