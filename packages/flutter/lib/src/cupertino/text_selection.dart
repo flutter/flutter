@@ -33,6 +33,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleCut,
     required this.handlePaste,
     required this.handleSelectAll,
+    required this.handleCaptureTextFromCamera,
     required this.selectionMidpoint,
     required this.textLineHeight,
   }) : super(key: key);
@@ -44,6 +45,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   final VoidCallback? handleCut;
   final VoidCallback? handlePaste;
   final VoidCallback? handleSelectAll;
+  final VoidCallback? handleCaptureTextFromCamera;
   final Offset selectionMidpoint;
   final double textLineHeight;
 
@@ -163,6 +165,10 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     if (widget.handleSelectAll != null) {
       addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
+    if(widget.handleCaptureTextFromCamera != null){
+      // TODO(luckysmg): Later it needs to change to an Icon like iOS Native here we just put a simple text "Scan" temporarily
+      addToolbarButton('Scan', widget.handleCaptureTextFromCamera!);
+    }
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
@@ -240,6 +246,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+      handleCaptureTextFromCamera: canCaptureTextFromCamara(delegate) ? () => handleCaptureTextFromCamera(delegate) : null,
       selectionMidpoint: selectionMidpoint,
       textLineHeight: textLineHeight,
     );

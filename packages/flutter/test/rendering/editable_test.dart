@@ -49,6 +49,11 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) { }
+
+  @override
+  Future<void> captureTextFromCamera(SelectionChangedCause cause){
+    return Future<void>.value();
+  }
 }
 
 @isTest

@@ -1569,4 +1569,9 @@ abstract class TextEditingActionTarget {
       cause,
     );
   }
+
+  /// Capture text from camera,do nothing
+  ///
+  /// {@macro flutter.widgets.TextEditingActionTarget.cause}
+  Future<void> captureTextFromCamera(SelectionChangedCause cause) async {}
 }

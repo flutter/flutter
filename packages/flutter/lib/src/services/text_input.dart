@@ -958,6 +958,9 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
+  /// Whether capture text from camera is enabled, must not be null.
+  bool get captureTextEnabled => true;
+
   /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
@@ -983,6 +986,11 @@ mixin TextSelectionDelegate {
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
   void copySelection(SelectionChangedCause cause);
+
+  /// Capture text from camera
+  ///
+  /// If [cause] is [SelectionChangedCause.toolbar], it will hide toolbar
+  Future<void> captureTextFromCamera(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
@@ -1245,6 +1253,15 @@ class TextInputConnection {
         'textDirectionIndex': textDirection.index,
       },
     );
+  }
+
+  /// Send a message to platform to start capturing text from camera
+  ///
+  /// After calling this method,the camera preview will show in native keyboard to
+  /// capture text and fill text in [TextField]
+  void startCapturingTextFromCamera(){
+    assert(attached);
+    TextInput._instance._startCapturingTextFromCamera();
   }
 
   /// Stop interacting with the text input control.
@@ -1656,6 +1673,10 @@ class TextInput {
       'TextInput.setStyle',
       args,
     );
+  }
+
+  void _startCapturingTextFromCamera(){
+    _channel.invokeMethod<void>('TextInput.startCapturingTextFromCamera');
   }
 
   /// Finishes the current autofill context, and potentially saves the user

@@ -8,6 +8,7 @@ import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1528,6 +1529,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
+  // TODO(luckysmg): Judge this device support OCR or not
+  @override
+  bool get captureTextEnabled => Theme.of(context).platform == TargetPlatform.iOS && !widget.readOnly;
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -1641,6 +1646,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.selectAll(cause);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
+    }
+  }
+
+  /// Capture text from camera ,only available on iOS platform
+  @override
+  Future<void> captureTextFromCamera(SelectionChangedCause cause) async {
+    if(_hasInputConnection){
+      _textInputConnection!.startCapturingTextFromCamera();
+    }
+    super.captureTextFromCamera(cause);
+    if(cause == SelectionChangedCause.toolbar){
+      hideToolbar();
     }
   }
 

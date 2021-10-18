@@ -200,6 +200,11 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
+  /// Whether the current selection of the text field can capture text from camera
+  bool canCaptureTextFromCamara(TextSelectionDelegate delegate) {
+    return delegate.captureTextEnabled && delegate.textEditingValue.selection.isCollapsed;
+  }
+
   /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
@@ -240,6 +245,11 @@ abstract class TextSelectionControls {
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+  }
+
+  /// Call [TextSelectionDelegate]
+  Future<void> handleCaptureTextFromCamera(TextSelectionDelegate delegate) async {
+    delegate.captureTextFromCamera(SelectionChangedCause.toolbar);
   }
 }
 
