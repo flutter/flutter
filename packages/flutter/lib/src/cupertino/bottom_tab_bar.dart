@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
@@ -64,6 +65,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.activeColor,
     this.inactiveColor = _kDefaultTabBarInactiveColor,
+    this.activeFontSize,
+    this.inactiveFontSize,
     this.iconSize = 30.0,
     this.border = const Border(
       top: BorderSide(
@@ -120,6 +123,17 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// color of the native `UITabBar` component. Cannot be null.
   final Color inactiveColor;
 
+  /// The font size of the [BottomNavigationBarItem] labels when they are selected.
+  ///
+  /// Defaults to [DefaultTextStyle.merge]'s fontSize.
+  final double? activeFontSize;
+
+  /// The font size of the [BottomNavigationBarItem] labels when they are not
+  /// unselected.
+  ///
+  /// Defaults to [DefaultTextStyle.merge]'s fontSize.
+  final double? inactiveFontSize;
+
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
   /// This value is used to configure the [IconTheme] for the navigation bar.
@@ -150,6 +164,17 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     assert(debugCheckHasMediaQuery(context));
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
+    double maxFontSize = 0;
+    if (activeFontSize != null && inactiveFontSize != null) {
+        maxFontSize   = math.max(activeFontSize!, inactiveFontSize!);
+    } else {
+        if (activeFontSize != null) {
+          maxFontSize = activeFontSize!;
+        } else if (inactiveFontSize != null) {
+          maxFontSize = inactiveFontSize!;
+        }
+    }
+
     final Color backgroundColor = CupertinoDynamicColor.resolve(
       this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
       context,
@@ -178,13 +203,13 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor,
       ),
       child: SizedBox(
-        height: _kTabBarHeight + bottomPadding,
+        height: _kTabBarHeight + bottomPadding + maxFontSize,
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(color: inactive, size: iconSize),
           child: DefaultTextStyle( // Default with the inactive state.
             style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle.copyWith(color: inactive),
             child: Padding(
-              padding: EdgeInsets.only(bottom: bottomPadding),
+              padding: EdgeInsets.only(top:  maxFontSize / 2.0, bottom: bottomPadding + maxFontSize / 2.0),
               child: Semantics(
                 explicitChildNodes: true,
                 child: Row(
@@ -262,7 +287,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Change the active tab item's icon and title colors to active.
   Widget _wrapActiveItem(BuildContext context, Widget item, { required bool active }) {
     if (!active)
-      return item;
+      return DefaultTextStyle.merge(
+        style: TextStyle(fontSize: inactiveFontSize),
+        child: item,
+      );
 
     final Color activeColor = CupertinoDynamicColor.resolve(
       this.activeColor ?? CupertinoTheme.of(context).primaryColor,
@@ -271,7 +299,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return IconTheme.merge(
       data: IconThemeData(color: activeColor),
       child: DefaultTextStyle.merge(
-        style: TextStyle(color: activeColor),
+        style: TextStyle(color: activeColor, fontSize: activeFontSize),
         child: item,
       ),
     );
@@ -285,6 +313,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color? backgroundColor,
     Color? activeColor,
     Color? inactiveColor,
+    double? activeFontSize,
+    double? inactiveFontSize,
     double? iconSize,
     Border? border,
     int? currentIndex,
@@ -296,6 +326,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       activeColor: activeColor ?? this.activeColor,
       inactiveColor: inactiveColor ?? this.inactiveColor,
+      activeFontSize: activeFontSize ?? this.activeFontSize,
+      inactiveFontSize: inactiveFontSize ?? this.inactiveFontSize,
       iconSize: iconSize ?? this.iconSize,
       border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,

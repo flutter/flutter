@@ -80,6 +80,39 @@ Future<void> main() async {
     expect(actualActive.text.style!.color, const Color(0xFF123456));
   });
 
+  testWidgets('Active and inactive label size', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 1',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 2',
+          ),
+        ],
+        activeFontSize: 16.0,
+        inactiveFontSize: 14.0,
+        currentIndex: 1,
+      ),
+    ));
+
+    final RichText inActualInactive = tester.widget(find.descendant(
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
+    ));
+    expect(inActualInactive.text.style!.fontSize, 14.0);
+
+    final RichText actualActive = tester.widget(find.descendant(
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualActive.text.style!.fontSize, 16.0);
+  });
 
   testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
