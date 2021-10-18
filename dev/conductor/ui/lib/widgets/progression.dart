@@ -86,7 +86,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
-                      InitializeReleaseSubsteps(nextStep: nextStep),
+                      CreateReleaseSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,

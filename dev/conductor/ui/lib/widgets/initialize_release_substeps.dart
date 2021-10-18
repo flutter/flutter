@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// Displays all substeps related to the 1st step.
 ///
 /// Uses input fields and dropdowns to capture all the parameters of the conductor start command.
-class InitializeReleaseSubsteps extends StatefulWidget {
-  const InitializeReleaseSubsteps({
+class CreateReleaseSubsteps extends StatefulWidget {
+  const CreateReleaseSubsteps({
     Key? key,
     required this.nextStep,
   }) : super(key: key);
@@ -16,7 +16,7 @@ class InitializeReleaseSubsteps extends StatefulWidget {
   final VoidCallback nextStep;
 
   @override
-  State<InitializeReleaseSubsteps> createState() => InitializeReleaseSubstepsState();
+  State<CreateReleaseSubsteps> createState() => CreateReleaseSubstepsState();
 
   static const List<String> substepTitles = <String>[
     'Candidate Branch',
@@ -35,14 +35,14 @@ class InitializeReleaseSubsteps extends StatefulWidget {
   };
 }
 
-class InitializeReleaseSubstepsState extends State<InitializeReleaseSubsteps> {
+class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
   late Map<String, String?> _releaseData;
 
   /// Initialize [_releaseData] with default values of release initialization parameters.
   @override
   void initState() {
     super.initState();
-    _releaseData = InitializeReleaseSubsteps.releaseDataDefault;
+    _releaseData = CreateReleaseSubsteps.releaseDataDefault;
   }
 
   /// Updates the corresponding [field] in [_releaseData] with [data].
@@ -137,13 +137,13 @@ class InputAsSubstep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      key: Key(InitializeReleaseSubsteps.substepTitles[index]),
+      key: Key(CreateReleaseSubsteps.substepTitles[index]),
       decoration: InputDecoration(
-        labelText: InitializeReleaseSubsteps.substepTitles[index],
+        labelText: CreateReleaseSubsteps.substepTitles[index],
         hintText: hintText,
       ),
       onChanged: (String data) {
-        setReleaseData(InitializeReleaseSubsteps.substepTitles[index], data);
+        setReleaseData(CreateReleaseSubsteps.substepTitles[index], data);
       },
     );
   }
@@ -169,13 +169,13 @@ class CheckboxListTileDropdown extends StatelessWidget {
     return Row(
       children: <Widget>[
         Text(
-          InitializeReleaseSubsteps.substepTitles[index],
+          CreateReleaseSubsteps.substepTitles[index],
           style: Theme.of(context).textTheme.subtitle1!.copyWith(color: Colors.grey[700]),
         ),
         const SizedBox(width: 20.0),
         DropdownButton<String>(
-          key: Key(InitializeReleaseSubsteps.substepTitles[index]),
-          value: releaseData[InitializeReleaseSubsteps.substepTitles[index]],
+          key: Key(CreateReleaseSubsteps.substepTitles[index]),
+          value: releaseData[CreateReleaseSubsteps.substepTitles[index]],
           icon: const Icon(Icons.arrow_downward),
           items: options.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
@@ -184,7 +184,7 @@ class CheckboxListTileDropdown extends StatelessWidget {
             );
           }).toList(),
           onChanged: (String? newValue) {
-            setReleaseData(InitializeReleaseSubsteps.substepTitles[index], newValue!);
+            setReleaseData(CreateReleaseSubsteps.substepTitles[index], newValue!);
           },
         ),
       ],
