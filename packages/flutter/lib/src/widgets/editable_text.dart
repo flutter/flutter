@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1531,7 +1531,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TODO(luckysmg): Judge this device support OCR or not
   @override
-  bool get captureTextEnabled => Theme.of(context).platform == TargetPlatform.iOS && !widget.readOnly;
+  bool get captureTextEnabled => Platform.isIOS && !widget.readOnly;
 
   void _onChangedClipboardStatus() {
     setState(() {
