@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
@@ -1375,8 +1374,7 @@ void main() {
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
@@ -1391,8 +1389,7 @@ void main() {
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
@@ -1407,8 +1404,7 @@ void main() {
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
@@ -1432,8 +1428,7 @@ void main() {
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
@@ -1457,8 +1452,7 @@ void main() {
     final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
@@ -1473,8 +1467,7 @@ void main() {
     final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
-    final PlistParser plistParser = PlistParser(fileSystem: globals.fs, logger: logger, processManager: globals.processManager);
-    final String displayName = plistParser.getValueFromFile(plistFile.path, 'CFBundleDisplayName');
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
@@ -2972,4 +2965,11 @@ class LoggingProcessManager extends LocalProcessManager {
   void clear() {
     commands.clear();
   }
+}
+
+String _getStringValueFromPlist({File plistFile, String key}) {
+  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
+  final int keyIndex = plist.indexOf('<key>$key</key>');
+  assert(keyIndex > 0);
+  return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }

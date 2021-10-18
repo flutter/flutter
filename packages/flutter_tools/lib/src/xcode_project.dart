@@ -488,7 +488,7 @@ class IosProject extends XcodeBasedProject {
     final String projectName = parent.manifest.appName;
 
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
-    final String titleCaseProjectName = projectName.split('_').map(camelCase).map(toTitleCase).join(' ');
+    final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
     template.render(
       target,
