@@ -28,6 +28,22 @@ class ConductorStatus extends StatefulWidget {
     'Release Updated at',
     'Dart SDK Revision',
   ];
+
+  static final List<String> engineRepoElements = <String>[
+    'Engine Candidate Branch',
+    'Engine Starting Git HEAD',
+    'Engine Current Git HEAD',
+    'Engine Path to Checkout',
+    'Engine LUCI Dashboard',
+  ];
+
+  static final List<String> frameworkRepoElements = <String>[
+    'Framework Candidate Branch',
+    'Framework Starting Git HEAD',
+    'Framework Current Git HEAD',
+    'Framework Path to Checkout',
+    'Framework LUCI Dashboard',
+  ];
 }
 
 class ConductorStatusState extends State<ConductorStatus> {
@@ -86,7 +102,6 @@ class ConductorStatusState extends State<ConductorStatus> {
             Table(
               columnWidths: const <int, TableColumnWidth>{
                 0: FixedColumnWidth(200.0),
-                1: FixedColumnWidth(400.0),
               },
               children: <TableRow>[
                 for (String headerElement in ConductorStatus.headerElements)
@@ -105,19 +120,23 @@ class ConductorStatusState extends State<ConductorStatus> {
               children: <Widget>[
                 Column(
                   children: <Widget>[
+                    RepoInfoExpansion(engineOrFramework: 'engine', currentStatus: currentStatus),
+                    const SizedBox(height: 10.0),
                     CherrypickTable(engineOrFramework: 'engine', currentStatus: currentStatus),
                   ],
                 ),
                 const SizedBox(width: 20.0),
                 Column(
                   children: <Widget>[
+                    RepoInfoExpansion(engineOrFramework: 'framework', currentStatus: currentStatus),
+                    const SizedBox(height: 10.0),
                     CherrypickTable(engineOrFramework: 'framework', currentStatus: currentStatus),
                   ],
                 ),
               ],
             )
           ],
-        )
+        ),
       ],
     );
   }
@@ -205,6 +224,83 @@ class CherrypickTableState extends State<CherrypickTable> {
           ],
         );
       }).toList(),
+    );
+  }
+}
+
+/// Widget to display repo info related to the engine and framework.
+///
+/// Click to show/hide the repo info in a dropdown fashion. By default the section is hidden.
+class RepoInfoExpansion extends StatefulWidget {
+  const RepoInfoExpansion({
+    Key? key,
+    required this.engineOrFramework,
+    required this.currentStatus,
+  }) : super(key: key);
+
+  final String engineOrFramework;
+  final Map<String, Object> currentStatus;
+
+  @override
+  RepoInfoExpansionState createState() => RepoInfoExpansionState();
+}
+
+class RepoInfoExpansionState extends State<RepoInfoExpansion> {
+  bool _isExpanded = false;
+
+  /// Show/hide [ExpansionPanel].
+  void showHide() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 500.0,
+      child: ExpansionPanelList(
+        expandedHeaderPadding: EdgeInsets.zero,
+        expansionCallback: (int index, bool isExpanded) {
+          showHide();
+        },
+        children: <ExpansionPanel>[
+          ExpansionPanel(
+            isExpanded: _isExpanded,
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return ListTile(
+                  key: Key('${widget.engineOrFramework}RepoInfoDropdown'),
+                  title: Text('${widget.engineOrFramework == 'engine' ? 'Engine' : 'Framework'} Repo Info'),
+                  onTap: () {
+                    showHide();
+                  });
+            },
+            body: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Table(
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FixedColumnWidth(240.0),
+                },
+                children: <TableRow>[
+                  for (String repoElement in widget.engineOrFramework == 'engine'
+                      ? ConductorStatus.engineRepoElements
+                      : ConductorStatus.frameworkRepoElements)
+                    TableRow(
+                      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
+                      children: <Widget>[
+                        Text('$repoElement:'),
+                        SelectableText(
+                            (widget.currentStatus[repoElement] == null || widget.currentStatus[repoElement] == '')
+                                ? 'Unknown'
+                                : widget.currentStatus[repoElement]! as String),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

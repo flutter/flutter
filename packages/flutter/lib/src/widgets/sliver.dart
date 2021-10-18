@@ -204,6 +204,7 @@ abstract class SliverChildDelegate {
       if (children != null)
         description.add('estimated child count: $children');
     } catch (e) {
+      // The exception is forwarded to widget inspector.
       description.add('estimated child count: EXCEPTION (${e.runtimeType})');
     }
   }

@@ -245,8 +245,30 @@ void main() {
     expect(expanded.maxHeight, equals(double.infinity));
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
+  test('copyWith, ==, hashCode basics', () {
+    expect(ThemeData(), ThemeData().copyWith());
+    expect(ThemeData().hashCode, ThemeData().copyWith().hashCode);
+  });
 
+  test('== and hashCode include focusColor and hoverColor', () {
+    // regression test for https://github.com/flutter/flutter/issues/91587
+
+    // Focus color and hover color are used in the default button theme, so
+    // use an empty one to ensure that just focus and hover colors are tested.
+    const ButtonThemeData buttonTheme = ButtonThemeData();
+
+    final ThemeData focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
+    expect(focusColorBlack != focusColorWhite, true);
+    expect(focusColorBlack.hashCode != focusColorWhite.hashCode, true);
+
+    final ThemeData hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
+    expect(hoverColorBlack != hoverColorWhite, true);
+    expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
+  });
+
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -639,5 +661,107 @@ void main() {
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
     expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
+  });
+
+  test('ThemeData diagnostics include all properties', () {
+    // List of properties must match the properties in ThemeData.hashCode()
+    final Set<String> expectedPropertyNames = <String>{
+      'visualDensity',
+      'primaryColor',
+      'primaryColorBrightness',
+      'primaryColorLight',
+      'primaryColorDark',
+      'canvasColor',
+      'shadowColor',
+      'accentColor',
+      'accentColorBrightness',
+      'scaffoldBackgroundColor',
+      'bottomAppBarColor',
+      'cardColor',
+      'dividerColor',
+      'focusColor',
+      'hoverColor',
+      'highlightColor',
+      'splashColor',
+      'splashFactory',
+      'selectedRowColor',
+      'unselectedWidgetColor',
+      'disabledColor',
+      'buttonTheme',
+      'buttonColor',
+      'toggleButtonsTheme',
+      'secondaryHeaderColor',
+      'textSelectionColor',
+      'cursorColor',
+      'textSelectionHandleColor',
+      'backgroundColor',
+      'dialogBackgroundColor',
+      'indicatorColor',
+      'hintColor',
+      'errorColor',
+      'toggleableActiveColor',
+      'textTheme',
+      'primaryTextTheme',
+      'accentTextTheme',
+      'inputDecorationTheme',
+      'iconTheme',
+      'primaryIconTheme',
+      'accentIconTheme',
+      'sliderTheme',
+      'tabBarTheme',
+      'tooltipTheme',
+      'cardTheme',
+      'chipTheme',
+      'platform',
+      'materialTapTargetSize',
+      'applyElevationOverlayColor',
+      'pageTransitionsTheme',
+      'appBarTheme',
+      'scrollbarTheme',
+      'bottomAppBarTheme',
+      'colorScheme',
+      'dialogTheme',
+      'floatingActionButtonTheme',
+      'navigationBarTheme',
+      'navigationRailTheme',
+      'typography',
+      'cupertinoOverrideTheme',
+      'snackBarTheme',
+      'bottomSheetTheme',
+      'popupMenuTheme',
+      'bannerTheme',
+      'dividerTheme',
+      'buttonBarTheme',
+      'bottomNavigationBarTheme',
+      'timePickerTheme',
+      'textButtonTheme',
+      'elevatedButtonTheme',
+      'outlinedButtonTheme',
+      'textSelectionTheme',
+      'dataTableTheme',
+      'checkboxTheme',
+      'radioTheme',
+      'switchTheme',
+      'progressIndicatorTheme',
+      'drawerTheme',
+      'listTileTheme',
+      'fixTextFieldOutlineLabel',
+      'useTextSelectionTheme',
+      'androidOverscrollIndicator',
+    };
+
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    ThemeData.light().debugFillProperties(properties);
+    final List<String> propertyNameList = properties.properties
+      .map((final DiagnosticsNode node) => node.name)
+      .whereType<String>()
+      .toList();
+    final Set<String> propertyNames = propertyNameList.toSet();
+
+    // Ensure there are no duplicates.
+    expect(propertyNameList.length, propertyNames.length);
+
+    // Ensure they are all there.
+    expect(propertyNames, expectedPropertyNames);
   });
 }

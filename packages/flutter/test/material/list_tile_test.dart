@@ -125,6 +125,54 @@ void main() {
     ]);
   });
 
+  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
+    late ListTileThemeData theme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            dense: true,
+            shape: const StadiumBorder(),
+            style: ListTileStyle.drawer,
+            selectedColor: const Color(0x00000001),
+            iconColor: const Color(0x00000002),
+            textColor: const Color(0x00000003),
+            contentPadding: const EdgeInsets.all(100),
+            tileColor: const Color(0x00000004),
+            selectedTileColor: const Color(0x00000005),
+            horizontalTitleGap: 200,
+            minVerticalPadding: 300,
+            minLeadingWidth: 400,
+            enableFeedback: true,
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  theme = ListTileTheme.of(context);
+                  return const Placeholder();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(theme.dense, true);
+    expect(theme.shape, const StadiumBorder());
+    expect(theme.style, ListTileStyle.drawer);
+    expect(theme.selectedColor, const Color(0x00000001));
+    expect(theme.iconColor, const Color(0x00000002));
+    expect(theme.textColor, const Color(0x00000003));
+    expect(theme.contentPadding, const EdgeInsets.all(100));
+    expect(theme.tileColor, const Color(0x00000004));
+    expect(theme.selectedTileColor, const Color(0x00000005));
+    expect(theme.horizontalTitleGap, 200);
+    expect(theme.minVerticalPadding, 300);
+    expect(theme.minLeadingWidth, 400);
+    expect(theme.enableFeedback, true);
+  });
+
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/go/design-lists
 
