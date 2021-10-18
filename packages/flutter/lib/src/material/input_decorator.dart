@@ -2945,12 +2945,31 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` &
+  /// `heightFactor`.
+  ///
+  /// ```dart
+  /// decoration: InputDecoration(
+  ///   border: OutlineInputBorder(),
+  ///     labelText: 'View password',
+  ///     prefixIcon: Align(
+  ///       alignment: Alignment.center,
+  ///       widthFactor: 1.0,
+  ///       heightFactor: 1.0,
+  ///       child: Icon(
+  ///         Icons.lock,
+  ///     ),
+  ///   ),
+  /// ),
+  /// ```
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [prefix] and [prefixText], which are other ways to show content
   ///    before the text field (but after the icon).
   ///  * [suffixIcon], which is the same but on the trailing edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? prefixIcon;
 
   /// The constraints for the prefix icon.
@@ -3055,12 +3074,31 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` &
+  /// `heightFactor`.
+  ///
+  /// ```dart
+  /// decoration: InputDecoration(
+  ///   border: OutlineInputBorder(),
+  ///     labelText: 'Enter password',
+  ///     suffixIcon: Align(
+  ///       alignment: Alignment.center,
+  ///       widthFactor: 1.0,
+  ///       heightFactor: 1.0,
+  ///       child: Icon(
+  ///         Icons.remove_red_eye,
+  ///     ),
+  ///   ),
+  /// ),
+  /// ``` 
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [suffix] and [suffixText], which are other ways to show content
   ///    after the text field (but before the icon).
   ///  * [prefixIcon], which is the same but on the leading edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? suffixIcon;
 
   /// Optional widget to place on the line after the input.
