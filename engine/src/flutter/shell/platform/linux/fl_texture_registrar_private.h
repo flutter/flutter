@@ -22,38 +22,16 @@ G_BEGIN_DECLS
 FlTextureRegistrar* fl_texture_registrar_new(FlEngine* engine);
 
 /**
- * fl_texture_registrar_populate_gl_external_texture:
- * @registrar: an #FlTextureRegistrar.
- * @texture_id: ID of texture.
- * @width: width of the texture.
- * @height: height of the texture.
- * @opengl_texture: (out): return an #FlutterOpenGLTexture.
- * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL to ignore.
- *
- * Attempts to populate the given @texture_id.
- *
- * Returns: %TRUE on success.
- */
-gboolean fl_texture_registrar_populate_gl_external_texture(
-    FlTextureRegistrar* registrar,
-    int64_t texture_id,
-    uint32_t width,
-    uint32_t height,
-    FlutterOpenGLTexture* opengl_texture,
-    GError** error);
-
-/**
- * fl_texture_registrar_get_texture:
+ * fl_texture_registrar_lookup_texture:
  * @registrar: an #FlTextureRegistrar.
  * @texture_id: ID of texture.
  *
- * Gets a registered texture by @texture_id.
+ * Looks for the texture with the given ID.
  *
- * Returns: an #FlTexture, or %NULL if not found.
+ * Returns: an #FlTexture or %NULL if no texture with this ID.
  */
-FlTexture* fl_texture_registrar_get_texture(FlTextureRegistrar* registrar,
-                                            int64_t texture_id);
+FlTexture* fl_texture_registrar_lookup_texture(FlTextureRegistrar* registrar,
+                                               int64_t texture_id);
 
 G_END_DECLS
 
