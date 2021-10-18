@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'binding.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard.dart';
