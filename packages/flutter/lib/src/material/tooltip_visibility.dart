@@ -23,8 +23,8 @@ class _TooltipVisibilityScope extends InheritedWidget {
 ///
 /// If disabled, the descendant [Tooltip] widgets will not display a tooltip
 /// when tapped, long-pressed, hovered by the mouse, or when
-/// `ensureTooltipVisible` is called. This only visually disables tooltips and
-/// semantics information will not be lost.
+/// `ensureTooltipVisible` is called. This only visually disables tooltips but
+/// continues to provide any semantic information that is provided.
 class TooltipVisibility extends StatelessWidget {
   /// Creates a widget that configures the visibility of [Tooltip].
   ///
@@ -43,7 +43,7 @@ class TooltipVisibility extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// Determines the visibility of [Tooltip] widets that inherit from this widget.
+  /// Determines the visibility of [Tooltip] widgets that inherit from this widget.
   final bool visible;
 
   /// The [visible] of the closest instance of this class that encloses the
