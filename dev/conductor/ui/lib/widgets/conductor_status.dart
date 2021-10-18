@@ -18,7 +18,7 @@ class ConductorStatus extends StatefulWidget {
   final String stateFilePath;
 
   @override
-  ConductorStatusState createState() => ConductorStatusState();
+  State<ConductorStatus> createState() => ConductorStatusState();
 
   static final List<String> headerElements = <String>[
     'Conductor Version',
@@ -194,7 +194,7 @@ class CherrypickTable extends StatefulWidget {
   final Map<String, Object> currentStatus;
 
   @override
-  CherrypickTableState createState() => CherrypickTableState();
+  State<CherrypickTable> createState() => CherrypickTableState();
 }
 
 class CherrypickTableState extends State<CherrypickTable> {
@@ -242,7 +242,7 @@ class RepoInfoExpansion extends StatefulWidget {
   final Map<String, Object> currentStatus;
 
   @override
-  RepoInfoExpansionState createState() => RepoInfoExpansionState();
+  State<RepoInfoExpansion> createState() => RepoInfoExpansionState();
 }
 
 class RepoInfoExpansionState extends State<RepoInfoExpansion> {

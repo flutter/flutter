@@ -36,20 +36,20 @@ class CreateReleaseSubsteps extends StatefulWidget {
 }
 
 class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
-  late Map<String, String?> _releaseData;
+  late Map<String, String?> releaseData; // Initialize a public state so it could be accessed in the test file.
 
-  /// Initialize [_releaseData] with default values of release initialization parameters.
+  /// Initialize [releaseData] with default values of release initialization parameters.
   @override
   void initState() {
     super.initState();
-    _releaseData = CreateReleaseSubsteps.releaseDataDefault;
+    releaseData = CreateReleaseSubsteps.releaseDataDefault;
   }
 
-  /// Updates the corresponding [field] in [_releaseData] with [data].
+  /// Updates the corresponding [field] in [releaseData] with [data].
   void setReleaseData(String field, String data) {
     setState(() {
-      _releaseData = <String, String?>{
-        ..._releaseData,
+      releaseData = <String, String?>{
+        ...releaseData,
         field: data,
       };
     });
@@ -67,7 +67,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
         ),
         CheckboxListTileDropdown(
           index: 1,
-          releaseData: _releaseData,
+          releaseData: releaseData,
           setReleaseData: setReleaseData,
           options: const <String>['-', 'dev', 'beta', 'stable'],
         ),
@@ -98,7 +98,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
         ),
         CheckboxListTileDropdown(
           index: 7,
-          releaseData: _releaseData,
+          releaseData: releaseData,
           setReleaseData: setReleaseData,
           options: const <String>['-', 'y', 'z', 'm', 'n'],
         ),
@@ -121,7 +121,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
 
 typedef SetReleaseData = void Function(String name, String data);
 
-/// Captures the input values and updates the corresponding field in [_releaseData].
+/// Captures the input values and updates the corresponding field in [releaseData].
 class InputAsSubstep extends StatelessWidget {
   const InputAsSubstep({
     Key? key,
@@ -149,7 +149,7 @@ class InputAsSubstep extends StatelessWidget {
   }
 }
 
-/// Captures the chosen option and updates the corresponding field in [_releaseData].
+/// Captures the chosen option and updates the corresponding field in [releaseData].
 class CheckboxListTileDropdown extends StatelessWidget {
   const CheckboxListTileDropdown({
     Key? key,
