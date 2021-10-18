@@ -54,7 +54,8 @@ Directory get localFlutterRoot {
   final String checkoutsDirname = fileSystem.path.normalize(
     fileSystem.path.join(
       fileSystem.path.dirname(filePath),
-      '..', // flutter/dev/tools
+      '..', // flutter/dev/conductor/core
+      '..', // flutter/dev/conductor
       '..', // flutter/dev
       '..', // flutter
     ),
