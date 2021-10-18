@@ -3090,7 +3090,7 @@ class InputDecoration {
   ///     ),
   ///   ),
   /// ),
-  /// ``` 
+  /// ```
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
