@@ -320,12 +320,12 @@ String _generateLicense(String prefix) {
 
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int? overrideMinimumMatches = checkMinimums ? null : 0;
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 3000, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 40, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 60, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 40, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 40, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 100, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', overrideMinimumMatches ?? 0, _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', overrideMinimumMatches ?? 1, '#!/usr/bin/env bash\n${_generateLicense('# ')}');
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', overrideMinimumMatches ?? 1, '@ECHO off\n${_generateLicense('REM ')}');
