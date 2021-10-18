@@ -34,7 +34,7 @@ static std::string ShaderLibraryDirectory() {
 }
 
 Playground::Playground()
-    : renderer_(ShaderLibraryDirectory(), "impeller.metallib") {}
+    : renderer_(ShaderLibraryDirectory(), "shader_fixtures.metallib") {}
 
 Playground::~Playground() = default;
 

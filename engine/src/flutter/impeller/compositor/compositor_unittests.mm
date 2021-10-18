@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/time/time_point.h"
+#include "flutter/impeller/fixtures/box_fade.frag.h"
+#include "flutter/impeller/fixtures/box_fade.vert.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compositor/command.h"
 #include "impeller/compositor/command_buffer.h"
@@ -17,15 +19,13 @@
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
 #include "impeller/playground/playground.h"
-#include "impeller/primitives/box_fade.frag.h"
-#include "impeller/primitives/box_fade.vert.h"
 
 namespace impeller {
 namespace testing {
 
-using PrimitivesTest = Playground;
+using CompositorTest = Playground;
 
-TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
+TEST_F(CompositorTest, CanCreateBoxPrimitive) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -89,7 +89,7 @@ TEST_F(PrimitivesTest, CanCreateBoxPrimitive) {
   // OpenPlaygroundHere(callback);
 }
 
-TEST_F(PrimitivesTest, CanRenderMultiplePrimitives) {
+TEST_F(CompositorTest, CanRenderMultiplePrimitives) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -160,7 +160,7 @@ TEST_F(PrimitivesTest, CanRenderMultiplePrimitives) {
   // OpenPlaygroundHere(callback);
 }
 
-TEST_F(PrimitivesTest, CanRenderToTexture) {
+TEST_F(CompositorTest, CanRenderToTexture) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -251,7 +251,7 @@ TEST_F(PrimitivesTest, CanRenderToTexture) {
   ASSERT_TRUE(r2t_pass->Commit(*context->GetTransientsAllocator()));
 }
 
-TEST_F(PrimitivesTest, CanRenderPath) {
+TEST_F(CompositorTest, CanRenderPath) {
   auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
   ASSERT_FALSE(path.GetBoundingBox().IsZero());
 
@@ -318,7 +318,7 @@ TEST_F(PrimitivesTest, CanRenderPath) {
 
     return true;
   };
-  OpenPlaygroundHere(callback);
+  // OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
