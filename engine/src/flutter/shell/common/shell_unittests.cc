@@ -3098,5 +3098,67 @@ TEST_F(ShellTest, PrefetchDefaultFontManager) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, OnPlatformViewCreatedWhenUIThreadIsBusy) {
+  // This test will deadlock if the threading logic in
+  // Shell::OnCreatePlatformView is wrong.
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(std::move(settings));
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetUITaskRunner(),
+                                    [&latch]() { latch.Wait(); });
+
+  ShellTest::PlatformViewNotifyCreated(shell.get());
+  latch.Signal();
+
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest, UIWorkAfterOnPlatformViewDestroyed) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(std::move(settings));
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("drawFrames");
+
+  fml::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent notify_native_latch;
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+                      notify_native_latch.Signal();
+                      latch.Wait();
+                    }));
+
+  RunEngine(shell.get(), std::move(configuration));
+  // Wait to make sure we get called back from Dart and thus have latched
+  // the UI thread before we create/destroy the platform view.
+  notify_native_latch.Wait();
+
+  ShellTest::PlatformViewNotifyCreated(shell.get());
+
+  fml::AutoResetWaitableEvent destroy_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &destroy_latch]() {
+        shell->GetPlatformView()->NotifyDestroyed();
+        destroy_latch.Signal();
+      });
+
+  destroy_latch.Wait();
+
+  // Unlatch the UI thread and let it send us a scene to render.
+  latch.Signal();
+
+  // Flush the UI task runner to make sure we process the render/scheduleFrame
+  // request.
+  fml::AutoResetWaitableEvent ui_flush_latch;
+  fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetUITaskRunner(),
+                                    [&ui_flush_latch]() {
+                                      FML_LOG(ERROR) << "123";
+                                      ui_flush_latch.Signal();
+                                    });
+  ui_flush_latch.Wait();
+
+  DestroyShell(std::move(shell));
+}
+
 }  // namespace testing
 }  // namespace flutter

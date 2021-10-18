@@ -13,6 +13,29 @@ void nativeReportTimingsCallback(List<int> timings) native 'NativeReportTimingsC
 void nativeOnBeginFrame(int microseconds) native 'NativeOnBeginFrame';
 void nativeOnPointerDataPacket(List<int> sequences) native 'NativeOnPointerDataPacket';
 
+
+@pragma('vm:entry-point')
+void drawFrames() {
+  // Wait for native to tell us to start going.
+  notifyNative();
+
+  PlatformDispatcher.instance.onBeginFrame = (Duration beginTime) {
+    final SceneBuilder builder = SceneBuilder();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    final Scene scene = builder.build();
+    window.render(scene);
+
+    scene.dispose();
+    picture.dispose();
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
 @pragma('vm:entry-point')
 void reportTimingsMain() {
   PlatformDispatcher.instance.onReportTimings = (List<FrameTiming> timings) {
