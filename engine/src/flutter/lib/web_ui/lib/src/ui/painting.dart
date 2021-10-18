@@ -585,15 +585,17 @@ void decodeImageFromPixels(
   bool allowUpscaling = true,
 }) {
   if (engine.useCanvasKit) {
-    engine.skiaInstantiateImageCodec(
+    engine.skiaDecodeImageFromPixels(
       pixels,
       width,
       height,
-      format.index,
-      rowBytes,
-    ).getNextFrame().then((FrameInfo info) {
-      callback(info.image);
-    });
+      format,
+      callback,
+      rowBytes: rowBytes,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      allowUpscaling: allowUpscaling,
+    );
     return;
   }
 

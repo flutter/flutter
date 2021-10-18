@@ -19,6 +19,36 @@ ui.Codec skiaInstantiateImageCodec(Uint8List list,
   return CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes');
 }
 
+// TODO(yjbanov): add support for targetWidth/targetHeight (https://github.com/flutter/flutter/issues/34075)
+void skiaDecodeImageFromPixels(
+  Uint8List pixels,
+  int width,
+  int height,
+  ui.PixelFormat format,
+  ui.ImageDecoderCallback callback, {
+  int? rowBytes,
+  int? targetWidth,
+  int? targetHeight,
+  bool allowUpscaling = true,
+}) {
+  // Run in a timer to avoid janking the current frame by moving the decoding
+  // work outside the frame event.
+  Timer.run(() {
+    final SkImage skImage = canvasKit.MakeImage(
+      SkImageInfo(
+        width: width,
+        height: height,
+        colorType: format == ui.PixelFormat.rgba8888 ? canvasKit.ColorType.RGBA_8888 : canvasKit.ColorType.BGRA_8888,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorSpace: SkColorSpaceSRGB,
+      ),
+      pixels,
+      rowBytes ?? 4 * width,
+    );
+    return callback(CkImage(skImage));
+  });
+}
+
 /// Thrown when the web engine fails to decode an image, either due to a
 /// network issue, corrupted image contents, or missing codec.
 class ImageCodecException implements Exception {
