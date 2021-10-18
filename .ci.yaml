@@ -2634,6 +2634,7 @@ targets:
     scheduler: luci
 
   - name: Mac_android hybrid_android_views_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/92016
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
