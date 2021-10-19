@@ -164,7 +164,7 @@ class Step {
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
 
-  /// [label] appears under the number icon.
+  /// Optional widget that appears under the [title]. By default, uses the `bodyText1` theme.
   final Widget? label;
 }
 
