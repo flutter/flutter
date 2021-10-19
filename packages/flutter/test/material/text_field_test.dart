@@ -1099,6 +1099,36 @@ void main() {
     expect(cursorOffsetSpaces.dx, inputWidth - kCaretGap);
   });
 
+  testWidgets('Overflowing a line with spaces stops the cursor at the end (rtl direction)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(
+        child: const TextField(
+          textDirection: TextDirection.rtl,
+          maxLines: null,
+        ),
+      ),
+    );
+
+    const String testValueOneLine = 'enough text to be exactly at the end of the line.';
+    // Enter a string with the same number of characters as testValueTwoLines,
+    // but where the overflowing part is all spaces. Assert that it only renders
+    // on one line.
+    const String testValueSpaces = '$testValueOneLine          ';
+
+    // Positioning the cursor at the end of a line overflowing with spaces puts
+    // it inside the input still.
+    await tester.enterText(find.byType(TextField), testValueSpaces);
+    await skipPastScrollingAnimation(tester);
+    await tester.tapAt(textOffsetToPosition(tester, testValueSpaces.length));
+    await tester.pump();
+
+    final Offset cursorOffsetSpaces = findRenderEditable(tester).getLocalRectForCaret(
+      const TextPosition(offset: testValueSpaces.length),
+    ).topLeft;
+
+    expect(cursorOffsetSpaces.dx, 0);
+  });
+
   testWidgets('mobile obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
