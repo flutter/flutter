@@ -11,10 +11,10 @@ group("impeller") {
     "aiks",
     "base",
     "compiler",
-    "compositor",
     "entity",
     "geometry",
     "image",
+    "renderer",
   ]
 }
 
@@ -25,11 +25,11 @@ executable("impeller_unittests") {
     "aiks:aiks_unittests",
     "base:base_unittests",
     "compiler:compiler_unittests",
-    "compositor:compositor_unittests",
     "entity:entity_unittests",
     "fixtures",
     "geometry:geometry_unittests",
     "image:image_unittests",
     "playground",
+    "renderer:renderer_unittests",
   ]
 }

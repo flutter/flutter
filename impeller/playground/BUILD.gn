@@ -14,7 +14,7 @@ impeller_component("playground") {
   ]
 
   public_deps = [
-    "../compositor",
+    "../renderer",
     "//flutter/testing",
     "//third_party/glfw",
   ]

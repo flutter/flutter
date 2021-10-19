@@ -6,14 +6,14 @@
 
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
-#include "impeller/compositor/allocator.h"
-#include "impeller/compositor/context.h"
-#include "impeller/compositor/formats_metal.h"
-#include "impeller/compositor/render_pass.h"
-#include "impeller/compositor/renderer.h"
-#include "impeller/compositor/surface.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/playground.h"
+#include "impeller/renderer/allocator.h"
+#include "impeller/renderer/context.h"
+#include "impeller/renderer/formats_metal.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/renderer.h"
+#include "impeller/renderer/surface.h"
 
 #define GLFW_INCLUDE_NONE
 #import "third_party/glfw/include/GLFW/glfw3.h"

@@ -5,12 +5,12 @@
 #include "impeller/entity/contents.h"
 
 #include "flutter/fml/logging.h"
-#include "impeller/compositor/render_pass.h"
-#include "impeller/compositor/surface.h"
-#include "impeller/compositor/tessellator.h"
-#include "impeller/compositor/vertex_buffer_builder.h"
 #include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/surface.h"
+#include "impeller/renderer/tessellator.h"
+#include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 
