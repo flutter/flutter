@@ -185,7 +185,7 @@ class CanvasParagraph implements EngineParagraph {
       }
 
       final EngineLineMetrics line = lines[i];
-      final List<RangeBox> boxes = line.boxes!;
+      final List<RangeBox> boxes = line.boxes;
       final StringBuffer buffer = StringBuffer();
 
       int j = 0;

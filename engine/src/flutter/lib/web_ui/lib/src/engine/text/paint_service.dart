@@ -22,60 +22,105 @@ class TextPaintService {
     // individually.
     final List<EngineLineMetrics> lines = paragraph.computeLineMetrics();
 
+    if (lines.isEmpty) {
+      return;
+    }
+
+    final EngineLineMetrics lastLine = lines.last;
     for (final EngineLineMetrics line in lines) {
-      for (final RangeBox box in line.boxes!) {
-        _paintBox(canvas, offset, line, box);
+      if (line.boxes.isEmpty) {
+        continue;
+      }
+
+      final RangeBox lastBox = line.boxes.last;
+      final double justifyPerSpaceBox =
+          _calculateJustifyPerSpaceBox(paragraph, line, lastLine, lastBox);
+
+      ui.Offset justifiedOffset = offset;
+
+      for (final RangeBox box in line.boxes) {
+        final bool isTrailingSpaceBox =
+            box == lastBox && box is SpanBox && box.isSpaceOnly;
+
+        // Don't paint background for the trailing space in the line.
+        if (!isTrailingSpaceBox) {
+          _paintBackground(canvas, justifiedOffset, line, box, justifyPerSpaceBox);
+        }
+        _paintText(canvas, justifiedOffset, line, box);
+
+        if (box is SpanBox && box.isSpaceOnly && justifyPerSpaceBox != 0.0) {
+          justifiedOffset = justifiedOffset.translate(justifyPerSpaceBox, 0.0);
+        }
       }
     }
   }
 
-  void _paintBox(
+  void _paintBackground(
     BitmapCanvas canvas,
     ui.Offset offset,
     EngineLineMetrics line,
     RangeBox box,
+    double justifyPerSpaceBox,
   ) {
-    // Placeholder spans don't need any painting. Their boxes should remain
-    // empty so that their underlying widgets do their own painting.
     if (box is SpanBox) {
       final FlatTextSpan span = box.span;
 
       // Paint the background of the box, if the span has a background.
       final SurfacePaint? background = span.style.background as SurfacePaint?;
       if (background != null) {
-        canvas.drawRect(
-          box.toTextBox(line).toRect().shift(offset),
-          background.paintData,
-        );
+        ui.Rect rect = box.toTextBox(line).toRect().shift(offset);
+        if (box.isSpaceOnly) {
+          rect = ui.Rect.fromPoints(
+            rect.topLeft,
+            rect.bottomRight.translate(justifyPerSpaceBox, 0.0),
+          );
+        }
+        canvas.drawRect(rect, background.paintData);
       }
+    }
+  }
 
-      // Paint the actual text.
+  void _paintText(
+    BitmapCanvas canvas,
+    ui.Offset offset,
+    EngineLineMetrics line,
+    RangeBox box,
+  ) {
+    // There's no text to paint in placeholder spans.
+    if (box is SpanBox) {
+      final FlatTextSpan span = box.span;
+
       _applySpanStyleToCanvas(span, canvas);
       final double x = offset.dx + line.left + box.left;
       final double y = offset.dy + line.baseline;
-      final String text = paragraph.toPlainText().substring(
-            box.start.index,
-            box.end.indexWithoutTrailingNewlines,
-          );
-      final double? letterSpacing = span.style.letterSpacing;
-      if (letterSpacing == null || letterSpacing == 0.0) {
-        canvas.fillText(text, x, y, shadows: span.style.shadows);
-      } else {
-        // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
-        //                https://github.com/flutter/flutter/issues/51234
-        double charX = x;
-        final int len = text.length;
-        for (int i = 0; i < len; i++) {
-          final String char = text[i];
-          canvas.fillText(char, charX.roundToDouble(), y,
-              shadows: span.style.shadows);
-          charX += letterSpacing + canvas.measureText(char).width!;
+
+      // Don't paint the text for space-only boxes. This is just an
+      // optimization, it doesn't have any effect on the output.
+      if (!box.isSpaceOnly) {
+        final String text = paragraph.toPlainText().substring(
+              box.start.index,
+              box.end.indexWithoutTrailingNewlines,
+            );
+        final double? letterSpacing = span.style.letterSpacing;
+        if (letterSpacing == null || letterSpacing == 0.0) {
+          canvas.fillText(text, x, y, shadows: span.style.shadows);
+        } else {
+          // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
+          //                https://github.com/flutter/flutter/issues/51234
+          double charX = x;
+          final int len = text.length;
+          for (int i = 0; i < len; i++) {
+            final String char = text[i];
+            canvas.fillText(char, charX.roundToDouble(), y,
+                shadows: span.style.shadows);
+            charX += letterSpacing + canvas.measureText(char).width!;
+          }
         }
       }
 
       // Paint the ellipsis using the same span styles.
       final String? ellipsis = line.ellipsis;
-      if (ellipsis != null && box == line.boxes!.last) {
+      if (ellipsis != null && box == line.boxes.last) {
         final double x = offset.dx + line.left + box.right;
         canvas.fillText(ellipsis, x, y);
       }
@@ -96,4 +141,32 @@ class TextPaintService {
     canvas.setCssFont(span.style.cssFontString);
     canvas.setUpPaint(paint.paintData, null);
   }
+}
+
+/// Calculates for the given [line], the amount of extra width that needs to be
+/// added to each space box in order to align the line with the rest of the
+/// paragraph.
+double _calculateJustifyPerSpaceBox(
+  CanvasParagraph paragraph,
+  EngineLineMetrics line,
+  EngineLineMetrics lastLine,
+  RangeBox lastBox,
+) {
+  // Don't apply any justification on the last line.
+  if (line != lastLine &&
+      paragraph.width.isFinite &&
+      paragraph.paragraphStyle.textAlign == ui.TextAlign.justify) {
+    final double justifyTotal = paragraph.width - line.width;
+
+    int spaceBoxesToJustify = line.spaceBoxCount;
+    // If the last box is a space box, we can't use it to justify text.
+    if (lastBox is SpanBox && lastBox.isSpaceOnly) {
+      spaceBoxesToJustify--;
+    }
+    if (spaceBoxesToJustify > 0) {
+      return justifyTotal / spaceBoxesToJustify;
+    }
+  }
+
+  return 0.0;
 }
