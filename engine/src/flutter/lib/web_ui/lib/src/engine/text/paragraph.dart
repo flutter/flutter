@@ -31,33 +31,8 @@ class EngineLineMetrics implements ui.LineMetrics {
         endIndex = -1,
         endIndexWithoutNewlines = -1,
         widthWithTrailingSpaces = width,
-        boxes = null;
-
-  EngineLineMetrics.withText(
-    String this.displayText, {
-    required this.startIndex,
-    required this.endIndex,
-    required this.endIndexWithoutNewlines,
-    required this.hardBreak,
-    required this.width,
-    required this.widthWithTrailingSpaces,
-    required this.left,
-    required this.lineNumber,
-  })  : assert(displayText != null), // ignore: unnecessary_null_comparison,
-        assert(startIndex != null), // ignore: unnecessary_null_comparison
-        assert(endIndex != null), // ignore: unnecessary_null_comparison
-        assert(endIndexWithoutNewlines != null), // ignore: unnecessary_null_comparison
-        assert(hardBreak != null), // ignore: unnecessary_null_comparison
-        assert(width != null), // ignore: unnecessary_null_comparison
-        assert(left != null), // ignore: unnecessary_null_comparison
-        assert(lineNumber != null && lineNumber >= 0), // ignore: unnecessary_null_comparison
-        ellipsis = null,
-        ascent = double.infinity,
-        descent = double.infinity,
-        unscaledAscent = double.infinity,
-        height = double.infinity,
-        baseline = double.infinity,
-        boxes = null;
+        boxes = <RangeBox>[],
+        spaceBoxCount = 0;
 
   EngineLineMetrics.rich(
     this.lineNumber, {
@@ -74,6 +49,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.ascent,
     required this.descent,
     required this.boxes,
+    required this.spaceBoxCount,
   })  : displayText = null,
         unscaledAscent = double.infinity;
 
@@ -101,7 +77,10 @@ class EngineLineMetrics implements ui.LineMetrics {
 
   /// The list of boxes representing the entire line, possibly across multiple
   /// spans.
-  final List<RangeBox>? boxes;
+  final List<RangeBox> boxes;
+
+  /// The number of boxes that are space-only.
+  final int spaceBoxCount;
 
   @override
   final bool hardBreak;
