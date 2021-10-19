@@ -83,5 +83,34 @@ void testMain() {
       js_util.setProperty(
           html.window.navigator, 'clipboard', originalClipboard);
     });
+
+    test('can find text scale factor', () async {
+      const double deltaTolerance = 1e-5;
+
+      final html.Element root = html.document.documentElement!;
+      final String oldFontSize = root.style.fontSize;
+
+      addTearDown(() {
+        root.style.fontSize = oldFontSize;
+      });
+
+      root.style.fontSize = '16px';
+      expect(findBrowserTextScaleFactor(), 1.0);
+
+      root.style.fontSize = '20px';
+      expect(findBrowserTextScaleFactor(), 1.25);
+
+      root.style.fontSize = '24px';
+      expect(findBrowserTextScaleFactor(), 1.5);
+
+      root.style.fontSize = '14.4px';
+      expect(findBrowserTextScaleFactor(), closeTo(0.9, deltaTolerance));
+
+      root.style.fontSize = '12.8px';
+      expect(findBrowserTextScaleFactor(), closeTo(0.8, deltaTolerance));
+
+      root.style.fontSize = null;
+      expect(findBrowserTextScaleFactor(), 1.0);
+    });
   });
 }

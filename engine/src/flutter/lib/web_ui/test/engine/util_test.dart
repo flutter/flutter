@@ -79,4 +79,26 @@ void testMain() {
     debugOperatingSystemOverride = null;
     debugIsIOS15 = null;
   });
+
+  test('parseFloat basic tests', () {
+    // Simple integers and doubles.
+    expect(parseFloat('108'), 108.0);
+    expect(parseFloat('.34'), 0.34);
+    expect(parseFloat('108.34'), 108.34);
+
+    // Number followed by text.
+    expect(parseFloat('108.34px'), 108.34);
+    expect(parseFloat('108.34px29'), 108.34);
+    expect(parseFloat('108.34px 29'), 108.34);
+
+    // Number followed by space and text.
+    expect(parseFloat('108.34 px29'), 108.34);
+    expect(parseFloat('108.34 px 29'), 108.34);
+
+    // Invalid numbers.
+    expect(parseFloat('text'), isNull);
+    expect(parseFloat('text108'), isNull);
+    expect(parseFloat('text 108'), isNull);
+    expect(parseFloat('another text 108'), isNull);
+  });
 }

@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@JS()
+library util;
+
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
@@ -652,4 +656,26 @@ extension JsonExtensions on Map<dynamic, dynamic> {
   double? tryDouble(String propertyName) {
     return this[propertyName] as double?;
   }
+}
+
+typedef JsParseFloat = num? Function(String source);
+
+@JS('parseFloat')
+external JsParseFloat get _jsParseFloat;
+
+/// Parses a string [source] into a double.
+///
+/// Uses the JavaScript `parseFloat` function instead of Dart's [double.parse]
+/// because the latter can't parse strings like "20px".
+///
+/// Returns null if it fails to parse.
+num? parseFloat(String source) {
+  // Using JavaScript's `parseFloat` here because it can parse values
+  // like "20px", while Dart's `double.tryParse` fails.
+  final num? result = _jsParseFloat(source);
+
+  if (result == null || result.isNaN) {
+    return null;
+  }
+  return result;
 }
