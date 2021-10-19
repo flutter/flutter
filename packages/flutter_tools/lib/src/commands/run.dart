@@ -529,6 +529,7 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6,
       stayResident: stayResident,
+      multidexEnabled: boolArg('multidex'),
     );
   }
 
