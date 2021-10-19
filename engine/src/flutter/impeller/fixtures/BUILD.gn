@@ -30,7 +30,7 @@ test_fixtures("file_fixtures") {
 group("fixtures") {
   testonly = true
 
-  deps = [
+  public_deps = [
     ":file_fixtures",
     ":shader_fixtures",
   ]
