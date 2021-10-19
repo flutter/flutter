@@ -631,6 +631,7 @@ class DevFS {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
         dirtyEntries[deviceUri] = content;
+        _logger.printTrace('Archive $archivePath was ${content.size} bytes.');
         syncedBytes += content.size;
         if (archivePath != null && !bundleFirstUpload) {
           assetPathsToEvict.add(archivePath);
@@ -654,6 +655,7 @@ class DevFS {
       if (compiledBinary.isNotEmpty) {
         final Uri entryUri = _fileSystem.path.toUri(pathToReload);
         final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
+        _logger.printTrace('Compiled binary $compiledBinary was ${content.size} bytes.');
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
