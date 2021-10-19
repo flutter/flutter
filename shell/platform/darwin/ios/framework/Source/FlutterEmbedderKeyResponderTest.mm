@@ -88,6 +88,8 @@ API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeF1 = (UIKeyboardHIDUsage)0x3a;
 API_AVAILABLE(ios(13.4))
 constexpr UIKeyboardHIDUsage kKeyCodeAltRight = (UIKeyboardHIDUsage)0xe6;
+API_AVAILABLE(ios(13.4))
+constexpr UIKeyboardHIDUsage kKeyCodeEject = (UIKeyboardHIDUsage)0xb8;
 
 constexpr uint64_t kPhysicalKeyUndefined = 0x00070003;
 
@@ -159,6 +161,64 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertEqual(event->timestamp, 123000000.0f);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
   XCTAssertEqual(event->logical, kLogicalKeyA);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
+
+  XCTAssertEqual(last_handled, TRUE);
+  XCTAssert([[events lastObject] hasCallback]);
+  [[events lastObject] respond:FALSE];  // Check if responding FALSE works
+  XCTAssertEqual(last_handled, FALSE);
+
+  [events removeAllObjects];
+}
+
+- (void)testIosKeyPlane API_AVAILABLE(ios(13.4)) {
+  __block NSMutableArray<TestKeyEvent*>* events = [[NSMutableArray<TestKeyEvent*> alloc] init];
+  __block BOOL last_handled = TRUE;
+  FlutterKeyEvent* event;
+
+  FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
+      initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
+                          _Nullable _VoidPtr user_data) {
+        [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
+                                                     callback:callback
+                                                     userData:user_data]];
+      }];
+
+  last_handled = FALSE;
+  // Verify that the eject key (keycode 0xb8, which is not present in the keymap)
+  // should be translated to the right logical and physical keys.
+  [responder handlePress:keyDownEvent(kKeyCodeEject, kModifierFlagNone, 123.0f)
+                callback:^(BOOL handled) {
+                  last_handled = handled;
+                }];
+
+  XCTAssertEqual([events count], 1u);
+  event = [events lastObject].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
+  XCTAssertEqual(event->physical, kKeyCodeEject | kIosPlane);
+  XCTAssertEqual(event->logical, kKeyCodeEject | kIosPlane);
+  XCTAssertEqual(event->character, nullptr);
+  XCTAssertEqual(event->synthesized, false);
+
+  XCTAssertEqual(last_handled, FALSE);
+  XCTAssert([[events lastObject] hasCallback]);
+  [[events lastObject] respond:TRUE];
+  XCTAssertEqual(last_handled, TRUE);
+
+  [events removeAllObjects];
+
+  last_handled = TRUE;
+  [responder handlePress:keyUpEvent(kKeyCodeEject, kModifierFlagNone, 123.0f)
+                callback:^(BOOL handled) {
+                  last_handled = handled;
+                }];
+
+  XCTAssertEqual([events count], 1u);
+  event = [events lastObject].data;
+  XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
+  XCTAssertEqual(event->physical, kKeyCodeEject | kIosPlane);
+  XCTAssertEqual(event->logical, kKeyCodeEject | kIosPlane);
   XCTAssertEqual(event->character, nullptr);
   XCTAssertEqual(event->synthesized, false);
 
