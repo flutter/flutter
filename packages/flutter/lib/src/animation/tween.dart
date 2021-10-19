@@ -221,7 +221,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// If `T` is not nullable, then [begin] and [end] must both be set to
 /// non-null values before using [lerp] or [transform], otherwise they
 /// will throw.
-class Tween<T extends dynamic> extends Animatable<T> {
+class Tween<T extends Object?> extends Animatable<T> {
   /// Creates a tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
@@ -246,7 +246,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 
   /// Returns the value this variable has at the given animation clock value.
   ///
-  /// The default implementation of this method uses the [+], [-], and [*]
+  /// The default implementation of this method uses the `+`, `-`, and `*`
   /// operators on `T`. The [begin] and [end] properties must therefore be
   /// non-null by the time this method is called.
   ///
@@ -261,7 +261,8 @@ class Tween<T extends dynamic> extends Animatable<T> {
       // that do not conform to the Tween requirements.
       dynamic result;
       try {
-        result = begin + (end - begin) * t;
+        // ignore: avoid_dynamic_calls
+        result = (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t;
         result as T;
         return true;
       } on NoSuchMethodError {
@@ -301,7 +302,8 @@ class Tween<T extends dynamic> extends Animatable<T> {
         ]);
       }
     }());
-    return begin + (end - begin) * t as T;
+    // ignore: avoid_dynamic_calls
+    return (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -330,7 +332,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
-class ReverseTween<T> extends Tween<T> {
+class ReverseTween<T extends Object?> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
     : assert(parent != null),

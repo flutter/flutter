@@ -33,7 +33,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in checked mode).
+/// in debug mode).
 ///
 /// The top-most layer used to write the application will have a concrete class
 /// that inherits from [BindingBase] and uses all the various [BindingBase]
@@ -67,6 +67,13 @@ abstract class BindingBase {
 
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
+
+  /// Additional configuration used by the framework during hot reload.
+  ///
+  /// See also:
+  ///
+  ///  * [DebugReassembleConfig], which describes the configuration.
+  static DebugReassembleConfig? debugReassembleConfig;
 
   /// The main window to which this binding is bound.
   ///
@@ -104,8 +111,8 @@ abstract class BindingBase {
   /// A number of additional bindings are defined as extensions of
   /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
   /// [WidgetsBinding]. Each of these bindings define behaviors that interact
-  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers a
-  /// [ui.PlatformDispatcher.onPlatformMessage] handler, and [RendererBinding]
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
+  /// listeners with the [ChannelBuffers], and [RendererBinding]
   /// registers [ui.PlatformDispatcher.onMetricsChanged],
   /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
   /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
@@ -169,10 +176,27 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: 'exit',
+          callback: _exitApplication,
+        );
+      }
+      // These service extensions are used in profile mode applications.
+      registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
       );
     }
 
@@ -245,23 +269,6 @@ abstract class BindingBase {
           };
         },
       );
-
-      registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
-        getter: () async => connectedVmServiceUri ?? '',
-        setter: (String uri) async {
-          connectedVmServiceUri = uri;
-        },
-      );
-
-      registerStringServiceExtension(
-        name: 'activeDevToolsServerAddress',
-        getter: () async => activeDevToolsServerAddress ?? '',
-        setter: (String serverAddress) async {
-          activeDevToolsServerAddress = serverAddress;
-        },
-      );
-
       return true;
     }());
     assert(() {
@@ -628,4 +635,24 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
+}
+
+/// Additional configuration used for hot reload reassemble optimizations.
+///
+/// Do not extend, implement, or mixin this class. This may only be instantiated
+/// in debug mode.
+class DebugReassembleConfig {
+  /// Create a new [DebugReassembleConfig].
+  ///
+  /// Throws a [FlutterError] if this is called in profile or release mode.
+  DebugReassembleConfig({
+    this.widgetName,
+  }) {
+    if (!kDebugMode) {
+      throw FlutterError('Cannot instaniate DebugReassembleConfig in profile or release mode.');
+    }
+  }
+
+  /// The name of the widget that was modified, or `null` if the change was elsewhere.
+  final String? widgetName;
 }

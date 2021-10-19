@@ -36,7 +36,7 @@ void main() {
       await flutter.run(
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose']);
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
     Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -106,7 +106,6 @@ void main() {
     });
   });
 
-
   group('Flutter test for web', () {
     final TestsProject project = TestsProject();
     Directory tempDir;
@@ -140,7 +139,7 @@ void main() {
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
         startPaused: true, script: project.testFilePath,
-        additionalCommandArgs: <String>['--verbose']);
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
     testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
@@ -174,13 +173,14 @@ void main() {
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
-  ObjRef res;
-  try {
-    res = await flutter.evaluateInFrame('"test"');
-  } on RPCError catch (e) {
-    expect(e.message, contains('Expression evaluation is not supported for this configuration'));
-  }
-  expect(res, null);
+  await expectLater(
+    flutter.evaluateInFrame('"test"'),
+    throwsA(isA<RPCError>().having(
+      (RPCError error) => error.message,
+      'message',
+      contains('Expression evaluation is not supported for this configuration'),
+    )),
+  );
 }
 
 Future<void> checkStaticScope(FlutterTestDriver flutter) async {
@@ -190,7 +190,7 @@ Future<void> checkStaticScope(FlutterTestDriver flutter) async {
 
 Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');
-  expectError(res, 'CompilationError: Getter not found: \'typo\'.\ntypo\n^^^^');
+  expectError(res, "CompilationError: Getter not found: 'typo'.\ntypo\n^^^^");
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {

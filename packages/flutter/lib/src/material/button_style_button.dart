@@ -14,6 +14,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'theme_data.dart';
 
 /// The base [StatefulWidget] class for buttons whose style is defined by a [ButtonStyle] object.
@@ -123,7 +124,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   bool get enabled => onPressed != null || onLongPress != null;
 
   @override
-  _ButtonStyleState createState() => _ButtonStyleState();
+  State<ButtonStyleButton> createState() => _ButtonStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -176,49 +177,15 @@ abstract class ButtonStyleButton extends StatefulWidget {
 ///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
-class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
+class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin, TickerProviderStateMixin {
   AnimationController? _controller;
   double? _elevation;
   Color? _backgroundColor;
-  final Set<MaterialState> _states = <MaterialState>{};
-
-  bool get _hovered => _states.contains(MaterialState.hovered);
-  bool get _focused => _states.contains(MaterialState.focused);
-  bool get _pressed => _states.contains(MaterialState.pressed);
-  bool get _disabled => _states.contains(MaterialState.disabled);
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
-  void _handleHighlightChanged(bool value) {
-    if (_pressed != value) {
-      setState(() {
-        _updateState(MaterialState.pressed, value);
-      });
-    }
-  }
-
-  void _handleHoveredChanged(bool value) {
-    if (_hovered != value) {
-      setState(() {
-        _updateState(MaterialState.hovered, value);
-      });
-    }
-  }
-
-  void _handleFocusedChanged(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _updateState(MaterialState.focused, value);
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
   }
 
   @override
@@ -230,13 +197,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   @override
   void didUpdateWidget(ButtonStyleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
-    if (_disabled && _pressed) {
-      _handleHighlightChanged(false);
+    if (isDisabled && isPressed) {
+      removeMaterialState(MaterialState.pressed);
     }
   }
 
@@ -256,7 +223,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     T? resolve<T>(MaterialStateProperty<T>? Function(ButtonStyle? style) getProperty) {
       return effectiveValue(
-        (ButtonStyle? style) => getProperty(style)?.resolve(_states),
+        (ButtonStyle? style) => getProperty(style)?.resolve(materialStates),
       );
     }
 
@@ -268,6 +235,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
+    final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -291,6 +259,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
+        maxWidth: resolvedMaximumSize!.width,
+        maxHeight: resolvedMaximumSize.height,
       ),
     );
     if (resolvedFixedSize != null) {
@@ -309,14 +279,15 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       }
     }
 
-    final EdgeInsetsGeometry padding = resolvedPadding!.add(
-      EdgeInsets.only(
-        left: densityAdjustment.dx,
-        top: densityAdjustment.dy,
-        right: densityAdjustment.dx,
-        bottom: densityAdjustment.dy,
-      ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    // Per the Material Design team: don't allow the VisualDensity
+    // adjustment to reduce the width of the left/right padding. If we
+    // did, VisualDensity.compact, the default for desktop/web, would
+    // reduce the horizontal padding to zero.
+    final double dy = densityAdjustment.dy;
+    final double dx = math.max(0, densityAdjustment.dx);
+    final EdgeInsetsGeometry padding = resolvedPadding!
+      .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
@@ -363,13 +334,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
-          onHighlightChanged: _handleHighlightChanged,
-          onHover: _handleHoveredChanged,
+          onHighlightChanged: updateMaterialState(MaterialState.pressed),
+          onHover: updateMaterialState(MaterialState.hovered),
           mouseCursor: resolvedMouseCursor,
           enableFeedback: resolvedEnableFeedback,
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: _handleFocusedChanged,
+          onFocusChange: updateMaterialState(MaterialState.focused),
           autofocus: widget.autofocus,
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,

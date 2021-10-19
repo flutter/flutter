@@ -71,9 +71,6 @@ int x = 'String';
         contains("A value of type 'String' can't be assigned to a variable of type 'int'."),
       );
       expect(result.exitCode, 1);
-    },
-    timeout: const Timeout(Duration(minutes: 3)),
-    // framework vms no longer have Visual Studio
-    skip: platform.isWindows);
+    }, timeout: const Timeout(Duration(minutes: 3)));
   }
 }

@@ -431,7 +431,7 @@ class Container extends StatelessWidget {
       current = Padding(padding: margin!, child: current);
 
     if (transform != null)
-      current = Transform(transform: transform!, child: current, alignment: transformAlignment);
+      current = Transform(transform: transform!, alignment: transformAlignment, child: current);
 
     return current!;
   }

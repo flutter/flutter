@@ -17,6 +17,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
+import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'convert.dart';
@@ -69,6 +70,9 @@ class DevelopmentArtifact {
   /// Artifacts required for the Flutter Runner.
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
 
+  /// Artifacts required for desktop Windows UWP.
+  static const DevelopmentArtifact windowsUwp = DevelopmentArtifact._('winuwp', feature: windowsUwpEmbedding);
+
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -88,6 +92,7 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
+    windowsUwp,
   ];
 
   @override
@@ -316,7 +321,13 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          _logger.printStatus('Waiting for another flutter command to release the startup lock...');
+          // This needs to go to stderr to avoid cluttering up stdout if a parent
+          // process is collecting stdout. It's not really an "error" though,
+          // so print it in grey.
+          _logger.printError(
+            'Waiting for another flutter command to release the startup lock...',
+            color: TerminalColor.grey,
+          );
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -474,7 +485,7 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-    /// Delete all stamp files maintained by the cache.
+  /// Delete all stamp files maintained by the cache.
   void clearStampFiles() {
     try {
       getStampFileFor('flutter_tools').deleteSync();
@@ -762,7 +773,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+      await artifactUpdater.downloadZipArchive('Downloading package $pkgName...', Uri.parse('$url$pkgName.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -798,7 +809,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await cache.doesRemoteExist('Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...', Uri.parse('$url$pkgName.zip'));
       if (!exists) {
         return false;
       }
@@ -1017,7 +1028,7 @@ class ArtifactUpdater {
       final Digest digest = await digests.stream.last;
       final String rawDigest = base64.encode(digest.bytes);
       if (rawDigest != md5Hash) {
-        throw Exception(''
+        throw Exception(
           'Expected $url to have md5 checksum $md5Hash, but was $rawDigest. This '
           'may indicate a problem with your connection to the Flutter backend servers. '
           'Please re-try the download after confirming that your network connection is '
@@ -1068,7 +1079,7 @@ class ArtifactUpdater {
     }
   }
 
-    /// Clear any zip/gzip files downloaded.
+  /// Clear any zip/gzip files downloaded.
   void removeDownloadedFiles() {
     for (final File file in downloadedFiles) {
       if (!file.existsSync()) {
@@ -1102,7 +1113,7 @@ class ArtifactUpdater {
 }
 
 @visibleForTesting
-String flattenNameSubdirs(Uri url, FileSystem fileSystem){
+String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +24,7 @@ Widget buildTest({
   double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
   Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
+  ScrollController? controller,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -57,10 +64,11 @@ Widget buildTest({
         return Container(
           padding: const EdgeInsets.all(10.0),
           child: ListView(
+            controller: controller,
             dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
             itemExtent: itemExtent,
-            children: <int>[0, 1, 2, 3, 4]
+            children: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
               .where((int i) => !dismissedItems.contains(i))
               .map<Widget>(buildDismissibleItem).toList(),
           ),
@@ -679,7 +687,7 @@ void main() {
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
           return Future<bool?>.value(confirmDismissValue);
-        }
+        },
       );
     }
 
@@ -761,7 +769,7 @@ void main() {
                   child: Text(1.toString()),
                 ),
               ),
-            ]
+            ],
           );
         },
       ),
@@ -872,5 +880,23 @@ void main() {
     await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
     await dismissItem(tester, 0, gestureDirection: AxisDirection.down);
     expect(find.text('0'), findsOneWidget);
+  });
+
+  testWidgets('DismissDirection.none does not prevent scrolling', (WidgetTester tester) async {
+    dismissDirection = DismissDirection.none;
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(buildTest(controller: controller));
+    expect(dismissedItems, isEmpty);
+    expect(controller.offset, 0.0);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
+    expect(controller.offset, 0.0);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
+    expect(controller.offset, 0.0);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.down);
+    expect(controller.offset, 0.0);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
+    expect(controller.offset, 99.9);
   });
 }

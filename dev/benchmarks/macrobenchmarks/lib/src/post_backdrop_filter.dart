@@ -7,15 +7,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PostBackdropFilterPage extends StatefulWidget {
-  const PostBackdropFilterPage({Key key}) : super(key: key);
+  const PostBackdropFilterPage({Key? key}) : super(key: key);
 
   @override
-  _PostBackdropFilterPageState createState() => _PostBackdropFilterPageState();
+  State<PostBackdropFilterPage> createState() => _PostBackdropFilterPageState();
 }
 
 class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with TickerProviderStateMixin {
   bool _includeBackdropFilter = false;
-  AnimationController animation;
+  late AnimationController animation;
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget w) {
+                          builder: (BuildContext c, Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -83,7 +83,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                       Checkbox(
                         key: const Key('bdf-checkbox'), // this key is used by the driver test
                         value: _includeBackdropFilter,
-                        onChanged: (bool v) => setState(() { _includeBackdropFilter = v; }),
+                        onChanged: (bool? v) => setState(() { _includeBackdropFilter = v ?? false; }),
                       ),
                       MaterialButton(
                         key: const Key('bdf-animate'), // this key is used by the driver test

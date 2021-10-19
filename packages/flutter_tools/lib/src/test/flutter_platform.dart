@@ -451,6 +451,15 @@ class FlutterPlatform extends PlatformPlugin {
       String mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
+        // When start paused is specified, it means that the user is likely
+        // running this with a debugger attached. Initialize the resident
+        // compiler in this case.
+        if (debuggingOptions.startPaused) {
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+          final Uri testUri = globals.fs.file(testPath).uri;
+          // Trigger a compilation to initialize the resident compiler.
+          unawaited(compiler.compile(testUri));
+        }
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles[testPath];
       } else {

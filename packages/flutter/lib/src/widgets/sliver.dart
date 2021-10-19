@@ -209,7 +209,7 @@ abstract class SliverChildDelegate {
   }
 }
 
-class _SaltedValueKey extends ValueKey<Key>{
+class _SaltedValueKey extends ValueKey<Key> {
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
@@ -446,6 +446,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   }
 
   @override
+  @pragma('vm:notify-debugger-on-exception')
   Widget? build(BuildContext context, int index) {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!))
@@ -469,7 +470,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override
@@ -733,7 +734,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
-    return KeyedSubtree(child: child, key: key);
+    return KeyedSubtree(key: key, child: child);
   }
 
   @override
@@ -749,7 +750,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///
 /// See also:
 ///
-/// * [KeepAlive], which marks whether its chlild widget should be kept alive.
+/// * [KeepAlive], which marks whether its child widget should be kept alive.
 /// * [SliverChildBuilderDelegate] and [SliverChildListDelegate], slivers
 ///    which make usr of the keep alive functionality through the
 ///    `addAutomaticKeepAlives` property.
@@ -1351,7 +1352,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         } else {
           throw FlutterError(
             'Could not find the number of children in ${widget.delegate}.\n'
-            'The childCount getter was called (implying that the delegate\'s builder returned null '
+            "The childCount getter was called (implying that the delegate's builder returned null "
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
             'the cost of searching for the final child.',
@@ -1669,7 +1670,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
 }
 
 class _SliverOffstageElement extends SingleChildRenderObjectElement {

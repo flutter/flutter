@@ -15,21 +15,13 @@ import '../../src/common.dart';
 const String _kFlutterRoot = '/data/flutter';
 
 void main() {
-  testWithoutContext('analyze generate correct DartDoc message', () async {
-    expect(AnalyzeBase.generateDartDocMessage(0), 'all public member have documentation');
-    expect(AnalyzeBase.generateDartDocMessage(1), 'one public member lacks documentation');
-    expect(AnalyzeBase.generateDartDocMessage(2), '2 public members lack documentation');
-  });
-
   testWithoutContext('analyze generate correct errors message', () async {
     expect(
       AnalyzeBase.generateErrorsMessage(
         issueCount: 0,
         seconds: '0.1',
-        undocumentedMembers: 1,
-        dartDocMessage: 'one public member lacks documentation',
       ),
-      'No issues found! (ran in 0.1s; one public member lacks documentation)',
+      'No issues found! (ran in 0.1s)',
     );
 
     expect(
@@ -38,10 +30,8 @@ void main() {
         issueDiff: 2,
         files: 1,
         seconds: '0.1',
-        undocumentedMembers: 1,
-        dartDocMessage: 'one public member lacks documentation',
       ),
-      '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s; one public member lacks documentation)',
+      '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s)',
     );
   });
 

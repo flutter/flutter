@@ -44,7 +44,7 @@ Future<void> main() async {
         final Directory appBundle = applications
             .listSync()
             .whereType<Directory>()
-            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app');
 
         final String flutterFramework = path.join(
           appBundle.path,
@@ -53,7 +53,8 @@ Future<void> main() async {
           'Flutter',
         );
         // Exits 0 only if codesigned.
-        eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
+        final Future<String> flutterCodesign =
+            eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
 
         final String appFramework = path.join(
           appBundle.path,
@@ -61,7 +62,10 @@ Future<void> main() async {
           'App.framework',
           'App',
         );
-        eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        final Future<String> appCodesign =
+            eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        await flutterCodesign;
+        await appCodesign;
       });
 
       return TaskResult.success(null);

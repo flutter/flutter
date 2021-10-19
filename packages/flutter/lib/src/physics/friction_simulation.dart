@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'simulation.dart';
 import 'tolerance.dart';
 
@@ -15,8 +17,8 @@ import 'tolerance.dart';
 /// the current velocity [tolerance]).
 class FrictionSimulation extends Simulation {
   /// Creates a [FrictionSimulation] with the given arguments, namely: the fluid
-  /// drag coefficient, a unitless value; the initial position, in the same
-  /// length units as used for [x]; and the initial velocity, in the same
+  /// drag coefficient _cₓ_, a unitless value; the initial position _x₀_, in the same
+  /// length units as used for [x]; and the initial velocity _dx₀_, in the same
   /// velocity units as used for [dx].
   FrictionSimulation(
     double drag,
@@ -29,7 +31,7 @@ class FrictionSimulation extends Simulation {
        _v = velocity,
        super(tolerance: tolerance);
 
-  /// Creates a new friction simulation with its fluid drag coefficient set so
+  /// Creates a new friction simulation with its fluid drag coefficient (_cₓ_) set so
   /// as to ensure that the simulation starts and ends at the specified
   /// positions and velocities.
   ///
@@ -90,14 +92,20 @@ class FrictionSimulation extends Simulation {
 
   @override
   bool isDone(double time) => dx(time).abs() < tolerance.velocity;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'FrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)})';
 }
 
 /// A [FrictionSimulation] that clamps the modeled particle to a specific range
 /// of values.
+///
+/// Only the position is clamped. The velocity [dx] will continue to report
+/// unbounded simulated velocities once the particle has reached the bounds.
 class BoundedFrictionSimulation extends FrictionSimulation {
   /// Creates a [BoundedFrictionSimulation] with the given arguments, namely:
-  /// the fluid drag coefficient, a unitless value; the initial position, in the
-  /// same length units as used for [x]; the initial velocity, in the same
+  /// the fluid drag coefficient _cₓ_, a unitless value; the initial position _x₀_, in the
+  /// same length units as used for [x]; the initial velocity _dx₀_, in the same
   /// velocity units as used for [dx], the minimum value for the position, and
   /// the maximum value for the position. The minimum and maximum values must be
   /// in the same units as the initial position, and the initial position must
@@ -125,4 +133,7 @@ class BoundedFrictionSimulation extends FrictionSimulation {
       (x(time) - _minX).abs() < tolerance.distance ||
       (x(time) - _maxX).abs() < tolerance.distance;
   }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'BoundedFrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, x: ${_minX.toStringAsFixed(1)}..${_maxX.toStringAsFixed(1)})';
 }

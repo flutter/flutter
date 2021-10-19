@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -62,321 +68,342 @@ void main() {
   setUp(ensureGestureBinding);
 
   group('Long press', () {
-    late LongPressGestureRecognizer longPress;
-    late bool longPressDown;
-    late bool longPressUp;
+    late LongPressGestureRecognizer gesture;
+    late List<String> recognized;
+
+    void setUpHandlers() {
+      gesture
+        ..onLongPressDown = (LongPressDownDetails details) {
+          recognized.add('down');
+        }
+        ..onLongPressCancel = () {
+          recognized.add('cancel');
+        }
+        ..onLongPress = () {
+          recognized.add('start');
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          recognized.add('move');
+        }
+        ..onLongPressUp = () {
+          recognized.add('end');
+        };
+    }
 
     setUp(() {
-      longPress = LongPressGestureRecognizer();
-      longPressDown = false;
-      longPress.onLongPress = () {
-        longPressDown = true;
-      };
-      longPressUp = false;
-      longPress.onLongPressUp = () {
-        longPressUp = true;
-      };
+      recognized = <String>[];
+      gesture = LongPressGestureRecognizer();
+      setUpHandlers();
     });
 
     testGesture('Should recognize long press', (GestureTester tester) {
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 700));
-      expect(longPressDown, isTrue);
-
-      longPress.dispose();
+      expect(recognized, const <String>['down', 'start']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start']);
     });
 
     testGesture('Should recognize long press with altered duration', (GestureTester tester) {
-      longPress = LongPressGestureRecognizer(duration: const Duration(milliseconds: 100));
-      longPressDown = false;
-      longPress.onLongPress = () {
-        longPressDown = true;
-      };
-      longPressUp = false;
-      longPress.onLongPressUp = () {
-        longPressUp = true;
-      };
-      longPress.addPointer(down);
+      gesture = LongPressGestureRecognizer(duration: const Duration(milliseconds: 100));
+      setUpHandlers();
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 50));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 50));
-      expect(longPressDown, isTrue);
-
-      longPress.dispose();
+      expect(recognized, const <String>['down', 'start']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start']);
     });
 
     testGesture('Up cancels long press', (GestureTester tester) {
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.route(up);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressDown, isFalse);
-
-      longPress.dispose();
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
     });
 
     testGesture('Moving before accept cancels', (GestureTester tester) {
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.route(move);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(seconds: 1));
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
-      expect(longPressUp, isFalse);
-
-      longPress.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
     });
 
     testGesture('Moving after accept is ok', (GestureTester tester) {
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressDown, isTrue);
+      expect(recognized, const <String>['down', 'start']);
       tester.route(move);
+      expect(recognized, const <String>['down', 'start', 'move']);
       tester.route(up);
+      expect(recognized, const <String>['down', 'start', 'move', 'end']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isTrue);
-      expect(longPressUp, isTrue);
-
-      longPress.dispose();
+      expect(recognized, const <String>['down', 'start', 'move', 'end']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start', 'move', 'end']);
     });
 
     testGesture('Should recognize both tap down and long press', (GestureTester tester) {
       final TapGestureRecognizer tap = TapGestureRecognizer();
-
-      bool tapDownRecognized = false;
       tap.onTapDown = (_) {
-        tapDownRecognized = true;
+        recognized.add('tap_down');
       };
 
       tap.addPointer(down);
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(tapDownRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(tapDownRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(tapDownRecognized, isTrue);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'tap_down']);
       tester.async.elapse(const Duration(milliseconds: 700));
-      expect(tapDownRecognized, isTrue);
-      expect(longPressDown, isTrue);
-
+      expect(recognized, const <String>['down', 'tap_down', 'start']);
       tap.dispose();
-      longPress.dispose();
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'tap_down', 'start']);
     });
 
     testGesture('Drag start delayed by microtask', (GestureTester tester) {
       final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-
       bool isDangerousStack = false;
-
-      bool dragStartRecognized = false;
       drag.onStart = (DragStartDetails details) {
         expect(isDangerousStack, isFalse);
-        dragStartRecognized = true;
+        recognized.add('drag_start');
       };
 
       drag.addPointer(down);
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(dragStartRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(dragStartRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(dragStartRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       isDangerousStack = true;
-      longPress.dispose();
+      gesture.dispose();
       isDangerousStack = false;
-      expect(dragStartRecognized, isFalse);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.flushMicrotasks();
-      expect(dragStartRecognized, isTrue);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel', 'drag_start']);
       drag.dispose();
     });
 
     testGesture('Should recognize long press up', (GestureTester tester) {
-      bool longPressUpRecognized = false;
-      longPress.onLongPressUp = () {
-        longPressUpRecognized = true;
-      };
-
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressUpRecognized, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down); // kLongPressTimeout = 500;
-      expect(longPressUpRecognized, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressUpRecognized, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 700));
+      expect(recognized, const <String>['down', 'start']);
       tester.route(up);
-      expect(longPressUpRecognized, isTrue);
-
-      longPress.dispose();
+      expect(recognized, const <String>['down', 'start', 'end']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start', 'end']);
     });
 
     testGesture('Should not recognize long press with more than one buttons', (GestureTester tester) {
-      longPress.addPointer(const PointerDownEvent(
+      gesture.addPointer(const PointerDownEvent(
         pointer: 5,
         kind: PointerDeviceKind.mouse,
         buttons: kSecondaryMouseButton | kTertiaryButton,
         position: Offset(10, 10),
       ));
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(up);
-      expect(longPressUp, isFalse);
-
-      longPress.dispose();
+      expect(recognized, const <String>[]);
+      gesture.dispose();
+      expect(recognized, const <String>[]);
     });
 
     testGesture('Should cancel long press when buttons change before acceptance', (GestureTester tester) {
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down']);
       tester.route(const PointerMoveEvent(
         pointer: 5,
         kind: PointerDeviceKind.mouse,
         buttons: kTertiaryButton,
         position: Offset(10, 10),
       ));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(milliseconds: 700));
-      expect(longPressDown, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.route(up);
-      expect(longPressUp, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
+    });
 
-      longPress.dispose();
+    testGesture('non-allowed pointer does not inadvertently reset the recognizer', (GestureTester tester) {
+      gesture = LongPressGestureRecognizer(kind: PointerDeviceKind.touch);
+      setUpHandlers();
+
+      // Accept a long-press gesture
+      gesture.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, const <String>['down', 'start']);
+
+      // Add a non-allowed pointer (doesn't match the kind filter)
+      gesture.addPointer(const PointerDownEvent(
+        pointer: 101,
+        kind: PointerDeviceKind.mouse,
+        position: Offset(10, 10),
+      ));
+      expect(recognized, const <String>['down', 'start']);
+
+      // Moving the primary pointer should result in a normal event
+      tester.route(const PointerMoveEvent(
+        pointer: 5,
+        position: Offset(15, 15),
+      ));
+      expect(recognized, const <String>['down', 'start', 'move']);
     });
   });
 
   group('long press drag', () {
-    late LongPressGestureRecognizer longPressDrag;
-    late bool longPressStart;
-    late bool longPressUp;
+    late LongPressGestureRecognizer gesture;
     Offset? longPressDragUpdate;
+    late List<String> recognized;
+
+    void setUpHandlers() {
+      gesture
+        ..onLongPressDown = (LongPressDownDetails details) {
+          recognized.add('down');
+        }
+        ..onLongPressCancel = () {
+          recognized.add('cancel');
+        }
+        ..onLongPress = () {
+          recognized.add('start');
+        }
+        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+          recognized.add('move');
+          longPressDragUpdate = details.globalPosition;
+        }
+        ..onLongPressUp = () {
+          recognized.add('end');
+        };
+    }
 
     setUp(() {
-      longPressDrag = LongPressGestureRecognizer();
-      longPressStart = false;
-      longPressDrag.onLongPressStart = (LongPressStartDetails details) {
-        longPressStart = true;
-      };
-      longPressUp = false;
-      longPressDrag.onLongPressEnd = (LongPressEndDetails details) {
-        longPressUp = true;
-      };
-      longPressDragUpdate = null;
-      longPressDrag.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-        longPressDragUpdate = details.globalPosition;
-      };
+      gesture = LongPressGestureRecognizer();
+      setUpHandlers();
+      recognized = <String>[];
     });
 
     testGesture('Should recognize long press down', (GestureTester tester) {
-      longPressDrag.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 700));
-      expect(longPressStart, isTrue);
-
-      longPressDrag.dispose();
+      expect(recognized, const <String>['down', 'start']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start']);
     });
 
     testGesture('Short up cancels long press', (GestureTester tester) {
-      longPressDrag.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.route(up);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressStart, isFalse);
-
-      longPressDrag.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
     });
 
     testGesture('Moving before accept cancels', (GestureTester tester) {
-      longPressDrag.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.route(move);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(seconds: 1));
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressStart, isFalse);
-      expect(longPressUp, isFalse);
-
-      longPressDrag.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'cancel']);
     });
 
     testGesture('Moving after accept does not cancel', (GestureTester tester) {
-      longPressDrag.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(5);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>[]);
       tester.route(down);
-      expect(longPressStart, isFalse);
+      expect(recognized, const <String>['down']);
       tester.async.elapse(const Duration(seconds: 1));
-      expect(longPressStart, isTrue);
+      expect(recognized, const <String>['down', 'start']);
       tester.route(move);
+      expect(recognized, const <String>['down', 'start', 'move']);
       expect(longPressDragUpdate, const Offset(100, 200));
       tester.route(up);
       tester.async.elapse(const Duration(milliseconds: 300));
-      expect(longPressStart, isTrue);
-      expect(longPressUp, isTrue);
-
-      longPressDrag.dispose();
+      expect(recognized, const <String>['down', 'start', 'move', 'end']);
+      gesture.dispose();
+      expect(recognized, const <String>['down', 'start', 'move', 'end']);
     });
   });
 
@@ -388,12 +415,17 @@ void main() {
       position: Offset(10, 10),
     );
 
+    late LongPressGestureRecognizer gesture;
     final List<String> recognized = <String>[];
 
-    late LongPressGestureRecognizer longPress;
-
     setUp(() {
-      longPress = LongPressGestureRecognizer()
+      gesture = LongPressGestureRecognizer()
+        ..onLongPressDown = (LongPressDownDetails details) {
+          recognized.add('down');
+        }
+        ..onLongPressCancel = () {
+          recognized.add('cancel');
+        }
         ..onLongPressStart = (LongPressStartDetails details) {
           recognized.add('start');
         }
@@ -403,40 +435,43 @@ void main() {
     });
 
     tearDown(() {
-      longPress.dispose();
+      gesture.dispose();
       recognized.clear();
     });
 
     testGesture('Should cancel long press when buttons change before acceptance', (GestureTester tester) {
       // First press
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(down.pointer);
       tester.route(down);
       tester.async.elapse(const Duration(milliseconds: 300));
       tester.route(moveR);
-      expect(recognized, <String>[]);
+      expect(recognized, const <String>['down', 'cancel']);
       tester.async.elapse(const Duration(milliseconds: 700));
       tester.route(up);
-      expect(recognized, <String>[]);
+      expect(recognized, const <String>['down', 'cancel']);
     });
 
     testGesture('Buttons change before acceptance should not prevent the next long press', (GestureTester tester) {
       // First press
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(down.pointer);
       tester.route(down);
+      expect(recognized, <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 300));
       tester.route(moveR);
+      expect(recognized, <String>['down', 'cancel']);
       tester.async.elapse(const Duration(milliseconds: 700));
       tester.route(up);
       recognized.clear();
 
       // Second press
-      longPress.addPointer(down2);
+      gesture.addPointer(down2);
       tester.closeArena(down2.pointer);
       tester.route(down2);
+      expect(recognized, <String>['down']);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start']);
+      expect(recognized, <String>['down', 'start']);
       recognized.clear();
 
       tester.route(up2);
@@ -445,11 +480,11 @@ void main() {
 
     testGesture('Should cancel long press when buttons change after acceptance', (GestureTester tester) {
       // First press
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(down.pointer);
       tester.route(down);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start']);
+      expect(recognized, <String>['down', 'start']);
       recognized.clear();
 
       tester.route(moveR);
@@ -460,7 +495,7 @@ void main() {
 
     testGesture('Buttons change after acceptance should not prevent the next long press', (GestureTester tester) {
       // First press
-      longPress.addPointer(down);
+      gesture.addPointer(down);
       tester.closeArena(down.pointer);
       tester.route(down);
       tester.async.elapse(const Duration(milliseconds: 1000));
@@ -469,11 +504,11 @@ void main() {
       recognized.clear();
 
       // Second press
-      longPress.addPointer(down2);
+      gesture.addPointer(down2);
       tester.closeArena(down2.pointer);
       tester.route(down2);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start']);
+      expect(recognized, <String>['down', 'start']);
       recognized.clear();
 
       tester.route(up2);
@@ -684,5 +719,20 @@ void main() {
     expect(recognized, <String>[]);
     longPress.dispose();
     recognized.clear();
+  });
+
+  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+    expect(
+      () {
+        LongPressGestureRecognizer(
+          kind: PointerDeviceKind.touch,
+          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
+      ),
+    );
   });
 }

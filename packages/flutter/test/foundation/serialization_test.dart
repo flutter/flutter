@@ -40,7 +40,7 @@ void main() {
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
       expect(read.getInt64(), equals(-9000000000000));
-    }, skip: kIsWeb);
+    }, skip: kIsWeb); // [intended] bigint isn't supported on web.
     test('of 64-bit integer in big endian', () {
       final WriteBuffer write = WriteBuffer();
       write.putInt64(-9000000000000, endian: Endian.big);
@@ -48,7 +48,7 @@ void main() {
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
       expect(read.getInt64(endian: Endian.big), equals(-9000000000000));
-    }, skip: kIsWeb);
+    }, skip: kIsWeb); // [intended] bigint isn't supported on web.
     test('of double', () {
       final WriteBuffer write = WriteBuffer();
       write.putFloat64(3.14);
@@ -86,7 +86,20 @@ void main() {
       final ReadBuffer read = ReadBuffer(written);
       read.getUint8();
       expect(read.getInt64List(3), equals(integers));
-    }, skip: kIsWeb);
+    }, skip: kIsWeb); // [intended] bigint isn't supported on web.
+    test('of float list when unaligned', () {
+      final Float32List floats = Float32List.fromList(<double>[3.14, double.nan]);
+      final WriteBuffer write = WriteBuffer();
+      write.putUint8(9);
+      write.putFloat32List(floats);
+      final ByteData written = write.done();
+      expect(written.lengthInBytes, equals(12));
+      final ReadBuffer read = ReadBuffer(written);
+      read.getUint8();
+      final Float32List readFloats = read.getFloat32List(2);
+      expect(readFloats[0], closeTo(3.14, 0.0001));
+      expect(readFloats[1], isNaN);
+    });
     test('of double list when unaligned', () {
       final Float64List doubles = Float64List.fromList(<double>[3.14, double.nan]);
       final WriteBuffer write = WriteBuffer();
@@ -99,6 +112,11 @@ void main() {
       final Float64List readDoubles = read.getFloat64List(2);
       expect(readDoubles[0], equals(3.14));
       expect(readDoubles[1], isNaN);
+    });
+    test('done twice', () {
+      final WriteBuffer write = WriteBuffer();
+      write.done();
+      expect(() => write.done(), throwsStateError);
     });
   });
 }

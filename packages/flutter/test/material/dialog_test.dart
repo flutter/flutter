@@ -32,7 +32,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
               },
             ),
           );
-        }
+        },
       ),
     ),
   );
@@ -47,10 +47,10 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 }
 
 // What was the AlertDialog's ButtonBar when many of these tests were written,
-// is now a Container with an OverflowBar child. The Container's size and location
-// match the original ButtonBar's size and location.
+// is now a Padding widget with an OverflowBar child. The Padding widget's size
+// and location  match the original ButtonBar's size and location.
 Finder _findButtonBar() {
-  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
+  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
@@ -180,8 +180,8 @@ void main() {
 
   testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
     const SimpleDialog dialog = SimpleDialog(
-      children: <Widget>[],
       clipBehavior: Clip.antiAlias,
+      children: <Widget>[],
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -327,8 +327,8 @@ void main() {
       children: <Widget>[
         SimpleDialogOption(
           onPressed: () {},
-          child: const Text('First option'),
           padding: customPadding,
+          child: const Text('First option'),
         ),
       ],
     );
@@ -517,6 +517,8 @@ void main() {
           child: const Text('button'),
         ),
       ],
+      // The OverflowBar is inset by the buttonPadding/2 + actionsPadding
+      buttonPadding: EdgeInsets.zero,
       actionsPadding: const EdgeInsets.all(30.0), // custom padding value
     );
 
@@ -536,7 +538,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(_findButtonBar());
+    final Size actionsSize = tester.getSize(find.byType(OverflowBar));
 
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
@@ -1263,8 +1265,8 @@ void main() {
           viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
-          child: Placeholder(),
           insetPadding: null,
+          child: Placeholder(),
         ),
       ),
     );
@@ -1284,13 +1286,15 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(Placeholder)),
-        Rect.fromLTRB(
-          screenRect.left + 10.0,
-          screenRect.top + 20.0,
-          screenRect.right - 30.0,
-          screenRect.bottom - 40.0,
-        ));
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      Rect.fromLTRB(
+        screenRect.left + 10.0,
+        screenRect.top + 20.0,
+        screenRect.right - 30.0,
+        screenRect.bottom - 40.0,
+      ),
+    );
   });
 
   testWidgets('AlertDialog widget contains route semantics from title for iOS', (WidgetTester tester) async {
@@ -1326,8 +1330,8 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(
-        label: 'Title',
-        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
 
     await tester.tap(find.text('X'));
@@ -1346,14 +1350,14 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const AlertDialog(
-            title: Text('title'),
-            content: Text('content'),
-            actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
-          ),
-        )
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const AlertDialog(
+          title: Text('title'),
+          content: Text('content'),
+          actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1387,8 +1391,10 @@ void main() {
                         ),
                         TestSemantics(
                           id: 7,
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton,
-                            SemanticsFlag.hasEnabledState],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                          ],
                           label: 'action',
                           textDirection: TextDirection.ltr,
                         ),
@@ -1509,16 +1515,16 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const SimpleDialog(
-            title: Text('title'),
-            children: <Widget>[
-              Text('content'),
-              TextButton(onPressed: null, child: Text('action'))
-            ],
-          ),
-        )
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const SimpleDialog(
+          title: Text('title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1556,8 +1562,10 @@ void main() {
                             ),
                             TestSemantics(
                               id: 8,
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                              ],
                               label: 'action',
                               textDirection: TextDirection.ltr,
                             ),
@@ -1946,7 +1954,7 @@ void main() {
         navigatorObservers: <NavigatorObserver>[
           _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
             currentRouteSetting = newRoute.settings;
-          })
+          }),
         ],
         home: const Material(
           child: Center(
@@ -2060,6 +2068,58 @@ void main() {
     await tester.restoreFrom(restorationData);
     expect(find.byType(AlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  testWidgets('AlertDialog.actionsAlignment', (WidgetTester tester) async {
+    final Key actionKey = UniqueKey();
+
+    Widget buildFrame(MainAxisAlignment? alignment) {
+      return MaterialApp(
+        home: Scaffold(
+          body: AlertDialog(
+            content: const SizedBox(width: 800),
+            actionsAlignment: alignment,
+            actions: <Widget>[SizedBox(key: actionKey, width: 20, height: 20)],
+            buttonPadding: EdgeInsets.zero,
+            insetPadding: EdgeInsets.zero,
+          ),
+        ),
+      );
+    }
+
+    // Default configuration
+    await tester.pumpWidget(buildFrame(null));
+    expect(tester.getTopLeft(find.byType(AlertDialog)).dx, 0);
+    expect(tester.getTopRight(find.byType(AlertDialog)).dx, 800);
+    expect(tester.getSize(find.byType(OverflowBar)).width, 800);
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, 800 - 20);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, 800);
+
+    // All possible alginment values
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.start));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, 20);
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.center));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.end));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, 800 - 20);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, 800);
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceBetween));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, 0);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, 20);
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceAround));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
+
+    await tester.pumpWidget(buildFrame(MainAxisAlignment.spaceEvenly));
+    expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
+    expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {

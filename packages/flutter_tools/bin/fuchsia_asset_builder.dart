@@ -9,10 +9,13 @@ import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
+import 'package:flutter_tools/src/bundle.dart';
+import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -21,6 +24,7 @@ const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
 const String _kOptionComponentName = 'component-name';
+const String _kOptionDepfile = 'depfile';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
@@ -47,7 +51,8 @@ Future<void> run(List<String> args) async {
         help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
     ..addOption(_kOptionAssetManifestOut)
-    ..addOption(_kOptionComponentName);
+    ..addOption(_kOptionComponentName)
+    ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
       .any((String option) => !argResults.options.contains(option))) {
@@ -61,6 +66,7 @@ Future<void> run(List<String> args) async {
     manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
     assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages] as String,
+    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 
   if (assets == null) {
@@ -77,6 +83,25 @@ Future<void> run(List<String> args) async {
 
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
+
+  if (argResults.options.contains(_kOptionDepfile)) {
+    await writeDepfile(assets, outputMan, argResults[_kOptionDepfile] as String);
+  }
+}
+
+Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
+  final Depfile depfileContent = Depfile(
+    assets.inputFiles,
+    <libfs.File>[globals.fs.file(outputManifest)],
+  );
+  final DepfileService depfileService = DepfileService(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  );
+
+  final libfs.File depfile = globals.fs.file(depfilePath);
+  await depfile.create(recursive: true);
+  depfileService.writeToFile(depfileContent, depfile);
 }
 
 Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {

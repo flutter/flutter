@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/analyze_size.dart';
@@ -43,15 +41,15 @@ const String aotSizeOutput = '''
 ''';
 
 void main() {
-  MemoryFileSystem fileSystem;
-  BufferLogger logger;
+  late MemoryFileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
   });
 
-  test('matchesPattern matches only entire strings', () {
+  testWithoutContext('matchesPattern matches only entire strings', () {
     expect(matchesPattern('', pattern: ''), isNotNull);
     expect(matchesPattern('', pattern: 'foo'), null);
     expect(matchesPattern('foo', pattern: ''), null);
@@ -62,7 +60,7 @@ void main() {
     expect(matchesPattern('foobar', pattern: RegExp(r'.*b')), null);
   });
 
-  test('builds APK analysis correctly', () async {
+  testWithoutContext('builds APK analysis correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -78,7 +76,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
@@ -92,54 +90,61 @@ void main() {
     );
 
     expect(result['type'], 'apk');
-
-    final Map<String, dynamic> androidManifestMap = result['children'][0] as Map<String, dynamic>;
+    final List<dynamic> resultChildren = result['children'] as List<dynamic>;
+    final Map<String, dynamic> androidManifestMap = resultChildren[0] as Map<String, dynamic>;
     expect(androidManifestMap['n'], 'AndroidManifest.xml');
     expect(androidManifestMap['value'], 6);
 
-    final Map<String, dynamic> metaInfMap = result['children'][1] as Map<String, dynamic>;
+    final Map<String, Object?> metaInfMap = resultChildren[1] as Map<String, Object?>;
+    final List<Map<String, Object?>> metaInfMapChildren = metaInfMap['children']! as List<Map<String, Object?>>;
     expect(metaInfMap['n'], 'META-INF');
     expect(metaInfMap['value'], 10);
-    final Map<String, dynamic> certRsaMap = metaInfMap['children'][0] as Map<String, dynamic>;
+    final Map<String, dynamic> certRsaMap = metaInfMapChildren[0];
     expect(certRsaMap['n'], 'CERT.RSA');
     expect(certRsaMap['value'], 5);
-    final Map<String, dynamic> certSfMap = metaInfMap['children'][1] as Map<String, dynamic>;
+    final Map<String, dynamic> certSfMap = metaInfMapChildren[1];
     expect(certSfMap['n'], 'CERT.SF');
     expect(certSfMap['value'], 5);
 
-    final Map<String, dynamic> libMap = result['children'][2] as Map<String, dynamic>;
+    final Map<String, Object?> libMap = resultChildren[2] as Map<String, Object?>;
+    final List<Map<String, Object?>> libMapChildren = libMap['children']! as List<Map<String, Object?>>;
     expect(libMap['n'], 'lib');
     expect(libMap['value'], 12);
-    final Map<String, dynamic> arm64Map = libMap['children'][0] as Map<String, dynamic>;
+    final Map<String, Object?> arm64Map = libMapChildren[0];
+    final List<Map<String, Object?>> arn64MapChildren = arm64Map['children']! as List<Map<String, Object?>>;
     expect(arm64Map['n'], 'arm64-v8a');
     expect(arm64Map['value'], 12);
-    final Map<String, dynamic> libAppMap = arm64Map['children'][0] as Map<String, dynamic>;
+    final Map<String, Object?> libAppMap = arn64MapChildren[0];
+    final List<dynamic> libAppMapChildren = libAppMap['children']! as List<dynamic>;
     expect(libAppMap['n'], 'libxyzzyapp.so (Dart AOT)');
     expect(libAppMap['value'], 6);
-    expect(libAppMap['children'].length, 3);
-    final Map<String, dynamic> internalMap = libAppMap['children'][0] as Map<String, dynamic>;
-    final Map<String, dynamic> skipMap = internalMap['children'][0] as Map<String, dynamic>;
+    expect(libAppMapChildren.length, 3);
+    final Map<String, Object?> internalMap = libAppMapChildren[0] as Map<String, Object?>;
+    final List<dynamic> internalMapChildren = internalMap['children']! as List<dynamic>;
+    final Map<String, Object?> skipMap = internalMapChildren[0] as Map<String, Object?>;
     expect(skipMap['n'], 'skip');
     expect(skipMap['value'], 2400);
-    final Map<String, dynamic> subListIterableMap = internalMap['children'][1] as Map<String, dynamic>;
+    final Map<String, Object?> subListIterableMap = internalMapChildren[1] as Map<String, Object?>;
     expect(subListIterableMap['n'], 'new SubListIterable.');
     expect(subListIterableMap['value'], 3560);
-    final Map<String, dynamic> coreMap = libAppMap['children'][1] as Map<String, dynamic>;
-    final Map<String, dynamic> rangeErrorMap = coreMap['children'][0] as Map<String, dynamic>;
+    final Map<String, Object?> coreMap = libAppMapChildren[1] as Map<String, Object?>;
+    final List<dynamic> coreMapChildren = coreMap['children']! as List<dynamic>;
+    final Map<String, Object?> rangeErrorMap = coreMapChildren[0] as Map<String, Object?>;
     expect(rangeErrorMap['n'], 'new RangeError.range');
     expect(rangeErrorMap['value'], 3920);
-    final Map<String, dynamic> stubsMap = libAppMap['children'][2] as Map<String, dynamic>;
-    final Map<String, dynamic> allocateMap = stubsMap['children'][0] as Map<String, dynamic>;
+    final Map<String, Object?> stubsMap = libAppMapChildren[2] as Map<String, Object?>;
+    final List<dynamic> stubsMapChildren = stubsMap['children']! as List<dynamic>;
+    final Map<String, Object?> allocateMap = stubsMapChildren[0] as Map<String, Object?>;
     expect(allocateMap['n'], 'Allocate ArgumentError');
     expect(allocateMap['value'], 4650);
-    final Map<String, dynamic> libFlutterMap = arm64Map['children'][1] as Map<String, dynamic>;
+    final Map<String, Object?> libFlutterMap = arn64MapChildren[1];
     expect(libFlutterMap['n'], 'libflutter.so (Flutter Engine)');
     expect(libFlutterMap['value'], 6);
 
     expect(result['precompiler-trace'], <String, Object>{});
   });
 
-  test('outputs summary to command line correctly', () async {
+  testWithoutContext('outputs summary to command line correctly', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -155,7 +160,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
@@ -181,7 +186,7 @@ void main() {
     );
   });
 
-  test('can analyze contents of output directory', () async {
+  testWithoutContext('can analyze contents of output directory', () async {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
@@ -202,7 +207,7 @@ void main() {
     final File precompilerTrace = fileSystem.file('trace.json')
       ..writeAsStringSync('{}');
 
-    final Map<String, Object> result = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> result = await sizeAnalyzer.analyzeAotSnapshot(
       outputDirectory: outputDirectory,
       aotSnapshot: aotSizeJson,
       precompilerTrace: precompilerTrace,
@@ -222,5 +227,37 @@ void main() {
     );
     expect(result['type'], 'linux');
     expect(result['precompiler-trace'], <String, Object>{});
+  });
+
+  testWithoutContext('handles null AOT snapshot json', () async {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: fileSystem,
+      logger: logger,
+      appFilenamePattern: RegExp(r'lib.*app\.so'),
+      flutterUsage: TestUsage(),
+    );
+
+    final Directory outputDirectory = fileSystem.directory('example/out/foo.app')..createSync(recursive: true);
+    final File invalidAotSizeJson = fileSystem.file('test.json')..writeAsStringSync('null');
+    final File precompilerTrace = fileSystem.file('trace.json');
+
+    await expectLater(
+        () => sizeAnalyzer.analyzeAotSnapshot(
+              outputDirectory: outputDirectory,
+              aotSnapshot: invalidAotSizeJson,
+              precompilerTrace: precompilerTrace,
+              type: 'linux',
+            ),
+        throwsToolExit());
+
+    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(Archive())!);
+    await expectLater(
+        () => sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+              zipFile: apk,
+              aotSnapshot: invalidAotSizeJson,
+              precompilerTrace: precompilerTrace,
+              kind: 'apk',
+            ),
+        throwsToolExit());
   });
 }

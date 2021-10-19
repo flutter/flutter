@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/test/event_printer.dart';
 import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:test/fake.dart';
@@ -13,8 +11,8 @@ import '../../src/common.dart';
 void main() {
   group(EventPrinter, () {
     final Uri observatoryUri = Uri.parse('http://localhost:1234');
-    EventPrinter eventPrinter;
-    StringBuffer output;
+    late EventPrinter eventPrinter;
+    late StringBuffer output;
 
     setUp(() {
       output = StringBuffer();
@@ -56,4 +54,4 @@ void main() {
   });
 }
 
-class FakeDevice extends Fake implements TestDevice {}
+class FakeDevice extends Fake implements TestDevice { }

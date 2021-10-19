@@ -279,8 +279,9 @@ class OutlineInputBorder extends InputBorder {
   ///
   /// See also:
   ///
-  ///  * [InputDecoration.hasFloatingPlaceholder], which should be set to false
-  ///    when the [borderSide] is [BorderSide.none]. If let as true, the label
+  ///  * [InputDecoration.floatingLabelBehavior], which should be set to
+  ///    [FloatingLabelBehavior.never] when the [borderSide] is
+  ///    [BorderSide.none]. If let as [FloatingLabelBehavior.auto], the label
   ///    will extend beyond the container as if the border were still being
   ///    drawn.
   const OutlineInputBorder({

@@ -279,7 +279,7 @@ class MouseTracker extends ChangeNotifier {
     _mouseCursorMixin.handleDeviceCursorUpdate(
       details.device,
       details.triggeringEvent,
-      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotaion) => annotaion.cursor),
+      details.nextAnnotations.keys.map((MouseTrackerAnnotation annotation) => annotation.cursor),
     );
   }
 
@@ -289,17 +289,20 @@ class MouseTracker extends ChangeNotifier {
   /// Trigger a device update with a new event and its corresponding hit test
   /// result.
   ///
-  /// The [updateWithEvent] indicates that an event has been observed, and
-  /// is called during the handler of the event. The `getResult` should return
-  /// the hit test result at the position of the event.
+  /// The [updateWithEvent] indicates that an event has been observed, and is
+  /// called during the handler of the event.  It is typically called by
+  /// [RendererBinding], and should be called with all events received, and let
+  /// [MouseTracker] filter which to react to.
+  ///
+  /// The `getResult` is a function to return the hit test result at the
+  /// position of the event. It should not simply return cached hit test
+  /// result, because the cache does not change throughout a tap sequence.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
-    assert(event != null);
-    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
-    assert(result != null);
     if (event.kind != PointerDeviceKind.mouse)
       return;
     if (event is PointerSignalEvent)
       return;
+    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
     if (!_shouldMarkStateDirty(existingState, event))

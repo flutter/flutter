@@ -13,10 +13,10 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';

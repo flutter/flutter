@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
@@ -19,11 +19,10 @@ void main() {
   group('AnimatedSize', () {
     testWidgets('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -36,11 +35,10 @@ void main() {
       expect(box.size.height, equals(100.0));
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 200.0,
               height: 200.0,
             ),
@@ -63,11 +61,10 @@ void main() {
       expect(box.size.height, equals(200.0));
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -92,14 +89,13 @@ void main() {
 
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox (
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              vsync: tester,
-              child: const SizedBox(
+              duration: Duration(milliseconds: 200),
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -114,14 +110,13 @@ void main() {
 
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox (
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              vsync: tester,
-              child: const SizedBox(
+              duration: Duration(milliseconds: 200),
+              child: SizedBox(
                 width: 200.0,
                 height: 200.0,
               ),
@@ -158,7 +153,6 @@ void main() {
         Center(
           child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            vsync: tester,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 100),
               width: 100.0,
@@ -175,7 +169,6 @@ void main() {
         Center(
           child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            vsync: tester,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 100),
               width: 200.0,
@@ -204,7 +197,6 @@ void main() {
         Center(
           child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            vsync: tester,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 1),
               width: 100.0,
@@ -228,7 +220,6 @@ void main() {
         const Center(
           child: AnimatedSize(
             duration: Duration(milliseconds: 200),
-            vsync: TestVSync(),
             child: SizedBox(
               width: 100.0,
               height: 100.0,
@@ -238,11 +229,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 200.0,
               height: 100.0,
             ),
@@ -258,11 +248,10 @@ void main() {
 
     testWidgets('does not run animation unnecessarily', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -282,11 +271,10 @@ void main() {
 
     testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: tester,
-            child: const SizedBox(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -303,7 +291,6 @@ void main() {
           Center(
             child: AnimatedSize(
               duration: const Duration(milliseconds: 200),
-              vsync: tester,
               clipBehavior: clip,
               child: const SizedBox(
                 width: 100.0,
@@ -327,7 +314,6 @@ void main() {
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOutBack,
-                    vsync: tester,
                     child: SizedBox(
                       width: size.width,
                       height: size.height,

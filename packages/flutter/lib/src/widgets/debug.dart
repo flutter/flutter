@@ -184,6 +184,8 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// assert(debugCheckHasTable(context));
 /// ```
 ///
+/// This method can be expensive (it walks the element tree).
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
@@ -215,7 +217,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
-    if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
+    if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No MediaQuery widget ancestor found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
@@ -267,7 +269,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
   assert(() {
-    if (context.widget is! Directionality && context.findAncestorWidgetOfExactType<Directionality>() == null) {
+    if (context.widget is! Directionality && context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
       why = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
@@ -372,6 +374,8 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasOverlay(context));
 /// ```
+///
+/// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasOverlay(BuildContext context) {

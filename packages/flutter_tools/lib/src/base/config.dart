@@ -23,17 +23,59 @@ class Config {
   /// `.flutter_$name` already exists there. On other platforms the
   /// configuration file will always be a file named `.flutter_$name` in the
   /// home directory.
+  ///
+  /// Uses some good default behaviours:
+  /// - deletes the file if it's not valid JSON
+  /// - reports an empty config in that case
+  /// - logs and catches any exceptions
   factory Config(
     String name, {
     required FileSystem fileSystem,
     required Logger logger,
+    required Platform platform
+  }) {
+    return Config._common(
+      name,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      managed: false
+    );
+  }
+
+  /// Similiar to the default config constructor, but with some different
+  /// behaviours:
+  /// - will not delete the config if it's not valid JSON
+  /// - will log but also rethrow any exceptions while loading the JSON, so
+  ///   you can actually detect whether something went wrong
+  ///
+  /// Useful if you want some more control.
+  factory Config.managed(
+    String name, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform
+  }) {
+    return Config._common(
+      name,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      managed: true
+    );
+  }
+
+  factory Config._common(
+    String name, {
+    required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
-    bool deleteFileOnFormatException = true
+    bool managed = false
   }) {
     final String filePath = _configPath(platform, fileSystem, name);
     final File file = fileSystem.file(filePath);
     file.parent.createSync(recursive: true);
-    return Config.createForTesting(file, logger, deleteFileOnFormatException: deleteFileOnFormatException);
+    return Config.createForTesting(file, logger, managed: managed);
   }
 
   /// Constructs a new [Config] object from a file called [name] in
@@ -44,44 +86,50 @@ class Config {
     String name = 'test',
     Directory? directory,
     Logger? logger,
-    bool deleteFileOnFormatException = true
+    bool managed = false
   }) {
     directory ??= MemoryFileSystem.test().directory('/');
     return Config.createForTesting(
       directory.childFile('.${kConfigDir}_$name'),
       logger ?? BufferLogger.test(),
-      deleteFileOnFormatException: deleteFileOnFormatException
+      managed: managed
     );
   }
 
   /// Test only access to the Config constructor.
   @visibleForTesting
-  Config.createForTesting(File file, Logger logger, {bool deleteFileOnFormatException = true}) : _file = file, _logger = logger {
+  Config.createForTesting(File file, Logger logger, {bool managed = false}) : _file = file, _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
     try {
       ErrorHandlingFileSystem.noExitOnFailure(() {
-        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) as Map<String, Object>? ?? <String, Object>{};
+        _values = castStringKeyedMap(json.decode(_file.readAsStringSync())) ?? <String, Object>{};
       });
     } on FormatException {
       _logger
         ..printError('Failed to decode preferences in ${_file.path}.')
         ..printError(
-            'You may need to reapply any previously saved configuration '
-            'with the "flutter config" command.',
+          'You may need to reapply any previously saved configuration '
+          'with the "flutter config" command.',
         );
 
-      if (deleteFileOnFormatException) {
+      if (managed) {
+        rethrow;
+      } else {
         _file.deleteSync();
       }
     } on Exception catch (err) {
       _logger
         ..printError('Could not read preferences in ${file.path}.\n$err')
         ..printError(
-            'You may need to resolve the error above and reapply any previously '
-            'saved configuration with the "flutter config" command.',
+          'You may need to resolve the error above and reapply any previously '
+          'saved configuration with the "flutter config" command.',
         );
+
+      if (managed) {
+        rethrow;
+      }
     }
   }
 
@@ -110,7 +158,7 @@ class Config {
 
   String get configPath => _file.path;
 
-  Map<String, Object> _values = <String, Object>{};
+  Map<String, dynamic> _values = <String, Object>{};
 
   Iterable<String> get keys => _values.keys;
 

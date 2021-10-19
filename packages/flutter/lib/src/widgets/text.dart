@@ -467,7 +467,8 @@ class Text extends StatelessWidget {
 
   /// How visual overflow should be handled.
   ///
-  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
+  /// If this is null [TextStyle.overflow] will be used, otherwise the value
+  /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
   /// The number of font pixels for each logical pixel.
@@ -526,7 +527,7 @@ class Text extends StatelessWidget {
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? defaultTextStyle.overflow,
+      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,

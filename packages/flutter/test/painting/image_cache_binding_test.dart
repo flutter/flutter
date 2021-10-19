@@ -77,4 +77,4 @@ class TestBindingBase implements BindingBase {
   ui.PlatformDispatcher get platformDispatcher => TestWindow(window: ui.window).platformDispatcher;
 }
 
-class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {}
+class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding { }

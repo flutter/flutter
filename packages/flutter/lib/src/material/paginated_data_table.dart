@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'data_table.dart';
@@ -26,7 +25,7 @@ import 'theme.dart';
 /// A paginated data table shows [rowsPerPage] rows of data per page and
 /// provides controls for showing other pages.
 ///
-/// Data is read lazily from from a [DataTableSource]. The widget is presented
+/// Data is read lazily from a [DataTableSource]. The widget is presented
 /// as a [Card].
 ///
 /// See also:
@@ -84,6 +83,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.arrowHeadColor,
     required this.source,
     this.checkboxHorizontalMargin,
   }) : assert(actions == null || (actions != null && header != null)),
@@ -235,6 +235,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// and the content in the first data column. This value defaults to 24.0.
   final double? checkboxHorizontalMargin;
 
+  /// Defines the color of the arrow heads in the footer.
+  final Color? arrowHeadColor;
+
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
 }
@@ -368,17 +371,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
-    double startPadding = 24.0;
     if (_selectedRowCount == 0 && widget.header != null) {
       headerWidgets.add(Expanded(child: widget.header!));
-      if (widget.header is ButtonBar) {
-        // We adjust the padding when a button bar is present, because the
-        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-        // around each button on each side, and the button itself will have 8
-        // pixels internally on each side, yet we want the left edge of the
-        // inside of the button to line up with the 24.0 left inset.
-        startPadding = 12.0;
-      }
     } else if (widget.header != null) {
       headerWidgets.add(Expanded(
         child: Text(localizations.selectedRowCountTitle(_selectedRowCount)),
@@ -442,27 +436,27 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 32.0),
       if (widget.showFirstLastButtons)
         IconButton(
-          icon: const Icon(Icons.skip_previous),
+          icon: Icon(Icons.skip_previous, color: widget.arrowHeadColor),
           padding: EdgeInsets.zero,
           tooltip: localizations.firstPageTooltip,
           onPressed: _firstRowIndex <= 0 ? null : _handleFirst,
         ),
       IconButton(
-        icon: const Icon(Icons.chevron_left),
+        icon: Icon(Icons.chevron_left, color: widget.arrowHeadColor),
         padding: EdgeInsets.zero,
         tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
       Container(width: 24.0),
       IconButton(
-        icon: const Icon(Icons.chevron_right),
+        icon: Icon(Icons.chevron_right, color: widget.arrowHeadColor),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
         onPressed: _isNextPageUnavailable() ? null : _handleNext,
       ),
       if (widget.showFirstLastButtons)
         IconButton(
-          icon: const Icon(Icons.skip_next),
+          icon: Icon(Icons.skip_next, color: widget.arrowHeadColor),
           padding: EdgeInsets.zero,
           tooltip: localizations.lastPageTooltip,
           onPressed: _isNextPageUnavailable()
@@ -497,7 +491,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                         height: 64.0,
                         color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
                         child: Padding(
-                          padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                          padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: headerWidgets,

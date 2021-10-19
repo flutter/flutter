@@ -15,6 +15,1364 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87281
+  - title: "Remove 'fixTextFieldOutlineLabel'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'fixTextFieldOutlineLabel'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'buttonColor'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentIconTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentIconTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentTextTheme'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentTextTheme'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Remove 'accentColorBrightness'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'accentColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      field: 'accentColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.secondary'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81336
+  - title: "Migrate to 'ColorScheme.secondary'"
+    date: 2021-04-30
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.fromSwatch().copyWith(secondary: {% accentColor %})'
+            requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme ==''"
+        - kind: 'removeParameter'
+          name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+    - if: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, secondary: {% accentColor %})'
+          requiredIf: "accentColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'accentColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      accentColor:
+        kind: 'fragment'
+        value: 'arguments[accentColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'clipToSize'
+      inClass: 'RenderListWheelViewport'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelViewport'
+    changes:
+    - kind: 'rename'
+      newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.hardEdge'
+          requiredIf: "clipToSize == 'true'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.none'
+          requiredIf: "clipToSize == 'false'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'useDelegate'
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelScrollView'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelScrollView'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'overflow'
+      inClass: 'RenderStack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderStack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81303
+  - title: "Migrate to 'setEnabledSystemUIMode'"
+    date: 2021-06-08
+    element:
+      uris: [ 'services.dart' ]
+      method: 'setEnabledSystemUIOverlays'
+      inClass: 'SystemChrome'
+    changes:
+      - kind: 'rename'
+        newName: 'setEnabledSystemUIMode'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'mode'
+        style: required_positional
+        argumentValue:
+          expression: 'SystemUiMode.manual'
+      - kind: 'addParameter'
+        index: 1
+        name: 'overlays'
+        style: optional_named
+        argumentValue:
+          expression: '{% overlays %}'
+          requiredIf: "overlays != ''"
+    variables:
+      overlays:
+        kind: 'fragment'
+        value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'cupertino.dart', 'widgets.dart', 'material.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'TextureAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
+  # Changes made in https://github.com/flutter/flutter/pull/60320
+  - title: "Migrate to 'viewId'"
+    date: 2020-07-05
+    element:
+      uris: [ 'services.dart' ]
+      getter: id
+      inClass: 'SurfaceAndroidViewController'
+    changes:
+      - kind: 'rename'
+        newName: 'viewId'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ScaleGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'MultiTapGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DoubleTapGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DelayedMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VerticalMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'HorizontalMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ImmediateMultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'MultiDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'LongPressGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'ForcePressGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 6
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'EagerGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 2
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'PrimaryPointerGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 6
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'OneSequenceGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'GestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'HorizontalDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VerticalDragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/81858
+  - title: "Migrate to 'supportedDevices'"
+    date: 2021-05-04
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'DragGestureRecognizer'
+    oneOf:
+      - if: "kind != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'supportedDevices'
+            style: optional_named
+            argumentValue:
+              expression: '<PointerDeviceKind>{{% kind %}}'
+              requiredIf: "kind != ''"
+          - kind: 'removeParameter'
+            name: 'kind'
+    variables:
+      kind:
+        kind: 'fragment'
+        value: 'arguments[kind]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'Draggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Draggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'LongPressDraggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'LongPressDraggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
   # Changes made in https://github.com/flutter/flutter/pull/66482
   - title: "Migrate to 'TextSelectionThemeData'"
     date: 2020-09-24
@@ -297,6 +1655,67 @@ transforms:
     element:
       uris: [ 'material.dart' ]
       constructor: ''
+      inClass: 'InputDecorationTheme'
+    oneOf:
+      - if: "hasFloatingPlaceholder == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.auto'
+              requiredIf: "hasFloatingPlaceholder == 'true'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder == 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 14
+            name: 'floatingLabelBehavior'
+            style: optional_named
+            argumentValue:
+              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
+              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
+              variables:
+                FloatingLabelBehavior:
+                  kind: 'import'
+                  uris: [ 'material.dart' ]
+                  name: 'FloatingLabelBehavior'
+          - kind: 'removeParameter'
+            name: 'hasFloatingPlaceholder'
+    variables:
+      hasFloatingPlaceholder:
+        kind: 'fragment'
+        value: 'arguments[hasFloatingPlaceholder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/46115
+  - title: "Migrate to 'floatingLabelBehavior'"
+    date: 2020-01-15
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
       inClass: 'InputDecorationTheme'
     oneOf:
       - if: "hasFloatingPlaceholder == 'true'"

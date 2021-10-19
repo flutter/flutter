@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -36,10 +36,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0xdd000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(FlatButton));
@@ -56,10 +56,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0xdd000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
 
     // Disabled FlatButton
@@ -81,10 +81,10 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle?.color, const Color(0x61000000));
-    expect(material.textStyle?.fontFamily, 'Roboto');
-    expect(material.textStyle?.fontSize, 14);
-    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0x61000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
   });
 
@@ -119,9 +119,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -182,10 +182,10 @@ void main() {
               colorScheme: colorScheme,
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
-                child: const Text('FlatButton'),
                 onPressed: () {},
                 focusNode: focusNode,
                 textColor: MaterialStateColor.resolveWith(getTextColor),
+                child: const Text('FlatButton'),
               ),
             ),
           ),
@@ -248,10 +248,10 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
-              child: const Text('FlatButton'),
               onPressed: () {},
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -374,10 +374,10 @@ void main() {
           body: Center(
             child: FlatButton(
               onPressed: null,
-              child: const Text('FlatButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor.resolveWith(getTextColor),
               disabledTextColor: unusedDisabledTextColor,
+              child: const Text('FlatButton'),
             ),
           ),
         ),
@@ -697,9 +697,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }

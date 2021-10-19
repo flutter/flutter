@@ -427,6 +427,25 @@ class SemanticsTester {
   @override
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode}';
 
+  bool _stringAttributesEqual(List<StringAttribute> first, List<StringAttribute> second) {
+    if (first.length != second.length)
+      return false;
+    for (int i = 0; i < first.length; i++) {
+      if (first[i] is SpellOutStringAttribute &&
+          (second[i] is! SpellOutStringAttribute ||
+           second[i].range != first[i].range)) {
+        return false;
+      }
+      if (first[i] is LocaleStringAttribute &&
+          (second[i] is! LocaleStringAttribute ||
+           second[i].range != first[i].range ||
+           (second[i] as LocaleStringAttribute).locale != (second[i] as LocaleStringAttribute).locale)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Returns all semantics nodes in the current semantics tree whose properties
   /// match the non-null arguments.
   ///
@@ -435,6 +454,9 @@ class SemanticsTester {
   ///
   /// If `ancestor` is not null, only the descendants of it are returned.
   Iterable<SemanticsNode> nodesWith({
+    AttributedString? attributedLabel,
+    AttributedString? attributedValue,
+    AttributedString? attributedHint,
     String? label,
     String? value,
     String? hint,
@@ -451,10 +473,25 @@ class SemanticsTester {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label)
         return false;
+      if (attributedLabel != null &&
+          (attributedLabel.string != node.attributedLabel.string ||
+          !_stringAttributesEqual(attributedLabel.attributes, node.attributedLabel.attributes))) {
+        return false;
+      }
       if (value != null && node.value != value)
         return false;
+      if (attributedValue != null &&
+          (attributedValue.string != node.attributedValue.string ||
+          !_stringAttributesEqual(attributedValue.attributes, node.attributedValue.attributes))) {
+        return false;
+      }
       if (hint != null && node.hint != hint)
         return false;
+      if (attributedHint != null &&
+          (attributedHint.string != node.attributedHint.string ||
+          !_stringAttributesEqual(attributedHint.attributes, node.attributedHint.attributes))) {
+        return false;
+      }
       if (textDirection != null && node.textDirection != textDirection)
         return false;
       if (actions != null) {
@@ -714,6 +751,9 @@ Matcher hasSemantics(
 
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
+    this.attributedLabel,
+    this.attributedValue,
+    this.attributedHint,
     this.label,
     this.value,
     this.hint,
@@ -725,7 +765,7 @@ class _IncludesNodeWith extends Matcher {
     this.scrollExtentMin,
     this.maxValueLength,
     this.currentValueLength,
-}) : assert(
+  }) : assert(
        label != null ||
        value != null ||
        actions != null ||
@@ -734,9 +774,11 @@ class _IncludesNodeWith extends Matcher {
        scrollExtentMax != null ||
        scrollExtentMin != null ||
        maxValueLength != null ||
-       currentValueLength != null
+       currentValueLength != null,
      );
-
+  final AttributedString? attributedLabel;
+  final AttributedString? attributedValue;
+  final AttributedString? attributedHint;
   final String? label;
   final String? value;
   final String? hint;
@@ -752,6 +794,9 @@ class _IncludesNodeWith extends Matcher {
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     return item.nodesWith(
+      attributedLabel: attributedLabel,
+      attributedValue: attributedValue,
+      attributedHint: attributedHint,
       label: label,
       value: value,
       hint: hint,
@@ -800,8 +845,11 @@ class _IncludesNodeWith extends Matcher {
 /// If null is provided for an argument, it will match against any value.
 Matcher includesNodeWith({
   String? label,
+  AttributedString? attributedLabel,
   String? value,
+  AttributedString? attributedValue,
   String? hint,
+  AttributedString? attributedHint,
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
@@ -813,8 +861,11 @@ Matcher includesNodeWith({
 }) {
   return _IncludesNodeWith(
     label: label,
+    attributedLabel: attributedLabel,
     value: value,
+    attributedValue: attributedValue,
     hint: hint,
+    attributedHint: attributedHint,
     textDirection: textDirection,
     actions: actions,
     flags: flags,

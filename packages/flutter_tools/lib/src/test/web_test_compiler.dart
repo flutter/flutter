@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -26,12 +23,12 @@ import 'test_config.dart';
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Artifacts artifacts,
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Config config,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Artifacts artifacts,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Config config,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
@@ -47,24 +44,23 @@ class WebTestCompiler {
   final Config _config;
 
   Future<WebMemoryFS> initialize({
-    @required Directory projectDirectory,
-    @required String testOutputDir,
-    @required List<String> testFiles,
-    @required BuildInfo buildInfo,
+    required Directory projectDirectory,
+    required String testOutputDir,
+    required List<String> testFiles,
+    required BuildInfo buildInfo,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
-    Artifact platformDillArtifact;
+    HostArtifact platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
     // TODO(jonahwilliams): to support autodetect this would need to partition the source code into a
     // a sound and unsound set and perform separate compilations.
-    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
+    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
     if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillArtifact = Artifact.webPlatformKernelDill;
+      platformDillArtifact = HostArtifact.webPlatformKernelDill;
       if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
         extraFrontEndOptions.add('--no-sound-null-safety');
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot);
+      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
@@ -107,7 +103,7 @@ class WebTestCompiler {
       config: _config,
     );
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      _artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       fileSystemRoots: <String>[
@@ -120,12 +116,11 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: _fileSystem.file(_artifacts
-        .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
+      platformDill: _artifacts
+        .getHostArtifact(platformDillArtifact)
         .absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
-      librariesSpec: _fileSystem.file(_artifacts
-        .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+      librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
       artifacts: _artifacts,
       processManager: _processManager,
@@ -134,13 +129,15 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
     );
 
-    final CompilerOutput output = await residentCompiler.recompile(
+    final CompilerOutput? output = await residentCompiler.recompile(
       Uri.parse('org-dartlang-app:///main.dart'),
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
+      fs: _fileSystem,
+      projectRootPath: projectDirectory.absolute.path,
     );
-    if (output.errorCount > 0) {
+    if (output == null || output.errorCount > 0) {
       throwToolExit('Failed to compile');
     }
     // Cache the output kernel file to speed up subsequent compiles.

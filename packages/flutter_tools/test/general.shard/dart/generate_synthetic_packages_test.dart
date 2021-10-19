@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:async';
 
@@ -10,14 +9,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
+import 'package:flutter_tools/src/dart/generate_synthetic_packages.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () async {
@@ -46,7 +44,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -59,7 +57,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });
@@ -91,7 +93,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -104,7 +106,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });
@@ -134,7 +140,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello': ExceptionMeasurement('hello', 'bar', null),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -147,7 +153,11 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(message: 'Generating synthetic localizations package has failed.'),
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
+      ),
     );
     await completer.future;
   });

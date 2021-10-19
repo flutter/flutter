@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'layout_builder.dart';
 import 'notification_listener.dart';
+import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
@@ -152,7 +153,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   final ScrollableWidgetBuilder builder;
 
   @override
-  _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
+  State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
 }
 
 /// A [Notification] related to the extent, which is the size, and scroll
@@ -335,8 +336,8 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
         final Widget sheet = FractionallySizedBox(
           heightFactor: _extent.currentExtent,
-          child: widget.builder(context, _scrollController),
           alignment: Alignment.bottomCenter,
+          child: widget.builder(context, _scrollController),
         );
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
@@ -431,8 +432,16 @@ class _DraggableScrollableSheetScrollPosition
         );
 
   VoidCallback? _dragCancelCallback;
+  VoidCallback? _ballisticCancelCallback;
   final _DraggableSheetExtent extent;
   bool get listShouldScroll => pixels > 0.0;
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    // Cancel the running ballistic simulation, if there is one.
+    _ballisticCancelCallback?.call();
+    super.beginActivity(newActivity);
+  }
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -481,6 +490,9 @@ class _DraggableScrollableSheetScrollPosition
       debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
+    // Stop the ballistic animation if a new activity starts.
+    // See: [beginActivity].
+    _ballisticCancelCallback = ballisticController.stop;
     double lastDelta = 0;
     void _tick() {
       final double delta = ballisticController.value - lastDelta;
@@ -501,7 +513,10 @@ class _DraggableScrollableSheetScrollPosition
     ballisticController
       ..addListener(_tick)
       ..animateWith(simulation).whenCompleteOrCancel(
-        ballisticController.dispose,
+        () {
+          _ballisticCancelCallback = null;
+          ballisticController.dispose();
+        },
       );
   }
 
@@ -554,7 +569,7 @@ class DraggableScrollableActuator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedResetNotifier(child: child, notifier: _notifier);
+    return _InheritedResetNotifier(notifier: _notifier, child: child);
   }
 }
 

@@ -20,7 +20,7 @@ import 'text_editing_intents.dart';
 ///   * [DefaultTextEditingShortcuts], which maps keyboard keys to many of the
 ///     [Intent]s that are handled here.
 ///   * [WidgetsApp], which creates a DefaultTextEditingShortcuts.
-class DefaultTextEditingActions extends Actions{
+class DefaultTextEditingActions extends Actions {
   /// Creates an instance of DefaultTextEditingActions.
   DefaultTextEditingActions({
     Key? key,
@@ -36,6 +36,12 @@ class DefaultTextEditingActions extends Actions{
   // are called on which platform.
   static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: _DoNothingAndStopPropagationTextAction(),
+    DeleteTextIntent: _DeleteTextAction(),
+    DeleteByWordTextIntent: _DeleteByWordTextAction(),
+    DeleteByLineTextIntent: _DeleteByLineTextAction(),
+    DeleteForwardTextIntent: _DeleteForwardTextAction(),
+    DeleteForwardByWordTextIntent: _DeleteForwardByWordTextAction(),
+    DeleteForwardByLineTextIntent: _DeleteForwardByLineTextAction(),
     ExtendSelectionDownTextIntent: _ExtendSelectionDownTextAction(),
     ExtendSelectionLeftByLineTextIntent: _ExtendSelectionLeftByLineTextAction(),
     ExtendSelectionLeftByWordTextIntent: _ExtendSelectionLeftByWordTextAction(),
@@ -60,6 +66,10 @@ class DefaultTextEditingActions extends Actions{
     MoveSelectionToEndTextIntent: _MoveSelectionToEndTextAction(),
     MoveSelectionToStartTextIntent: _MoveSelectionToStartTextAction(),
     MoveSelectionUpTextIntent: _MoveSelectionUpTextAction(),
+    SelectAllTextIntent: _SelectAllTextAction(),
+    CopySelectionTextIntent: _CopySelectionTextAction(),
+    CutSelectionTextIntent: _CutSelectionTextAction(),
+    PasteTextIntent: _PasteTextAction(),
   };
 }
 
@@ -74,6 +84,48 @@ class _DoNothingAndStopPropagationTextAction extends TextEditingAction<DoNothing
 
   @override
   void invoke(DoNothingAndStopPropagationTextIntent intent, [BuildContext? context]) {}
+}
+
+class _DeleteTextAction extends TextEditingAction<DeleteTextIntent> {
+  @override
+  Object? invoke(DeleteTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.delete(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteByWordTextAction extends TextEditingAction<DeleteByWordTextIntent> {
+  @override
+  Object? invoke(DeleteByWordTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteByWord(SelectionChangedCause.keyboard, false);
+  }
+}
+
+class _DeleteByLineTextAction extends TextEditingAction<DeleteByLineTextIntent> {
+  @override
+  Object? invoke(DeleteByLineTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteByLine(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardTextAction extends TextEditingAction<DeleteForwardTextIntent> {
+  @override
+  Object? invoke(DeleteForwardTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForward(SelectionChangedCause.keyboard);
+  }
+}
+
+class _DeleteForwardByWordTextAction extends TextEditingAction<DeleteForwardByWordTextIntent> {
+  @override
+  Object? invoke(DeleteForwardByWordTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+  }
+}
+
+class _DeleteForwardByLineTextAction extends TextEditingAction<DeleteForwardByLineTextIntent> {
+  @override
+  Object? invoke(DeleteForwardByLineTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
+  }
 }
 
 class _ExpandSelectionLeftByLineTextAction extends TextEditingAction<ExpandSelectionLeftByLineTextIntent> {
@@ -241,5 +293,34 @@ class _MoveSelectionToStartTextAction extends TextEditingAction<MoveSelectionToS
   @override
   Object? invoke(MoveSelectionToStartTextIntent intent, [BuildContext? context]) {
     textEditingActionTarget!.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+  }
+}
+
+
+class _SelectAllTextAction extends TextEditingAction<SelectAllTextIntent> {
+  @override
+  Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.selectAll(SelectionChangedCause.keyboard);
+  }
+}
+
+class _CopySelectionTextAction extends TextEditingAction<CopySelectionTextIntent> {
+  @override
+  Object? invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.copySelection();
+  }
+}
+
+class _CutSelectionTextAction extends TextEditingAction<CutSelectionTextIntent> {
+  @override
+  Object? invoke(CutSelectionTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.cutSelection(SelectionChangedCause.keyboard);
+  }
+}
+
+class _PasteTextAction extends TextEditingAction<PasteTextIntent> {
+  @override
+  Object? invoke(PasteTextIntent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.pasteText(SelectionChangedCause.keyboard);
   }
 }

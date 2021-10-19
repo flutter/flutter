@@ -271,6 +271,7 @@ class BottomAppBar extends StatefulWidget {
 
 class _BottomAppBarState extends State<BottomAppBar> {
   late ValueListenable<ScaffoldGeometry> geometryListenable;
+  final GlobalKey materialKey = GlobalKey();
   static const double _defaultElevation = 8.0;
 
   @override
@@ -285,10 +286,11 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
     final CustomClipper<Path> clipper = notchedShape != null
       ? _BottomAppBarClipper(
-        geometry: geometryListenable,
-        shape: notchedShape,
-        notchMargin: widget.notchMargin,
-      )
+          geometry: geometryListenable,
+          shape: notchedShape,
+          materialKey: materialKey,
+          notchMargin: widget.notchMargin,
+        )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
     final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
@@ -299,6 +301,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
+        key: materialKey,
         type: MaterialType.transparency,
         child: widget.child == null
           ? null
@@ -312,6 +315,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   const _BottomAppBarClipper({
     required this.geometry,
     required this.shape,
+    required this.materialKey,
     required this.notchMargin,
   }) : assert(geometry != null),
        assert(shape != null),
@@ -320,17 +324,21 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
+  final GlobalKey materialKey;
   final double notchMargin;
+
+  // Returns the top of the BottomAppBar in global coordinates.
+  double get bottomNavigationBarTop {
+    final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
+    return box?.localToGlobal(Offset.zero).dy ?? 0;
+  }
 
   @override
   Path getClip(Size size) {
     // button is the floating action button's bounding rectangle in the
     // coordinate system whose origin is at the appBar's top left corner,
     // or null if there is no floating action button.
-    final Rect? button = geometry.value.floatingActionButtonArea?.translate(
-      0.0,
-      geometry.value.bottomNavigationBarTop! * -1.0,
-    );
+    final Rect? button = geometry.value.floatingActionButtonArea?.translate(0.0, bottomNavigationBarTop * -1.0);
     return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
   }
 

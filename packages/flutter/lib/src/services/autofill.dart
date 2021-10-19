@@ -12,6 +12,8 @@ import 'text_input.dart';
 /// documentation for their availability on each platform, and the platform
 /// values each autofill hint corresponds to.
 class AutofillHints {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
   AutofillHints._();
 
   /// The input field expects an address locality (city/town).

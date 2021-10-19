@@ -2,37 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals_null_migrated.dart' as globals;
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 
 /// Run the localizations generation script with the configuration [options].
-void generateLocalizations({
-  @required Directory projectDir,
-  @required Directory dependenciesDir,
-  @required LocalizationOptions options,
-  @required LocalizationsGenerator localizationsGenerator,
-  @required Logger logger,
+LocalizationsGenerator generateLocalizations({
+  required Directory projectDir,
+  Directory? dependenciesDir,
+  required LocalizationOptions options,
+  required Logger logger,
+  required FileSystem fileSystem,
 }) {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
-  final FlutterManifest flutterManifest = FlutterManifest.createFromPath(
+  final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
     projectDir.childFile('pubspec.yaml').path,
     fileSystem: projectDir.fileSystem,
     logger: logger,
   );
-  if (options.useSyntheticPackage && !flutterManifest.generateSyntheticPackage) {
-    logger.printError(
+  if (options.useSyntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
+    throwToolExit(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
       '\n'
@@ -40,57 +38,56 @@ void generateLocalizations({
       'been added and rebuild the project. Otherwise, the localizations '
       'source code will not be importable.'
     );
-    throw Exception();
   }
 
   precacheLanguageAndRegionTags();
 
-  final String inputPathString = options?.arbDirectory?.path ?? globals.fs.path.join('lib', 'l10n');
-  final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
-  final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
-
+  final String inputPathString = options.arbDirectory?.path ?? fileSystem.path.join('lib', 'l10n');
+  final String templateArbFileName = options.templateArbFile?.toFilePath() ?? 'app_en.arb';
+  final String outputFileString = options.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
+  LocalizationsGenerator generator;
   try {
-    localizationsGenerator
-      ..initialize(
-        inputsAndOutputsListPath: dependenciesDir?.path,
-        projectPathString: projectDir.path,
-        inputPathString: inputPathString,
-        templateArbFileName: templateArbFileName,
-        outputFileString: outputFileString,
-        outputPathString: options?.outputDirectory?.path,
-        classNameString: options.outputClass ?? 'AppLocalizations',
-        preferredSupportedLocales: options.preferredSupportedLocales,
-        headerString: options.header,
-        headerFile: options?.headerFile?.toFilePath(),
-        useDeferredLoading: options.deferredLoading ?? false,
-        useSyntheticPackage: options.useSyntheticPackage ?? true,
-        areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
-        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
-        usesNullableGetter: options?.usesNullableGetter ?? true,
-      )
+    generator = LocalizationsGenerator(
+      fileSystem: fileSystem,
+      inputsAndOutputsListPath: dependenciesDir?.path,
+      projectPathString: projectDir.path,
+      inputPathString: inputPathString,
+      templateArbFileName: templateArbFileName,
+      outputFileString: outputFileString,
+      outputPathString: options.outputDirectory?.path,
+      classNameString: options.outputClass ?? 'AppLocalizations',
+      preferredSupportedLocales: options.preferredSupportedLocales,
+      headerString: options.header,
+      headerFile: options.headerFile?.toFilePath(),
+      useDeferredLoading: options.deferredLoading ?? false,
+      useSyntheticPackage: options.useSyntheticPackage,
+      areResourceAttributesRequired: options.areResourceAttributesRequired,
+      untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
+      usesNullableGetter: options.usesNullableGetter,
+    )
       ..loadResources()
       ..writeOutputFiles(logger, isFromYaml: true);
   } on L10nException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
+    throwToolExit(e.message);
   }
+  return generator;
 }
 
 /// The path for the synthetic package.
-final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen');
+String _defaultSyntheticPackagePath(FileSystem fileSystem) => fileSystem.path.join('.dart_tool', 'flutter_gen');
 
 /// The default path used when the `_useSyntheticPackage` setting is set to true
 /// in [LocalizationsGenerator].
 ///
 /// See [LocalizationsGenerator.initialize] for where and how it is used by the
 /// localizations tool.
-final String syntheticL10nPackagePath = globals.fs.path.join(defaultSyntheticPackagePath, 'gen_l10n');
+String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
 
 List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
-  final Placeholder countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
+  final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
-    final String type = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? type = placeholder == countPlaceholder ? 'int' : placeholder.type;
     return '$type ${placeholder.name}';
   }).toList();
 }
@@ -103,27 +100,28 @@ String generateDateFormattingLogic(Message message) {
   final Iterable<String> formatStatements = message.placeholders
     .where((Placeholder placeholder) => placeholder.isDate)
     .map((Placeholder placeholder) {
-      if (placeholder.format == null) {
+      final String? placeholderFormat = placeholder.format;
+      if (placeholderFormat == null) {
         throw L10nException(
           'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
           'the "${placeholder.type}" type. To properly resolve for the right '
           '${placeholder.type} format, the "format" attribute needs to be set '
           'to determine which DateFormat to use. \n'
-          'Check the intl library\'s DateFormat class constructors for allowed '
+          "Check the intl library's DateFormat class constructors for allowed "
           'date formats.'
         );
       }
       if (!placeholder.hasValidDateFormat) {
         throw L10nException(
-          'Date format "${placeholder.format}" for placeholder '
+          'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
-          'constructor\n. Check the intl library\'s DateFormat class '
+          "constructor\n. Check the intl library's DateFormat class "
           'constructors for allowed date formats.'
         );
       }
       return dateFormatTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format);
+        .replaceAll('@(format)', placeholderFormat);
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
@@ -137,11 +135,12 @@ String generateNumberFormattingLogic(Message message) {
   final Iterable<String> formatStatements = message.placeholders
     .where((Placeholder placeholder) => placeholder.isNumber)
     .map((Placeholder placeholder) {
-      if (!placeholder.hasValidNumberFormat) {
+      final String? placeholderFormat = placeholder.format;
+      if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
         throw L10nException(
-          'Number format ${placeholder.format} for the ${placeholder.name} '
+          'Number format $placeholderFormat for the ${placeholder.name} '
           'placeholder does not have a corresponding NumberFormat constructor.\n'
-          'Check the intl library\'s NumberFormat class constructors for allowed '
+          "Check the intl library's NumberFormat class constructors for allowed "
           'number formats.'
         );
       }
@@ -158,19 +157,19 @@ String generateNumberFormattingLogic(Message message) {
       if (placeholder.hasNumberFormatWithParameters) {
         return numberFormatNamedTemplate
             .replaceAll('@(placeholder)', placeholder.name)
-            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(format)', placeholderFormat)
             .replaceAll('@(parameters)', parameters.join(',\n      '));
       } else {
         return numberFormatPositionalTemplate
             .replaceAll('@(placeholder)', placeholder.name)
-            .replaceAll('@(format)', placeholder.format);
+            .replaceAll('@(format)', placeholderFormat);
       }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
 }
 
-String generatePluralMethod(Message message, AppResourceBundle bundle) {
+String _generatePluralMethod(Message message, String translationForMessage) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
       'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
@@ -181,20 +180,12 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = bundle.translationFor(message);
+  String easyMessage = translationForMessage;
   for (final Placeholder placeholder in message.placeholders) {
     easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
   }
 
   final Placeholder countPlaceholder = message.getCountPlaceholder();
-  if (countPlaceholder == null) {
-    throw L10nException(
-      'Unable to find the count placeholder for the plural message: ${message.resourceId}.\n'
-      'Check to see if the plural message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
-    );
-  }
-
   const Map<String, String> pluralIds = <String, String>{
     '=0': 'zero',
     '=1': 'one',
@@ -207,46 +198,128 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
   final List<String> pluralLogicArgs = <String>[];
   for (final String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
-    final RegExpMatch match = expRE.firstMatch(easyMessage);
+    final RegExpMatch? match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = generateString(match.group(2));
+      String argValue = generateString(match.group(2)!);
       for (final Placeholder placeholder in message.placeholders) {
-        if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}String}'
-              : '\$${placeholder.name}String'
-          );
-        } else {
-          argValue = argValue.replaceAll(
-            '#${placeholder.name}#',
-            _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-              ? '\${${placeholder.name}}'
-              : '\$${placeholder.name}'
-          );
+        String variable = placeholder.name;
+        if (placeholder.requiresFormatting) {
+          variable += 'String';
         }
+        argValue = argValue.replaceAll(
+          '#${placeholder.name}#',
+          _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
+            ? '\${$variable}'
+            : '\$$variable'
+        );
       }
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
     return '$placeholderType ${placeholder.name}';
   }).toList();
 
   final String comment = message.description ?? 'No description provided in @${message.resourceId}';
 
-  return pluralMethodTemplate
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return pluralMethodTemplate
+      .replaceAll('@(comment)', comment)
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(count)', countPlaceholder.name)
+      .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
+      .replaceAll('@(none)\n', '');
+  }
+
+  const String variable = 'pluralString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
+  return pluralMethodTemplateInString
     .replaceAll('@(comment)', comment)
     .replaceAll('@(name)', message.resourceId)
-    .replaceAll('@(parameters)', parameters.join(', '))
     .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
     .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+    .replaceAll('@(parameters)', parameters.join(', '))
+    .replaceAll('@(variable)', variable)
     .replaceAll('@(count)', countPlaceholder.name)
     .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.join(',\n'))
-    .replaceAll('@(none)\n', '');
+    .replaceAll('@(none)\n', '')
+    .replaceAll('@(string)', string);
+}
+
+String _replaceWithVariable(String translation, String variable) {
+  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
+  prefix = prefix.substring(0, prefix.length - 1);
+  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
+  suffix = suffix.substring(1);
+
+  // escape variable when the suffix can be combined with the variable
+  if (suffix.isNotEmpty && !suffix.startsWith(' ')) {
+    variable = '{$variable}';
+  }
+  return prefix + r'$' + variable + suffix;
+}
+
+String _generateSelectMethod(Message message, String translationForMessage) {
+  if (message.placeholders.isEmpty) {
+    throw L10nException(
+      'Unable to find placeholders for the select message: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
+
+  final List<String> cases = <String>[];
+
+  final RegExpMatch? selectMatch =
+    LocalizationsGenerator._selectRE.firstMatch(translationForMessage);
+  String? choice;
+  if (selectMatch != null && selectMatch.groupCount == 2) {
+    choice = selectMatch.group(1);
+    final String pattern = selectMatch.group(2)!;
+    final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
+    for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
+      if (patternMatch.groupCount == 2) {
+        final String value = patternMatch.group(2)!
+          .replaceAll("'", r"\'")
+          .replaceAll('"', r'\"');
+        cases.add(
+          "        '${patternMatch.group(1)}': '$value'",
+        );
+      }
+    }
+  }
+
+  final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
+    final String placeholderType = placeholder.type ?? 'object';
+    return '$placeholderType ${placeholder.name}';
+  }).toList();
+
+  final String description = message.description ?? 'No description provided in @${message.resourceId}';
+
+  if (translationForMessage.startsWith('{') && translationForMessage.endsWith('}')) {
+    return selectMethodTemplate
+        .replaceAll('@(name)', message.resourceId)
+        .replaceAll('@(parameters)', parameters.join(', '))
+        .replaceAll('@(choice)', choice!)
+        .replaceAll('@(cases)', cases.join(',\n').trim())
+        .replaceAll('@(description)', description);
+  }
+
+  const String variable = 'selectString';
+  final String string = _replaceWithVariable(translationForMessage, variable);
+  return selectMethodTemplateInString
+      .replaceAll('@(name)', message.resourceId)
+      .replaceAll('@(parameters)', parameters.join(', '))
+      .replaceAll('@(variable)', variable)
+      .replaceAll('@(choice)', choice!)
+      .replaceAll('@(cases)', cases.join(',\n').trim())
+      .replaceAll('@(description)', description)
+      .replaceAll('@(string)', string);
 }
 
 bool _needsCurlyBracketStringInterpolation(String messageString, String placeholder) {
@@ -286,32 +359,31 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
   }
 }
 
-String generateMethod(Message message, AppResourceBundle bundle) {
+String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
-    String messageValue = generateString(bundle.translationFor(message));
+    String messageValue = generateString(translationForMessage);
     for (final Placeholder placeholder in message.placeholders) {
+      String variable = placeholder.name;
       if (placeholder.requiresFormatting) {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}String}'
-            : '\$${placeholder.name}String'
-        );
-      } else {
-        messageValue = messageValue.replaceAll(
-          '{${placeholder.name}}',
-          _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-            ? '\${${placeholder.name}}'
-            : '\$${placeholder.name}'
-        );
+        variable += 'String';
       }
+      messageValue = messageValue.replaceAll(
+        '{${placeholder.name}}',
+        _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
+          ? '\${$variable}'
+          : '\$$variable'
+      );
     }
 
     return messageValue;
   }
 
   if (message.isPlural) {
-    return generatePluralMethod(message, bundle);
+    return _generatePluralMethod(message, translationForMessage);
+  }
+
+  if (message.isSelect) {
+    return _generateSelectMethod(message, translationForMessage);
   }
 
   if (message.placeholdersRequireFormatting) {
@@ -336,7 +408,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
+String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
@@ -353,6 +425,22 @@ String generateBaseClassMethod(Message message, LocaleInfo templateArbLocale) {
     .replaceAll('@(comment)', comment)
     .replaceAll('@(templateLocaleTranslationComment)', templateLocaleTranslationComment)
     .replaceAll('@(name)', message.resourceId);
+}
+
+// Add spaces to pad the start of each line. Skips the first line
+// assuming that the padding is already present.
+String _addSpaces(String message, {int spaces = 0}) {
+  bool isFirstLine = true;
+  return message
+    .split('\n')
+    .map((String value) {
+      if (isFirstLine) {
+        isFirstLine = false;
+        return value;
+      }
+      return value.padLeft(spaces);
+    })
+    .join('\n');
 }
 
 String _generateLookupByAllCodes(
@@ -374,7 +462,7 @@ String _generateLookupByAllCodes(
 
   return allCodesLookupTemplate.replaceAll(
     '@(allCodesSwitchClauses)',
-    switchClauses.join('\n    '),
+    switchClauses.join('\n        '),
   );
 }
 
@@ -392,14 +480,21 @@ String _generateLookupByScriptCode(
       return null;
     }
 
-    return nestedSwitchTemplate
+    return _addSpaces(nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(code)', 'scriptCode')
-      .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.scriptCode);
-        }).join('\n        '));
-  }).where((String switchClause) => switchClause != null);
+      .replaceAll('@(switchClauses)',
+        _addSpaces(
+          localesWithScriptCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale)
+              .replaceAll('@(case)', locale.scriptCode!);
+          }).join('\n'),
+          spaces: 8,
+        ),
+      ),
+      spaces: 4,
+    );
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -407,7 +502,7 @@ String _generateLookupByScriptCode(
 
   return languageCodeSwitchTemplate
     .replaceAll('@(comment)', '// Lookup logic when language+script codes are specified.')
-    .replaceAll('@(switchClauses)', switchClauses.join('\n    '),
+    .replaceAll('@(switchClauses)', switchClauses.join('\n      '),
   );
 }
 
@@ -425,14 +520,19 @@ String _generateLookupByCountryCode(
       return null;
     }
 
-    return nestedSwitchTemplate
-      .replaceAll('@(languageCode)', language)
-      .replaceAll('@(code)', 'countryCode')
-      .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
-          return generateSwitchClauseTemplate(locale)
-            .replaceAll('@(case)', locale.countryCode);
-        }).join('\n        '));
-  }).where((String switchClause) => switchClause != null);
+    return _addSpaces(
+      nestedSwitchTemplate
+        .replaceAll('@(languageCode)', language)
+        .replaceAll('@(code)', 'countryCode')
+        .replaceAll('@(switchClauses)', _addSpaces(
+          localesWithCountryCodes.map((LocaleInfo locale) {
+            return generateSwitchClauseTemplate(locale).replaceAll('@(case)', locale.countryCode!);
+          }).join('\n'),
+          spaces: 4,
+        )),
+      spaces: 4,
+    );
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -460,8 +560,8 @@ String _generateLookupByLanguageCode(
     return localesWithLanguageCode.map((LocaleInfo locale) {
       return generateSwitchClauseTemplate(locale)
         .replaceAll('@(case)', locale.languageCode);
-    }).join('\n        ');
-  }).where((String switchClause) => switchClause != null);
+    }).join('\n      ');
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -505,11 +605,11 @@ String _generateLookupBody(
 }
 
 String _generateDelegateClass({
-  AppResourceBundleCollection allBundles,
-  String className,
-  Set<String> supportedLanguageCodes,
-  bool useDeferredLoading,
-  String fileName,
+  required AppResourceBundleCollection allBundles,
+  required String className,
+  required Set<String> supportedLanguageCodes,
+  required bool useDeferredLoading,
+  required String fileName,
 }) {
 
   final String lookupBody = _generateLookupBody(
@@ -522,11 +622,11 @@ String _generateDelegateClass({
     useDeferredLoading ? loadBodyDeferredLoadingTemplate : loadBodyTemplate
   )
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className');
+    .replaceAll('@(lookupName)', 'lookup$className');
   final String lookupFunction = (useDeferredLoading ?
   lookupFunctionDeferredLoadingTemplate : lookupFunctionTemplate)
     .replaceAll('@(class)', className)
-    .replaceAll('@(lookupName)', '_lookup$className')
+    .replaceAll('@(lookupName)', 'lookup$className')
     .replaceAll('@(lookupBody)', lookupBody);
   return delegateClassTemplate
     .replaceAll('@(class)', className)
@@ -536,66 +636,122 @@ String _generateDelegateClass({
 }
 
 class LocalizationsGenerator {
+  /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
+  /// [outputFile] and [className].
+  ///
+  /// Throws an [L10nException] when a provided configuration is not allowed
+  /// by [LocalizationsGenerator].
+  ///
+  /// Throws a [FileSystemException] when a file operation necessary for setting
+  /// up the [LocalizationsGenerator] cannot be completed.
+  factory LocalizationsGenerator({
+    required FileSystem fileSystem,
+    required String inputPathString,
+    String? outputPathString,
+    required String templateArbFileName,
+    required String outputFileString,
+    required String classNameString,
+    List<String>? preferredSupportedLocales,
+    String? headerString,
+    String? headerFile,
+    bool useDeferredLoading = false,
+    String? inputsAndOutputsListPath,
+    bool useSyntheticPackage = true,
+    String? projectPathString,
+    bool areResourceAttributesRequired = false,
+    String? untranslatedMessagesFile,
+    bool usesNullableGetter = true,
+  }) {
+    final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
+    final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
+    final Directory outputDirectory = outputDirectoryFromPath(fileSystem, outputPathString ?? inputPathString, useSyntheticPackage, projectDirectory);
+    return LocalizationsGenerator._(
+      fileSystem,
+      useSyntheticPackage: useSyntheticPackage,
+      usesNullableGetter: usesNullableGetter,
+      className: classNameFromString(classNameString),
+      projectDirectory: projectDirectory,
+      inputDirectory: inputDirectory,
+      outputDirectory: outputDirectory,
+      templateArbFile: templateArbFileFromFileName(templateArbFileName, inputDirectory),
+      baseOutputFile: outputDirectory.childFile(outputFileString),
+      preferredSupportedLocales: preferredSupportedLocalesFromLocales(preferredSupportedLocales),
+      header: headerFromFile(headerString, headerFile, inputDirectory),
+      useDeferredLoading: useDeferredLoading,
+      untranslatedMessagesFile: _untranslatedMessagesFileFromPath(fileSystem, untranslatedMessagesFile),
+      inputsAndOutputsListFile: _inputsAndOutputsListFileFromPath(fileSystem, inputsAndOutputsListPath),
+      areResourceAttributesRequired: areResourceAttributesRequired,
+    );
+  }
+
   /// Creates an instance of the localizations generator class.
   ///
   /// It takes in a [FileSystem] representation that the class will act upon.
-  LocalizationsGenerator(this._fs);
+  LocalizationsGenerator._(this._fs, {
+    required this.inputDirectory,
+    required this.outputDirectory,
+    required this.templateArbFile,
+    required this.baseOutputFile,
+    required this.className,
+    this.preferredSupportedLocales = const <LocaleInfo>[],
+    this.header = '',
+    this.useDeferredLoading = false,
+    required this.inputsAndOutputsListFile,
+    this.useSyntheticPackage = true,
+    this.projectDirectory,
+    this.areResourceAttributesRequired = false,
+    this.untranslatedMessagesFile,
+    this.usesNullableGetter = true,
+  });
 
   final FileSystem _fs;
-  Iterable<Message> _allMessages;
-  AppResourceBundleCollection _allBundles;
-  LocaleInfo _templateArbLocale;
-  bool _useSyntheticPackage = true;
+  Iterable<Message> _allMessages = <Message>[];
+  late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
+
+  late final AppResourceBundle _templateBundle = AppResourceBundle(templateArbFile);
+  late final LocaleInfo _templateArbLocale = _templateBundle.locale;
+
+  @visibleForTesting
+  final bool useSyntheticPackage;
+
   // Used to decide if the generated code is nullable or not
   // (whether AppLocalizations? or AppLocalizations is returned from
   // `static {name}Localizations{?} of (BuildContext context))`
-  bool _usesNullableGetter = true;
+  @visibleForTesting
+  final bool usesNullableGetter;
 
   /// The directory that contains the project's arb files, as well as the
   /// header file, if specified.
   ///
   /// It is assumed that all input files (e.g. [templateArbFile], arb files
   /// for translated messages, header file templates) will reside here.
-  ///
-  /// This directory is specified with the [initialize] method.
-  Directory inputDirectory;
+  final Directory inputDirectory;
 
   /// The Flutter project's root directory.
-  ///
-  /// This directory is specified with the [initialize] method.
-  Directory projectDirectory;
+  final Directory? projectDirectory;
 
   /// The directory to generate the project's localizations files in.
   ///
   /// It is assumed that all output files (e.g. The localizations
   /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
   /// will reside here.
-  ///
-  /// This directory is specified with the [initialize] method.
-  Directory outputDirectory;
+  final Directory outputDirectory;
 
   /// The input arb file which defines all of the messages that will be
   /// exported by the generated class that's written to [outputFile].
-  ///
-  /// This file is specified with the [initialize] method.
-  File templateArbFile;
+  final File templateArbFile;
 
   /// The file to write the generated abstract localizations and
   /// localizations delegate classes to. Separate localizations
   /// files will also be generated for each language using this
   /// filename as a prefix and the locale as the suffix.
-  ///
-  /// This file is specified with the [initialize] method.
-  File baseOutputFile;
+  final File baseOutputFile;
 
   /// The class name to be used for the localizations class in [outputFile].
   ///
   /// For example, if 'AppLocalizations' is passed in, a class named
   /// AppLocalizations will be used for localized message lookups.
-  ///
-  /// The class name is specified with the [initialize] method.
-  String get className => _className;
-  String _className;
+  final String className;
 
   /// The list of preferred supported locales.
   ///
@@ -607,10 +763,7 @@ class LocalizationsGenerator {
   /// The order of locales in this list will also be the order of locale
   /// priority. For example, if a device supports 'en' and 'es' and
   /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
-  ///
-  /// The list of preferred locales is specified with the [initialize] method.
-  List<LocaleInfo> get preferredSupportedLocales => _preferredSupportedLocales;
-  List<LocaleInfo> _preferredSupportedLocales;
+  final List<LocaleInfo> preferredSupportedLocales;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -626,7 +779,7 @@ class LocalizationsGenerator {
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
   /// The header to be prepended to the generated Dart localization file.
-  String header = '';
+  final String header;
 
   final Map<LocaleInfo, List<String>> _unimplementedMessages = <LocaleInfo, List<String>>{};
 
@@ -644,73 +797,32 @@ class LocalizationsGenerator {
   ///
   /// Note that this flag does not affect other platforms such as mobile or
   /// desktop.
-  bool get useDeferredLoading => _useDeferredLoading;
-  bool _useDeferredLoading;
+  final bool useDeferredLoading;
 
   /// Contains a map of each output language file to its corresponding content in
   /// string format.
   final Map<File, String> _languageFileMap = <File, String>{};
 
-  /// Contains the generated application's localizations and localizations delegate
-  /// classes.
-  String _generatedLocalizationsFile;
-
   /// A generated file that will contain the list of messages for each locale
   /// that do not have a translation yet.
-  File _untranslatedMessagesFile;
+  @visibleForTesting
+  final File? untranslatedMessagesFile;
 
   /// The file that contains the list of inputs and outputs for generating
   /// localizations.
-  File _inputsAndOutputsListFile;
-  List<String> _inputFileList;
-  List<String> _outputFileList;
+  @visibleForTesting
+  final File? inputsAndOutputsListFile;
+  final List<String> _inputFileList = <String>[];
+  final List<String> _outputFileList = <String>[];
 
   /// Whether or not resource attributes are required for each corresponding
   /// resource id.
   ///
   /// Resource attributes provide metadata about the message.
-  bool _areResourceAttributesRequired;
+  @visibleForTesting
+  final bool areResourceAttributesRequired;
 
-  /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
-  /// [outputFile] and [className].
-  ///
-  /// Throws an [L10nException] when a provided configuration is not allowed
-  /// by [LocalizationsGenerator].
-  ///
-  /// Throws a [FileSystemException] when a file operation necessary for setting
-  /// up the [LocalizationsGenerator] cannot be completed.
-  void initialize({
-    String inputPathString,
-    String outputPathString,
-    String templateArbFileName,
-    String outputFileString,
-    String classNameString,
-    List<String> preferredSupportedLocales,
-    String headerString,
-    String headerFile,
-    bool useDeferredLoading = false,
-    String inputsAndOutputsListPath,
-    bool useSyntheticPackage = true,
-    String projectPathString,
-    bool areResourceAttributesRequired = false,
-    String untranslatedMessagesFile,
-    bool usesNullableGetter = true,
-  }) {
-    _useSyntheticPackage = useSyntheticPackage;
-    _usesNullableGetter = usesNullableGetter;
-    setProjectDir(projectPathString);
-    setInputDirectory(inputPathString);
-    setOutputDirectory(outputPathString ?? inputPathString);
-    setTemplateArbFile(templateArbFileName);
-    setBaseOutputFile(outputFileString);
-    setPreferredSupportedLocales(preferredSupportedLocales);
-    _setHeader(headerString, headerFile);
-    _setUseDeferredLoading(useDeferredLoading);
-    _setUntranslatedMessagesFile(untranslatedMessagesFile);
-    className = classNameString;
-    _setInputsAndOutputsListFile(inputsAndOutputsListPath);
-    _areResourceAttributesRequired = areResourceAttributesRequired;
-  }
+  static final RegExp _selectRE = RegExp(r'\{([\w\s,]*),\s*select\s*,\s*([\w\d]+\s*\{.*\})+\s*\}');
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -727,31 +839,28 @@ class LocalizationsGenerator {
   }
 
   @visibleForTesting
-  void setProjectDir(String projectPathString) {
+  static Directory? projectDirFromPath(FileSystem fileSystem, String? projectPathString) {
     if (projectPathString == null) {
-      return;
+      return null;
     }
 
-    final Directory directory = _fs.directory(projectPathString);
+    final Directory directory = fileSystem.directory(projectPathString);
     if (!directory.existsSync()) {
       throw L10nException(
         'Directory does not exist: $directory.\n'
-        'Please select a directory that contains the project\'s localizations '
+        "Please select a directory that contains the project's localizations "
         'resource files.'
       );
     }
-    projectDirectory = directory;
+    return directory;
   }
 
   /// Sets the reference [Directory] for [inputDirectory].
   @visibleForTesting
-  void setInputDirectory(String inputPathString) {
-    if (inputPathString == null) {
-      throw L10nException('inputPathString argument cannot be null');
-    }
-    inputDirectory = _fs.directory(
+  static Directory inputDirectoryFromPath(FileSystem fileSystem, String inputPathString, Directory? projectDirectory) {
+    final Directory inputDirectory = fileSystem.directory(
       projectDirectory != null
-        ? _getAbsoluteProjectPath(inputPathString)
+        ? _getAbsoluteProjectPath(inputPathString, projectDirectory)
         : inputPathString
     );
 
@@ -769,46 +878,33 @@ class LocalizationsGenerator {
         'Please ensure that the user has read and write permissions.'
       );
     }
+    return inputDirectory;
   }
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  void setOutputDirectory(
-    String outputPathString,
-  ) {
-    if (_useSyntheticPackage) {
-      outputDirectory = _fs.directory(
+  static Directory outputDirectoryFromPath(FileSystem fileSystem, String outputPathString, bool useSyntheticPackage, Directory? projectDirectory) {
+    Directory outputDirectory;
+    if (useSyntheticPackage) {
+      outputDirectory = fileSystem.directory(
         projectDirectory != null
-          ? _getAbsoluteProjectPath(syntheticL10nPackagePath)
-          : syntheticL10nPackagePath
+          ? _getAbsoluteProjectPath(_syntheticL10nPackagePath(fileSystem), projectDirectory)
+          : _syntheticL10nPackagePath(fileSystem)
       );
     } else {
-      if (outputPathString == null) {
-        throw L10nException(
-          'outputPathString argument cannot be null if not using '
-          'synthetic package option.'
-        );
-      }
-
-      outputDirectory = _fs.directory(
+      outputDirectory = fileSystem.directory(
         projectDirectory != null
-          ? _getAbsoluteProjectPath(outputPathString)
+          ? _getAbsoluteProjectPath(outputPathString, projectDirectory)
           : outputPathString
       );
     }
+    return outputDirectory;
   }
 
   /// Sets the reference [File] for [templateArbFile].
   @visibleForTesting
-  void setTemplateArbFile(String templateArbFileName) {
-    if (templateArbFileName == null) {
-      throw L10nException('templateArbFileName argument cannot be null');
-    }
-    if (inputDirectory == null) {
-      throw L10nException('inputDirectory cannot be null when setting template arb file');
-    }
-
-    templateArbFile = _fs.file(globals.fs.path.join(inputDirectory.path, templateArbFileName));
+  static File templateArbFileFromFileName(String templateArbFileName, Directory inputDirectory) {
+    final File templateArbFile = inputDirectory.childFile(templateArbFileName);
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-') {
       throw L10nException(
@@ -816,15 +912,7 @@ class LocalizationsGenerator {
         'Please ensure that the user has read permissions.'
       );
     }
-  }
-
-  /// Sets the reference [File] for the localizations delegate [outputFile].
-  @visibleForTesting
-  void setBaseOutputFile(String outputFileString) {
-    if (outputFileString == null) {
-      throw L10nException('outputFileString argument cannot be null');
-    }
-    baseOutputFile = _fs.file(globals.fs.path.join(outputDirectory.path, outputFileString));
+    return templateArbFile;
   }
 
   static bool _isValidClassName(String className) {
@@ -850,32 +938,31 @@ class LocalizationsGenerator {
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
   @visibleForTesting
-  set className(String classNameString) {
-    if (classNameString == null || classNameString.isEmpty) {
-      throw L10nException('classNameString argument cannot be null or empty');
+  static String classNameFromString(String classNameString) {
+    if (classNameString.isEmpty) {
+      throw L10nException('classNameString argument cannot be empty');
     }
     if (!_isValidClassName(classNameString)) {
       throw L10nException(
         "The 'output-class', $classNameString, is not a valid public Dart class name.\n"
       );
     }
-    _className = classNameString;
+    return classNameString;
   }
 
   /// Sets [preferredSupportedLocales] so that this particular list of locales
   /// will take priority over the other locales.
   @visibleForTesting
-  void setPreferredSupportedLocales(List<String> inputLocales) {
+  static List<LocaleInfo> preferredSupportedLocalesFromLocales(List<String>? inputLocales) {
     if (inputLocales == null || inputLocales.isEmpty) {
-      _preferredSupportedLocales = const <LocaleInfo>[];
-    } else {
-      _preferredSupportedLocales = inputLocales.map((String localeString) {
-        return LocaleInfo.fromString(localeString);
-      }).toList();
+      return const <LocaleInfo>[];
     }
+    return inputLocales.map((String localeString) {
+      return LocaleInfo.fromString(localeString);
+    }).toList();
   }
 
-  void _setHeader(String headerString, String headerFile) {
+  static String headerFromFile(String? headerString, String? headerFile, Directory inputDirectory) {
     if (headerString != null && headerFile != null) {
       throw L10nException(
         'Cannot accept both header and header file arguments. \n'
@@ -884,10 +971,10 @@ class LocalizationsGenerator {
     }
 
     if (headerString != null) {
-      header = headerString;
+      return headerString;
     } else if (headerFile != null) {
       try {
-        header = _fs.file(globals.fs.path.join(inputDirectory.path, headerFile)).readAsStringSync();
+        return inputDirectory.childFile(headerFile).readAsStringSync();
       } on FileSystemException catch (error) {
         throw L10nException (
           'Failed to read header file: "$headerFile". \n'
@@ -895,38 +982,28 @@ class LocalizationsGenerator {
         );
       }
     }
+    return '';
   }
 
-  String _getAbsoluteProjectPath(String relativePath) => globals.fs.path.join(projectDirectory.path, relativePath);
+  static String _getAbsoluteProjectPath(String relativePath, Directory projectDirectory) =>
+      projectDirectory.fileSystem.path.join(projectDirectory.path, relativePath);
 
-  void _setUseDeferredLoading(bool useDeferredLoading) {
-    if (useDeferredLoading == null) {
-      throw L10nException('useDeferredLoading argument cannot be null.');
-    }
-    _useDeferredLoading = useDeferredLoading;
-  }
-
-  void _setUntranslatedMessagesFile(String untranslatedMessagesFileString) {
+  static File? _untranslatedMessagesFileFromPath(FileSystem fileSystem, String? untranslatedMessagesFileString) {
     if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
-      return;
+      return null;
     }
 
-    _untranslatedMessagesFile = _fs.file(
-      globals.fs.path.join(untranslatedMessagesFileString),
-    );
+    return fileSystem.file(untranslatedMessagesFileString);
   }
 
-  void _setInputsAndOutputsListFile(String inputsAndOutputsListPath) {
+  static File? _inputsAndOutputsListFileFromPath(FileSystem fileSystem, String? inputsAndOutputsListPath) {
     if (inputsAndOutputsListPath == null) {
-      return;
+      return null;
     }
 
-    _inputsAndOutputsListFile = _fs.file(
-      globals.fs.path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
+    return fileSystem.file(
+      fileSystem.path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
     );
-
-    _inputFileList = <String>[];
-    _outputFileList = <String>[];
   }
 
   static bool _isValidGetterAndMethodName(String name) {
@@ -952,12 +1029,10 @@ class LocalizationsGenerator {
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
-    final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
-    _templateArbLocale = templateBundle.locale;
-    _allMessages = templateBundle.resourceIds.map((String id) => Message(
-      templateBundle.resources, id, _areResourceAttributesRequired,
+    _allMessages = _templateBundle.resourceIds.map((String id) => Message(
+      _templateBundle.resources, id, areResourceAttributesRequired,
     ));
-    for (final String resourceId in templateBundle.resourceIds) {
+    for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
         throw L10nException(
           'Invalid ARB resource name "$resourceId" in $templateArbFile.\n'
@@ -968,8 +1043,7 @@ class LocalizationsGenerator {
       }
     }
 
-    _allBundles = AppResourceBundleCollection(inputDirectory);
-    if (_inputsAndOutputsListFile != null) {
+    if (inputsAndOutputsListFile != null) {
       _inputFileList.addAll(_allBundles.bundles.map((AppResourceBundle bundle) {
         return bundle.file.absolute.path;
       }));
@@ -994,7 +1068,7 @@ class LocalizationsGenerator {
 
   void _addUnimplementedMessage(LocaleInfo locale, String message) {
     if (_unimplementedMessages.containsKey(locale)) {
-      _unimplementedMessages[locale].add(message);
+      _unimplementedMessages[locale]!.add(message);
     } else {
       _unimplementedMessages.putIfAbsent(locale, () => <String>[message]);
     }
@@ -1015,9 +1089,9 @@ class LocalizationsGenerator {
         _addUnimplementedMessage(locale, message.resourceId);
       }
 
-      return generateMethod(
+      return _generateMethod(
         message,
-        bundle.translationFor(message) == null ? templateBundle : bundle,
+        bundle.translationFor(message) ?? templateBundle.translationFor(message)!,
       );
     });
 
@@ -1048,7 +1122,7 @@ class LocalizationsGenerator {
 
     final Iterable<String> methods = messages
       .where((Message message) => bundle.translationFor(message) != null)
-      .map((Message message) => generateMethod(message, bundle));
+      .map((Message message) => _generateMethod(message, bundle.translationFor(message)!));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -1061,7 +1135,7 @@ class LocalizationsGenerator {
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
   // and all AppLocalizations subclasses for every locale. This method by
   // itself does not generate the output files.
-  void _generateCode() {
+  String _generateCode() {
     bool isBaseClassLocale(LocaleInfo locale, String language) {
       return locale.languageCode == language
           && locale.countryCode == null
@@ -1078,36 +1152,34 @@ class LocalizationsGenerator {
         .map((AppResourceBundle bundle) => bundle.locale).toList();
     }
 
-    final String directory = globals.fs.path.basename(outputDirectory.path);
-    final String outputFileName = globals.fs.path.basename(baseOutputFile.path);
+    final String directory = _fs.path.basename(outputDirectory.path);
+    final String outputFileName = _fs.path.basename(baseOutputFile.path);
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
-      final String countryCode = locale.countryCode;
-      final String scriptCode = locale.scriptCode;
+      final String? countryCode = locale.countryCode;
+      final String? scriptCode = locale.scriptCode;
 
       if (countryCode == null && scriptCode == null) {
-        return 'Locale(\'$languageCode\')';
+        return "Locale('$languageCode')";
       } else if (countryCode != null && scriptCode == null) {
-        return 'Locale(\'$languageCode\', \'$countryCode\')';
+        return "Locale('$languageCode', '$countryCode')";
       } else if (countryCode != null && scriptCode != null) {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', countryCode: \'$countryCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', countryCode: '$countryCode', scriptCode: '$scriptCode')";
       } else {
-        return 'Locale.fromSubtags(languageCode: \'$languageCode\', scriptCode: \'$scriptCode\')';
+        return "Locale.fromSubtags(languageCode: '$languageCode', scriptCode: '$scriptCode')";
       }
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
-      _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
+      _allBundles.locales.map<String>((LocaleInfo locale) => "'${locale.languageCode}'")
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File languageMessageFile = _fs.file(
-          globals.fs.path.join(outputDirectory.path, '${fileName}_$locale.dart'),
-        );
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.dart');
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1116,8 +1188,8 @@ class LocalizationsGenerator {
           className,
           outputFileName,
           header,
-          _allBundles.bundleFor(locale),
-          _allBundles.bundleFor(_templateArbLocale),
+          _allBundles.bundleFor(locale)!,
+          _allBundles.bundleFor(_templateArbLocale)!,
           _allMessages,
         );
 
@@ -1128,7 +1200,7 @@ class LocalizationsGenerator {
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
           return _generateSubclass(
             className,
-            _allBundles.bundleFor(locale),
+            _allBundles.bundleFor(locale)!,
             _allMessages,
           );
         });
@@ -1160,7 +1232,7 @@ class LocalizationsGenerator {
       fileName: fileName,
     );
 
-    _generatedLocalizationsFile = fileTemplate
+    return fileTemplate
       .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
@@ -1169,22 +1241,30 @@ class LocalizationsGenerator {
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
       .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
       .replaceAll('@(delegateClass)', delegateClass)
-      .replaceAll('@(requiresFoundationImport)', _useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
+      .replaceAll('@(requiresFoundationImport)', useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';")
       .replaceAll('@(requiresIntlImport)', _requiresIntlImport() ? "import 'package:intl/intl.dart' as intl;" : '')
-      .replaceAll('@(canBeNullable)', _usesNullableGetter ? '?' : '')
-      .replaceAll('@(needsNullCheck)', _usesNullableGetter ? '' : '!');
+      .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
+      .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
+      // Removes all trailing whitespace from the generated file.
+      .split('\n').map((String line) => line.trimRight()).join('\n')
+      // Cleans out unnecessary newlines.
+      .replaceAll('\n\n\n', '\n\n');
   }
 
-  bool _requiresIntlImport() => _allMessages.any((Message message) => message.isPlural || message.placeholdersRequireFormatting);
+  bool _requiresIntlImport() => _allMessages.any((Message message) {
+    return message.isPlural
+        || message.isSelect
+        || message.placeholdersRequireFormatting;
+  });
 
   void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
-    _generateCode();
+    final String generatedLocalizationsFile = _generateCode();
 
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
-    if (_useSyntheticPackage) {
-      final Directory syntheticPackageDirectory = _fs.directory(defaultSyntheticPackagePath);
+    if (useSyntheticPackage) {
+      final Directory syntheticPackageDirectory = _fs.directory(_defaultSyntheticPackagePath(_fs));
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
@@ -1208,15 +1288,15 @@ class LocalizationsGenerator {
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
       file.writeAsStringSync(contents);
-      if (_inputsAndOutputsListFile != null) {
+      if (inputsAndOutputsListFile != null) {
         _outputFileList.add(file.absolute.path);
       }
     });
 
-    baseOutputFile.writeAsStringSync(_generatedLocalizationsFile);
-
-    if (_untranslatedMessagesFile != null) {
-      _generateUntranslatedMessagesFile(logger);
+    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    final File? messagesFile = untranslatedMessagesFile;
+    if (messagesFile != null) {
+      _generateUntranslatedMessagesFile(logger, messagesFile);
     } else if (_unimplementedMessages.isNotEmpty) {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
@@ -1242,16 +1322,16 @@ class LocalizationsGenerator {
         'need to be translated.'
       );
     }
-
-    if (_inputsAndOutputsListFile != null) {
+    final File? inputsAndOutputsListFileLocal = inputsAndOutputsListFile;
+    if (inputsAndOutputsListFileLocal != null) {
       _outputFileList.add(baseOutputFile.absolute.path);
 
       // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
-      if (!_inputsAndOutputsListFile.existsSync()) {
-        _inputsAndOutputsListFile.createSync(recursive: true);
+      if (!inputsAndOutputsListFileLocal.existsSync()) {
+        inputsAndOutputsListFileLocal.createSync(recursive: true);
       }
 
-      _inputsAndOutputsListFile.writeAsStringSync(
+      inputsAndOutputsListFileLocal.writeAsStringSync(
         json.encode(<String, Object> {
           'inputs': _inputFileList,
           'outputs': _outputFileList,
@@ -1260,17 +1340,11 @@ class LocalizationsGenerator {
     }
   }
 
-  void _generateUntranslatedMessagesFile(Logger logger) {
-    if (logger == null) {
-      throw L10nException(
-        'Logger must be defined when generating untranslated messages file.'
-      );
-    }
-
+  void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
-      _untranslatedMessagesFile.writeAsStringSync('{}');
-      if (_inputsAndOutputsListFile != null) {
-        _outputFileList.add(_untranslatedMessagesFile.absolute.path);
+      untranslatedMessagesFile.writeAsStringSync('{}');
+      if (inputsAndOutputsListFile != null) {
+        _outputFileList.add(untranslatedMessagesFile.absolute.path);
       }
       return;
     }
@@ -1298,9 +1372,9 @@ class LocalizationsGenerator {
     });
 
     resultingFile += '}\n';
-    _untranslatedMessagesFile.writeAsStringSync(resultingFile);
-    if (_inputsAndOutputsListFile != null) {
-      _outputFileList.add(_untranslatedMessagesFile.absolute.path);
+    untranslatedMessagesFile.writeAsStringSync(resultingFile);
+    if (inputsAndOutputsListFile != null) {
+      _outputFileList.add(untranslatedMessagesFile.absolute.path);
     }
   }
 }

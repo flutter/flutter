@@ -933,20 +933,20 @@ abstract class TransitionDelegate<T> {
   ///
   /// For example, consider the following case.
   ///
-  /// newPageRouteHistory = [A, B, C]
+  /// `newPageRouteHistory = [A, B, C]`
   ///
-  /// locationToExitingPageRoute = {A -> D, C -> E}
+  /// `locationToExitingPageRoute = {A -> D, C -> E}`
   ///
   /// The following outputs are valid.
   ///
-  /// result = [A, B ,C ,D ,E] is valid.
-  /// result = [D, A, B ,C ,E] is also valid because exiting route can be
+  /// `result = [A, B ,C ,D ,E]` is valid.
+  /// `result = [D, A, B ,C ,E]` is also valid because exiting route can be
   /// inserted in any place.
   ///
   /// The following outputs are invalid.
   ///
-  /// result = [B, A, C ,D ,E] is invalid because B must be after A.
-  /// result = [A, B, C ,E] is invalid because results must include D.
+  /// `result = [B, A, C ,D ,E]` is invalid because B must be after A.
+  /// `result = [A, B, C ,E]` is invalid because results must include D.
   ///
   /// See also:
   ///
@@ -1624,6 +1624,13 @@ class Navigator extends StatefulWidget {
   /// route update message to the engine when it detects top-most route changes.
   /// The messages are used by the web engine to update the browser URL bar.
   ///
+  /// If the property is set to true when the [Navigator] is first created,
+  /// single-entry history mode is requested using
+  /// [SystemNavigator.selectSingleEntryHistory]. This means this property
+  /// should not be used at the same time as [PlatformRouteInformationProvider]
+  /// is used with a [Router] (including when used with [MaterialApp.router],
+  /// for example).
+  ///
   /// If there are multiple navigators in the widget tree, at most one of them
   /// can set this property to true (typically, the top-most one created from
   /// the [WidgetsApp]). Otherwise, the web engine may receive multiple route
@@ -1731,7 +1738,7 @@ class Navigator extends StatefulWidget {
     BuildContext context,
     String routeName, {
     Object? arguments,
-   }) {
+  }) {
     return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
@@ -1943,7 +1950,7 @@ class Navigator extends StatefulWidget {
     String routeName, {
     TO? result,
     Object? arguments,
-   }) {
+  }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -1974,11 +1981,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePopAndPushNamed<T extends Object?, TO extends Object?>(
-      BuildContext context,
-      String routeName, {
-      TO? result,
-      Object? arguments,
-    }) {
+    BuildContext context,
+    String routeName, {
+    TO? result,
+    Object? arguments,
+  }) {
     return Navigator.of(context).restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -2079,11 +2086,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushNamedAndRemoveUntil<T extends Object?>(
-      BuildContext context,
-      String newRouteName,
-      RoutePredicate predicate, {
-      Object? arguments,
-    }) {
+    BuildContext context,
+    String newRouteName,
+    RoutePredicate predicate, {
+    Object? arguments,
+  }) {
     return Navigator.of(context).restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
@@ -2712,6 +2719,8 @@ class Navigator extends StatefulWidget {
   ///
   /// If there is no [Navigator] in the give `context`, this function will throw
   /// a [FlutterError] in debug mode, and an exception in release mode.
+  ///
+  /// This method can be expensive (it walks the element tree).
   static NavigatorState of(
     BuildContext context, {
     bool rootNavigator = false,
@@ -2719,7 +2728,7 @@ class Navigator extends StatefulWidget {
     // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
     if (context is StatefulElement && context.state is NavigatorState) {
-        navigator = context.state as NavigatorState;
+      navigator = context.state as NavigatorState;
     }
     if (rootNavigator) {
       navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
@@ -2760,10 +2769,12 @@ class Navigator extends StatefulWidget {
   /// subsequent instances of [Navigator].
   ///
   /// Will return null if there is no ancestor [Navigator] in the `context`.
+  ///
+  /// This method can be expensive (it walks the element tree).
   static NavigatorState? maybeOf(
-      BuildContext context, {
-        bool rootNavigator = false,
-      }) {
+    BuildContext context, {
+    bool rootNavigator = false,
+  }) {
     // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
     if (context is StatefulElement && context.state is NavigatorState) {
@@ -3352,7 +3363,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void initState() {
     super.initState();
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3393,6 +3404,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       .getElementForInheritedWidgetOfExactType<HeroControllerScope>()
       ?.widget as HeroControllerScope?;
     _updateHeroController(heroControllerScope?.controller);
+
+    if (widget.reportsRouteUpdateToEngine) {
+      SystemNavigator.selectSingleEntryHistory();
+    }
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -3460,7 +3475,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       'All routes returned by onGenerateInitialRoutes are not restorable. '
       'Please make sure that all routes returned by onGenerateInitialRoutes '
       'have their RouteSettings defined with names that are defined in the '
-      'app\'s routes table.',
+      "app's routes table.",
     );
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
@@ -3549,7 +3564,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert((){
+    assert(() {
       if (widget.pages != const <Page<dynamic>>[]) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
@@ -3588,7 +3603,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages && !restorePending) {
-      assert((){
+      assert(() {
         if (widget.pages.isEmpty) {
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -3611,7 +3626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _debugCheckDuplicatedPageKeys() {
-    assert((){
+    assert(() {
       final Set<Key> keyReservation = <Key>{};
       for (final Page<dynamic> page in widget.pages) {
         final LocalKey? key = page.key;
@@ -3625,15 +3640,34 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   @override
+  void deactivate() {
+    for (final NavigatorObserver observer in _effectiveObservers)
+      observer._navigator = null;
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    for (final NavigatorObserver observer in _effectiveObservers) {
+      assert(observer.navigator == null);
+      observer._navigator = this;
+    }
+  }
+
+  @override
   void dispose() {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
       return true;
     }());
+    assert(() {
+      for (final NavigatorObserver observer in _effectiveObservers)
+        assert(observer._navigator != this);
+      return true;
+    }());
     _updateHeroController(null);
-    for (final NavigatorObserver observer in _effectiveObservers)
-      observer._navigator = null;
     focusScopeNode.dispose();
     for (final _RouteEntry entry in _history)
       entry.dispose();
@@ -4039,17 +4073,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
-    // Announces route name changes.
+    // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
       final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
         (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
       );
       final String? routeName = lastEntry?.route.settings.name;
-      if (routeName != _lastAnnouncedRouteName) {
-        SystemNavigator.routeUpdated(
-          routeName: routeName,
-          previousRouteName: _lastAnnouncedRouteName,
-        );
+      if (routeName != null && routeName != _lastAnnouncedRouteName) {
+        SystemNavigator.routeInformationUpdated(location: routeName);
         _lastAnnouncedRouteName = routeName;
       }
     }
@@ -4482,7 +4513,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   bool _debugCheckIsPagelessRoute(Route<dynamic> route) {
-    assert((){
+    assert(() {
       if (route.settings is Page) {
         FlutterError.reportError(
           FlutterErrorDetails(

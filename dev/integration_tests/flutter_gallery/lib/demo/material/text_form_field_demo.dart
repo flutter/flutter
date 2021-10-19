@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../../gallery/demo.dart';
 
@@ -45,7 +45,7 @@ class PasswordField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
 
   @override
-  _PasswordFieldState createState() => _PasswordFieldState();
+  State<PasswordField> createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {
@@ -143,7 +143,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (form == null || !_formWasEdited || form.validate())
       return true;
 
-    return showDialog<bool>(
+    final bool? result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -161,7 +161,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ],
         );
       },
-    ) as Future<bool>;
+    );
+    return result!;
   }
 
   @override
@@ -279,8 +280,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   const SizedBox(height: 24.0),
                   Center(
                     child: ElevatedButton(
-                      child: const Text('SUBMIT'),
                       onPressed: _handleSubmitted,
+                      child: const Text('SUBMIT'),
                     ),
                   ),
                   const SizedBox(height: 24.0),
@@ -316,17 +317,20 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
         selectionIndex++;
     }
     if (newTextLength >= 4) {
-      newText.write(newValue.text.substring(0, usedSubstringIndex = 3) + ') ');
+      final String value = newValue.text.substring(0, usedSubstringIndex = 3);
+      newText.write('$value) ');
       if (newValue.selection.end >= 3)
         selectionIndex += 2;
     }
     if (newTextLength >= 7) {
-      newText.write(newValue.text.substring(3, usedSubstringIndex = 6) + '-');
+      final String value = newValue.text.substring(3, usedSubstringIndex = 6);
+      newText.write('$value-');
       if (newValue.selection.end >= 6)
         selectionIndex++;
     }
     if (newTextLength >= 11) {
-      newText.write(newValue.text.substring(6, usedSubstringIndex = 10) + ' ');
+      final String value = newValue.text.substring(6, usedSubstringIndex = 10);
+      newText.write('$value ');
       if (newValue.selection.end >= 10)
         selectionIndex++;
     }

@@ -80,7 +80,7 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
 
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<InlineSpanSemanticsInformation> inputs) sync* {
   String workingText = '';
-  String workingLabel;
+  String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       if (workingText != null) {
@@ -92,8 +92,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
     } else {
       workingText += info.text;
       workingLabel ??= '';
-      if (info.semanticsLabel != null) {
-        workingLabel += info.semanticsLabel;
+      final String? infoSemanticsLabel = info.semanticsLabel;
+      if (infoSemanticsLabel != null) {
+        workingLabel += infoSemanticsLabel;
       } else {
         workingLabel += info.text;
       }
@@ -108,7 +109,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
 
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpanSemanticsInformation> inputs) {
   String workingText = '';
-  String workingLabel;
+  String? workingLabel;
   final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
@@ -121,8 +122,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
     } else {
       workingText += info.text;
       workingLabel ??= '';
-      if (info.semanticsLabel != null) {
-        workingLabel += info.semanticsLabel;
+      final String? infoSemanticsLabel = info.semanticsLabel;
+      if (infoSemanticsLabel != null) {
+        workingLabel += infoSemanticsLabel;
       } else {
         workingLabel += info.text;
       }

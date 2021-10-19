@@ -13,11 +13,12 @@ import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
@@ -28,14 +29,24 @@ class WebDriverService extends DriverService {
   WebDriverService({
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
+    @required Logger logger,
   }) : _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath;
+       _dartSdkPath = dartSdkPath,
+       _logger = logger;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
+  final Logger _logger;
 
   ResidentRunner _residentRunner;
   Uri _webUri;
+
+  /// The result of [ResidentRunner.run].
+  ///
+  /// This is expected to stay `null` throughout the test, as the application
+  /// must be running until [stop] is called. If it becomes non-null, it likely
+  /// indicates a bug.
+  int _runResult;
 
   @override
   Future<void> start(
@@ -69,23 +80,48 @@ class WebDriverService extends DriverService {
           port: debuggingOptions.port,
           disablePortPublication: debuggingOptions.disablePortPublication,
         ),
-      stayResident: false,
+      stayResident: true,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       usage: globals.flutterUsage,
-      logger: globals.logger,
+      logger: _logger,
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
-    final int result = await _residentRunner.run(
+    final Future<int> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
       enableDevTools: false,
       route: route,
     );
+
+    bool isAppStarted = false;
+    await Future.any<Object>(<Future<Object>>[
+      runFuture.then((int result) {
+        _runResult = result;
+        return null;
+      }),
+      appStartedCompleter.future.then((_) {
+        isAppStarted = true;
+        return null;
+      }),
+    ]);
+
+    if (_runResult != null) {
+      throw ToolExit(
+        'Application exited before the test started. Check web driver logs '
+        'for possible application-side errors.'
+      );
+    }
+
+    if (!isAppStarted) {
+      throw ToolExit('Failed to start application');
+    }
+
     _webUri = _residentRunner.uri;
-    if (result != 0) {
-      throwToolExit(null);
+
+    if (_webUri == null) {
+      throw ToolExit('Unable to connect to the app. URL not available.');
     }
   }
 
@@ -97,6 +133,7 @@ class WebDriverService extends DriverService {
     bool androidEmulator,
     int driverPort,
     List<String> browserDimension,
+    String profileMemory,
   }) async {
     async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);
@@ -108,9 +145,11 @@ class WebDriverService extends DriverService {
       );
     } on Exception catch (ex) {
       throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing. \n'
-        'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-        'Make sure the WebDriver Server matches option --browser-name. \n'
+        'Unable to start WebDriver Session for Flutter for Web testing.\n'
+        'Make sure you have the correct WebDriver Server running at $driverPort.\n'
+        'Make sure the WebDriver Server matches option --browser-name.\n'
+        'For more information see: '
+        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
         '$ex'
       );
     }
@@ -147,7 +186,16 @@ class WebDriverService extends DriverService {
 
   @override
   Future<void> stop({File writeSkslOnExit, String userIdentifier}) async {
+    final bool appDidFinishPrematurely = _runResult != null;
+    await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
+
+    if (appDidFinishPrematurely) {
+      throw ToolExit(
+        'Application exited before the test finished. Check web driver logs '
+        'for possible application-side errors.'
+      );
+    }
   }
 
   Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
@@ -276,7 +324,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
 }
 
 /// Converts [browserName] string to [Browser]
-Browser _browserNameToEnum(String browserName){
+Browser _browserNameToEnum(String browserName) {
   switch (browserName) {
     case 'android-chrome': return Browser.androidChrome;
     case 'chrome': return Browser.chrome;

@@ -4,37 +4,21 @@
 
 // @dart = 2.8
 
+import 'package:args/args.dart';
+import 'package:meta/meta.dart';
+
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
-  FormatCommand() {
-    argParser.addFlag('dry-run',
-      abbr: 'n',
-      help: 'Show which files would be modified but make no changes.',
-      defaultsTo: false,
-      negatable: false,
-    );
-    argParser.addFlag('set-exit-if-changed',
-      help: 'Return exit code 1 if there are any formatting changes.',
-      defaultsTo: false,
-      negatable: false,
-    );
-    argParser.addFlag('machine',
-      abbr: 'm',
-      help: 'Produce machine-readable JSON output.',
-      defaultsTo: false,
-      negatable: false,
-    );
-    argParser.addOption('line-length',
-      abbr: 'l',
-      help: 'Wrap lines longer than this length.',
-      valueHelp: 'characters',
-      defaultsTo: '80',
-    );
-  }
+  FormatCommand({@required this.verboseHelp});
+
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
+
+  final bool verboseHelp;
 
   @override
   final String name = 'format';
@@ -50,29 +34,25 @@ class FormatCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.isEmpty) {
-      throwToolExit(
-        'No files specified to be formatted.\n'
-        '\n'
-        'To format all files in the current directory tree:\n'
-        '${runner.executableName} $name .\n'
-        '\n'
-        '$usage'
-      );
-    }
-
-    final String dartSdk = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final String dartBinary = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String dartBinary = globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
-      globals.fs.path.join(dartSdk, 'bin', 'snapshots', 'dartfmt.dart.snapshot'),
-      if (boolArg('dry-run')) '-n',
-      if (boolArg('machine')) '-m',
-      if (argResults['line-length'] != null) '-l ${argResults['line-length']}',
-      if (!boolArg('dry-run') && !boolArg('machine')) '-w',
-      if (boolArg('set-exit-if-changed')) '--set-exit-if-changed',
-      ...argResults.rest,
+      'format',
     ];
+    if (argResults.rest.isEmpty) {
+      globals.printError(
+        'No files specified to be formatted.'
+      );
+      command.add('-h');
+    } else {
+      command.addAll(<String>[
+        for (String arg in argResults.rest)
+          if (arg == '--dry-run' || arg == '-n')
+            '--output=none'
+          else
+            arg
+      ]);
+    }
 
     final int result = await globals.processUtils.stream(command);
     if (result != 0) {

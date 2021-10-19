@@ -15,6 +15,7 @@ Future<void> main(List<String> arguments) async {
   exit(await run(arguments) ? 0 : 1);
 }
 
+// Return true if successful, false if failed.
 Future<bool> run(List<String> arguments) async {
   final ArgParser argParser = ArgParser(
     allowTrailingOptions: false,
@@ -78,13 +79,13 @@ Future<bool> run(List<String> arguments) async {
     exit(1);
   }
 
-  final int repeat = int.tryParse(parsedArguments['repeat'] as String);
+  final int? repeat = int.tryParse(parsedArguments['repeat'] as String);
   final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
   final bool skipTemplate = parsedArguments['skip-template'] as bool;
   final bool verbose = parsedArguments['verbose'] as bool;
   final bool help = parsedArguments['help'] as bool;
-  final int numberShards = int.tryParse(parsedArguments['shards'] as String);
-  final int shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
+  final int? numberShards = int.tryParse(parsedArguments['shards'] as String);
+  final int? shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments
     .rest
     .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
@@ -92,11 +93,21 @@ Future<bool> run(List<String> arguments) async {
     .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
     .toList();
 
-  if (help || repeat == null || files.isEmpty) {
+  if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {
     printHelp();
     if (verbose) {
       if (repeat == null)
         print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      if (numberShards == null) {
+        print('Error: Could not parse shards count ("${parsedArguments['shards']}")');
+      } else if (numberShards < 1) {
+        print('Error: The specified shards count ($numberShards) is less than 1. It must be greater than zero.');
+      }
+      if (shardIndex == null) {
+        print('Error: Could not parse shard index ("${parsedArguments['shard-index']}")');
+      } else if (shardIndex < 0) {
+        print('Error: The specified shard index ($shardIndex) is negative. It must be in the range [0 .. shards - 1].');
+      }
       if (parsedArguments.rest.isEmpty) {
         print('Error: No file arguments specified.');
       } else if (files.isEmpty) {
@@ -106,13 +117,16 @@ Future<bool> run(List<String> arguments) async {
     return help;
   }
 
-  if (files.length < shardIndex)
-    print('Warning: There are more shards than tests. Some shards will not run any tests.');
-
-  if (numberShards <= shardIndex) {
-    print('Error: There are more shard indexes than shards.');
-    return help;
+  if (shardIndex > numberShards - 1) {
+    print(
+      'Error: The specified shard index ($shardIndex) is more than the specified number of shards ($numberShards). '
+      'It must be in the range [0 .. shards - 1].'
+    );
+    return false;
   }
+
+  if (files.length < numberShards)
+    print('Warning: There are more shards than tests. Some shards will not run any tests.');
 
   return runTests(
     repeat: repeat,

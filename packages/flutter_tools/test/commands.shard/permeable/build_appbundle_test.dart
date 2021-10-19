@@ -41,8 +41,7 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
       final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
-      expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64'));
+      expect((await command.usageValues).commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -53,23 +52,19 @@ void main() {
           arguments: <String>['--no-pub', '--template=app']);
 
       final BuildAppBundleCommand commandDefault = await runBuildAppBundleCommand(projectPath);
-      expect(await commandDefault.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
+      expect((await commandDefault.usageValues).commandBuildAppBundleBuildMode, 'release');
 
       final BuildAppBundleCommand commandInRelease = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--release']);
-      expect(await commandInRelease.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
+      expect((await commandInRelease.usageValues).commandBuildAppBundleBuildMode, 'release');
 
       final BuildAppBundleCommand commandInDebug = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--debug']);
-      expect(await commandInDebug.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'debug'));
+      expect((await commandInDebug.usageValues).commandBuildAppBundleBuildMode, 'debug');
 
       final BuildAppBundleCommand commandInProfile = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--profile']);
-      expect(await commandInProfile.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'profile'));
+      expect((await commandInProfile.usageValues).commandBuildAppBundleBuildMode, 'profile');
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -161,9 +156,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-not-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     },
@@ -201,9 +196,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'appbundle',
+          'gradle',
           label: 'app-using-android-x',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     },

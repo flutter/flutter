@@ -210,13 +210,15 @@ class GoogleChromeDevice extends ChromiumDevice {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     String version = 'unknown';
     if (_platform.isWindows) {
-      final ProcessResult result = await _processManager.run(<String>[
-        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
-      ]);
-      if (result.exitCode == 0) {
-        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-        if (parts.length > 2) {
-          version = 'Google Chrome ' + parts[parts.length - 2];
+      if (_processManager.canRun('reg')) {
+        final ProcessResult result = await _processManager.run(<String>[
+          r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
+        ]);
+        if (result.exitCode == 0) {
+          final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+          if (parts.length > 2) {
+            version = 'Google Chrome ${parts[parts.length - 2]}';
+          }
         }
       }
     } else {
@@ -231,7 +233,6 @@ class GoogleChromeDevice extends ChromiumDevice {
     }
     return version.trim();
   }
-
 }
 
 /// The Microsoft Edge browser based on Chromium.
@@ -270,13 +271,15 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _getSdkNameAndVersion();
   String _sdkNameAndVersion;
   Future<String> _getSdkNameAndVersion() async {
-    final ProcessResult result = await _processManager.run(<String>[
-      r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
-    ]);
-    if (result.exitCode == 0) {
-      final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-      if (parts.length > 2) {
-        return 'Microsoft Edge ' + parts[parts.length - 2];
+    if (_processManager.canRun('reg')) {
+      final ProcessResult result = await _processManager.run(<String>[
+        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
+      ]);
+      if (result.exitCode == 0) {
+        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+        if (parts.length > 2) {
+          return 'Microsoft Edge ${parts[parts.length - 2]}';
+        }
       }
     }
     // Return a non-null string so that the tool can validate the version
@@ -359,6 +362,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform =>  _featureFlags.isWebEnabled;
+
+  @override
+  List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
 }
 
 @visibleForTesting

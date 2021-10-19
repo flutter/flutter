@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+  testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       MaterialApp(
@@ -84,7 +84,7 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
   bool shouldReload(_DummyLocalizationsDelegate old) => true;
 }
 
-class DummyLocalizations {}
+class DummyLocalizations { }
 
 class LocalizationTracker extends StatefulWidget {
   const LocalizationTracker({Key? key}) : super(key: key);

@@ -30,7 +30,7 @@ class RecordedInvocation {
   String stackToString({ String indent = '' }) {
     assert(indent != null);
     return indent + FlutterError.defaultStackFilter(
-      stack.toString().trimRight().split('\n')
+      stack.toString().trimRight().split('\n'),
     ).join('\n$indent');
   }
 }

@@ -87,7 +87,7 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
 
     await tester.pumpWidget(
-        _appWithDialog(tester, dialog, theme: theme)
+      _appWithDialog(tester, dialog, theme: theme),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -106,7 +106,7 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
     await tester.pumpWidget(
-      _appWithDialog(tester, dialog, theme: theme)
+      _appWithDialog(tester, dialog, theme: theme),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();

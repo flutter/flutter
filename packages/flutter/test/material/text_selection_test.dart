@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
@@ -27,7 +28,7 @@ class MockClipboard {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
@@ -148,11 +149,11 @@ void main() {
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
@@ -222,7 +223,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -287,7 +288,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -361,7 +362,7 @@ void main() {
       expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -467,7 +468,7 @@ void main() {
       final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -541,7 +542,7 @@ void main() {
       final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
     },
-      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -565,7 +566,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0,
+                      context, TextSelectionHandleType.right, 10.0, null,
                     ),
                   ),
                 ),
@@ -579,6 +580,38 @@ void main() {
         find.byType(RepaintBoundary),
         matchesGoldenFile('transparent_handle.png'),
       );
+    });
+
+    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          textSelectionTheme: const TextSelectionThemeData(
+            selectionHandleColor: Color(0x550000AA),
+          ),
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return Container(
+              color: Colors.white,
+              height: 800,
+              width: 800,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 250),
+                child: FittedBox(
+                  child: materialTextSelectionControls.buildHandle(
+                    context, TextSelectionHandleType.right, 10.0,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ));
+
+      // No expect here as this should simply compile / not throw any
+      // exceptions while building. The test will fail if this either does
+      // not compile or if the tester catches an exception, which we do
+      // not take here.
     });
   });
 
@@ -634,7 +667,10 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+  },
+    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
+  );
 
   // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
   testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
@@ -686,5 +722,8 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })
+  );
 }

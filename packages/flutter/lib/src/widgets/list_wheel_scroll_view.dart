@@ -93,7 +93,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (index < 0 || index >= children.length)
       return null;
-    return IndexedSemantics(child: children[index], index: index);
+    return IndexedSemantics(index: index, child: children[index]);
   }
 
   @override
@@ -139,7 +139,7 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (children.isEmpty)
       return null;
-    return IndexedSemantics(child: children[index % children.length], index: index);
+    return IndexedSemantics(index: index, child: children[index % children.length]);
   }
 
   @override
@@ -182,11 +182,11 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   Widget? build(BuildContext context, int index) {
     if (childCount == null) {
       final Widget? child = builder(context, index);
-      return child == null ? null : IndexedSemantics(child: child, index: index);
+      return child == null ? null : IndexedSemantics(index: index, child: child);
     }
     if (index < 0 || index >= childCount!)
       return null;
-    return IndexedSemantics(child: builder(context, index), index: index);
+    return IndexedSemantics(index: index, child: builder(context, index));
   }
 
   @override
@@ -737,7 +737,7 @@ class ListWheelScrollView extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   @override
-  _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
+  State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
 }
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {
@@ -843,8 +843,10 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
     if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       performRebuild();
+      renderObject.markNeedsLayout();
+    }
   }
 
   @override

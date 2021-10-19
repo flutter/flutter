@@ -42,23 +42,26 @@ Future<void> main() async {
     ),
   ));
 
-  await SchedulerBinding.instance.endOfFrame;
+  // Wait for frame rendering to stabilize.
+  for (int i = 0; i < 5; i++) {
+    await SchedulerBinding.instance?.endOfFrame;
+  }
 
   final Stopwatch watch = Stopwatch();
 
-  print('flutter_test allElements benchmark... (${WidgetsBinding.instance.renderViewElement})');
+  print('flutter_test allElements benchmark... (${WidgetsBinding.instance?.renderViewElement})');
   // Make sure we get enough elements to process for consistent benchmark runs
-  int elementCount = collectAllElementsFrom(WidgetsBinding.instance.renderViewElement, skipOffstage: false).length;
+  int elementCount = collectAllElementsFrom(WidgetsBinding.instance!.renderViewElement!, skipOffstage: false).length;
   while (elementCount < 2458) {
     await Future<void>.delayed(Duration.zero);
-    elementCount = collectAllElementsFrom(WidgetsBinding.instance.renderViewElement, skipOffstage: false).length;
+    elementCount = collectAllElementsFrom(WidgetsBinding.instance!.renderViewElement!, skipOffstage: false).length;
   }
   print('element count: $elementCount');
 
   watch.start();
   for (int i = 0; i < _kNumIters; i += 1) {
     final List<Element> allElements = collectAllElementsFrom(
-      WidgetsBinding.instance.renderViewElement,
+      WidgetsBinding.instance!.renderViewElement!,
       skipOffstage: false,
     ).toList();
     allElements.clear();

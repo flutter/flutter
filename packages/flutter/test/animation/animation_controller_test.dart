@@ -2,14 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -385,7 +391,7 @@ void main() {
         '   A given AnimationController cannot be disposed more than once.\n'
         '   The following AnimationController object was disposed multiple\n'
         '   times:\n'
-        '     AnimationController#00000(⏮ 0.000; paused; DISPOSED)\n'
+        '     AnimationController#00000(⏮ 0.000; paused; DISPOSED)\n',
       ),
     );
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -966,41 +972,44 @@ void main() {
       expect(
         error.toStringDeep(),
         'FlutterError\n'
-          '   AnimationController.forward() called with no default duration.\n'
-          '   The "duration" property should be set, either in the constructor\n'
-          '   or later, before calling the forward() function.\n'
+        '   AnimationController.forward() called with no default duration.\n'
+        '   The "duration" property should be set, either in the constructor\n'
+        '   or later, before calling the forward() function.\n',
       );
 
       controller.dispose();
     });
 
-    test('AnimationController animateTo() will throw an error if there is no explicit duration '
-      'and default duration', () {
-      final AnimationController controller = AnimationController(
-        vsync: const TestVSync(),
-      );
+    test(
+      'AnimationController animateTo() will throw an error if there is no explicit duration '
+      'and default duration',
+      () {
+        final AnimationController controller = AnimationController(
+          vsync: const TestVSync(),
+        );
 
-      late FlutterError error;
-      try {
-        controller.animateTo(0.8);
-      } on FlutterError catch (e) {
-        error = e;
-      }
+        late FlutterError error;
+        try {
+          controller.animateTo(0.8);
+        } on FlutterError catch (e) {
+          error = e;
+        }
 
-      expect(error, isNotNull);
-      expect(
-        error.toStringDeep(),
-        'FlutterError\n'
+        expect(error, isNotNull);
+        expect(
+          error.toStringDeep(),
+          'FlutterError\n'
           '   AnimationController.animateTo() called with no explicit duration\n'
           '   and no default duration.\n'
           '   Either the "duration" argument to the animateTo() method should\n'
           '   be provided, or the "duration" property should be set, either in\n'
           '   the constructor or later, before calling the animateTo()\n'
-          '   function.\n'
-      );
+          '   function.\n',
+        );
 
-      controller.dispose();
-    });
+        controller.dispose();
+      },
+    );
 
     test('AnimationController reverse() will throw an error if there is no default duration or reverseDuration', () {
       final AnimationController controller = AnimationController(
@@ -1018,43 +1027,46 @@ void main() {
       expect(
         error.toStringDeep(),
         'FlutterError\n'
-          '   AnimationController.reverse() called with no default duration or\n'
-          '   reverseDuration.\n'
-          '   The "duration" or "reverseDuration" property should be set,\n'
-          '   either in the constructor or later, before calling the reverse()\n'
-          '   function.\n'
+        '   AnimationController.reverse() called with no default duration or\n'
+        '   reverseDuration.\n'
+        '   The "duration" or "reverseDuration" property should be set,\n'
+        '   either in the constructor or later, before calling the reverse()\n'
+        '   function.\n',
       );
 
       controller.dispose();
     });
 
-    test('AnimationController animateBack() will throw an error if there is no explicit duration and '
-      'no default duration or reverseDuration', () {
-      final AnimationController controller = AnimationController(
-        vsync: const TestVSync(),
-      );
+    test(
+      'AnimationController animateBack() will throw an error if there is no explicit duration and '
+      'no default duration or reverseDuration',
+      () {
+        final AnimationController controller = AnimationController(
+          vsync: const TestVSync(),
+        );
 
-      late FlutterError error;
-      try {
-        controller.animateBack(0.8);
-      } on FlutterError catch (e) {
-        error = e;
-      }
+        late FlutterError error;
+        try {
+          controller.animateBack(0.8);
+        } on FlutterError catch (e) {
+          error = e;
+        }
 
-      expect(error, isNotNull);
-      expect(
-        error.toStringDeep(),
-        'FlutterError\n'
+        expect(error, isNotNull);
+        expect(
+          error.toStringDeep(),
+          'FlutterError\n'
           '   AnimationController.animateBack() called with no explicit\n'
           '   duration and no default duration or reverseDuration.\n'
           '   Either the "duration" argument to the animateBack() method should\n'
           '   be provided, or the "duration" or "reverseDuration" property\n'
           '   should be set, either in the constructor or later, before calling\n'
-          '   the animateBack() function.\n'
-      );
+          '   the animateBack() function.\n',
+        );
 
-      controller.dispose();
-    });
+        controller.dispose();
+      },
+    );
   });
 
 }

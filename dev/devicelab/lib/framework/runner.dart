@@ -4,60 +4,126 @@
 
 import 'dart:async';
 import 'dart:convert';
+// import 'dart:core' as core;
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'adb.dart';
 import 'cocoon.dart';
+import 'devices.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
+/// Run a list of tasks.
+///
+/// For each task, an auto rerun will be triggered when task fails.
+///
+/// If the task succeeds the first time, it will be recorded as successful.
+///
+/// If the task fails first, but gets passed in the end, the
+/// test will be recorded as successful but with a flake flag.
+///
+/// If the task fails all reruns, it will be recorded as failed.
 Future<void> runTasks(
   List<String> taskNames, {
   bool exitOnFirstTestFailure = false,
   bool silent = false,
-  String deviceId,
-  String gitBranch,
-  String localEngine,
-  String localEngineSrcPath,
-  String luciBuilder,
-  String resultsPath,
-  List<String> taskArgs,
+  String? deviceId,
+  String? gitBranch,
+  String? localEngine,
+  String? localEngineSrcPath,
+  String? luciBuilder,
+  String? resultsPath,
+  List<String>? taskArgs,
+  @visibleForTesting Map<String, String>? isolateParams,
+  @visibleForTesting Function(String) print = print,
+  @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
-    section('Running task "$taskName"');
-    final TaskResult result = await runTask(
-      taskName,
-      deviceId: deviceId,
-      localEngine: localEngine,
-      localEngineSrcPath: localEngineSrcPath,
-      silent: silent,
-      taskArgs: taskArgs,
-    );
-
-    print('Task result:');
-    print(const JsonEncoder.withIndent('  ').convert(result));
-    section('Finished task "$taskName"');
-
-    if (resultsPath != null) {
-      final Cocoon cocoon = Cocoon();
-      await cocoon.writeTaskResultToFile(
-        builderName: luciBuilder,
-        gitBranch: gitBranch,
-        result: result,
+    TaskResult result = TaskResult.success(null);
+    int retry = 0;
+    while (retry <= Cocoon.retryNumber) {
+      result = await rerunTask(
+        taskName,
+        deviceId: deviceId,
+        localEngine: localEngine,
+        localEngineSrcPath: localEngineSrcPath,
+        silent: silent,
+        taskArgs: taskArgs,
         resultsPath: resultsPath,
+        gitBranch: gitBranch,
+        luciBuilder: luciBuilder,
+        isolateParams: isolateParams,
       );
+
+      section('Flaky status for "$taskName"');
+      if (!result.succeeded) {
+        retry++;
+      } else {
+        if (retry > 0) {
+          print('Total ${retry+1} executions: $retry failures and 1 success');
+          print('flaky: true');
+        } else {
+          print('Total ${retry+1} executions: 1 success');
+          print('flaky: false');
+        }
+        break;
+      }
     }
 
     if (!result.succeeded) {
+      print('Total $retry executions: 0 success');
+      print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {
         return;
       }
     }
   }
+}
+
+/// A rerun wrapper for `runTask`.
+///
+/// This separates reruns in separate sections.
+Future<TaskResult> rerunTask(
+  String taskName, {
+  String? deviceId,
+  String? localEngine,
+  String? localEngineSrcPath,
+  bool silent = false,
+  List<String>? taskArgs,
+  String? resultsPath,
+  String? gitBranch,
+  String? luciBuilder,
+  @visibleForTesting Map<String, String>? isolateParams,
+}) async {
+  section('Running task "$taskName"');
+  final TaskResult result = await runTask(
+    taskName,
+    deviceId: deviceId,
+    localEngine: localEngine,
+    localEngineSrcPath: localEngineSrcPath,
+    silent: silent,
+    taskArgs: taskArgs,
+    isolateParams: isolateParams,
+  );
+
+  print('Task result:');
+  print(const JsonEncoder.withIndent('  ').convert(result));
+  section('Finished task "$taskName"');
+
+  if (resultsPath != null) {
+    final Cocoon cocoon = Cocoon();
+    await cocoon.writeTaskResultToFile(
+      builderName: luciBuilder,
+      gitBranch: gitBranch,
+      result: result,
+      resultsPath: resultsPath,
+    );
+  }
+  return result;
 }
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
@@ -73,11 +139,11 @@ Future<void> runTasks(
 Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
-  String localEngine,
-  String localEngineSrcPath,
-  String deviceId,
-  List<String> taskArgs,
-  @visibleForTesting Map<String, String> isolateParams,
+  String? localEngine,
+  String? localEngineSrcPath,
+  String? deviceId,
+  List<String> ?taskArgs,
+  @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -103,9 +169,9 @@ Future<TaskResult> runTask(
 
   bool runnerFinished = false;
 
-  runner.exitCode.whenComplete(() {
+  unawaited(runner.exitCode.whenComplete(() {
     runnerFinished = true;
-  });
+  }));
 
   final Completer<Uri> uri = Completer<Uri>();
 
@@ -114,7 +180,7 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
+      final Uri? serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
       if (serviceUri != null)
         uri.complete(serviceUri);
     }
@@ -136,7 +202,7 @@ Future<TaskResult> runTask(
       'ext.cocoonRunTask',
       args: isolateParams,
       isolateId: result.isolate.id,
-    )).json;
+    )).json!;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;
@@ -165,13 +231,13 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       // Look up the isolate.
       final VmService client = await vmServiceConnectUri(url);
       VM vm = await client.getVM();
-      while (vm.isolates.isEmpty) {
+      while (vm.isolates!.isEmpty) {
         await Future<void>.delayed(const Duration(seconds: 1));
         vm = await client.getVM();
       }
-      final IsolateRef isolate = vm.isolates.first;
+      final IsolateRef isolate = vm.isolates!.first;
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json['response'] != 'ready')
+      if (response.json!['response'] != 'ready')
         throw 'not ready yet';
       return ConnectionResult(client, isolate);
     } catch (error) {
@@ -190,7 +256,7 @@ class ConnectionResult {
 }
 
 /// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log log}) async {
+Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
   final WebSocket socket = await WebSocket.connect(wsUri);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
@@ -204,7 +270,7 @@ Future<VmService> vmServiceConnectUri(String wsUri, {Log log}) async {
         controller.add(data);
       }
     },
-    onError: (dynamic err, StackTrace stackTrace) => controller.addError(err, stackTrace),
+    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
     onDone: () => streamClosedCompleter.complete(),
   );
 

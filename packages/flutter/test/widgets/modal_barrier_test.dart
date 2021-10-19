@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -54,8 +54,7 @@ void main() {
     await tester.pumpWidget(subject);
     await tester.tap(find.text('target'), warnIfMissed: false);
     await tester.pumpWidget(subject);
-    expect(tapped, isFalse,
-      reason: 'because the tap is not prevented by ModalBarrier');
+    expect(tapped, isFalse, reason: 'because the tap is not prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier prevents hover interactions with widgets behind it', (WidgetTester tester) async {
@@ -83,8 +82,7 @@ void main() {
     await gesture.moveTo(const Offset(100, 100));
     await tester.pumpWidget(subject);
 
-    expect(hovered, isFalse,
-      reason: 'because the hover is not prevented by ModalBarrier');
+    expect(hovered, isFalse, reason: 'because the hover is not prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
@@ -99,8 +97,7 @@ void main() {
     await tester.pumpWidget(subject);
     await tester.tap(find.text('target'));
     await tester.pumpWidget(subject);
-    expect(tapped, isTrue,
-      reason: 'because the tap is prevented by ModalBarrier');
+    expect(tapped, isTrue, reason: 'because the tap is prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
@@ -127,8 +124,7 @@ void main() {
       const Offset(-20, 0),
     );
     await tester.pumpWidget(subject);
-    expect(dragged, isTrue,
-      reason: 'because the drag is prevented by ModalBarrier');
+    expect(dragged, isTrue, reason: 'because the drag is prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
@@ -150,22 +146,20 @@ void main() {
     // Move into hoverTarget
     await gesture.moveTo(const Offset(5, 5));
     await tester.pumpWidget(subject);
-    expect(hovered, isTrue,
-      reason: 'because the hover is prevented by ModalBarrier');
+    expect(hovered, isTrue, reason: 'because the hover is prevented by ModalBarrier');
     hovered = false;
 
     // Move out
     await gesture.moveTo(const Offset(100, 100));
     await tester.pumpWidget(subject);
-    expect(hovered, isTrue,
-      reason: 'because the hover is prevented by ModalBarrier');
+    expect(hovered, isTrue, reason: 'because the hover is prevented by ModalBarrier');
     hovered = false;
   });
 
   testWidgets('ModalBarrier plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
     final List<String> playedSystemSounds = <String>[];
     try {
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'SystemSound.play')
           playedSystemSounds.add(methodCall.arguments as String);
       });
@@ -182,7 +176,7 @@ void main() {
       await tester.tap(find.text('target'), warnIfMissed: false);
       await tester.pumpWidget(subject);
     } finally {
-      SystemChannels.platform.setMockMethodCallHandler(null);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     }
     expect(playedSystemSounds, hasLength(1));
     expect(playedSystemSounds[0], SystemSoundType.alert.toString());
@@ -214,8 +208,11 @@ void main() {
     // Release the pointer; the barrier should be dismissed
     await gesture.up();
     await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should have been dismissed by tapping the barrier.');
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.',
+    );
   });
 
   testWidgets('ModalBarrier pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
@@ -245,8 +242,11 @@ void main() {
     // Release the pointer; the barrier should be dismissed
     await gesture.up();
     await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should have been dismissed by tapping the barrier.');
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.',
+    );
   });
 
   testWidgets('ModalBarrier may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
@@ -270,8 +270,11 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should have been dismissed by tapping the barrier.');
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.',
+    );
   });
 
   testWidgets('ModalBarrier does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
@@ -309,8 +312,11 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget,
-      reason: 'The route should still be present if the pop is vetoed.');
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsOneWidget,
+      reason: 'The route should still be present if the pop is vetoed.',
+    );
 
     expect(willPopCalled, isTrue);
   });
@@ -350,8 +356,11 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should not be present if the pop is permitted.');
+    expect(
+      find.byKey(const ValueKey<String>('barrier')),
+      findsNothing,
+      reason: 'The route should not be present if the pop is permitted.',
+    );
 
     expect(willPopCalled, isTrue);
   });
@@ -458,7 +467,7 @@ class SecondWidgetWithCompetence extends StatelessWidget {
           onVerticalDragStart: (_) {},
           behavior: HitTestBehavior.translucent,
           child: Container(),
-        )
+        ),
       ],
     );
   }

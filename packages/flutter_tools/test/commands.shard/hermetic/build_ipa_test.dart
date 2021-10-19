@@ -4,12 +4,14 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -21,7 +23,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
-        String scheme,
+        XcodeProjectBuildContext buildContext,
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
@@ -81,7 +83,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -98,8 +100,6 @@ void main() {
         'COMPILER_INDEX_STORE_ENABLE=NO',
         '-archivePath', '/build/ios/archive/Runner',
         'archive',
-        if (showBuildSettings)
-          '-showBuildSettings',
       ],
       stdout: 'STDOUT STUFF',
       onRun: onRun,
@@ -111,6 +111,8 @@ void main() {
       'xcrun',
       'xcodebuild',
       '-exportArchive',
+      '-allowProvisioningDeviceRegistration',
+      '-allowProvisioningUpdates',
       '-archivePath',
       '/build/ios/archive/Runner.xcarchive',
       '-exportPath',
@@ -155,9 +157,10 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
+    final bool supported = BuildIOSArchiveCommand(verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
-    ), throwsToolExit());
+    ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
@@ -218,12 +221,12 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'ipa', '--no-pub']
     );
+    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(),
-      setUpFakeXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -241,7 +244,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(verbose: true),
-      setUpFakeXcodeBuildHandler(verbose: true, showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -302,7 +304,6 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpFakeXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
@@ -334,7 +335,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           xattrCommand,
           setUpFakeXcodeBuildHandler(),
-          setUpFakeXcodeBuildHandler(showBuildSettings: true),
           exportArchiveCommand,
         ]),
     Platform: () => macosPlatform,

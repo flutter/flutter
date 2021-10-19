@@ -9,7 +9,6 @@ import 'platform.dart';
 import 'terminal.dart';
 
 const String fire = '🔥';
-const String image = '🖼️';
 const int maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
@@ -32,9 +31,13 @@ class CommandHelp {
 
   final OutputPreferences _outputPreferences;
 
+  // COMMANDS IN ALPHABETICAL ORDER.
+  // Uppercase first, then lowercase.
+  // When updating this, update all the tests in command_help_test.dart accordingly.
+
   late final CommandHelpOption I = _makeOption(
     'I',
-    'Toggle oversized image inversion $image.',
+    'Toggle oversized image inversion.',
     'debugInvertOversizedImages',
   );
 
@@ -42,6 +45,11 @@ class CommandHelp {
     'L',
     'Dump layer tree to the console.',
     'debugDumpLayerTree',
+  );
+
+  late final CommandHelpOption M = _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
   );
 
   late final CommandHelpOption P = _makeOption(
@@ -75,7 +83,7 @@ class CommandHelp {
 
   late final CommandHelpOption b = _makeOption(
     'b',
-    'Toggle the platform brightness setting (dark and light mode).',
+    'Toggle platform brightness (dark and light mode).',
     'debugBrightnessOverride',
   );
 
@@ -94,15 +102,25 @@ class CommandHelp {
     'Run source code generators.'
   );
 
-  late final CommandHelpOption h = _makeOption(
+  late final CommandHelpOption hWithDetails = _makeOption(
     'h',
     'Repeat this help message.',
+  );
+
+  late final CommandHelpOption hWithoutDetails = _makeOption(
+    'h',
+    'List all available interactive commands.',
   );
 
   late final CommandHelpOption i = _makeOption(
     'i',
     'Toggle widget inspector.',
     'WidgetsApp.showWidgetInspectorOverride',
+  );
+
+  late final CommandHelpOption k = _makeOption(
+    'k',
+    'Toggle CanvasKit rendering.',
   );
 
   late final CommandHelpOption o = _makeOption(
@@ -138,26 +156,19 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
+  late final CommandHelpOption v = _makeOption(
+    'v',
+    'Open Flutter DevTools.',
+  );
+
   late final CommandHelpOption w = _makeOption(
     'w',
     'Dump widget hierarchy to the console.',
     'debugDumpApp',
   );
 
-  late final CommandHelpOption z = _makeOption(
-    'z',
-    'Toggle elevation checker.',
-  );
-
-  late final CommandHelpOption k = _makeOption(
-    'k',
-    'Toggle CanvasKit rendering.',
-  );
-
-  late final CommandHelpOption M = _makeOption(
-    'M',
-    'Write SkSL shaders to a unique file in the project directory.',
-  );
+  // When updating the list above, see the notes above the list regarding order
+  // and tests.
 
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',

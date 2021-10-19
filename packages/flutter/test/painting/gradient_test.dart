@@ -801,7 +801,7 @@ void main() {
           child: RepaintBoundary(
             key: painterKey,
             child: CustomPaint(
-              painter: GradientPainter(shader, rect)
+              painter: GradientPainter(shader, rect),
             ),
           ),
         ),
@@ -816,7 +816,7 @@ void main() {
       for (final Gradient gradient in gradients45) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
 
@@ -824,7 +824,7 @@ void main() {
       for (final Gradient gradient in gradients90) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
-        }, skip: isBrowser); // https://github.com/flutter/flutter/issues/41389
+        });
       }
     });
   });

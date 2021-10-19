@@ -18,15 +18,27 @@
           },
           "label": {
             "description": "A more descriptive, user-friendly label for the device.",
-            "type": "string"
+            "type": "string",
+            "default": "",
+            "required": false
           },
           "sdkNameAndVersion": {
             "description": "Additional information about the device. For other devices, this is the SDK (for example Android SDK, Windows SDK) name and version.",
-            "type": "string"
+            "type": "string",
+            "default": "",
+            "required": false
           },
-          "disabled": {
-            "description": "If true, this device will be ignored completely by the flutter SDK and none of the commands configured will be called. You can use this as a way to comment out device configs you're still working on, for example.",
-            "type": "boolean"
+          "enabled": {
+            "description": "If false, this device will be ignored completely by the flutter SDK and none of the commands configured will be called. You can use this as a way to comment out device configs you're still working on, for example.",
+            "type": "boolean",
+            "default": true,
+            "required": false
+          },
+          "platform": {
+            "description": "The platform of the target device.",
+            "enum": ["linux-arm64", "linux-x64"],
+            "default": "linux-arm64",
+            "required": false
           },
           "ping": {
             "description": "The command to be invoked to ping the device. Used to find out whether its available or not. Every exit code unequal 0 will be treated as \"unavailable\". On Windows, consider providing a \"pingSuccessRegex\" since Windows' ping will also return 0 on failure. Make sure the command times out internally since it's not guaranteed the flutter SDK will enforce a timeout itself.",
@@ -43,7 +55,7 @@
             "description": "When the output of the ping command matches this regex (and the ping command finished with exit code 0), the ping will be considered successful and the pinged device reachable. If this regex is not provided the ping command will be considered successful when it returned with exit code 0. The regex syntax is the standard dart syntax.",
             "type": ["string", "null"],
             "format": "regex",
-            "default": "ms TTL=",
+            "default": "[<=]\\d+ms",
             "required": false
           },
           "postBuild": {
@@ -106,6 +118,18 @@
             "type": ["string", "null"],
             "format": "regex",
             "default": "Linux",
+            "required": false
+          },
+          "screenshot": {
+            "description": "Take a screenshot of the app as a png image. This command should take the screenshot, convert it to png, then base64 encode it and echo to stdout. Any stderr output will be ignored. If this command is not given, screenshotting will be disabled for this device.",
+            "type": ["array", "null"],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "default": [
+              "ssh", "pi@raspberrypi", "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+            ],
             "required": false
           }
         }

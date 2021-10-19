@@ -94,7 +94,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// unnecessary memory usage for images. Callers that wish to display an image
   /// above its native resolution should prefer scaling the canvas the image is
   /// drawn into.
-  Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
+  Future<ui.Codec> instantiateImageCodec(
+    Uint8List bytes, {
     int? cacheWidth,
     int? cacheHeight,
     bool allowUpscaling = false,

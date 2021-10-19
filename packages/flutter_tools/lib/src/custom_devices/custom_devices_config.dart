@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
@@ -23,44 +21,62 @@ class CustomDevicesConfig {
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
   CustomDevicesConfig({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform
-  }) : _fileSystem = fileSystem,
-       _config = Config(
+    required Platform platform,
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _configLoader = (() => Config.managed(
          _kCustomDevicesConfigName,
          fileSystem: fileSystem,
          logger: logger,
          platform: platform,
-         deleteFileOnFormatException: false
-       )
-  {
-    ensureFileExists();
-  }
+       ));
 
   @visibleForTesting
   CustomDevicesConfig.test({
-    @required FileSystem fileSystem,
-    Directory directory,
-    @required Logger logger
-  }) : _fileSystem = fileSystem,
-       _config = Config.test(
+    required FileSystem fileSystem,
+    required Logger logger,
+    Directory? directory,
+    Platform? platform,
+  }) : _platform = platform ?? FakePlatform(),
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
          directory: directory,
          logger: logger,
-         deleteFileOnFormatException: false
-       )
-  {
-    ensureFileExists();
-  }
+         managed: true
+       ));
 
   static const String _kCustomDevicesConfigName = 'custom_devices.json';
   static const String _kCustomDevicesConfigKey = 'custom-devices';
   static const String _kSchema = r'$schema';
   static const String _kCustomDevices = 'custom-devices';
 
+  final Platform _platform;
   final FileSystem _fileSystem;
-  final Config _config;
+  final Logger _logger;
+  final Config Function() _configLoader;
+
+  // When the custom devices feature is disabled, CustomDevicesConfig is
+  // constructed anyway. So loading the config in the constructor isn't a good
+  // idea. (The Config ctor logs any errors)
+  //
+  // I also didn't want to introduce a FeatureFlags argument to the constructor
+  // and conditionally load the config when the feature is enabled, because
+  // sometimes we need that Config object even when the feature is disabled.
+  // For example inside ensureFileExists, which is used when enabling
+  // the feature.
+  //
+  // Instead, users of this config should handle the feature flags. So for
+  // example don't get [devices] when the feature is disabled.
+  Config? __config;
+  Config get _config {
+    __config ??= _configLoader();
+    return __config!;
+  }
 
   String get _defaultSchema {
     final Uri uri = _fileSystem
@@ -86,28 +102,123 @@ class CustomDevicesConfig {
   void ensureFileExists() {
     if (!_fileSystem.file(_config.configPath).existsSync()) {
       _config.setValue(_kSchema, _defaultSchema);
-      _config.setValue(_kCustomDevices, <dynamic>[CustomDeviceConfig.example.toJson()]);
+      _config.setValue(_kCustomDevices, <dynamic>[
+        CustomDeviceConfig.getExampleForPlatform(_platform).toJson(),
+      ]);
     }
+  }
+
+  List<dynamic>? _getDevicesJsonValue() {
+    final dynamic json = _config.getValue(_kCustomDevicesConfigKey);
+
+    if (json == null) {
+      return null;
+    } else if (json is! List) {
+      const String msg = "Could not load custom devices config. config['$_kCustomDevicesConfigKey'] is not a JSON array.";
+      _logger.printError(msg);
+      throw const CustomDeviceRevivalException(msg);
+    }
+
+    return json;
   }
 
   /// Get the list of [CustomDeviceConfig]s that are listed in the config file
   /// including disabled ones.
   ///
-  /// Returns an empty list when the config could not be loaded.
+  /// Throws an Exception when the config could not be loaded and logs any
+  /// errors.
   List<CustomDeviceConfig> get devices {
-    final dynamic json = _config.getValue(_kCustomDevicesConfigKey);
-
-    if (json == null) {
+    final List<dynamic>? typedListNullable = _getDevicesJsonValue();
+    if (typedListNullable == null) {
       return <CustomDeviceConfig>[];
     }
 
-    final List<dynamic> typedList = json as List<dynamic>;
+    final List<dynamic> typedList = typedListNullable;
+    final List<CustomDeviceConfig> revived = <CustomDeviceConfig>[];
+    for (final MapEntry<int, dynamic> entry in typedList.asMap().entries) {
+      try {
+        revived.add(CustomDeviceConfig.fromJson(entry.value));
+      } on CustomDeviceRevivalException catch (e) {
+        final String msg = 'Could not load custom device from config index ${entry.key}: $e';
+        _logger.printError(msg);
+        throw CustomDeviceRevivalException(msg);
+      }
+    }
 
-    return typedList.map((dynamic e) => CustomDeviceConfig.fromJson(e)).toList();
+    return revived;
   }
 
-  // We don't have a setter for devices here because we don't need it and
-  // it also may overwrite any things done by the user that aren't explicitly
-  // tracked by the JSON-representation. For example comments (not possible right now,
-  // but they'd be useful so maybe in the future) or formatting.
+  /// Get the list of [CustomDeviceConfig]s that are listed in the config file
+  /// including disabled ones.
+  ///
+  /// Returns an empty list when the config could not be loaded and logs any
+  /// errors.
+  List<CustomDeviceConfig> tryGetDevices() {
+    try {
+      return devices;
+    } on Exception {
+      // any Exceptions are logged by [devices] already.
+      return <CustomDeviceConfig>[];
+    }
+  }
+
+  /// Set the list of [CustomDeviceConfig]s in the config file.
+  ///
+  /// It should generally be avoided to call this often, since this could mean
+  /// data loss. If you want to add or remove a device from the config,
+  /// consider using [add] or [remove].
+  set devices(List<CustomDeviceConfig> configs) {
+    _config.setValue(
+      _kCustomDevicesConfigKey,
+      configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+    );
+  }
+
+  /// Add a custom device to the config file.
+  ///
+  /// Works even when some of the custom devices in the config file are not
+  /// valid.
+  ///
+  /// May throw a [CustomDeviceRevivalException] if `config['custom-devices']`
+  /// is not a list.
+  void add(CustomDeviceConfig config) {
+    _config.setValue(
+      _kCustomDevicesConfigKey,
+      <dynamic>[
+        ...?_getDevicesJsonValue(),
+        config.toJson()
+      ]
+    );
+  }
+
+  /// Returns true if the config file contains a device with id [deviceId].
+  bool contains(String deviceId) {
+    return devices.any((CustomDeviceConfig device) => device.id == deviceId);
+  }
+
+  /// Removes the first device with this device id from the config file.
+  ///
+  /// Returns true if the device was successfully removed, false if a device
+  /// with this id could not be found.
+  bool remove(String deviceId) {
+    final List<CustomDeviceConfig> modifiedDevices = devices;
+
+    // we use this instead of filtering so we can detect if we actually removed
+    // anything.
+    final CustomDeviceConfig? device = modifiedDevices
+      .cast<CustomDeviceConfig?>()
+      .firstWhere((CustomDeviceConfig? d) => d!.id == deviceId,
+      orElse: () => null
+    );
+
+    if (device == null) {
+      return false;
+    }
+
+    modifiedDevices.remove(device);
+    devices = modifiedDevices;
+    return true;
+  }
+
+  String get configPath => _config.configPath;
 }

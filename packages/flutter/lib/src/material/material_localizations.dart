@@ -448,7 +448,7 @@ abstract class MaterialLocalizations {
   /// Tooltip used to put the time picker into [TimePickerEntryMode.input].
   String get inputTimeModeButtonLabel;
 
-  /// The semantics label used to indicate which account is signed in in the
+  /// The semantics label used to indicate which account is signed in the
   /// [UserAccountsDrawerHeader] widget.
   String get signedInLabel;
 

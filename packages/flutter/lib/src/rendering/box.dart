@@ -497,7 +497,7 @@ class BoxConstraints extends Constraints {
   ///
   /// Most of the APIs on BoxConstraints expect the constraints to be
   /// normalized and have undefined behavior when they are not. In
-  /// checked mode, many of these APIs will assert if the constraints
+  /// debug mode, many of these APIs will assert if the constraints
   /// are not normalized.
   @override
   bool get isNormalized {
@@ -695,7 +695,7 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// The `position` argument may be null, which will be forwarded to the
   /// `hitTest` callback as-is. Using null as the position can be useful if
-  /// the child speaks a different hit test protocol then the parent and the
+  /// the child speaks a different hit test protocol than the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
   /// The function returns the return value of the `hitTest` callback.
@@ -706,7 +706,6 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// ```dart
   /// abstract class RenderFoo extends RenderBox {
-  ///
   ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
   ///
   ///   @override
@@ -1861,7 +1860,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
-  /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
+  /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
   Size computeDryLayout(BoxConstraints constraints) {
@@ -1942,7 +1941,7 @@ abstract class RenderBox extends RenderObject {
             'otherwise, the only object that is allowed to read RenderBox.size '
             'is its parent, if they have said they will. It you hit this assert '
             'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            'that child\'s layout().',
+            "that child's layout().",
           );
         }
         assert(_size == this._size);
@@ -1952,7 +1951,7 @@ abstract class RenderBox extends RenderObject {
     return _size!;
   }
   Size? _size;
-  /// Setting the size, in checked mode, triggers some analysis of the render box,
+  /// Setting the size, in debug mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
   @protected
@@ -2209,7 +2208,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
         ]);
-     }
+      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size!)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2273,7 +2272,7 @@ abstract class RenderBox extends RenderObject {
         // Checking that getDryLayout computes the same size.
         _dryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
-        late Size dryLayoutSize;
+        final Size dryLayoutSize;
         try {
           dryLayoutSize = getDryLayout(constraints);
         } finally {
@@ -2323,9 +2322,9 @@ abstract class RenderBox extends RenderObject {
 
   /// {@macro flutter.rendering.RenderObject.performResize}
   ///
-  /// By default this method calls [getDryLayout] with the current
-  /// [constraints]. Instead of overriding this method, consider overriding
-  /// [computeDryLayout] (the backend implementation of [getDryLayout]).
+  /// By default this method sets [size] to the result of [computeDryLayout]
+  /// called with the current [constraints]. Instead of overriding this method,
+  /// consider overriding [computeDryLayout].
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true

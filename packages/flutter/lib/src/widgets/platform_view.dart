@@ -345,6 +345,7 @@ class HtmlElementView extends StatelessWidget {
   const HtmlElementView({
     Key? key,
     required this.viewType,
+    this.onPlatformViewCreated,
   }) : assert(viewType != null),
        assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.'),
        super(key: key);
@@ -353,6 +354,11 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
+
+  /// Callback to invoke after the platform view has been created.
+  ///
+  /// May be null.
+  final PlatformViewCreatedCallback? onPlatformViewCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -372,7 +378,10 @@ class HtmlElementView extends StatelessWidget {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
     final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
-    controller._initialize().then((_) { params.onPlatformViewCreated(params.id); });
+    controller._initialize().then((_) {
+      params.onPlatformViewCreated(params.id);
+      onPlatformViewCreated?.call(params.id);
+    });
     return controller;
   }
 }
@@ -537,7 +546,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      _id,
+      <String, dynamic>{'platformViewId': _id, 'usesVirtualDisplay': true},
     ).catchError((dynamic e) {
       if (e is MissingPluginException) {
         // We land the framework part of Android platform views keyboard
@@ -893,9 +902,13 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      <String, dynamic>{'platformViewId': _id},
+    );
   }
 
-  void _handlePlatformFocusChanged(bool isFocused){
+  void _handlePlatformFocusChanged(bool isFocused) {
     if (isFocused) {
       _focusNode!.requestFocus();
     }

@@ -45,9 +45,9 @@ void main() {
       // equality check on the error to be true.
       final Error error = Error();
       expect(
-          AsyncSnapshot<int>.withError(ConnectionState.done, error),
-          AsyncSnapshot<int>.withError(
-              ConnectionState.done, error, StackTrace.empty));
+        AsyncSnapshot<int>.withError(ConnectionState.done, error),
+        AsyncSnapshot<int>.withError(ConnectionState.done, error, StackTrace.empty),
+      );
     });
   });
   group('Async smoke tests', () {
@@ -67,7 +67,7 @@ void main() {
     });
     testWidgets('StreamFold', (WidgetTester tester) async {
       await tester.pumpWidget(StringCollector(
-        stream: Stream<String>.fromIterable(<String>['hello', 'world'])
+        stream: Stream<String>.fromIterable(<String>['hello', 'world']),
       ));
       await eventFiring(tester);
     });
@@ -164,6 +164,24 @@ void main() {
         initialData: 'Ignored',
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, I, null, null)'), findsOneWidget);
+    });
+    testWidgets('debugRethrowError rethrows caught error', (WidgetTester tester) async {
+      FutureBuilder.debugRethrowError = true;
+      final Completer<void> caughtError = Completer<void>();
+      await runZonedGuarded(() async {
+        final Completer<String> completer = Completer<String>();
+        await tester.pumpWidget(FutureBuilder<String>(
+          future: completer.future,
+          builder: snapshotText,
+        ), const Duration(seconds: 1));
+        completer.completeError('bad');
+      }, (Object error, StackTrace stack) {
+        expectSync(error, equals('bad'));
+        caughtError.complete();
+      });
+      await tester.pumpAndSettle();
+      expectSync(caughtError.isCompleted, isTrue);
+      FutureBuilder.debugRethrowError = false;
     });
   });
   group('StreamBuilder', () {

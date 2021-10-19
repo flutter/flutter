@@ -118,7 +118,7 @@ class AppContext {
     if (value == null && _parent != null) {
       value = _parent!.get<T>();
     }
-    return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
+    return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T?;
   }
 
   /// Runs [body] in a child context and returns the value returned by [body].

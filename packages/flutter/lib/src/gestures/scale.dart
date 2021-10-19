@@ -64,7 +64,7 @@ class ScaleStartDetails {
   ///
   /// Typically this is the number of fingers being used to pan the widget using the gesture
   /// recognizer.
- final int pointerCount;
+  final int pointerCount;
 
   @override
   String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
@@ -85,12 +85,20 @@ class ScaleUpdateDetails {
     this.verticalScale = 1.0,
     this.rotation = 0.0,
     this.pointerCount = 0,
+    this.delta = Offset.zero,
   }) : assert(focalPoint != null),
+       assert(delta != null),
        assert(scale != null && scale >= 0.0),
        assert(horizontalScale != null && horizontalScale >= 0.0),
        assert(verticalScale != null && verticalScale >= 0.0),
        assert(rotation != null),
        localFocalPoint = localFocalPoint ?? focalPoint;
+
+  /// The amount the pointer has moved in the coordinate space of the event
+  /// receiver since the previous update.
+  ///
+  /// Defaults to zero if not specified in the constructor.
+  final Offset delta;
 
   /// The focal point of the pointers in contact with the screen.
   ///
@@ -212,7 +220,7 @@ bool _isFlingGesture(Velocity velocity) {
 ///
 /// [_LineBetweenPointers] is an abstraction of a line between two pointers in
 /// contact with the screen. Used to track the rotation of a scale gesture.
-class _LineBetweenPointers{
+class _LineBetweenPointers {
 
   /// Creates a [_LineBetweenPointers]. None of the [pointerStartLocation], [pointerStartId]
   /// [pointerEndLocation] and [pointerEndId] must be null. [pointerStartId] and [pointerEndId]
@@ -247,13 +255,22 @@ class _LineBetweenPointers{
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///
-  /// {@macro flutter.gestures.GestureRecognizer.kind}
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   ScaleGestureRecognizer({
     Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
     PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
   }) : assert(dragStartBehavior != null),
-       super(debugOwner: debugOwner, kind: kind);
+       super(
+         debugOwner: debugOwner,
+         kind: kind,
+         supportedDevices: supportedDevices,
+       );
 
   /// Determines what point is used as the starting point in all calculations
   /// involving this gesture.
@@ -273,7 +290,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   DragStartBehavior dragStartBehavior;
 
@@ -285,7 +302,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
   ///   which provides more information about the gesture arena.
   GestureScaleStartCallback? onStart;
 
@@ -341,8 +358,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
@@ -441,7 +458,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerEndId: _pointerQueue[1],
         pointerEndLocation: _pointerLocations[_pointerQueue[1]]!,
       );
-      _currentLine = null;
+      _currentLine = _initialLine;
     }
   }
 
@@ -499,6 +516,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           rotation: _computeRotationFactor(),
           pointerCount: _pointerQueue.length,
+          delta: _currentFocalPoint - _initialFocalPoint,
         ));
       });
   }
