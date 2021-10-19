@@ -115,54 +115,54 @@ void main() {
   testWithoutContext('flutter test should run a test when its name matches a regexp', () async {
     final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--name', 'inc.*de']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should run a test when its name contains a string', () async {
     final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--plain-name', 'include']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should run a test with a given tag', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--tags', 'include-tag']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should not run a test with excluded tag', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--exclude-tags', 'exclude-tag']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should run all tests when tags are unspecified', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory);
-    expect(result.stdout, contains(RegExp(r'\+\d+ -1: Some tests failed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+ -1: Some tests failed\.')));
     expect(result.exitCode, 1);
   });
 
   testWithoutContext('flutter test should run a widgetTest with a given tag', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag_widget', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--tags', 'include-tag']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should not run a widgetTest with excluded tag', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag_widget', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--exclude-tags', 'exclude-tag']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
     expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should run all widgetTest when tags are unspecified', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag_widget', automatedTestsDirectory, flutterTestDirectory);
-    expect(result.stdout, contains(RegExp(r'\+\d+ -1: Some tests failed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+ -1: Some tests failed\.')));
     expect(result.exitCode, 1);
   });
 
@@ -170,7 +170,7 @@ void main() {
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--verbose']);
     final String stdout = (result.stdout as String).replaceAll('\r', '\n');
-    expect(stdout, contains('+1: All tests passed'));
+    expect(stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
     expect(stdout, contains('test 0: Starting flutter_tester process with command'));
     expect(stdout, contains('test 0: deleting temporary directory'));
     expect(stdout, contains('test 0: finished'));
@@ -185,7 +185,7 @@ void main() {
     final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, '$flutterTestDirectory/child_directory',
       extraArguments: const <String>['--verbose']);
     final String stdout = (result.stdout as String).replaceAll('\r', '\n');
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed')));
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
     expect(stdout, contains('test 0: Starting flutter_tester process with command'));
     expect(stdout, contains('test 0: deleting temporary directory'));
     expect(stdout, contains('test 0: finished'));

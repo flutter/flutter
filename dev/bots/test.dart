@@ -61,7 +61,6 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
-bool skipSmokeTest = false;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
@@ -171,6 +170,7 @@ Future<void> main(List<String> args) async {
   try {
     flutterTestArgs.addAll(args);
     final Set<String> removeArgs = <String>{};
+    bool runSmokeTests = true;
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
@@ -182,8 +182,8 @@ Future<void> main(List<String> args) async {
         _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
         removeArgs.add(arg);
       }
-      if (arg.startsWith('--skip-smoke-test')) {
-        skipSmokeTest = true;
+      if (arg.startsWith('--no-smoke-tests')) {
+        runSmokeTests = false;
         removeArgs.add(arg);
       }
     }
@@ -191,7 +191,9 @@ Future<void> main(List<String> args) async {
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
-    await _runSmokeTests();
+    if (runSmokeTests) {
+      await _runSmokeTests();
+    }
     print('═' * 80);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
@@ -244,9 +246,6 @@ Future<void> _validateEngineHash() async {
 }
 
 Future<void> _runSmokeTests() async {
-  if (skipSmokeTest) {
-    return;
-  }
   print('${green}Running smoketests...$reset');
 
   await _validateEngineHash();

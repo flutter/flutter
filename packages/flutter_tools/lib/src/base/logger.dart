@@ -54,7 +54,10 @@ abstract class Logger {
   bool hadWarningOutput = false;
 
   /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
-  /// [hadWarningOutput] is true.
+  /// [hadWarningOutput] or [hadErrorOutput] is true.
+  ///
+  /// In other words, setting `warningsAreFatal` implies that [errorsAreFatal]
+  /// is also true.
   bool warningsAreFatal = false;
 
   /// Returns the terminal attached to this logger.
@@ -199,11 +202,13 @@ abstract class Logger {
   /// Clears all output.
   void clear();
 
-  /// Causes the logger to check if either [hadErrorOutput] and/or
-  /// [hadWarningOutput] are true and call [throwToolExit] if [errorsAreFatal]
-  /// or [warningsAreFatal] are also true, respectively.
+  /// Causes the logger to check if [hadErrorOutput] is set, and call
+  /// [throwToolExit] if [errorsAreFatal] is also true. Or, if either
+  /// [hadWarningOutput] or [hadErrorOutput] is true, and [warningsAreFatal] is
+  /// set, then to call [throwToolExit].
   void checkForFatalLogs() {
-    if ((warningsAreFatal && hadWarningOutput) || (errorsAreFatal && hadErrorOutput)) {
+    if ((warningsAreFatal && (hadWarningOutput || hadErrorOutput)) ||
+        (errorsAreFatal && hadErrorOutput)) {
       throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
           'during the run, and --fatal-logger-output is enabled.');
     }
@@ -899,7 +904,7 @@ class VerboseLogger extends DelegatingLogger {
         super.printStatus(prefix + terminal.bolden(indentMessage));
         break;
       case _LogType.trace:
-        super.printStatus(prefix + indentMessage);
+        super.printTrace(prefix + indentMessage);
         break;
     }
   }

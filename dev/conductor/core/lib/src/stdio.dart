@@ -10,6 +10,8 @@ abstract class Stdio {
   final List<String> logs = <String>[];
 
   /// Error messages printed to STDERR.
+  ///
+  /// Calls to printError are typically (eventually) followed with a call to `toolExit`, explaining
   @mustCallSuper
   void printError(String message) {
     logs.add('[error] $message');

@@ -164,6 +164,7 @@ class Cache {
 
   late final ArtifactUpdater _artifactUpdater = _createUpdater();
 
+  @visibleForTesting
   @protected
   void registerArtifact(ArtifactSet artifactSet) {
     _artifacts.add(artifactSet);
