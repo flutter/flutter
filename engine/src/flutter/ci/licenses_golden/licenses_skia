@@ -1,4 +1,4 @@
-Signature: 20a02844011ed87b96f4933ab8137810
+Signature: a3e5153d3b6618f23044fda896450455
 
 UNUSED LICENSES:
 
@@ -1942,8 +1942,6 @@ FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.h
-FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLIRGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMain.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryLayout.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
@@ -2302,6 +2300,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformDataManager.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformDataManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Rect.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.cpp
@@ -4128,6 +4128,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlRenderCommandEncoder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTrampoline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlUtils.mm
