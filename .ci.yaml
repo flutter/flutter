@@ -715,7 +715,9 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    timeout: 60
+    enabled_branches:
+      - main
+      - master
     properties:
       tags: >
         ["framework","hostonly","shard"]
