@@ -387,7 +387,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
       'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, '
       'then update ${gradleFile.path}:\n'
       "ext.kotlin_version = '<latest-version>'",
-      indent: 4
+      indent: 4,
     );
     return GradleBuildStatus.exit;
   },
