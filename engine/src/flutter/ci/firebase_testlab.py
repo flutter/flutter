@@ -23,7 +23,7 @@ def RunFirebaseTest(apk, results_dir):
   # This type of test will give the application a handle to a file, and
   # we'll write the timeline JSON to that file.
   # See https://firebase.google.com/docs/test-lab/android/game-loop
-  # Pixel 4. As of this commit, this is a highly available device in FTL.
+  # Pixel 5. As of this commit, this is a highly available device in FTL.
   process = subprocess.Popen(
     [
       'gcloud',
@@ -34,7 +34,7 @@ def RunFirebaseTest(apk, results_dir):
       '--timeout', '2m',
       '--results-bucket', bucket,
       '--results-dir', results_dir,
-      '--device', 'model=flame,version=29',
+      '--device', 'model=redfin,version=30',
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
