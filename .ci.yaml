@@ -6,6 +6,7 @@
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
 enabled_branches:
+  - flutter-2.7-candidate.3
   - master
   - dev
   - beta
