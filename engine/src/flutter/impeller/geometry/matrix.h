@@ -5,8 +5,10 @@
 #pragma once
 
 #include <cmath>
+#include <optional>
 #include <utility>
 
+#include "impeller/geometry/matrix_decomposition.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/scalar.h"
@@ -35,28 +37,6 @@ struct Matrix {
     Vector4 vec[4];
   };
 
-  struct Decomposition {
-    Vector3 translation;
-    Vector3 scale;
-    Shear shear;
-    Vector4 perspective;
-    Quaternion rotation;
-
-    enum class Component {
-      kTranslation = 1 << 0,
-      kScale = 1 << 1,
-      kShear = 1 << 2,
-      kPerspective = 1 << 3,
-      kRotation = 1 << 4,
-    };
-
-    uint64_t GetComponentsMask() const;
-  };
-
-  // TODO(csg): Radar restrictions of C++11 don't exist. Use optionals instead.
-  using DecompositionResult =
-      std::pair<bool /* success */, Decomposition /* result */>;
-
   //----------------------------------------------------------------------------
   /// Construts a default identity matrix.
   ///
@@ -79,7 +59,7 @@ struct Matrix {
             Vector4(m12, m13, m14, m15)} {}
   // clang-format on
 
-  Matrix(const Decomposition& decomposition);
+  Matrix(const MatrixDecomposition& decomposition);
 
   static constexpr Matrix MakeTranslation(const Vector3& t) {
     // clang-format off
@@ -243,7 +223,7 @@ struct Matrix {
     );
   }
 
-  DecompositionResult Decompose() const;
+  std::optional<MatrixDecomposition> Decompose() const;
 
   constexpr bool operator==(const Matrix& m) const {
     // clang-format off

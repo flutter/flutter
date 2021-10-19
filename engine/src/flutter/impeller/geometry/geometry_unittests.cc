@@ -64,9 +64,9 @@ TEST(GeometryTest, TestDecomposition) {
 
   auto result = rotated.Decompose();
 
-  ASSERT_TRUE(result.first);
+  ASSERT_TRUE(result.has_value());
 
-  Matrix::Decomposition res = result.second;
+  MatrixDecomposition res = result.value();
 
   auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
   ASSERT_QUATERNION_NEAR(res.rotation, quaternion);
@@ -79,9 +79,9 @@ TEST(GeometryTest, TestDecomposition2) {
 
   auto result = (translated * rotated * scaled).Decompose();
 
-  ASSERT_TRUE(result.first);
+  ASSERT_TRUE(result.has_value());
 
-  Matrix::Decomposition res = result.second;
+  MatrixDecomposition res = result.value();
 
   auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
 
@@ -104,9 +104,9 @@ TEST(GeometryTest, TestRecomposition) {
 
   auto result = rotated.Decompose();
 
-  ASSERT_TRUE(result.first);
+  ASSERT_TRUE(result.has_value());
 
-  Matrix::Decomposition res = result.second;
+  MatrixDecomposition res = result.value();
 
   auto quaternion = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
 
@@ -125,9 +125,9 @@ TEST(GeometryTest, TestRecomposition2) {
 
   auto result = matrix.Decompose();
 
-  ASSERT_TRUE(result.first);
+  ASSERT_TRUE(result.has_value());
 
-  ASSERT_MATRIX_NEAR(matrix, Matrix{result.second});
+  ASSERT_MATRIX_NEAR(matrix, Matrix{result.value()});
 }
 
 TEST(GeometryTest, QuaternionLerp) {

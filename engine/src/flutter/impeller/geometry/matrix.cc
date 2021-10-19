@@ -9,7 +9,7 @@
 
 namespace impeller {
 
-Matrix::Matrix(const Decomposition& d) : Matrix() {
+Matrix::Matrix(const MatrixDecomposition& d) : Matrix() {
   /*
    *  Apply perspective.
    */
@@ -197,14 +197,14 @@ Scalar Matrix::GetDeterminant() const {
  *  Adapted for Impeller from Graphics Gems:
  *  http://www.realtimerendering.com/resources/GraphicsGems/gemsii/unmatrix.c
  */
-Matrix::DecompositionResult Matrix::Decompose() const {
+std::optional<MatrixDecomposition> Matrix::Decompose() const {
   /*
    *  Normalize the matrix.
    */
   Matrix self = *this;
 
   if (self.e[3][3] == 0) {
-    return {false, {}};
+    return std::nullopt;
   }
 
   for (int i = 0; i < 4; i++) {
@@ -225,10 +225,10 @@ Matrix::DecompositionResult Matrix::Decompose() const {
   perpectiveMatrix.e[3][3] = 1;
 
   if (perpectiveMatrix.GetDeterminant() == 0.0) {
-    return {false, {}};
+    return std::nullopt;
   }
 
-  Decomposition result;
+  MatrixDecomposition result;
 
   /*
    *  ==========================================================================
@@ -355,10 +355,10 @@ Matrix::DecompositionResult Matrix::Decompose() const {
     result.rotation.z = -result.rotation.z;
   }
 
-  return DecompositionResult(true, result);
+  return result;
 }
 
-uint64_t Matrix::Decomposition::GetComponentsMask() const {
+uint64_t MatrixDecomposition::GetComponentsMask() const {
   uint64_t mask = 0;
 
   Quaternion noRotation(0.0, 0.0, 0.0, 1.0);
