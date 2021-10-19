@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -53,8 +54,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// The current platform configuration.
   @override
   ui.PlatformConfiguration get configuration => _configuration;
-  ui.PlatformConfiguration _configuration =
-      ui.PlatformConfiguration(locales: parseBrowserLanguages());
+  ui.PlatformConfiguration _configuration = ui.PlatformConfiguration(
+    locales: parseBrowserLanguages(),
+    textScaleFactor: findBrowserTextScaleFactor(),
+  );
 
   /// Receives all events related to platform configuration changes.
   @override
@@ -1075,4 +1078,42 @@ void invoke3<A1, A2, A3>(void Function(A1 a1, A2 a2, A3 a3)? callback,
       callback(arg1, arg2, arg3);
     });
   }
+}
+
+const double _defaultRootFontSize = 16.0;
+
+/// Finds the text scale factor of the browser by looking at the computed style
+/// of the browser's <html> element.
+double findBrowserTextScaleFactor() {
+  final num fontSize = _parseFontSize(html.document.documentElement!) ?? _defaultRootFontSize;
+  return fontSize / _defaultRootFontSize;
+}
+
+/// Parses the font size of [element] and returns the value without a unit.
+num? _parseFontSize(html.Element element) {
+  num? fontSize;
+
+  if (js_util.hasProperty(element, 'computedStyleMap')) {
+    // Use the newer `computedStyleMap` API available on some browsers.
+    final dynamic computedStyleMap =
+        // ignore: implicit_dynamic_function
+        js_util.callMethod(element, 'computedStyleMap', <Object?>[]);
+    if (computedStyleMap is Object) {
+      final dynamic fontSizeObject =
+          // ignore: implicit_dynamic_function
+          js_util.callMethod(computedStyleMap, 'get', <Object?>['font-size']);
+      if (fontSizeObject is Object) {
+        // ignore: implicit_dynamic_function
+        fontSize = js_util.getProperty(fontSizeObject, 'value') as num;
+      }
+    }
+  }
+
+  if (fontSize == null) {
+    // Fallback to `getComputedStyle`.
+    final String fontSizeString = element.getComputedStyle().fontSize;
+    fontSize = parseFloat(fontSizeString);
+  }
+
+  return fontSize;
 }
