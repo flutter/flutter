@@ -31,8 +31,8 @@ class TooltipVisibility extends StatelessWidget {
   /// Both arguments must not be null.
   const TooltipVisibility({
     Key? key,
-    required this.child,
     required this.visible,
+    required this.child,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -56,8 +56,8 @@ class TooltipVisibility extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TooltipVisibilityScope(
-      child: child,
       visible: visible,
+      child: child,
     );
   }
 }
