@@ -32,8 +32,8 @@ impeller_component("entity") {
   deps = [ ":entity_shaders" ]
 
   public_deps = [
-    "../compositor",
     "../image",
+    "../renderer",
   ]
 }
 
