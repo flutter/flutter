@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
