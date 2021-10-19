@@ -151,7 +151,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
 
-    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 1950);
+    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 2000);
     await tester.pumpAndSettle();
 
     expectedSemantics = TestSemantics.root(

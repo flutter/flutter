@@ -881,7 +881,7 @@ class KeyEventManager {
     for (final PhysicalKeyboardKey key in physicalKeysPressed.difference(_rawKeyboard.physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyUpEvent(
         physicalKey: key,
-        logicalKey: _hardwareKeyboard.lookUpLayout(physicalKey)!,
+        logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
         timeStamp: timeStamp,
         synthesized: true,
       ));
@@ -889,7 +889,7 @@ class KeyEventManager {
     for (final PhysicalKeyboardKey key in _rawKeyboard.physicalKeysPressed.difference(physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyDownEvent(
         physicalKey: key,
-        logicalKey: _rawKeyboard.lookUpLayout(physicalKey)!,
+        logicalKey: _rawKeyboard.lookUpLayout(key)!,
         timeStamp: timeStamp,
         synthesized: true,
       ));

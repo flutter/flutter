@@ -499,6 +499,13 @@ void _validateIosPodfile(String appPath) {
     'test_plugin_swift',
     'ios',
   ));
+
+  // Make sure no Xcode build settings are leaking derived data/build directory into the ios directory.
+  checkDirectoryNotExists(path.join(
+    appPath,
+    'ios',
+    'build',
+  ));
 }
 
 void _validateMacOSPodfile(String appPath) {

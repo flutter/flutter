@@ -918,8 +918,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 40);
-    expect(cheapWidgets, 21);
+    expect(expensiveWidgets, 38);
+    expect(cheapWidgets, 20);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
@@ -961,9 +961,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 17);
-    expect(cheapWidgets, 44);
-    expect(physics.count, 44 + 17);
+    expect(expensiveWidgets, 18);
+    expect(cheapWidgets, 40);
+    expect(physics.count, 40 + 18);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
@@ -1004,7 +1004,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 0);
-    expect(cheapWidgets, 61);
+    expect(cheapWidgets, 58);
   });
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
