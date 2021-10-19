@@ -1283,18 +1283,6 @@ Future<void> generateMainDartWithPluginRegistrant(
     packageConfig.packageOf(mainFile.absolute.uri),
     Cache.flutterRoot!,
   );
-
-  late String dartMainContent;
-  try {
-    dartMainContent = mainFile.readAsStringSync();
-  } on FileSystemException catch (error) {
-    globals.printError(
-      'Unable to read file ${mainFile.path}, received error: $error.\n'
-      'Please verify that this file exists.'
-    );
-    rethrow;
-  }
-
   final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),

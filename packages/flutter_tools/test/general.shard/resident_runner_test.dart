@@ -1164,7 +1164,6 @@ void main() {
 }''');
     globals.fs.file('l10n.yaml').createSync();
     globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
-    globals.fs.directory('lib').childFile('main.dart').createSync();
 
     // Create necessary files for [DartPluginRegistrantTarget]
     final File packageConfig = globals.fs.directory('.dart_tool')

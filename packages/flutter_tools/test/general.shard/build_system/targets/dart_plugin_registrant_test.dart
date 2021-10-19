@@ -183,11 +183,6 @@ void main() {
 
       projectDir.childFile('.packages').createSync();
 
-      projectDir.childDirectory('lib')
-          .childFile('main.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main(){}');
-
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
@@ -222,10 +217,7 @@ void main() {
 
       projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
-      projectDir.childDirectory('lib')
-          .childFile('main.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main(){}');
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
@@ -365,11 +357,7 @@ void main() {
 
       projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
-      fileSystem
-          .directory('root')
-          .childFile('external.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main(){}');
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
