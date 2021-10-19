@@ -34,7 +34,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     // Not Windows.
     platform = FakePlatform(
-      operatingSystem: 'linux',
       environment: <String, String>{},
     );
     processManager = FakeProcessManager.any();
@@ -147,7 +146,6 @@ void main() {
           ],
           stdout: 'success',
           stderr: 'failure',
-          exitCode: 0,
         )
       ]);
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
@@ -180,7 +178,6 @@ void main() {
           ],
           stdout: 'Observatory listening on http://localhost:1234',
           stderr: 'failure',
-          exitCode: 0,
         )
       ]);
       device = createDevice(enableObservatory: true);
@@ -220,11 +217,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         treeShakeIcons: false,
         packagesPath: '.dart_tool/package_config.json',
       ),
-      startPaused: false,
-      enableDds: true,
-      disableServiceAuthCodes: false,
       hostVmServicePort: 1234,
-      nullAssertions: false,
       dartEntrypointArgs: dartEntrypointArgs,
     ),
     enableObservatory: enableObservatory,

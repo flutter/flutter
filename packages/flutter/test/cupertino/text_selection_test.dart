@@ -173,7 +173,6 @@ void main() {
                       context,
                       TextSelectionHandleType.right,
                       10.0,
-                      null,
                     ),
                   ),
                 ),

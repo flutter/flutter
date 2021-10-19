@@ -1091,6 +1091,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The prompt rectangle will only be requested on non-web iOS applications.
   ///
   /// When set to null, the currently displayed prompt rectangle (if any) will be dismissed.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setPromptRectRange(TextRange? newRange) {
     _autocorrectHighlightPainter.highlightedRange = newRange;
   }
@@ -1601,13 +1602,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutText(maxWidth: double.infinity);
+    _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutText(maxWidth: double.infinity);
+    _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
 
@@ -1700,13 +1701,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -1884,7 +1885,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
     if (position.offset - word.start <= 1) {
-      newSelection = TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream);
+      newSelection = TextSelection.collapsed(offset: word.start);
     } else {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
@@ -1969,7 +1970,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
@@ -1993,7 +1994,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          default:
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline:
+          case ui.PlaceholderAlignment.bottom:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.top:
             baselineOffset = null;
             break;
         }

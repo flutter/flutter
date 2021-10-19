@@ -85,7 +85,7 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
@@ -122,7 +122,7 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
 ///
@@ -585,9 +585,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       return result.addWithPaintOffset(
         offset: _paintOffset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position + -_paintOffset);
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
     }

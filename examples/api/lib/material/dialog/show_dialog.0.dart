@@ -2,31 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateless_widget_restoration_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for showDialog
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample demonstrates how to create a restorable Material dialog. This is
-// accomplished by enabling state restoration by specifying
-// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
-// push [DialogRoute] when the button is tapped.
-//
-// {@macro flutter.widgets.RestorationManager}
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -42,14 +23,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -71,8 +48,4 @@ class MyStatelessWidget extends StatelessWidget {
           const AlertDialog(title: Text('Material Alert!')),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

@@ -531,7 +531,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -624,7 +624,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'My name is: ',
@@ -670,7 +670,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'outer',
@@ -799,7 +799,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -906,7 +906,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1013,7 +1013,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1120,7 +1120,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',
@@ -1227,7 +1227,7 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'C ',

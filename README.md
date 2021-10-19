@@ -42,7 +42,7 @@ graphics, video, text, and controls without limitation. Flutter includes a full
 [set of widgets][widget catalog] that deliver pixel-perfect experiences on both
 iOS and Android.
 
-![Reflectly hero image][Reflectly hero image]
+<p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
 
 ### Fast results
 
@@ -53,7 +53,7 @@ Flutter code is powered by the world-class [Dart platform], which enables
 compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
 as JavaScript for the web and Intel x64 for desktop devices.
 
-![Dart platform diagram][]
+<p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
 ### Productive development
 
@@ -84,10 +84,8 @@ Information on how to get started can be found in our
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
-[Reflectly hero image]: https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
-[Dart platform diagram]: https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true
 [Hot reload animation]: https://github.com/flutter/website/blob/main/src/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter

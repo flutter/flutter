@@ -45,7 +45,6 @@ void main() {
     RenderPositionedBox child;
     final RealRoot root = RealRoot(
       child = RenderPositionedBox(
-        alignment: Alignment.center,
         child: RenderSizedBox(const Size(100.0, 100.0)),
       ),
     );

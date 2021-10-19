@@ -16,7 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -248,7 +248,8 @@ class RunCommand extends RunCommandBase {
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
-    addPublishPort(enabledByDefault: true, verboseHelp: verboseHelp);
+    addPublishPort(verboseHelp: verboseHelp);
+    addMultidexOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -342,6 +343,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   final String description = 'Run your Flutter app on an attached device.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   List<Device> devices;
   bool webMode = false;
@@ -497,6 +501,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,
+        multidexEnabled: boolArg('multidex'),
       );
     } else if (webMode) {
       return webRunnerFactory.createWebRunner(
@@ -524,6 +529,7 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6,
       stayResident: stayResident,
+      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -560,7 +566,6 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
-          machine: true,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

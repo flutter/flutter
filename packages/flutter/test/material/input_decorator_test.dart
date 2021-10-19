@@ -204,7 +204,6 @@ void main() {
     // The label appears within the input text when there is content and floatingLabelBehavior is never
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: false,
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
@@ -249,7 +248,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           labelText: 'label',
         ),
@@ -309,7 +307,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           labelText: 'label',
           enabled: false,
@@ -329,7 +326,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           labelText: 'label',
           enabled: false,
@@ -350,7 +346,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           labelText: 'label',
           alignLabelWithHint: true,
@@ -461,7 +456,6 @@ void main() {
     // the floatingLabelBehavior is set to never.
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: false,
         // isFocused: false (default)
         decoration: const InputDecoration(
           label: Text.rich(
@@ -528,7 +522,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
@@ -611,7 +604,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
@@ -642,7 +634,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
@@ -674,7 +665,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
@@ -871,9 +861,8 @@ void main() {
                     labelText: 'label',
                     alignLabelWithHint: alignLabelWithHint,
                     hintText: 'hint',
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(width: 1, color: Colors.black, style: BorderStyle.solid),
-                      borderRadius: BorderRadius.circular(0),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
                 ),
@@ -1014,7 +1003,6 @@ void main() {
 
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: false,
         isFocused: true,
         decoration: const InputDecoration(
           labelText: 'label',
@@ -1462,7 +1450,6 @@ void main() {
           labelText: 'label',
           helperText: kHelper3,
           helperMaxLines: 3,
-          errorText: null,
           filled: true,
         ),
       ),
@@ -1493,7 +1480,6 @@ void main() {
           labelText: 'label',
           helperText: kHelper3,
           helperMaxLines: 2,
-          errorText: null,
           filled: true,
         ),
       ),
@@ -1514,7 +1500,6 @@ void main() {
           labelText: 'label',
           helperText: kHelper2,
           helperMaxLines: 3,
-          errorText: null,
           filled: true,
         ),
       ),
@@ -1535,7 +1520,6 @@ void main() {
           labelText: 'label',
           helperText: kHelper1,
           helperMaxLines: 3,
-          errorText: null,
           filled: true,
         ),
       ),
@@ -1925,7 +1909,6 @@ void main() {
 
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: false,
         isFocused: true,
         visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
@@ -2020,7 +2003,6 @@ void main() {
 
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: false,
         isFocused: true,
         visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
         decoration: const InputDecoration(
@@ -2948,7 +2930,6 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        textDirection: TextDirection.ltr,
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           labelText: 'label',
@@ -3159,7 +3140,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        isFocused: false,
         baseStyle: style,
         decoration: const InputDecoration(
           hintText: 'hint',
@@ -3422,7 +3402,7 @@ void main() {
     expect(tester.widget<Text>(find.text('suffix')).style!.color, suffixStyle.color);
     expect(tester.widget<Text>(find.text('helper')).style!.color, helperStyle.color);
     expect(tester.widget<Text>(find.text('counter')).style!.color, counterStyle.color);
-    expect(getLabelStyle(tester).color, hintStyle.color);
+    expect(getLabelStyle(tester).color, labelStyle.color);
   });
 
   testWidgets('InputDecorationTheme style overrides (focused)', (WidgetTester tester) async {
@@ -3498,8 +3478,6 @@ void main() {
       decoration: InputDecoration(),
       baseStyle: TextStyle(),
       textAlign: TextAlign.center,
-      isFocused: false,
-      isEmpty: false,
       child: Placeholder(),
     );
     expect(
@@ -3664,6 +3642,110 @@ void main() {
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
   });
 
+  testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
+    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.green);
+    });
+
+    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      return const TextStyle(color: Colors.blue);
+    });
+
+    // InputDecorationTheme arguments define InputDecoration properties.
+    InputDecoration decoration = const InputDecoration().applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+      ),
+    );
+
+    expect(decoration.labelStyle, themeStyle);
+    expect(decoration.helperStyle, themeStyle);
+    expect(decoration.hintStyle, themeStyle);
+    expect(decoration.errorStyle, themeStyle);
+    expect(decoration.isDense, true);
+    expect(decoration.contentPadding, const EdgeInsets.all(1.0));
+    expect(decoration.prefixStyle, themeStyle);
+    expect(decoration.suffixStyle, themeStyle);
+    expect(decoration.counterStyle, themeStyle);
+    expect(decoration.filled, true);
+    expect(decoration.fillColor, Colors.red);
+    expect(decoration.border, InputBorder.none);
+    expect(decoration.alignLabelWithHint, true);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+
+    // InputDecoration (baseDecoration) defines InputDecoration properties
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+      return const OutlineInputBorder();
+    });
+    decoration = InputDecoration(
+      labelStyle: decorationStyle,
+      helperStyle: decorationStyle,
+      hintStyle: decorationStyle,
+      errorStyle: decorationStyle,
+      isDense: false,
+      contentPadding: const EdgeInsets.all(4.0),
+      prefixStyle: decorationStyle,
+      suffixStyle: decorationStyle,
+      counterStyle: decorationStyle,
+      filled: false,
+      fillColor: Colors.blue,
+      border: border,
+      alignLabelWithHint: false,
+      constraints: const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    ).applyDefaults(
+      InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        helperMaxLines: 5,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        errorMaxLines: 4,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        focusColor: Colors.blue,
+        border: InputBorder.none,
+        alignLabelWithHint: true,
+        constraints: const BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
+      ),
+    );
+
+    expect(decoration.labelStyle, decorationStyle);
+    expect(decoration.helperStyle, decorationStyle);
+    expect(decoration.helperMaxLines, 5);
+    expect(decoration.hintStyle, decorationStyle);
+    expect(decoration.errorStyle, decorationStyle);
+    expect(decoration.errorMaxLines, 4);
+    expect(decoration.isDense, false);
+    expect(decoration.contentPadding, const EdgeInsets.all(4.0));
+    expect(decoration.prefixStyle, decorationStyle);
+    expect(decoration.suffixStyle, decorationStyle);
+    expect(decoration.counterStyle, decorationStyle);
+    expect(decoration.filled, false);
+    expect(decoration.fillColor, Colors.blue);
+    expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
+    expect(decoration.alignLabelWithHint, false);
+    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+  });
+
   testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/15742
 
@@ -3671,11 +3753,11 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           filled: true,
-          fillColor: const Color(0xFF00FF00),
+          fillColor: Color(0xFF00FF00),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.all(Radius.circular(12.0)),
           ),
         ),
       ),
@@ -3958,7 +4040,7 @@ void main() {
       );
     }
 
-    await pumpDecorator(focused: false, empty: true);
+    await pumpDecorator(focused: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
@@ -3968,7 +4050,7 @@ void main() {
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
-    await pumpDecorator(focused: true, empty: true);
+    await pumpDecorator(focused: true);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
@@ -3978,7 +4060,7 @@ void main() {
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
-    await pumpDecorator(focused: false, empty: true, enabled: false);
+    await pumpDecorator(focused: false, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
@@ -3989,7 +4071,7 @@ void main() {
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
 
     // Focused and disabled happens with NavigationMode.directional.
-    await pumpDecorator(focused: true, empty: true, enabled: false);
+    await pumpDecorator(focused: true, enabled: false);
     await tester.pumpAndSettle();
     expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(const Size(80, 16)));
@@ -4061,7 +4143,6 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         theme: theme,
-        decoration: const InputDecoration(),
       ),
     );
     await tester.pumpAndSettle();
@@ -4084,7 +4165,6 @@ void main() {
       buildInputDecorator(
         theme: theme,
         isHovering: true,
-        decoration: const InputDecoration(),
       ),
     );
     await tester.pumpAndSettle();
@@ -4095,7 +4175,6 @@ void main() {
       buildInputDecorator(
         theme: theme,
         isFocused: true,
-        decoration: const InputDecoration(),
       ),
     );
     await tester.pumpAndSettle();
@@ -4803,7 +4882,7 @@ void main() {
             child: TextField(
               decoration: InputDecoration(
                 border: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
+                  borderSide: BorderSide(color: Colors.greenAccent),
                 ),
                 suffixIcon: const Icon(Icons.arrow_drop_down),
                 floatingLabelBehavior: floatingLabelBehavior,
@@ -5215,8 +5294,7 @@ void main() {
 
     await tester.pumpWidget(
       buildInputDecorator(
-        isEmpty: true,
-        isFocused: false, // Label appears inline, on top of the input field.
+        isEmpty: true, // Label appears inline, on top of the input field.
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: labelStyle,
           // filled: false (default) - don't pad by left/right 12dps
@@ -5242,68 +5320,6 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
 
     // Verify that the styles were passed along
-    expect(getLabelStyle(tester).color, labelStyle.color);
-  });
-
-  testWidgets('hintStyle is used for labelText when labelText is on top of the input field and labelStyle is used for labelText when labelText moves above widget', (WidgetTester tester) async {
-    const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
-    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.purple));
-    final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.red));
-
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        isFocused: false, // Label appears inline, on top of the input field.
-        decoration: InputDecoration(
-          labelText: 'label',
-          labelStyle: labelStyle,
-          hintStyle: hintStyle,
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 56dps:
-    //   12 - top padding
-    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
-    //    4 - floating label / input text gap
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-    expect(getBorderBottom(tester), 56.0);
-    expect(getBorderWeight(tester), 1.0);
-
-    // Verify that the hintStyle was used
-    expect(getLabelStyle(tester).color, hintStyle.color);
-
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        isFocused: true, // Label moves above (i.e., vertically adjacent to) the input field
-        decoration: InputDecoration(
-          labelText: 'label',
-          labelStyle: labelStyle,
-          hintStyle: hintStyle,
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    // Overall height for this InputDecorator is 56dps:
-    //   12 - top padding
-    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
-    //    4 - floating label / input text gap
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
-    expect(getBorderBottom(tester), 56.0);
-    expect(getBorderWeight(tester), 2.0);
-
-    // Verify that the labelStyle was used
     expect(getLabelStyle(tester).color, labelStyle.color);
   });
 }

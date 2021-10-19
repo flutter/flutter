@@ -215,14 +215,22 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     bool isClosing = false;
@@ -318,7 +326,6 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
       maxHeight: isScrollControlled
         ? constraints.maxHeight
         : constraints.maxHeight * 9.0 / 16.0,
@@ -641,7 +648,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
 /// It also demonstrates how to close the bottom sheet using the [Navigator]

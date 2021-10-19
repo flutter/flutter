@@ -18,7 +18,7 @@ import 'theme.dart';
 /// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
 /// a [ScrollView] to the enclosing [PrimaryScrollController].
 ///
-/// {@tool dartpad --template=stateful_widget_cupertino}
+/// {@tool dartpad}
 /// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
 /// The [CupertinoButton] is connected to a callback that increments a counter.
 /// The [backgroundColor] can be changed.

@@ -704,6 +704,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     return Semantics(
       label: widget.semanticsLabel,
+      excludeSemantics: widget.semanticsLabel != null,
       onLongPress: () {
         _effectiveFocusNode.requestFocus();
       },

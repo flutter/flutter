@@ -34,6 +34,9 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   Duration get deviceDiscoveryTimeout {
     if (argResults['timeout'] != null) {
       final int timeoutSeconds = int.tryParse(stringArg('timeout'));

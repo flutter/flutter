@@ -608,7 +608,7 @@ class FakePicture extends Fake implements Picture {
 
 class ConcreteLayer extends Layer {
   @override
-  void addToScene(SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {}
+  void addToScene(SceneBuilder builder) {}
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
