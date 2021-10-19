@@ -71,6 +71,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
+  incompatibleKotlinVersionHandler,
 ];
 
 // Permission defined error message.
@@ -363,4 +364,32 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'lock-dep-issue',
+);
+
+@visibleForTesting
+final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'Module was compiled with an incompatible version of Kotlin',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+    globals.printStatus(
+      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.',
+      emphasis: true,
+    );
+    globals.printStatus(
+      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, '
+      'then update ${gradleFile.path}:\n'
+      "ext.kotlin_version = '<latest-version>'",
+      indent: 4
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-kotlin-version',
 );
