@@ -92,7 +92,7 @@ class MaterialButton extends StatelessWidget {
     this.materialTapTargetSize,
     this.animationDuration,
     this.minWidth,
-    this.height,
+    this.minHeight,
     this.enableFeedback = true,
     this.child,
   }) : assert(clipBehavior != null),
@@ -380,10 +380,10 @@ class MaterialButton extends StatelessWidget {
   /// Defaults to the value from the current [ButtonTheme].
   final double? minWidth;
 
-  /// The vertical extent of the button.
+  /// The smallest vertical extent that the button will occupy.
   ///
   /// Defaults to the value from the current [ButtonTheme].
-  final double? height;
+  final double? minHeight;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -420,7 +420,7 @@ class MaterialButton extends StatelessWidget {
       visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this).copyWith(
         minWidth: minWidth,
-        minHeight: height,
+        minHeight: minHeight,
       ),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,

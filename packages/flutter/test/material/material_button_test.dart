@@ -650,15 +650,15 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
-    Widget buildFrame({ double? minWidth, double? height, EdgeInsets padding = EdgeInsets.zero, Widget? child }) {
+  testWidgets('MaterialButton minWidth and minHeight parameters', (WidgetTester tester) async {
+    Widget buildFrame({ double? minWidth, double? minHeight, EdgeInsets padding = EdgeInsets.zero, Widget? child }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: MaterialButton(
             padding: padding,
             minWidth: minWidth,
-            height: height,
+            minHeight: minHeight,
             onPressed: null,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             child: child,
@@ -667,14 +667,14 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(minWidth: 8.0, height: 24.0));
+    await tester.pumpWidget(buildFrame(minWidth: 8.0, minHeight: 24.0));
     expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 24.0));
 
     await tester.pumpWidget(buildFrame(minWidth: 8.0));
     // Default minHeight constraint is 36, see RawMaterialButton.
     expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 36.0));
 
-    await tester.pumpWidget(buildFrame(height: 8.0));
+    await tester.pumpWidget(buildFrame(minHeight: 8.0));
     // Default minWidth constraint is 88, see RawMaterialButton.
     expect(tester.getSize(find.byType(MaterialButton)), const Size(88.0, 8.0));
 
@@ -688,7 +688,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         minWidth: 0.0,
-        height: 0.0,
+        minHeight: 0.0,
         padding: const EdgeInsets.all(4.0),
       ),
     );
@@ -698,7 +698,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         minWidth: 0.0,
-        height: 0.0,
+        minHeight: 0.0,
         padding: const EdgeInsets.all(4.0),
         child: const SizedBox(width: 8.0, height: 8.0),
       ),
@@ -709,7 +709,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         minWidth: 18.0,
-        height: 18.0,
+        minHeight: 18.0,
         padding: const EdgeInsets.all(4.0),
         child: const SizedBox(width: 8.0, height: 8.0),
       ),

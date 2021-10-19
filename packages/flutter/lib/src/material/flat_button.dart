@@ -64,7 +64,7 @@ class FlatButton extends MaterialButton {
        assert(autofocus != null),
        super(
          key: key,
-         height: height,
+         minHeight: height,
          minWidth: minWidth,
          onPressed: onPressed,
          onLongPress: onLongPress,
@@ -153,7 +153,7 @@ class FlatButton extends MaterialButton {
       visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this).copyWith(
         minWidth: minWidth,
-        minHeight: height,
+        minHeight: minHeight,
       ),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
