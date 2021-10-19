@@ -3323,6 +3323,51 @@ void main() {
 
       semantics.dispose();
     });
+
+    // Regression test for b/201218542.
+    testWidgets('copying with a11y works even when toolbar is hidden', (WidgetTester tester) async {
+      Future<void> testByControls(TextSelectionControls controls) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
+
+        await tester.pumpWidget(MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: controls,
+          ),
+        ));
+        await tester.tap(find.byType(EditableText));
+        await tester.pump();
+
+        final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+        const int expectedNodeId = 5;
+
+        expect(controller.value.selection.isCollapsed, isTrue);
+
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.value.text.length,
+        );
+        await tester.pump();
+
+        expect(find.text('Copy'), findsNothing);
+
+        owner.performAction(expectedNodeId, SemanticsAction.copy);
+        expect(tester.takeException(), isNull);
+        expect(
+          (await Clipboard.getData(Clipboard.kTextPlain))!.text,
+          equals('ABCDEFG'),
+        );
+
+        semantics.dispose();
+      }
+      await testByControls(materialTextSelectionControls);
+      await testByControls(cupertinoTextSelectionControls);
+    });
   });
 
   testWidgets('can set text with a11y', (WidgetTester tester) async {

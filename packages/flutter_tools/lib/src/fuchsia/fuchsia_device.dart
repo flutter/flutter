@@ -191,7 +191,6 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
     final List<String> text = (await _fuchsiaSdk.listDevices(
       timeout: timeout,
-      useDeviceFinder: _fuchsiaWorkflow.shouldUseDeviceFinder,
     ))?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
@@ -218,18 +217,9 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return null;
     }
     final String name = words[1];
-    String resolvedHost;
 
-    // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
-    if (_fuchsiaWorkflow.shouldUseDeviceFinder) {
-      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
-      resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
-        name,
-      );
-    } else {
-      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
-      resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
-    }
+     // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
+    final String resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;

@@ -82,7 +82,21 @@ void main() {
         operatingSystem: 'windows',
       );
       await expectLater(
-        () async => runner.run(<String>['start']),
+        () async => runner.run(<String>[
+          'start',
+          '--$kFrameworkMirrorOption',
+          frameworkMirror,
+          '--$kEngineMirrorOption',
+          engineMirror,
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          'dev',
+          '--$kStateOption',
+          '/path/to/statefile.json',
+          '--$kIncrementOption',
+          'y',
+        ]),
         throwsExceptionWith(
           'Error! This tool is only supported on macOS and Linux',
         ),
@@ -236,12 +250,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 
@@ -420,12 +434,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 

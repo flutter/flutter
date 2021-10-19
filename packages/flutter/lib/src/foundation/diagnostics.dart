@@ -2832,6 +2832,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     try {
       _value = _computeValue!();
     } catch (exception) {
+      // The error is reported to inspector; rethrowing would destroy the
+      // debugging experience.
       _exception = exception;
       _value = null;
     }

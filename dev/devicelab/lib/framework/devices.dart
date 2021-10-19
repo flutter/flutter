@@ -794,7 +794,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     }
 
     if (deviceIds.isEmpty) {
-      throw const DeviceException('No connected iOS devices found.');
+      throw const DeviceException('No connected physical iOS devices found.');
     }
     return deviceIds;
   }

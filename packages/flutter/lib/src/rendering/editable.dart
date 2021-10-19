@@ -1091,6 +1091,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The prompt rectangle will only be requested on non-web iOS applications.
   ///
   /// When set to null, the currently displayed prompt rectangle (if any) will be dismissed.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setPromptRectRange(TextRange? newRange) {
     _autocorrectHighlightPainter.highlightedRange = newRange;
   }

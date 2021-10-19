@@ -679,14 +679,13 @@ class _SshPortForwarder implements PortForwarder {
   /// If successful returns a valid [ServerSocket] (which must be disconnected
   /// later).
   static Future<ServerSocket?> _createLocalSocket() async {
-    ServerSocket s;
     try {
-      s = await ServerSocket.bind(_ipv4Loopback, 0);
+      return await ServerSocket.bind(_ipv4Loopback, 0);
     } catch (e) {
-      // Failures are signaled by a return value of 0 from this function.
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       _log.warning('_createLocalSocket failed: $e');
       return null;
     }
-    return s;
   }
 }
