@@ -14,7 +14,6 @@ import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
-import 'tooltip_visibility.dart';
 
 /// A material design tooltip.
 ///
@@ -70,7 +69,6 @@ import 'tooltip_visibility.dart';
 ///
 ///  * <https://material.io/design/components/tooltips.html>
 ///  * [TooltipTheme] or [ThemeData.tooltipTheme]
-///  * [TooltipVisibility]
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
@@ -329,7 +327,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool enableFeedback;
   late bool _isConcealed;
   late bool _forceRemoval;
-  late bool _visible;
 
   /// The plain text message for this tooltip.
   ///
@@ -353,12 +350,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _visible = TooltipVisibility.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -492,11 +483,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// Shows the tooltip if it is not already visible.
   ///
-  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
-  /// was already visible.
+  /// Returns `false` when the tooltip was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible)
-      return false;
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -683,31 +671,27 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
     enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
-    Widget result = Semantics(
-      label: excludeFromSemantics
-          ? null
-          : _tooltipMessage,
-      child: widget.child,
+    Widget result = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
+        _handlePress : null,
+      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+      excludeFromSemantics: true,
+      child: Semantics(
+        label: excludeFromSemantics
+            ? null
+            : _tooltipMessage,
+        child: widget.child,
+      ),
     );
 
-    // Only check for gestures if tooltip should be visible.
-    if (_visible) {
-      result = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-        onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
-        excludeFromSemantics: true,
+    // Only check for hovering if there is a mouse connected.
+    if (_mouseIsConnected) {
+      result = MouseRegion(
+        onEnter: (_) => _handleMouseEnter(),
+        onExit: (_) => _handleMouseExit(),
         child: result,
       );
-      // Only check for hovering if there is a mouse connected.
-      if (_mouseIsConnected) {
-        result = MouseRegion(
-          onEnter: (_) => _handleMouseEnter(),
-          onExit: (_) => _handleMouseExit(),
-          child: result,
-        );
-      }
     }
 
     return result;
