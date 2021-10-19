@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -44,6 +45,17 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
          ),
        ),
        super(key: key);
+
+  /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
+  /// a [Icon] widget
+  CupertinoTextSelectionToolbarButton.icon({
+    Key? key,
+    this.onPressed,
+    required IconData icon,
+  })  : child = Icon(
+    icon,
+    size: 18,
+  ), super(key: key);
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
   /// The child of this button.

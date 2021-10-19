@@ -1531,7 +1531,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TODO(luckysmg): Judge this device support OCR or not
   @override
-  bool get captureTextEnabled => _isIOS15() && !widget.readOnly;
+  bool get captureTextEnabled => _isCaptureTextEnabled() && !widget.readOnly;
 
   void _onChangedClipboardStatus() {
     setState(() {
@@ -1539,8 +1539,28 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  bool _isIOS15(){
-    return Platform.isIOS && Platform.operatingSystemVersion.startsWith('15');
+  bool _isCaptureTextEnabled(){
+    if(!Platform.isIOS){
+      return false;
+    }
+
+    // Get operatingSystemVersion for iOS like "15.0.2"
+    final List<String> versionSplitList = Platform.operatingSystemVersion.split('.');
+    if(versionSplitList.isEmpty){
+      return false;
+    }
+
+    final String iOSOperatingSystemVersion = versionSplitList.first;
+    final int? versionNum = int.tryParse(iOSOperatingSystemVersion);
+    if(versionNum == null){
+      return false;
+    }
+
+    if(versionNum < 15){
+      return false;
+    }
+
+    return true;
   }
 
   // Start TextEditingActionTarget.

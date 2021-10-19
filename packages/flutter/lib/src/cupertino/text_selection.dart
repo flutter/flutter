@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -138,7 +139,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     final Widget onePhysicalPixelVerticalDivider =
         SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
-    void addToolbarButton(
+    void addTextToolbarButton(
       String text,
       VoidCallback onPressed,
     ) {
@@ -152,22 +153,36 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       ));
     }
 
+    void addIconToolbarButton(
+        IconData icon,
+        VoidCallback onPressed,
+        ) {
+      if (items.isNotEmpty) {
+        items.add(onePhysicalPixelVerticalDivider);
+      }
+
+      items.add(CupertinoTextSelectionToolbarButton.icon(
+        onPressed: onPressed,
+        icon: icon,
+      ));
+    }
+
     if (widget.handleCut != null) {
-      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
+      addTextToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
     }
     if (widget.handleCopy != null) {
-      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
+      addTextToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
         && _clipboardStatus!.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
+      addTextToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
+      addTextToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
     if(widget.handleCaptureTextFromCamera != null){
-      // TODO(luckysmg): Later it needs to change to an Icon like iOS Native here we just put a simple text "Scan" temporarily
-      addToolbarButton('Scan', widget.handleCaptureTextFromCamera!);
+      // TODO(luckysmg): Later it needs to change to an Icon like iOS Native here we just put a simple Icon "camera_alt" temporarily
+      addIconToolbarButton(Icons.camera_alt, widget.handleCaptureTextFromCamera!);
     }
 
     // If there is no option available, build an empty widget.

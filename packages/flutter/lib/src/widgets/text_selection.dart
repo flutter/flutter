@@ -247,9 +247,9 @@ abstract class TextSelectionControls {
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 
-  /// Call [TextSelectionDelegate.captureTextFromCamera]
+  /// Call [TextSelectionDelegate.captureTextFromCamera] to capture text from camera
   ///
-  ///
+  /// At present this feature is only available on iOS platform
   Future<void> handleCaptureTextFromCamera(TextSelectionDelegate delegate) async {
     delegate.captureTextFromCamera(SelectionChangedCause.toolbar);
   }
