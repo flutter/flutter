@@ -16,6 +16,12 @@
 namespace fml {
 
 class MessageLoopDarwin : public MessageLoopImpl {
+ public:
+  // A custom CFRunLoop mode used when processing flutter messages,
+  // so that the CFRunLoop can be run without being interrupted by UIKit,
+  // while still being able to receive and be interrupted by framework messages.
+  static CFStringRef kMessageLoopCFRunLoopMode;
+
  private:
   std::atomic_bool running_;
   CFRef<CFRunLoopTimerRef> delayed_wake_timer_;
