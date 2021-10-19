@@ -38,7 +38,7 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints = parse(results);
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{});
 
       expect(metricPoints[0].value, equals(0.4550425531914895));
       expect(metricPoints[1].value, equals(0.473));
@@ -52,7 +52,7 @@ void main() {
         'ResultData': null,
         'BenchmarkScoreKeys': null,
       };
-      final List<MetricPoint> metricPoints = parse(results);
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{});
 
       expect(metricPoints.length, 0);
     });
@@ -73,7 +73,7 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints = parse(results);
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{});
       final FakeFlutterDestination flutterDestination = FakeFlutterDestination();
       String? taskName;
       const int commitTimeSinceEpoch = 1629220312;
@@ -97,7 +97,7 @@ void main() {
           '90th_percentile_frame_build_time_millis',
         ],
       };
-      final List<MetricPoint> metricPoints = parse(results);
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{});
       final FakeFlutterDestination flutterDestination = FakeFlutterDestination();
       const String taskName = 'test';
       const int commitTimeSinceEpoch = 1629220312;
