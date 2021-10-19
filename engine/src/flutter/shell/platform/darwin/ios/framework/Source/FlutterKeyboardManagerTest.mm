@@ -8,6 +8,7 @@
 #import <XCTest/XCTest.h>
 #include <_types/_uint32_t.h>
 
+#include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
@@ -59,7 +60,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 namespace {
 
-typedef void (^KeyCallbackSetter)(FlutterAsyncKeyCallback callback);
+typedef void (^KeyCallbackSetter)(FlutterUIPressProxy* press, FlutterAsyncKeyCallback callback)
+    API_AVAILABLE(ios(13.4));
 typedef BOOL (^BoolGetter)();
 
 }  // namespace
@@ -100,11 +102,14 @@ typedef BOOL (^BoolGetter)();
       OCMStrictProtocolMock(@protocol(FlutterKeyPrimaryResponder));
   OCMStub([mock handlePress:[OCMArg any] callback:[OCMArg any]])
       .andDo((^(NSInvocation* invocation) {
+        FlutterUIPressProxy* press;
         FlutterAsyncKeyCallback callback;
+        [invocation getArgument:&press atIndex:2];
         [invocation getArgument:&callback atIndex:3];
-        CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopDefaultMode, ^() {
-          callbackSetter(callback);
-        });
+        CFRunLoopPerformBlock(CFRunLoopGetCurrent(),
+                              fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode, ^() {
+                                callbackSetter(press, callback);
+                              });
       }));
   return mock;
 }
@@ -149,7 +154,8 @@ typedef BOOL (^BoolGetter)();
   FlutterKeyboardManager* manager = [[FlutterKeyboardManager alloc] init];
   __block BOOL primaryResponse = FALSE;
   __block int callbackCount = 0;
-  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterAsyncKeyCallback callback) {
+  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterUIPressProxy* press,
+                                                            FlutterAsyncKeyCallback callback) {
              callbackCount++;
              callback(primaryResponse);
            }]];
@@ -181,14 +187,16 @@ typedef BOOL (^BoolGetter)();
 
   __block BOOL callback1Response = FALSE;
   __block int callback1Count = 0;
-  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterAsyncKeyCallback callback) {
+  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterUIPressProxy* press,
+                                                            FlutterAsyncKeyCallback callback) {
              callback1Count++;
              callback(callback1Response);
            }]];
 
   __block BOOL callback2Response = FALSE;
   __block int callback2Count = 0;
-  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterAsyncKeyCallback callback) {
+  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterUIPressProxy* press,
+                                                            FlutterAsyncKeyCallback callback) {
              callback2Count++;
              callback(callback2Response);
            }]];
@@ -242,7 +250,8 @@ typedef BOOL (^BoolGetter)();
 
   __block BOOL primaryResponse = FALSE;
   __block int callbackCount = 0;
-  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterAsyncKeyCallback callback) {
+  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterUIPressProxy* press,
+                                                            FlutterAsyncKeyCallback callback) {
              callbackCount++;
              callback(primaryResponse);
            }]];
@@ -289,6 +298,75 @@ typedef BOOL (^BoolGetter)();
             }];
   XCTAssertEqual(callbackCount, 1);
   XCTAssertFalse(completeHandled);
+}
+
+- (void)testEventsProcessedSequentially API_AVAILABLE(ios(13.4)) {
+  constexpr UIKeyboardHIDUsage keyId1 = (UIKeyboardHIDUsage)0x50;
+  constexpr UIKeyboardHIDUsage keyId2 = (UIKeyboardHIDUsage)0x51;
+  FlutterUIPressProxy* event1 = keyDownEvent(keyId1);
+  FlutterUIPressProxy* event2 = keyDownEvent(keyId2);
+  __block FlutterAsyncKeyCallback key1Callback;
+  __block FlutterAsyncKeyCallback key2Callback;
+  __block bool key1Handled = true;
+  __block bool key2Handled = true;
+
+  FlutterKeyboardManager* manager = [[FlutterKeyboardManager alloc] init];
+  [manager addPrimaryResponder:[self mockPrimaryResponder:^(FlutterUIPressProxy* press,
+                                                            FlutterAsyncKeyCallback callback) {
+             if (press == event1) {
+               key1Callback = callback;
+             } else if (press == event2) {
+               key2Callback = callback;
+             }
+           }]];
+
+  // Add both presses into the main CFRunLoop queue
+  CFRunLoopTimerRef timer0 = CFRunLoopTimerCreateWithHandler(
+      kCFAllocatorDefault, CFAbsoluteTimeGetCurrent(), 0, 0, 0, ^(CFRunLoopTimerRef timerRef) {
+        [manager handlePress:event1
+                  nextAction:^() {
+                    key1Handled = false;
+                  }];
+      });
+  CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer0, kCFRunLoopCommonModes);
+  CFRunLoopTimerRef timer1 = CFRunLoopTimerCreateWithHandler(
+      kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 1, 0, 0, 0, ^(CFRunLoopTimerRef timerRef) {
+        // key1 should be completely finished by now
+        XCTAssertFalse(key1Handled);
+        [manager handlePress:event2
+                  nextAction:^() {
+                    key2Handled = false;
+                  }];
+        // End the nested CFRunLoop
+        CFRunLoopStop(CFRunLoopGetCurrent());
+      });
+  CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer1, kCFRunLoopCommonModes);
+
+  // Add the callbacks to the CFRunLoop with mode kMessageLoopCFRunLoopMode
+  // This allows them to interrupt the loop started within handlePress
+  CFRunLoopTimerRef timer2 = CFRunLoopTimerCreateWithHandler(
+      kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 2, 0, 0, 0, ^(CFRunLoopTimerRef timerRef) {
+        // No processing should be done on key2 yet
+        XCTAssertTrue(key1Callback != nil);
+        XCTAssertTrue(key2Callback == nil);
+        key1Callback(false);
+      });
+  CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer2,
+                    fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode);
+  CFRunLoopTimerRef timer3 = CFRunLoopTimerCreateWithHandler(
+      kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 3, 0, 0, 0, ^(CFRunLoopTimerRef timerRef) {
+        // Both keys should be processed by now
+        XCTAssertTrue(key1Callback != nil);
+        XCTAssertTrue(key2Callback != nil);
+        key2Callback(false);
+      });
+  CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer3,
+                    fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode);
+
+  // Start a nested CFRunLoop so we can wait for both presses to complete before exiting the test
+  CFRunLoopRun();
+  XCTAssertFalse(key2Handled);
+  XCTAssertFalse(key1Handled);
 }
 
 @end
