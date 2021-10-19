@@ -45,7 +45,7 @@ void main() {
     /// Tests the Release Channel dropdown menu.
     await tester.tap(find.byKey(const Key('Release Channel')));
     await tester.pumpAndSettle(); // finish the menu animation
-    expect(createReleaseSubstepsState.releaseData['Release Channel'], equals('-'));
+    expect(createReleaseSubstepsState.releaseData['Release Channel'], equals(null));
     await tester.tap(find.text(releaseChannel).last);
     await tester.pumpAndSettle(); // finish the menu animation
 
@@ -58,7 +58,7 @@ void main() {
     /// Tests the Increment dropdown menu.
     await tester.tap(find.byKey(const Key('Increment')));
     await tester.pumpAndSettle(); // finish the menu animation
-    expect(createReleaseSubstepsState.releaseData['Increment'], equals('-'));
+    expect(createReleaseSubstepsState.releaseData['Increment'], equals(null));
     await tester.tap(find.text(increment).last);
     await tester.pumpAndSettle(); // finish the menu animation
 

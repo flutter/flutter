@@ -28,22 +28,12 @@ class CreateReleaseSubsteps extends StatefulWidget {
     'Dart Revision (if necessary)',
     'Increment',
   ];
-
-  static const Map<String, String?> releaseDataDefault = <String, String?>{
-    'Release Channel': '-',
-    'Increment': '-',
-  };
 }
 
 class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
-  late Map<String, String?> releaseData; // Initialize a public state so it could be accessed in the test file.
-
-  /// Initialize [releaseData] with default values of release initialization parameters.
-  @override
-  void initState() {
-    super.initState();
-    releaseData = CreateReleaseSubsteps.releaseDataDefault;
-  }
+  // Initialize a public state so it could be accessed in the test file.
+  @visibleForTesting
+  late Map<String, String?> releaseData = <String, String?>{};
 
   /// Updates the corresponding [field] in [releaseData] with [data].
   void setReleaseData(String field, String data) {
@@ -69,7 +59,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           index: 1,
           releaseData: releaseData,
           setReleaseData: setReleaseData,
-          options: const <String>['-', 'dev', 'beta', 'stable'],
+          options: const <String>['dev', 'beta', 'stable'],
         ),
         InputAsSubstep(
           index: 2,
@@ -100,7 +90,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           index: 7,
           releaseData: releaseData,
           setReleaseData: setReleaseData,
-          options: const <String>['-', 'y', 'z', 'm', 'n'],
+          options: const <String>['y', 'z', 'm', 'n'],
         ),
         const SizedBox(height: 20.0),
         Center(
@@ -174,6 +164,7 @@ class CheckboxListTileDropdown extends StatelessWidget {
         ),
         const SizedBox(width: 20.0),
         DropdownButton<String>(
+          hint: const Text('-'),
           key: Key(CreateReleaseSubsteps.substepTitles[index]),
           value: releaseData[CreateReleaseSubsteps.substepTitles[index]],
           icon: const Icon(Icons.arrow_downward),
