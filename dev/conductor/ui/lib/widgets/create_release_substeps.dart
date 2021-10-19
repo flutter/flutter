@@ -164,7 +164,7 @@ class CheckboxListTileDropdown extends StatelessWidget {
         ),
         const SizedBox(width: 20.0),
         DropdownButton<String>(
-          hint: const Text('-'),
+          hint: const Text('-'), // Dropdown initially displays the hint when no option is selected.
           key: Key(CreateReleaseSubsteps.substepTitles[index]),
           value: releaseData[CreateReleaseSubsteps.substepTitles[index]],
           icon: const Icon(Icons.arrow_downward),
