@@ -251,6 +251,7 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
+          "export 'package:path_provider_example/main.dart';\n"
           "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
@@ -283,7 +284,6 @@ void main() {
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
-          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'
@@ -395,6 +395,7 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
+          "export 'file:///root/external.dart';\n"
           "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
@@ -427,7 +428,6 @@ void main() {
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
-          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'

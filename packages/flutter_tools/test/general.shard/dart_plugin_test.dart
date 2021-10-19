@@ -599,6 +599,7 @@ void main() {
           '\n'
           '// @dart = 2.8\n'
           '\n'
+          "export 'package:app/main.dart';\n"
           "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
@@ -686,7 +687,6 @@ void main() {
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
-          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'
@@ -793,6 +793,7 @@ void dreamWithFlags() => run(interactive: false);
           '\n'
           '// @dart = 2.8\n'
           '\n'
+          "export 'package:app/main.dart';\n"
           "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
@@ -880,28 +881,11 @@ void dreamWithFlags() => run(interactive: false);
           'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
           'typedef _NullaryFunction = dynamic Function();\n'
           '\n'
-          "@pragma('vm:entry-point')\n"
           'void main(List<String> args) {\n'
           '  if (entrypoint.main is _UnaryFunction) {\n'
           '    (entrypoint.main as _UnaryFunction)(args);\n'
           '  } else {\n'
           '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
-          '}\n'
-          "@pragma('vm:entry-point')\n"
-          'void dream(List<String> args) {\n'
-          '  if (entrypoint.dream is _UnaryFunction) {\n'
-          '    (entrypoint.dream as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.dream as _NullaryFunction)();\n'
-          '  }\n'
-          '}\n'
-          "@pragma('vm:entry-point', foobar)\n"
-          'void dreamWithFlags(List<String> args) {\n'
-          '  if (entrypoint.dreamWithFlags is _UnaryFunction) {\n'
-          '    (entrypoint.dreamWithFlags as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.dreamWithFlags as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
           ,
