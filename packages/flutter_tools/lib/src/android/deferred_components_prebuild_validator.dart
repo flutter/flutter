@@ -256,7 +256,6 @@ class _DeferredComponentAndroidFiles {
       final Directory templateComponentDir = templatesDir.childDirectory('module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component');
       template = Template(templateComponentDir, templateComponentDir,
         fileSystem: globals.fs,
-        templateManifest: null,
         logger: logger,
         templateRenderer: globals.templateRenderer,
       );
