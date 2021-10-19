@@ -71,7 +71,9 @@ void main(List<String> arguments) {
 
     try {
       androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
-    } on FileSystemException {}
+    } on FileSystemException {
+      // noop
+    }
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);

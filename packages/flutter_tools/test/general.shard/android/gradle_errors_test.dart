@@ -664,7 +664,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         contains(
           '[!] Your project requires a newer version of the Kotlin Gradle plugin.\n'
           '    Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update /android/build.gradle:\n'
-          '    ext.kotlin_version = \'<latest-version>\'\n'
+          "    ext.kotlin_version = '<latest-version>'\n"
         )
       );
     }, overrides: <Type, Generator>{
