@@ -5,8 +5,9 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
-#include "impeller/compositor/renderer.h"
-#include "impeller/compositor/texture.h"
+#include "impeller/geometry/point.h"
+#include "impeller/renderer/renderer.h"
+#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

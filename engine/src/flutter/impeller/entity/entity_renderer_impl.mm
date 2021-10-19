@@ -5,8 +5,8 @@
 #include "impeller/entity/entity_renderer_impl.h"
 
 #include "flutter/fml/trace_event.h"
-#include "impeller/compositor/tessellator.h"
-#include "impeller/compositor/vertex_buffer_builder.h"
+#include "impeller/renderer/tessellator.h"
+#include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 

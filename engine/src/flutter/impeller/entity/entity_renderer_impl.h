@@ -7,15 +7,15 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/compositor/context.h"
-#include "impeller/compositor/pipeline.h"
-#include "impeller/compositor/pipeline_builder.h"
-#include "impeller/compositor/render_pass.h"
-#include "impeller/compositor/surface.h"
 #include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
+#include "impeller/renderer/context.h"
+#include "impeller/renderer/pipeline.h"
+#include "impeller/renderer/pipeline_builder.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/surface.h"
 
 namespace impeller {
 
