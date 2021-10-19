@@ -65,7 +65,7 @@ third_party/gn/
 .packages
 .pub-cache/
 .pub/
-build/
+*/**/build/
 flutter_*.png
 linked_*.ds
 unlinked.ds
