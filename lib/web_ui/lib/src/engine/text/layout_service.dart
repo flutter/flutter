@@ -273,7 +273,7 @@ class TextLayoutService {
   List<ui.TextBox> getBoxesForPlaceholders() {
     final List<ui.TextBox> boxes = <ui.TextBox>[];
     for (final EngineLineMetrics line in lines) {
-      for (final RangeBox box in line.boxes!) {
+      for (final RangeBox box in line.boxes) {
         if (box is PlaceholderBox) {
           boxes.add(box.toTextBox(line));
         }
@@ -303,7 +303,7 @@ class TextLayoutService {
 
     for (final EngineLineMetrics line in lines) {
       if (line.overlapsWith(start, end)) {
-        for (final RangeBox box in line.boxes!) {
+        for (final RangeBox box in line.boxes) {
           if (box is SpanBox && box.overlapsWith(start, end)) {
             boxes.add(box.intersect(line, start, end));
           }
@@ -336,7 +336,7 @@ class TextLayoutService {
     }
 
     final double dx = offset.dx - line.left;
-    for (final RangeBox box in line.boxes!) {
+    for (final RangeBox box in line.boxes) {
       if (box.left <= dx && dx <= box.right) {
         return box.getPositionForX(dx);
       }
@@ -892,6 +892,8 @@ class LineBuilder {
   /// Whether the end of this line is a prohibited break.
   bool get isEndProhibited => end.type == LineBreakType.prohibited;
 
+  int _spaceBoxCount = 0;
+
   bool get isEmpty => _segments.isEmpty;
   bool get isNotEmpty => _segments.isNotEmpty;
 
@@ -1131,6 +1133,9 @@ class LineBuilder {
     if (_currentBoxStart.index > poppedSegment.start.index) {
       final RangeBox poppedBox = _boxes.removeLast();
       _currentBoxStartOffset -= poppedBox.width;
+      if (poppedBox is SpanBox && poppedBox.isSpaceOnly) {
+        _spaceBoxCount--;
+      }
     }
 
     return poppedSegment;
@@ -1274,6 +1279,10 @@ class LineBuilder {
       isSpaceOnly: isSpaceOnly,
     ));
 
+    if (isSpaceOnly) {
+      _spaceBoxCount++;
+    }
+
     _currentBoxStartOffset = widthIncludingSpace;
   }
 
@@ -1308,6 +1317,7 @@ class LineBuilder {
       ascent: ascent,
       descent: descent,
       boxes: _boxes,
+      spaceBoxCount: _spaceBoxCount,
     );
   }
 
