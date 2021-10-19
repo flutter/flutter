@@ -70,7 +70,7 @@ static uint64_t KeyOfPlane(uint64_t baseKey, uint64_t plane) {
 static uint64_t GetPhysicalKeyForKeyCode(UInt32 keyCode) {
   auto physicalKey = keyCodeToPhysicalKey.find(keyCode);
   if (physicalKey == keyCodeToPhysicalKey.end()) {
-    return 0;
+    return KeyOfPlane(keyCode, kIosPlane);
   }
   return physicalKey->second;
 }
