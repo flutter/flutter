@@ -146,13 +146,13 @@ class SimControl {
         return decodeResult;
       }
       _logger.printError('simctl returned unexpected JSON response: ${results.stdout}');
-      return <String, Object?>{};
+      return <String, Object>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
       _logger.printError('simctl returned non-JSON response: ${results.stdout}');
-      return <String, Object?>{};
+      return <String, Object>{};
     }
   }
 
@@ -573,7 +573,7 @@ class IOSSimulator extends Device {
     return logPath != null
       ? logPath.replaceAll('%{id}', id)
       : globals.fs.path.join(
-          globals.fsUtils.homeDirPath ?? '~',
+          globals.fsUtils.homeDirPath!,
           'Library',
           'Logs',
           'CoreSimulator',
@@ -749,7 +749,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // We don't want to wait for the process or its callback. Best effort
     // cleanup in the callback.
     unawaited(_deviceProcess?.exitCode.whenComplete(() {
-      if (_linesController.hasListener == true) {
+      if (_linesController.hasListener) {
         _linesController.close();
       }
     }));
