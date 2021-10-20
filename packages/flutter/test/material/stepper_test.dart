@@ -1147,11 +1147,15 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
   testWidgets('Stepper with Alternative Label', (WidgetTester tester) async {
     int index = 0;
+    late TextStyle bodyText1Style;
+    late TextStyle captionStyle;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            bodyText1Style = Theme.of(context).textTheme.bodyText1!;
+            captionStyle = Theme.of(context).textTheme.caption!;
             return Stepper(
               currentStep: index,
               onStepTapped: (int i) {
@@ -1159,27 +1163,28 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
                   index = i;
                 });
               },
-              steps: const <Step>[
-                Step(
+              steps: <Step>[
+                const Step(
                   // label, subtitle are nullable arguments
                   title: Text('Step 1 Title'),
                   content: Text('Step 1 Content'),
                 ),
-                Step(
+                const Step(
                   title: Text('Step 2 Title'),
                   content: Text('Step 2 Content'),
                   label: Text('Step 2 Label'),
                 ),
                 Step(
-                  title: Text('Step 3 Title'),
-                  content: Text('Step 3 Content'),
-                  subtitle: Text('Step 3 Subtitle'),
-                  label: Text('Step 3 Label'),
+                  title: const Text('Step 3 Title'),
+                  content: const Text('Step 3 Content'),
+                  subtitle: const Text('Step 3 Subtitle'),
+                  label: Text('Step 3 Label', style: Theme.of(context).textTheme.bodyText1),
                 ),
                 Step(
-                  title: Text('Step 4 Title'),
-                  content: Text('Step 4 Content'),
-                  subtitle: Text('Step 4 Subtitle'),
+                  title: const Text('Step 4 Title'),
+                  content: const Text('Step 4 Content'),
+                  subtitle: const Text('Step 4 Subtitle'),
+                  label: Text('Step 4 Label', style: Theme.of(context).textTheme.caption),
                 ),
               ],
             );
@@ -1193,6 +1198,12 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     // Tap to Step2 Label then, index become 1 from 2
     await tester.tap(find.text('Step 2 Label'));
     expect(index, 1);
+
+    final Text label3TextWidget = tester.widget<Text>(find.text('Step 3 Label'));
+    final Text label4TextWidget = tester.widget<Text>(find.text('Step 4 Label'));
+
+    expect(bodyText1Style, label3TextWidget.style);
+    expect(captionStyle, label4TextWidget.style);
   });
 }
 
