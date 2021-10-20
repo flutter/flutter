@@ -37,9 +37,7 @@ std::unique_ptr<rapidjson::Document> JsonMessageCodec::DecodeMessageInternal(
   auto json_message = std::make_unique<rapidjson::Document>();
   rapidjson::ParseResult result =
       json_message->Parse(raw_message, message_size);
-  bool parsing_successful =
-      result == rapidjson::ParseErrorCode::kParseErrorNone;
-  if (!parsing_successful) {
+  if (result.IsError()) {
     std::cerr << "Unable to parse JSON message:" << std::endl
               << rapidjson::GetParseError_En(result.Code()) << std::endl;
     return nullptr;
