@@ -470,6 +470,57 @@ void main() {
     );
   });
 
+  testWidgets('FlexibleSpaceBar sets width constraints for the title - override expandedScale', (WidgetTester tester) async {
+    const double titleFontSize = 20.0;
+    const double height = 300.0;
+    late double width;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              width = MediaQuery.of(context).size.width;
+              return CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    expandedHeight: height,
+                    pinned: true,
+                    stretch: true,
+                    flexibleSpace: FlexibleSpaceBar(
+                      expandedScale: 3,
+                      titlePadding: EdgeInsets.zero,
+                      title: Text(
+                        'X' * 2000,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: titleFontSize),
+                      ),
+                      centerTitle: false,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The title is scaled and transformed to be 3 times bigger, when the
+    // FlexibleSpaceBar is fully expanded, thus we expect the width to be
+    // 3 times smaller than the full width. The height of the text is the same
+    // as the font size, with 40 dps bottom margin.
+    expect(
+      tester.getRect(find.byType(Text)),
+      Rect.fromLTRB(
+        0,
+        height - titleFontSize - 40,
+        (width / 3).floorToDouble(),
+        height - 40,
+      ),
+    );
+  });
+
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
