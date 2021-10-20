@@ -677,7 +677,6 @@ void main() {
       'focusColor',
       'hoverColor',
       'shadowColor',
-      // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       'canvasColor',
       'scaffoldBackgroundColor',
       'bottomAppBarColor',
