@@ -720,11 +720,11 @@ class KeyEventManager {
   /// Key messages received from the platform are first sent to [RawKeyboard]'s
   /// listeners and [HardwareKeyboard]'s handlers, then sent to
   /// [keyMessageHandler], regardless of the results of [HardwareKeyboard]'s
-  /// handlers. The event result from the handlers and [keyMessageHandler] are
+  /// handlers. The event results from the handlers and [keyMessageHandler] are
   /// combined and returned to the platform. The event result is explained
   /// below.
   ///
-  /// For most common applications, which uses the [WidgetsBinding], this field
+  /// For most common applications, which use [WidgetsBinding], this field
   /// is set by the focus system (see [FocusManger]) on startup and should not
   /// be change explicitly.
   ///
