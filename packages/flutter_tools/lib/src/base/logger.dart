@@ -66,7 +66,8 @@ abstract class Logger {
   OutputPreferences get _outputPreferences;
 
   /// Display an error `message` to the user. Commands should use this if they
-  /// fail in some way.
+  /// fail in some way. Errors are typically followed shortly by a call to
+  /// [throwToolExit] to terminate the run.
   ///
   /// The `message` argument is printed to the stderr in [TerminalColor.red] by
   /// default.
@@ -207,10 +208,13 @@ abstract class Logger {
   /// [hadWarningOutput] or [hadErrorOutput] is true, and [warningsAreFatal] is
   /// set, then to call [throwToolExit].
   void checkForFatalLogs() {
-    if ((warningsAreFatal && (hadWarningOutput || hadErrorOutput)) ||
-        (errorsAreFatal && hadErrorOutput)) {
+    if (errorsAreFatal && hadErrorOutput) {
+      throwToolExit('Logger received error output during the run, and '
+          '"--fatal-log-errors" is enabled.');
+    }
+    if (warningsAreFatal && (hadWarningOutput || hadErrorOutput)) {
       throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
-          'during the run, and --fatal-logger-output is enabled.');
+          'during the run, and "--fatal-log-warnings" is enabled.');
     }
   }
 }
@@ -508,7 +512,9 @@ class StdoutLogger extends Logger {
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
-      return SilentStatus.empty();
+      return SilentStatus(
+        stopwatch: _stopwatchFactory.createStopwatch(),
+      )..start();
     }
     if (supportsColor) {
       _status = SpinnerStatus(
@@ -730,7 +736,9 @@ class BufferLogger extends Logger {
   }) {
     assert(progressIndicatorPadding != null);
     printStatus(message);
-    return SilentStatus.empty();
+    return SilentStatus(
+      stopwatch: _stopwatchFactory.createStopwatch(),
+    )..start();
   }
 
   @override
@@ -904,7 +912,10 @@ class VerboseLogger extends DelegatingLogger {
         super.printStatus(prefix + terminal.bolden(indentMessage));
         break;
       case _LogType.trace:
-        super.printTrace(prefix + indentMessage);
+        // This seems wrong, since there is a 'printTrace' to call on the
+        // superclass, but it's actually the entire point of this logger: to
+        // make things more verbose than they normally would be.
+        super.printStatus(prefix + indentMessage);
         break;
     }
   }
@@ -1020,10 +1031,6 @@ class SilentStatus extends Status {
     onFinish: onFinish,
     stopwatch: stopwatch,
   );
-
-  /// An empty [SilentStatus] shows nothing, doesn't require a stopwatch, and is
-  /// started automatically when created.
-  SilentStatus.empty() : super(stopwatch: Stopwatch()) { start(); }
 
   @override
   void finish() {

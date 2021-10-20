@@ -43,7 +43,6 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
     _addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
-    usesFatalLogOutputOption(verboseHelp: verboseHelp);
   }
 
   void _addSubcommand(BuildSubCommand command) {
@@ -66,8 +65,9 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand() {
+  BuildSubCommand({@required bool verboseHelp}) {
     requiresPubspecYaml();
+    usesFatalLogOutputOption(verboseHelp: verboseHelp);
   }
 
   @override

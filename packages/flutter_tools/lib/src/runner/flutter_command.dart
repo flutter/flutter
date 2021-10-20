@@ -1165,7 +1165,6 @@ abstract class FlutterCommand extends Command<void> {
           }
           if (_usesFatalLogs) {
             globals.logger.checkForFatalLogs();
-            assert(!globals.logger.hadWarningOutput || !globals.logger.errorsAreFatal);
           }
         }
       },

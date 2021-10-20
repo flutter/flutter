@@ -613,7 +613,9 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus.empty();
+    return SilentStatus(
+      stopwatch: Stopwatch(),
+    )..start();
   }
 
   @override
