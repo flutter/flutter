@@ -179,7 +179,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     for (final BuildInfo buildInfo in buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
+      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -446,7 +446,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = toTitleCase(getNameForBuildMode(BuildMode.debug));
+      final String simulatorConfiguration = sentenceCase(getNameForBuildMode(BuildMode.debug));
       pluginsBuildCommand = <String>[
         ...globals.xcode.xcrunCommand(),
         'xcodebuild',

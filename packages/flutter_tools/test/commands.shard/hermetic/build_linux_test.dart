@@ -78,7 +78,7 @@ void main() {
         'cmake',
         '-G',
         'Ninja',
-        '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
+        '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-$target',
         '/linux',
       ],

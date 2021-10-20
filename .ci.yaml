@@ -715,7 +715,9 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    timeout: 60
+    enabled_branches:
+      - main
+      - master
     properties:
       tags: >
         ["framework","hostonly","shard"]
@@ -1444,6 +1446,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__image_cache_memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/92018
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2189,7 +2192,6 @@ targets:
 
   - name: Mac plugin_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/88794
     timeout: 60
     properties:
       caches: >-

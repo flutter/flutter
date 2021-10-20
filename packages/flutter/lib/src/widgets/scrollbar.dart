@@ -1348,7 +1348,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert (() {
       try {
         scrollController!.position;
-      } catch (_) {
+      } catch (error) {
+        if (scrollController == null || scrollController.positions.length <= 1) {
+          rethrow;
+        }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             'The $controllerForError is currently attached to more than one '
