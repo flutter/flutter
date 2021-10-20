@@ -45,7 +45,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///       "90th_percentile_frame_build_time_millis"
 ///     ]
 ///   }
-List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, String> benchmarkTagsMap) {
+List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTagsMap) {
   print('Results to upload to skia perf: $resultsJson');
   print('Benchmark tags to upload to skia perf: $benchmarkTagsMap');
   final List<String> scoreKeys =
@@ -64,7 +64,8 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, String> be
       kNameKey: builderName,
       kSubResultKey: scoreKey,
     };
-    tags = mergeMaps<String, String>(tags, benchmarkTagsMap);
+    tags = mergeMaps<String, String>(
+        tags, benchmarkTagsMap.map((String key, dynamic value) => MapEntry<String, String>(key, value.toString())));
     metricPoints.add(
       MetricPoint(
         (resultData[scoreKey] as num).toDouble(),
@@ -116,7 +117,7 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
-  final Map<String, String> benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, String>;
+  final Map<String, dynamic> benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
