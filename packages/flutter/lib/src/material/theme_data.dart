@@ -222,8 +222,11 @@ class ThemeData with Diagnosticable {
   factory ThemeData({
     Brightness? brightness, // TODO(hansmuller): Deprecate this https://github.com/flutter/flutter/issues/91772
     // COLORS
-    MaterialColor? primarySwatch,
+    /// [colorScheme] is the preferred way to configure colors. The other color
+    /// properties will gradually be phased out, see
+    ///  https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
+    MaterialColor? primarySwatch,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
     Color? primaryColorLight,
@@ -245,7 +248,6 @@ class ThemeData with Diagnosticable {
     Color? focusColor,
     Color? hoverColor,
     Color? shadowColor,
-    // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
     Color? canvasColor,
     Color? scaffoldBackgroundColor,
     Color? bottomAppBarColor,
@@ -509,7 +511,6 @@ class ThemeData with Diagnosticable {
       focusColor: focusColor,
       hoverColor: hoverColor,
       shadowColor: shadowColor,
-      // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       canvasColor: canvasColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor,
@@ -600,6 +601,9 @@ class ThemeData with Diagnosticable {
     // operator == and in the hashValues method and in the order of fields
     // in this class, and in the lerp() method.
     // COLORS
+    /// [colorScheme] is the preferred way to configure colors. The other color
+    /// properties will gradually be phased out, see
+    /// https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.primaryColor,
     required this.primaryColorBrightness,
@@ -622,7 +626,6 @@ class ThemeData with Diagnosticable {
     required this.focusColor,
     required this.hoverColor,
     required this.shadowColor,
-    // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
     required this.canvasColor,
     required this.scaffoldBackgroundColor,
     required this.bottomAppBarColor,
@@ -831,7 +834,7 @@ class ThemeData with Diagnosticable {
 
   /// COLORS
 
-  /// A set of thirteen colors that can be used to configure the
+  /// A set of twelve colors that can be used to configure the
   /// color properties of most components.
   ///
   /// This property was added much later than the theme's set of highly
@@ -1357,6 +1360,9 @@ class ThemeData with Diagnosticable {
   /// The [brightness] value is applied to the [colorScheme].
   ThemeData copyWith({
     Brightness? brightness,
+    /// [colorScheme] is the preferred way to configure colors. The other color
+    /// properties will gradually be phased out, see
+    /// https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
@@ -1379,7 +1385,6 @@ class ThemeData with Diagnosticable {
     Color? focusColor,
     Color? hoverColor,
     Color? shadowColor,
-    // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
     Color? canvasColor,
     Color? scaffoldBackgroundColor,
     Color? bottomAppBarColor,
@@ -1505,7 +1510,6 @@ class ThemeData with Diagnosticable {
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       shadowColor: shadowColor ?? this.shadowColor,
-      // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       canvasColor: canvasColor ?? this.canvasColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
@@ -1667,7 +1671,6 @@ class ThemeData with Diagnosticable {
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t)!,
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
-      // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t)!,
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t)!,
@@ -1765,7 +1768,6 @@ class ThemeData with Diagnosticable {
         && other.focusColor == focusColor
         && other.hoverColor == hoverColor
         && other.shadowColor == shadowColor
-        // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
         && other.canvasColor == canvasColor
         && other.scaffoldBackgroundColor == scaffoldBackgroundColor
         && other.bottomAppBarColor == bottomAppBarColor
@@ -1860,7 +1862,6 @@ class ThemeData with Diagnosticable {
       focusColor,
       hoverColor,
       shadowColor,
-      // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
       canvasColor,
       scaffoldBackgroundColor,
       bottomAppBarColor,
@@ -1955,7 +1956,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
-    // The following color properties are subject to deprecation, see https://github.com/flutter/flutter/issues/91772
     properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
