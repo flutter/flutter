@@ -17,7 +17,7 @@ Future<dds.DartDevelopmentService> Function(
   bool enableAuthCodes,
   bool ipv6,
   Uri? serviceUri,
-  List<String> cachedUserTags,
+  bool cacheStartupProfile,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -37,6 +37,7 @@ class DartDevelopmentService {
     int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
@@ -48,13 +49,14 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.',
     );
     try {
+      print(StackTrace.current);
       _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
           ipv6: ipv6 == true,
           // Enables caching of CPU samples collected during application startup.
-          cachedUserTags: const <String>['AppStartUp'],
+          cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const [],
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {
