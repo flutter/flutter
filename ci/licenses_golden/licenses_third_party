@@ -1,4 +1,4 @@
-Signature: 9a680f9ac02abdeba34800956cf8cf3b
+Signature: 8bb93861ae3046f3be3db4ad3c4ca8cd
 
 UNUSED LICENSES:
 
@@ -9801,6 +9801,8 @@ FILE: ../../../third_party/dart/benchmarks/StringPool/dart/version2.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool.dart
 FILE: ../../../third_party/dart/benchmarks/StringPool/dart2/StringPool100.dart
 FILE: ../../../third_party/dart/runtime/bin/abstract_socket_test.cc
+FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.h
+FILE: ../../../third_party/dart/runtime/bin/platform_macos_cocoa.mm
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils_test.cc
 FILE: ../../../third_party/dart/runtime/bin/utils.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
@@ -9913,7 +9915,6 @@ FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_generate
 FILE: ../../../third_party/dart/runtime/bin/ffi_unit_test/run_ffi_unit_tests.cc
 FILE: ../../../third_party/dart/runtime/bin/file_win.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.h
-FILE: ../../../third_party/dart/runtime/bin/platform_macos_test.cc
 FILE: ../../../third_party/dart/runtime/bin/priority_heap_test.cc
 FILE: ../../../third_party/dart/runtime/include/dart_api_dl.c
 FILE: ../../../third_party/dart/runtime/include/dart_api_dl.h
