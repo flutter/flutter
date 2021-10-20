@@ -94,8 +94,8 @@ class ScrollBehavior {
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
-      scrollbar: scrollbars ?? true,
-      overscrollIndicator: overscroll ?? true,
+      scrollbars: scrollbars ?? true,
+      overscroll: overscroll ?? true,
       physics: physics,
       platform: platform,
       dragDevices: dragDevices,
@@ -253,8 +253,8 @@ class ScrollBehavior {
 class _WrappedScrollBehavior implements ScrollBehavior {
   const _WrappedScrollBehavior({
     required this.delegate,
-    this.scrollbar = true,
-    this.overscrollIndicator = true,
+    this.scrollbars = true,
+    this.overscroll = true,
     this.physics,
     this.platform,
     Set<PointerDeviceKind>? dragDevices,
@@ -263,8 +263,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
        _dragDevices = dragDevices;
 
   final ScrollBehavior delegate;
-  final bool scrollbar;
-  final bool overscrollIndicator;
+  final bool scrollbars;
+  final bool overscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
@@ -279,14 +279,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    if (overscrollIndicator)
+    if (overscroll)
       return delegate.buildOverscrollIndicator(context, child, details);
     return child;
   }
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    if (scrollbar)
+    if (scrollbars)
       return delegate.buildScrollbar(context, child, details);
     return child;
   }
@@ -306,8 +306,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
-      scrollbars: scrollbars ?? scrollbar,
-      overscroll: overscroll ?? overscrollIndicator,
+      scrollbars: scrollbars ?? this.scrollbars,
+      overscroll: overscroll ?? this.overscroll,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
       dragDevices: dragDevices ?? this.dragDevices,
@@ -328,8 +328,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType
-        || oldDelegate.scrollbar != scrollbar
-        || oldDelegate.overscrollIndicator != overscrollIndicator
+        || oldDelegate.scrollbars != scrollbars
+        || oldDelegate.overscroll != overscroll
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
         || setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
