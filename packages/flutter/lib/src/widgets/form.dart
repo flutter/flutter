@@ -105,6 +105,16 @@ class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
+  
+  /// List of all registered feidls
+  List<FormFieldState<dynamic>> get fields => _fields.toList(growable: false);
+
+  /// List of all registered invalid feilds
+  /// Before calling validate the form, otherwise list will be empty
+  List<FormFieldState<dynamic>> get invalidFields {
+    return fields.where((field) => field.hasError).toList(growable: false);
+  }
+
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
