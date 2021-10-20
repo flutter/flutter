@@ -416,7 +416,9 @@ class FlutterDevice {
     }
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    final Map<String, dynamic> platformArgs = <String, dynamic>{
+      'multidex': hotRunner.multidexEnabled,
+    };
 
     await startEchoingDeviceLog();
 
@@ -492,6 +494,7 @@ class FlutterDevice {
     if (coldRunner.traceStartup != null) {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
+    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
