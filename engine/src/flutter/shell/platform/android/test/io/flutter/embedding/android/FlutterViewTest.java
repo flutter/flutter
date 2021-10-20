@@ -26,6 +26,7 @@ import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.os.Build;
 import android.view.DisplayCutout;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -270,10 +271,7 @@ public class FlutterViewTest {
 
     // Verify.
     verify(flutterRenderer, times(3)).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingRight);
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 100, 100, 100);
   }
 
   // This test uses the pre-API 30 Algorithm for window insets.
@@ -303,18 +301,12 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
+    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
     flutterView.onApplyWindowInsets(windowInsets);
 
     // Verify.
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingRight);
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 100, 0);
   }
 
   // This test uses the API 30+ Algorithm for window insets. The legacy algorithm is
@@ -354,10 +346,7 @@ public class FlutterViewTest {
     // Verify.
     verify(flutterRenderer, times(3)).setViewportMetrics(viewportMetricsCaptor.capture());
     // Top padding is reported as-is.
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingRight);
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 100, 100, 100);
   }
 
   // This test uses the pre-API 30 Algorithm for window insets.
@@ -385,19 +374,13 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
+    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
     flutterView.onApplyWindowInsets(windowInsets);
 
     // Verify.
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
     // Top padding is reported as-is.
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingRight);
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 100, 100, 0);
   }
 
   @Test
@@ -405,12 +388,7 @@ public class FlutterViewTest {
   public void systemInsetHandlesFullscreenNavbarRight() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
-    display.setRotation(1);
+    setExpectedDisplayRotation(Surface.ROTATION_90);
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility())
         .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -431,24 +409,16 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
-    }
+    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
+    mockSystemGestureInsetsIfNeed(windowInsets);
 
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
     // Top padding is removed due to full screen.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-    // Bottom padding is removed due to hide navigation.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
     // Right padding is zero because the rotation is 90deg
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingRight);
+    // Bottom padding is removed due to hide navigation.
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 0, 0);
   }
 
   @Test
@@ -456,12 +426,7 @@ public class FlutterViewTest {
   public void systemInsetHandlesFullscreenNavbarRightBelowSDK23() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
-    display.setRotation(3);
+    setExpectedDisplayRotation(Surface.ROTATION_270);
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility())
         .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -482,24 +447,16 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
-    }
+    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
+    mockSystemGestureInsetsIfNeed(windowInsets);
 
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
     // Top padding is removed due to full screen.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-    // Bottom padding is removed due to hide navigation.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     // Right padding is zero because the rotation is 270deg under SDK 23
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingRight);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingLeft);
+    // Bottom padding is removed due to hide navigation.
+    validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 0, 0);
   }
 
   @Test
@@ -507,12 +464,7 @@ public class FlutterViewTest {
   public void systemInsetHandlesFullscreenNavbarLeft() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
-    display.setRotation(3);
+    setExpectedDisplayRotation(Surface.ROTATION_270);
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility())
         .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -533,24 +485,16 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(100);
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
-    }
+    mockSystemWindowInsets(windowInsets, 100, 100, 100, 100);
+    mockSystemGestureInsetsIfNeed(windowInsets);
 
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    // Top padding is removed due to full screen.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-    // Bottom padding is removed due to hide navigation.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     // Left padding is zero because the rotation is 270deg
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(100, viewportMetricsCaptor.getValue().viewPaddingRight);
+    // Top padding is removed due to full screen.
+    // Bottom padding is removed due to hide navigation.
+    validateViewportMetricPadding(viewportMetricsCaptor, 0, 0, 100, 0);
   }
 
   // This test uses the API 30+ Algorithm for window insets. The legacy algorithm is
@@ -561,12 +505,7 @@ public class FlutterViewTest {
   public void systemInsetGetInsetsFullscreen() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
-    display.setRotation(3);
+    setExpectedDisplayRotation(Surface.ROTATION_270);
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility())
         .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -588,19 +527,13 @@ public class FlutterViewTest {
     Insets insets = Insets.of(10, 20, 30, 40);
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(-1);
+    mockSystemWindowInsets(windowInsets, -1, -1, -1, -1);
     when(windowInsets.getInsets(anyInt())).thenReturn(insets);
 
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(20, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(30, viewportMetricsCaptor.getValue().viewPaddingRight);
-    assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    validateViewportMetricPadding(viewportMetricsCaptor, 10, 20, 30, 40);
   }
 
   // This test uses the pre-API 30 Algorithm for window insets.
@@ -610,12 +543,7 @@ public class FlutterViewTest {
   public void systemInsetGetInsetsFullscreenLegacy() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
-    display.setRotation(3);
+    setExpectedDisplayRotation(Surface.ROTATION_270);
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility())
         .thenReturn(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -636,21 +564,15 @@ public class FlutterViewTest {
 
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(100);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(101);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(102);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(103);
+    mockSystemWindowInsets(windowInsets, 102, 100, 103, 101);
 
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    // Top padding is removed due to full screen.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
-    // Bottom padding is removed due to hide navigation.
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
     // Left padding is zero because the rotation is 270deg
-    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(103, viewportMetricsCaptor.getValue().viewPaddingRight);
+    // Top padding is removed due to full screen.
+    // Bottom padding is removed due to hide navigation.
+    validateViewportMetricPadding(viewportMetricsCaptor, 0, 0, 103, 0);
   }
 
   // This test uses the API 30+ Algorithm for window insets. The legacy algorithm is
@@ -661,11 +583,6 @@ public class FlutterViewTest {
   public void systemInsetDisplayCutoutSimple() {
     RuntimeEnvironment.setQualifiers("+land");
     FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.systemContext));
-    ShadowDisplay display =
-        Shadows.shadowOf(
-            ((WindowManager)
-                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay());
     assertEquals(0, flutterView.getSystemUiVisibility());
     when(flutterView.getWindowSystemUiVisibility()).thenReturn(0);
     when(flutterView.getContext()).thenReturn(RuntimeEnvironment.systemContext);
@@ -688,10 +605,7 @@ public class FlutterViewTest {
     // Then we simulate the system applying a window inset.
     WindowInsets windowInsets = mock(WindowInsets.class);
     DisplayCutout displayCutout = mock(DisplayCutout.class);
-    when(windowInsets.getSystemWindowInsetTop()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(-1);
-    when(windowInsets.getSystemWindowInsetRight()).thenReturn(-1);
+    mockSystemWindowInsets(windowInsets, -1, -1, -1, -1);
     when(windowInsets.getInsets(anyInt())).thenReturn(insets);
     when(windowInsets.getSystemGestureInsets()).thenReturn(systemGestureInsets);
     when(windowInsets.getDisplayCutout()).thenReturn(displayCutout);
@@ -706,10 +620,7 @@ public class FlutterViewTest {
     flutterView.onApplyWindowInsets(windowInsets);
 
     verify(flutterRenderer, times(2)).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(150, viewportMetricsCaptor.getValue().viewPaddingTop);
-    assertEquals(150, viewportMetricsCaptor.getValue().viewPaddingBottom);
-    assertEquals(200, viewportMetricsCaptor.getValue().viewPaddingLeft);
-    assertEquals(200, viewportMetricsCaptor.getValue().viewPaddingRight);
+    validateViewportMetricPadding(viewportMetricsCaptor, 200, 150, 200, 150);
 
     assertEquals(100, viewportMetricsCaptor.getValue().viewInsetTop);
   }
@@ -911,6 +822,41 @@ public class FlutterViewTest {
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
 
     assertFalse(-1 == viewportMetricsCaptor.getValue().physicalTouchSlop);
+  }
+
+  private void setExpectedDisplayRotation(int rotation) {
+    ShadowDisplay display =
+        Shadows.shadowOf(
+            ((WindowManager)
+                    RuntimeEnvironment.systemContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay());
+    display.setRotation(rotation);
+  }
+
+  private void validateViewportMetricPadding(
+      ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor,
+      int left,
+      int top,
+      int right,
+      int bottom) {
+    assertEquals(left, viewportMetricsCaptor.getValue().viewPaddingLeft);
+    assertEquals(top, viewportMetricsCaptor.getValue().viewPaddingTop);
+    assertEquals(right, viewportMetricsCaptor.getValue().viewPaddingRight);
+    assertEquals(bottom, viewportMetricsCaptor.getValue().viewPaddingBottom);
+  }
+
+  private void mockSystemWindowInsets(
+      WindowInsets windowInsets, int left, int top, int right, int bottom) {
+    when(windowInsets.getSystemWindowInsetLeft()).thenReturn(left);
+    when(windowInsets.getSystemWindowInsetTop()).thenReturn(top);
+    when(windowInsets.getSystemWindowInsetRight()).thenReturn(right);
+    when(windowInsets.getSystemWindowInsetBottom()).thenReturn(bottom);
+  }
+
+  private void mockSystemGestureInsetsIfNeed(WindowInsets windowInsets) {
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+      when(windowInsets.getSystemGestureInsets()).thenReturn(Insets.NONE);
+    }
   }
 
   /*
