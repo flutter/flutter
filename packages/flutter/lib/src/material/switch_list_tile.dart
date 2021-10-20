@@ -49,7 +49,7 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
@@ -75,7 +75,7 @@ enum _SwitchListTileType { material, adaptive }
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled radio widget, called
@@ -92,7 +92,7 @@ enum _SwitchListTileType { material, adaptive }
 /// combining [Switch] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledSwitch widget, but you can easily
@@ -146,6 +146,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -191,6 +192,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -289,7 +291,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
+  /// If this property is null then its value is based on [ListTileThemeData.dense].
   final bool? dense;
 
   /// The tile's internal padding.
@@ -321,7 +323,7 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.material.ListTileTheme.shape}
+  /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
@@ -341,6 +343,9 @@ class SwitchListTile extends StatelessWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color? hoverColor;
 
   @override
   Widget build(BuildContext context) {
@@ -410,6 +415,7 @@ class SwitchListTile extends StatelessWidget {
           visualDensity: visualDensity,
           focusNode: focusNode,
           enableFeedback: enableFeedback,
+          hoverColor: hoverColor,
         ),
       ),
     );

@@ -82,7 +82,21 @@ void main() {
         operatingSystem: 'windows',
       );
       await expectLater(
-        () async => runner.run(<String>['start']),
+        () async => runner.run(<String>[
+          'start',
+          '--$kFrameworkMirrorOption',
+          frameworkMirror,
+          '--$kEngineMirrorOption',
+          engineMirror,
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          'dev',
+          '--$kStateOption',
+          '/path/to/statefile.json',
+          '--$kIncrementOption',
+          'y',
+        ]),
         throwsExceptionWith(
           'Error! This tool is only supported on macOS and Linux',
         ),
@@ -236,12 +250,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 
@@ -282,8 +296,10 @@ void main() {
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
       expect(state.engine.dartRevision, nextDartRevision);
+      expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
+      expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, revision);
       expect(state.incrementLevel, incrementLevel);
@@ -418,12 +434,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 

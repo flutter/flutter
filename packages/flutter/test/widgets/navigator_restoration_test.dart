@@ -812,9 +812,7 @@ void main() {
     // Move navigator into restoration scope.
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
-      child: TestWidget(
-        restorationId: 'app',
-      ),
+      child: TestWidget(),
     ));
 
     expect(findRoute('Foo'), findsOneWidget);

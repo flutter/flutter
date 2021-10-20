@@ -21,10 +21,10 @@ void main() {
       logger: BufferLogger.test(),
     );
     expect(state1.shouldRedisplayWelcomeMessage, null);
-    state1.redisplayWelcomeMessage = true;
+    state1.setShouldRedisplayWelcomeMessage(true);
     expect(stateFile.existsSync(), true);
     expect(state1.shouldRedisplayWelcomeMessage, true);
-    state1.redisplayWelcomeMessage = false;
+    state1.setShouldRedisplayWelcomeMessage(false);
     expect(state1.shouldRedisplayWelcomeMessage, false);
 
     final PersistentToolState state2 = PersistentToolState.test(

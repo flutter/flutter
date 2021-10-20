@@ -514,18 +514,19 @@ class HardwareKeyboard {
         final bool thisResult = handler(event);
         handled = handled || thisResult;
       } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<KeyEvent>('Event', event);
+          };
+          return true;
+        }());
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<HardwareKeyboard>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
+          context: ErrorDescription('while processing a key handler'),
+          informationCollector: collector,
         ));
       }
     }
@@ -718,15 +719,20 @@ class KeyEventManager {
   /// Key messages received from the platform are first sent to [RawKeyboard]'s
   /// listeners and [HardwareKeyboard]'s handlers, then sent to
   /// [keyMessageHandler], regardless of the results of [HardwareKeyboard]'s
-  /// handlers. The result from the handlers and [keyMessageHandler] are
-  /// combined and returned to the platform. The handler result is explained below.
+  /// handlers. The event results from the handlers and [keyMessageHandler] are
+  /// combined and returned to the platform. The event result is explained
+  /// below.
   ///
-  /// This handler is normally set by the [FocusManager] so that it can control
-  /// the key event propagation to focused widgets. Applications that use the
-  /// focus system (see [Focus] and [FocusManager]) to receive key events
-  /// do not need to set this field.
+  /// For most common applications, which use [WidgetsBinding], this field
+  /// is set by the focus system (see `FocusManger`) on startup and should not
+  /// be change explicitly.
   ///
-  /// ## Handler result
+  /// If you are not using the focus system to manage focus, set this
+  /// attribute to a [KeyMessageHandler] that returns true if the propagation
+  /// on the platform should not be continued. If this field is null, key events
+  /// will be assumed to not have been handled by Flutter.
+  ///
+  /// ## Event result
   ///
   /// Key messages on the platform are given to Flutter to be handled by the
   /// engine. If they are not handled, then the platform will continue to
@@ -738,20 +744,14 @@ class KeyEventManager {
   /// is not handled by other controls either (such as the "bonk" noise on
   /// macOS).
   ///
-  /// If you are not using the [FocusManager] to manage focus, set this
-  /// attribute to a [KeyMessageHandler] that returns true if the propagation
-  /// on the platform should not be continued. Otherwise, key events will be
-  /// assumed to not have been handled by Flutter, and will also be sent to
-  /// other (possibly non-Flutter) controls in the application.
+  /// The result from [keyMessageHandler] and [HardwareKeyboard]'s handlers
+  /// are combined. If any of the handlers claim to handle the event,
+  /// the overall result will be "event handled".
   ///
   /// See also:
   ///
-  ///  * [Focus.onKeyEvent], a [Focus] callback attribute that will be given
-  ///    key events distributed by the [FocusManager] based on the current
-  ///    primary focus.
-  ///  * [HardwareKeyboard.addHandler], which accepts multiple handlers to
-  ///    control the handler result but only accepts [KeyEvent] instead of
-  ///    [KeyMessage].
+  ///  * [HardwareKeyboard.addHandler], which accepts multiple global handlers
+  ///    to process [KeyEvent]s
   KeyMessageHandler? keyMessageHandler;
 
   final HardwareKeyboard _hardwareKeyboard;
@@ -827,7 +827,25 @@ class KeyEventManager {
     }
 
     if (keyMessageHandler != null) {
-      handled = keyMessageHandler!(KeyMessage(_keyEventsSinceLastMessage, rawEvent)) || handled;
+      final KeyMessage message = KeyMessage(_keyEventsSinceLastMessage, rawEvent);
+      try {
+        handled = keyMessageHandler!(message) || handled;
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<KeyMessage>('KeyMessage', message);
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while processing the key message handler'),
+          informationCollector: collector,
+        ));
+      }
     }
     _keyEventsSinceLastMessage.clear();
 

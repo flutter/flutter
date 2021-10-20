@@ -236,9 +236,20 @@ class AndroidDevice extends Device {
         return buildMode != BuildMode.jitRelease;
       case TargetPlatform.android_x86:
         return buildMode == BuildMode.debug;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.darwin:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
+      case TargetPlatform.windows_x64:
         throw UnsupportedError('Invalid target platform for Android');
     }
+    throw null; // dead code, remove after null migration
   }
 
   @override
@@ -530,7 +541,7 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, dynamic> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
@@ -560,7 +571,17 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_x86:
         androidArch = AndroidArch.x86;
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.darwin:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
+      case TargetPlatform.windows_x64:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -574,7 +595,8 @@ class AndroidDevice extends Device {
           androidBuildInfo: AndroidBuildInfo(
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
-            fastStart: debuggingOptions.fastStart
+            fastStart: debuggingOptions.fastStart,
+            multidexEnabled: (platformArgs['multidex'] as bool) ?? false,
           ),
       );
       // Package has been built, so we can get the updated application ID and

@@ -44,7 +44,6 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
           child: Container(height: 600.0),
         ),
       ),
@@ -64,7 +63,6 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
           child: Container(height: 600.1),
         ),
       ),
@@ -216,7 +214,7 @@ void main() {
   });
 
   testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
-    const SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.vertical);
+    const SingleChildScrollView view = SingleChildScrollView();
     expect(view.primary, isTrue);
   });
 
@@ -228,7 +226,6 @@ void main() {
   testWidgets('SingleChildScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
     final SingleChildScrollView view = SingleChildScrollView(
       controller: ScrollController(),
-      scrollDirection: Axis.vertical,
     );
     expect(view.primary, isFalse);
   });

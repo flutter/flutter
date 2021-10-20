@@ -288,6 +288,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   void stop() {}
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

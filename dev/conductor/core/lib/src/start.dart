@@ -114,9 +114,6 @@ class StartCommand extends Command<void> {
   final ProcessManager processManager;
   final Stdio stdio;
 
-  /// Git revision for the currently running Conductor.
-  late final String conductorVersion;
-
   @override
   String get name => 'start';
 
@@ -125,14 +122,6 @@ class StartCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final Git git = Git(processManager);
-    conductorVersion = (await git.getOutput(
-      <String>['rev-parse', 'HEAD'],
-      'look up the current revision.',
-      workingDirectory: flutterRoot.path,
-    )).trim();
-
-    assert(conductorVersion.isNotEmpty);
     final ArgResults argumentResults = argResults!;
     if (!platform.isMacOS && !platform.isLinux) {
       throw ConductorException(
@@ -140,14 +129,6 @@ class StartCommand extends Command<void> {
       );
     }
 
-    final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
-    );
-    if (stateFile.existsSync()) {
-      throw ConductorException(
-          'Error! A persistent state file already found at ${argResults![kStateOption]}.\n\n'
-          'Run `conductor clean` to cancel a previous release.');
-    }
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
       argumentResults,
@@ -199,7 +180,96 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
+    final File stateFile = checkouts.fileSystem.file(
+      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
+    );
 
+    final StartContext context = StartContext(
+      candidateBranch: candidateBranch,
+      checkouts: checkouts,
+      dartRevision: dartRevision,
+      engineCherrypickRevisions: engineCherrypickRevisions,
+      engineMirror: engineMirror,
+      engineUpstream: engineUpstream,
+      flutterRoot: flutterRoot,
+      frameworkCherrypickRevisions: frameworkCherrypickRevisions,
+      frameworkMirror: frameworkMirror,
+      frameworkUpstream: frameworkUpstream,
+      incrementLetter: incrementLetter,
+      processManager: processManager,
+      releaseChannel: releaseChannel,
+      stateFile: stateFile,
+      stdio: stdio,
+    );
+    return context.run();
+  }
+}
+
+/// Context for starting a new release.
+///
+/// This is a frontend-agnostic implementation.
+class StartContext {
+  StartContext({
+    required this.candidateBranch,
+    required this.checkouts,
+    required this.dartRevision,
+    required this.engineCherrypickRevisions,
+    required this.engineMirror,
+    required this.engineUpstream,
+    required this.frameworkCherrypickRevisions,
+    required this.frameworkMirror,
+    required this.frameworkUpstream,
+    required this.flutterRoot,
+    required this.incrementLetter,
+    required this.processManager,
+    required this.releaseChannel,
+    required this.stateFile,
+    required this.stdio,
+  }) : git = Git(processManager);
+
+  final String candidateBranch;
+  final Checkouts checkouts;
+  final String? dartRevision;
+  final List<String> engineCherrypickRevisions;
+  final String engineMirror;
+  final String engineUpstream;
+  final List<String> frameworkCherrypickRevisions;
+  final String frameworkMirror;
+  final String frameworkUpstream;
+  final Directory flutterRoot;
+  final String incrementLetter;
+  final Git git;
+  final ProcessManager processManager;
+  final String releaseChannel;
+  final File stateFile;
+  final Stdio stdio;
+
+  /// Git revision for the currently running Conductor.
+  Future<String> get conductorVersion async {
+    if (_conductorVersion != null) {
+      return Future<String>.value(_conductorVersion);
+    }
+    _conductorVersion = (await git.getOutput(
+      <String>['rev-parse', 'HEAD'],
+      'look up the current revision.',
+      workingDirectory: flutterRoot.path,
+    )).trim();
+    if (_conductorVersion == null || _conductorVersion!.isEmpty) {
+      throw ConductorException(
+        'Failed to determine the git revision of the Flutter SDK\n'
+        'Working directory: ${flutterRoot.path}'
+      );
+    }
+    return _conductorVersion!;
+  }
+  String? _conductorVersion;
+
+  Future<void> run() async {
+    if (stateFile.existsSync()) {
+      throw ConductorException(
+          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
+          'Run `conductor clean` to cancel a previous release.');
+    }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
@@ -233,8 +303,8 @@ class StartCommand extends Command<void> {
     final String workingBranchName = 'cherrypicks-$candidateBranch';
     await engine.newBranch(workingBranchName);
 
-    if (dartRevision != null && dartRevision.isNotEmpty) {
-      await engine.updateDartRevision(dartRevision);
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
     final List<pb.Cherrypick> engineCherrypicks = (await _sortCherrypicks(
@@ -349,7 +419,7 @@ class StartCommand extends Command<void> {
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 
-    state.conductorVersion = conductorVersion;
+    state.conductorVersion = await conductorVersion;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 

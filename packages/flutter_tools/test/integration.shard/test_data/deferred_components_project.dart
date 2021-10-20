@@ -131,6 +131,8 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   rootProject.buildDir = '../build'
   subprojects {
       project.buildDir = "${rootProject.buildDir}/${project.name}"
+  }
+  subprojects {
       project.evaluationDependsOn(':app')
   }
 
@@ -175,7 +177,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 30
+      compileSdkVersion flutter.compileSdkVersion
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
@@ -188,8 +190,8 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       defaultConfig {
           // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "ninja.qian.splitaottest1"
-          minSdkVersion 16
-          targetSdkVersion 30
+          minSdkVersion flutter.minSdkVersion
+          targetSdkVersion flutter.targetSdkVersion
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }

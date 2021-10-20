@@ -335,10 +335,10 @@ void main() {
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-    expect(getScrollOffset(tester, last: true), 20.0);
+    expect(getScrollOffset(tester), 20.0);
     // Pointer signals should not cause overscroll.
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
-    expect(getScrollOffset(tester, last: true), 0.0);
+    expect(getScrollOffset(tester), 0.0);
   });
 
   testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
@@ -1187,7 +1187,6 @@ void main() {
           controller: outerController,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Column(
                 children: <Widget>[
@@ -1295,7 +1294,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 
   testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
-    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: true);
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
 
     await gesture.moveBy(const Offset(0.0, -200));

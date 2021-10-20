@@ -173,8 +173,9 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
+/// An example the shows how to use the [Stepper], and the [Stepper] UI
+/// appearance.
 ///
 /// ** See code in examples/api/lib/material/stepper/stepper.0.dart **
 /// {@end-tool}
@@ -256,7 +257,7 @@ class Stepper extends StatefulWidget {
   /// [ControlsDetails.currentStep] value within the callback can change the text
   /// of the continue or cancel button depending on which step users are at.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -758,7 +759,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
-                child: Column(children: stepPanels, crossAxisAlignment: CrossAxisAlignment.stretch),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: stepPanels),
               ),
               _buildVerticalControls(widget.currentStep),
             ],

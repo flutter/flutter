@@ -37,7 +37,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['adb', '-s', '1', 'forward', 'tcp:456', 'tcp:123'],
-          stdout: '',
         )
       ]),
       logger: BufferLogger.test(),

@@ -38,7 +38,7 @@ abstract class PersistentToolState {
   ///
   /// May give null if the value has not been set.
   bool? get shouldRedisplayWelcomeMessage;
-  set redisplayWelcomeMessage(bool value); // Enforced nonnull setter.
+  void setShouldRedisplayWelcomeMessage(bool value); // Enforced nonnull setter.
 
   /// Returns the last active version for a given [channel].
   ///
@@ -50,11 +50,11 @@ abstract class PersistentToolState {
 
   /// Return the hash of the last active license terms.
   String? get lastActiveLicenseTermsHash;
-  set lastActiveLicenseTerms(String value); // Enforced nonnull setter.
+  void setLastActiveLicenseTermsHash(String value); // Enforced nonnull setter.
 
   /// Whether this client was already determined to be or not be a bot.
   bool? get isRunningOnBot;
-  set runningOnBot(bool value); // Enforced nonnull setter.
+  void setIsRunningOnBot(bool value); // Enforced nonnull setter.
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -98,7 +98,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  set redisplayWelcomeMessage(bool value) {
+  void setShouldRedisplayWelcomeMessage(bool value) {
     _config.setValue(_kRedisplayWelcomeMessage, value);
   }
 
@@ -120,7 +120,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   String? get lastActiveLicenseTermsHash => _config.getValue(_kLicenseHash) as String?;
 
   @override
-  set lastActiveLicenseTerms(String value) {
+  void setLastActiveLicenseTermsHash(String value) {
     _config.setValue(_kLicenseHash, value);
   }
 
@@ -132,7 +132,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   bool? get isRunningOnBot => _config.getValue(_kBotKey) as bool?;
 
   @override
-  set runningOnBot(bool value) {
+  void setIsRunningOnBot(bool value) {
     _config.setValue(_kBotKey, value);
   }
 }
