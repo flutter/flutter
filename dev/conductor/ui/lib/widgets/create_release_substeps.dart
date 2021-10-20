@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'common/tooltip.dart';
+
 /// Displays all substeps related to the 1st step.
 ///
 /// Uses input fields and dropdowns to capture all the parameters of the conductor start command.
@@ -162,6 +164,21 @@ class CheckboxListTileDropdown extends StatelessWidget {
           CreateReleaseSubsteps.substepTitles[index],
           style: Theme.of(context).textTheme.subtitle1!.copyWith(color: Colors.grey[700]),
         ),
+        // Only add a tooltip for the increment dropdown
+        if (index == 7)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+            child: InfoTooltip(
+              tooltipName: 'ReleaseIncrement',
+              // m: has one less space than the other lines, because otherwise,
+              // it would display on the app one more space than the other lines
+              tooltipMessage: '''
+m:   Indicates a standard dev release.
+n:    Indicates a hotfix to a dev or beta release.
+y:    Indicates the first dev release after a beta release.
+z:    Indicates a hotfix to a stable release.''',
+            ),
+          ),
         const SizedBox(width: 20.0),
         DropdownButton<String>(
           hint: const Text('-'), // Dropdown initially displays the hint when no option is selected.

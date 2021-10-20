@@ -6,6 +6,8 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
+import 'common/tooltip.dart';
+
 /// Displays the current conductor state.
 class ConductorStatus extends StatefulWidget {
   const ConductorStatus({
@@ -142,44 +144,6 @@ class ConductorStatusState extends State<ConductorStatus> {
   }
 }
 
-/// Displays explanations for each status type as a tooltip.
-class StatusTooltip extends StatefulWidget {
-  const StatusTooltip({
-    Key? key,
-    this.engineOrFramework,
-  }) : super(key: key);
-
-  final String? engineOrFramework;
-
-  @override
-  State<StatusTooltip> createState() => _StatusTooltipState();
-}
-
-class _StatusTooltipState extends State<StatusTooltip> {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        const Text('Status'),
-        const SizedBox(width: 10.0),
-        Tooltip(
-          padding: const EdgeInsets.all(10.0),
-          message: '''
-PENDING: The cherrypick has not yet been applied.
-PENDING_WITH_CONFLICT: The cherrypick has not been applied and will require manual resolution.
-COMPLETED: The cherrypick has been successfully applied to the local checkout.
-ABANDONED: The cherrypick will NOT be applied in this release.''',
-          child: Icon(
-            Icons.info,
-            size: 16.0,
-            key: Key('${widget.engineOrFramework}ConductorStatusTooltip'),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Widget for showing the engine and framework cherrypicks applied to the current release.
 ///
 /// Shows the cherrypicks' SHA and status in two separate table DataRow cells.
@@ -210,7 +174,22 @@ class CherrypickTableState extends State<CherrypickTable> {
       decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
       columns: <DataColumn>[
         DataColumn(label: Text('${widget.engineOrFramework == 'engine' ? 'Engine' : 'Framework'} Cherrypicks')),
-        DataColumn(label: StatusTooltip(engineOrFramework: widget.engineOrFramework)),
+        DataColumn(
+          label: Row(
+            children: <Widget>[
+              const Text('Status'),
+              const SizedBox(width: 10.0),
+              InfoTooltip(
+                tooltipName: widget.engineOrFramework,
+                tooltipMessage: '''
+PENDING:   The cherrypick has not yet been applied.
+PENDING_WITH_CONFLICT:   The cherrypick has not been applied and will require manual resolution.
+COMPLETED:   The cherrypick has been successfully applied to the local checkout.
+ABANDONED:   The cherrypick will NOT be applied in this release.''',
+              ),
+            ],
+          ),
+        ),
       ],
       rows: cherrypicks.map((Map<String, String> cherrypick) {
         return DataRow(
