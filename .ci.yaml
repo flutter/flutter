@@ -4,8 +4,9 @@
 # for every commit.
 #
 # More information at:
-#  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
+#  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
+  - main
   - master
   - dev
   - beta
@@ -269,6 +270,7 @@ targets:
 
   - name: Linux docs_publish
     enabled_branches:
+      - main
       - master
     recipe: flutter/flutter
     presubmit: false
@@ -678,6 +680,7 @@ targets:
 
   - name: Linux skp_generator
     enabled_branches:
+      - main
       - master
     recipe: flutter/flutter_drone
     timeout: 60
