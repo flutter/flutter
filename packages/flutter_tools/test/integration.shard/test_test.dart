@@ -252,10 +252,7 @@ Future<void> _testFile(
   }
   // Whether cached artifacts need to be downloaded is dependent on what
   // previous tests have run. Disregard these messages.
-  final RegExp downloadingPattern = RegExp(r'Downloading .*\.\.\.');
-  output.removeWhere((String line) {
-    return downloadingPattern.hasMatch(line);
-  });
+  output.removeWhere(RegExp(r'Downloading .*\.\.\.').hasMatch);
   output.add('<<stderr>>');
   output.addAll((exec.stderr as String).split('\n'));
   final List<String> expectations = fileSystem.file(fullTestExpectation).readAsLinesSync();
