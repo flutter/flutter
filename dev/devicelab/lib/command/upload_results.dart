@@ -55,14 +55,14 @@ class UploadResultsCommand extends Command<void> {
       print('Successfully uploaded metrics to skia perf');
     }
 
-    // final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    // return cocoon.sendTaskStatus(
-    //   resultsPath: resultsPath,
-    //   isTestFlaky: testFlakyStatus == 'True',
-    //   gitBranch: gitBranch,
-    //   builderName: builderName,
-    //   testStatus: testStatus,
-    //   builderBucket: builderBucket,
-    // );
+    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+    return cocoon.sendTaskStatus(
+      resultsPath: resultsPath,
+      isTestFlaky: testFlakyStatus == 'True',
+      gitBranch: gitBranch,
+      builderName: builderName,
+      testStatus: testStatus,
+      builderBucket: builderBucket,
+    );
   }
 }

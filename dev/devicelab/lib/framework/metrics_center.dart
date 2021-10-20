@@ -29,7 +29,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
   );
 }
 
-/// Parse results into Metric Points.
+/// Parse results and append additional benchmark tags into Metric Points.
 ///
 /// An example of `resultsJson`:
 ///   {
@@ -45,9 +45,18 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///       "90th_percentile_frame_build_time_millis"
 ///     ]
 ///   }
-List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTagsMap) {
+///
+/// An example of `benchmarkTags`:
+///   {
+///     "arch": "intel",
+///     "device_type": "Moto G Play",
+///     "device_version": "android-25",
+///     "host_type": "linux",
+///     "host_version": "debian-10.11"
+///   }
+List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags) {
   print('Results to upload to skia perf: $resultsJson');
-  print('Benchmark tags to upload to skia perf: $benchmarkTagsMap');
+  print('Benchmark tags to upload to skia perf: $benchmarkTags');
   final List<String> scoreKeys =
       (resultsJson['BenchmarkScoreKeys'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
   final Map<String, dynamic> resultData =
@@ -64,8 +73,9 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> b
       kNameKey: builderName,
       kSubResultKey: scoreKey,
     };
+    // Append additional benchmark tags, which will surface in Skia Perf dashboards.
     tags = mergeMaps<String, String>(
-        tags, benchmarkTagsMap.map((String key, dynamic value) => MapEntry<String, String>(key, value.toString())));
+        tags, benchmarkTags.map((String key, dynamic value) => MapEntry<String, String>(key, value.toString())));
     metricPoints.add(
       MetricPoint(
         (resultData[scoreKey] as num).toDouble(),

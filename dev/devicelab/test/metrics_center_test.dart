@@ -24,7 +24,7 @@ class FakeFlutterDestination implements FlutterDestination {
 
 void main() {
   group('Parse', () {
-    test('succeeds', () {
+    test('without additional benchmark tags', () {
       final Map<String, dynamic> results = <String, dynamic>{
         'CommitBranch': 'master',
         'CommitSha': 'abc',
@@ -42,6 +42,35 @@ void main() {
 
       expect(metricPoints[0].value, equals(0.4550425531914895));
       expect(metricPoints[1].value, equals(0.473));
+    });
+
+    test('with additional benchmark tags', () {
+      final Map<String, dynamic> results = <String, dynamic>{
+        'CommitBranch': 'master',
+        'CommitSha': 'abc',
+        'BuilderName': 'test',
+        'ResultData': <String, dynamic>{
+          'average_frame_build_time_millis': 0.4550425531914895,
+          '90th_percentile_frame_build_time_millis': 0.473,
+        },
+        'BenchmarkScoreKeys': <String>[
+          'average_frame_build_time_millis',
+          '90th_percentile_frame_build_time_millis',
+        ],
+      };
+      final Map<String, dynamic> tags = <String, dynamic>{
+        'arch': 'intel',
+        'device_type': 'Moto G Play',
+        'device_version': 'android-25',
+        'host_type': 'linux',
+        'host_version': 'debian-10.11'
+      };
+      final List<MetricPoint> metricPoints = parse(results, tags);
+
+      expect(metricPoints[0].value, equals(0.4550425531914895));
+      expect(metricPoints[0].tags.keys.contains('arch'), isTrue);
+      expect(metricPoints[1].value, equals(0.473));
+      expect(metricPoints[1].tags.keys.contains('device_type'), isTrue);
     });
 
     test('succeeds - null ResultData', () {
