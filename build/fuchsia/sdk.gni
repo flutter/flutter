@@ -117,10 +117,8 @@ template("_fuchsia_fidl_library") {
       rebase_path(invoker.meta),
       "--json",
       rebase_path("$target_gen_dir/$library_name_json"),
-      "--include-base",
+      "--fidlgen-root",
       rebase_path("$target_gen_dir"),
-      "--output-base-cc",
-      rebase_path("$target_gen_dir/$library_name_slashes/cpp/fidl"),
       "--output-c-tables",
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]

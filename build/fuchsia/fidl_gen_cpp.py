@@ -40,8 +40,7 @@ def main():
   parser.add_argument('--sdk-base', dest='sdk_base', action='store', required=True)
   parser.add_argument('--root', dest='root', action='store', required=True)
   parser.add_argument('--json', dest='json', action='store', required=True)
-  parser.add_argument('--include-base', dest='include_base', action='store', required=True)
-  parser.add_argument('--output-base-cc', dest='output_base_cc', action='store', required=True)
+  parser.add_argument('--fidlgen-root', dest='fidlgen_root', action='store', required=True)
   parser.add_argument('--output-c-tables', dest='output_c_tables', action='store', required=True)
 
   args = parser.parse_args()
@@ -79,14 +78,10 @@ def main():
 
   fidlgen_command = [
     args.fidlgen_bin,
-    '-generators',
-    'cpp',
-    '-include-base',
-    args.include_base,
     '-json',
     args.json,
-    '-output-base',
-    args.output_base_cc
+    '-root',
+    args.fidlgen_root
   ]
 
   subprocess.check_call(fidlgen_command)
