@@ -2331,6 +2331,7 @@ targets:
         ["framework","hostonly","shard"]
       validation: verify_binaries_codesigned
       validation_name: Verify binaries codesigned
+    scheduler: luci
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
