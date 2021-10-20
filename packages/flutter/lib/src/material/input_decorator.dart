@@ -2153,7 +2153,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.textTheme.subtitle1!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
-      .merge(style);
+      .merge(style)
+      // Setting TextStyle.height to 1 ensures that the label's height will equal
+      // its font size.
+      .copyWith(height: 1);
   }
 
   // The base style for the inline hint when they're displayed "inline",
@@ -2179,8 +2182,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : _getActiveColor(themeData);
 
       return TextStyle(color: decoration!.enabled ? color : themeData.disabledColor)
-        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
-    }
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle)
+        // Setting TextStyle.height to 1 ensures that the label's height will equal
+        // its font size.
+        .copyWith(height: 1);
+      }
 
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
