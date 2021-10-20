@@ -97,9 +97,11 @@ class ShadowDomHostNode implements HostNode {
     root.isConnected ?? true,
     'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.',
     ) {
-    _shadow = root.attachShadow(<String, String>{
+    _shadow = root.attachShadow(<String, dynamic>{
       'mode': 'open',
-      'delegatesFocus': 'true',
+      // This needs to stay false to prevent issues like this:
+      // - https://github.com/flutter/flutter/issues/85759
+      'delegatesFocus': false,
     });
 
     final html.StyleElement shadowRootStyleElement = html.StyleElement();
