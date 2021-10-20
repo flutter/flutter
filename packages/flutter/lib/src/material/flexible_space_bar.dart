@@ -125,7 +125,9 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
   final EdgeInsetsGeometry? titlePadding;
 
-  /// Defines how much the title is scaled when expanded. Defaults to 1.5.
+  /// Defines how much the title is scaled when expanded.
+  ///
+  /// Defaults to 1.5 and must be greater than 1.
   final double expandedScale;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
