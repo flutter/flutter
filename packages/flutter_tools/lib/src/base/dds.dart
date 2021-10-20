@@ -17,7 +17,7 @@ Future<dds.DartDevelopmentService> Function(
   bool enableAuthCodes,
   bool ipv6,
   Uri? serviceUri,
-  bool cacheStartupProfile,
+  List<String> cachedUserTags,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
