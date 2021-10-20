@@ -599,7 +599,9 @@ void main() {
           '\n'
           '// @dart = 2.8\n'
           '\n'
+          '// When `package:app/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
           "export 'package:app/main.dart';\n"
+          '\n'
           "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
@@ -793,7 +795,9 @@ void dreamWithFlags() => run(interactive: false);
           '\n'
           '// @dart = 2.8\n'
           '\n'
+          '// When `package:app/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
           "export 'package:app/main.dart';\n"
+          '\n'
           "import 'package:app/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:url_launcher_android/url_launcher_android.dart';\n"
