@@ -587,7 +587,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${toTitleCase(getFriendlyModeName(buildMode))} '
+          '${sentenceCase(getFriendlyModeName(buildMode))} '
           'mode is not supported by ${device.name}.',
         );
       }

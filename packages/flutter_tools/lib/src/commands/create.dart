@@ -10,6 +10,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
@@ -247,9 +248,13 @@ class CreateCommand extends CreateBase {
       );
     }
 
+    // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
+    final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
+
     final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
+      titleCaseProjectName: titleCaseProjectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPluginHook: generatePlugin,

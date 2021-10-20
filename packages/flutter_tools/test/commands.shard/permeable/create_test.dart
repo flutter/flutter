@@ -1363,6 +1363,114 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
+  testUsingContext('display name is Title Case for objc iOS project.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
+  testUsingContext('display name is Title Case for swift iOS project.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
+  testUsingContext('display name is Title Case for objc iOS module.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('display name is Title Case for swift iOS module.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('display name is Title Case for swift iOS plugin.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=plugin', '--no-pub', '--org', 'com.foo.bar', '--platforms=ios', '--ios-language=swift', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
+  testUsingContext('display name is Title Case for objc iOS plugin.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=plugin', '--no-pub', '--org', 'com.foo.bar', '--platforms=ios', '--ios-language=objc', '--project-name=my_project', projectDir.path]);
+
+    final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
+    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
+    expect(plistFile, exists);
+    final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
+    expect(displayName, 'My Project');
+  });
+
   testUsingContext('has correct content and formatting with macOS app template', () async {
     Cache.flutterRoot = '../..';
 
@@ -2857,4 +2965,11 @@ class LoggingProcessManager extends LocalProcessManager {
   void clear() {
     commands.clear();
   }
+}
+
+String _getStringValueFromPlist({File plistFile, String key}) {
+  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
+  final int keyIndex = plist.indexOf('<key>$key</key>');
+  assert(keyIndex > 0);
+  return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }
