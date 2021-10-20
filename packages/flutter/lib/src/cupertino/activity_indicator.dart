@@ -124,7 +124,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
-          activeColor: widget.color 
+          activeColor: widget.color
                 ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
           progress: widget.progress,
