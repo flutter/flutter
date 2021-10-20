@@ -158,6 +158,28 @@ void main() {
         ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
+
+  testWidgets('Can specify color', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: CupertinoColors.white,
+            child: const CupertinoActivityIndicator.partiallyRevealed(
+              color: CupertinoColors.activeBlue,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.color.1.0.png'),
+    );
+  });
 }
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
