@@ -458,7 +458,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
@@ -483,7 +483,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
@@ -512,7 +512,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(
@@ -538,7 +538,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(

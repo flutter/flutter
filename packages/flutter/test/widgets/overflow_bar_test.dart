@@ -162,7 +162,7 @@ void main() {
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0 - 32, 112, 100, 144));
 
     // Children are right aligned
-    await tester.pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.start, textDirection: TextDirection.rtl));
+    await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
     expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0 - 48, 0, 100, 48));
     expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0 - 64, 48, 100, 112));
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0 - 32, 112, 100, 144));

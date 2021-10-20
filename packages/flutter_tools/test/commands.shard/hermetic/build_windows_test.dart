@@ -36,7 +36,6 @@ final Platform windowsPlatform = FakePlatform(
   }
 );
 final Platform notWindowsPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   }
@@ -195,7 +194,7 @@ void main() {
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
@@ -396,7 +395,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   testUsingContext('hidden when not enabled on Windows host', () {
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Platform: () => windowsPlatform,
   });
 
@@ -537,7 +536,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('Windows UWP build completes successfully', () async {

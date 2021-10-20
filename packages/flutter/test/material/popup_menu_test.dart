@@ -438,7 +438,6 @@ void main() {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(
-                      enabled: true,
                       value: 1,
                       child: Text('Tap me please!', key: childKey),
                     ),
@@ -557,9 +556,9 @@ void main() {
     testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-            child: const Text('heyo'),
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
         );
       }, throwsAssertionError);
     });
@@ -1700,8 +1699,8 @@ void main() {
     expect(() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-        child: Container(),
         icon: const Icon(Icons.error),
+        child: Container(),
       );
     }, throwsAssertionError);
   });

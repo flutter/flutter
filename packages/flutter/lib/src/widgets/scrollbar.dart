@@ -686,21 +686,22 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ScrollbarPainter old) {
+  bool shouldRepaint(ScrollbarPainter oldDelegate) {
     // Should repaint if any properties changed.
-    return color != old.color
-        || trackColor != old.trackColor
-        || trackBorderColor != old.trackBorderColor
-        || textDirection != old.textDirection
-        || thickness != old.thickness
-        || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
-        || mainAxisMargin != old.mainAxisMargin
-        || crossAxisMargin != old.crossAxisMargin
-        || radius != old.radius
-        || minLength != old.minLength
-        || padding != old.padding
-        || minOverscrollLength != old.minOverscrollLength
-        || scrollbarOrientation != old.scrollbarOrientation;
+    return color != oldDelegate.color
+        || trackColor != oldDelegate.trackColor
+        || trackBorderColor != oldDelegate.trackBorderColor
+        || textDirection != oldDelegate.textDirection
+        || thickness != oldDelegate.thickness
+        || fadeoutOpacityAnimation != oldDelegate.fadeoutOpacityAnimation
+        || mainAxisMargin != oldDelegate.mainAxisMargin
+        || crossAxisMargin != oldDelegate.crossAxisMargin
+        || radius != oldDelegate.radius
+        || shape != oldDelegate.shape
+        || padding != oldDelegate.padding
+        || minLength != oldDelegate.minLength
+        || minOverscrollLength != oldDelegate.minOverscrollLength
+        || scrollbarOrientation != oldDelegate.scrollbarOrientation;
   }
 
   @override
@@ -1276,7 +1277,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert (() {
       try {
         scrollController!.position;
-      } catch (_) {
+      } catch (error) {
+        if (scrollController == null || scrollController.positions.length <= 1) {
+          rethrow;
+        }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             'The $controllerForError is currently attached to more than one '
@@ -1311,9 +1315,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
-  void  updateScrollbarPainter() {
+  void updateScrollbarPainter() {
     scrollbarPainter
-      ..color =  widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius

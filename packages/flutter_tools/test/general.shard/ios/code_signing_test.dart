@@ -138,7 +138,7 @@ void main() {
 
       final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         logger: logger,
         config: testConfig,
         terminal: testTerminal,

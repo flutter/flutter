@@ -41,7 +41,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   String? get restorationId => widget.restorationId;
 
   final RestorableDateTimeN _startDate =
-      RestorableDateTimeN(DateTime(2021, 1, 1));
+      RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate =
       RestorableDateTimeN(DateTime(2021, 1, 5));
   late final RestorableRouteFuture<DateTimeRange?>
@@ -85,9 +85,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           restorationId: 'date_picker_dialog',
           initialDateRange:
               _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
-          firstDate: DateTime(2021, 1, 1),
+          firstDate: DateTime(2021),
           currentDate: DateTime(2021, 1, 25),
-          lastDate: DateTime(2022, 1, 1),
+          lastDate: DateTime(2022),
         );
       },
     );

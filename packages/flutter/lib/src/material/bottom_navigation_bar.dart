@@ -578,14 +578,12 @@ class _Tile extends StatelessWidget {
       return Align(
         heightFactor: 1,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[icon, const SizedBox(width: 8), label],
         ),
       );
     }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, label],

@@ -42,9 +42,7 @@ void main() {
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
-    ).attach(
-      enableDevTools: false,
-    );
+    ).attach();
     expect(exitCode, 2);
   });
 
@@ -88,9 +86,7 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).run(
-        enableDevTools: false,
-      );
+      ).run();
 
       expect(result, 1);
     });
@@ -106,9 +102,7 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
-      ).run(
-        enableDevTools: false,
-      );
+      ).run();
 
       expect(result, 0);
       expect(memoryFileSystem.directory(getBuildDirectory()).childFile('start_up_info.json').existsSync(), true);
@@ -131,9 +125,7 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
-      ).run(
-        enableDevTools: false,
-      );
+      ).run();
 
       expect(result, 0);
       expect(memoryFileSystem.directory('test_output_dir').childFile('start_up_info.json').existsSync(), true);

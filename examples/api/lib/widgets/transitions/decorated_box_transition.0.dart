@@ -37,7 +37,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       color: const Color(0xFFFFFFFF),
       border: Border.all(style: BorderStyle.none),
       borderRadius: BorderRadius.circular(60.0),
-      shape: BoxShape.rectangle,
       boxShadow: const <BoxShadow>[
         BoxShadow(
           color: Color(0x66666666),
@@ -74,7 +73,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       color: Colors.white,
       child: Center(
         child: DecoratedBoxTransition(
-          position: DecorationPosition.background,
           decoration: decorationTween.animate(_controller),
           child: Container(
             width: 200,

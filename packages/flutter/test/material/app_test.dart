@@ -631,7 +631,6 @@ void main() {
         darkTheme: ThemeData(
           brightness: Brightness.dark,
         ),
-        themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -657,7 +656,6 @@ void main() {
         darkTheme: ThemeData(
           brightness: Brightness.dark,
         ),
-        themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);

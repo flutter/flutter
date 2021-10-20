@@ -6,6 +6,7 @@ import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
 import 'conductor_status.dart';
+import 'create_release_substeps.dart';
 import 'substeps.dart';
 
 /// Displays the progression and each step of the release from the conductor.
@@ -23,7 +24,7 @@ class MainProgression extends StatefulWidget {
   final String stateFilePath;
 
   @override
-  MainProgressionState createState() => MainProgressionState();
+  State<MainProgression> createState() => MainProgressionState();
 
   static const List<String> _stepTitles = <String>[
     'Initialize a New Flutter Release',
@@ -37,7 +38,7 @@ class MainProgression extends StatefulWidget {
 class MainProgressionState extends State<MainProgression> {
   int _completedStep = 0;
 
-  // Move forward the stepper to the next step of the release.
+  /// Move forward the stepper to the next step of the release.
   void nextStep() {
     if (_completedStep < MainProgression._stepTitles.length - 1) {
       setState(() {
@@ -74,13 +75,9 @@ class MainProgressionState extends State<MainProgression> {
               releaseState: widget.releaseState,
               stateFilePath: widget.stateFilePath,
             ),
+            const SizedBox(height: 20.0),
             Stepper(
-              controlsBuilder: (BuildContext context, ControlsDetails details) {
-                return Row(
-                  children: const <Widget>[],
-                );
-              },
-              type: StepperType.vertical,
+              controlsBuilder: (BuildContext context, ControlsDetails details) => Row(),
               physics: const ScrollPhysics(),
               currentStep: _completedStep,
               onStepContinue: nextStep,
@@ -89,7 +86,7 @@ class MainProgressionState extends State<MainProgression> {
                   title: Text(MainProgression._stepTitles[0]),
                   content: Column(
                     children: <Widget>[
-                      ConductorSubsteps(nextStep: nextStep),
+                      CreateReleaseSubsteps(nextStep: nextStep),
                     ],
                   ),
                   isActive: true,
@@ -127,9 +124,7 @@ class MainProgressionState extends State<MainProgression> {
                 ),
                 Step(
                   title: Text(MainProgression._stepTitles[4]),
-                  content: Column(
-                    children: const <Widget>[],
-                  ),
+                  content: Column(),
                   isActive: true,
                   state: handleStepState(4),
                 ),

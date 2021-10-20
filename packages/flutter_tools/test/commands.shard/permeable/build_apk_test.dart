@@ -157,6 +157,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -186,6 +187,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Psplit-debug-info=${tempDir.path}',
           '-Ptrack-widget-creation=true',
@@ -216,6 +218,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Pextra-front-end-options=foo,bar',
           '-Ptrack-widget-creation=true',
@@ -246,6 +249,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -281,6 +285,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -335,12 +340,12 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.
@@ -382,12 +387,12 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.

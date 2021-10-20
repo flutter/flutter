@@ -91,10 +91,8 @@ class FlutterCommandResult {
         return 'fail';
       case ExitStatus.killed:
         return 'killed';
-      default:
-        assert(false);
-        return null;
     }
+    return null; // dead code, remove with null safety migration
   }
 }
 
@@ -817,6 +815,16 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Initializes the resident compiler with a specific kernel file instead of '
         'the default cached location.',
       hide: hide,
+    );
+  }
+
+  void addMultidexOption({ bool hide = false }) {
+    argParser.addFlag('multidex',
+      negatable: true,
+      defaultsTo: true,
+      help: 'When enabled, indicates that the app should be built with multidex support. This '
+            'flag adds the dependencies for multidex when the minimum android sdk is 20 or '
+            'below. For android sdk versions 21 and above, multidex support is native.',
     );
   }
 

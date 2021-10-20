@@ -272,7 +272,6 @@ class OutlinedButton extends ButtonStyleButton {
       maximumSize: Size.infinite,
       side: BorderSide(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-        width: 1,
       ),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,

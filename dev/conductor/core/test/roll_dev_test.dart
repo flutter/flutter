@@ -174,7 +174,7 @@ void main() {
         ),
         false,
       );
-      expect(stdio.logs.join('').contains(nextVersion), true);
+      expect(stdio.logs.join().contains(nextVersion), true);
     });
 
     test("exits with exception if --skip-tagging is provided but commit isn't already tagged", () {

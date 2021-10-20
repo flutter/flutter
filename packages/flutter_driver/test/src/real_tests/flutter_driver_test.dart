@@ -82,7 +82,7 @@ void main() {
       });
 
       test('logFilePathName was set when a new driver was created', () {
-        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
         logFile = File(driver.logFilePathName);
         expect(logFile.path, endsWith('.log'));
       });
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: false);
+      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });
@@ -783,7 +783,7 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
+      driver = WebFlutterDriver.connectedTo(fakeConnection);
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });

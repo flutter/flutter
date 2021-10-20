@@ -40,7 +40,7 @@ class DemoButton extends StatelessWidget {
   final double order;
 
   void _handleOnPressed() {
-    print('Button $name pressed.');
+    debugPrint('Button $name pressed.');
     debugDumpFocusTree();
   }
 

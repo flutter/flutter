@@ -35,7 +35,7 @@ class MyStatelessWidget extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.blue.withAlpha(30),
           onTap: () {
-            print('Card tapped.');
+            debugPrint('Card tapped.');
           },
           child: const SizedBox(
             width: 300,

@@ -889,7 +889,7 @@ class CatmullRomCurve extends Curve {
       // and (1, 1), respectively.
       <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)],
       tension: tension,
-    ).generateSamples(start: 0.0, end: 1.0, tolerance: 1e-12).toList();
+    ).generateSamples(tolerance: 1e-12).toList();
   }
 
   /// A static accumulator for assertion failures. Not used in release mode.

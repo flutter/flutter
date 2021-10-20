@@ -122,42 +122,39 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const Expanded(
-              child: Text(
-                '(',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text('(', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: areaCodeFocusNode,
-                  controller: areaCodeController,
-                  maxLength: 3),
-              flex: 3),
+            flex: 3,
+            child: DigitInput(
+              focusNode: areaCodeFocusNode,
+              controller: areaCodeController,
+              maxLength: 3,
+            ),
+          ),
           const Expanded(
-              child: Text(
-                ')',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text(')', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: prefixFocusNode,
-                  controller: prefixController,
-                  maxLength: 3),
-              flex: 3),
+            flex: 3,
+            child: DigitInput(
+              focusNode: prefixFocusNode,
+              controller: prefixController,
+              maxLength: 3,
+            ),
+          ),
           const Expanded(
-              child: Text(
-                '-',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text('-', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: lineNumberFocusNode,
-                  controller: lineNumberController,
-                  textInputAction: TextInputAction.done,
-                  maxLength: 4),
-              flex: 4),
+            flex: 4,
+            child: DigitInput(
+              focusNode: lineNumberFocusNode,
+              controller: lineNumberController,
+              textInputAction: TextInputAction.done,
+              maxLength: 4,
+            ),
+          ),
         ],
       ),
     );

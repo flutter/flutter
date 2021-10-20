@@ -47,7 +47,17 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
     case TargetPlatform.android_x86:
       targetPlatform = TargetPlatform.android;
       break;
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.ios:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       break;
   }
   final Map<String, Object> manifest = <String, Object>{

@@ -854,7 +854,7 @@ class WebDevFS implements DevFS {
       fs: globals.fs,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
 
     // Only update the last compiled time if we successfully compiled.

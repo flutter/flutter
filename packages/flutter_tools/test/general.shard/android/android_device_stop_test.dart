@@ -20,7 +20,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       processManager: FakeProcessManager.any(),
     );
 

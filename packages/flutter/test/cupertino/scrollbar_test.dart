@@ -482,7 +482,6 @@ void main() {
           child: PrimaryScrollController(
             controller: controller,
             child: CupertinoScrollbar(
-              isAlwaysShown: false,
               controller: controller,
               child: const SingleChildScrollView(
                 child: SizedBox(

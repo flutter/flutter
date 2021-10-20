@@ -39,7 +39,6 @@ final CatmullRomSpline path = CatmullRomSpline(
   ],
   startHandle: const Offset(0.93, 0.93),
   endHandle: const Offset(0.18, 0.23),
-  tension: 0.0,
 );
 
 class FollowCurve2D extends StatefulWidget {
@@ -74,7 +73,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
     animation = CurvedAnimation(parent: controller, curve: widget.curve);
     // Have the controller repeat indefinitely.  If you want it to "bounce" back
     // and forth, set the reverse parameter to true.
-    controller.repeat(reverse: false);
+    controller.repeat();
     controller.addListener(() => setState(() {}));
   }
 
@@ -107,7 +106,6 @@ class MyStatelessWidget extends StatelessWidget {
       alignment: Alignment.center,
       child: FollowCurve2D(
         path: path,
-        curve: Curves.easeInOut,
         duration: const Duration(seconds: 3),
         child: CircleAvatar(
           backgroundColor: Colors.yellow,

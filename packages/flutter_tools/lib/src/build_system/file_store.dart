@@ -236,7 +236,7 @@ class FileStore {
     final Md5Hash hash = Md5Hash();
     RandomAccessFile? openFile;
     try {
-      openFile = file.openSync(mode: FileMode.read);
+      openFile = file.openSync();
       int bytes = 0;
       while (bytes < fileBytes) {
         final int bytesRead = openFile.readIntoSync(_readBuffer);

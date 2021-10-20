@@ -549,7 +549,6 @@ class _RailDestination extends StatelessWidget {
           width: minWidth,
           height: minWidth,
           child: Align(
-            alignment: Alignment.center,
             child: themedIcon,
           ),
         );
@@ -663,7 +662,6 @@ class _RailDestination extends StatelessWidget {
         children: <Widget>[
           Material(
             type: MaterialType.transparency,
-            clipBehavior: Clip.none,
             child: InkResponse(
               onTap: onTap,
               onHover: (_) {},

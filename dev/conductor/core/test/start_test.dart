@@ -82,7 +82,21 @@ void main() {
         operatingSystem: 'windows',
       );
       await expectLater(
-        () async => runner.run(<String>['start']),
+        () async => runner.run(<String>[
+          'start',
+          '--$kFrameworkMirrorOption',
+          frameworkMirror,
+          '--$kEngineMirrorOption',
+          engineMirror,
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          'dev',
+          '--$kStateOption',
+          '/path/to/statefile.json',
+          '--$kIncrementOption',
+          'y',
+        ]),
         throwsExceptionWith(
           'Error! This tool is only supported on macOS and Linux',
         ),
@@ -236,12 +250,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 
@@ -296,7 +310,7 @@ void main() {
       const String revision3 = '123abc';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-      const String previousVersion = '1.2.0-1.0.pre';
+      const String previousVersion = '1.2.0-3.0.pre';
       const String nextVersion = '1.2.0';
       const String incrementLevel = 'z';
 
@@ -420,12 +434,12 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision,
           ),
-          ...engineCommands,
-          ...frameworkCommands,
         ],
       );
 

@@ -132,7 +132,7 @@ String generateDateFormattingLogic(Message message) {
         .replaceAll('@(format)', generateString(placeholderFormat));
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
 String generateNumberFormattingLogic(Message message) {
@@ -174,7 +174,7 @@ String generateNumberFormattingLogic(Message message) {
       }
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
 String _generatePluralMethod(Message message, String translationForMessage) {

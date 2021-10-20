@@ -272,7 +272,7 @@ void main() {
 
       final Matrix4 expectedTransform = Matrix4.identity()
         ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
-        ..translate(-topLeft.dx, -topLeft.dy, 0);
+        ..translate(-topLeft.dx, -topLeft.dy);
 
       expect(center, isNot(const Offset(50, 50)));
 
@@ -350,7 +350,7 @@ void main() {
       const Offset offset = Offset((800 - 100) / 2, (600 - 100) / 2);
       final Matrix4 expectedTransform = Matrix4.identity()
         ..rotateZ(-math.pi / 2)
-        ..translate(-offset.dx, -offset.dy, 0.0);
+        ..translate(-offset.dx, -offset.dy);
 
       final Offset localDownPosition = const Offset(50, 50) + const Offset(5, -10);
       expect(down.localPosition, within(distance: 0.001, from: localDownPosition));

@@ -79,6 +79,10 @@ abstract class FlutterTestDriver {
       lastTime = time;
     }
     if (_printDebugOutputToStdOut) {
+      // This is the one place in this file that can call print. It is gated by
+      // _printDebugOutputToStdOut which should not be set to true in CI; it is
+      // intended only for use in local debugging.
+      // ignore: avoid_print
       print('$time$_logPrefix$line');
     }
   }
@@ -609,7 +613,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);
           if (!startPaused) {
-            await resume(waitForNextPause: false);
+            await resume();
           }
         }
 
@@ -634,7 +638,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   Future<void> hotRestart({ bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
   Future<void> hotReload({ bool debounce = false, int debounceDurationOverrideMs }) =>
-      _restart(fullRestart: false, debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
+      _restart(debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
 
   Future<void> scheduleFrame() async {
     if (_currentRunningAppId == null) {
@@ -803,7 +807,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       if (beforeStart != null) {
         await beforeStart();
       }
-      await resume(waitForNextPause: false);
+      await resume();
     }
   }
 

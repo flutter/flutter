@@ -13,8 +13,8 @@ void main() {
     const TextSpan a2 = TextSpan(text: 'a');
     const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
     const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    const TextSpan c1 = TextSpan(text: null);
-    const TextSpan c2 = TextSpan(text: null);
+    const TextSpan c1 = TextSpan();
+    const TextSpan c2 = TextSpan();
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);

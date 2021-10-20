@@ -7,9 +7,10 @@ import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+
+import '../common.dart';
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.

@@ -357,7 +357,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late AnimationController _toolbarController;
+  late final AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   /// Retrieve current value.
@@ -496,7 +496,7 @@ class TextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar!.remove();
+    _toolbar?.remove();
     _toolbar = null;
   }
 
@@ -1587,7 +1587,13 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
-    } catch (stacktrace) {
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking if the clipboard has strings'),
+      ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {

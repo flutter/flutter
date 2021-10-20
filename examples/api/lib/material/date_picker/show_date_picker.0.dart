@@ -64,8 +64,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.calendarOnly,
           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
-          firstDate: DateTime(2021, 1, 1),
-          lastDate: DateTime(2022, 1, 1),
+          firstDate: DateTime(2021),
+          lastDate: DateTime(2022),
         );
       },
     );

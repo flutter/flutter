@@ -45,7 +45,7 @@ class MyStatelessWidget extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('FAB pressed.');
+          debugPrint('FAB pressed.');
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

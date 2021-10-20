@@ -416,7 +416,9 @@ class FlutterDevice {
     }
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    final Map<String, dynamic> platformArgs = <String, dynamic>{
+      'multidex': hotRunner.multidexEnabled,
+    };
 
     await startEchoingDeviceLog();
 
@@ -492,6 +494,7 @@ class FlutterDevice {
     if (coldRunner.traceStartup != null) {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
+    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
@@ -560,7 +563,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -1467,9 +1470,19 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }
 
 /// Redirects terminal commands to the correct resident runner methods.
@@ -1607,7 +1620,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        final OperationResult result = await residentRunner.restart();
         if (result.fatal) {
           throwToolExit(result.message);
         }

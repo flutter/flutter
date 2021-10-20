@@ -49,7 +49,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       },
       side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
-          return const BorderSide(width: 1, color: Colors.red);
+          return const BorderSide(color: Colors.red);
         }
         return null; // Defer to default value on the theme or widget.
       }),

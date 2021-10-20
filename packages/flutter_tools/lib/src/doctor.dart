@@ -24,7 +24,7 @@ import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
-import 'globals.dart' as globals;
+import 'globals_null_migrated.dart' as globals;
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
