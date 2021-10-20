@@ -49,7 +49,6 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.',
     );
     try {
-      print(StackTrace.current);
       _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
