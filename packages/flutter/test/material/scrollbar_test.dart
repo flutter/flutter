@@ -1216,25 +1216,23 @@ void main() {
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     int tapCount = 0;
     final ScrollController scrollController = ScrollController();
-    final List<int> list = List<int>.generate(40, (int index) => index);
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          color: Colors.transparent,
-          child: PrimaryScrollController(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
             controller: scrollController,
-            child: Scrollbar(
-              isAlwaysShown: true,
-              controller: scrollController,
-              child: ListView.builder(
-                itemExtent: 100.0,
-                itemCount: list.length,
-                dragStartBehavior: DragStartBehavior.down,
-                itemBuilder: (BuildContext context, int index) => ListTile(
-                  title: Text(list[index].toString()),
-                  onTap: () {
-                    tapCount += 1;
-                  },
+            child: SingleChildScrollView(
+              dragStartBehavior: DragStartBehavior.down,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  tapCount += 1;
+                },
+                child: const SizedBox(
+                  width: 4000.0,
+                  height: 4000.0,
                 ),
               ),
             ),
