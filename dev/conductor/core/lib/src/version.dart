@@ -256,7 +256,7 @@ class Version {
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
   void ensureValid(String candidateBranch, String incrementLetter) {
-    if (!const <String>{'x', 'y', 'z', 'm', 'n'}.contains(incrementLetter)) {
+    if (!const <String>{'y', 'z', 'm', 'n'}.contains(incrementLetter)) {
       throw ConductorException('Invalid incrementLetter: $incrementLetter');
     }
     final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
