@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'binding.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard.dart';
@@ -725,10 +724,10 @@ class KeyEventManager {
   /// below.
   ///
   /// For most common applications, which use [WidgetsBinding], this field
-  /// is set by the focus system (see [FocusManger]) on startup and should not
+  /// is set by the focus system (see `FocusManger`) on startup and should not
   /// be change explicitly.
   ///
-  /// If you are not using the [FocusManager] to manage focus, set this
+  /// If you are not using the focus system to manage focus, set this
   /// attribute to a [KeyMessageHandler] that returns true if the propagation
   /// on the platform should not be continued. If this field is null, key events
   /// will be assumed to not have been handled by Flutter.
@@ -751,9 +750,6 @@ class KeyEventManager {
   ///
   /// See also:
   ///
-  ///  * [Focus.onKey] and [Focus.onKeyEvent], which are [Focus] callback
-  ///    attributes that will be given key events based on the current primary
-  ///    focus.
   ///  * [HardwareKeyboard.addHandler], which accepts multiple global handlers
   ///    to process [KeyEvent]s
   KeyMessageHandler? keyMessageHandler;
