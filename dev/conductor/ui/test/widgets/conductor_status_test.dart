@@ -5,7 +5,6 @@
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:conductor_ui/widgets/conductor_status.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -119,20 +118,6 @@ void main() {
       expect(find.text(engineCherrypick1), findsOneWidget);
       expect(find.text(engineCherrypick2), findsOneWidget);
       expect(find.text(frameworkCherrypick), findsOneWidget);
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.addPointer(location: Offset.zero);
-
-      /// Tests the tooltip is displaying status explanations upon cursor hovering.
-      ///
-      /// Before hovering, status explanations are not found.
-      /// When the cursor hovers over the info icon, the explanations are displayed and found.
-      expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsNothing);
-      await tester.pump();
-      await gesture.moveTo(tester.getCenter(find.byKey(const Key('engineConductorStatusTooltip'))));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsOneWidget);
     });
 
     testWidgets('Conductor_status displays correct status with a null state file except a releaseChannel',
@@ -166,20 +151,6 @@ void main() {
       }
       expect(find.text(releaseChannel), findsOneWidget);
       expect(find.text('Unknown'), findsNWidgets(11));
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.addPointer(location: Offset.zero);
-
-      /// Tests the tooltip is displaying status explanations upon cursor hovering.
-      ///
-      /// Before hovering, status explanations are not found.
-      /// When the cursor hovers over the info icon, the explanations are displayed and found.
-      expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsNothing);
-      await tester.pump();
-      await gesture.moveTo(tester.getCenter(find.byKey(const Key('engineConductorStatusTooltip'))));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('PENDING: The cherrypick has not yet been applied.'), findsOneWidget);
     });
 
     testWidgets('Repo Info section displays corresponding info in a dropdown fashion', (WidgetTester tester) async {
