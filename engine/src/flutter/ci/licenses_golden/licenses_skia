@@ -1,4 +1,4 @@
-Signature: 8b2b35b7a94f960ac918940efc5479c8
+Signature: 45ce71a10cfae955c7bd5df12d3037cf
 
 UNUSED LICENSES:
 
@@ -4076,7 +4076,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/SmallPathShapeData.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/SmallPathShapeData.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/MiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeIterator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/VectorXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/WangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTControl.h
