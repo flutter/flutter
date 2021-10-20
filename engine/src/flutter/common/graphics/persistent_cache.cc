@@ -253,7 +253,7 @@ std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() const {
     rapidjson::ParseResult parse_result =
         json_doc.Parse(reinterpret_cast<const char*>(mapping->GetMapping()),
                        mapping->GetSize());
-    if (parse_result != rapidjson::ParseErrorCode::kParseErrorNone) {
+    if (parse_result.IsError()) {
       FML_LOG(ERROR) << "Failed to parse json file: " << kAssetFileName;
     } else {
       for (auto& item : json_doc["data"].GetObject()) {
