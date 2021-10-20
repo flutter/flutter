@@ -497,11 +497,13 @@ void main() {
     expect(tester.getBottomRight(buttonsBar), const Offset(770.0, 560.0));
   });
 
-  testWidgets('Persistent bottom buttons with BottomNav pad properly', (WidgetTester tester) async {
+  testWidgets('persistentFooterButtons with bottomNavigationBar apply SafeArea properly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/92039
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(
+            // Representing a navigational notch at the bottom of the screen
             padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 40.0),
           ),
           child: Scaffold(
@@ -535,6 +537,12 @@ void main() {
     );
 
     final Finder buttonsBar = find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
+    // The SafeArea of the persistentFooterButtons should not pad below them
+    // since they are stacked on top of the bottomNavigationBar. The
+    // bottomNavigationBar will handle the padding instead.
+    // 488 represents the height of the persistentFooterButtons, with the bottom
+    // of the screen being 600. If the 40 pixels of bottom padding were being
+    // errantly applied, the buttons would be higher (448).
     expect(tester.getTopLeft(buttonsBar), const Offset(0.0, 488.0));
   });
 
