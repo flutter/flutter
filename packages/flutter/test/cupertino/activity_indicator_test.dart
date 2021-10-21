@@ -181,8 +181,7 @@ void main() {
       find.byType(CupertinoActivityIndicator),
       paints
         ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
-                color: const Color(0x935d3fd3),
-                ),
+                color: const Color(0x935d3fd3)),
     );
   });
 }
