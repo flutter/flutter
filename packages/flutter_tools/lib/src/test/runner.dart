@@ -176,6 +176,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               browserFinder: findChromeExecutable,
               logger: globals.logger,
             ),
+            cache: globals.cache,
           );
         },
       );
