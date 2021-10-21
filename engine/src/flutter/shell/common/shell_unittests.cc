@@ -3150,11 +3150,9 @@ TEST_F(ShellTest, UIWorkAfterOnPlatformViewDestroyed) {
   // Flush the UI task runner to make sure we process the render/scheduleFrame
   // request.
   fml::AutoResetWaitableEvent ui_flush_latch;
-  fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetUITaskRunner(),
-                                    [&ui_flush_latch]() {
-                                      FML_LOG(ERROR) << "123";
-                                      ui_flush_latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetUITaskRunner(),
+      [&ui_flush_latch]() { ui_flush_latch.Signal(); });
   ui_flush_latch.Wait();
 
   DestroyShell(std::move(shell));
