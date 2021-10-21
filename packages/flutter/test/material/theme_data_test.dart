@@ -666,14 +666,23 @@ void main() {
   test('ThemeData diagnostics include all properties', () {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
-      // COLORS
+      // GENERAL CONFIGURATION
+      'androidOverscrollIndicator',
+      'applyElevationOverlayColor',
+      'cupertinoOverrideTheme',
+      'inputDecorationTheme',
+      'materialTapTargetSize',
+      'pageTransitionsTheme',
+      'platform',
+      'scrollbarTheme',
+      'splashFactory',
+      'visualDensity',
+      // COLOR
       'colorScheme',
       'primaryColor',
       'primaryColorBrightness',
       'primaryColorLight',
       'primaryColorDark',
-      'accentColor',
-      'accentColorBrightness',
       'focusColor',
       'hoverColor',
       'shadowColor',
@@ -687,11 +696,7 @@ void main() {
       'selectedRowColor',
       'unselectedWidgetColor',
       'disabledColor',
-      'buttonColor',
       'secondaryHeaderColor',
-      'textSelectionColor',
-      'cursorColor',
-      'textSelectionHandleColor',
       'backgroundColor',
       'dialogBackgroundColor',
       'indicatorColor',
@@ -702,10 +707,8 @@ void main() {
       'typography',
       'textTheme',
       'primaryTextTheme',
-      'accentTextTheme',
       'iconTheme',
       'primaryIconTheme',
-      'accentIconTheme',
       // COMPONENT THEMES
       'appBarTheme',
       'bannerTheme',
@@ -739,19 +742,17 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
-      // OTHER CONFIGURATION
-      'androidOverscrollIndicator',
-      'applyElevationOverlayColor',
-      'cupertinoOverrideTheme',
-      'fixTextFieldOutlineLabel',
-      'inputDecorationTheme',
-      'materialTapTargetSize',
-      'pageTransitionsTheme',
-      'platform',
-      'scrollbarTheme',
-      'splashFactory',
+      // DEPRECATED (newest deprecations at the bottom)
       'useTextSelectionTheme',
-      'visualDensity',
+      'textSelectionColor',
+      'cursorColor',
+      'textSelectionHandleColor',
+      'accentColor',
+      'accentColorBrightness',
+      'accentTextTheme',
+      'accentIconTheme',
+      'buttonColor',
+      'fixTextFieldOutlineLabel',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
