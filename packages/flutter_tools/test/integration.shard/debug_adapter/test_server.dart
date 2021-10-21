@@ -10,7 +10,6 @@ import 'package:dds/src/dap/logging.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/server.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
-import 'package:pedantic/pedantic.dart';
 
 /// Enable to run from local source when running out-of-process (useful in
 /// development to avoid having to keep rebuilding the flutter tool).

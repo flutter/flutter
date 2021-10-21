@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';

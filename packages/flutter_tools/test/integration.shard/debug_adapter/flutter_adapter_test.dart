@@ -4,10 +4,11 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:pedantic/pedantic.dart';
 
 import '../../src/common.dart';
 import '../test_data/basic_project.dart';
