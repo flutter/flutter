@@ -232,11 +232,11 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    /// [colorScheme] is the preferred way to configure colors. The other color
-    /// properties will gradually be phased out, see
-    /// https://github.com/flutter/flutter/issues/91772.
+    // [colorScheme] is the preferred way to configure colors. The other color
+    // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
+    // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
-    Brightness? brightness, // TODO(hansmuller): Deprecate this https://github.com/flutter/flutter/issues/91772
+    Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
@@ -627,9 +627,9 @@ class ThemeData with Diagnosticable {
     required this.splashFactory,
     required this.visualDensity,
     // COLOR
-    /// [colorScheme] is the preferred way to configure colors. The other color
-    /// properties will gradually be phased out, see
-    /// https://github.com/flutter/flutter/issues/91772.
+    // [colorScheme] is the preferred way to configure colors. The other color
+    // properties will gradually be phased out, see
+    // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.primaryColor,
     required this.primaryColorBrightness,
@@ -1479,9 +1479,9 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    /// [colorScheme] is the preferred way to configure colors. The other color
-    /// properties will gradually be phased out, see
-    /// https://github.com/flutter/flutter/issues/91772.
+    // [colorScheme] is the preferred way to configure colors. The other color
+    // properties will gradually be phased out, see
+    // https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
     Brightness? brightness,
     Color? primaryColor,
