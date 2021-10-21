@@ -144,6 +144,11 @@ class FlutterWindowsEngine {
   // given |texture_id|.
   bool MarkExternalTextureFrameAvailable(int64_t texture_id);
 
+  // Dispatches a semantics action to the specified semantics node.
+  bool DispatchSemanticsAction(uint64_t id,
+                               FlutterSemanticsAction action,
+                               const std::vector<uint8_t>& data);
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
