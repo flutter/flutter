@@ -616,6 +616,12 @@ class DevFS {
     });
 
     if (bundle != null) {
+      // Mark processing of bundle started for testability of starting the compile
+      // before processing bundle.
+      _logger.printTrace('Processing bundle.');
+      // await null to give time for telling the compiler to compile.
+      await null;
+
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -636,6 +642,10 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
         }
       });
+
+      // Mark processing of bundle done for testability of starting the compile
+      // before processing bundle.
+      _logger.printTrace('Bundle processing done.');
     }
     final CompilerOutput? compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
