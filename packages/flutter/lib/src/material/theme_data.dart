@@ -932,7 +932,7 @@ class ThemeData with Diagnosticable {
   // hashValues() and in the raw constructor and in the order of fields in
   // the class and in the lerp() method.
 
-  /// GENERAL CONFIGURATION
+  // GENERAL CONFIGURATION
 
   /// Specifies which overscroll indicator to use on [TargetPlatform.android].
   ///
@@ -1081,7 +1081,7 @@ class ThemeData with Diagnosticable {
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
-  /// COLOR
+  // COLOR
 
   /// A set of twelve colors that can be used to configure the
   /// color properties of most components.
@@ -1200,7 +1200,7 @@ class ThemeData with Diagnosticable {
   /// [Switch], [Radio], and [Checkbox].
   final Color toggleableActiveColor;
 
-  /// TYPOGRAPHY & ICONOGRAPHY
+  // TYPOGRAPHY & ICONOGRAPHY
 
   /// The color and geometry [TextTheme] values used to configure [textTheme].
   ///
@@ -1219,7 +1219,7 @@ class ThemeData with Diagnosticable {
   /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
 
-  /// COMPONENT THEMES
+  // COMPONENT THEMES
 
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
