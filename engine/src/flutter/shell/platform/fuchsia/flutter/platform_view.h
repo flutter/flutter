@@ -71,6 +71,7 @@ class PlatformView : public flutter::PlatformView,
       fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
       fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
       fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source,
       fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
       fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
           view_ref_focused,

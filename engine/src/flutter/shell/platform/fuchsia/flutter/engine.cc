@@ -146,12 +146,14 @@ void Engine::Initialize(
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
   fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused;
   fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source;
+  fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source;
 
   fuchsia::ui::composition::ViewBoundProtocols flatland_view_protocols;
   if (use_flatland) {
     flatland_view_protocols.set_view_focuser(focuser.NewRequest());
     flatland_view_protocols.set_view_ref_focused(view_ref_focused.NewRequest());
     flatland_view_protocols.set_touch_source(touch_source.NewRequest());
+    flatland_view_protocols.set_mouse_source(mouse_source.NewRequest());
   } else {
     gfx_protocols.set_view_focuser(focuser.NewRequest());
     gfx_protocols.set_view_ref_focused(view_ref_focused.NewRequest());
@@ -370,6 +372,7 @@ void Engine::Initialize(
            focuser = std::move(focuser),
            view_ref_focused = std::move(view_ref_focused),
            touch_source = std::move(touch_source),
+           mouse_source = std::move(mouse_source),
            on_session_listener_error_callback =
                std::move(on_session_listener_error_callback),
            on_enable_wireframe_callback =
@@ -445,7 +448,8 @@ void Engine::Initialize(
                       shell, shell.GetTaskRunners(), std::move(view_ref),
                       std::move(external_view_embedder), std::move(ime_service),
                       std::move(keyboard), std::move(touch_source),
-                      std::move(focuser), std::move(view_ref_focused),
+                      std::move(mouse_source), std::move(focuser),
+                      std::move(view_ref_focused),
                       std::move(parent_viewport_watcher),
                       std::move(on_enable_wireframe_callback),
                       std::move(on_create_flatland_view_callback),
@@ -462,7 +466,8 @@ void Engine::Initialize(
                   shell, shell.GetTaskRunners(), std::move(view_ref),
                   std::move(external_view_embedder), std::move(ime_service),
                   std::move(keyboard), std::move(touch_source),
-                  std::move(focuser), std::move(view_ref_focused),
+                  std::move(mouse_source), std::move(focuser),
+                  std::move(view_ref_focused),
                   std::move(session_listener_request),
                   std::move(on_session_listener_error_callback),
                   std::move(on_enable_wireframe_callback),

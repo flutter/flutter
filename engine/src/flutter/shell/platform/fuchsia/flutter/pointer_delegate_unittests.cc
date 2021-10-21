@@ -15,6 +15,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "pointer_delegate.h"
+#include "tests/fakes/mouse_source.h"
 #include "tests/fakes/touch_source.h"
 #include "tests/pointer_event_utility.h"
 
@@ -32,7 +33,7 @@ using fup_ViewParameters = fuchsia::ui::pointer::ViewParameters;
 
 constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {20, 20}}};
 constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-constexpr fup_TouchIxnId kIxnOne = {.device_id = 0u,
+constexpr fup_TouchIxnId kIxnOne = {.device_id = 1u,
                                     .pointer_id = 1u,
                                     .interaction_id = 2u};
 
@@ -42,18 +43,22 @@ class PointerDelegateTest : public ::testing::Test {
  protected:
   PointerDelegateTest() : loop_(&kAsyncLoopConfigAttachToCurrentThread) {
     touch_source_ = std::make_unique<FakeTouchSource>();
+    mouse_source_ = std::make_unique<FakeMouseSource>();
     pointer_delegate_ = std::make_unique<flutter_runner::PointerDelegate>(
-        touch_source_bindings_.AddBinding(touch_source_.get()));
+        touch_source_bindings_.AddBinding(touch_source_.get()),
+        mouse_source_bindings_.AddBinding(mouse_source_.get()));
   }
 
   void RunLoopUntilIdle() { loop_.RunUntilIdle(); }
 
   std::unique_ptr<FakeTouchSource> touch_source_;
+  std::unique_ptr<FakeMouseSource> mouse_source_;
   std::unique_ptr<flutter_runner::PointerDelegate> pointer_delegate_;
 
  private:
   async::Loop loop_;
   fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_source_bindings_;
+  fidl::BindingSet<fuchsia::ui::pointer::MouseSource> mouse_source_bindings_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PointerDelegateTest);
 };
@@ -611,7 +616,7 @@ TEST_F(PointerDelegateTest, Protocol_PointersAreIndependent) {
   RunLoopUntilIdle();  // Server gets watch call.
 
   constexpr fup_TouchIxnId kIxnTwo = {
-      .device_id = 0u, .pointer_id = 2u, .interaction_id = 2u};
+      .device_id = 1u, .pointer_id = 2u, .interaction_id = 2u};
 
   // Fuchsia ptr1 ADD and ptr2 ADD, no grant result for either - buffer them.
   std::vector<fup_TouchEvent> events =
@@ -641,11 +646,17 @@ TEST_F(PointerDelegateTest, Protocol_PointersAreIndependent) {
   touch_source_->ScheduleCallback(std::move(events));
   RunLoopUntilIdle();
 
+  // Note: Fuchsia's device and pointer IDs (both 32 bit) are coerced together
+  // to fit in Flutter's 64-bit device ID. However, Flutter's pointer_identifier
+  // is not set by platform runner code - PointerDataCaptureConverter (PDPC)
+  // sets it.
   ASSERT_TRUE(pointers.has_value());
   ASSERT_EQ(pointers.value().size(), 2u);
-  EXPECT_EQ(pointers.value()[0].pointer_identifier, 2);
+  EXPECT_EQ(pointers.value()[0].pointer_identifier, 0);  // reserved for PDPC
+  EXPECT_EQ(pointers.value()[0].device, (int64_t)((1ul << 32) | 2u));
   EXPECT_EQ(pointers.value()[0].change, flutter::PointerData::Change::kAdd);
-  EXPECT_EQ(pointers.value()[1].pointer_identifier, 2);
+  EXPECT_EQ(pointers.value()[1].pointer_identifier, 0);  // reserved for PDPC
+  EXPECT_EQ(pointers.value()[1].device, (int64_t)((1ul << 32) | 2u));
   EXPECT_EQ(pointers.value()[1].change, flutter::PointerData::Change::kDown);
   pointers = {};
 
@@ -659,9 +670,11 @@ TEST_F(PointerDelegateTest, Protocol_PointersAreIndependent) {
 
   ASSERT_TRUE(pointers.has_value());
   ASSERT_EQ(pointers.value().size(), 2u);
-  EXPECT_EQ(pointers.value()[0].pointer_identifier, 1);
+  EXPECT_EQ(pointers.value()[0].pointer_identifier, 0);  // reserved for PDPC
+  EXPECT_EQ(pointers.value()[0].device, (int64_t)((1ul << 32) | 1u));
   EXPECT_EQ(pointers.value()[0].change, flutter::PointerData::Change::kAdd);
-  EXPECT_EQ(pointers.value()[1].pointer_identifier, 1);
+  EXPECT_EQ(pointers.value()[1].pointer_identifier, 0);  // reserved for PDPC
+  EXPECT_EQ(pointers.value()[1].device, (int64_t)((1ul << 32) | 1u));
   EXPECT_EQ(pointers.value()[1].change, flutter::PointerData::Change::kDown);
   pointers = {};
 }
