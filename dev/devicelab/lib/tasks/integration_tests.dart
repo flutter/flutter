@@ -29,6 +29,14 @@ TaskFunction createFlavorsTest() {
   );
 }
 
+TaskFunction createIntegrationTestFlavorsTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/flavors',
+    'lib/main.dart',
+    extraOptions: <String>['--flavor', 'paid'],
+  );
+}
+
 TaskFunction createExternalUiIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_ui',
@@ -116,9 +124,10 @@ TaskFunction createEndToEndKeyboardTextfieldTest() {
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example,A',
-    '--dart-define=test.valueB=Value',
+    'lib/defines.dart',
+    extraOptions: <String>[
+      '--dart-define=test.valueA=Example,A',
+      '--dart-define=test.valueB=Value',
     ],
   );
 }
@@ -134,9 +143,8 @@ class DriverTest {
   DriverTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-    }
-  );
+    this.extraOptions = const <String>[],
+  });
 
   final String testDirectory;
   final String testTarget;
@@ -166,10 +174,15 @@ class DriverTest {
 }
 
 class IntegrationTest {
-  IntegrationTest(this.testDirectory, this.testTarget);
+  IntegrationTest(
+    this.testDirectory,
+    this.testTarget, {
+    this.extraOptions = const <String>[],
+  });
 
   final String testDirectory;
   final String testTarget;
+  final List<String> extraOptions;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -183,6 +196,7 @@ class IntegrationTest {
         '-d',
         deviceId,
         testTarget,
+        ...extraOptions,
       ];
       await flutter('test', options: options);
 
