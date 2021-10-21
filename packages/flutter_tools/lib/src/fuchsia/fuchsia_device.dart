@@ -70,7 +70,6 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
     ipv6: true,
     disableServiceAuthCodes: disableServiceAuthCodes,
     logger: globals.logger,
-    cacheStartupProfile: true,
   );
 }
 
