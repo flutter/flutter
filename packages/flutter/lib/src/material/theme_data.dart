@@ -1000,7 +1000,9 @@ class ThemeData with Diagnosticable {
 
   /// Configures the hit test size of certain Material widgets.
   ///
-  /// Defaults to a [platform]-appropriate size.
+  /// Defaults to a [platform]-appropriate size: [MaterialTapTargetSize.padded]
+  /// on mobile platforms, [MaterialTapTargetSize.shrinkWrap] on desktop 
+  /// platforms.
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
