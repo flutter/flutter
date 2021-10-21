@@ -45,13 +45,18 @@ enum ScrollbarOrientation {
   bottom,
 }
 
-/// Doc
+/// How a scrollbar behaves in infinte [ScrollView]s.
 enum InfiniteScrollBehavior {
-  /// Doc
+  /// The scrollbar will build up additioanl extent as it reaches the end of the
+  /// currently assumed extent, simulating the loading of additional content.
   chunk,
 
-  /// Doc
+  /// The scrollbar will always assume a constant extent ahead of it along the
+  /// scrollbar track.
   continuous,
+
+  /// A scrollbar will not be rendered in infinite [ScrollView]s.
+  none,
 }
 
 /// Paints a scrollbar's track and thumb.
@@ -99,7 +104,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
-    InfiniteScrollBehavior infiniteBehavior = InfiniteScrollBehavior.chunk,
+    InfiniteScrollBehavior infiniteBehavior = InfiniteScrollBehavior.continuous,
   }) : assert(color != null),
        assert(radius == null || shape == null),
        assert(thickness != null),
@@ -628,6 +633,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
             _infiniteDepth = metrics.pixels + _infiniteLeadingExtent;
           }
           break;
+        case InfiniteScrollBehavior.none:
+          break;
       }
       scrollableExtent = _infiniteDepth - metrics.minScrollExtent;
     }
@@ -659,6 +666,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
     _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+
+    // Do not paint a scrollbar if InfiniteScroll is not wanted.
+    if (infiniteBehavior == InfiniteScrollBehavior.none)
+      return;
 
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
