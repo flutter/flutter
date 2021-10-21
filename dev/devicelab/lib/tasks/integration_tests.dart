@@ -177,8 +177,9 @@ class IntegrationTest {
   IntegrationTest(
     this.testDirectory,
     this.testTarget, {
-    this.extraOptions = const <String>[],
-  });
+      this.extraOptions = const <String>[],
+    }
+  );
 
   final String testDirectory;
   final String testTarget;
