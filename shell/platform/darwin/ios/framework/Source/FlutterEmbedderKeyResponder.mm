@@ -158,7 +158,7 @@ static uint64_t GetLogicalKeyForEvent(FlutterUIPressProxy* press, uint64_t physi
   const char* characters =
       getEventCharacters(press.key.charactersIgnoringModifiers, press.key.keyCode);
   NSString* keyLabel =
-      characters == nullptr ? nil : [[NSString alloc] initWithUTF8String:characters];
+      characters == nullptr ? nil : [[[NSString alloc] initWithUTF8String:characters] autorelease];
   NSUInteger keyLabelLength = [keyLabel length];
   // If this key is printable, generate the logical key from its Unicode
   // value. Control keys such as ESC, CTRL, and SHIFT are not printable. HOME,
@@ -514,11 +514,11 @@ void HandleResponse(bool handled, void* user_data);
   FlutterKeyCallbackGuard* guardedCallback = nil;
   switch (press.phase) {
     case UIPressPhaseBegan:
-      guardedCallback = [[FlutterKeyCallbackGuard alloc] initWithCallback:callback];
+      guardedCallback = [[[FlutterKeyCallbackGuard alloc] initWithCallback:callback] autorelease];
       [self handlePressBegin:press callback:guardedCallback];
       break;
     case UIPressPhaseEnded:
-      guardedCallback = [[FlutterKeyCallbackGuard alloc] initWithCallback:callback];
+      guardedCallback = [[[FlutterKeyCallbackGuard alloc] initWithCallback:callback] autorelease];
       [self handlePressEnd:press callback:guardedCallback];
       break;
     case UIPressPhaseChanged:
@@ -623,7 +623,7 @@ void HandleResponse(bool handled, void* user_data);
   _responseId += 1;
   uint64_t responseId = _responseId;
   FlutterKeyPendingResponse* pending =
-      [[FlutterKeyPendingResponse alloc] initWithHandler:self responseId:responseId];
+      [[[FlutterKeyPendingResponse alloc] initWithHandler:self responseId:responseId] autorelease];
   [callback pendTo:_pendingResponses withId:responseId];
   _sendEvent(event, HandleResponse, pending);
 }
