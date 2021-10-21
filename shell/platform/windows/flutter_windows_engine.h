@@ -149,6 +149,12 @@ class FlutterWindowsEngine {
                                FlutterSemanticsAction action,
                                const std::vector<uint8_t>& data);
 
+  // Informs the engine that the semantics enabled state has changed.
+  void UpdateSemanticsEnabled(bool enabled);
+
+  // Returns true if the semantics tree is enabled.
+  bool semantics_enabled() const { return semantics_enabled_; }
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
@@ -205,6 +211,8 @@ class FlutterWindowsEngine {
   // is being destroyed.
   FlutterDesktopOnPluginRegistrarDestroyed
       plugin_registrar_destruction_callback_ = nullptr;
+
+  bool semantics_enabled_ = false;
 
 #ifndef WINUWP
   // The manager for WindowProc delegate registration and callbacks.

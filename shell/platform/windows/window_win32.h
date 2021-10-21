@@ -121,6 +121,14 @@ class WindowWin32 {
                      bool extended,
                      bool was_down) = 0;
 
+  // Called when the OS requests a COM object.
+  //
+  // The primary use of this function is to supply Windows with wrapped
+  // semantics objects for use by Windows accessibility.
+  void OnGetObject(UINT const message,
+                   WPARAM const wparam,
+                   LPARAM const lparam);
+
   // Called when IME composing begins.
   virtual void OnComposeBegin() = 0;
 
@@ -169,6 +177,9 @@ class WindowWin32 {
   //
   // |rect| is in Win32 window coordinates.
   virtual void UpdateCursorRect(const Rect& rect);
+
+  // Called when accessibility support is enabled or disabled.
+  virtual void OnUpdateSemanticsEnabled(bool enabled) = 0;
 
   // Called when mouse scrollwheel input occurs.
   virtual void OnScroll(double delta_x,

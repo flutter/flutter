@@ -248,6 +248,10 @@ void FlutterWindowsView::OnPlatformBrightnessChanged() {
   SendPlatformBrightnessChanged();
 }
 
+void FlutterWindowsView::OnUpdateSemanticsEnabled(bool enabled) {
+  engine_->UpdateSemanticsEnabled(enabled);
+}
+
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
   binding_handler_->OnCursorRectUpdated(rect);
 }
