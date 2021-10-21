@@ -195,6 +195,39 @@ void main() {
     );
   });
 
+  test('LinearGradient with different transforms', () {
+    const LinearGradient testGradient1 = LinearGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    const LinearGradient testGradient1Copy = LinearGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    const LinearGradient testGradient2 = LinearGradient(
+      transform: GradientRotation(math.pi/2),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+
+    expect(
+      testGradient1,
+      equals(testGradient1Copy),
+    );
+    expect(
+      testGradient1,
+      isNot(equals(testGradient2)),
+    );
+  });
+
   test('LinearGradient with AlignmentDirectional', () {
     expect(
       () {
