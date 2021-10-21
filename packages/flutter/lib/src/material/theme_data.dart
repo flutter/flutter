@@ -2221,9 +2221,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   @override
   Color get scaffoldBackgroundColor => _cupertinoOverrideTheme.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
 
-  @override
-  Color? get activityIndicatorColor => _cupertinoOverrideTheme.scaffoldBackgroundColor ?? _materialTheme.progressIndicatorTheme.color;
-
   /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
   ///
   /// Only the specified override attributes of the [ThemeData]'s
