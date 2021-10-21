@@ -143,8 +143,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   FlutterEngineGetProcAddresses(&embedder_api_);
 
   task_runner_ = TaskRunner::Create(
-      GetCurrentThreadId(), embedder_api_.GetCurrentTime,
-      [this](const auto* task) {
+      embedder_api_.GetCurrentTime, [this](const auto* task) {
         if (!engine_) {
           std::cerr << "Cannot post an engine task when engine is not running."
                     << std::endl;
