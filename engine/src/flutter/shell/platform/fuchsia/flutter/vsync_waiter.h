@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_VSYNC_WAITER_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_VSYNC_WAITER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VSYNC_WAITER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VSYNC_WAITER_H_
 
 #include <lib/async/cpp/wait.h>
 
@@ -46,6 +46,7 @@ class VsyncWaiter final : public flutter::VsyncWaiter {
   AwaitVsyncForSecondaryCallbackCallback
       await_vsync_for_secondary_callback_callback_;
 
+  fml::WeakPtr<VsyncWaiter> weak_ui_;
   std::unique_ptr<fml::WeakPtrFactory<VsyncWaiter>> weak_factory_ui_;
   fml::WeakPtrFactory<VsyncWaiter> weak_factory_;
 
@@ -54,4 +55,4 @@ class VsyncWaiter final : public flutter::VsyncWaiter {
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_VSYNC_WAITER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VSYNC_WAITER_H_

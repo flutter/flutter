@@ -30,10 +30,17 @@ VsyncWaiter::VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
       weak_factory_(this) {
   fire_callback_callback_ = [this](fml::TimePoint frame_start,
                                    fml::TimePoint frame_end) {
-    // Note: It is VERY important to set |pause_secondary_tasks| to false, else
-    // Animator will almost immediately crash on Fuchsia.
-    // FML_LOG(INFO) << "CRASH:: VsyncWaiter about to FireCallback";
-    FireCallback(frame_start, frame_end, /*pause_secondary_tasks=*/false);
+    task_runners_.GetUITaskRunner()->PostTaskForTime(
+        [frame_start, frame_end, weak_this = weak_ui_]() {
+          if (weak_this) {
+            // Note: It is VERY important to set |pause_secondary_tasks| to
+            // false, else Animator will almost immediately crash on Fuchsia.
+            // FML_LOG(INFO) << "CRASH:: VsyncWaiter about to FireCallback";
+            weak_this->FireCallback(frame_start, frame_end,
+                                    /*pause_secondary_tasks*/ false);
+          }
+        },
+        frame_start);
   };
 
   // Generate a WeakPtrFactory for use with the UI thread. This does not need
@@ -41,8 +48,9 @@ VsyncWaiter::VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
   // thread so we have ordering guarantees (see ::AwaitVSync())
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(), fml::MakeCopyable([this]() mutable {
-        this->weak_factory_ui_ =
+        weak_factory_ui_ =
             std::make_unique<fml::WeakPtrFactory<VsyncWaiter>>(this);
+        weak_ui_ = weak_factory_ui_->GetWeakPtr();
       }));
 }
 
