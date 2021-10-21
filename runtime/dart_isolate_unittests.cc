@@ -59,6 +59,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       vm_data->GetIsolateSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
+      nullptr,                             // root_isolate_create_callback
       settings.isolate_create_callback,    // isolate create callback
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
@@ -97,6 +98,7 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
       vm_data->GetIsolateSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
+      nullptr,                             // root_isolate_create_callback
       settings.isolate_create_callback,    // isolate create callback
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
@@ -170,6 +172,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       vm_data->GetIsolateSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
+      nullptr,                             // root_isolate_create_callback
       settings.isolate_create_callback,    // isolate create callback
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
@@ -392,6 +395,7 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
       vm_data->GetIsolateSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
+      nullptr,                             // root_isolate_create_callback
       settings.isolate_create_callback,    // isolate create callback
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
@@ -490,6 +494,7 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
       vm_data->GetIsolateSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
+      nullptr,                             // root_isolate_create_callback
       settings.isolate_create_callback,    // isolate create callback
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint

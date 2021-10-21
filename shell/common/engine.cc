@@ -202,19 +202,22 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
 
   UpdateAssetManager(configuration.GetAssetManager());
 
-  // If the embedding prefetched the default font manager, then set up the
-  // font manager later in the engine launch process.  This makes it less
-  // likely that the setup will need to wait for the prefetch to complete.
-  if (settings_.prefetched_default_font_manager) {
-    SetupDefaultFontManager();
-  }
-
   if (runtime_controller_->IsRootIsolateRunning()) {
     return RunStatus::FailureAlreadyRunning;
   }
 
+  // If the embedding prefetched the default font manager, then set up the
+  // font manager later in the engine launch process.  This makes it less
+  // likely that the setup will need to wait for the prefetch to complete.
+  auto root_isolate_create_callback = [&]() {
+    if (settings_.prefetched_default_font_manager) {
+      SetupDefaultFontManager();
+    }
+  };
+
   if (!runtime_controller_->LaunchRootIsolate(
           settings_,                                 //
+          root_isolate_create_callback,              //
           configuration.GetEntrypoint(),             //
           configuration.GetEntrypointLibrary(),      //
           configuration.TakeIsolateConfiguration())  //
