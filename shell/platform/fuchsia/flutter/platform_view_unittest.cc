@@ -252,6 +252,12 @@ class PlatformViewBuilder {
     return *this;
   }
 
+  PlatformViewBuilder& SetMouseSource(
+      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source) {
+    mouse_source_ = std::move(mouse_source);
+    return *this;
+  }
+
   PlatformViewBuilder& SetFocuser(
       fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser) {
     focuser_ = std::move(focuser);
@@ -308,7 +314,8 @@ class PlatformViewBuilder {
     return GfxPlatformView(
         delegate_, task_runners_, std::move(view_ref_pair_.view_ref),
         external_external_view_embedder_, std::move(ime_service_),
-        std::move(keyboard_), std::move(touch_source_), std::move(focuser_),
+        std::move(keyboard_), std::move(touch_source_),
+        std::move(mouse_source_), std::move(focuser_),
         std::move(view_ref_focused_), std::move(session_listener_request_),
         std::move(on_session_listener_error_callback_),
         std::move(wireframe_enabled_callback_),
@@ -333,6 +340,7 @@ class PlatformViewBuilder {
   fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service_;
   fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard_;
   fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source_;
+  fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source_;
   fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused_;
   fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser_;
   fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>

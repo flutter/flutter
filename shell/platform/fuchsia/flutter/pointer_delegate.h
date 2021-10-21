@@ -7,9 +7,11 @@
 
 #include <fuchsia/ui/pointer/cpp/fidl.h>
 
+#include <array>
 #include <functional>
 #include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "flutter/lib/ui/window/pointer_data.h"
@@ -26,28 +28,35 @@ struct IxnHasher {
   }
 };
 
-// Channel processor for fuchsia.ui.pointer.TouchSource protocol. It manages the
-// channel state, collects touch events, and surfaces them to PlatformView as
-// flutter::PointerData events for further processing and dispatch.
+// Channel processors for fuchsia.ui.pointer.TouchSource and MouseSource
+// protocols. It manages the channel state, collects touch and mouse events, and
+// surfaces them to PlatformView as flutter::PointerData events for further
+// processing and dispatch.
 class PointerDelegate {
  public:
   PointerDelegate(
-      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source)
-      : touch_source_(touch_source.Bind()) {}
+      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source)
+      : touch_source_(touch_source.Bind()),
+        mouse_source_(mouse_source.Bind()) {}
 
-  // Each TouchEvent must carry a TouchPointerSample, and the supplied callback
-  // will translate each to a flutter::PointerData, and the vector of
-  // PointerData placed in a PointerDataPacket for transport to the Engine.
+  // This function collects Fuchsia's TouchPointerSample and MousePointerSample
+  // data and transforms them into flutter::PointerData structs. It then calls
+  // the supplied callback with a vector of flutter::PointerData, which (1) does
+  // last processing (applies metrics), and (2) packs these flutter::PointerData
+  // in a flutter::PointerDataPacket for transport to the Engine.
   void WatchLoop(
       std::function<void(std::vector<flutter::PointerData>)> callback);
 
  private:
+  /***** TOUCH STATE *****/
+
   // Channel for touch events from Scenic.
   fuchsia::ui::pointer::TouchSourcePtr touch_source_;
 
   // Receive touch events from Scenic. Must be copyable.
   std::function<void(std::vector<fuchsia::ui::pointer::TouchEvent>)>
-      watch_loop_;
+      touch_responder_;
 
   // Per-interaction buffer of touch events from Scenic. When an interaction
   // starts with event.pointer_sample.phase == ADD, we allocate a buffer and
@@ -85,20 +94,52 @@ class PointerDelegate {
   std::unordered_map<fuchsia::ui::pointer::TouchInteractionId,
                      std::vector<flutter::PointerData>,
                      IxnHasher>
-      buffer_;
+      touch_buffer_;
 
   // The fuchsia.ui.pointer.TouchSource protocol allows one in-flight
   // hanging-get Watch() call to gather touch events, and the client is expected
   // to respond with consumption intent on the following hanging-get Watch()
   // call. Store responses here for the next call.
-  std::vector<fuchsia::ui::pointer::TouchResponse> responses_;
+  std::vector<fuchsia::ui::pointer::TouchResponse> touch_responses_;
 
-  // The fuchsia.ui.pointer.TouchSource protocol issues a channel-global view
+  // The fuchsia.ui.pointer.TouchSource protocol issues channel-global view
   // parameters on connection and on change. Events must apply these view
   // parameters to correctly map to logical view coordinates. The "nullopt"
   // state represents the absence of view parameters, early in the protocol
   // lifecycle.
-  std::optional<fuchsia::ui::pointer::ViewParameters> view_parameters_;
+  std::optional<fuchsia::ui::pointer::ViewParameters> touch_view_parameters_;
+
+  /***** MOUSE STATE *****/
+
+  // Channel for mouse events from Scenic.
+  fuchsia::ui::pointer::MouseSourcePtr mouse_source_;
+
+  // Receive mouse events from Scenic. Must be copyable.
+  std::function<void(std::vector<fuchsia::ui::pointer::MouseEvent>)>
+      mouse_responder_;
+
+  // The set of mouse devices that are currently interacting with the UI.
+  // A mouse is considered flutter::PointerData::Change::kDown if any button is
+  // pressed. This set is used to correctly set the phase in
+  // flutter::PointerData.change, with this high-level algorithm:
+  //   if !mouse_down[id] && !button then: change = kHover
+  //   if !mouse_down[id] &&  button then: change = kDown; mouse_down.add(id)
+  //   if  mouse_down[id] &&  button then: change = kMove
+  //   if  mouse_down[id] && !button then: change = kUp; mouse_down.remove(id)
+  std::unordered_set</*mouse device ID*/ uint32_t> mouse_down_;
+
+  // For each mouse device, its device-specific information, such as mouse
+  // button priority order.
+  std::unordered_map</*mouse device ID*/ uint32_t,
+                     fuchsia::ui::pointer::MouseDeviceInfo>
+      mouse_device_info_;
+
+  // The fuchsia.ui.pointer.MouseSource protocol issues channel-global view
+  // parameters on connection and on change. Events must apply these view
+  // parameters to correctly map to logical view coordinates. The "nullopt"
+  // state represents the absence of view parameters, early in the protocol
+  // lifecycle.
+  std::optional<fuchsia::ui::pointer::ViewParameters> mouse_view_parameters_;
 };
 
 }  // namespace flutter_runner

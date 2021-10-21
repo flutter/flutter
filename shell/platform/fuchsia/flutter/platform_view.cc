@@ -58,6 +58,7 @@ PlatformView::PlatformView(
     fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
     fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
     fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+    fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
     fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused,
     OnEnableWireframe wireframe_enabled_callback,
@@ -75,7 +76,8 @@ PlatformView::PlatformView(
           std::make_shared<FocusDelegate>(std::move(view_ref_focused),
                                           std::move(focuser))),
       pointer_delegate_(
-          std::make_shared<PointerDelegate>(std::move(touch_source))),
+          std::make_shared<PointerDelegate>(std::move(touch_source),
+                                            std::move(mouse_source))),
       ime_client_(this),
       text_sync_service_(ime_service.Bind()),
       keyboard_listener_binding_(this),

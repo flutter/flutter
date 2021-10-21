@@ -16,6 +16,7 @@ FlatlandPlatformView::FlatlandPlatformView(
     fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
     fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
     fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
+    fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
     fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused,
     fidl::InterfaceHandle<fuchsia::ui::composition::ParentViewportWatcher>
@@ -38,6 +39,7 @@ FlatlandPlatformView::FlatlandPlatformView(
                    std::move(ime_service),
                    std::move(keyboard),
                    std::move(touch_source),
+                   std::move(mouse_source),
                    std::move(focuser),
                    std::move(view_ref_focused),
                    std::move(wireframe_enabled_callback),
