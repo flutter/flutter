@@ -33,8 +33,10 @@ declare_args() {
 #   fuchsia_component("my_component") {
 #      manifest = "meta/component-manifest.cmx"
 #      resources = [
-#        path = "testdata/use_case1.json"
-#        dest = "data/testdata/use_case1.json"
+#        {
+#          path = "testdata/use_case1.json"
+#          dest = "data/testdata/use_case1.json"
+#        },
 #      ]
 #      data_deps = [ ":hello_world_executable"]
 #   }
