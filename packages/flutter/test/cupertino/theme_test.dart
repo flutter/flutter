@@ -181,6 +181,7 @@ void main() {
           'primaryContrastingColor',
           'barBackgroundColor',
           'scaffoldBackgroundColor',
+          'activityIndicatorColor',
           'textStyle',
           'actionTextStyle',
           'tabLabelTextStyle',
@@ -236,11 +237,17 @@ void main() {
         darkColor: Color(0xF01D1D1D),
       );
 
+      const CupertinoDynamicColor activeTickColor = CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF3C3C44),
+        darkColor: Color(0xFFEBEBF5),
+      );
+
       final CupertinoThemeData theme = await testTheme(tester, data);
 
       colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
       colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.activityIndicatorColor, activeTickColor);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
       colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
