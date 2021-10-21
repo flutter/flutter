@@ -179,7 +179,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get hasViewportDimension => _viewportDimension != null;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
-  /// [outOfRange], and [atEdge] are available.
+  /// [outOfRange], [atStart], [atEnd], and [atEdge] are available.
   ///
   /// Set to true just before the first time [applyNewDimensions] is called.
   bool get haveDimensions => _haveDimensions;

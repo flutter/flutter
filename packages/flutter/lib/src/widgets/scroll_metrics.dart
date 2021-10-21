@@ -97,9 +97,14 @@ mixin ScrollMetrics {
   /// [maxScrollExtent].
   bool get outOfRange => pixels < minScrollExtent || pixels > maxScrollExtent;
 
-  /// Whether the [pixels] value is exactly at the [minScrollExtent] or the
-  /// [maxScrollExtent].
-  bool get atEdge => pixels == minScrollExtent || pixels == maxScrollExtent;
+  /// Whether the this position is at the start of its scrollable range.
+  bool get atStart => pixels == minScrollExtent;
+
+  /// Whether the this position is at the end of its scrollable range.
+  bool get atEnd => pixels == maxScrollExtent;
+
+  /// Whether the this position is at the top or bottom of its scrollable range.
+  bool get atEdge => atStart || atEnd;
 
   /// The quantity of content conceptually "above" the viewport in the scrollable.
   /// This is the content above the content described by [extentInside].
