@@ -55,7 +55,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
         animating = false,
         super(key: key);
 
-  /// The color of the CupertinoActivityIndicator.
+  /// Color of the activity indicator.
   ///
   /// Defaults to color extracted from native iOS.
   final Color? color;

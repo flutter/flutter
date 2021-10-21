@@ -167,17 +167,22 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(
-              color: CupertinoColors.activeBlue,
+            child: const CupertinoActivityIndicator(
+              animating: false,
+              color: Color(0xFF5D3FD3),
+              radius: 100,
             ),
           ),
         ),
       ),
     );
 
-    await expectLater(
-      find.byKey(key),
-      matchesGoldenFile('activityIndicator.color.1.0.png'),
+    expect(
+      find.byType(CupertinoActivityIndicator),
+      paints
+        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
+                color: const Color(0x935d3fd3),
+                ),
     );
   });
 }
