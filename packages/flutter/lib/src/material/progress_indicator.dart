@@ -594,7 +594,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
-    return CupertinoActivityIndicator(key: widget.key);
+    final Color? tickColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
+    return tickColor == null ? CupertinoActivityIndicator(key: widget.key) :
+      CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
