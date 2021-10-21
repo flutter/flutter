@@ -795,11 +795,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
   if (@available(iOS 13.4, *)) {
     for (UIPress* press in presses) {
-      [_textInputDelegate handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press
-                                                                            withEvent:event]
-                                nextAction:^() {
-                                  [super pressesBegan:[NSSet setWithObject:press] withEvent:event];
-                                }];
+      [_textInputDelegate
+          handlePressEvent:[[[FlutterUIPressProxy alloc] initWithPress:press
+                                                             withEvent:event] autorelease]
+                nextAction:^() {
+                  [super pressesBegan:[NSSet setWithObject:press] withEvent:event];
+                }];
     }
   } else {
     [super pressesBegan:presses withEvent:event];
@@ -811,7 +812,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   if (@available(iOS 13.4, *)) {
     for (UIPress* press in presses) {
       [_textInputDelegate
-          handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+          handlePressEvent:[[[FlutterUIPressProxy alloc] initWithPress:press
+                                                             withEvent:event] autorelease]
                 nextAction:^() {
                   [super pressesChanged:[NSSet setWithObject:press] withEvent:event];
                 }];
@@ -825,11 +827,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
            withEvent:(UIPressesEvent*)event API_AVAILABLE(ios(9.0)) {
   if (@available(iOS 13.4, *)) {
     for (UIPress* press in presses) {
-      [_textInputDelegate handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press
-                                                                            withEvent:event]
-                                nextAction:^() {
-                                  [super pressesEnded:[NSSet setWithObject:press] withEvent:event];
-                                }];
+      [_textInputDelegate
+          handlePressEvent:[[[FlutterUIPressProxy alloc] initWithPress:press
+                                                             withEvent:event] autorelease]
+                nextAction:^() {
+                  [super pressesEnded:[NSSet setWithObject:press] withEvent:event];
+                }];
     }
   } else {
     [super pressesEnded:presses withEvent:event];
@@ -841,7 +844,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   if (@available(iOS 13.4, *)) {
     for (UIPress* press in presses) {
       [_textInputDelegate
-          handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+          handlePressEvent:[[[FlutterUIPressProxy alloc] initWithPress:press
+                                                             withEvent:event] autorelease]
                 nextAction:^() {
                   [super pressesCancelled:[NSSet setWithObject:press] withEvent:event];
                 }];
