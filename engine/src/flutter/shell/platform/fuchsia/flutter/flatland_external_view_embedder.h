@@ -163,6 +163,7 @@ class FlatlandExternalViewEmbedder final
   };
 
   struct FlatlandLayer {
+    // Transform on which Images are set.
     fuchsia::ui::composition::TransformId transform_id;
   };
 
@@ -177,6 +178,7 @@ class FlatlandExternalViewEmbedder final
 
   std::unordered_map<EmbedderLayerId, EmbedderLayer> frame_layers_;
   std::vector<EmbedderLayerId> frame_composition_order_;
+  std::vector<fuchsia::ui::composition::TransformId> child_transforms_;
   SkISize frame_size_ = SkISize::Make(0, 0);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandExternalViewEmbedder);

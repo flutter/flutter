@@ -221,6 +221,7 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         // Attach the FlatlandView to the main scene graph.
         flatland_.flatland()->AddChild(root_transform_id_,
                                        viewport.transform_id);
+        child_transforms_.emplace_back(viewport.transform_id);
       }
 
       // Acquire the surface associated with the layer.
@@ -263,6 +264,8 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         // Attach the FlatlandLayer to the main scene graph.
         flatland_.flatland()->AddChild(
             root_transform_id_,
+            flatland_layers_[flatland_layer_index].transform_id);
+        child_transforms_.emplace_back(
             flatland_layers_[flatland_layer_index].transform_id);
       }
 
@@ -352,7 +355,20 @@ void FlatlandExternalViewEmbedder::DestroyView(
     FlatlandViewIdCallback on_view_unbound) {
   auto flatland_view = flatland_views_.find(view_id);
   FML_CHECK(flatland_view != flatland_views_.end());
+
   auto viewport_id = flatland_view->second.viewport_id;
+  auto transform_id = flatland_view->second.transform_id;
+  flatland_.flatland()->ReleaseViewport(viewport_id, [](auto) {});
+  auto itr =
+      std::find_if(child_transforms_.begin(), child_transforms_.end(),
+                   [transform_id](fuchsia::ui::composition::TransformId id) {
+                     return id.value == transform_id.value;
+                   });
+  if (itr != child_transforms_.end()) {
+    flatland_.flatland()->RemoveChild(root_transform_id_, transform_id);
+    child_transforms_.erase(itr);
+  }
+  flatland_.flatland()->ReleaseTransform(transform_id);
 
   flatland_views_.erase(flatland_view);
   on_view_unbound(viewport_id);
@@ -374,9 +390,15 @@ void FlatlandExternalViewEmbedder::Reset() {
   frame_composition_order_.clear();
   frame_size_ = SkISize::Make(0, 0);
 
+  // Clear all children from root.
+  for (const auto& transform : child_transforms_) {
+    flatland_.flatland()->RemoveChild(root_transform_id_, transform);
+  }
+  child_transforms_.clear();
+
   // Clear images on all layers so they aren't cached unnecessarily.
-  for (auto& layer : flatland_layers_) {
-    flatland_.flatland()->RemoveChild(root_transform_id_, layer.transform_id);
+  for (const auto& layer : flatland_layers_) {
+    flatland_.flatland()->SetContent(layer.transform_id, {0});
   }
 }
 
