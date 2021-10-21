@@ -38,23 +38,19 @@ typedef ScrollableWidgetBuilder = Widget Function(
 class DraggableScrollableController {
   DraggableScrollableController();
 
-  final List<_DraggableScrollableSheetScrollController> _internalControllers = [];
+  final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers = [];
 
-  List<_DraggableScrollableSheetScrollController> get _attachedControllers {
-    assert(
-      _internalControllers.isNotEmpty,
-      'DraggableScrollableController not attached to any sheets. A DraggableScrollableController '
-      'must be used in a DraggableScrollableSheet before any of its methods are called.',
-    );
-    return _internalControllers;
-  }
+  double get minSize => _singleController.extent.minSize;
 
-  void _attach(_DraggableScrollableSheetScrollController scrollController) {
-    _internalControllers.add(scrollController);
-  }
+  double get maxSize => _singleController.extent.maxSize;
+
+  double get currentSize => _singleController.extent.currentSize;
+
+  double get pixels => _singleController.extent.currentPixels;
 
   void reset() {
-    for (final _DraggableScrollableSheetScrollController controller in _internalControllers) {
+    _assertAttached();
+    for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
       controller.reset();
     }
   }
@@ -62,14 +58,25 @@ class DraggableScrollableController {
   Future<void> animateTo(
     double size, {
     Duration duration = const Duration(milliseconds: 200),
-    Curve curve = Curves.easeOut,
+    Curve curve = Curves.linear,
   }) async {
+    _assertAttached();
     await Future.wait(
       // Use map so that we can easily wait on the result
-      _internalControllers.map((_DraggableScrollableSheetScrollController controller) async {
+      _attachedInternalControllers.map((_DraggableScrollableSheetScrollController controller) async {
+        controller.position.goIdle();
         // This disables any snapping until the next user interaction with the sheet.
         controller.extent.hasDragged = false;
-        controller.position.goIdle();
+        final AnimationController animationController = AnimationController.unbounded(
+          vsync: controller.position.context.vsync,
+          value: controller.extent.currentSize,
+        );
+        CurvedAnimation(parent: animationController, curve: curve).addListener(() {
+          controller.extent.updateSize(animationController.value, controller.position.context.notificationContext!);
+        });
+        await animationController
+            .animateTo(size, duration: duration)
+            .then<void>((void value) => controller.position.goBallistic(0));
 
         controller.position.goBallistic(0.0);
       }),
@@ -77,13 +84,34 @@ class DraggableScrollableController {
   }
 
   void jumpTo(double size) {
-    for (final _DraggableScrollableSheetScrollController controller in _internalControllers) {
+    _assertAttached();
+    for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
       controller.position.goIdle();
       controller.extent.hasDragged = false;
       controller.extent.updateSize(size, controller.position.context.notificationContext!);
       controller.position.goBallistic(0.0);
     }
   }
+
+  void _assertAttached() {
+    assert(
+      _attachedInternalControllers.isNotEmpty,
+      'DraggableScrollableController not attached to any sheets. A DraggableScrollableController '
+        'must be used in a DraggableScrollableSheet before any of its methods are called.',
+    );
+  }
+
+  _DraggableScrollableSheetScrollController get _singleController {
+    _assertAttached();
+    assert(_attachedInternalControllers.length == 1, 'DraggableScrollableController attached to multiple sheets. '
+        'Size and pixel getters can only be used with controllers attached to a single sheet.');
+    return _attachedInternalControllers.single;
+  }
+
+  void _attach(_DraggableScrollableSheetScrollController scrollController) {
+    _attachedInternalControllers.add(scrollController);
+  }
+
 }
 
 /// A container for a [Scrollable] that responds to drag gestures by resizing
@@ -633,6 +661,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       super.position as _DraggableScrollableSheetScrollPosition;
 
   void reset() {
+    extent.hasDragged = false;
     // jumpTo can result in trying to replace semantics during build.
     // Just animate really fast.
     // Avoid doing it at all if the offset is already 0.0.
@@ -643,8 +672,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
         curve: Curves.linear,
       );
     }
-    extent.hasDragged = false;
-    extent.updateSize(extent.currentSize, position.context.notificationContext!);
+    extent.updateSize(extent.initialSize, position.context.notificationContext!);
   }
 }
 
@@ -816,6 +844,13 @@ class _DraggableScrollableSheetScrollPosition
 /// the user has tapped back if the sheet has started to cover more of the body
 /// than when at its initial position. This is important for users of assistive
 /// technology, where dragging may be difficult to communicate.
+///
+/// This is just a wrapper on top of [DraggableScrollableController]. It is
+/// primarily useful for controlling a sheet in a part of the widget tree that
+/// the current code does not control (eg library code trying to affect a sheet
+/// in library users' code). Generally, it's easier to control the sheet
+/// directly by creating a controller and passing the controller to the sheet in
+/// its constructor (see [DraggableScrollableSheet.controller]).
 class DraggableScrollableActuator extends StatelessWidget {
   /// Creates a widget that can notify descendent [DraggableScrollableSheet]s
   /// to reset to their initial position.

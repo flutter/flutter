@@ -348,33 +348,42 @@ void main() {
     ));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
-    const Key containerKey = ValueKey<String>('container');
-    const Key stackKey = ValueKey<String>('stack');
-    await tester.pumpWidget(_boilerplate(null,
-      snap: true,
-      containerKey: containerKey,
-      stackKey: stackKey,
-    ));
-    await tester.pumpAndSettle();
-    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+  for (final bool useActuator in [false, true]) {
+    testWidgets('Does not snap away from initial child on ${useActuator ? 'actuator' : 'controller'}.reset()', (WidgetTester tester) async {
+      const Key containerKey = ValueKey<String>('container');
+      const Key stackKey = ValueKey<String>('stack');
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(_boilerplate(
+        null,
+        controller: controller,
+        snap: true,
+        containerKey: containerKey,
+        stackKey: stackKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
-    await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(1.0, precisionErrorTolerance),
-    );
+      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
-    DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
-    await tester.pumpAndSettle();
+      if (useActuator) {
+        DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
+      } else {
+        controller.reset();
+      }
+      await tester.pumpAndSettle();
 
-    // The sheet should have reset without snapping away from initial child.
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
-    );
-  }, variant: TargetPlatformVariant.all());
+      // The sheet should have reset without snapping away from initial child.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    });
+  }
 
   testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
@@ -714,9 +723,9 @@ void main() {
       // Use a local helper to animate so we can share code across a jumpTo test
       // and an animateTo test.
       void goTo(double size) => shouldAnimate ? controller.animateTo(size) : controller.jumpTo(size);
-      // If we're animating, pump will call three times:
-      //   (animation speed (200 ms) / pump duration (100 ms)) + 1 = 3.
-      final int expectedPumpCount = shouldAnimate ? 3 : 2;
+      // If we're animating, pump will call four times, two of which are for the
+      // animation duration.
+      final int expectedPumpCount = shouldAnimate ? 4 : 2;
 
       goTo(.6);
       expect(await tester.pumpAndSettle(), expectedPumpCount);
@@ -761,64 +770,63 @@ void main() {
     });
   }
 
-  testWidgets('Can reset without snapping', (WidgetTester tester) async {
+  testWidgets('Can control multiple sheets with one controller', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
-    const Key containerKey = ValueKey<String>('container');
+    const Key containerKeyA = ValueKey<String>('containerA');
+    const Key containerKeyB = ValueKey<String>('containerB');
     final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(_boilerplate(
-      null,
-      controller: controller,
-      stackKey: stackKey,
-      containerKey: containerKey,
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        key: stackKey,
+        children: [
+          _boilerplate(
+            null,
+            controller: controller,
+            containerKey: containerKeyA,
+          ),
+          _boilerplate(
+            null,
+            controller: controller,
+            containerKey: containerKeyB,
+          )
+        ],
+      ),
     ));
     await tester.pumpAndSettle();
     final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
-    // Use a local helper to animate so we can share code across a jumpTo test
-    // and an animateTo test.
-    void goTo(double size) => shouldAnimate ? controller.animateTo(size) : controller.jumpTo(size);
-    // If we're animating, pump will call three times:
-    //   (animation speed (200 ms) / pump duration (100 ms)) + 1 = 3.
-    final int expectedPumpCount = shouldAnimate ? 3 : 2;
 
-    goTo(.6);
-    expect(await tester.pumpAndSettle(), expectedPumpCount);
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.6, precisionErrorTolerance),
-    );
-    expect(find.text('Item 1'), findsOneWidget);
-    expect(find.text('Item 20'), findsOneWidget);
-    expect(find.text('Item 70'), findsNothing);
-
-    goTo(.4);
-    expect(await tester.pumpAndSettle(), expectedPumpCount);
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.4, precisionErrorTolerance),
-    );
-    expect(find.text('Item 1'), findsOneWidget);
-    expect(find.text('Item 20'), findsNothing);
-    expect(find.text('Item 70'), findsNothing);
-
-    await tester.fling(find.text('Item 1'), Offset(0, -screenHeight), 100);
+    controller.jumpTo(.6);
     await tester.pumpAndSettle();
     expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(1, precisionErrorTolerance),
+      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
     );
-    expect(find.text('Item 1'), findsNothing);
-    expect(find.text('Item 20'), findsOneWidget);
-    expect(find.text('Item 70'), findsNothing);
-
-    // Programmatic control does not affect the inner scrollable's position.
-    goTo(.8);
-    expect(await tester.pumpAndSettle(), expectedPumpCount);
     expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    controller.animateTo(.8);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
       closeTo(.8, precisionErrorTolerance),
     );
-    expect(find.text('Item 1'), findsNothing);
-    expect(find.text('Item 20'), findsOneWidget);
-    expect(find.text('Item 70'), findsNothing);
+    expect(
+      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
+      closeTo(.8, precisionErrorTolerance),
+    );
+
+    controller.reset();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+    expect(
+      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
   });
 }
