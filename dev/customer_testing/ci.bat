@@ -8,9 +8,9 @@ REM This should match the ci.sh file in this directory.
 REM This is called from the LUCI recipes:
 REM https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.bat
 
-pub get
+dart __deprecated_pub get
 CD ..\tools
-pub get
+dart __deprecated_pub get
 CD ..\customer_testing
 
 CMD /S /C "IF EXIST "..\..\bin\cache\pkg\tests\" RMDIR /S /Q ..\..\bin\cache\pkg\tests"

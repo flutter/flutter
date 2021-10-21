@@ -75,21 +75,22 @@ class Cocoon {
     return _commitSha = result.stdout as String;
   }
 
-  /// Upload the JSON results in [resultsPath] to Cocoon.
+  /// Update test status to Cocoon.
   ///
   /// Flutter infrastructure's workflow is:
-  /// 1. Run DeviceLab test, writing results to a known path
+  /// 1. Run DeviceLab test
   /// 2. Request service account token from luci auth (valid for at least 3 minutes)
-  /// 3. Upload results from (1) to Cocoon
+  /// 3. Update test status from (1) to Cocoon
   ///
   /// The `resultsPath` is not available for all tests. When it doesn't show up, we
   /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
-  Future<void> sendResultsPath({
+  Future<void> sendTaskStatus({
     String? resultsPath,
     bool? isTestFlaky,
     String? gitBranch,
     String? builderName,
     String? testStatus,
+    String? builderBucket,
   }) async {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
     if (resultsPath != null) {
@@ -102,14 +103,19 @@ class Cocoon {
       resultsJson['NewStatus'] = testStatus;
     }
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
-    const List<String> supportedBranches = <String>['master'];
-    if (supportedBranches.contains(resultsJson['CommitBranch'])) {
+    if (_shouldUpdateCocoon(resultsJson, builderBucket ?? 'prod')) {
       await retry(
         () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
         retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
         maxAttempts: requestRetryLimit,
       );
     }
+  }
+
+  /// Only post-submit tests on `master` are allowed to update in cocoon.
+  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson, String builderBucket) {
+    const List<String> supportedBranches = <String>['master'];
+    return supportedBranches.contains(resultJson['CommitBranch']) && builderBucket == 'prod';
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].

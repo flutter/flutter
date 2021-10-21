@@ -29,7 +29,6 @@ final ArgParser parser = ArgParser()
   ..addOption('target', help: 'The GN target to attach to')
   ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
-  ..addOption('dev-finder', help: 'The location of the device-finder binary')
   ..addOption('ffx', help: 'The location of the ffx binary')
   ..addFlag('verbose', negatable: true);
 
@@ -48,7 +47,6 @@ Future<void> main(List<String> args) async {
   final String buildDirectory = argResults['build-dir'] as String;
   final File frontendServer = globals.fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = globals.fs.file('$buildDirectory/ssh-keys/ssh_config');
-  final File devFinder = globals.fs.file(argResults['dev-finder']);
   final File ffx = globals.fs.file(argResults['ffx']);
   final File platformKernelDill = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk');
@@ -60,10 +58,6 @@ Future<void> main(List<String> args) async {
   originalWorkingDirectory = globals.fs.currentDirectory.path;
   globals.fs.currentDirectory = path;
 
-  if (!devFinder.existsSync()) {
-    print('Error: device-finder not found at ${devFinder.path}.');
-    return 1;
-  }
   if (!ffx.existsSync()) {
     print('Error: ffx not found at ${ffx.path}.');
     return 1;
@@ -108,13 +102,11 @@ Future<void> main(List<String> args) async {
       _FuchsiaDoctorCommand(), // If attach fails the tool will attempt to run doctor.
     ],
     verbose: verbose,
-    muteCommandLogging: false,
-    verboseHelp: false,
     overrides: <Type, Generator>{
       FeatureFlags: () => const _FuchsiaFeatureFlags(),
       DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-        sshConfig: sshConfig, devFinder: devFinder, ffx: ffx),
+        sshConfig: sshConfig, ffx: ffx),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(
           fileSystem: globals.fs,

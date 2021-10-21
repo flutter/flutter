@@ -25,7 +25,6 @@ Widget buildFrame({
   required TextDirection textDirection,
 }) {
   final PageView child = PageView(
-    scrollDirection: Axis.horizontal,
     reverse: reverse,
     onPageChanged: (int page) { currentPage = page; },
     children: pages.map<Widget>(buildPage).toList(),

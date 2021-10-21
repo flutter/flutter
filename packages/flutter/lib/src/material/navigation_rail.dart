@@ -35,7 +35,7 @@ import 'theme.dart';
 /// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
@@ -284,13 +284,13 @@ class NavigationRail extends StatefulWidget {
   /// This can be used to synchronize animations in the [leading] or [trailing]
   /// widget, such as an animated menu or a [FloatingActionButton] animation.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  /// This example shows how to use this animation to create a
-  /// [FloatingActionButton] that animates itself between the normal and
-  /// extended states of the [NavigationRail].
+  /// {@tool dartpad}
+  /// This example shows how to use this animation to create a [FloatingActionButton]
+  /// that animates itself between the normal and extended states of the
+  /// [NavigationRail].
   ///
-  /// An instance of `ExtendableFab` would be created for
-  /// [NavigationRail.leading].
+  /// An instance of `MyNavigationRailFab` is created for [NavigationRail.leading].
+  /// Pressing the FAB button toggles the "extended" state of the [NavigationRail].
   ///
   /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.extended_animation.0.dart **
   /// {@end-tool}
@@ -549,7 +549,6 @@ class _RailDestination extends StatelessWidget {
           width: minWidth,
           height: minWidth,
           child: Align(
-            alignment: Alignment.center,
             child: themedIcon,
           ),
         );
@@ -573,6 +572,7 @@ class _RailDestination extends StatelessWidget {
             ),
           );
         } else {
+          final Animation<double> labelFadeAnimation = extendedTransitionAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
@@ -587,9 +587,9 @@ class _RailDestination extends StatelessWidget {
                       heightFactor: 1.0,
                       widthFactor: extendedTransitionAnimation.value,
                       alignment: AlignmentDirectional.centerStart,
-                      child: Opacity(
+                      child: FadeTransition(
                         alwaysIncludeSemantics: true,
-                        opacity: _extendedLabelFadeValue(),
+                        opacity: labelFadeAnimation,
                         child: styledLabel,
                       ),
                     ),
@@ -604,6 +604,8 @@ class _RailDestination extends StatelessWidget {
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
+        final Interval interval = selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
+        final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: interval));
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -621,9 +623,9 @@ class _RailDestination extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   heightFactor: appearingAnimationValue,
                   widthFactor: 1.0,
-                  child: Opacity(
+                  child: FadeTransition(
                     alwaysIncludeSemantics: true,
-                    opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
+                    opacity: labelFadeAnimation,
                     child: styledLabel,
                   ),
                 ),
@@ -660,7 +662,6 @@ class _RailDestination extends StatelessWidget {
         children: <Widget>[
           Material(
             type: MaterialType.transparency,
-            clipBehavior: Clip.none,
             child: InkResponse(
               onTap: onTap,
               onHover: (_) {},
@@ -678,28 +679,6 @@ class _RailDestination extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  double _normalLabelFadeInValue() {
-    if (destinationAnimation.value < 0.25) {
-      return 0;
-    } else if (destinationAnimation.value < 0.75) {
-      return (destinationAnimation.value - 0.25) * 2;
-    } else {
-      return 1;
-    }
-  }
-
-  double _normalLabelFadeOutValue() {
-    if (destinationAnimation.value > 0.75) {
-      return (destinationAnimation.value - 0.75) * 4.0;
-    } else {
-      return 0;
-    }
-  }
-
-  double _extendedLabelFadeValue() {
-    return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4.0 : 1.0;
   }
 }
 

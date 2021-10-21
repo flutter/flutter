@@ -187,7 +187,7 @@ void main() {
         HotRunnerConfig: () => failingTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -216,7 +216,7 @@ void main() {
               false,
               true,
             ),
-        ).restart(fullRestart: false);
+        ).restart();
         expect(result.isOk, false);
         expect(result.message, 'setupHotReload failed');
         expect(failingTestingConfig.updateDevFSCompleteCalled, false);
@@ -224,7 +224,7 @@ void main() {
         HotRunnerConfig: () => failingTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
@@ -254,7 +254,7 @@ void main() {
         HotRunnerConfig: () => shutdownTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -276,7 +276,7 @@ void main() {
         HotRunnerConfig: () => shutdownTestingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
@@ -328,6 +328,7 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: true,
+            fastReassemble: false,
             hotEventOverallTimeInMs: 64000,
             hotEventSyncedBytes: 4,
             hotEventInvalidatedSourcesCount: 2,
@@ -342,7 +343,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -415,7 +416,7 @@ void main() {
               false,
               true,
             ),
-        ).restart(fullRestart: false);
+        ).restart();
 
         expect(result.isOk, true);
         expect(testUsage.events, <TestUsageEvent>[
@@ -445,7 +446,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -479,7 +480,7 @@ void main() {
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -507,13 +508,13 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(fullRestart: false), throwsA('updateDevFS failed'));
+        await expectLater(runner.restart(), throwsA('updateDevFS failed'));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => testUsage,
       });
@@ -547,15 +548,13 @@ void main() {
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).attach(
-        enableDevTools: false,
-      );
+      ).attach();
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
       HotRunnerConfig: () => TestHotRunnerConfig(),
       Artifacts: () => Artifacts.test(),
       FileSystem: () => fileSystem,
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -606,6 +605,9 @@ class FakeDevFs extends Fake implements DevFS {
   Uri baseUri;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   bool disposed = false;
 

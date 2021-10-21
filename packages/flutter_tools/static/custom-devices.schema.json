@@ -102,7 +102,7 @@
             ]
           },
           "forwardPort": {
-            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since thats not the default behaviour.",
+            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since that's not the default behaviour.",
             "type": ["array", "null"],
             "items": {
               "type": "string"

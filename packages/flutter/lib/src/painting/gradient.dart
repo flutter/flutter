@@ -331,7 +331,7 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///

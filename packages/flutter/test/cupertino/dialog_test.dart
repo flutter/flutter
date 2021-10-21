@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -1124,7 +1128,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          data: MediaQueryData(),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
         ),
       ),
@@ -1293,7 +1297,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          data: MediaQueryData(),
           child: CupertinoAlertDialog(
             actions: <Widget>[
               CupertinoDialogAction(child: Text('OK')),

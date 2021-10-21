@@ -31,11 +31,9 @@ void main() {
       final List<PointerEventRecord> records = <PointerEventRecord>[
         PointerEventRecord(Duration.zero, <PointerEvent>[
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             pointer: 1,
           ),

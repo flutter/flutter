@@ -23,6 +23,7 @@ import 'utils.dart';
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String flutterPackages = path.join(flutterRoot, 'packages');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -64,6 +65,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Goldens...');
+  await verifyGoldenTags(flutterPackages);
 
   print('$clock Skip test comments...');
   await verifySkipTestComments(flutterRoot);
@@ -114,10 +118,10 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  // Analyze all the sample code in the repo
+  // Analyze all the sample code in the repo.
   print('$clock Sample code...');
   await runCommand(dart,
-    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze_sample_code.dart'), '--verbose'],
     workingDirectory: flutterRoot,
   );
 
@@ -145,6 +149,72 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
+final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
+final RegExp _leadingComment = RegExp(r'\/\/');
+final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
+final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
+
+/// Only golden file tests in the flutter package are subject to reduced testing,
+/// for example, invocations in flutter_test to validate comparator
+/// functionality do not require tagging.
+const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart)';
+const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
+
+Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 2000 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    bool needsTag = false;
+    bool hasTagNotation = false;
+    bool hasReducedTag = false;
+    bool ignoreForFile = false;
+    final List<String> lines = file.readAsLinesSync();
+    for (final String line in lines) {
+      if (line.contains(_goldenTagPattern1)) {
+        hasTagNotation = true;
+      }
+      if (line.contains(_goldenTagPattern2)) {
+        hasReducedTag = true;
+      }
+      if (line.contains(_findGoldenTestPattern)
+          && !line.contains(_findGoldenDefinitionPattern)
+          && !line.contains(_leadingComment)
+          && !line.contains(_ignoreGoldenTag)) {
+        needsTag = true;
+      }
+      if (line.contains(_ignoreGoldenTagForFile)) {
+        ignoreForFile = true;
+      }
+      // If the file is being ignored or a reduced test tag is already accounted
+      // for, skip parsing the rest of the lines for golden file tests.
+      if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
+        break;
+      }
+    }
+    // If a reduced test tag is already accounted for, move on to the next file.
+    if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
+      continue;
+    }
+    // If there are golden file tests, ensure they are tagged for all reduced
+    // test environments.
+    if (needsTag) {
+      if (!hasTagNotation) {
+        errors.add('${file.path}: Files containing golden tests must be tagged using '
+            '`@Tags(...)` at the top of the file before import statements.');
+      } else if (!hasReducedTag) {
+        errors.add('${file.path}: Files containing golden tests must be tagged with '
+            "'reduced-test-set'.");
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      ...errors,
+      '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
+    ]);
+  }
+}
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
@@ -498,9 +568,9 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   if (errors.isNotEmpty) {
     exitWithError(<String>[
       if (errors.length == 1)
-        '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
+        '${bold}An error was detected when looking at integration test timeouts:$reset'
       else
-        '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
+        '${bold}Multiple errors were detected when looking at integration test timeouts:$reset',
       ...errors.map((String paragraph) => '$paragraph\n'),
     ]);
   }
@@ -1274,47 +1344,39 @@ Future<void> _checkConsumerDependencies() async {
     print(result.stderr as Object);
     exit(result.exitCode);
   }
-  final Set<String> dependencySet = <String>{};
+  final Set<String> dependencies = <String>{};
   for (final String line in result.stdout.toString().split('\n')) {
     if (!line.contains('->')) {
       continue;
     }
     final List<String> parts = line.split('->');
     final String name = parts[0].trim();
-    dependencySet.add(name);
+    dependencies.add(name);
   }
-  final List<String> dependencies = dependencySet.toList()
-    ..sort();
-  final List<String> disallowed = <String>[];
-  final StreamController<Digest> controller = StreamController<Digest>();
-  final ByteConversionSink hasher = sha256.startChunkedConversion(controller.sink);
-  for (final String dependency in dependencies) {
-    hasher.add(utf8.encode(dependency));
-    if (!kCorePackageAllowList.contains(dependency)) {
-      disallowed.add(dependency);
-    }
-  }
-  hasher.close();
-  final Digest digest = await controller.stream.last;
-  final String signature = base64.encode(digest.bytes);
 
-  // Do not change this signature without following the directions in
-  // dev/bots/allowlist.dart
-  const String kExpected = 'nkO7DCjvSMB6VKyw+V9MU46m3xFEk/oYSbmgAWqvbXE=';
+  final Set<String> removed = kCorePackageAllowList.difference(dependencies);
+  final Set<String> added = dependencies.difference(kCorePackageAllowList);
 
-  if (disallowed.isNotEmpty) {
+  String plural(int n, String s, String p) => n == 1 ? s : p;
+
+  if (added.isNotEmpty) {
     exitWithError(<String>[
-      'Warning: transitive closure contained non-allowlisted packages:',
-      '${disallowed..join(', ')}',
-      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
+      'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
+      '  ${added.join(', ')}',
+      'We strongly desire to keep the number of dependencies to a minimum and',
+      'therefore would much prefer not to add new dependencies.',
+      'See dev/bots/allowlist.dart for instructions on how to update the package',
+      'allowlist if you nonetheless believe this is a necessary addition.',
     ]);
   }
 
-  if (signature != kExpected) {
+  if (removed.isNotEmpty) {
     exitWithError(<String>[
-      'Warning: transitive closure sha256 does not match expected signature.',
-      'See dev/bots/allowlist.dart for instructions on how to update the package allowlist.',
-      '$signature != $kExpected',
+      'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
+      '  ${removed.join(', ')}',
+      'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
+      'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
+      'Thanks!',
     ]);
   }
 }

@@ -239,6 +239,7 @@ abstract class TextSelectionControls {
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 
@@ -356,7 +357,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late AnimationController _toolbarController;
+  late final AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   /// Retrieve current value.
@@ -495,7 +496,7 @@ class TextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar!.remove();
+    _toolbar?.remove();
     _toolbar = null;
   }
 
@@ -871,27 +872,27 @@ class _TextSelectionHandleOverlayState
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by textfield implementations wrapping
+/// The interface is usually implemented by text field implementations wrapping
 /// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
 /// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the textfield.
+/// the builder with information about the current state of the text field.
 /// Based on these information, the builder adds the correct gesture handlers
 /// to the gesture detector.
 ///
 /// See also:
 ///
-///  * [TextField], which implements this delegate for the Material textfield.
+///  * [TextField], which implements this delegate for the Material text field.
 ///  * [CupertinoTextField], which implements this delegate for the Cupertino
-///    textfield.
+///    text field.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
   GlobalKey<EditableTextState> get editableTextKey;
 
-  /// Whether the textfield should respond to force presses.
+  /// Whether the text field should respond to force presses.
   bool get forcePressEnabled;
 
-  /// Whether the user may select text in the textfield.
+  /// Whether the user may select text in the text field.
   bool get selectionEnabled;
 }
 
@@ -924,7 +925,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
   /// The delegate provides the builder with information about what actions can
-  /// currently be performed on the textfield. Based on this, the builder adds
+  /// currently be performed on the text field. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
@@ -1586,7 +1587,13 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
-    } catch (stacktrace) {
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking if the clipboard has strings'),
+      ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {

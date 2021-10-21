@@ -29,7 +29,7 @@ import 'routes.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 ///
 ///
 /// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.1.dart **

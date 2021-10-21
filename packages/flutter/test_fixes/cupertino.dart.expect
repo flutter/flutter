@@ -12,8 +12,10 @@ void main() {
   Object object;
 
   // Change made in https://github.com/flutter/flutter/pull/41859
-  const CupertinoTextThemeData themeData = CupertinoTextThemeData();
+  CupertinoTextThemeData themeData = CupertinoTextThemeData();
   themeData.copyWith();
+  themeData = CupertinoTextThemeData(error: '');
+  themeData.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/44189
   const Element element = Element(myWidget);
@@ -47,81 +49,106 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/66305
   const Stack stack = Stack(clipBehavior: Clip.none);
   const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  const Stack stack = Stack(error: '');
   final behavior = stack.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidateMode: AutovalidateMode.always);
   const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
+  const Form form = Form(error: '');
   final autoMode = form.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
   const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
+  const FormField formField = FormField(error: '');
   final autoMode = formField.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.maybeOf(context);
   MediaQuery.of(context);
+  MediaQuery.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/70726
   Navigator.maybeOf(context);
   Navigator.of(context);
+  Navigator.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68910
   Router.maybeOf(context);
   Router.of(context);
+  Router.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68911
   Localizations.maybeLocaleOf(context);
   Localizations.localeOf(context);
+  Localizations.localeOf(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68917
   FocusTraversalOrder.maybeOf(context);
   FocusTraversalOrder.of(context);
+  FocusTraversalOrder.of(error: '');
+  FocusTraversalGroup.of(error: '');
   FocusTraversalGroup.maybeOf(context);
   FocusTraversalGroup.of(context);
   Focus.maybeOf(context);
   Focus.of(context);
+  Focus.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68921
   Shortcuts.maybeOf(context);
   Shortcuts.of(context);
+  Shortcuts.of(error: '');
+  Actions.find(error: '');
   Actions.maybeFind(context);
   Actions.find(context);
   Actions.handler(context);
   Actions.handler(context);
+  Actions.handler(error: '');
+  Actions.invoke(error: '');
   Actions.maybeInvoke(context);
   Actions.invoke(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68925
   AnimatedList.maybeOf(context);
   AnimatedList.of(context);
+  AnimatedList.of(error: '');
+  SliverAnimatedList.of(error: '');
   SliverAnimatedList.maybeOf(context);
   SliverAnimatedList.of(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68905
   CupertinoDynamicColor.maybeResolve(Color(0), context);
   CupertinoDynamicColor.resolve(Color(0), context);
+  CupertinoDynamicColor.resolve(error: '');
+  CupertinoDynamicColor.resolveFrom(error: '');
   CupertinoDynamicColor.resolveFrom(context);
   CupertinoDynamicColor.resolveFrom(context);
   CupertinoUserInterfaceLevel.maybeOf(context);
   CupertinoUserInterfaceLevel.of(context);
+  CupertinoUserInterfaceLevel.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
   CupertinoTheme.maybeBrightnessOf(context);
   CupertinoTheme.brightnessOf(context);
+  CupertinoTheme.brightnessOf(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68905
   CupertinoThemeData.resolveFrom(context);
   CupertinoThemeData.resolveFrom(context);
+  CupertinoThemeData.resolveFrom(error: '');
+  NoDefaultCupertinoThemeData.resolveFrom(error: '');
   NoDefaultCupertinoThemeData.resolveFrom(context);
   NoDefaultCupertinoThemeData.resolveFrom(context);
   CupertinoTextThemeData.resolveFrom(context);
   CupertinoTextThemeData.resolveFrom(context);
+  CupertinoTextThemeData.resolveFrom(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/72043
   CupertinoTextField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
   CupertinoTextField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  CupertinoTextField(error: '');
+  CupertinoTextField.borderless(error: '');
   CupertinoTextField.borderless(maxLengthEnforcement: MaxLengthEnforcement.enforce);
   CupertinoTextField.borderless(maxLengthEnforcement: MaxLengthEnforcement.none);
   final CupertinoTextField textField;
@@ -129,16 +156,20 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
   bottomNavigationBarItem.label;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
   Draggable draggable = Draggable();
+  draggable = Draggable(error: '');
   draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
   draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
   draggable.dragAnchorStrategy;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
   LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(error: '');
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
   longPressDraggable.dragAnchorStrategy;
@@ -173,16 +204,20 @@ void main() {
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView(error: '');
   listWheelScrollView = ListWheelScrollView.useDelegate();
   listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
   listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
   listWheelScrollView.clipBehavior;
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport = ListWheelViewport(error: '');
   listWheelViewport.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/87839
-  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  notification = OverscrollIndicatorNotification(error: '');
   notification.disallowIndicator();
 }

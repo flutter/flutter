@@ -3,11 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=4281596210"
-@Tags(<String>['no-shuffle'])
 
 import 'dart:async';
 import 'dart:typed_data';
@@ -426,7 +421,6 @@ void main() {
                   height: 100.0,
                   child: AndroidView(
                     viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
                   ),
                 ),
@@ -1191,6 +1185,10 @@ void main() {
 
     testWidgets('clip is handled correctly during resizing', (WidgetTester tester) async {
       // Regressing test for https://github.com/flutter/flutter/issues/67343
+
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
       Widget buildView(double width, double height, Clip clipBehavior) {
         return Center(
           child: SizedBox(
@@ -1574,7 +1572,6 @@ void main() {
                   height: 100.0,
                   child: UiKitView(
                     viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
                   ),
                 ),

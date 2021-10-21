@@ -202,7 +202,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// of space that has been scrolled beforehand has not exceeded the main axis
 /// extent of the viewport.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// In this sample the [SliverFillRemaining] sizes its [child] to fill the
 /// remaining extent of the viewport in both axes. The icon is centered in the
 /// sliver, and would be in any computed extent for the sliver.
@@ -213,7 +213,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// child's size exceeds the remaining space in the viewport.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the child's extent exceeds that of the remaining extent of the
 /// viewport's main axis.
@@ -224,7 +224,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// [SliverConstraints.precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the [SliverConstraints.precedingScrollExtent] has gone
 /// beyond that of the viewport's main axis.
@@ -239,7 +239,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool sample}
 /// In this sample the [SliverFillRemaining]'s child stretches to fill the
 /// overscroll area when [fillOverscroll] is true. This sample also features a
 /// button that is pinned to the bottom of the sliver, regardless of size or

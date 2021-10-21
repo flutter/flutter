@@ -36,7 +36,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// }
 /// ```
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// Here is an example that demonstrates the effect of not using the resolver
 /// versus using it.
 ///

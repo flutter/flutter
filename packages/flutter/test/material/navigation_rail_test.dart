@@ -2331,14 +2331,23 @@ Finder _opacityAboveLabel(String text) {
 }
 
 // Only valid when labelType != all.
-double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+double? _labelOpacity(WidgetTester tester, String text) {
+  // We search for both Opacity and FadeTransition since in some
+  // cases opacity is animated, in other it's not.
+  final Iterable<Opacity> opacityWidgets = tester.widgetList<Opacity>(find.ancestor(
+    of: find.text(text),
+    matching: find.byType(Opacity),
+  ));
+  if (opacityWidgets.isNotEmpty)
+    return opacityWidgets.single.opacity;
+
+  final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
     find.ancestor(
       of: find.text(text),
-      matching: find.byType(Opacity),
-    ),
+      matching: find.byType(FadeTransition),
+    ).first, // first because there's also a FadeTransition from the MaterialPageRoute, which is up the tree
   );
-  return opacityWidget.opacity;
+  return fadeTransitionWidget.opacity.value;
 }
 
 Material _railMaterial(WidgetTester tester) {

@@ -37,13 +37,13 @@ void main() {
 
   testWidgets('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    SnackBarThemeData(
-      backgroundColor: const Color(0xFFFFFFFF),
-      actionTextColor: const Color(0xFF0000AA),
-      disabledActionTextColor: const Color(0xFF00AA00),
-      contentTextStyle: const TextStyle(color: Color(0xFF123456)),
+    const SnackBarThemeData(
+      backgroundColor: Color(0xFFFFFFFF),
+      actionTextColor: Color(0xFF0000AA),
+      disabledActionTextColor: Color(0xFF00AA00),
+      contentTextStyle: TextStyle(color: Color(0xFF123456)),
       elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       behavior: SnackBarBehavior.floating,
     ).debugFillProperties(builder);
 
@@ -365,12 +365,12 @@ void main() {
 }
 
 SnackBarThemeData _snackBarTheme() {
-  return SnackBarThemeData(
+  return const SnackBarThemeData(
     backgroundColor: Colors.orange,
     actionTextColor: Colors.green,
-    contentTextStyle: const TextStyle(color: Colors.blue),
+    contentTextStyle: TextStyle(color: Colors.blue),
     elevation: 12.0,
-    shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
   );
 }
 
