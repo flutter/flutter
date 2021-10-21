@@ -120,6 +120,12 @@ class RuntimeController : public PlatformConfigurationClient {
   ///             Launch an isolate in that runtime controller instead.
   ///
   /// @param[in]  settings                 The per engine instance settings.
+  /// @param[in]  root_isolate_create_callback  A callback invoked before the
+  ///                                      root isolate has launched the Dart
+  ///                                      program, but after it has been
+  ///                                      created. This is called without
+  ///                                      isolate scope, and after any root
+  ///                                      isolate callback in the settings.
   /// @param[in]  dart_entrypoint          The dart entrypoint. If
   ///                                      `std::nullopt` or empty, `main` will
   ///                                      be attempted.
@@ -133,6 +139,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   [[nodiscard]] bool LaunchRootIsolate(
       const Settings& settings,
+      fml::closure root_isolate_create_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
       std::unique_ptr<IsolateConfiguration> isolate_configuration);
