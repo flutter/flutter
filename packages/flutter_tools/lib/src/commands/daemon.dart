@@ -462,7 +462,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        '${sentenceCase(options.buildInfo.friendlyModeName)} '
         'mode is not supported for ${device.name}.',
       );
     }

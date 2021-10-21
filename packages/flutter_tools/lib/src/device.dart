@@ -468,7 +468,7 @@ abstract class Device {
   /// The ID returned matches that in the output of `flutter emulators`. Fetching
   /// this name may require connecting to the device and if an error occurs null
   /// will be returned.
-  Future<String> get emulatorId;
+  Future<String?> get emulatorId;
 
   /// Whether this device can run the provided [buildMode].
   ///
@@ -501,7 +501,7 @@ abstract class Device {
   /// Specify [userIdentifier] to install for a particular user (Android only).
   Future<bool> installApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Uninstall an app package from the current device.
@@ -510,7 +510,7 @@ abstract class Device {
   /// defaults to all users (Android only).
   Future<bool> uninstallApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Check if the device is supported by Flutter.
@@ -550,12 +550,12 @@ abstract class Device {
   /// reader will also include log messages from before the invocation time.
   /// Defaults to false.
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    covariant ApplicationPackage? app,
     bool includePastLogs = false,
   });
 
   /// Get the port forwarder for this device.
-  DevicePortForwarder get portForwarder;
+  DevicePortForwarder? get portForwarder;
 
   /// Get the DDS instance for this device.
   final DartDevelopmentService dds = DartDevelopmentService();
@@ -572,13 +572,13 @@ abstract class Device {
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Whether this device implements support for hot reload.
@@ -603,7 +603,7 @@ abstract class Device {
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Query the current application memory usage..
@@ -917,7 +917,7 @@ class DiscoveredApp {
 
 // An empty device log reader
 class NoOpDeviceLogReader implements DeviceLogReader {
-  NoOpDeviceLogReader(this.name);
+  NoOpDeviceLogReader(String? nameOrNull) : name = nameOrNull ?? '';
 
   @override
   final String name;

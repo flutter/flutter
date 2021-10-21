@@ -16,7 +16,7 @@ class ConductorSubsteps extends StatefulWidget {
   final VoidCallback nextStep;
 
   @override
-  ConductorSubstepsState createState() => ConductorSubstepsState();
+  State<ConductorSubsteps> createState() => ConductorSubstepsState();
 
   static const List<String> _substepTitles = <String>[
     'Substep 1',
