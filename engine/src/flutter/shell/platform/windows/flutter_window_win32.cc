@@ -211,6 +211,10 @@ void FlutterWindowWin32::OnComposeChange(const std::u16string& text,
   binding_handler_delegate_->OnComposeChange(text, cursor_pos);
 }
 
+void FlutterWindowWin32::OnUpdateSemanticsEnabled(bool enabled) {
+  binding_handler_delegate_->OnUpdateSemanticsEnabled(enabled);
+}
+
 void FlutterWindowWin32::OnScroll(double delta_x,
                                   double delta_y,
                                   FlutterPointerDeviceKind device_kind,

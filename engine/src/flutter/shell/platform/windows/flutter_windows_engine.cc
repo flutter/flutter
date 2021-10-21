@@ -452,4 +452,11 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
               engine_, target, action, data.data(), data.size()) == kSuccess);
 }
 
+void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
+  if (engine_ && semantics_enabled_ != enabled) {
+    semantics_enabled_ = enabled;
+    embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
+  }
+}
+
 }  // namespace flutter

@@ -93,6 +93,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   void OnResetImeComposing() override;
 
   // |WindowWin32|
+  void OnUpdateSemanticsEnabled(bool enabled) override;
+
+  // |WindowWin32|
   void OnScroll(double delta_x,
                 double delta_y,
                 FlutterPointerDeviceKind device_kind,

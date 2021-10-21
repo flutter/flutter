@@ -158,6 +158,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |WindowBindingHandlerDelegate|
   void OnPlatformBrightnessChanged() override;
 
+  // |WindowBindingHandlerDelegate|
+  virtual void OnUpdateSemanticsEnabled(bool enabled) override;
+
   // |TextInputPluginDelegate|
   void OnCursorRectUpdated(const Rect& rect) override;
 
@@ -346,6 +349,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Target for the window width. Valid when resize_pending_ is set. Guarded by
   // resize_mutex_.
   size_t resize_target_height_ = 0;
+
+  // True when flutter's semantics tree is enabled.
+  bool semantics_enabled_ = false;
 };
 
 }  // namespace flutter

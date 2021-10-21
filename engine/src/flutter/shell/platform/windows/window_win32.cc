@@ -139,6 +139,33 @@ void WindowWin32::TrackMouseLeaveEvent(HWND hwnd) {
   }
 }
 
+void WindowWin32::OnGetObject(UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam) {
+  LRESULT reference_result = static_cast<LRESULT>(0L);
+
+  // Only the lower 32 bits of lparam are valid when checking the object id
+  // because it sometimes gets sign-extended incorrectly (but not always).
+  DWORD obj_id = static_cast<DWORD>(static_cast<DWORD_PTR>(lparam));
+
+  bool is_msaa_request = static_cast<DWORD>(OBJID_CLIENT) == obj_id;
+  if (is_msaa_request) {
+    // On Windows, we don't get a notification that the screen reader has been
+    // enabled or disabled. There is an API to query for screen reader state,
+    // but that state isn't set by all screen readers, including by Narrator,
+    // the screen reader that ships with Windows:
+    // https://docs.microsoft.com/en-us/windows/win32/winauto/screen-reader-parameter
+    //
+    // Instead, we enable semantics in Flutter if Windows issues queries for
+    // Microsoft Active Accessibility (MSAA) COM objects.
+    OnUpdateSemanticsEnabled(true);
+
+    // TODO(cbracken): https://github.com/flutter/flutter/issues/77838
+    // Once AccessibilityBridge is wired up, look up the IAccessible
+    // representing the root view and call LresultFromObject.
+  }
+}
+
 void WindowWin32::OnImeSetContext(UINT const message,
                                   WPARAM const wparam,
                                   LPARAM const lparam) {
@@ -376,6 +403,9 @@ WindowWin32::HandleMessage(UINT const message,
       OnScroll((static_cast<short>(HIWORD(wparam)) /
                 static_cast<double>(WHEEL_DELTA)),
                0.0, kFlutterPointerDeviceKindMouse, kDefaultPointerDeviceId);
+      break;
+    case WM_GETOBJECT:
+      OnGetObject(message, wparam, lparam);
       break;
     case WM_INPUTLANGCHANGE:
       // TODO(cbracken): pass this to TextInputManager to aid with

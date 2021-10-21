@@ -98,6 +98,10 @@ class WindowBindingHandlerDelegate {
 
   // Notifies delegate that backing window has received brightness change event.
   virtual void OnPlatformBrightnessChanged() = 0;
+
+  // Notifies delegate that the Flutter semantics tree should be enabled or
+  // disabled.
+  virtual void OnUpdateSemanticsEnabled(bool enabled) = 0;
 };
 
 }  // namespace flutter
