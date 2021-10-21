@@ -1754,7 +1754,9 @@ FILE: ../../../flutter/shell/platform/windows/system_utils.h
 FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils_win32.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils_winuwp.cc
+FILE: ../../../flutter/shell/platform/windows/task_runner.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner.h
+FILE: ../../../flutter/shell/platform/windows/task_runner_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32.h
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32_window.cc

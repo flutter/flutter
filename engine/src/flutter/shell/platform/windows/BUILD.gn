@@ -77,6 +77,7 @@ source_set("flutter_windows_source") {
     "sequential_id_generator.cc",
     "sequential_id_generator.h",
     "system_utils.h",
+    "task_runner.cc",
     "task_runner.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
@@ -226,6 +227,7 @@ executable("flutter_windows_unittests") {
     "sequential_id_generator_unittests.cc",
     "string_conversion_unittests.cc",
     "system_utils_unittests.cc",
+    "task_runner_unittests.cc",
     "testing/engine_modifier.h",
     "testing/mock_gl_functions.h",
   ]

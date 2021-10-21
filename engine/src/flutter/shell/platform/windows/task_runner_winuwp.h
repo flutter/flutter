@@ -2,51 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINRT_TASK_RUNNER_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_WINRT_TASK_RUNNER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TASK_RUNNER_WINUWP_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_TASK_RUNNER_WINUWP_H_
 
-#include <windows.h>
-
-#include <third_party/cppwinrt/generated/winrt/Windows.UI.Core.h>
-
-#include <chrono>
-#include <functional>
-#include <thread>
+#include <third_party/cppwinrt/generated/winrt/Windows.Foundation.h>
+#include <third_party/cppwinrt/generated/winrt/Windows.System.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 
 namespace flutter {
 
-// A custom task runner that uses a CoreDispatcher to schedule
-// flutter tasks.
+// A custom task runner that uses a DispatcherQueue.
 class TaskRunnerWinUwp : public TaskRunner {
  public:
-  TaskRunnerWinUwp(DWORD main_thread_id,
+  TaskRunnerWinUwp(CurrentTimeProc get_current_time,
                    const TaskExpiredCallback& on_task_expired);
-
-  ~TaskRunnerWinUwp();
-
-  TaskRunnerWinUwp(const TaskRunnerWinUwp&) = delete;
-  TaskRunnerWinUwp& operator=(const TaskRunnerWinUwp&) = delete;
+  virtual ~TaskRunnerWinUwp();
 
   // |TaskRunner|
   bool RunsTasksOnCurrentThread() const override;
 
+ protected:
   // |TaskRunner|
-  void PostFlutterTask(FlutterTask flutter_task,
-                       uint64_t flutter_target_time_nanos) override;
-
-  // |TaskRunner|
-  void PostTask(TaskClosure task) override;
+  void WakeUp() override;
 
  private:
-  DWORD main_thread_id_;
-  TaskExpiredCallback on_task_expired_;
+  void OnTick(winrt::Windows::System::DispatcherQueueTimer const&,
+              winrt::Windows::Foundation::IInspectable const&);
 
-  winrt::Windows::UI::Core::CoreDispatcher dispatcher_{nullptr};
+  void ProcessTasksAndScheduleNext();
+
+  winrt::Windows::System::DispatcherQueue dispatcher_queue_{nullptr};
+  winrt::Windows::System::DispatcherQueueTimer dispatcher_queue_timer_{nullptr};
+
+  TaskRunnerWinUwp(const TaskRunnerWinUwp&) = delete;
+  TaskRunnerWinUwp& operator=(const TaskRunnerWinUwp&) = delete;
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINRT_TASK_RUNNER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TASK_RUNNER_WINUWP_H_
