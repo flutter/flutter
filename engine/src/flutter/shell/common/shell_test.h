@@ -43,7 +43,9 @@ class ShellTest : public FixtureTest {
           shell_test_external_view_embedder = nullptr,
       bool is_gpu_disabled = false,
       ShellTestPlatformView::BackendType rendering_backend =
-          ShellTestPlatformView::BackendType::kDefaultBackend);
+          ShellTestPlatformView::BackendType::kDefaultBackend,
+      Shell::CreateCallback<PlatformView> platform_view_create_callback =
+          nullptr);
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell, TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();
