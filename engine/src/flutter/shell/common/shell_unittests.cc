@@ -3093,8 +3093,7 @@ TEST_F(ShellTest, UserTagSetOnStartup) {
 TEST_F(ShellTest, PrefetchDefaultFontManager) {
   auto settings = CreateSettingsForFixture();
   settings.prefetched_default_font_manager = true;
-
-  auto shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell;
 
   auto get_font_manager_count = [&] {
     fml::AutoResetWaitableEvent latch;
@@ -3109,8 +3108,17 @@ TEST_F(ShellTest, PrefetchDefaultFontManager) {
     latch.Wait();
     return font_manager_count;
   };
+  size_t initial_font_manager_count = 0;
+  settings.root_isolate_create_callback = [&](const auto& isolate) {
+    ASSERT_GT(initial_font_manager_count, 0ul);
+    // Should not have fetched the default font manager yet, since the root
+    // isolate was only just created.
+    ASSERT_EQ(get_font_manager_count(), initial_font_manager_count);
+  };
 
-  size_t initial_font_manager_count = get_font_manager_count();
+  shell = CreateShell(std::move(settings));
+
+  initial_font_manager_count = get_font_manager_count();
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("emptyMain");
