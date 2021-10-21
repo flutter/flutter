@@ -7,7 +7,6 @@ import("//flutter/tools/fuchsia/dart/config.gni")
 import("//flutter/tools/fuchsia/dart/dart.gni")
 import("//flutter/tools/fuchsia/dart/dart_package_config.gni")
 import("//flutter/tools/fuchsia/dart/kernel/dart_kernel.gni")
-import("//flutter/tools/fuchsia/dist/resource.gni")
 import("//flutter/tools/fuchsia/gn-sdk/cmc.gni")
 import("//flutter/tools/fuchsia/gn-sdk/component.gni")
 
@@ -69,6 +68,11 @@ template("flutter_dart_component") {
     _component_name = invoker.component_name
   } else {
     _component_name = target_name
+  }
+
+  _resources = []
+  if (defined(invoker.resources)) {
+    _resources = invoker.resources
   }
 
   # Flutter and Dart components need to run inside the runner which matches how
@@ -231,20 +235,7 @@ template("flutter_dart_component") {
       args += [ rebase_path(_kernel_path, root_build_dir) ]
     }
 
-    # copy the snapshot as a resource
-    _snapshot_resource_target_name = "${target_name}_snapshot_resource"
-
-    # TODO(richkadel): It looks like this is the _ONLY_ place resource() is used
-    # and maybe that logic should simply be embedded here, directly?
-    resource(_snapshot_resource_target_name) {
-      sources = [ _snapshot_path ]
-      outputs = [ "data/${_component_name}/app_aot_snapshot.so" ]
-    }
-
-    _component_deps += [
-      ":$_snapshot_resource_target_name",
-      ":$_snapshot_target_name",
-    ]
+    _component_deps += [ ":$_snapshot_target_name" ]
   }
 
   fuchsia_component(_component_name) {
@@ -257,7 +248,14 @@ template("flutter_dart_component") {
     manifest = _manifest
     manifest_output_name = _manifest_output_name
 
-    if (!build_cfg.is_aot) {
+    if (build_cfg.is_aot) {
+      _resources += [
+        {
+          path = _snapshot_path
+          dest = "data/${_component_name}/app_aot_snapshot.so"
+        },
+      ]
+    } else {
       _convert_kernel_target_name =
           "${_kernel_target_name}_convert_kernel_manifest"
       _convert_kernel_manifest_file =
@@ -274,6 +272,8 @@ template("flutter_dart_component") {
       # at some point during the build/compile phase.
       resources_in_json_files = [ rebase_path(_convert_kernel_manifest_file) ]
     }
+
+    resources = _resources
   }
 
   group(target_name) {
