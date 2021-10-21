@@ -22,17 +22,18 @@ import("//flutter/tools/fuchsia/flutter/internal/flutter_dart_component.gni")
 #
 # Once a library is defined a flutter component can be created which
 # depends on this package. If the component needs any other resources they may
-# be defined using the resource target and added to the components deps.
+# be defined in the `resources` variable.
 #
 # ```
-# resource("text-file") {
-#   sources = [ "text_file.txt" ]
-#   outputs = [ "data/text_file.txt" ]
-# }
-#
 # flutter_component("my-component") {
 #   manifest = "meta/my-component.cmx"
 #   main_package = "my_library"
+#   resources = [
+#     {
+#       path = "text_file.txt"
+#       dest = "data/text_file.txt"
+#     },
+#   ]
 #   deps = [
 #     ":lib",
 #     ":text-file",
@@ -133,6 +134,7 @@ template("flutter_component") {
                              "main_dart",
                              "main_package",
                              "component_name",
+                             "resources",
                            ])
     deps = _component_deps
 
