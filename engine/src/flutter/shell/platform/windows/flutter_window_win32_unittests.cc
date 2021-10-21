@@ -216,6 +216,7 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
   MOCK_METHOD0(OnComposeCommit, void());
   MOCK_METHOD0(OnComposeEnd, void());
   MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
+  MOCK_METHOD1(OnUpdateSemanticsEnabled, void(bool));
   MOCK_METHOD7(OnScroll,
                void(double,
                     double,
