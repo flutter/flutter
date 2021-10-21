@@ -6,7 +6,8 @@ import("//flutter/common/config.gni")
 
 source_set("ax") {
   visibility = [ "//flutter/third_party/accessibility/*" ]
-  include_dirs = [ "//flutter/third_party/accessibility" ]
+  public_configs =
+      [ "//flutter/third_party/accessibility:accessibility_config" ]
 
   sources = [
     "platform/ax_platform_node.cc",
