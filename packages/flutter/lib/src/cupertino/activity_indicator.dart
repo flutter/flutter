@@ -4,8 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
 
