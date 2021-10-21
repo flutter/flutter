@@ -325,7 +325,8 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
     std::shared_ptr<ShellTestExternalViewEmbedder>
         shell_test_external_view_embedder,
     bool is_gpu_disabled,
-    ShellTestPlatformView::BackendType rendering_backend) {
+    ShellTestPlatformView::BackendType rendering_backend,
+    Shell::CreateCallback<PlatformView> platform_view_create_callback) {
   const auto vsync_clock = std::make_shared<ShellTestVsyncClock>();
 
   CreateVsyncWaiter create_vsync_waiter = [&]() {
@@ -338,21 +339,21 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
     }
   };
 
-  Shell::CreateCallback<PlatformView> platfrom_view_create_callback =
-      [vsync_clock,                        //
-       &create_vsync_waiter,               //
-       shell_test_external_view_embedder,  //
-       rendering_backend                   //
-  ](Shell& shell) {
-        return ShellTestPlatformView::Create(
-            shell,                             //
-            shell.GetTaskRunners(),            //
-            vsync_clock,                       //
-            std::move(create_vsync_waiter),    //
-            rendering_backend,                 //
-            shell_test_external_view_embedder  //
-        );
-      };
+  if (!platform_view_create_callback) {
+    platform_view_create_callback = [vsync_clock,                        //
+                                     &create_vsync_waiter,               //
+                                     shell_test_external_view_embedder,  //
+                                     rendering_backend                   //
+    ](Shell& shell) {
+      return ShellTestPlatformView::Create(shell,                             //
+                                           shell.GetTaskRunners(),            //
+                                           vsync_clock,                       //
+                                           std::move(create_vsync_waiter),    //
+                                           rendering_backend,                 //
+                                           shell_test_external_view_embedder  //
+      );
+    };
+  }
 
   Shell::CreateCallback<Rasterizer> rasterizer_create_callback =
       [](Shell& shell) { return std::make_unique<Rasterizer>(shell); };
@@ -360,7 +361,7 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
   return Shell::Create(flutter::PlatformData(),        //
                        task_runners,                   //
                        settings,                       //
-                       platfrom_view_create_callback,  //
+                       platform_view_create_callback,  //
                        rasterizer_create_callback,     //
                        is_gpu_disabled                 //
   );

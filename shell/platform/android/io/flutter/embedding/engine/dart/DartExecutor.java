@@ -59,7 +59,7 @@ public class DartExecutor implements BinaryMessenger {
     this.flutterJNI = flutterJNI;
     this.assetManager = assetManager;
     this.dartMessenger = new DartMessenger(flutterJNI);
-    dartMessenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler);
+    dartMessenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler, null);
     this.binaryMessenger = new DefaultBinaryMessenger(dartMessenger);
     // The JNI might already be attached if coming from a spawned engine. If so, correctly report
     // that this DartExecutor is already running.
@@ -170,6 +170,14 @@ public class DartExecutor implements BinaryMessenger {
   // ------ START BinaryMessenger (Deprecated: use getBinaryMessenger() instead) -----
   /** @deprecated Use {@link #getBinaryMessenger()} instead. */
   @Deprecated
+  @UiThread
+  @Override
+  public TaskQueue makeBackgroundTaskQueue() {
+    return binaryMessenger.makeBackgroundTaskQueue();
+  }
+
+  /** @deprecated Use {@link #getBinaryMessenger()} instead. */
+  @Deprecated
   @Override
   @UiThread
   public void send(@NonNull String channel, @Nullable ByteBuffer message) {
@@ -192,8 +200,10 @@ public class DartExecutor implements BinaryMessenger {
   @Override
   @UiThread
   public void setMessageHandler(
-      @NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
-    binaryMessenger.setMessageHandler(channel, handler);
+      @NonNull String channel,
+      @Nullable BinaryMessenger.BinaryMessageHandler handler,
+      @Nullable TaskQueue taskQueue) {
+    binaryMessenger.setMessageHandler(channel, handler, taskQueue);
   }
   // ------ END BinaryMessenger -----
 
@@ -371,6 +381,10 @@ public class DartExecutor implements BinaryMessenger {
       this.messenger = messenger;
     }
 
+    public TaskQueue makeBackgroundTaskQueue() {
+      return messenger.makeBackgroundTaskQueue();
+    }
+
     /**
      * Sends the given {@code message} from Android to Dart over the given {@code channel}.
      *
@@ -413,8 +427,10 @@ public class DartExecutor implements BinaryMessenger {
     @Override
     @UiThread
     public void setMessageHandler(
-        @NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
-      messenger.setMessageHandler(channel, handler);
+        @NonNull String channel,
+        @Nullable BinaryMessenger.BinaryMessageHandler handler,
+        @Nullable TaskQueue taskQueue) {
+      messenger.setMessageHandler(channel, handler, taskQueue);
     }
   }
 }

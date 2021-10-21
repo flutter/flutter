@@ -11,7 +11,10 @@ import java.nio.ByteBuffer;
 /** Handler that receives messages from Dart code. */
 public interface PlatformMessageHandler {
   void handleMessageFromDart(
-      @NonNull final String channel, @Nullable ByteBuffer message, final int replyId);
+      @NonNull final String channel,
+      @Nullable ByteBuffer message,
+      final int replyId,
+      long messageData);
 
   void handlePlatformMessageResponse(int replyId, @Nullable ByteBuffer reply);
 }
