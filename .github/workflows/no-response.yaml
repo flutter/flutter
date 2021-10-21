@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: lee-dohm/no-response@caff5e7de24d19659c31dda1ff2520a3f6a88370
+      - uses: lee-dohm/no-response@9bb0a4b5e6a45046f00353d5de7d90fb8bd773bb
         with:
           token: ${{ github.token }}
           # Comment to post when closing an Issue for lack of response. Set to `false` to disable
