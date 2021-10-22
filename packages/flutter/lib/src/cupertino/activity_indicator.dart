@@ -6,9 +6,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
+import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
+
+// Extracted from iOS 13.2 Beta.
+const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFF3C3C44),
+  darkColor: Color(0xFFEBEBF5),
+);
 
 /// An iOS-style activity indicator that spins clockwise.
 ///
@@ -110,12 +116,6 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
     super.dispose();
   }
 
-  Color _getActiveColor(BuildContext context) {
-    return
-     widget.color ??
-     CupertinoTheme.of(context).activityIndicatorColor!;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -124,7 +124,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
-          activeColor: _getActiveColor(context),
+          activeColor: widget.color ?? _kActiveTickColor,
           radius: widget.radius,
           progress: widget.progress,
         ),
