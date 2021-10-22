@@ -88,7 +88,7 @@ void main() {
     await gestureLight.up();
     await tester.pump();
     expect(find.byType(CupertinoContextMenuAction), paints..rect(color: _kBackgroundColor.color));
-    
+
     await tester.pumpWidget(_getApp(isDark: true));
     expect(find.byType(CupertinoContextMenuAction), paints..rect(color: _kBackgroundColor.darkColor));
 
