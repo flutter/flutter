@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/divider.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -1174,7 +1173,7 @@ class _ContextMenuSheet extends StatelessWidget {
                  Column(
                    children: <Widget>[
                       actions[i],
-                      const Divider(
+                      Container(
                         color: _kBackgroundColorPressed,
                         height: .9,
                       ),
