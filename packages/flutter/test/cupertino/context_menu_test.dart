@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   final TestWidgetsFlutterBinding binding =
     TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -190,6 +192,83 @@ void main() {
   });
 
   group('CupertinoContextMenu when open', () {
+    testWidgets('Can adapt to light and dark mode', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+
+      final Widget child =  Container(
+              width: 300.0,
+              height: 100.0,
+              color: const Color(0xFF0000FF),
+            );
+      // Pump a CupertinoContextMenu with Brightness.light
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(
+            brightness: Brightness.light,
+          ),
+          home: CupertinoPageScaffold(
+            child: Align(
+              child: CupertinoContextMenu(
+              actions: const <CupertinoContextMenuAction>[
+              CupertinoContextMenuAction(
+                child: Text('CupertinoContextMenuAction'),
+                ),
+              ],
+            child: child,
+            ),
+          ),
+        ),
+      ));
+      expect(find.byType(CupertinoContextMenuAction), findsNothing);
+      final Rect childRect1 = tester.getRect(find.byWidget(child));
+      final TestGesture gesture1 = await tester.startGesture(childRect1.center);
+      await tester.pumpAndSettle();
+      await gesture1.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is in the center of the screen.
+      expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
+      expect(find.byType(CupertinoContextMenuAction),
+          paints..rect(color: const Color(0xFFEEEEEE)));
+
+      // Close the CupertinoContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoContextMenuAction), findsNothing);
+
+      // Pump a CupertinoContextMenu with Brightness.dark
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(
+            brightness: Brightness.dark,
+          ),
+          home: CupertinoPageScaffold(
+            child: Align(
+              child: CupertinoContextMenu(
+              actions: const <CupertinoContextMenuAction>[
+              CupertinoContextMenuAction(
+                child: Text('CupertinoContextMenuAction'),
+                ),
+              ],
+            child: child,
+            ),
+          ),
+        ),
+      ));
+      expect(find.byType(CupertinoContextMenuAction), findsNothing);
+      final Rect childRect2 = tester.getRect(find.byWidget(child));
+      final TestGesture gesture2 = await tester.startGesture(childRect2.center);
+      await tester.pumpAndSettle();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is in the center of the screen.
+      expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
+      expect(find.byType(CupertinoContextMenuAction),
+          paints..rect(color: const Color(0xFF212122)));
+    });
+
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(child: child));

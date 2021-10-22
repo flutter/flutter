@@ -19,7 +19,7 @@ const double _kOpenScale = 1.1;
 // static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
 const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFDDDDDD),
-  darkColor: Color(0xFF3F3F40),
+  darkColor: Color(0xFF373738),
 );
 
 typedef _DismissCallback = void Function(
@@ -1176,7 +1176,7 @@ class _ContextMenuSheet extends StatelessWidget {
                       actions[i],
                       const Divider(
                         color: _kBackgroundColorPressed,
-                        height: 1,
+                        height: .9,
                       ),
                    ],
                   ),
