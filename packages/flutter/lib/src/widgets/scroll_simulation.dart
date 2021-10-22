@@ -202,14 +202,28 @@ class ClampingScrollSimulation extends Simulation {
   // Scale f(t) so that 0.0 <= f(t) <= 1.0
   // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
   //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
-  static const double _initialVelocityPenetration = 3.065;
+  //
+  // TODO(grouma): The following logic works around the poor fit of the
+  // cubic curve. Ideally we re-implement the scroll logic found on Android.
+  //
+  // The above cubic curve fit results in a velocity function of:
+  // v(t) = 3.6 t^2 - 6.54 t + 3.065
+  // Which has a global minimum of 379/4000 at time 109/120.
+  //
+  // To ensure velocity is 0 at time 1 we shift the velocity function:
+  // v(t) = 3.6 (1 - 2 t + t^2)
+  //
+  // Integrating the velocity function to preserve the feel results in the
+  // following fit function:
+  // f(t) = 1.2 t^3 - 3.6 t ^2 + 3.6
+  static const double _initialVelocityPenetration = 3.6;
   static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
+    return (1.2 * t * t * t) - (3.6 * t * t) + (_initialVelocityPenetration * t);
   }
 
   // The derivative of the _flingDistancePenetration() function.
   static double _flingVelocityPenetration(double t) {
-    return (3.6 * t * t) - (6.54 * t) + _initialVelocityPenetration;
+    return (3.6 * t * t) - (7.2 * t) + _initialVelocityPenetration;
   }
 
   @override
