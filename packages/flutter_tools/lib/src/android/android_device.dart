@@ -541,7 +541,7 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, dynamic> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
@@ -595,7 +595,8 @@ class AndroidDevice extends Device {
           androidBuildInfo: AndroidBuildInfo(
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
-            fastStart: debuggingOptions.fastStart
+            fastStart: debuggingOptions.fastStart,
+            multidexEnabled: (platformArgs['multidex'] as bool) ?? false,
           ),
       );
       // Package has been built, so we can get the updated application ID and

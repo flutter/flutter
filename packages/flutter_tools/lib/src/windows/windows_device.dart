@@ -194,7 +194,7 @@ class WindowsUWPDevice extends Device {
     }
     final String binaryDir = _fileSystem.path.absolute(
         _fileSystem.path.join('build', 'winuwp', 'runner_uwp', 'AppPackages', binaryName));
-    final String config = toTitleCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
+    final String config = sentenceCase(getNameForBuildMode(_buildMode ?? BuildMode.debug));
 
     // If a multi-architecture package exists, install that; otherwise install
     // the single-architecture package.

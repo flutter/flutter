@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'base/common.dart';
@@ -282,7 +281,6 @@ abstract class Artifacts {
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
   ///
   /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
-  @visibleForTesting
   factory Artifacts.test({String? localEngine, FileSystem? fileSystem}) {
     fileSystem ??= MemoryFileSystem.test();
     if (localEngine != null) {

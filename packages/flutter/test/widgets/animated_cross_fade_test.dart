@@ -384,6 +384,53 @@ void main() {
     await tester.pump();
     expect(hiddenNode.hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('AnimatedCrossFade second child do not receive touch events',
+      (WidgetTester tester) async {
+    int numberOfTouchEventNoticed = 0;
+
+    Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
+      return tester.pumpWidget(
+        SizedBox(
+          width: 300,
+          height: 600,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: AnimatedCrossFade(
+              firstChild: const Text('AAA'),
+              secondChild: TextButton(
+                  style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
+                  onPressed: () {
+                    numberOfTouchEventNoticed++;
+                  },
+                  child: const Text('BBB'),
+              ),
+              crossFadeState: crossFadeState,
+              duration: const Duration(milliseconds: 50),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> touchSecondButton() async {
+      final TestGesture gestureTouchSecondButton = await tester
+          .startGesture(const Offset(150, 300));
+
+      return gestureTouchSecondButton.up();
+    }
+
+    await buildAnimatedFrame(CrossFadeState.showSecond);
+
+    await touchSecondButton();
+    expect(numberOfTouchEventNoticed, 1);
+
+    await buildAnimatedFrame(CrossFadeState.showFirst);
+    await touchSecondButton();
+    await touchSecondButton();
+
+    expect(numberOfTouchEventNoticed, 1);
+  });
 }
 
 class _TickerWatchingWidget extends StatefulWidget {
