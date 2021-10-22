@@ -1262,10 +1262,11 @@ class Transform extends SingleChildRenderObjectWidget {
        alignment = null,
        super(key: key, child: child);
 
-  /// Creates a widget that scales its child uniformly.
+  /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scale` argument must not be null. It gives the scalar by which
-  /// to multiply the `x` and `y` axes.
+  /// The `scaleX` and `scaleY` provide the scalars to multply the `x` and `y` axes.
+  ///
+  /// If `scale` is set then it overrides `scaleX` and `scaleY` and the child is scaled uniformly.
   ///
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
@@ -1293,14 +1294,17 @@ class Transform extends SingleChildRenderObjectWidget {
   ///    over a given duration.
   Transform.scale({
     Key? key,
-    required double scale,
+    double? scale,
+    double scaleX = 1.0,
+    double scaleY = 1.0,
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
     this.filterQuality,
     Widget? child,
-  }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
-       super(key: key, child: child);
+  })  : transform =
+            Matrix4.diagonal3Values(scale ?? scaleX, scale ?? scaleY, 1.0),
+        super(key: key, child: child);
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
