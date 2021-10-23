@@ -40,13 +40,17 @@ class DraggableScrollableController {
 
   final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers = [];
 
-  double get minSize => _singleController.extent.minSize;
-
-  double get maxSize => _singleController.extent.maxSize;
-
-  double get currentSize => _singleController.extent.currentSize;
+  double get size => _singleController.extent.currentSize;
 
   double get pixels => _singleController.extent.currentPixels;
+
+  double get minPixels {
+    return _singleController.extent.sizeToPixels(_singleController.extent.minSize);
+  }
+
+  double get maxPixels {
+    return _singleController.extent.sizeToPixels(_singleController.extent.maxSize);
+  }
 
   void reset() {
     _assertAttached();
@@ -84,6 +88,7 @@ class DraggableScrollableController {
   }
 
   void jumpTo(double size) {
+    assert(size >= 0 && size <= 1);
     _assertAttached();
     for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
       controller.position.goIdle();
@@ -112,6 +117,9 @@ class DraggableScrollableController {
     _attachedInternalControllers.add(scrollController);
   }
 
+  void _detach(_DraggableScrollableSheetScrollController scrollController) {
+    _attachedInternalControllers.remove(scrollController);
+  }
 }
 
 /// A container for a [Scrollable] that responds to drag gestures by resizing
@@ -564,6 +572,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
+    widget.controller?._detach(_scrollController);
     _scrollController.dispose();
     _extent.dispose();
     super.dispose();

@@ -767,6 +767,15 @@ void main() {
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 20'), findsOneWidget);
       expect(find.text('Item 70'), findsNothing);
+
+      // Attempting to move to a size too big or too small instead moves to the
+      // min or max child size.
+      goTo(.1);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
     });
   }
 
@@ -828,5 +837,69 @@ void main() {
       tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
       closeTo(.5, precisionErrorTolerance),
     );
+  });
+
+  testWidgets('Can get size and pixels', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    expect(controller.minPixels, .25*screenHeight);
+    expect(controller.maxPixels, screenHeight);
+
+    controller.animateTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+    expect(controller.size, closeTo(.6, precisionErrorTolerance));
+    expect(controller.pixels, closeTo(.6*screenHeight, precisionErrorTolerance));
+
+    await tester.drag(find.text('Item 5'), Offset(0, .2*screenHeight));
+    expect(controller.size, closeTo(.4, precisionErrorTolerance));
+    expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
+  });
+
+  testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    // Can't use a controller before attaching it.
+    expect(() => controller.jumpTo(.1), throwsAssertionError);
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+    ));
+
+    // Can't animate to invalid sizes.
+    expect(() => controller.jumpTo(-1), throwsAssertionError);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: [
+          _boilerplate(
+            null,
+            controller: controller,
+          ),
+          _boilerplate(
+            null,
+            controller: controller,
+          )
+        ],
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Can't access getters when attached to multiple controllers.
+    expect(() => controller.size, throwsAssertionError);
+    expect(() => controller.pixels, throwsAssertionError);
   });
 }
