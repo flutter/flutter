@@ -2963,7 +2963,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextDirection textDirection;
   final Locale? locale;
   final String obscuringCharacter;
-  final bool? obscureText;
+  final bool obscureText;
   final ObscureTextBehavior obscureTextBehavior;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
