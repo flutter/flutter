@@ -250,6 +250,15 @@ class AnimatedSwitcher extends StatefulWidget {
   /// of the children is set by the passed [Alignment] parameter. If
   /// [Alignment.center] is passed, the returned function equals
   /// [defaultLayoutBuilder].
+  /// 
+  /// Example:
+  /// ```dart
+  ///AnimatedSwitcher(
+  ///  ...
+  ///  layoutBuilder: AnimatedSwitcher.customAlignedLayoutBuilder(alignment: Alignment.topCenter),
+  ///  ...
+  ///),
+  /// ```
   ///
   /// The new child is placed in a [Stack] that sizes itself to match the
   /// largest of the child or a previous child.
