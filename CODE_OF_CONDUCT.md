@@ -13,7 +13,7 @@ Specifically:
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
-or, if you prefer, directly contact someone on the team, for instance
+or, if you prefer, directly contact someone on the team, for instance,
 [Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
 not tolerate harassment from anyone in Flutter's community, even outside
 of Flutter's public communication channels.
@@ -23,16 +23,16 @@ of Flutter's public communication channels.
 When multiple contributors disagree on the direction for a particular
 patch or the general direction of the project, the conflict should be
 resolved by communication. The people who disagree should get
-together, try to understand each other's points of view, and work to
+together, try to understand each other's points of view and work to
 find a design that addresses everyone's concerns.
 
 This is usually sufficient to resolve issues. If you cannot come to an
 agreement, ask for the advice of a more senior member of the team.
 
-Be wary of agreement by attrition, where one person argues a point
-repeatedly until other participants give up in the interests of moving
+Be wary of the agreement by attrition, where one person argues a point
+repeatedly until other participants give up in the interest of moving
 on. This is not conflict resolution, as it does not address everyone's
-concerns. Be wary of agreement by compromise, where two good competing
+concerns. Be wary of the agreement by compromise, where two good competing
 solutions are merged into one mediocre solution. A conflict is
 addressed when the participants agree that the final solution is
 _better_ than all the conflicting proposals. Sometimes the solution is
