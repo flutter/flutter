@@ -236,13 +236,7 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-    return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        ...previousChildren,
-        if (currentChild != null) currentChild,
-      ],
-    );
+    return _alignedStack(currentChild, previousChildren, Alignment.center);
   }
 
   /// Returns an [AnimatedSwitcherLayoutBuilder] where the relative position
@@ -254,15 +248,17 @@ class AnimatedSwitcher extends StatefulWidget {
   /// largest of the child or a previous child.
   static AnimatedSwitcherLayoutBuilder customAlignedLayoutBuilder({required Alignment alignment}) {
     return (Widget? currentChild, List<Widget> previousChildren) {
-      return Stack(
-        alignment: alignment,
+      return _alignedStack(currentChild, previousChildren, alignment);
+    };
+  }
+
+  static Widget _alignedStack(Widget? currentChild, List<Widget> previousChildren, Alignment alignment) => Stack(
+        alignment: Alignment.center,
         children: <Widget>[
           ...previousChildren,
           if (currentChild != null) currentChild,
         ],
       );
-    };
-  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
