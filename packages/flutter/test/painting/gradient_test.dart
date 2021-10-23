@@ -184,13 +184,14 @@ void main() {
       const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomLeft,
+        transform: GradientRotation(1.57),
         colors: <Color>[
           Color(0x33333333),
           Color(0x66666666),
         ],
       ).toString(),
       equals(
-        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp, null)',
+        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp, GradientRotation(1.57))',
       ),
     );
   });

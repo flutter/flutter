@@ -118,6 +118,24 @@ class GradientRotation extends GradientTransform {
       ..translate(originX, originY)
       ..rotateZ(radians);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is GradientRotation
+        && other.radians == radians;
+  }
+
+  @override
+  int get hashCode => radians.hashCode;
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'GradientRotation')}($radians)';
+  }
 }
 
 /// A 2D gradient.
