@@ -245,6 +245,25 @@ class AnimatedSwitcher extends StatefulWidget {
     );
   }
 
+  /// Returns an [AnimatedSwitcherLayoutBuilder] where the relative position
+  /// of the children is set by the passed [Alignment] parameter. If
+  /// [Alignment.center] is passed, the returned function equals
+  /// [defaultLayoutBuilder].
+  ///
+  /// The new child is placed in a [Stack] that sizes itself to match the
+  /// largest of the child or a previous child.
+  static AnimatedSwitcherLayoutBuilder customAlignedLayoutBuilder({required Alignment alignment}) {
+    return (Widget? currentChild, List<Widget> previousChildren) {
+      return Stack(
+        alignment: alignment,
+        children: <Widget>[
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
+      );
+    };
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
