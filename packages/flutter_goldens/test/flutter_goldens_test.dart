@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:async';
@@ -574,19 +568,17 @@ void main() {
       });
 
       test('compare properly awaits validation & output before failing.', () async {
-        final Completer<bool> completer = Completer<bool>();
         final Future<bool> result = comparator.compare(
           Uint8List.fromList(_kFailPngBytes),
           Uri.parse('flutter.golden_test.1.png'),
         );
-        bool shouldThrow = true;
-        result.then((_) {
-          if (shouldThrow)
-            fail('Compare completed before validation completed!');
+        await result.then<bool>((_) {
+          fail('Compare completed before validation completed!');
+        }).catchError((Object error) {
+          // compare should throw a FlutterError as the png's does not match
+          expect(error, isFlutterError);
+          return false;
         });
-        await Future<void>.value();
-        shouldThrow = false;
-        completer.complete(Future<bool>.value(false));
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
@@ -611,6 +603,8 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+        // reset property or it will carry on to other tests
+        fakeSkiaClient.getExpectationForTestThrowable = null;
       });
     });
   });
