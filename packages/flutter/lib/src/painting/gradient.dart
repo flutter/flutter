@@ -134,7 +134,7 @@ class GradientRotation extends GradientTransform {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'GradientRotation')}($radians)';
+    return '${objectRuntimeType(this, 'GradientRotation')}(radians: ${debugFormatDouble(radians)})';
   }
 }
 
@@ -523,7 +523,16 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode, $transform)';
+    final List<String> description = <String>[
+      'begin: $begin',
+      'end: $end',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
   }
 }
 
@@ -788,7 +797,18 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius, $transform)';
+    final List<String> description = <String>[
+      'center: $center',
+      'radius: ${debugFormatDouble(radius)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (focal != null) 'focal: $focal',
+      'focalRadius: ${debugFormatDouble(focalRadius)}',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
   }
 }
 
@@ -1035,6 +1055,16 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode, $transform)';
+    final List<String> description = <String>[
+      'center: $center',
+      'startAngle: ${debugFormatDouble(startAngle)}',
+      'endAngle: ${debugFormatDouble(endAngle)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
   }
 }
