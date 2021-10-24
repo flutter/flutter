@@ -1,4 +1,4 @@
-Signature: a4cd2ba208ff4c891b815492419d7921
+Signature: fcf8a23eac8f73df2f1b2889e30ab1cc
 
 UNUSED LICENSES:
 
@@ -849,6 +849,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm-Release-Flutter_Android.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm64-Debug-Android_HWASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-arm64-Release-Android_Wuffs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-Coverage.json
@@ -5438,6 +5439,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/AtlasRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/CullTest.h
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.h
+FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.cpp
+FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google Inc.
