@@ -289,6 +289,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     Clip clipBehavior = Clip.none,
+    bool debugOverflow = true,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
@@ -301,7 +302,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
        _textBaseline = textBaseline,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _debugOverflow = debugOverflow {
     addAll(children);
   }
 
@@ -486,7 +488,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _overflow = 0;
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
-  bool get _hasOverflow => _overflow > precisionErrorTolerance;
+  bool get _hasOverflow => _debugOverflow && _overflow > precisionErrorTolerance;
+
+  /// Indicates if the overflow indicator has to be shown in debug mode.
+  ///
+  /// Defaults to true.
+  bool get debugOverflow => _debugOverflow;
+  bool _debugOverflow;
+  set debugOverflow(bool value) {
+    assert(value != null);
+    if (_debugOverflow != value) {
+      _debugOverflow = value;
+      markNeedsPaint();
+    }
+  }
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -1170,6 +1185,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(EnumProperty<bool>('debugOverflow', debugOverflow, defaultValue: true));
   }
 }
 

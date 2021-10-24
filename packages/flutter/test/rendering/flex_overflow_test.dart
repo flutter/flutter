@@ -53,4 +53,24 @@ void main() {
 
     expect(find.byType(Column), isNot(paints..rect()));
   });
+
+  testWidgets('Flex overflow indicator not shown if debugOverflow is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 100.0,
+          child: Column(
+            debugOverflow: false,
+            children: const <Widget>[
+              SizedBox(width: 200.0, height: 200.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    expect(find.byType(Column), isNot(paints..rect()));
+  });
 }

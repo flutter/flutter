@@ -4324,6 +4324,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
+    this.debugOverflow = true,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -4429,6 +4430,11 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// Indicates if the overflow indicator has to be shown in debug mode.
+  ///
+  /// Defaults to true.
+  final bool debugOverflow;
+
   bool get _needTextDirection {
     assert(direction != null);
     switch (direction) {
@@ -4472,6 +4478,7 @@ class Flex extends MultiChildRenderObjectWidget {
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
       clipBehavior: clipBehavior,
+      debugOverflow: debugOverflow,
     );
   }
 
@@ -4485,7 +4492,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..debugOverflow = debugOverflow;
   }
 
   @override
@@ -4498,6 +4506,7 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(EnumProperty<bool>('debugOverflow', debugOverflow, defaultValue: true));
   }
 }
 
@@ -4699,6 +4708,7 @@ class Row extends Flex {
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
+    bool debugOverflow = true,
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
@@ -4710,6 +4720,7 @@ class Row extends Flex {
     textDirection: textDirection,
     verticalDirection: verticalDirection,
     textBaseline: textBaseline,
+    debugOverflow: debugOverflow,
   );
 }
 
@@ -4899,6 +4910,7 @@ class Column extends Flex {
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
+    bool debugOverflow = true,
     List<Widget> children = const <Widget>[],
   }) : super(
     children: children,
@@ -4910,6 +4922,7 @@ class Column extends Flex {
     textDirection: textDirection,
     verticalDirection: verticalDirection,
     textBaseline: textBaseline,
+    debugOverflow: debugOverflow,
   );
 }
 
