@@ -436,7 +436,7 @@ Future<void> main() async {
         });
       });
     });
-  
+
     group('placeholder\'s BoxFit', () {
       testWidgets('should be the image\'s BoxFit when not set', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
