@@ -1001,7 +1001,7 @@ class ThemeData with Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   ///
   /// Defaults to a [platform]-appropriate size: [MaterialTapTargetSize.padded]
-  /// on mobile platforms, [MaterialTapTargetSize.shrinkWrap] on desktop 
+  /// on mobile platforms, [MaterialTapTargetSize.shrinkWrap] on desktop
   /// platforms.
   final MaterialTapTargetSize materialTapTargetSize;
 
@@ -2200,7 +2200,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     this._materialTheme,
     this._cupertinoOverrideTheme,
   ) : assert(_materialTheme != null),
-      assert(_cupertinoOverrideTheme != null), 
+      assert(_cupertinoOverrideTheme != null),
       // Pass all values to the superclass so Material-agnostic properties
       // like barBackgroundColor can still behave like a normal
       // CupertinoThemeData.
