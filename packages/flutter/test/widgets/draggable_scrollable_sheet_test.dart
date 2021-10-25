@@ -722,7 +722,9 @@ void main() {
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
       // Use a local helper to animate so we can share code across a jumpTo test
       // and an animateTo test.
-      void goTo(double size) => shouldAnimate ? controller.animateTo(size) : controller.jumpTo(size);
+      void goTo(double size) => shouldAnimate
+          ? controller.animateTo(size, duration: const Duration(milliseconds: 200), curve: Curves.linear)
+          : controller.jumpTo(size);
       // If we're animating, pump will call four times, two of which are for the
       // animation duration.
       final int expectedPumpCount = shouldAnimate ? 4 : 2;
@@ -770,8 +772,12 @@ void main() {
 
       // Attempting to move to a size too big or too small instead moves to the
       // min or max child size.
-      goTo(.1);
-      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      goTo(.5);
+      await tester.pumpAndSettle();
+      goTo(0);
+      // The animation was cut short by half, there should have been on less pumps
+      final int truncatedPumpCount = shouldAnimate ? expectedPumpCount - 1 : expectedPumpCount;
+      expect(await tester.pumpAndSettle(), truncatedPumpCount);
       expect(
         tester.getSize(find.byKey(containerKey)).height / screenHeight,
         closeTo(.25, precisionErrorTolerance),
@@ -816,7 +822,7 @@ void main() {
       closeTo(.6, precisionErrorTolerance),
     );
 
-    controller.animateTo(.8);
+    controller.animateTo(.8, duration: const Duration(milliseconds: 200), curve: Curves.linear);
     await tester.pumpAndSettle();
     expect(
       tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
@@ -839,6 +845,117 @@ void main() {
     );
   });
 
+  testWidgets('animateTo interrupts other animations', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    await tester.flingFrom(Offset(0, .5*screenHeight), Offset(0, -.5*screenHeight), 2000);
+    // Wait until `flinFrom` finished dragging, but before the scrollable goes ballistic.
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(1, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsOneWidget);
+
+    controller.animateTo(.9, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.9, precisionErrorTolerance),
+    );
+    // The ballistic animation should have been canceled so item 1 should still be visible.
+    expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('Other animations interrupt animateTo', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
+
+    // Interrupt animation and drag downward.
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.65, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('animateTo can be interrupted by other animateTo or jumpTo', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
+
+    // Interrupt animation with a new `animateTo`.
+    controller.animateTo(.25, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+
+    // Interrupt animation with a jump.
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+  });
+
   testWidgets('Can get size and pixels', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
@@ -855,7 +972,7 @@ void main() {
     expect(controller.minPixels, .25*screenHeight);
     expect(controller.maxPixels, screenHeight);
 
-    controller.animateTo(.6);
+    controller.animateTo(.6, duration: const Duration(milliseconds: 200), curve: Curves.linear);
     await tester.pumpAndSettle();
     expect(
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
@@ -880,6 +997,7 @@ void main() {
 
     // Can't animate to invalid sizes.
     expect(() => controller.jumpTo(-1), throwsAssertionError);
+    expect(() => controller.jumpTo(1.1), throwsAssertionError);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
