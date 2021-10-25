@@ -2565,6 +2565,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_android android_semantics_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/92014
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
