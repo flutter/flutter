@@ -319,7 +319,7 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text only support TextSpan', (WidgetTester tester) async {
+  testWidgets('Rich selectable text supports WidgetSpan', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -357,7 +357,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isAssertionError);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {

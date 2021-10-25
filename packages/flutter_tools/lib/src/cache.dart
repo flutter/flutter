@@ -127,7 +127,6 @@ class Cache {
   /// Defaults to a memory file system, fake platform,
   /// buffer logger, and no accessible artifacts.
   /// By default, the root cache directory path is "cache".
-  @visibleForTesting
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
