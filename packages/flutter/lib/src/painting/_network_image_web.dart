@@ -100,7 +100,7 @@ class NetworkImage
 
     final Uri resolved = Uri.base.resolve(key.url);
 
-    // We use a different method when headers are set because the 
+    // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
     if (key.headers?.isNotEmpty ?? false) {
       final Completer<html.HttpRequest> completer =
