@@ -3369,7 +3369,8 @@ class _WordBoundary extends _TextBoundary {
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: textLayout.getWordBoundary(position).start,
-      affinity: TextAffinity.downstream,
+      // Word boundary seems to always report downstream on many platforms.
+      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
     );
   }
   @override
@@ -3377,7 +3378,7 @@ class _WordBoundary extends _TextBoundary {
     return TextPosition(
       offset: textLayout.getWordBoundary(position).end,
       // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,
+      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
     );
   }
 }
@@ -3397,7 +3398,6 @@ class _LineBreak extends _TextBoundary {
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: textLayout.getLineAtOffset(position).start,
-      affinity: TextAffinity.downstream,
     );
   }
   @override

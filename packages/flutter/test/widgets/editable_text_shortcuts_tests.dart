@@ -145,7 +145,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 19, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 19),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -171,7 +171,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -187,7 +186,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -211,7 +210,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 71, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 71),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -232,7 +231,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -253,7 +252,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -283,7 +282,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 20, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 20),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -309,7 +308,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -325,7 +323,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -370,7 +368,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -391,7 +389,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 8),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -417,7 +415,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 8),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -438,7 +436,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 8),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -459,7 +457,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -480,7 +478,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 1, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 1),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -513,7 +511,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 24, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 24),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -539,7 +537,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -555,7 +552,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -579,7 +576,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 71, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 71),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -600,7 +597,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -621,7 +618,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -654,7 +651,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 23, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 23),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -680,7 +677,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -696,7 +692,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -734,7 +730,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -755,7 +751,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 8),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -788,7 +784,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 20, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 20),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -812,7 +808,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 20, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 20),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -821,7 +817,6 @@ void main() {
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
             offset: 40,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -831,7 +826,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 40, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 40),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -857,7 +852,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -873,7 +867,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -896,7 +890,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 55, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 55),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -917,7 +911,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -938,7 +932,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -971,7 +965,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 23, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 23),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -999,7 +993,6 @@ void main() {
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
             offset: 40,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -1014,7 +1007,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 40, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 40),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -1040,7 +1033,6 @@ void main() {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
-            affinity: TextAffinity.downstream,
           );
 
           await tester.pumpWidget(buildEditableText());
@@ -1056,7 +1048,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -1094,7 +1086,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all());
 
@@ -1115,7 +1107,7 @@ void main() {
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+            const TextSelection.collapsed(offset: 8),
           );
         }, variant: TargetPlatformVariant.all());
       });
@@ -1128,7 +1120,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             );
 
             await tester.pumpWidget(buildEditableText());
@@ -1139,7 +1130,7 @@ void main() {
 
               expect(
                 controller.selection,
-                const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+                const TextSelection.collapsed(offset: 0),
                 reason: activator.toString(),
               );
             }
@@ -1149,7 +1140,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger));
@@ -1157,7 +1147,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 19,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1165,7 +1154,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger, control: true));
@@ -1173,7 +1161,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: allExceptMacOS);
 
@@ -1181,7 +1168,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger, alt: true));
@@ -1189,7 +1175,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: allExceptMacOS);
         });
@@ -1201,7 +1186,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
-              affinity: TextAffinity.downstream,
             );
 
             await tester.pumpWidget(buildEditableText());
@@ -1219,7 +1203,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger));
@@ -1227,7 +1210,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 21,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1235,7 +1217,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger, control: true));
@@ -1243,7 +1224,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: allExceptMacOS);
 
@@ -1251,7 +1231,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
             await sendKeyCombination(tester, const SingleActivator(trigger, alt: true));
@@ -1278,7 +1257,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
-              affinity: TextAffinity.downstream,
             ));
 
             // The word "all" is selected.
@@ -1291,7 +1269,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
-              affinity: TextAffinity.downstream,
             ));
 
             // The word "all" is selected.
@@ -1304,7 +1281,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 23,
-              affinity: TextAffinity.downstream,
             ));
 
             // The word "all" is selected.
@@ -1317,7 +1293,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 23,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1334,7 +1309,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 39, // Before "come".
-              affinity: TextAffinity.downstream,
             ));
 
             // "good" to "come" is selected.
@@ -1348,7 +1322,6 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20, // Before "all".
               //offset: 39, // Before "come".
-              affinity: TextAffinity.downstream,
             ));
 
             // "good" to "come" is selected.
@@ -1361,7 +1334,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 46, // After "to".
-              affinity: TextAffinity.downstream,
             ));
 
             // "good" to "come" is selected.
@@ -1374,7 +1346,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
-              affinity: TextAffinity.downstream,
             ));
           }, variant: allExceptMacOS);
 
@@ -1391,7 +1362,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 36, // Before "to".
-              affinity: TextAffinity.downstream,
             ));
 
             // "good" to "come" is selected.
@@ -1404,7 +1374,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20, // Before "all".
-              affinity: TextAffinity.downstream,
             ));
 
             // "good" to "come" is selected.
@@ -1440,7 +1409,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             );
 
             await tester.pumpWidget(buildEditableText());
@@ -1452,7 +1420,7 @@ void main() {
               expect(controller.text, testText);
               expect(
                 controller.selection,
-                const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+                const TextSelection.collapsed(offset: 0),
                 reason: activator.toString(),
               );
             }
@@ -1462,7 +1430,6 @@ void main() {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
-              affinity: TextAffinity.downstream,
             );
 
             await tester.pumpWidget(buildEditableText());
@@ -1487,7 +1454,6 @@ void main() {
 
             controller.selection = const TextSelection.collapsed(
               offset: 2,
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
 
@@ -1509,28 +1475,24 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
-              affinity: TextAffinity.downstream,
             ));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 14,
-              affinity: TextAffinity.downstream,
             ));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 16,
-              affinity: TextAffinity.downstream,
             ));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
-              affinity: TextAffinity.downstream,
             ));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
@@ -1558,7 +1520,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             ));
 
             await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
@@ -1579,7 +1540,6 @@ void main() {
 
             controller.selection = const TextSelection.collapsed(
               offset: 2,
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
 
@@ -1587,7 +1547,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             ));
 
             // Layout changes.
@@ -1597,7 +1556,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 3,
-              affinity: TextAffinity.downstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1611,7 +1569,6 @@ void main() {
 
             controller.selection = const TextSelection.collapsed(
               offset: 2,
-              affinity: TextAffinity.downstream,
             );
             await tester.pumpWidget(buildEditableText());
 
@@ -1619,17 +1576,14 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             ));
 
             controller.selection = const TextSelection.collapsed(
               offset: 1,
-              affinity: TextAffinity.downstream,
             );
             await tester.pump();
             controller.selection = const TextSelection.collapsed(
               offset: 0,
-              affinity: TextAffinity.downstream,
             );
             await tester.pump();
 
@@ -1637,7 +1591,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 3,   // Would have been 4 if the run wasn't interrupted.
-              affinity: TextAffinity.downstream,
             ));
           }, variant: TargetPlatformVariant.all());
         });
@@ -1653,7 +1606,6 @@ void main() {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
-        affinity: TextAffinity.downstream,
       );
       await tester.pumpWidget(buildEditableText());
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true));
@@ -1661,7 +1613,6 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 4,
-        affinity: TextAffinity.downstream,
       ));
     }, variant: macOSOnly);
 
@@ -1669,7 +1620,6 @@ void main() {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
-        affinity: TextAffinity.downstream,
       );
       await tester.pumpWidget(buildEditableText());
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true));
@@ -1677,7 +1627,6 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 10,
-        affinity: TextAffinity.downstream,
       ));
     }, variant: macOSOnly);
 
@@ -1685,7 +1634,6 @@ void main() {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
-        affinity: TextAffinity.downstream,
       );
       await tester.pumpWidget(buildEditableText());
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true));
@@ -1693,7 +1641,6 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 20,
-        affinity: TextAffinity.downstream,
       ));
     }, variant: macOSOnly);
 
@@ -1701,7 +1648,6 @@ void main() {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
-        affinity: TextAffinity.downstream,
       );
       await tester.pumpWidget(buildEditableText());
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true));
@@ -1726,7 +1672,6 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 39, // Before "come".
-        affinity: TextAffinity.downstream,
       ));
 
       // "good" to "come" is selected.
@@ -1740,7 +1685,6 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(
         offset: 20, // Before "all".
         //offset: 39, // Before "come".
-        affinity: TextAffinity.downstream,
       ));
 
       // "good" to "come" is selected.
@@ -1753,7 +1697,6 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 46, // After "to".
-        affinity: TextAffinity.downstream,
       ));
 
       // "good" to "come" is selected.
@@ -1766,7 +1709,6 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 28, // After "good".
-        affinity: TextAffinity.downstream,
       ));
     }, variant: macOSOnly);
 
@@ -1783,7 +1725,6 @@ void main() {
 
       expect(controller.selection, const TextSelection.collapsed(
         offset: 36, // Before "to".
-        affinity: TextAffinity.downstream,
       ));
 
       // "good" to "come" is selected.
@@ -1796,7 +1737,6 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 20, // Before "all".
-        affinity: TextAffinity.downstream,
       ));
 
       // "good" to "come" is selected.

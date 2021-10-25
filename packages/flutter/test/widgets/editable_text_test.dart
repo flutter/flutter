@@ -4461,7 +4461,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4483,7 +4482,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4767,7 +4765,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4854,7 +4851,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4878,7 +4874,6 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4948,7 +4943,6 @@ void main() {
         const TextSelection(
           baseOffset: 4,
           extentOffset: 4,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -4985,7 +4979,6 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
@@ -5031,7 +5024,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 0,
-          affinity: TextAffinity.downstream,
         ),
       ),
       reason: 'on $platform',
