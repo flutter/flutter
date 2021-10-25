@@ -98,8 +98,8 @@ def main():
       print(line.strip())
     return_code = process.wait()
     if return_code != 0:
-      print('Firebase test failed ' + returncode)
-      sys.exit(process.returncode)
+      print('Firebase test failed with code: %s' % return_code)
+      sys.exit(return_code)
 
     print('Checking logcat for %s' % results_dir)
     CheckLogcat(results_dir)
