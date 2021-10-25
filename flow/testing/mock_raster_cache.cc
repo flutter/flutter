@@ -10,7 +10,7 @@ namespace flutter {
 namespace testing {
 
 MockRasterCacheResult::MockRasterCacheResult(SkIRect device_rect)
-    : RasterCacheResult(nullptr, SkRect::MakeEmpty()),
+    : RasterCacheResult(nullptr, SkRect::MakeEmpty(), "RasterCacheFlow::test"),
       device_rect_(device_rect) {}
 
 std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(

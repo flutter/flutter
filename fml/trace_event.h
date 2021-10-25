@@ -370,13 +370,13 @@ class TraceFlow {
     other.nonce_ = 0;
   }
 
-  void Step(const char* label) const {
-    TraceEventFlowStep0("flutter", label, nonce_);
+  void Step(const char* label = nullptr) const {
+    TraceEventFlowStep0("flutter", label ? label : label_, nonce_);
   }
 
   void End(const char* label = nullptr) {
     if (nonce_ != 0) {
-      TraceEventFlowEnd0("flutter", label == nullptr ? label_ : label, nonce_);
+      TraceEventFlowEnd0("flutter", label ? label : label_, nonce_);
       nonce_ = 0;
     }
   }
