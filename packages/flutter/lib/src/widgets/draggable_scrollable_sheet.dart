@@ -600,7 +600,6 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       assert(index == 0 || snapSize > widget.snapSizes![index - 1],
         '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
     }
-    widget.snapSizes?.asMap().forEach((int index, double snapSize) {});
     // Ensure the snap sizes start and end with the min and max child sizes.
     if (widget.snapSizes == null || widget.snapSizes!.isEmpty) {
       return <double>[
