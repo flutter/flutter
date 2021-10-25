@@ -2879,6 +2879,7 @@ targets:
     scheduler: luci
 
   - name: Mac_android integration_ui_textfield
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/92012
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
