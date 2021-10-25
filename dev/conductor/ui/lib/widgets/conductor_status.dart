@@ -90,7 +90,9 @@ class ConductorStatusState extends State<ConductorStatus> {
   Widget build(BuildContext context) {
     late final Map<String, Object> currentStatus;
     if (widget.releaseState == null) {
-      return SelectableText('No persistent state file found at ${widget.stateFilePath}');
+      return SelectableText(
+          "No release state file found at ${widget.stateFilePath}. If 'Step 1: Initialize a New Flutter "
+          "Release' is successfully completed, a release state file will be generated, and the release status will be displayed here.");
     } else {
       currentStatus = presentStateDesktop(widget.releaseState!);
     }

@@ -81,7 +81,7 @@ void main() {
         ),
       );
 
-      expect(find.text('No persistent state file found at $testPath'), findsOneWidget);
+      expect(find.textContaining('No release state file found at $testPath'), findsOneWidget);
       expect(find.text('Conductor version:'), findsNothing);
     });
 

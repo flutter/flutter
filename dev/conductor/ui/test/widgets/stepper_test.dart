@@ -18,6 +18,7 @@ void main() {
                 children: const <Widget>[
                   MainProgression(
                     stateFilePath: './testPath',
+                    completedStep: 1,
                   ),
                 ],
               ),
@@ -27,10 +28,8 @@ void main() {
       ),
     );
 
-    expect(tester.widget<Stepper>(find.byType(Stepper)).currentStep, equals(0));
+    expect(tester.widget<Stepper>(find.byType(Stepper)).currentStep, equals(1));
 
-    await tester.tap(find.text('Continue'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Initialize a New Flutter Release'));
     await tester.pumpAndSettle();
 
