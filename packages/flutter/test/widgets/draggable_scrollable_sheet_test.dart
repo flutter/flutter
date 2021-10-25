@@ -348,7 +348,7 @@ void main() {
     ));
   }, variant: TargetPlatformVariant.all());
 
-  for (final bool useActuator in [false, true]) {
+  for (final bool useActuator in <bool>[false, true]) {
     testWidgets('Does not snap away from initial child on ${useActuator ? 'actuator' : 'controller'}.reset()', (WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
@@ -707,7 +707,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final bool shouldAnimate in [true, false]) {
+  for (final bool shouldAnimate in <bool>[true, false]) {
     testWidgets('Can ${shouldAnimate ? 'animate' : 'jump'} to arbitrary positions', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
@@ -794,7 +794,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Stack(
         key: stackKey,
-        children: [
+        children: <Widget>[
           _boilerplate(
             null,
             controller: controller,
@@ -1013,7 +1013,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(
-        children: [
+        children: <Widget>[
           _boilerplate(
             null,
             controller: controller,

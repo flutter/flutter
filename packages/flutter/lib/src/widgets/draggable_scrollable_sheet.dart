@@ -44,7 +44,8 @@ class DraggableScrollableController {
   /// Creates a draggable scrollable controller.
   DraggableScrollableController();
 
-  final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers = [];
+  final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers =
+    <_DraggableScrollableSheetScrollController>[];
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
   ///
