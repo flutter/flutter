@@ -5,6 +5,7 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 
 #include "impeller/renderer/formats_metal.h"
+#include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
@@ -55,9 +56,8 @@ bool PipelineDescriptor::IsEqual(const PipelineDescriptor& other) const {
              other.back_stencil_attachment_descriptor_;
 }
 
-PipelineDescriptor& PipelineDescriptor::SetLabel(
-    const std::string_view& label) {
-  label_ = {label.data(), label.size()};
+PipelineDescriptor& PipelineDescriptor::SetLabel(std::string label) {
+  label_ = std::move(label);
   return *this;
 }
 
@@ -130,47 +130,6 @@ PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
   front_stencil_attachment_descriptor_ = front;
   back_stencil_attachment_descriptor_ = back;
   return *this;
-}
-
-MTLRenderPipelineDescriptor*
-PipelineDescriptor::GetMTLRenderPipelineDescriptor() const {
-  auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
-  descriptor.label = @(label_.c_str());
-  descriptor.sampleCount = sample_count_;
-
-  for (const auto& entry : entrypoints_) {
-    if (entry.first == ShaderStage::kVertex) {
-      descriptor.vertexFunction = entry.second->GetMTLFunction();
-    }
-    if (entry.first == ShaderStage::kFragment) {
-      descriptor.fragmentFunction = entry.second->GetMTLFunction();
-    }
-  }
-
-  if (vertex_descriptor_) {
-    descriptor.vertexDescriptor = vertex_descriptor_->GetMTLVertexDescriptor();
-  }
-
-  for (const auto& item : color_attachment_descriptors_) {
-    descriptor.colorAttachments[item.first] =
-        ToMTLRenderPipelineColorAttachmentDescriptor(item.second);
-  }
-
-  descriptor.depthAttachmentPixelFormat = ToMTLPixelFormat(depth_pixel_format_);
-  descriptor.stencilAttachmentPixelFormat =
-      ToMTLPixelFormat(stencil_pixel_format_);
-
-  return descriptor;
-}
-
-id<MTLDepthStencilState> PipelineDescriptor::CreateDepthStencilDescriptor(
-    id<MTLDevice> device) const {
-  auto descriptor =
-      ToMTLDepthStencilDescriptor(depth_attachment_descriptor_,          //
-                                  front_stencil_attachment_descriptor_,  //
-                                  back_stencil_attachment_descriptor_    //
-      );
-  return [device newDepthStencilStateWithDescriptor:descriptor];
 }
 
 }  // namespace impeller

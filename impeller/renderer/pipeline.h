@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <future>
 
 #include "flutter/fml/macros.h"
@@ -26,25 +24,14 @@ class Pipeline {
     kRender,
   };
 
-  ~Pipeline();
+  virtual ~Pipeline();
 
-  bool IsValid() const;
+  virtual bool IsValid() const = 0;
 
-  id<MTLRenderPipelineState> GetMTLRenderPipelineState() const;
-
-  id<MTLDepthStencilState> GetMTLDepthStencilState() const;
+ protected:
+  Pipeline();
 
  private:
-  friend class PipelineLibrary;
-
-  Type type_ = Type::kUnknown;
-  id<MTLRenderPipelineState> pipeline_state_;
-  id<MTLDepthStencilState> depth_stencil_state_;
-  bool is_valid_ = false;
-
-  Pipeline(id<MTLRenderPipelineState> state,
-           id<MTLDepthStencilState> depth_stencil_state);
-
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };
 

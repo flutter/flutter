@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/sampler_descriptor.h"
+#include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 
-#include "impeller/renderer/formats_metal.h"
-#include "impeller/renderer/sampler.h"
+#include "impeller/renderer/backend/metal/formats_mtl.h"
+#include "impeller/renderer/backend/metal/sampler_mtl.h"
 
 namespace impeller {
 
-SamplerLibrary::SamplerLibrary(id<MTLDevice> device) : device_(device) {}
+SamplerLibraryMTL::SamplerLibraryMTL(id<MTLDevice> device) : device_(device) {}
 
-SamplerLibrary::~SamplerLibrary() = default;
+SamplerLibraryMTL::~SamplerLibraryMTL() = default;
 
-std::shared_ptr<const Sampler> SamplerLibrary::GetSampler(
+std::shared_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
     SamplerDescriptor descriptor) {
   auto found = samplers_.find(descriptor);
   if (found != samplers_.end()) {
@@ -32,7 +32,7 @@ std::shared_ptr<const Sampler> SamplerLibrary::GetSampler(
   if (!mtl_sampler) {
     return nullptr;
   }
-  auto sampler = std::shared_ptr<Sampler>(new Sampler(mtl_sampler));
+  auto sampler = std::shared_ptr<SamplerMTL>(new SamplerMTL(mtl_sampler));
   if (!sampler->IsValid()) {
     return nullptr;
   }

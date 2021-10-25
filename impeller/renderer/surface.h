@@ -4,14 +4,13 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_pass_descriptor.h"
 
 namespace impeller {
 
