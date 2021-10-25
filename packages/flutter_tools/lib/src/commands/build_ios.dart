@@ -129,7 +129,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      globals.logger.printStatus('Skipping IPA');
+      globals.printStatus('Skipping IPA');
       return xcarchiveResult;
     }
 
@@ -176,7 +176,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       throwToolExit('Encountered error while building IPA:\n$errorMessage');
     }
 
-    globals.logger.printStatus('Built IPA to $outputPath.');
+    globals.printStatus('Built IPA to $outputPath.');
 
     return FlutterCommandResult.success();
   }

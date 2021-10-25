@@ -1178,7 +1178,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
     if (!_lastBuild.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
-        globals.logger.printError(
+        globals.printError(
           exceptionMeasurement.exception.toString(),
           stackTrace: globals.logger.isVerbose
             ? exceptionMeasurement.stackTrace
@@ -1186,7 +1186,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
     }
-    globals.logger.printTrace('complete');
+    globals.printTrace('complete');
   }
 
   @protected
@@ -1241,7 +1241,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (_dillOutputPath != null) {
       return;
     }
-    globals.logger.printTrace('Caching compiled dill');
+    globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
       final String copyPath = getDefaultCachedKernelPath(
