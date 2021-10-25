@@ -1079,7 +1079,8 @@ class _SnappingSimulation extends Simulation {
   // non-zero, select the size in the velocity's direction. Otherwise,
   // the nearest snap size.
   double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
-    final int indexOfNextSize = pixelSnapSizes.indexWhere((double size) => size >= position);
+    final int indexOfNextSize = pixelSnapSizes
+        .indexWhere((double size) => size >= position);
     if (indexOfNextSize == 0) {
       return pixelSnapSizes.first;
     }
