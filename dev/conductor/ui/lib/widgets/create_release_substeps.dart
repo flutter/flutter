@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../logic/helper_functions.dart';
 import 'common/tooltip.dart';
 
 const FileSystem fileSystem = LocalFileSystem();
@@ -54,19 +55,17 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
   @visibleForTesting
   late Map<String, String?> releaseData = <String, String?>{};
 
-  late Object? _error;
-  late bool _isLoading;
+  Object? _error;
+  bool _isLoading = false;
 
-  @override
-  void initState() {
-    _error = null;
-    _isLoading = false;
-    super.initState();
-  }
-
-  // Function that initializes and executes the equivalent of `conductor start` CLI command
+  /// Function that initializes and executes the equivalent of `conductor start` CLI command.
+  ///
+  /// Exceptions and errors can be thrown by this function and needed to be caught by the outer block.
   Future<void> runStartContext(
-      FileSystem fileSystem, ProcessManager processManager, Platform platform, Stdio stdio) async {
+      {required FileSystem fileSystem,
+      required ProcessManager processManager,
+      required Platform platform,
+      required Stdio stdio}) async {
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
       parentDirectory: localFlutterRoot.parent,
@@ -74,8 +73,8 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
       processManager: processManager,
       stdio: stdio,
     );
-    final String _stateFilePath = defaultStateFilePath(platform);
-    final File _stateFile = fileSystem.file(_stateFilePath);
+    final String stateFilePath = defaultStateFilePath(platform);
+    final File stateFile = fileSystem.file(stateFilePath);
 
     /// Data captured by the input forms and dropdowns are transformed to conform the formats of StartContext.
     final StartContext startContext = widget.startContext ??
@@ -84,14 +83,8 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           releaseChannel: releaseData[CreateReleaseSubsteps.substepTitles[1]] ?? '',
           frameworkMirror: releaseData[CreateReleaseSubsteps.substepTitles[2]] ?? '',
           engineMirror: releaseData[CreateReleaseSubsteps.substepTitles[3]] ?? '',
-          engineCherrypickRevisions: releaseData[CreateReleaseSubsteps.substepTitles[4]] == '' ||
-                  releaseData[CreateReleaseSubsteps.substepTitles[4]] == null
-              ? <String>[]
-              : releaseData[CreateReleaseSubsteps.substepTitles[4]]!.split(','),
-          frameworkCherrypickRevisions: releaseData[CreateReleaseSubsteps.substepTitles[5]] == '' ||
-                  releaseData[CreateReleaseSubsteps.substepTitles[5]] == null
-              ? <String>[]
-              : releaseData[CreateReleaseSubsteps.substepTitles[5]]!.split(','),
+          engineCherrypickRevisions: cherrypickStringtoArray(releaseData[CreateReleaseSubsteps.substepTitles[4]]),
+          frameworkCherrypickRevisions: cherrypickStringtoArray(releaseData[CreateReleaseSubsteps.substepTitles[5]]),
           dartRevision: releaseData[CreateReleaseSubsteps.substepTitles[6]] == ''
               ? null
               : releaseData[CreateReleaseSubsteps.substepTitles[6]],
@@ -101,7 +94,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           flutterRoot: localFlutterRoot,
           frameworkUpstream: FrameworkRepository.defaultUpstream,
           processManager: processManager,
-          stateFile: _stateFile,
+          stateFile: stateFile,
           stdio: stdio,
         );
     await startContext.run();
@@ -125,7 +118,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
   }
 
   /// Method to modify the state [_isLoading].
-  void setisLoading(bool result) {
+  void setIsLoading(bool result) {
     setState(() {
       _isLoading = result;
     });
@@ -153,7 +146,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           setReleaseData: setReleaseData,
           hintText: 'The candidate branch the release will be based on.',
         ),
-        CheckboxListTileDropdown(
+        DropdownAsSubstep(
           index: 1,
           releaseData: releaseData,
           setReleaseData: setReleaseData,
@@ -184,7 +177,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           setReleaseData: setReleaseData,
           hintText: 'New Dart revision to cherrypick.',
         ),
-        CheckboxListTileDropdown(
+        DropdownAsSubstep(
           index: 7,
           releaseData: releaseData,
           setReleaseData: setReleaseData,
@@ -204,17 +197,18 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
             ElevatedButton(
               key: const Key('step1continue'),
               onPressed: _isLoading
-                  ? null // if the release initialization is loading, disable the Continue button
+                  ? null // if the release initialization is loading, disable this button
                   : () async {
                       setError(null);
                       try {
-                        setisLoading(true);
-                        await runStartContext(fileSystem, processManager, platform, stdio);
+                        setIsLoading(true);
+                        await runStartContext(
+                            fileSystem: fileSystem, processManager: processManager, platform: platform, stdio: stdio);
                         // ignore: avoid_catches_without_on_clauses
                       } catch (error) {
                         setError(error);
                       } finally {
-                        setisLoading(false);
+                        setIsLoading(false);
                       }
                       if (_error == null) {
                         widget.nextStep();
@@ -265,8 +259,8 @@ class InputAsSubstep extends StatelessWidget {
 }
 
 /// Captures the chosen option and updates the corresponding field in [releaseData].
-class CheckboxListTileDropdown extends StatelessWidget {
-  const CheckboxListTileDropdown({
+class DropdownAsSubstep extends StatelessWidget {
+  const DropdownAsSubstep({
     Key? key,
     required this.index,
     required this.releaseData,

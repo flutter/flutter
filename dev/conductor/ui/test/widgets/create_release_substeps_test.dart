@@ -232,7 +232,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(tester.widget<ElevatedButton>(continueButton).enabled, false);
 
-      await tester.pump(const Duration(milliseconds: delayInMS + 1000));
+      await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(tester.widget<ElevatedButton>(continueButton).enabled, true);
     });
