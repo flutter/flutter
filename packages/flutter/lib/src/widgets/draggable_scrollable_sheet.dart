@@ -787,7 +787,7 @@ class _DraggableScrollableSheetScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
     required this.getExtent,
-  }) : super(
+  })  : super(
           physics: physics,
           context: context,
           initialPixels: initialPixels,
