@@ -456,7 +456,7 @@ class _DraggableSheetExtent {
     required this.initialSize,
     required this.onSizeChanged,
     ValueNotifier<double>? currentSize,
-    bool? hasChanged,
+    bool? hasDragged,
   })  : assert(minSize != null),
         assert(maxSize != null),
         assert(initialSize != null),
@@ -467,7 +467,7 @@ class _DraggableSheetExtent {
         _currentSize = (currentSize ?? ValueNotifier<double>(initialSize))
           ..addListener(onSizeChanged),
         availablePixels = double.infinity,
-        hasDragged = hasChanged ?? false;
+        hasDragged = hasDragged ?? false;
 
   VoidCallback? _cancelActivity;
 
@@ -512,7 +512,7 @@ class _DraggableSheetExtent {
     // Stop any playing sheet animations.
     _cancelActivity?.call();
     _cancelActivity = null;
-    // The user has interacted with the sheet, set `hasChanged` to true so that
+    // The user has interacted with the sheet, set `hasDragged` to true so that
     // we'll snap if applicable.
     hasDragged = true;
     if (availablePixels == 0) {
@@ -569,7 +569,7 @@ class _DraggableSheetExtent {
       currentSize: ValueNotifier<double>(hasDragged
           ? _currentSize.value.clamp(minSize, maxSize)
           : initialSize),
-      hasChanged: hasDragged,
+      hasDragged: hasDragged,
     );
   }
 }
