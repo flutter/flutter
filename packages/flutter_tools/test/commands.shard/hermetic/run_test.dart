@@ -304,22 +304,6 @@ void main() {
         fs = MemoryFileSystem.test();
       });
 
-      testUsingContext("doesn't fail if --fatal-log-errors specified and no errors occur", () async {
-        try {
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-            '--fatal-log-errors',
-          ]);
-        } on Exception {
-          fail('Unexpected exception thrown');
-        }
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
       testUsingContext("doesn't fail if --fatal-log-warnings specified and no warnings occur", () async {
         try {
           await createTestCommandRunner(command).run(<String>[
@@ -327,22 +311,6 @@ void main() {
             '--no-pub',
             '--no-hot',
             '--fatal-log-warnings',
-          ]);
-        } on Exception {
-          fail('Unexpected exception thrown');
-        }
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext("doesn't fail if --fatal-log-errors not specified", () async {
-        testLogger.printError('Error: Danger Will Robinson!');
-        try {
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
           ]);
         } on Exception {
           fail('Unexpected exception thrown');
@@ -376,19 +344,6 @@ void main() {
           '--no-hot',
           '--fatal-log-warnings',
         ]), throwsToolExit(message: 'Logger received warning output during the run, and "--fatal-log-warnings" is enabled.'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('fails if --fatal-log-errors specified and errors emitted', () async {
-        testLogger.printError('Error: Danger Will Robinson!');
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--no-pub',
-          '--no-hot',
-          '--fatal-log-errors',
-        ]), throwsToolExit(message: 'Logger received error output during the run, and "--fatal-log-errors" is enabled.'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

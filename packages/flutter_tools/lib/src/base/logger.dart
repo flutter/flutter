@@ -45,19 +45,12 @@ abstract class Logger {
   /// since the last time it was set to false.
   bool hadErrorOutput = false;
 
-  /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
-  /// [hadErrorOutput] is true.
-  bool errorsAreFatal = false;
-
   /// If true, then [printWarning] has been called at least once for this logger
   /// since the last time it was reset to false.
   bool hadWarningOutput = false;
 
   /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
-  /// [hadWarningOutput] or [hadErrorOutput] is true.
-  ///
-  /// In other words, setting `warningsAreFatal` implies that [errorsAreFatal]
-  /// is also true.
+  /// [hadWarningOutput] is true.
   bool warningsAreFatal = false;
 
   /// Returns the terminal attached to this logger.
@@ -203,15 +196,12 @@ abstract class Logger {
   /// Clears all output.
   void clear();
 
-  /// Causes the logger to check if [hadErrorOutput] is set, and call
-  /// [throwToolExit] if [errorsAreFatal] is also true. Or, if either
-  /// [hadWarningOutput] or [hadErrorOutput] is true, and [warningsAreFatal] is
-  /// set, then to call [throwToolExit].
+  /// If [warningsAreFatal] is set, causes the logger to check if
+  /// [hadWarningOutput] is true, and then to call [throwToolExit] if so.
+  ///
+  /// The [warningsAreFatal] flag can be set from the command line with the
+  /// "--fatal-log-warnings" option on commands that support it.
   void checkForFatalLogs() {
-    if (errorsAreFatal && hadErrorOutput) {
-      throwToolExit('Logger received error output during the run, and '
-          '"--fatal-log-errors" is enabled.');
-    }
     if (warningsAreFatal && (hadWarningOutput || hadErrorOutput)) {
       throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
           'during the run, and "--fatal-log-warnings" is enabled.');
@@ -252,12 +242,6 @@ class DelegatingLogger implements Logger {
 
   @override
   set hadErrorOutput(bool value) => _delegate.hadErrorOutput = value;
-
-  @override
-  bool get errorsAreFatal => _delegate.errorsAreFatal;
-
-  @override
-  set errorsAreFatal(bool value) => _delegate.errorsAreFatal = value;
 
   @override
   bool get hadWarningOutput => _delegate.hadWarningOutput;

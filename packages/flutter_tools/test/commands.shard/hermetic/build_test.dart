@@ -37,23 +37,6 @@ void main() {
       Cache.disableLocking();
     });
 
-    testUsingContext("doesn't fail if --fatal-log-errors specified and no errors occur", () async {
-      command = FakeBuildCommand();
-      try {
-      await createTestCommandRunner(command).run(<String>[
-          'build',
-          'test',
-          '--fatal-log-errors',
-        ]);
-      } on Exception {
-        fail('Unexpected exception thrown');
-      }
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
     testUsingContext("doesn't fail if --fatal-log-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand();
       try {
@@ -61,22 +44,6 @@ void main() {
           'build',
           'test',
           '--fatal-log-warnings',
-        ]);
-      } on Exception {
-        fail('Unexpected exception thrown');
-      }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext("doesn't fail if --fatal-log-errors not specified", () async {
-      command = FakeBuildCommand();
-      testLogger.printError('Error: Danger Will Robinson!');
-      try {
-        await createTestCommandRunner(command).run(<String>[
-          'build',
-          'test',
         ]);
       } on Exception {
         fail('Unexpected exception thrown');
@@ -110,19 +77,6 @@ void main() {
         'test',
         '--fatal-log-warnings',
       ]), throwsToolExit(message: 'Logger received warning output during the run, and "--fatal-log-warnings" is enabled.'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('fails if --fatal-log-errors specified and errors emitted', () async {
-      command = FakeBuildCommand();
-      testLogger.printError('Error: Danger Will Robinson!');
-      await expectLater(createTestCommandRunner(command).run(<String>[
-        'build',
-        'test',
-        '--fatal-log-errors',
-      ]), throwsToolExit(message: 'Logger received error output during the run, and "--fatal-log-errors" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),

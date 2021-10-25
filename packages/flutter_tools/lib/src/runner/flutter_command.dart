@@ -115,7 +115,6 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
-  static const String kFatalLogErrors = 'fatal-log-errors';
   static const String kFatalLogWarnings = 'fatal-log-warnings';
 }
 
@@ -276,12 +275,6 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesFatalLogOutputOption({ @required bool verboseHelp }) {
-    argParser.addFlag(FlutterOptions.kFatalLogErrors,
-        defaultsTo: false,
-        hide: !verboseHelp,
-        help: 'Causes the command to fail if errors or warnings are sent to the log '
-            'during its execution. Implies "--${FlutterOptions.kFatalLogWarnings}".'
-    );
     argParser.addFlag(FlutterOptions.kFatalLogWarnings,
         defaultsTo: false,
         hide: !verboseHelp,
@@ -1144,7 +1137,6 @@ abstract class FlutterCommand extends Command<void> {
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         if (_usesFatalLogs) {
-          globals.logger.errorsAreFatal = boolArg(FlutterOptions.kFatalLogErrors);
           globals.logger.warningsAreFatal = boolArg(FlutterOptions.kFatalLogWarnings);
         }
         // Prints the welcome message if needed.

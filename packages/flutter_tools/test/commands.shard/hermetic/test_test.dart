@@ -646,25 +646,6 @@ dev_dependencies:
   });
 
   group('Fatal Logs', () {
-    testUsingContext("doesn't fail when --fatal-log-errors is set and no error output", () async {
-      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-      final TestCommand testCommand = TestCommand(testRunner: testRunner);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      try {
-        await commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--fatal-log-errors',
-        ]);
-      } on Exception {
-        fail('Unexpected exception thrown');
-      }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
     testUsingContext("doesn't fail when --fatal-log-warnings is set and no warning output", () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -680,41 +661,6 @@ dev_dependencies:
       } on Exception {
         fail('Unexpected exception thrown');
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-    testUsingContext("doesn't fail if --fatal-log-errors not specified", () async {
-      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-      final TestCommand testCommand = TestCommand(testRunner: testRunner);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      testLogger.printError('Error: Danger Will Robinson!');
-      try {
-        await commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-        ]);
-      } on Exception {
-        fail('Unexpected exception thrown');
-      }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-    testUsingContext('fails if --fatal-log-errors specified and errors emitted', () async {
-      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
-
-      final TestCommand testCommand = TestCommand(testRunner: testRunner);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      testLogger.printError('Error: Danger Will Robinson!');
-      expect(commandRunner.run(const <String>[
-        'test',
-        '--no-pub',
-        '--fatal-log-errors',
-      ]), throwsToolExit(message: 'Logger received error output during the run, and "--fatal-log-errors" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
