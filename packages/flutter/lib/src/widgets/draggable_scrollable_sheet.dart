@@ -352,6 +352,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// being built or since the last call to [DraggableScrollableActuator.reset].
   final List<double>? snapSizes;
 
+  /// A controller that can be used to programmatically control this sheet.
   final DraggableScrollableController? controller;
 
   /// The builder that creates a child to display in this widget, which will
