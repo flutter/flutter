@@ -19,10 +19,10 @@ class UsageEvent {
   final String parameter;
   final String? label;
   final int? value;
-  final Usage flutterUsage;
+  final Usage? flutterUsage;
 
   void send() {
-    flutterUsage.sendEvent(category, parameter, label: label, value: value);
+    flutterUsage?.sendEvent(category, parameter, label: label, value: value);
   }
 }
 
@@ -99,7 +99,7 @@ class HotEvent extends UsageEvent {
       hotEventReassembleTimeInMs: reassembleTimeInMs,
       hotEventReloadVMTimeInMs: reloadVMTimeInMs,
     );
-    flutterUsage.sendEvent(category, parameter, parameters: parameters);
+    flutterUsage?.sendEvent(category, parameter, parameters: parameters);
   }
 }
 
@@ -122,13 +122,13 @@ class DoctorResultEvent extends UsageEvent {
   @override
   void send() {
     if (validator is! GroupedValidator) {
-      flutterUsage.sendEvent(category, parameter, label: label);
+      flutterUsage?.sendEvent(category, parameter, label: label);
       return;
     }
     final GroupedValidator group = validator as GroupedValidator;
     // The validator crashed.
     if (group.subResults.isEmpty) {
-      flutterUsage.sendEvent(category, parameter, label: label);
+      flutterUsage?.sendEvent(category, parameter, label: label);
       return;
     }
     for (int i = 0; i < group.subValidators.length; i++) {
@@ -179,7 +179,7 @@ class BuildEvent extends UsageEvent {
       buildEventSettings: _settings,
       buildEventError: _eventError,
     );
-    flutterUsage.sendEvent(
+    flutterUsage?.sendEvent(
       category,
       parameter,
       label: label,
@@ -198,7 +198,7 @@ class CommandResultEvent extends UsageEvent {
   @override
   void send() {
     // An event for the command result.
-    flutterUsage.sendEvent(
+    flutterUsage?.sendEvent(
       'tool-command-result',
       category,
       label: parameter,
@@ -209,7 +209,7 @@ class CommandResultEvent extends UsageEvent {
     // throws an exception.
     try {
       final int maxRss = globals.processInfo.maxRss;
-      flutterUsage.sendEvent(
+      flutterUsage?.sendEvent(
         'tool-command-max-rss',
         category,
         label: parameter,
