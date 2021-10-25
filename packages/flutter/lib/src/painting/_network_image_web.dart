@@ -12,20 +12,20 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// Creates a type for an overridable factory function for testing purposes
+/// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = html.HttpRequest Function();
 
-/// Default httpClient
-html.HttpRequest httpClient() {
+/// Default HTTP client.
+html.HttpRequest _httpClient() {
   return html.HttpRequest();
 }
 
-/// Creates an overridable factory function
-HttpRequestFactory httpRequestFactory = httpClient;
+/// Creates an overridable factory function.
+HttpRequestFactory httpRequestFactory = _httpClient;
 
-/// Restores to the default HttpRequest
+/// Restores to the default HTTP request factory.
 void debugRestoreHttpRequestFactory() {
-  httpRequestFactory = () => html.HttpRequest();
+  httpRequestFactory = _httpClient;
 }
 
 /// The dart:html implementation of [image_provider.NetworkImage].
