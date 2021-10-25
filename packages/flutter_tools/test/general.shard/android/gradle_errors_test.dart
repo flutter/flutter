@@ -33,7 +33,6 @@ void main() {
           transformInputIssue,
           lockFileDepMissing,
           multidexErrorHandler,
-          incompatibleKotlinVersionHandler,
         ])
       );
     });
@@ -846,35 +845,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle\n'
           'To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle\n'
           '\n'
-        )
-      );
-    }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.empty(),
-    });
-  });
-
-  group('Incompatible Kotlin version', () {
-    testWithoutContext('pattern', () {
-      expect(
-        incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
-        isTrue,
-      );
-    });
-
-    testUsingContext('suggestion', () async {
-      await incompatibleKotlinVersionHandler.handler(
-        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
-      );
-
-      expect(
-        testLogger.statusText,
-        contains(
-          '[!] Your project requires a newer version of the Kotlin Gradle plugin.\n'
-          '    Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update /android/build.gradle:\n'
-          "    ext.kotlin_version = '<latest-version>'\n"
         )
       );
     }, overrides: <Type, Generator>{
