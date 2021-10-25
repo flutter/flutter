@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <memory>
 #include <string>
 
@@ -18,14 +16,14 @@
 
 namespace impeller {
 
-class DeviceBuffer final : public Buffer,
-                           public std::enable_shared_from_this<DeviceBuffer> {
+class DeviceBuffer : public Buffer,
+                     public std::enable_shared_from_this<DeviceBuffer> {
  public:
-  ~DeviceBuffer();
+  virtual ~DeviceBuffer();
 
-  [[nodiscard]] bool CopyHostBuffer(const uint8_t* source,
-                                    Range source_range,
-                                    size_t offset = 0u);
+  [[nodiscard]] virtual bool CopyHostBuffer(const uint8_t* source,
+                                            Range source_range,
+                                            size_t offset = 0u) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Create a texture whose contents are the same as that of this
@@ -39,30 +37,19 @@ class DeviceBuffer final : public Buffer,
   /// @return     The texture whose contents are backed by (a part of) this
   ///             buffer.
   ///
-  std::shared_ptr<Texture> MakeTexture(TextureDescriptor desc,
-                                       size_t offset = 0u) const;
+  virtual std::shared_ptr<Texture> MakeTexture(TextureDescriptor desc,
+                                               size_t offset = 0u) const = 0;
 
-  id<MTLBuffer> GetMTLBuffer() const;
+  virtual bool SetLabel(const std::string& label) = 0;
 
-  bool SetLabel(const std::string& label);
+  virtual bool SetLabel(const std::string& label, Range range) = 0;
 
-  bool SetLabel(const std::string& label, Range range);
+  virtual BufferView AsBufferView() const = 0;
 
-  BufferView AsBufferView() const;
+ protected:
+  DeviceBuffer();
 
  private:
-  friend class Allocator;
-
-  const id<MTLBuffer> buffer_;
-  const size_t size_;
-  const StorageMode mode_;
-
-  DeviceBuffer(id<MTLBuffer> buffer, size_t size, StorageMode mode);
-
-  // |Buffer|
-  std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
-      Allocator& allocator) const override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);
 };
 

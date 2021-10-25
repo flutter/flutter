@@ -9,6 +9,7 @@
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/allocator.h"
+#include "impeller/renderer/backend/metal/context_mtl.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/formats_metal.h"
 #include "impeller/renderer/render_pass.h"
@@ -34,7 +35,8 @@ static std::string ShaderLibraryDirectory() {
 }
 
 Playground::Playground()
-    : renderer_(ShaderLibraryDirectory(), "shader_fixtures.metallib") {}
+    : renderer_(std::make_shared<ContextMTL>(ShaderLibraryDirectory(),
+                                             "shader_fixtures.metallib")) {}
 
 Playground::~Playground() = default;
 
@@ -112,7 +114,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
   NSWindow* cocoa_window = ::glfwGetCocoaWindow(window);
   CAMetalLayer* layer = [CAMetalLayer layer];
-  layer.device = renderer_.GetContext()->GetMTLDevice();
+  layer.device = ContextMTL::Cast(*renderer_.GetContext()).GetMTLDevice();
   layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
   cocoa_window.contentView.layer = layer;
   cocoa_window.contentView.wantsLayer = YES;

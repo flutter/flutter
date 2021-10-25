@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <memory>
 #include <string>
 
@@ -21,45 +19,34 @@ class Allocator;
 
 class Context {
  public:
-  Context(std::string shaders_directory, std::string main_library_file_name);
+  virtual ~Context();
 
-  ~Context();
-
-  bool IsValid() const;
+  virtual bool IsValid() const = 0;
 
   //----------------------------------------------------------------------------
   /// @return     An allocator suitable for allocations that persist between
   ///             frames.
   ///
-  std::shared_ptr<Allocator> GetPermanentsAllocator() const;
+  virtual std::shared_ptr<Allocator> GetPermanentsAllocator() const = 0;
 
   //----------------------------------------------------------------------------
   /// @return     An allocator suitable for allocations that used only for one
   ///             frame or render pass.
   ///
-  std::shared_ptr<Allocator> GetTransientsAllocator() const;
+  virtual std::shared_ptr<Allocator> GetTransientsAllocator() const = 0;
 
-  std::shared_ptr<ShaderLibrary> GetShaderLibrary() const;
+  virtual std::shared_ptr<ShaderLibrary> GetShaderLibrary() const = 0;
 
-  std::shared_ptr<SamplerLibrary> GetSamplerLibrary() const;
+  virtual std::shared_ptr<SamplerLibrary> GetSamplerLibrary() const = 0;
 
-  std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const;
+  virtual std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const = 0;
 
-  std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const;
+  virtual std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const = 0;
 
-  id<MTLDevice> GetMTLDevice() const;
+ protected:
+  Context();
 
  private:
-  id<MTLDevice> device_ = nullptr;
-  id<MTLCommandQueue> render_queue_ = nullptr;
-  id<MTLCommandQueue> transfer_queue_ = nullptr;
-  std::shared_ptr<ShaderLibrary> shader_library_;
-  std::shared_ptr<PipelineLibrary> pipeline_library_;
-  std::shared_ptr<SamplerLibrary> sampler_library_;
-  std::shared_ptr<Allocator> permanents_allocator_;
-  std::shared_ptr<Allocator> transients_allocator_;
-  bool is_valid_ = false;
-
   FML_DISALLOW_COPY_AND_ASSIGN(Context);
 };
 

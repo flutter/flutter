@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <functional>
 #include <map>
 #include <memory>
@@ -30,15 +28,28 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   ~PipelineDescriptor();
 
-  PipelineDescriptor& SetLabel(const std::string_view& label);
+  PipelineDescriptor& SetLabel(std::string label);
+
+  const std::string& GetLabel() const { return label_; }
 
   PipelineDescriptor& SetSampleCount(size_t samples);
+
+  size_t GetSampleCount() const { return sample_count_; }
 
   PipelineDescriptor& AddStageEntrypoint(
       std::shared_ptr<const ShaderFunction> function);
 
+  const std::map<ShaderStage, std::shared_ptr<const ShaderFunction>>&
+  GetStageEntrypoints() const {
+    return entrypoints_;
+  }
+
   PipelineDescriptor& SetVertexDescriptor(
       std::shared_ptr<PipelineVertexDescriptor> vertex_descriptor);
+
+  const std::shared_ptr<PipelineVertexDescriptor>& GetVertexDescriptor() const {
+    return vertex_descriptor_;
+  }
 
   PipelineDescriptor& SetColorAttachmentDescriptor(
       size_t index,
@@ -47,8 +58,18 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   const PipelineColorAttachment* GetColorAttachmentDescriptor(
       size_t index) const;
 
+  const std::map<size_t /* index */, PipelineColorAttachment>
+  GetColorAttachmentDescriptors() const {
+    return color_attachment_descriptors_;
+  }
+
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
       PipelineDepthAttachment desc);
+
+  std::optional<PipelineDepthAttachment> GetDepthStencilAttachmentDescriptor()
+      const {
+    return depth_attachment_descriptor_;
+  }
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
       PipelineStencilAttachment front_and_back);
@@ -57,14 +78,23 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       PipelineStencilAttachment front,
       PipelineStencilAttachment back);
 
+  std::optional<PipelineStencilAttachment> GetFrontStencilAttachmentDescriptor()
+      const {
+    return front_stencil_attachment_descriptor_;
+  }
+
+  std::optional<PipelineStencilAttachment> GetBackStencilAttachmentDescriptor()
+      const {
+    return back_stencil_attachment_descriptor_;
+  }
+
   PipelineDescriptor& SetDepthPixelFormat(PixelFormat format);
+
+  PixelFormat GetDepthPixelFormat() const { return depth_pixel_format_; }
 
   PipelineDescriptor& SetStencilPixelFormat(PixelFormat format);
 
-  MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor() const;
-
-  id<MTLDepthStencilState> CreateDepthStencilDescriptor(
-      id<MTLDevice> device) const;
+  PixelFormat GetStencilPixelFormat() const { return stencil_pixel_format_; }
 
   // Comparable<PipelineDescriptor>
   std::size_t GetHash() const override;
@@ -76,7 +106,8 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::string label_;
   size_t sample_count_ = 1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
-  std::map<size_t, PipelineColorAttachment> color_attachment_descriptors_;
+  std::map<size_t /* index */, PipelineColorAttachment>
+      color_attachment_descriptors_;
   std::shared_ptr<PipelineVertexDescriptor> vertex_descriptor_;
   PixelFormat depth_pixel_format_ = PixelFormat::kUnknown;
   PixelFormat stencil_pixel_format_ = PixelFormat::kUnknown;

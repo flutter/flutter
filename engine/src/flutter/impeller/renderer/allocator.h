@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <string>
 
 #include "flutter/fml/macros.h"
@@ -51,35 +49,30 @@ class Texture;
 
 class Allocator {
  public:
-  ~Allocator();
+  virtual ~Allocator();
 
   bool IsValid() const;
 
-  std::shared_ptr<DeviceBuffer> CreateBuffer(StorageMode mode, size_t length);
+  virtual std::shared_ptr<DeviceBuffer> CreateBuffer(StorageMode mode,
+                                                     size_t length) = 0;
 
-  std::shared_ptr<Texture> CreateTexture(StorageMode mode,
-                                         const TextureDescriptor& desc);
+  virtual std::shared_ptr<Texture> CreateTexture(
+      StorageMode mode,
+      const TextureDescriptor& desc) = 0;
 
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(const uint8_t* buffer,
-                                                     size_t length);
+  virtual std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
+      const uint8_t* buffer,
+      size_t length) = 0;
 
-  std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
-      const fml::Mapping& mapping);
+  virtual std::shared_ptr<DeviceBuffer> CreateBufferWithCopy(
+      const fml::Mapping& mapping) = 0;
 
   static bool RequiresExplicitHostSynchronization(StorageMode mode);
 
+ protected:
+  Allocator();
+
  private:
-  friend class Context;
-
-  // In the prototype, we are going to be allocating resources directly with the
-  // MTLDevice APIs. But, in the future, this could be backed by named heaps
-  // with specific limits.
-  id<MTLDevice> device_;
-  std::string allocator_label_;
-  bool is_valid_ = false;
-
-  Allocator(id<MTLDevice> device, std::string label);
-
   FML_DISALLOW_COPY_AND_ASSIGN(Allocator);
 };
 

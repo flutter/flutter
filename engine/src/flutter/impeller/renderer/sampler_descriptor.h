@@ -4,10 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
-#include <unordered_map>
-
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/comparable.h"
 #include "impeller/renderer/formats.h"
@@ -38,27 +34,6 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
            height_address_mode == o.height_address_mode &&
            depth_address_mode == o.depth_address_mode;
   }
-};
-
-class SamplerLibrary {
- public:
-  ~SamplerLibrary();
-
-  std::shared_ptr<const Sampler> GetSampler(SamplerDescriptor descriptor);
-
- private:
-  friend Context;
-
-  using Samplers = std::unordered_map<SamplerDescriptor,
-                                      std::shared_ptr<const Sampler>,
-                                      ComparableHash<SamplerDescriptor>,
-                                      ComparableEqual<SamplerDescriptor>>;
-  id<MTLDevice> device_ = nullptr;
-  Samplers samplers_;
-
-  SamplerLibrary(id<MTLDevice> device);
-
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerLibrary);
 };
 
 }  // namespace impeller

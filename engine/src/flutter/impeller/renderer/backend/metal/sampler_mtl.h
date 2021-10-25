@@ -4,18 +4,36 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/metal/backend_cast.h"
 #include "impeller/renderer/sampler.h"
 
 namespace impeller {
 
-class SamplerMTL final : public Sampler {
+class SamplerLibraryMTL;
+
+class SamplerMTL final : public Sampler,
+                         public BackendCast<SamplerMTL, Sampler> {
  public:
   SamplerMTL();
 
+  // |Sampler|
   ~SamplerMTL() override;
 
+  id<MTLSamplerState> GetMTLSamplerState() const;
+
  private:
+  friend SamplerLibraryMTL;
+
+  id<MTLSamplerState> state_ = nullptr;
+
+  SamplerMTL(id<MTLSamplerState> state);
+
+  // |Sampler|
+  bool IsValid() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(SamplerMTL);
 };
 

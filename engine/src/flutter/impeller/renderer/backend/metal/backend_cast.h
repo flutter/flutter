@@ -5,18 +5,17 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/renderer.h"
 
 namespace impeller {
 
-class RendererMTL final : public Renderer {
+template <class Sub, class Base>
+class BackendCast {
  public:
-  RendererMTL();
+  static Sub& Cast(Base& base) { return reinterpret_cast<Sub&>(base); }
 
-  ~RendererMTL() override;
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(RendererMTL);
+  static const Sub& Cast(const Base& base) {
+    return reinterpret_cast<const Sub&>(base);
+  }
 };
 
 }  // namespace impeller
