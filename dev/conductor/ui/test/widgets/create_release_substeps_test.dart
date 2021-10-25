@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_function_declarations_over_variables
-
-import 'dart:io';
-
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_ui/widgets/create_release_substeps.dart';
 import 'package:flutter/material.dart';
@@ -197,10 +193,10 @@ void main() {
 
     testWidgets('Is able to display the loading animation', (WidgetTester tester) async {
       final StartContext startContext = MockStartContext();
-      const String exceptionMsg = 'There is a conductor Exception';
 
       when(startContext.run()).thenAnswer((_) async {
-        Future<ConductorException>.delayed(const Duration(milliseconds: 5000), () => ConductorException(exceptionMsg));
+        await Future<void>.delayed(const Duration(milliseconds: 3000));
+        return;
       });
 
       await tester.pumpWidget(
@@ -222,24 +218,14 @@ void main() {
         ),
       );
 
-      final StatefulElement createReleaseSubsteps = tester.element(find.byType(CreateReleaseSubsteps));
-      final CreateReleaseSubstepsState createReleaseSubstepsState =
-          createReleaseSubsteps.state as CreateReleaseSubstepsState;
-
       expect(find.byKey(const Key('step1continue')), findsOneWidget);
       await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
       await tester.pump();
 
-      expect(createReleaseSubstepsState.isLoading, false);
       await tester.tap(find.byKey(const Key('step1continue')));
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      // expect(createReleaseSubstepsState.isLoading, true);
-
       await tester.pumpAndSettle();
-      verify(startContext.run()).called(1);
-      // expect(find.textContaining(exceptionMsg), findsOneWidget);
-      // expect(createReleaseSubstepsState.isLoading, false);
     });
   });
 }
