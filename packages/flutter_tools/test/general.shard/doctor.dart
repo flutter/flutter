@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -15,13 +14,13 @@ import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 void main() {
-  Testbed testbed;
+  Testbed? testbed;
 
   setUp(() {
     testbed = Testbed();
   });
 
-  test('doctor validators includes desktop when features are enabled', () => testbed.run(() {
+  test('doctor validators includes desktop when features are enabled', () => testbed?.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         contains(isA<LinuxDoctorValidator>()));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
@@ -33,7 +32,7 @@ void main() {
     ),
   }));
 
-  test('doctor validators does not include desktop when features are enabled', () => testbed.run(() {
+  test('doctor validators does not include desktop when features are enabled', () => testbed?.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         isNot(contains(isA<LinuxDoctorValidator>())));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
@@ -42,7 +41,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(),
   }));
 
-  test('doctor validators includes web when feature is enabled', () => testbed.run(() {
+  test('doctor validators includes web when feature is enabled', () => testbed?.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         contains(isA<ChromiumValidator>()));
   }, overrides: <Type, Generator>{
@@ -51,7 +50,7 @@ void main() {
     ),
   }));
 
-  test('doctor validators does not include web when feature is disabled', () => testbed.run(() {
+  test('doctor validators does not include web when feature is disabled', () => testbed?.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         isNot(contains(isA<ChromiumValidator>())));
   }, overrides: <Type, Generator>{
