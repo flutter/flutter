@@ -232,6 +232,8 @@ void main() {
 
       expect(createReleaseSubstepsState.isLoading, false);
       await tester.tap(find.byKey(const Key('step1continue')));
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
       // expect(createReleaseSubstepsState.isLoading, true);
 
       await tester.pumpAndSettle();
