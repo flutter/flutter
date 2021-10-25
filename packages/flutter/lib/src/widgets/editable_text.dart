@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
@@ -1529,38 +1528,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
-  // TODO(luckysmg): Judge this device support OCR or not
   @override
-  bool get captureTextEnabled => _isCaptureTextEnabled() && !widget.readOnly;
+  bool get captureTextEnabled => ui.window.captureTextFromCameraEnabled && !widget.readOnly;
 
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
     });
-  }
-
-  bool _isCaptureTextEnabled(){
-    if(!Platform.isIOS){
-      return false;
-    }
-
-    // Get operatingSystemVersion for iOS like "15.0.2"
-    final List<String> versionSplitList = Platform.operatingSystemVersion.split('.');
-    if(versionSplitList.isEmpty){
-      return false;
-    }
-
-    final String iOSOperatingSystemVersion = versionSplitList.first;
-    final int? versionNum = int.tryParse(iOSOperatingSystemVersion);
-    if(versionNum == null){
-      return false;
-    }
-
-    if(versionNum < 15){
-      return false;
-    }
-
-    return true;
   }
 
   // Start TextEditingActionTarget.

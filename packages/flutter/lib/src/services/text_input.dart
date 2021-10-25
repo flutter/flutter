@@ -959,7 +959,7 @@ mixin TextSelectionDelegate {
   bool get selectAllEnabled => true;
 
   /// Whether capture text from camera is enabled, must not be null.
-  bool get captureTextEnabled => true;
+  bool get captureTextEnabled => false;
 
   /// Cut current selection to [Clipboard].
   ///
