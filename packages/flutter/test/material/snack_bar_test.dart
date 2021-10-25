@@ -741,8 +741,7 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(platform: TargetPlatform.android),
-      cupertinoOverrideTheme: null,
+      typography: Typography.material2018(),
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
@@ -1919,7 +1918,6 @@ void main() {
           await tester.pumpWidget(
             MediaQuery(
               data: const MediaQueryData(
-                padding: EdgeInsets.zero,
                 viewPadding: EdgeInsets.all(20),
                 viewInsets: EdgeInsets.all(100),
               ),
@@ -2595,7 +2593,8 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
           Offset(-scaffoldWidth, 0.0), // drag to left gesture
         ];
         break;
-      default:
+      case DismissDirection.none:
+        break;
     }
   }
 

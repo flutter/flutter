@@ -9,8 +9,6 @@ import 'package:platform/platform.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
 
-const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
-
 const String gsutilBinary = 'gsutil.py';
 
 const List<String> kReleaseChannels = <String>[
@@ -56,7 +54,8 @@ Directory get localFlutterRoot {
   final String checkoutsDirname = fileSystem.path.normalize(
     fileSystem.path.join(
       fileSystem.path.dirname(filePath),
-      '..', // flutter/dev/tools
+      '..', // flutter/dev/conductor/core
+      '..', // flutter/dev/conductor
       '..', // flutter/dev
       '..', // flutter
     ),

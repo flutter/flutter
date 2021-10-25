@@ -458,7 +458,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
@@ -483,7 +483,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
@@ -512,7 +512,35 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
+      ProcessManager: () => processManager,
+      Stdio: () => mockStdio,
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('token pass arguments through to pub', () async {
+      Cache.flutterRoot = '';
+      globals.fs.file('pubspec.yaml').createSync();
+      final IOSink stdin = IOSink(StreamController<List<int>>().sink);
+      processManager.addCommand(
+        FakeCommand(command: const <String>[
+          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list'],
+          stdin: stdin,
+        ),
+      );
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
+
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(
@@ -538,7 +566,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       Pub: () => Pub(

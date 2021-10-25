@@ -18,7 +18,6 @@ void main() {
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -31,14 +30,12 @@ void main() {
 
   test('RenderSliverOpacity does composite if it is opaque', () {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
-      opacity: 1.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -57,7 +54,6 @@ void main() {
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -83,7 +79,6 @@ void main() {
     )..value = 0.0;
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
@@ -91,7 +86,6 @@ void main() {
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -108,7 +102,6 @@ void main() {
     )..value = 1.0;
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
@@ -116,7 +109,6 @@ void main() {
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -140,7 +132,6 @@ void main() {
     );
 
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,

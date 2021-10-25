@@ -119,7 +119,6 @@ class PubDependencies extends ArtifactSet {
     await _pub().get(
       context: PubContext.pubGet,
       directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
-      generateSyntheticPackage: false,
     );
   }
 }
@@ -197,6 +196,14 @@ class FlutterWebSdk extends CachedArtifact {
         entity.copySync(newPath);
       }
     }
+
+    final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
+    final String canvasKitUrl = '$_cipdBaseUrl/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
+    return artifactUpdater.downloadZipArchive(
+      'Downloading CanvasKit...',
+      Uri.parse(canvasKitUrl),
+      location,
+    );
   }
 }
 

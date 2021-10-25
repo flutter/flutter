@@ -96,7 +96,6 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Slider(
-              min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
               label: '$seed',

@@ -127,7 +127,6 @@ class Cache {
   /// Defaults to a memory file system, fake platform,
   /// buffer logger, and no accessible artifacts.
   /// By default, the root cache directory path is "cache".
-  @visibleForTesting
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
@@ -247,6 +246,7 @@ class Cache {
       }
     } on Exception catch (error) {
       // There is currently no logger attached since this is computed at startup.
+      // ignore: avoid_print
       print(userMessages.runnerNoRoot('$error'));
     }
     return normalize('.');

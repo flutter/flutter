@@ -493,8 +493,26 @@ void main() {
         case SemanticsAction.setText:
           semanticsOwner.performAction(expectedId, action, 'text');
           break;
-        default:
+        case SemanticsAction.copy:
+        case SemanticsAction.customAction:
+        case SemanticsAction.cut:
+        case SemanticsAction.decrease:
+        case SemanticsAction.didGainAccessibilityFocus:
+        case SemanticsAction.didLoseAccessibilityFocus:
+        case SemanticsAction.dismiss:
+        case SemanticsAction.increase:
+        case SemanticsAction.longPress:
+        case SemanticsAction.moveCursorBackwardByWord:
+        case SemanticsAction.moveCursorForwardByWord:
+        case SemanticsAction.paste:
+        case SemanticsAction.scrollDown:
+        case SemanticsAction.scrollLeft:
+        case SemanticsAction.scrollRight:
+        case SemanticsAction.scrollUp:
+        case SemanticsAction.showOnScreen:
+        case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
+          break;
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);

@@ -98,6 +98,9 @@ abstract class AssetBundle {
   /// loaded, the cache will be reread from the asset bundle.
   void evict(String key) { }
 
+  /// If this is a caching asset bundle, clear all cached data.
+  void clear() { }
+
   @override
   String toString() => '${describeIdentity(this)}()';
 }
@@ -214,6 +217,12 @@ abstract class CachingAssetBundle extends AssetBundle {
   void evict(String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
+  }
+
+  @override
+  void clear() {
+    _stringCache.clear();
+    _structuredDataCache.clear();
   }
 }
 

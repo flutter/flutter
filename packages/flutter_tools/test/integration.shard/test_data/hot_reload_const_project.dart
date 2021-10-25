@@ -53,6 +53,10 @@ class HotReloadConstProject extends Project {
       'final int field = 2;',
       '// final int field = 2;',
     );
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }

@@ -622,6 +622,12 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     group('unified logging', () {
+      BufferLogger logger;
+
+      setUp(() {
+        logger = BufferLogger.test();
+      });
+
       testUsingContext('log reader handles escaped multiline messages', () async {
         const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
           'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
@@ -675,6 +681,47 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       }, overrides: <Type, Generator>{
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
+      });
+
+      testUsingContext('log reader handles bad output', () async {
+        const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+            'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+            'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(const FakeCommand(
+            command:  <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: '"eventMessage" : "message with incorrect escaping""',
+        ));
+
+        final IOSSimulator device = IOSSimulator(
+          '123456',
+          simulatorCategory: 'iOS 11.0',
+          simControl: simControl,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
+        );
+
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, isEmpty);
+        expect(logger.errorText, contains('Logger returned non-JSON response'));
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => fakeProcessManager,
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
       });
     });
   });

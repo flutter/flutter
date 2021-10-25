@@ -504,7 +504,7 @@ void main() {
     await tester.tap(find.byKey(icon));
     await tester.pump();
     expect(controller.text, '');
-    expect(controller.selection, const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 0));
   });
 
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
@@ -682,7 +682,7 @@ void main() {
       actualNewValue,
       const TextEditingValue(
         text: '12',
-        selection: TextSelection.collapsed(offset: 2, affinity: TextAffinity.downstream),
+        selection: TextSelection.collapsed(offset: 2),
       ),
     );
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
@@ -768,7 +768,7 @@ void main() {
     // First tap moved the cursor.
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+      const TextSelection.collapsed(offset: 8),
     );
     await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
     await tester.pump();
@@ -860,7 +860,6 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
-                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
@@ -2221,7 +2220,6 @@ void main() {
                       child: TextField(
                         controller: controller,
                         expands: true,
-                        minLines: null,
                         maxLines: null,
                       ),
                     ),
@@ -4115,7 +4113,6 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: testValue,
         selection: TextSelection.collapsed(offset: 10),
-        composing: TextRange.empty,
       ));
       await tester.pump();
       expect(textController.text, testValue);
@@ -4125,7 +4122,6 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: '${testValue}9999999',
         selection: TextSelection.collapsed(offset: 10 + 7),
-        composing: TextRange.empty,
       ));
       await tester.pump();
 
@@ -4137,7 +4133,6 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: '0123455555555556789',
         selection: TextSelection.collapsed(offset: 19),
-        composing: TextRange.empty,
       ));
       await tester.pump();
 
@@ -4164,7 +4159,6 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: testValue,
         selection: TextSelection(baseOffset: 8, extentOffset: 10),
-        composing: TextRange.empty,
       ));
       await tester.pump();
       expect(textController.text, testValue);
@@ -4174,7 +4168,6 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: '01234569999999',
         selection: TextSelection.collapsed(offset: 14),
-        composing: TextRange.empty,
       ));
       await tester.pump();
 
@@ -4706,7 +4699,6 @@ void main() {
           home: Material(
             child: RawKeyboardListener(
               focusNode: focusNode,
-              onKey: null,
               child: TextField(
                 controller: controller,
                 maxLines: 3,
@@ -4899,7 +4891,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -4976,7 +4967,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -5050,7 +5040,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -5103,7 +5092,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -5181,7 +5169,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -5250,7 +5237,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -5302,7 +5288,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: textField,
           ),
         ),
@@ -6991,7 +6976,7 @@ void main() {
       // Cursor at tap position, not at word edge.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 3),
       );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
@@ -7095,7 +7080,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pumpAndSettle();
@@ -7497,7 +7482,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -7655,7 +7640,7 @@ void main() {
       // Long press on iOS shows collapsed selection cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 3),
       );
       // Cursor move doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7666,7 +7651,7 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 6),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7677,7 +7662,7 @@ void main() {
       // The selection position is now moved with the drag.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 9),
       );
       // Still no toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -7688,7 +7673,7 @@ void main() {
       // The selection isn't affected by the gesture lift.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 9),
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(2));
@@ -7706,7 +7691,6 @@ void main() {
           child: Center(
             child: TextField(
               controller: controller,
-              maxLines: 1,
             ),
           ),
         ),
@@ -7741,14 +7725,14 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
+      const TextSelection.collapsed(offset: 56),
     );
     // Keep moving out.
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
+      const TextSelection.collapsed(offset: 62),
     );
     await gesture.moveBy(const Offset(1, 0));
     await tester.pump();
@@ -7810,7 +7794,7 @@ void main() {
       // First tap moved the cursor to the beginning of the second word.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -7854,7 +7838,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 3),
       );
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
@@ -7862,7 +7846,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pumpAndSettle();
@@ -7908,7 +7892,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 3),
       );
 
       await gesture.down(textFieldStart + const Offset(150.0, 9.0));
@@ -7919,7 +7903,7 @@ void main() {
       // the word.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 9),
       );
 
       // Double click selection.
@@ -7992,7 +7976,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 8),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pumpAndSettle();
@@ -8038,7 +8022,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 3),
       );
 
       // Second click selects.
@@ -8060,7 +8044,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 6),
       );
       await gesture.down(textFieldStart + const Offset(100.0, 9.0));
       await tester.pump();
@@ -8079,7 +8063,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 9),
       );
       await gesture.down(textFieldStart + const Offset(150.0, 9.0));
       await tester.pump();
@@ -8321,7 +8305,6 @@ void main() {
       position: offset + const Offset(150.0, 9.0),
       pressure: 0.5,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     // We don't want this gesture to select any word on Android.
@@ -8368,7 +8351,6 @@ void main() {
         position: textfieldStart + const Offset(150.0, 9.0),
         pressure: 0.5,
         pressureMin: 0,
-        pressureMax: 1,
       ),
     );
     // We expect the force press to select a word at the given location.
@@ -8420,7 +8402,6 @@ void main() {
         position: textfieldStart + const Offset(150.0, 9.0),
         pressure: 0.5,
         pressureMin: 0,
-        pressureMax: 1,
       ),
     );
     await gesture.up();
@@ -8459,12 +8440,10 @@ void main() {
       decoration: InputDecoration(labelText: 'foo'),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
-      textCapitalization: TextCapitalization.none,
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
       autofocus: true,
-      obscureText: false,
       autocorrect: false,
       maxLines: 10,
       maxLength: 100,
@@ -9771,7 +9750,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(textFieldBuilder(behavior: FloatingLabelBehavior.auto));
+    await tester.pumpWidget(textFieldBuilder());
     // The label will be positioned within the content when unfocused.
     expect(tester.getTopLeft(find.text('Label')).dy, 20.0);
 

@@ -320,6 +320,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///    middle of layout and applying the new position immediately.
   ///  * [animateTo], which is like [jumpTo] but animating to the
   ///    destination offset.
+  // ignore: use_setters_to_change_properties, (API is intended to discourage setting value)
   void correctPixels(double value) {
     _pixels = value;
   }
@@ -989,7 +990,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// so this is useful for listening to [ScrollMetrics] changes that are not
 /// caused by the user scrolling.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample shows how a [ScrollMetricsNotification] is dispatched when
 /// the `windowSize` is changed. Press the floating action button to increase
 /// the scrollable window's size.

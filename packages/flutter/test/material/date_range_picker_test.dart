@@ -28,7 +28,7 @@ void main() {
   String? saveText;
 
   setUp(() {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     currentDate = null;
     initialDateRange = DateTimeRange(
@@ -127,7 +127,7 @@ void main() {
   });
 
   testWidgets('Last month header should be visible if last date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: lastDate,
@@ -141,7 +141,7 @@ void main() {
   });
 
   testWidgets('First month header should be visible if first date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: firstDate,
@@ -156,9 +156,9 @@ void main() {
   });
 
   testWidgets('Current month header should be visible if no date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
-    currentDate = DateTime(2016, DateTime.september, 1);
+    currentDate = DateTime(2016, DateTime.september);
     initialDateRange = null;
 
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -352,7 +352,7 @@ void main() {
                    onPressed: () {
                      showDateRangePicker(
                        context: context,
-                       firstDate:DateTime(2001, DateTime.january, 1),
+                       firstDate:DateTime(2001),
                        lastDate: DateTime(2031, DateTime.december, 31),
                        builder: (BuildContext context, Widget? child) {
                          return Directionality(
@@ -618,7 +618,7 @@ void main() {
 
   group('Input mode', () {
     setUp(() {
-      firstDate = DateTime(2015, DateTime.january, 1);
+      firstDate = DateTime(2015);
       lastDate = DateTime(2017, DateTime.december, 31);
       initialDateRange = DateTimeRange(
         start: DateTime(2017, DateTime.january, 15),
@@ -814,7 +814,6 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData.light().copyWith(
           inputDecorationTheme: const InputDecorationTheme(
-            filled: false,
             border: border,
           ),
         ),
@@ -978,7 +977,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   @override
   String? get restorationId => 'scaffold_state';
 
-  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021, 1, 1));
+  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
   late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
@@ -1019,9 +1018,9 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.values[args['datePickerEntryMode'] as int],
-          firstDate: DateTime(2021, 1, 1),
+          firstDate: DateTime(2021),
           currentDate: DateTime(2021, 1, 25),
-          lastDate: DateTime(2022, 1, 1),
+          lastDate: DateTime(2022),
         );
       },
     );

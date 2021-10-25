@@ -89,7 +89,6 @@ class ImageIcon extends StatelessWidget {
         height: iconSize,
         color: iconColor,
         fit: BoxFit.scaleDown,
-        alignment: Alignment.center,
         excludeFromSemantics: true,
       ),
     );

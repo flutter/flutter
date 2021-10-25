@@ -32,7 +32,7 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows the [BottomAppBar], which can be configured to have a notch using the
 /// [BottomAppBar.shape] property. This also includes an optional [FloatingActionButton], which illustrates
 /// the [FloatingActionButtonLocation]s in relation to the [BottomAppBar].

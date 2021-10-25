@@ -163,8 +163,14 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       // This test only runs on Android so we can assume path separator is '/'.
       final File file = File('${outDir.path}/$kEventsFileName');
       await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
+      if (!mounted) {
+        return;
+      }
       showMessage(context, 'Saved original events to ${file.path}');
     } catch (e) {
+      if (!mounted) {
+        return;
+      }
       showMessage(context, 'Failed saving ${e.toString()}');
     }
   }
@@ -199,7 +205,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.value(null);
+    return Future<dynamic>.value();
   }
 
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
@@ -212,7 +218,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         setState(() {});
         break;
     }
-    return Future<dynamic>.value(null);
+    return Future<dynamic>.value();
   }
 
   Widget buildEventTile(BuildContext context, int index) {

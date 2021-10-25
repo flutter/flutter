@@ -219,6 +219,11 @@ class FlutterProject {
     .childDirectory('generated')
     .childDirectory(manifest.appName);
 
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('generated_main.dart');
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
@@ -349,6 +354,7 @@ class FlutterProject {
         'version': buildName,
       if (buildNumber != null)
         'build_number': buildNumber,
+      'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
   }
@@ -544,7 +550,6 @@ to migrate your project.
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 

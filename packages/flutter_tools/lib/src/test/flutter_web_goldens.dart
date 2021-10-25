@@ -15,6 +15,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
+import '../web/compile.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 
@@ -31,6 +32,7 @@ class TestGoldenComparator {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required ProcessManager processManager,
+    @required this.webRenderer,
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
        _fileSystem = fileSystem,
@@ -42,6 +44,7 @@ class TestGoldenComparator {
   final Logger _logger;
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
+  final WebRendererMode webRenderer;
 
   TestCompiler _compiler;
   TestGoldenComparatorProcess _previousComparator;
@@ -88,6 +91,7 @@ class TestGoldenComparator {
     final Map<String, String> environment = <String, String>{
       // Chrome is the only supported browser currently.
       'FLUTTER_TEST_BROWSER': 'chrome',
+      'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
     };
     return _processManager.start(command, environment: environment);
   }

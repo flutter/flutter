@@ -45,6 +45,16 @@ class IMobileDevice {
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _processManager = processManager;
 
+  /// Create an [IMobileDevice] for testing.
+  factory IMobileDevice.test({ required ProcessManager processManager }) {
+    return IMobileDevice(
+      artifacts: Artifacts.test(),
+      cache: Cache.test(processManager: processManager),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+  }
+
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
   final MapEntry<String, String> _dyLdLibEntry;
@@ -93,7 +103,7 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
-  required String targetOverride,
+  String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   DarwinArch? activeArch,
   bool codesign = true,
@@ -184,12 +194,14 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Map<String, String> buildSettings = await app.project.buildSettingsForBuildInfo(
         buildInfo,
-        environmentType: environmentType
+        environmentType: environmentType,
+        deviceId: deviceID,
       ) ?? <String, String>{};
 
   if (codesign && environmentType == EnvironmentType.physical) {
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
       buildSettings: buildSettings,
+      platform: globals.platform,
       processManager: globals.processManager,
       logger: globals.logger,
       config: globals.config,
@@ -249,11 +261,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool hasWatchCompanion = await app.project.containsWatchCompanion(
     projectInfo.targets,
     buildInfo,
+    deviceID,
   );
   if (hasWatchCompanion) {
     // The -sdk argument has to be omitted if a watchOS companion app exists.
     // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
-    globals.printStatus('Watch companion app found. Adjusting build settings.');
+    globals.printStatus('Watch companion app found.');
     if (environmentType == EnvironmentType.simulator && (deviceID == null || deviceID == '')) {
       globals.printError('No simulator device ID has been set.');
       globals.printError('A device ID is required to build an app with a watchOS companion app.');
@@ -261,15 +274,21 @@ Future<XcodeBuildResult> buildXcodeProject({
       globals.printError('and specify one using the -d, --device-id flag.');
       return XcodeBuildResult(success: false);
     }
-    if (environmentType == EnvironmentType.simulator) {
-      buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
-    }
   } else {
     if (environmentType == EnvironmentType.physical) {
       buildCommands.addAll(<String>['-sdk', 'iphoneos']);
     } else {
       buildCommands.addAll(<String>['-sdk', 'iphonesimulator']);
     }
+  }
+
+  buildCommands.add('-destination');
+  if (deviceID != null) {
+    buildCommands.add('id=$deviceID');
+  } else if (environmentType == EnvironmentType.physical) {
+    buildCommands.add('generic/platform=iOS');
+  } else {
+    buildCommands.add('generic/platform=iOS Simulator');
   }
 
   if (activeArch != null) {
@@ -589,8 +608,6 @@ String xcodeBuildActionToString(XcodeBuildAction action) {
         return 'build';
       case XcodeBuildAction.archive:
         return 'archive';
-      default:
-        throw UnsupportedError('Unknown Xcode build action');
     }
 }
 

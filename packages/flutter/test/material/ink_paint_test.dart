@@ -38,7 +38,7 @@ void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
-    final BorderRadius borderRadius = BorderRadius.circular(6.0);
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -87,7 +87,7 @@ void main() {
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
-    final BorderRadius borderRadius = BorderRadius.circular(6.0);
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -254,7 +254,7 @@ void main() {
   testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
-    final BorderRadius borderRadius = BorderRadius.circular(6.0);
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
     Future<void> buildTest(Intent intent) async {

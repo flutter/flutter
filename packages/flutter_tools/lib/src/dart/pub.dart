@@ -104,6 +104,7 @@ abstract class Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   });
 
   /// Runs pub in 'batch' mode.
@@ -179,6 +180,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
     final File packageConfigFile = _fileSystem.file(
@@ -232,9 +234,9 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final Status status = _logger.startProgress(
+    final Status? status = printProgress ? _logger.startProgress(
       'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
-    );
+    ) : null;
     final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (verbose)
@@ -257,10 +259,29 @@ class _DefaultPub implements Pub {
         retry: !offline,
         flutterRootOverride: flutterRootOverride,
       );
-      status.stop();
+      status?.stop();
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      status.cancel();
+      status?.cancel();
+      if (exception is io.ProcessException) {
+        final StringBuffer buffer = StringBuffer(exception.message);
+        buffer.writeln('Working directory: "$directory"');
+        final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
+        if (env.entries.isNotEmpty) {
+          buffer.writeln('pub env: {');
+          for (final MapEntry<String, String> entry in env.entries) {
+            buffer.writeln('  "${entry.key}": "${entry.value}",');
+          }
+          buffer.writeln('}');
+        }
+
+        throw io.ProcessException(
+          exception.executable,
+          exception.arguments,
+          buffer.toString(),
+          exception.errorCode,
+        );
+      }
       rethrow;
     }
 

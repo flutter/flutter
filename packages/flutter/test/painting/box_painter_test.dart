@@ -34,7 +34,6 @@ void main() {
     expect(BorderSide.lerp(side1, side2, 0.5), equals(BorderSide(
       color: Color.lerp(const Color(0xFF000000), const Color(0xFF00FFFF), 0.5)!,
       width: 1.5,
-      style: BorderStyle.solid,
     )));
 
     final BorderSide side3 = side2.copyWith(style: BorderStyle.none);
@@ -262,7 +261,7 @@ void main() {
             child: Center(
               child: Container(
                 decoration: const BoxDecoration(
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.normal)],
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0)],
                 ),
                 width: 20,
                 height: 20,
@@ -295,7 +294,7 @@ void main() {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.black,
-                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), blurStyle: BlurStyle.normal, color: Colors.green, spreadRadius: 2)],
+                  boxShadow: <BoxShadow>[BoxShadow(blurRadius: 16.0, offset: Offset(4, 4), color: Colors.green, spreadRadius: 2)],
                 ),
                 width: 64,
                 height: 64,
