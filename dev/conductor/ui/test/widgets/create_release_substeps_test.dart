@@ -2,21 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_ui/widgets/create_release_substeps.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'create_release_substeps_test.mocks.dart';
+import 'package:platform/platform.dart';
+
+import '../common.dart';
 
 /// A fake class to be mocked in order to test if nextStep is being called.
 class FakeNextStep {
   void nextStep() {}
 }
 
-@GenerateMocks(<Type>[StartContext, FakeNextStep])
+const String _flutterRoot = '/flutter';
+const String _checkoutsParentDirectory = '$_flutterRoot/dev/tools/';
+
 void main() {
   const String candidateBranch = 'flutter-1.2-candidate.3';
   const String releaseChannel = 'dev';
@@ -92,11 +99,15 @@ void main() {
   });
 
   group('The desktop app is connected with the CLI conductor', () {
-    testWidgets('Is able to display a conductor exception in the UI', (WidgetTester tester) async {
-      final StartContext startContext = MockStartContext();
-      const String exceptionMsg = 'There is a conductor Exception';
+    const String exceptionMsg = 'There is a conductor Exception';
 
-      when(startContext.run()).thenThrow(ConductorException(exceptionMsg));
+    testWidgets('Is able to display a conductor exception in the UI', (WidgetTester tester) async {
+      final FakeStartContext startContext = FakeStartContext();
+
+      startContext.addCommand(FakeCommand(
+        command: const <String>['git', 'clone', '--origin', 'upstream', '--', EngineRepository.defaultUpstream, '${_checkoutsParentDirectory}flutter_conductor_checkouts/engine'],
+        onRun: () => throw ConductorException(exceptionMsg),
+      ));
 
       await tester.pumpWidget(
         StatefulBuilder(
@@ -123,15 +134,17 @@ void main() {
       await tester.pump();
       await tester.tap(continueButton);
       await tester.pumpAndSettle();
-      verify(startContext.run()).called(1);
       expect(find.textContaining(exceptionMsg), findsOneWidget);
     });
 
     testWidgets('Is able to display a general exception in the UI', (WidgetTester tester) async {
-      final StartContext startContext = MockStartContext();
+      final FakeStartContext startContext = FakeStartContext();
       const String exceptionMsg = 'There is a general Exception';
 
-      when(startContext.run()).thenThrow(Exception(exceptionMsg));
+      startContext.addCommand(FakeCommand(
+        command: const <String>['git', 'clone', '--origin', 'upstream', '--', EngineRepository.defaultUpstream, '${_checkoutsParentDirectory}flutter_conductor_checkouts/engine'],
+        onRun: () => throw Exception(exceptionMsg),
+      ));
 
       await tester.pumpWidget(
         StatefulBuilder(
@@ -153,18 +166,18 @@ void main() {
       );
 
       final Finder continueButton = find.byKey(const Key('step1continue'));
+
       expect(continueButton, findsOneWidget);
       await tester.drag(continueButton, const Offset(-250, 0));
       await tester.pump();
       await tester.tap(continueButton);
       await tester.pumpAndSettle();
-      verify(startContext.run()).called(1);
       expect(find.textContaining(exceptionMsg), findsOneWidget);
     });
 
     testWidgets('Proceeds to the next step if there is no exception', (WidgetTester tester) async {
-      final StartContext startContext = MockStartContext();
-      final FakeNextStep fakeNextStep = MockFakeNextStep();
+      final StartContext startContext = FakeStartContext();
+      final FakeNextStep fakeNextStep = FakeNextStep();
 
       await tester.pumpWidget(
         StatefulBuilder(
@@ -191,18 +204,19 @@ void main() {
       await tester.pump();
       await tester.tap(continueButton);
       await tester.pumpAndSettle();
-      verify(startContext.run()).called(1);
-      verify(fakeNextStep.nextStep()).called(1);
     });
 
     testWidgets('Is able to display the loading UI, and hides it after release is done', (WidgetTester tester) async {
-      final StartContext startContext = MockStartContext();
-      const int delayInMS = 3000;
+      final FakeStartContext startContext = FakeStartContext();
 
-      when(startContext.run()).thenAnswer((_) async {
-        await Future<void>.delayed(const Duration(milliseconds: delayInMS));
-        return;
-      });
+      // This completer signifies the completion of `startContext.run()`
+      // function
+      final Completer<void> completer = Completer<void>();
+
+      startContext.addCommand(FakeCommand(
+        command: const <String>['git', 'clone', '--origin', 'upstream', '--', EngineRepository.defaultUpstream, '${_checkoutsParentDirectory}flutter_conductor_checkouts/engine'],
+        completer: completer,
+      ));
 
       await tester.pumpWidget(
         StatefulBuilder(
@@ -232,9 +246,107 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(tester.widget<ElevatedButton>(continueButton).enabled, false);
 
-      await tester.pump(const Duration(milliseconds: delayInMS + 1000));
+      completer.complete();
+      await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(tester.widget<ElevatedButton>(continueButton).enabled, true);
     });
   });
+}
+
+class FakeStartContext extends StartContext {
+  factory FakeStartContext({
+    String candidateBranch = 'flutter-1.2-candidate.3',
+    Checkouts? checkouts,
+    String? dartRevision,
+    List<String> engineCherrypickRevisions = const <String>[],
+    String engineMirror = 'git@github:user/engine',
+    String engineUpstream = EngineRepository.defaultUpstream,
+    List<String> frameworkCherrypickRevisions = const <String>[],
+    String frameworkMirror = 'git@github:user/flutter',
+    String frameworkUpstream = FrameworkRepository.defaultUpstream,
+    Directory? flutterRoot,
+    String incrementLetter = 'm',
+    FakeProcessManager? processManager,
+    String releaseChannel = 'dev',
+    File? stateFile,
+    Stdio? stdio,
+  }) {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    flutterRoot ??= fileSystem.directory(_flutterRoot);
+    stateFile ??= fileSystem.file(kStateFileName);
+    final Platform platform = FakePlatform(
+      environment: <String, String>{'HOME': '/path/to/user/home'},
+      operatingSystem: const LocalPlatform().operatingSystem,
+      pathSeparator: r'/',
+    );
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    stdio ??= TestStdio();
+    checkouts = Checkouts(
+      fileSystem: fileSystem,
+      parentDirectory: fileSystem.directory(_checkoutsParentDirectory),
+      platform: platform,
+      processManager: processManager,
+      stdio: stdio,
+    );
+    return FakeStartContext._(
+        candidateBranch: candidateBranch,
+        checkouts: checkouts,
+        dartRevision: dartRevision,
+        engineCherrypickRevisions: engineCherrypickRevisions,
+        engineMirror: engineMirror,
+        engineUpstream: engineUpstream,
+        flutterRoot: flutterRoot,
+        frameworkCherrypickRevisions: frameworkCherrypickRevisions,
+        frameworkMirror: frameworkMirror,
+        frameworkUpstream: frameworkUpstream,
+        incrementLetter: incrementLetter,
+        processManager: processManager,
+        releaseChannel: releaseChannel,
+        stateFile: stateFile,
+        stdio: stdio,
+    );
+  }
+
+  FakeStartContext._({
+    required String candidateBranch,
+    required Checkouts checkouts,
+    String? dartRevision,
+    required List<String> engineCherrypickRevisions,
+    required String engineMirror,
+    required String engineUpstream,
+    required List<String> frameworkCherrypickRevisions,
+    required String frameworkMirror,
+    required String frameworkUpstream,
+    required Directory flutterRoot,
+    required String incrementLetter,
+    required ProcessManager processManager,
+    required String releaseChannel,
+    required File stateFile,
+    required Stdio stdio,
+  }) : super(
+        candidateBranch: candidateBranch,
+        checkouts: checkouts,
+        dartRevision: dartRevision,
+        engineCherrypickRevisions: engineCherrypickRevisions,
+        engineMirror: engineMirror,
+        engineUpstream: engineUpstream,
+        flutterRoot: flutterRoot,
+        frameworkCherrypickRevisions: frameworkCherrypickRevisions,
+        frameworkMirror: frameworkMirror,
+        frameworkUpstream: frameworkUpstream,
+        incrementLetter: incrementLetter,
+        processManager: processManager,
+        releaseChannel: releaseChannel,
+        stateFile: stateFile,
+        stdio: stdio,
+  );
+
+  void addCommand(FakeCommand command) {
+    (checkouts.processManager as FakeProcessManager).addCommand(command);
+  }
+
+  void addCommands(List<FakeCommand> commands) {
+    (checkouts.processManager as FakeProcessManager).addCommands(commands);
+  }
 }
