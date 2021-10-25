@@ -26,6 +26,7 @@ void main() {
   const String frameworkCherrypick = '768cd702b691584b2c67b8d30b5cb33e0ef6f0';
   const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
   const String increment = 'y';
+
   group('Capture and validate all parameters of a release initialization', () {
     testWidgets('Widget should capture all parameters correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -116,10 +117,11 @@ void main() {
         ),
       );
 
-      expect(find.byKey(const Key('step1continue')), findsOneWidget);
-      await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
+      final Finder continueButton = find.byKey(const Key('step1continue'));
+      expect(continueButton, findsOneWidget);
+      await tester.drag(continueButton, const Offset(-250, 0));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('step1continue')));
+      await tester.tap(continueButton);
       await tester.pumpAndSettle();
       verify(startContext.run()).called(1);
       expect(find.textContaining(exceptionMsg), findsOneWidget);
@@ -150,10 +152,11 @@ void main() {
         ),
       );
 
-      expect(find.byKey(const Key('step1continue')), findsOneWidget);
-      await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
+      final Finder continueButton = find.byKey(const Key('step1continue'));
+      expect(continueButton, findsOneWidget);
+      await tester.drag(continueButton, const Offset(-250, 0));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('step1continue')));
+      await tester.tap(continueButton);
       await tester.pumpAndSettle();
       verify(startContext.run()).called(1);
       expect(find.textContaining(exceptionMsg), findsOneWidget);
@@ -182,10 +185,11 @@ void main() {
         ),
       );
 
-      expect(find.byKey(const Key('step1continue')), findsOneWidget);
-      await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
+      final Finder continueButton = find.byKey(const Key('step1continue'));
+      expect(continueButton, findsOneWidget);
+      await tester.drag(continueButton, const Offset(-250, 0));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('step1continue')));
+      await tester.tap(continueButton);
       await tester.pumpAndSettle();
       verify(startContext.run()).called(1);
       verify(fakeNextStep.nextStep()).called(1);
@@ -219,17 +223,18 @@ void main() {
         ),
       );
 
-      expect(find.byKey(const Key('step1continue')), findsOneWidget);
-      await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
+      final Finder continueButton = find.byKey(const Key('step1continue'));
+      expect(continueButton, findsOneWidget);
+      await tester.drag(continueButton, const Offset(-250, 0));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('step1continue')));
+      await tester.tap(continueButton);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(tester.widget<ElevatedButton>(find.byKey(const Key('step1continue'))).enabled, false);
+      expect(tester.widget<ElevatedButton>(continueButton).enabled, false);
 
       await tester.pump(const Duration(milliseconds: delayInMS + 1000));
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(tester.widget<ElevatedButton>(find.byKey(const Key('step1continue'))).enabled, true);
+      expect(tester.widget<ElevatedButton>(continueButton).enabled, true);
     });
   });
 }
