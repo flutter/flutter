@@ -20,8 +20,9 @@
 namespace flutter {
 
 RasterCacheResult::RasterCacheResult(sk_sp<SkImage> image,
-                                     const SkRect& logical_rect)
-    : image_(std::move(image)), logical_rect_(logical_rect) {}
+                                     const SkRect& logical_rect,
+                                     const char* type)
+    : image_(std::move(image)), logical_rect_(logical_rect), flow_(type) {}
 
 void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
   TRACE_EVENT0("flutter", "RasterCacheResult::draw");
@@ -32,6 +33,7 @@ void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
       std::abs(bounds.size().width() - image_->dimensions().width()) <= 1 &&
       std::abs(bounds.size().height() - image_->dimensions().height()) <= 1);
   canvas.resetMatrix();
+  flow_.Step();
   canvas.drawImage(image_, bounds.fLeft, bounds.fTop, SkSamplingOptions(),
                    paint);
 }
@@ -117,6 +119,7 @@ static std::unique_ptr<RasterCacheResult> Rasterize(
     SkColorSpace* dst_color_space,
     bool checkerboard,
     const SkRect& logical_rect,
+    const char* type,
     const std::function<void(SkCanvas*)>& draw_function) {
   TRACE_EVENT0("flutter", "RasterCachePopulate");
   SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
@@ -144,7 +147,7 @@ static std::unique_ptr<RasterCacheResult> Rasterize(
   }
 
   return std::make_unique<RasterCacheResult>(surface->makeImageSnapshot(),
-                                             logical_rect);
+                                             logical_rect, type);
 }
 
 std::unique_ptr<RasterCacheResult> RasterCache::RasterizePicture(
@@ -154,7 +157,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizePicture(
     SkColorSpace* dst_color_space,
     bool checkerboard) const {
   return Rasterize(context, ctm, dst_color_space, checkerboard,
-                   picture->cullRect(),
+                   picture->cullRect(), "RasterCacheFlow::SkPicture",
                    [=](SkCanvas* canvas) { canvas->drawPicture(picture); });
 }
 
@@ -165,7 +168,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizeDisplayList(
     SkColorSpace* dst_color_space,
     bool checkerboard) const {
   return Rasterize(context, ctm, dst_color_space, checkerboard,
-                   display_list->bounds(),
+                   display_list->bounds(), "RasterCacheFlow::DisplayList",
                    [=](SkCanvas* canvas) { display_list->RenderTo(canvas); });
 }
 
@@ -188,7 +191,8 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizeLayer(
     bool checkerboard) const {
   return Rasterize(
       context->gr_context, ctm, context->dst_color_space, checkerboard,
-      layer->paint_bounds(), [layer, context](SkCanvas* canvas) {
+      layer->paint_bounds(), "RasterCacheFlow::Layer",
+      [layer, context](SkCanvas* canvas) {
         SkISize canvas_size = canvas->getBaseLayerSize();
         SkNWayCanvas internal_nodes_canvas(canvas_size.width(),
                                            canvas_size.height());
