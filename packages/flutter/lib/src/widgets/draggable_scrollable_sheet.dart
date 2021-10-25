@@ -46,25 +46,32 @@ class DraggableScrollableController {
 
   final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers = [];
 
+  /// Get the current size (as a fraction of the parent height) of the attached sheet.
+  ///
+  /// This controller must be attached to exactly one draggable sheet.
   double get size => _singleController.extent.currentSize;
 
+  /// Get the current pixel height of the attached sheet.
+  ///
+  /// This controller must be attached to exactly one draggable sheet.
   double get pixels => _singleController.extent.currentPixels;
 
-  double get minPixels {
-    return _singleController.extent.sizeToPixels(_singleController.extent.minSize);
-  }
+  /// Convert a sheet's size (fractional value of parent container height) to pixels.
+  double sizeToPixels(double size) => _singleController.extent.sizeToPixels(size);
 
-  double get maxPixels {
-    return _singleController.extent.sizeToPixels(_singleController.extent.maxSize);
-  }
+  /// Convert a sheet's pixel height to size (fractional value of parent container height).
+  double pixelsToSize(double pixels) => _singleController.extent.pixelsToSize(pixels);
 
-  /// Animates any attached sheets from their respective current sizes to [size].
+  /// Animates all attached sheets from their respective current sizes to
+  /// [size], a fractional value of parent container height.
   ///
   /// If [size] is outside of an attached sheets min and max child size,
-  /// [animateTo] will animate to the nearest valid size instead.
+  /// [animateTo] will animate that sheet to the nearest valid size instead. As
+  /// a result, the animation may finish before [duration] time has elapsed.
   ///
-  /// Any active animation is canceled. If the user is currently scrolling, that
-  /// action is canceled.
+  /// Any active sheet animation is canceled. If the sheet's internal controller
+  /// is currently animating (eg responding to a user fling), that animation is
+  /// canceled as well. This animation is canceled by user drag events.
   ///
   /// The returned [Future] will complete when the animation ends, whether it
   /// completed successfully or whether it was interrupted prematurely.
@@ -86,6 +93,8 @@ class DraggableScrollableController {
     required Curve curve,
   }) async {
     _assertAttached();
+    assert(size >= 0 && size <= 1);
+    assert(duration != Duration.zero);
     await Future.wait(
       // Use map so that we can easily wait on the result
       _attachedInternalControllers.map((_DraggableScrollableSheetScrollController controller) async {
@@ -121,11 +130,15 @@ class DraggableScrollableController {
     );
   }
 
-  /// Jumps any attached sheets from their current size to the given [size],
-  /// without animation.
+  /// Jumps all attached sheets from their current size to the given to [size],
+  /// a fractional value of parent container height.
   ///
-  /// If [size] is outside of an attached sheets min and max child size,
-  /// [animateTo] will animate to the nearest valid size instead.
+  /// If [size] is outside of an attached sheet's min and max child size,
+  /// [jumpTo] will jump that sheet to the nearest valid size instead.
+  ///
+  /// Any active sheet animation is canceled. If the sheet's internal controller
+  /// is currently animating (eg responding to a user fling), that animation is
+  /// canceled as well.
   ///
   /// If this method changes the scroll position, a sequence of start/update/end
   /// scroll notifications will be dispatched. No overscroll notifications can
@@ -134,8 +147,8 @@ class DraggableScrollableController {
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
   void jumpTo(double size) {
-    assert(size >= 0 && size <= 1);
     _assertAttached();
+    assert(size >= 0 && size <= 1);
     for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
       // Call start activity to interrupt any other playing activities.
       controller.extent.startActivity(onCanceled: () {});
@@ -740,6 +753,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       super.position as _DraggableScrollableSheetScrollPosition;
 
   void reset() {
+    extent._cancelActivity?.call();
     extent.hasDragged = false;
     // jumpTo can result in trying to replace semantics during build.
     // Just animate really fast.

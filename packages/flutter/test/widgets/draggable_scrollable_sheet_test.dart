@@ -969,8 +969,8 @@ void main() {
     await tester.pumpAndSettle();
     final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
-    expect(controller.minPixels, .25*screenHeight);
-    expect(controller.maxPixels, screenHeight);
+    expect(controller.sizeToPixels(.25), .25*screenHeight);
+    expect(controller.pixelsToSize(.25*screenHeight), .25);
 
     controller.animateTo(.6, duration: const Duration(milliseconds: 200), curve: Curves.linear);
     await tester.pumpAndSettle();
@@ -995,9 +995,20 @@ void main() {
       controller: controller,
     ));
 
-    // Can't animate to invalid sizes.
+    // Can't jump or animate to invalid sizes.
     expect(() => controller.jumpTo(-1), throwsAssertionError);
     expect(() => controller.jumpTo(1.1), throwsAssertionError);
+    expect(
+      () => controller.animateTo(-1, duration: const Duration(milliseconds: 1), curve: Curves.linear),
+      throwsAssertionError,
+    );
+    expect(
+      () => controller.animateTo(1.1, duration: const Duration(milliseconds: 1), curve: Curves.linear),
+      throwsAssertionError,
+    );
+
+    // Can't use animateTo with a zero duration.
+    expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1019,5 +1030,10 @@ void main() {
     // Can't access getters when attached to multiple controllers.
     expect(() => controller.size, throwsAssertionError);
     expect(() => controller.pixels, throwsAssertionError);
+    expect(() => controller.sizeToPixels(0), throwsAssertionError);
+    expect(() => controller.pixelsToSize(0), throwsAssertionError);
+
+    // Can't use animateTo with a zero duration.
+    expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
 }
