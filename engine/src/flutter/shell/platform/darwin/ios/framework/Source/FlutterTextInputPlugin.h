@@ -15,6 +15,7 @@
 @interface FlutterTextInputPlugin : NSObject <FlutterKeySecondaryResponder>
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
+@property(nonatomic, assign) UIViewController* viewController;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 /**

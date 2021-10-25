@@ -9,8 +9,13 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
 FLUTTER_ASSERT_ARC
+
+@interface FlutterEngine ()
+- (nonnull FlutterTextInputPlugin*)textInputPlugin;
+@end
 
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
@@ -58,6 +63,8 @@ FLUTTER_ASSERT_ARC
                    clearText:(BOOL)clearText
                 delayRemoval:(BOOL)delayRemoval;
 - (NSArray<UIView*>*)textInputViews;
+- (UIView*)hostView;
+- (void)addToInputParentViewIfNeeded:(FlutterTextInputView*)inputView;
 @end
 
 @interface FlutterTextInputPluginTest : XCTestCase
@@ -68,6 +75,7 @@ FLUTTER_ASSERT_ARC
   NSDictionary* _passwordTemplate;
   id engine;
   FlutterTextInputPlugin* textInputPlugin;
+  FlutterViewController* viewController;
 }
 
 - (void)setUp {
@@ -76,6 +84,8 @@ FLUTTER_ASSERT_ARC
   engine = OCMClassMock([FlutterEngine class]);
   textInputPlugin = [[FlutterTextInputPlugin alloc] init];
   textInputPlugin.textInputDelegate = engine;
+  viewController = [FlutterViewController new];
+  textInputPlugin.viewController = viewController;
 }
 
 - (void)tearDown {
@@ -87,6 +97,7 @@ FLUTTER_ASSERT_ARC
   [textInputPlugin cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
   [[[[textInputPlugin textInputView] superview] subviews]
       makeObjectsPerformSelector:@selector(removeFromSuperview)];
+  viewController = nil;
   [super tearDown];
 }
 
@@ -1345,8 +1356,11 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
+  FlutterViewController* flutterViewController = [FlutterViewController new];
   FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] init];
   myInputPlugin.textInputDelegate = engine;
+  myInputPlugin.viewController = flutterViewController;
+
   __weak UIView* activeView;
   @autoreleasepool {
     FlutterMethodCall* setClientCall = [FlutterMethodCall
@@ -1367,6 +1381,21 @@ FLUTTER_ASSERT_ARC
   }
   // This assert proves the myInputPlugin.textInputView is not deallocated.
   XCTAssertNotNil(activeView);
+}
+
+- (void)testFlutterTextInputPluginHostViewNilCrash {
+  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] init];
+  myInputPlugin.viewController = nil;
+  XCTAssertThrows([myInputPlugin hostView], @"Throws exception if host view is nil");
+}
+
+- (void)testFlutterTextInputPluginHostViewNotNil {
+  FlutterViewController* flutterViewController = [FlutterViewController new];
+  FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
+  [flutterEngine runWithEntrypoint:nil];
+  flutterEngine.viewController = flutterViewController;
+  XCTAssertNotNil(flutterEngine.textInputPlugin.viewController);
+  XCTAssertNotNil([flutterEngine.textInputPlugin hostView]);
 }
 
 @end
