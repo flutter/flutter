@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <optional>
-
 #include <Metal/Metal.h>
+
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/color.h"

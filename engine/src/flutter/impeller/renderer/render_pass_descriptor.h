@@ -7,8 +7,6 @@
 #include <map>
 #include <optional>
 
-#include <Metal/Metal.h>
-
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/formats.h"
@@ -33,8 +31,6 @@ class RenderPassDescriptor {
 
   RenderPassDescriptor& SetStencilAttachment(
       RenderPassStencilAttachment attachment);
-
-  MTLRenderPassDescriptor* ToMTLRenderPassDescriptor() const;
 
  private:
   std::map<size_t, RenderPassColorAttachment> colors_;

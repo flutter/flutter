@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <vector>
 
 #include "flutter/fml/macros.h"

@@ -4,18 +4,49 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_pass_descriptor.h"
 
 namespace impeller {
 
 class RenderPassMTL final : public RenderPass {
  public:
-  RenderPassMTL();
-
+  // |RenderPass|
   ~RenderPassMTL() override;
 
  private:
+  friend class CommandBufferMTL;
+
+  id<MTLCommandBuffer> buffer_ = nil;
+  MTLRenderPassDescriptor* desc_ = nil;
+  std::vector<Command> commands_;
+  std::shared_ptr<HostBuffer> transients_buffer_;
+  std::string label_;
+  bool is_valid_ = false;
+
+  RenderPassMTL(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
+
+  // |RenderPass|
+  bool IsValid() const override;
+
+  // |RenderPass|
+  void SetLabel(std::string label) override;
+
+  // |RenderPass|
+  HostBuffer& GetTransientsBuffer() override;
+
+  // |RenderPass|
+  bool RecordCommand(Command command) override;
+
+  // |RenderPass|
+  bool Commit(Allocator& transients_allocator) const override;
+
+  bool EncodeCommands(Allocator& transients_allocator,
+                      id<MTLRenderCommandEncoder> pass) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPassMTL);
 };
 

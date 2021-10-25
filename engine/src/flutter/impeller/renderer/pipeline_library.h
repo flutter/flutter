@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
-#include <memory>
-#include <unordered_map>
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/pipeline.h"
@@ -19,28 +16,17 @@ class Context;
 
 class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
-  ~PipelineLibrary();
+  virtual ~PipelineLibrary();
 
   PipelineFuture GetRenderPipeline(
       std::optional<PipelineDescriptor> descriptor);
 
-  PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor);
+  virtual PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) = 0;
+
+ protected:
+  PipelineLibrary();
 
  private:
-  friend Context;
-
-  using Pipelines = std::unordered_map<PipelineDescriptor,
-                                       std::shared_ptr<const Pipeline>,
-                                       ComparableHash<PipelineDescriptor>,
-                                       ComparableEqual<PipelineDescriptor>>;
-  id<MTLDevice> device_ = nullptr;
-  Pipelines pipelines_;
-
-  PipelineLibrary(id<MTLDevice> device);
-
-  void SavePipeline(PipelineDescriptor descriptor,
-                    std::shared_ptr<const Pipeline> pipeline);
-
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibrary);
 };
 

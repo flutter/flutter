@@ -4,19 +4,39 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
-class CommabdBufferMTL final : public CommabdBuffer {
+class CommandBufferMTL final : public CommandBuffer {
  public:
-  CommabdBufferMTL();
+  CommandBufferMTL();
 
-  ~CommabdBufferMTL() override;
+  // |CommandBuffer|
+  ~CommandBufferMTL() override;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(CommabdBufferMTL);
+  friend class ContextMTL;
+
+  id<MTLCommandBuffer> buffer_ = nullptr;
+  bool is_valid_ = false;
+
+  CommandBufferMTL(id<MTLCommandQueue> queue);
+
+  // |CommandBuffer|
+  bool IsValid() const override;
+
+  // |CommandBuffer|
+  void Commit(CommitCallback callback) override;
+
+  // |CommandBuffer|
+  std::shared_ptr<RenderPass> CreateRenderPass(
+      const RenderPassDescriptor& desc) const override;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferMTL);
 };
 
 }  // namespace impeller

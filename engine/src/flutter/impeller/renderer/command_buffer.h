@@ -4,24 +4,19 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/render_pass.h"
 
 namespace impeller {
 
 class Context;
+class RenderPass;
+class RenderPassDescriptor;
 
 class CommandBuffer {
  public:
-  ~CommandBuffer();
-
-  bool IsValid() const;
-
   enum class CommitResult {
     kPending,
     kError,
@@ -29,19 +24,20 @@ class CommandBuffer {
   };
 
   using CommitCallback = std::function<void(CommitResult)>;
-  void Commit(CommitCallback callback);
 
-  std::shared_ptr<RenderPass> CreateRenderPass(
-      const RenderPassDescriptor& desc) const;
+  virtual ~CommandBuffer();
+
+  virtual bool IsValid() const = 0;
+
+  virtual void Commit(CommitCallback callback) = 0;
+
+  virtual std::shared_ptr<RenderPass> CreateRenderPass(
+      const RenderPassDescriptor& desc) const = 0;
+
+ protected:
+  CommandBuffer();
 
  private:
-  friend class Context;
-
-  id<MTLCommandBuffer> buffer_ = nullptr;
-  bool is_valid_ = false;
-
-  CommandBuffer(id<MTLCommandQueue> queue);
-
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };
 

@@ -4,18 +4,33 @@
 
 #pragma once
 
+#include <Metal/Metal.h>
+
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/metal/backend_cast.h"
 #include "impeller/renderer/shader_function.h"
 
 namespace impeller {
 
-class ShaderFunctionMTL final : public ShaderFunction {
+class ShaderFunctionMTL final
+    : public ShaderFunction,
+      public BackendCast<ShaderFunctionMTL, ShaderFunction> {
  public:
-  ShaderFunctionMTL();
-
+  // |ShaderFunction|
   ~ShaderFunctionMTL() override;
 
+  id<MTLFunction> GetMTLFunction() const;
+
  private:
+  friend class ShaderLibraryMTL;
+
+  id<MTLFunction> function_ = nullptr;
+
+  ShaderFunctionMTL(UniqueID parent_library_id,
+                    id<MTLFunction> function,
+                    std::string name,
+                    ShaderStage stage);
+
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunctionMTL);
 };
 

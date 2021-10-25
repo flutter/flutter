@@ -6,16 +6,8 @@
 
 namespace impeller {
 
-Sampler::Sampler(id<MTLSamplerState> state) : state_(state) {}
+Sampler::Sampler() = default;
 
 Sampler::~Sampler() = default;
-
-bool Sampler::IsValid() const {
-  return state_;
-}
-
-id<MTLSamplerState> Sampler::GetMTLSamplerState() const {
-  return state_;
-}
 
 }  // namespace impeller

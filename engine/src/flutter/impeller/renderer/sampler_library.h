@@ -4,21 +4,25 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 
-class Sampler {
+class SamplerLibrary {
  public:
-  virtual ~Sampler();
+  virtual ~SamplerLibrary();
 
-  virtual bool IsValid() const = 0;
+  virtual std::shared_ptr<const Sampler> GetSampler(
+      SamplerDescriptor descriptor) = 0;
 
  protected:
-  Sampler();
+  SamplerLibrary();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(Sampler);
+  FML_DISALLOW_COPY_AND_ASSIGN(SamplerLibrary);
 };
 
 }  // namespace impeller

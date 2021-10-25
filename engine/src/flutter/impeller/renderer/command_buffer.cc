@@ -2,23 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
-
-#include "flutter/fml/macros.h"
+#include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
-class Sampler {
- public:
-  virtual ~Sampler();
+CommandBuffer::CommandBuffer() = default;
 
-  virtual bool IsValid() const = 0;
-
- protected:
-  Sampler();
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(Sampler);
-};
+CommandBuffer::~CommandBuffer() = default;
 
 }  // namespace impeller

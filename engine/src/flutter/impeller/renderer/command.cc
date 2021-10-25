@@ -4,8 +4,6 @@
 
 #include "impeller/renderer/command.h"
 
-#include <Metal/Metal.h>
-
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {

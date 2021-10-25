@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/comparable.h"
@@ -15,11 +13,10 @@ namespace impeller {
 
 class ShaderFunction : public Comparable<ShaderFunction> {
  public:
+  // |Comparable<ShaderFunction>|
   virtual ~ShaderFunction();
 
   ShaderStage GetStage() const;
-
-  id<MTLFunction> GetMTLFunction() const;
 
   // |Comparable<ShaderFunction>|
   std::size_t GetHash() const override;
@@ -27,18 +24,15 @@ class ShaderFunction : public Comparable<ShaderFunction> {
   // |Comparable<ShaderFunction>|
   bool IsEqual(const ShaderFunction& other) const override;
 
- private:
-  friend class ShaderLibrary;
-
-  UniqueID parent_library_id_;
-  id<MTLFunction> function_ = nullptr;
-  std::string name_;
-  ShaderStage stage_;
-
+ protected:
   ShaderFunction(UniqueID parent_library_id,
-                 id<MTLFunction> function,
                  std::string name,
                  ShaderStage stage);
+
+ private:
+  UniqueID parent_library_id_;
+  std::string name_;
+  ShaderStage stage_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunction);
 };

@@ -6,8 +6,6 @@
 
 #include <string_view>
 
-#include <Metal/Metal.h>
-
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/formats.h"
@@ -17,24 +15,24 @@ namespace impeller {
 
 class Texture {
  public:
-  Texture(TextureDescriptor desc, id<MTLTexture> texture);
+  virtual ~Texture();
 
-  ~Texture();
+  virtual void SetLabel(const std::string_view& label) = 0;
 
-  void SetLabel(const std::string_view& label);
+  [[nodiscard]] virtual bool SetContents(const uint8_t* contents,
+                                         size_t length) = 0;
 
-  [[nodiscard]] bool SetContents(const uint8_t* contents, size_t length);
+  virtual bool IsValid() const = 0;
 
-  bool IsValid() const;
+  virtual ISize GetSize() const = 0;
 
-  ISize GetSize() const;
+  const TextureDescriptor& GetTextureDescriptor() const;
 
-  id<MTLTexture> GetMTLTexture() const;
+ protected:
+  Texture(TextureDescriptor desc);
 
  private:
   const TextureDescriptor desc_;
-  id<MTLTexture> texture_ = nullptr;
-  bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Texture);
 };
