@@ -53,13 +53,14 @@ class CreateReleaseSubsteps extends StatefulWidget {
 class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
   @visibleForTesting
   late Map<String, String?> releaseData = <String, String?>{};
-  late Object? error;
-  late bool isLoading;
+
+  late Object? _error;
+  late bool _isLoading;
 
   @override
   void initState() {
-    error = null;
-    isLoading = false;
+    _error = null;
+    _isLoading = false;
     super.initState();
   }
 
@@ -116,17 +117,17 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
     });
   }
 
-  /// Updates the error object with what the conductor throws.
+  /// Updates [_error] with what the conductor throws.
   void setError(Object? errorThrown) {
     setState(() {
-      error = errorThrown;
+      _error = errorThrown;
     });
   }
 
-  /// Method to modify the state [isLoading].
+  /// Method to modify the state [_isLoading].
   void setisLoading(bool result) {
     setState(() {
-      isLoading = result;
+      _isLoading = result;
     });
   }
 
@@ -190,10 +191,10 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           options: const <String>['y', 'z', 'm', 'n'],
         ),
         const SizedBox(height: 20.0),
-        if (error != null)
+        if (_error != null)
           Center(
             child: SelectableText(
-              presentError(error),
+              presentError(_error),
               style: Theme.of(context).textTheme.subtitle1!.copyWith(color: Colors.red),
             ),
           ),
@@ -202,7 +203,7 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('step1continue'),
-              onPressed: isLoading
+              onPressed: _isLoading
                   ? null // if the release initialization is loading, disable the Continue button
                   : () async {
                       setError(null);
@@ -215,14 +216,14 @@ class CreateReleaseSubstepsState extends State<CreateReleaseSubsteps> {
                       } finally {
                         setisLoading(false);
                       }
-                      if (error == null) {
+                      if (_error == null) {
                         widget.nextStep();
                       }
                     },
               child: const Text('Continue'),
             ),
             const SizedBox(width: 30.0),
-            if (isLoading)
+            if (_isLoading)
               const CircularProgressIndicator(
                 semanticsLabel: 'Linear progress indicator',
               ),
