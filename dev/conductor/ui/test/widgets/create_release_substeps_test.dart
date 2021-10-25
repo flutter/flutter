@@ -191,11 +191,12 @@ void main() {
       verify(fakeNextStep.nextStep()).called(1);
     });
 
-    testWidgets('Is able to display the loading animation', (WidgetTester tester) async {
+    testWidgets('Is able to display the loading UI, and hides it after release is done', (WidgetTester tester) async {
       final StartContext startContext = MockStartContext();
+      const int delayInMS = 3000;
 
       when(startContext.run()).thenAnswer((_) async {
-        await Future<void>.delayed(const Duration(milliseconds: 3000));
+        await Future<void>.delayed(const Duration(milliseconds: delayInMS));
         return;
       });
 
@@ -221,11 +222,14 @@ void main() {
       expect(find.byKey(const Key('step1continue')), findsOneWidget);
       await tester.drag(find.byKey(const Key('step1continue')), const Offset(-250, 0));
       await tester.pump();
-
       await tester.tap(find.byKey(const Key('step1continue')));
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.pumpAndSettle();
+      expect(tester.widget<ElevatedButton>(find.byKey(const Key('step1continue'))).enabled, false);
+
+      await tester.pump(const Duration(milliseconds: delayInMS + 1000));
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(tester.widget<ElevatedButton>(find.byKey(const Key('step1continue'))).enabled, true);
     });
   });
 }
