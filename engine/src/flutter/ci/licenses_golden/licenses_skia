@@ -1,4 +1,4 @@
-Signature: cdeca6e3f27af47569fc4a2dda74b524
+Signature: 12754cad4eea1b848c16f5ecfe6a3d55
 
 UNUSED LICENSES:
 
@@ -2338,6 +2338,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Context.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ContextPriv.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ContextPriv.h
+FILE: ../../../third_party/skia/experimental/graphite/src/CopyTask.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/CopyTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawContext.cpp
