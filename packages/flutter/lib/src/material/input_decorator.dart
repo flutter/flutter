@@ -3076,6 +3076,7 @@ class InputDecoration {
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon.0.dart **
   /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
