@@ -36,6 +36,16 @@ import 'inherited_model.dart';
 ///
 /// ** See code in examples/api/lib/widgets/app_model/app_model.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// The following sample demonstrates how a single lazily computed
+/// value could be shared within an app. A Flutter package that
+/// provided custom widgets might use this approach to share a (possibly
+/// private) value with instances of those widgets.
+///
+/// ** See code in examples/api/lib/widgets/app_model/app_model.1.dart **
+/// {@end-tool}
+
 class AppModel extends StatefulWidget {
   /// Creates a widget based on [InheritedModel] that supports build
   /// dependencies qualified by keywords. Descendant widgets create
@@ -79,6 +89,15 @@ class AppModel extends StatefulWidget {
     final _AppModelData model = context.findAncestorWidgetOfExactType<_AppModelData>()!;
     model.appModelState.set<K, V>(key, value);
   }
+
+  /// Unconditionally changes the app model's [value] for [key].
+  ///
+  /// Unlike [AppModel.set], this method does _not_ cause dependent widgets
+  /// to be rebuilt.
+  static void init<K extends Object, V>(BuildContext context, K key, V? value) {
+    final _AppModelData model = context.findAncestorWidgetOfExactType<_AppModelData>()!;
+    model.appModelState.init<K, V>(key, value);
+  }
 }
 
 class _AppModelState extends State<AppModel> {
@@ -104,6 +123,11 @@ class _AppModelState extends State<AppModel> {
         data[key] = value;
       });
     }
+  }
+
+  void init<K extends Object, V>(K key, V? value) {
+    data = Map<Object, Object?>.from(data);
+    data[key] = value;
   }
 }
 
