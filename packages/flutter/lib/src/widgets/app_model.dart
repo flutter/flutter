@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
+import 'framework.dart';
+import 'inherited_model.dart';
 
 /// Enables sharing key/value data with the all of the widgets below [child].
 ///
