@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +16,7 @@ import 'package:flutter/material.dart';
 /// creates a dependency on the AppModel: when the value of keyword
 /// changes with AppModel.set(), the widget will be rebuilt.
 ///
-/// An instance of this widget is created automatically by [WidgetApp].
+/// An instance of this widget is created automatically by [WidgetsApp].
 ///
 /// There are many ways to share data with a widget subtree. This
 /// class is based on [InheritedModel], which is an [InheritedWidget].
