@@ -1498,8 +1498,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                               binaryMessageHandler:handler];
 }
 
-- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
-  [_engine.get().binaryMessenger cleanupConnection:connection];
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
+  [_engine.get().binaryMessenger cleanUpConnection:connection];
 }
 
 #pragma mark - FlutterTextureRegistry

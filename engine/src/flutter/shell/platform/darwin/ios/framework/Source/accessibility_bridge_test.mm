@@ -1570,7 +1570,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     latch.Signal();
   });
   latch.Wait();
-  OCMVerify([messenger cleanupConnection:connection]);
+  OCMVerify([messenger cleanUpConnection:connection]);
   [engine stopMocking];
 }
 @end

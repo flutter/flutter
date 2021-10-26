@@ -70,7 +70,7 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 - (void)setMessageHandler:(FlutterMessageHandler)handler {
   if (!handler) {
     if (_connection > 0) {
-      [_messenger cleanupConnection:_connection];
+      [_messenger cleanUpConnection:_connection];
       _connection = 0;
     } else {
       [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
@@ -230,7 +230,7 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
 - (void)setMethodCallHandler:(FlutterMethodCallHandler)handler {
   if (!handler) {
     if (_connection > 0) {
-      [_messenger cleanupConnection:_connection];
+      [_messenger cleanUpConnection:_connection];
       _connection = 0;
     } else {
       [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];

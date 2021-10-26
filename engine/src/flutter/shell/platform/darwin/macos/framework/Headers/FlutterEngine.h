@@ -24,7 +24,7 @@ FLUTTER_DARWIN_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**
- * Initializes an engine with the given viewController.
+ * Initializes an engine with the given project.
  *
  * @param labelPrefix Currently unused; in the future, may be used for labelling threads
  *                    as with the iOS FlutterEngine.
@@ -34,7 +34,7 @@ FLUTTER_DARWIN_EXPORT
                              project:(nullable FlutterDartProject*)project;
 
 /**
- * Initializes an engine with the given viewController.
+ * Initializes an engine that can run headlessly with the given project.
  *
  * @param labelPrefix Currently unused; in the future, may be used for labelling threads
  *                    as with the iOS FlutterEngine.

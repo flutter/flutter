@@ -43,7 +43,7 @@
   return 0;
 }
 
-- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
 }
 
 @end
@@ -184,7 +184,7 @@
   OCMVerify([binaryMessenger setMessageHandlerOnChannel:channelName
                                    binaryMessageHandler:[OCMArg isNotNil]]);
   [channel setMessageHandler:nil];
-  OCMVerify([binaryMessenger cleanupConnection:connection]);
+  OCMVerify([binaryMessenger cleanUpConnection:connection]);
 }
 
 - (void)testMethodChannelCleanup {
@@ -208,7 +208,7 @@
   OCMVerify([binaryMessenger setMessageHandlerOnChannel:channelName
                                    binaryMessageHandler:[OCMArg isNotNil]]);
   [channel setMethodCallHandler:nil];
-  OCMVerify([binaryMessenger cleanupConnection:connection]);
+  OCMVerify([binaryMessenger cleanUpConnection:connection]);
 }
 
 @end

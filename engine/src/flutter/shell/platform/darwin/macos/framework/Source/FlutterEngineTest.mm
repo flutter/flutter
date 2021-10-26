@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+
+#include <functional>
+
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 
@@ -403,6 +408,69 @@ TEST(FlutterEngine, DartEntrypointArguments) {
 
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
   EXPECT_TRUE(called);
+}
+
+// If a channel overrides a previous channel with the same name, cleaning
+// the previous channel should not affect the new channel.
+//
+// This is important when recreating classes that uses a channel, because the
+// new instance would create the channel before the first class is deallocated
+// and clears the channel.
+TEST_F(FlutterEngineTest, MessengerCleanupConnectionWorks) {
+  FlutterEngine* engine = GetFlutterEngine();
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+
+  NSString* channel = @"_test_";
+  NSData* channel_data = [channel dataUsingEncoding:NSUTF8StringEncoding];
+
+  // Mock SendPlatformMessage so that if a message is sent to
+  // "test/send_message", act as if the framework has sent an empty message to
+  // the channel marked by the `sendOnChannel:message:` call's message.
+  engine.embedderAPI.SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage, ([](auto engine_, auto message_) {
+        if (strcmp(message_->channel, "test/send_message") == 0) {
+          // The simplest message that is acceptable to a method channel.
+          std::string message = R"|({"method": "a"})|";
+          std::string channel(reinterpret_cast<const char*>(message_->message),
+                              message_->message_size);
+          reinterpret_cast<EmbedderEngine*>(engine_)
+              ->GetShell()
+              .GetPlatformView()
+              ->HandlePlatformMessage(std::make_unique<PlatformMessage>(
+                  channel.c_str(), fml::MallocMapping::Copy(message.c_str(), message.length()),
+                  fml::RefPtr<PlatformMessageResponse>()));
+        }
+        return kSuccess;
+      }));
+
+  __block int record = 0;
+
+  FlutterMethodChannel* channel1 =
+      [FlutterMethodChannel methodChannelWithName:channel
+                                  binaryMessenger:engine.binaryMessenger
+                                            codec:[FlutterJSONMethodCodec sharedInstance]];
+  [channel1 setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    record += 1;
+  }];
+
+  [engine.binaryMessenger sendOnChannel:@"test/send_message" message:channel_data];
+  EXPECT_EQ(record, 1);
+
+  FlutterMethodChannel* channel2 =
+      [FlutterMethodChannel methodChannelWithName:channel
+                                  binaryMessenger:engine.binaryMessenger
+                                            codec:[FlutterJSONMethodCodec sharedInstance]];
+  [channel2 setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    record += 10;
+  }];
+
+  [engine.binaryMessenger sendOnChannel:@"test/send_message" message:channel_data];
+  EXPECT_EQ(record, 11);
+
+  [channel1 setMethodCallHandler:nil];
+
+  [engine.binaryMessenger sendOnChannel:@"test/send_message" message:channel_data];
+  EXPECT_EQ(record, 21);
 }
 
 }  // namespace flutter::testing

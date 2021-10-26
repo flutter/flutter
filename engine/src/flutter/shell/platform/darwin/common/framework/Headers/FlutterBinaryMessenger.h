@@ -87,7 +87,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * @param connection The result from `setMessageHandlerOnChannel:binaryMessageHandler:`.
  */
-- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection;
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection;
 @end
 NS_ASSUME_NONNULL_END
 #endif  // FLUTTER_FLUTTERBINARYMESSENGER_H_
