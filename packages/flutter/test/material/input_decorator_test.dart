@@ -1786,6 +1786,50 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  testWidgets('InputDecorator prefixIcon/suffixIcon alignment', (WidgetTester tester) async {
+    // prefixIcon and suffixIcon are aligned to center.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: Align(child: Icon(Icons.pages)),
+          suffixIcon: Align(child: Icon(Icons.satellite)),
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.byIcon(Icons.pages)).dy, 300.0);
+    expect(tester.getCenter(find.byIcon(Icons.satellite)).dy, 300.0);
+
+    // prefixIcon and suffixIcon are aligned to top center.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: Align(alignment: Alignment.topCenter, child: Icon(Icons.pages)),
+          suffixIcon: Align(alignment: Alignment.topCenter,child: Icon(Icons.satellite)),
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.byIcon(Icons.pages)).dy, 12.0);
+    expect(tester.getCenter(find.byIcon(Icons.satellite)).dy, 12.0);
+
+    // prefixIcon and suffixIcon are aligned to bottom center.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          prefixIcon: Align(alignment: Alignment.bottomCenter, child: Icon(Icons.pages)),
+          suffixIcon: Align(alignment: Alignment.bottomCenter,child: Icon(Icons.satellite)),
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.byIcon(Icons.pages)).dy, 588.0);
+    expect(tester.getCenter(find.byIcon(Icons.satellite)).dy, 588.0);
+  });
+
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
