@@ -13,6 +13,7 @@ jobs:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/engine' }}
     name: Mirror main branch to master branch
     steps:
       - name: Mirror action step
