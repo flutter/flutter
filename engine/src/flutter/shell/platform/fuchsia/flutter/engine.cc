@@ -138,15 +138,15 @@ void Engine::Initialize(
   // Connect to Scenic.
   auto scenic = runner_services->Connect<fuchsia::ui::scenic::Scenic>();
   fuchsia::ui::scenic::SessionEndpoints gfx_protocols;
-  fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session;
+  fuchsia::ui::scenic::SessionHandle session;
   gfx_protocols.set_session(session.NewRequest());
-  fidl::InterfaceHandle<fuchsia::ui::scenic::SessionListener> session_listener;
+  fuchsia::ui::scenic::SessionListenerHandle session_listener;
   auto session_listener_request = session_listener.NewRequest();
   gfx_protocols.set_session_listener(session_listener.Bind());
-  fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser;
-  fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused;
-  fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source;
-  fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source;
+  fuchsia::ui::views::FocuserHandle focuser;
+  fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused;
+  fuchsia::ui::pointer::TouchSourceHandle touch_source;
+  fuchsia::ui::pointer::MouseSourceHandle mouse_source;
 
   fuchsia::ui::composition::ViewBoundProtocols flatland_view_protocols;
   if (use_flatland) {
@@ -163,7 +163,7 @@ void Engine::Initialize(
   scenic->CreateSessionT(std::move(gfx_protocols), [] {});
 
   // Connect to Flatland.
-  fidl::InterfaceHandle<fuchsia::ui::composition::Flatland> flatland;
+  fuchsia::ui::composition::FlatlandHandle flatland;
   zx_status_t flatland_status =
       runner_services->Connect<fuchsia::ui::composition::Flatland>(
           flatland.NewRequest());
@@ -173,8 +173,7 @@ void Engine::Initialize(
   }
 
   // Connect to SemanticsManager service.
-  fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
-      semantics_manager;
+  fuchsia::accessibility::semantics::SemanticsManagerHandle semantics_manager;
   zx_status_t semantics_status =
       runner_services
           ->Connect<fuchsia::accessibility::semantics::SemanticsManager>(
@@ -187,7 +186,7 @@ void Engine::Initialize(
   }
 
   // Connect to ImeService service.
-  fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service;
+  fuchsia::ui::input::ImeServiceHandle ime_service;
   zx_status_t ime_status =
       runner_services->Connect<fuchsia::ui::input::ImeService>(
           ime_service.NewRequest());
@@ -197,7 +196,7 @@ void Engine::Initialize(
   }
 
   // Connect to Keyboard service.
-  fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard;
+  fuchsia::ui::input3::KeyboardHandle keyboard;
   zx_status_t keyboard_status =
       runner_services->Connect<fuchsia::ui::input3::Keyboard>(
           keyboard.NewRequest());

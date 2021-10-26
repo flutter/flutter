@@ -16,9 +16,8 @@ namespace flutter_runner {
 
 class FocusDelegate {
  public:
-  FocusDelegate(fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
-                    view_ref_focused,
-                fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser)
+  FocusDelegate(fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+                fuchsia::ui::views::FocuserHandle focuser)
       : view_ref_focused_(view_ref_focused.Bind()), focuser_(focuser.Bind()) {}
 
   /// Continuously watches the host viewRef for focus events, invoking a

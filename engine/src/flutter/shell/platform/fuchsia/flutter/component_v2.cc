@@ -207,7 +207,7 @@ ComponentV2::ComponentV2(
 
   directory_request_ = directory_ptr_.NewRequest();
 
-  fidl::InterfaceHandle<fuchsia::io::Directory> flutter_public_dir;
+  fuchsia::io::DirectoryHandle flutter_public_dir;
   // TODO(anmittal): when fixing enumeration using new c++ vfs, make sure that
   // flutter_public_dir is only accessed once we receive OnOpen Event.
   // That will prevent FL-175 for public directory
@@ -236,7 +236,7 @@ ComponentV2::ComponentV2(
         const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
         // add other directories as RemoteDirs.
         for (auto& dir_str : other_dirs) {
-          fidl::InterfaceHandle<fuchsia::io::Directory> dir;
+          fuchsia::io::DirectoryHandle dir;
           auto request = dir.NewRequest().TakeChannel();
           auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
                                                 dir_str, request.release());

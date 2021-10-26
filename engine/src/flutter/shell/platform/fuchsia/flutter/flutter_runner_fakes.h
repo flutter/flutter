@@ -19,8 +19,7 @@ class MockSemanticsManager
   // |fuchsia::accessibility::semantics::SemanticsManager|:
   void RegisterViewForSemantics(
       fuchsia::ui::views::ViewRef view_ref,
-      fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticListener>
-          handle,
+      fuchsia::accessibility::semantics::SemanticListenerHandle handle,
       fidl::InterfaceRequest<fuchsia::accessibility::semantics::SemanticTree>
           semantic_tree) override {
     tree_binding_.Bind(std::move(semantic_tree));

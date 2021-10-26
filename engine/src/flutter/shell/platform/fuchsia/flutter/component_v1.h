@@ -120,8 +120,7 @@ class ComponentV1 final : public Engine::Delegate,
   void CreateView(
       zx::eventpair token,
       fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> incoming_services,
-      fidl::InterfaceHandle<fuchsia::sys::ServiceProvider> outgoing_services)
-      override;
+      fuchsia::sys::ServiceProviderHandle outgoing_services) override;
 
   // |fuchsia::ui::app::ViewProvider|
   void CreateViewWithViewRef(zx::eventpair view_token,
