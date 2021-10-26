@@ -1,4 +1,4 @@
-Signature: 12754cad4eea1b848c16f5ecfe6a3d55
+Signature: 392706e02b2cdde86771ac3999e740c8
 
 UNUSED LICENSES:
 
@@ -2362,6 +2362,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Renderer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
@@ -2400,6 +2401,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTypesPriv.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlUtils.h
+FILE: ../../../third_party/skia/experimental/graphite/src/render/StencilAndFillPathRenderer.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/QMath.h
 FILE: ../../../third_party/skia/experimental/lowp-basic/bilerp-study.cpp
 FILE: ../../../third_party/skia/experimental/lowp-basic/lerp-study.cpp
