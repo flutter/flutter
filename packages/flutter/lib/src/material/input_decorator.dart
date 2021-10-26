@@ -2963,7 +2963,7 @@ class InputDecoration {
   ///         Icons.person,
   ///       ),
   ///     ),
-  ///   ),
+  ///   )
   /// )
   /// ```
   /// {@end-tool}
@@ -3098,7 +3098,7 @@ class InputDecoration {
   ///         Icons.remove_red_eye,
   ///       ),
   ///     ),
-  ///   ),
+  ///   )
   /// )
   /// ```
   /// {@end-tool}
