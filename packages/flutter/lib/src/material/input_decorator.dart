@@ -2951,18 +2951,20 @@ class InputDecoration {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// decoration: InputDecoration(
-  ///   border: OutlineInputBorder(),
-  ///     labelText: 'View password',
+  /// TextField(
+  ///   decoration: InputDecoration(
+  ///     border: OutlineInputBorder(),
+  ///     labelText: 'Enter name',
   ///     prefixIcon: Align(
   ///       alignment: Alignment.center,
   ///       widthFactor: 1.0,
   ///       heightFactor: 1.0,
   ///       child: Icon(
-  ///         Icons.lock,
+  ///         Icons.person,
+  ///       ),
   ///     ),
   ///   ),
-  /// ),
+  /// )
   /// ```
   /// {@end-tool}
   ///
@@ -3084,18 +3086,20 @@ class InputDecoration {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// decoration: InputDecoration(
-  ///   border: OutlineInputBorder(),
-  ///     labelText: 'Enter password',
+  /// TextField(
+  ///   decoration: InputDecoration(
+  ///     border: OutlineInputBorder(),
+  ///     labelText: 'Enter name',
   ///     suffixIcon: Align(
   ///       alignment: Alignment.center,
   ///       widthFactor: 1.0,
   ///       heightFactor: 1.0,
   ///       child: Icon(
   ///         Icons.remove_red_eye,
+  ///       ),
   ///     ),
   ///   ),
-  /// ),
+  /// )
   /// ```
   /// {@end-tool}
   /// See also:
