@@ -79,7 +79,7 @@ class AnalysisServer {
     final Stream<String> errorStream = _process!.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter());
-    errorStream.listen(_logger.printError);
+    errorStream.listen(_handleError);
 
     final Stream<String> inStream = _process!.stdout
         .transform<String>(utf8.decoder)
@@ -92,6 +92,14 @@ class AnalysisServer {
 
     _sendCommand('analysis.setAnalysisRoots',
         <String, dynamic>{'included': directories, 'excluded': <String>[]});
+  }
+
+  final List<String> _logs = <String>[];
+  String get logs => _logs.join('\n');
+
+  void _handleError(String message) {
+    _logs.add('[stderr] $message');
+    _logger.printError(message);
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;
@@ -113,6 +121,7 @@ class AnalysisServer {
   }
 
   void _handleServerResponse(String line) {
+    _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
 
     final dynamic response = json.decode(line);
