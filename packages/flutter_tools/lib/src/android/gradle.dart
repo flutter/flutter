@@ -69,7 +69,7 @@ Directory getRepoDirectory(Directory buildDirectory) {
 String _taskFor(String prefix, BuildInfo buildInfo) {
   final String buildType = camelCase(buildInfo.modeName);
   final String productFlavor = buildInfo.flavor ?? '';
-  return '$prefix${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+  return '$prefix${sentenceCase(productFlavor)}${sentenceCase(buildType)}';
 }
 
 /// Returns the task to build an APK.
@@ -592,7 +592,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
             ' mode, building as un-obfuscated.',
       );
     }
