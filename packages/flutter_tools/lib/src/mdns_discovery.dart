@@ -143,7 +143,7 @@ class MDnsObservatoryDiscovery {
       _client.stop();
     }
   }
-
+  
   Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
