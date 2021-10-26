@@ -1,4 +1,4 @@
-Signature: e5d164188cf09f772e6e09582afc8ed7
+Signature: b69c7fa79c36f599e8ee685cd22968e3
 
 UNUSED LICENSES:
 
@@ -2378,8 +2378,9 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
-FILE: ../../../third_party/skia/experimental/graphite/src/UniformDataManager.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/UniformDataManager.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Uniform.h
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/IntersectionTree.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/IntersectionTree.h
