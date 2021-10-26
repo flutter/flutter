@@ -4,7 +4,7 @@
 
 part of ui;
 
-// For documentation see https://github.com/flutter/engine/blob/master/lib/ui/painting.dart
+// For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
 // ignore_for_file: public_member_api_docs
 
 abstract class Path {

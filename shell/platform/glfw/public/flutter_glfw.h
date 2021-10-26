@@ -51,7 +51,7 @@ typedef struct {
   const char* aot_library_path;
   // The switches to pass to the Flutter engine.
   //
-  // See: https://github.com/flutter/engine/blob/master/shell/common/switches.h
+  // See: https://github.com/flutter/engine/blob/main/shell/common/switches.h
   // for details. Not all arguments will apply to desktop.
   const char** switches;
   // The number of elements in |switches|.

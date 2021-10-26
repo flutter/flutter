@@ -20,7 +20,7 @@ import 'dart:typed_data';
 // For some good articles on the topic, see
 // https://randomascii.wordpress.com/category/floating-point/page/2/
 // Port based on:
-// https://github.com/google/skia/blob/master/include/private/SkFloatBits.h
+// https://github.com/google/skia/blob/main/include/private/SkFloatBits.h
 //
 // Here is the 32 bit IEEE representation:
 //   uint32_t mantissa : 23;
