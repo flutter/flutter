@@ -64,6 +64,29 @@ Directory get localFlutterRoot {
   return _flutterRoot!;
 }
 
+Directory? _cocoonRoot;
+
+/// Getter method to get the local cocoon root directory.
+Directory get localCocoonRoot {
+  if (_cocoonRoot != null) {
+    return _cocoonRoot!;
+  }
+  String filePath;
+  const FileSystem fileSystem = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+
+  filePath = platform.script.toFilePath();
+  final String checkoutsDirname = fileSystem.path.normalize(
+    fileSystem.path.join(
+      fileSystem.path.dirname(filePath),
+      '..', // cocoon/release_dashboard
+      '..', // cocoon
+    ),
+  );
+  _cocoonRoot = fileSystem.directory(checkoutsDirname);
+  return _cocoonRoot!;
+}
+
 bool assertsEnabled() {
   // Verify asserts enabled
   bool assertsEnabled = false;
@@ -100,9 +123,8 @@ String? getValueFromEnvOrArgs(
   if (allowNull) {
     return null;
   }
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 /// Return multiple values from the environment or fall back to [argResults].
@@ -128,9 +150,8 @@ List<String> getValuesFromEnvOrArgs(
     return argValues;
   }
 
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 /// Translate CLI arg names to env variable names.
