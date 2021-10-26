@@ -533,7 +533,7 @@ const double _fTolerance = 0.5;
 /// the path.
 ///
 /// Implementation is based on
-/// https://github.com/google/skia/blob/master/src/core/SkContourMeasure.cpp
+/// https://github.com/google/skia/blob/main/src/core/SkContourMeasure.cpp
 /// to maintain consistency with native platforms.
 class SurfacePathMetric implements ui.PathMetric {
   SurfacePathMetric._(this._measure)

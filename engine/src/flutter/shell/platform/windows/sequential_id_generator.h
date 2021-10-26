@@ -14,7 +14,7 @@ namespace flutter {
 // new ID is always the lowest possible ID in the sequence.
 //
 // based on
-// https://source.chromium.org/chromium/chromium/src/+/master:ui/gfx/sequential_id_generator.h
+// https://source.chromium.org/chromium/chromium/src/+/main:ui/gfx/sequential_id_generator.h
 class SequentialIdGenerator {
  public:
   // Creates a new generator with the specified lower bound and uppoer bound for

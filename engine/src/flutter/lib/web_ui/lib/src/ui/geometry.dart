@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// See https://github.com/flutter/engine/blob/master/lib/ui/geometry.dart for
+// See https://github.com/flutter/engine/blob/main/lib/ui/geometry.dart for
 // documentation of APIs.
 // ignore_for_file: public_member_api_docs
 part of ui;

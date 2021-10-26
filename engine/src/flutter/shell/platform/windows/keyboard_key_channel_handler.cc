@@ -43,7 +43,7 @@ static constexpr int kMaxPendingEvents = 1000;
 // the same scancode as its non-extended counterpart, such as ShiftLeft.  In
 // Chromium's scancode table, from which Flutter's physical key list is
 // derived, these keys are marked with this bit.  See
-// https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc
+// https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_code_data.inc
 static constexpr int kScancodeExtended = 0xe000;
 
 // Re-definition of the modifiers for compatibility with the Flutter framework.

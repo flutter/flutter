@@ -1445,7 +1445,7 @@ class RRect {
   /// Therefore, this method is only needed for RRect use cases that require
   /// the appropriately scaled radii values.
   ///
-  /// See the [Skia scaling implementation](https://github.com/google/skia/blob/master/src/core/SkRRect.cpp)
+  /// See the [Skia scaling implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
   /// for more details.
   RRect scaleRadii() {
     double scale = 1.0;
