@@ -1191,6 +1191,82 @@ void main() {
     expect(testLogger.statusText, isEmpty);
   }));
 
+  testUsingContext('generated main uses correct target', () => testbed.run(() async {
+    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  generate: true
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_linux: 1.0.0
+''');
+
+    // Create necessary files for [DartPluginRegistrantTarget], including a
+    // plugin that will trigger generation.
+    final File packageConfig = globals.fs.directory('.dart_tool')
+        .childFile('package_config.json');
+    packageConfig.createSync(recursive: true);
+    packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "/path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    globals.fs.file('.packages').writeAsStringSync('''
+path_provider_linux:/path_provider_linux/lib/
+''');
+    final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
+    final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
+    pluginPubspec.createSync(recursive: true);
+    pluginPubspec.writeAsStringSync('''
+name: path_provider_linux
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      linux:
+        dartPluginClass: PathProviderLinux
+''');
+
+    residentRunner = HotRunner(
+        <FlutterDevice>[
+          flutterDevice,
+        ],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'custom_main.dart',
+        devtoolsHandler: createNoOpHandler,
+      );
+    await residentRunner.runSourceGenerators();
+
+    final File generatedMain = globals.fs.directory('.dart_tool')
+        .childDirectory('flutter_build')
+        .childFile('generated_main.dart');
+
+    expect(generatedMain.readAsStringSync(), contains('custom_main.dart'));
+    expect(testLogger.errorText, isEmpty);
+    expect(testLogger.statusText, isEmpty);
+  }));
+
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
     // Intentionally define arb file with wrong name. generate_localizations defaults
     // to app_en.arb.
