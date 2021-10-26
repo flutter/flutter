@@ -100,7 +100,15 @@ class SystemChannels {
   ///  * `SystemChrome.setEnabledSystemUIOverlays`: Specifies the set of system
   ///    overlays to have visible when the application is running. The argument
   ///    is a [List] of values which are string representations of values of the
-  ///    [SystemUiOverlay] enum. See [SystemChrome.setEnabledSystemUIOverlays].
+  ///    [SystemUiOverlay] enum. See [SystemChrome.setEnabledSystemUIMode].
+  ///    [SystemUiOverlay]s can only be configured individually when using
+  ///    [SystemUiMode.manual].
+  ///
+  ///  * `SystemChrome.setEnabledSystemUIMode`: Specifies the [SystemUiMode] for
+  ///    the application. The optional `overlays` argument is a [List] of values
+  ///    which are string representations of values of the [SystemUiOverlay]
+  ///    enum when using [SystemUiMode.manual]. See
+  ///    [SystemChrome.setEnabledSystemUIMode].
   ///
   ///  * `SystemChrome.setSystemUIOverlayStyle`: Specifies whether system
   ///    overlays (e.g. the status bar on Android or iOS) should be `light` or
@@ -109,6 +117,15 @@ class SystemChannels {
   ///
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `SystemChrome.systemUIChange`: The user has changed the visibility of
+  ///    the system overlays. This is relevant when using [SystemUiMode]s
+  ///    through [SystemChrome.setEnabledSystemUIMode]. See
+  ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
+  ///    application state.
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
@@ -278,7 +295,6 @@ class SystemChannels {
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -304,7 +320,6 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -335,7 +350,6 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -361,7 +375,6 @@ class SystemChannels {
   ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for localization.

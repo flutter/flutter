@@ -13,7 +13,7 @@ enum FilterType {
 
 class FilteredChildAnimationPage extends StatefulWidget {
   const FilteredChildAnimationPage(this.initialFilterType, {
-    Key key,
+    Key? key,
     this.initialComplexChild = true,
     this.initialUseRepaintBoundary = true,
   }) : super(key: key);
@@ -27,13 +27,13 @@ class FilteredChildAnimationPage extends StatefulWidget {
 }
 
 class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
   final GlobalKey _childKey = GlobalKey(debugLabel: 'child to animate');
   Offset _childCenter = Offset.zero;
 
-  FilterType _filterType;
-  bool _complexChild;
-  bool _useRepaintBoundary;
+  FilterType? _filterType;
+  late bool _complexChild;
+  late bool _useRepaintBoundary;
 
   @override
   void initState() {
@@ -41,8 +41,8 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _filterType = widget.initialFilterType;
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox childBox = _childKey.currentContext.findRenderObject() as RenderBox;
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      final RenderBox childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       _childCenter = childBox.paintBounds.center;
     });
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
@@ -64,7 +64,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       case FilterType.opacity: return 'Fading Child Animation';
       case FilterType.rotateTransform: return 'Transformed Child Animation';
       case FilterType.rotateFilter: return 'Matrix Filtered Child Animation';
-      default: return 'Static Child';
+      case null: return 'Static Child';
     }
   }
 
@@ -73,7 +73,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       color: Colors.green,
       boxShadow: complex ? <BoxShadow>[
         const BoxShadow(
-          color: Colors.black,
           blurRadius: 10.0,
         ),
       ] : null,
@@ -102,22 +101,23 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     );
   }
 
-  Widget _animate({Widget child, bool protectChild}) {
+  Widget _animate({required Widget child, required bool protectChild}) {
     if (_filterType == null) {
       _controller.reset();
       return child;
     }
+    final FilterType filterType = _filterType!;
     _controller.repeat();
-    Widget Function(BuildContext, Widget) builder;
-    switch (_filterType) {
+    Widget Function(BuildContext, Widget?) builder;
+    switch (filterType) {
       case FilterType.opacity:
-        builder = (BuildContext context, Widget child) => Opacity(
+        builder = (BuildContext context, Widget? child) => Opacity(
           opacity: (_controller.value * 2.0 - 1.0).abs(),
           child: child,
         );
         break;
       case FilterType.rotateTransform:
-        builder = (BuildContext context, Widget child) => Transform(
+        builder = (BuildContext context, Widget? child) => Transform(
           transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
           alignment: Alignment.center,
           filterQuality: FilterQuality.low,
@@ -125,7 +125,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
         );
         break;
       case FilterType.rotateFilter:
-        builder = (BuildContext context, Widget child) => ImageFiltered(
+        builder = (BuildContext context, Widget? child) => ImageFiltered(
           imageFilter: ImageFilter.matrix((
               Matrix4.identity()
                 ..translate(_childCenter.dx, _childCenter.dy)
@@ -176,17 +176,17 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
                 const Text('Opacity:'),
                 Checkbox(
                   value: _filterType == FilterType.opacity,
-                  onChanged: (bool b) => _setFilterType(FilterType.opacity, b),
+                  onChanged: (bool? b) => _setFilterType(FilterType.opacity, b ?? false),
                 ),
                 const Text('Tx Rotate:'),
                 Checkbox(
                   value: _filterType == FilterType.rotateTransform,
-                  onChanged: (bool b) => _setFilterType(FilterType.rotateTransform, b),
+                  onChanged: (bool? b) => _setFilterType(FilterType.rotateTransform, b ?? false),
                 ),
                 const Text('IF Rotate:'),
                 Checkbox(
                   value: _filterType == FilterType.rotateFilter,
-                  onChanged: (bool b) => _setFilterType(FilterType.rotateFilter, b),
+                  onChanged: (bool? b) => _setFilterType(FilterType.rotateFilter, b ?? false),
                 ),
               ],
             ),
@@ -196,12 +196,12 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
                 const Text('Complex child:'),
                 Checkbox(
                   value: _complexChild,
-                  onChanged: (bool b) => setState(() => _complexChild = b),
+                  onChanged: (bool? b) => setState(() => _complexChild = b ?? false),
                 ),
                 const Text('RPB on child:'),
                 Checkbox(
                   value: _useRepaintBoundary,
-                  onChanged: (bool b) => setState(() => _useRepaintBoundary = b),
+                  onChanged: (bool? b) => setState(() => _useRepaintBoundary = b ?? false),
                 ),
               ],
             ),

@@ -596,7 +596,6 @@ void main() {
       constrainedAxis: Axis.horizontal,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
-        direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
         children: <RenderBox>[flexible],
       ),
@@ -648,7 +647,7 @@ void main() {
       child: box200x200,
     );
     layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultBox.paint(context, Offset.zero);
+    context.paintChild(defaultBox, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
@@ -659,7 +658,7 @@ void main() {
           clipBehavior: clip,
       );
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      box.paint(context, Offset.zero);
+      context.paintChild(box, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
@@ -1085,9 +1084,9 @@ void main() {
 
     test('localToGlobal with ancestor', () {
       final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
-      final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
+      final RenderPositionedBox innerCenter = RenderPositionedBox(child: innerConstrained);
       final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
-      final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
+      final RenderPositionedBox outerCentered = RenderPositionedBox(child: outerConstrained);
 
       layout(outerCentered);
 

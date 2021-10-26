@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210723"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -341,7 +347,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
-      expect(await FakeCrashingDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
@@ -422,7 +428,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format', () async {
-      expect(await FakeDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -489,7 +495,7 @@ void main() {
     final BufferLogger wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
     );
-    expect(await FakeDoctor(wrapLogger).diagnose(verbose: true), isFalse);
+    expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
     expect(wrapLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
@@ -666,7 +672,7 @@ class NoOpDoctor implements Doctor {
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
 
   @override
-  Future<void> summary() => null;
+  Future<void> summary() async { }
 
   @override
   List<DoctorValidator> get validators => <DoctorValidator>[];
@@ -1015,6 +1021,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   String get name => 'name';

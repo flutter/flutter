@@ -45,7 +45,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       await controller.pumpAndSettle();
       // Scroll back to the top
       await controller.drag(demoList, const Offset(0.0, 10000.0));
-      await controller.pumpAndSettle(const Duration(milliseconds: 100));
+      await controller.pumpAndSettle();
     }
     currentDemoCategory = demoCategory;
 
@@ -61,6 +61,14 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       final Finder demoItem = find.text(demoName);
       await controller.scrollUntilVisible(demoItem, 48.0);
       await controller.pumpAndSettle();
+      if (demoItem.evaluate().isEmpty) {
+        print('Failed to find $demoItem');
+        print('All available elements:');
+        print(controller.allElements.toList().join('\n'));
+        print('App structure:');
+        debugDumpApp();
+        throw TestFailure('Failed to find element');
+      }
       await controller.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {

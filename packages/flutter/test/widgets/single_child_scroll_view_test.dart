@@ -44,7 +44,6 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
           child: Container(height: 600.0),
         ),
       ),
@@ -52,11 +51,11 @@ void main() {
 
     // 1st, check that the render object has received the default clip behavior.
     final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
     TestClipPaintingContext context = TestClipPaintingContext();
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.none));
 
     // 3rd, height overflow test: check that the painting context call pushClipRect.
@@ -64,12 +63,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
           child: Container(height: 600.1),
         ),
       ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     // 4th, width == widow.width test: check that the painting context do not call pushClipRect.
@@ -84,7 +82,7 @@ void main() {
         ),
       ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.none));
 
     // 5th, width overflow test: check that the painting context call pushClipRect.
@@ -97,7 +95,7 @@ void main() {
         ),
       ),
     );
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
   });
 
@@ -106,19 +104,19 @@ void main() {
 
     // 1st, check that the render object has received the default clip behavior.
     final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
     // 3rd, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
-    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias)); // ignore: avoid_dynamic_calls
 
     // 4th, check that a non-default clip behavior can be sent to the painting context.
-    renderObject.paint(context, Offset.zero);
+    renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
@@ -216,7 +214,7 @@ void main() {
   });
 
   testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
-    const SingleChildScrollView view = SingleChildScrollView(scrollDirection: Axis.vertical);
+    const SingleChildScrollView view = SingleChildScrollView();
     expect(view.primary, isTrue);
   });
 
@@ -228,7 +226,6 @@ void main() {
   testWidgets('SingleChildScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
     final SingleChildScrollView view = SingleChildScrollView(
       controller: ScrollController(),
-      scrollDirection: Axis.vertical,
     );
     expect(view.primary, isFalse);
   });

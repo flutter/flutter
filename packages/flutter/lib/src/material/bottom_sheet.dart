@@ -215,14 +215,22 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     bool isClosing = false;
@@ -318,7 +326,6 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
       maxHeight: isScrollControlled
         ? constraints.maxHeight
         : constraints.maxHeight * 9.0 / 16.0,
@@ -497,7 +504,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
-    _animationController = transitionAnimationController ?? BottomSheet.createAnimationController(navigator!.overlay!);
+    if (transitionAnimationController != null) {
+      _animationController = transitionAnimationController;
+      willDisposeAnimationController = false;
+    } else {
+      _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+    }
     return _animationController!;
   }
 
@@ -593,7 +605,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
-/// preventing the use from interacting with the app. Persistent bottom sheets
+/// preventing the user from interacting with the app. Persistent bottom sheets
 /// can be created and displayed with the [showBottomSheet] function or the
 /// [ScaffoldState.showBottomSheet] method.
 ///
@@ -626,7 +638,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// for more details).
 ///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
-/// exit animations if provided.
+/// exit animations. It's up to the owner of the controller to call
+/// [AnimationController.dispose] when the controller is no longer needed.
 ///
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
@@ -635,47 +648,15 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
 /// It also demonstrates how to close the bottom sheet using the [Navigator]
 /// when a user taps on a button inside the bottom sheet.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: ElevatedButton(
-///       child: const Text('showModalBottomSheet'),
-///       onPressed: () {
-///         showModalBottomSheet<void>(
-///           context: context,
-///           builder: (BuildContext context) {
-///             return Container(
-///               height: 200,
-///               color: Colors.amber,
-///               child: Center(
-///                 child: Column(
-///                   mainAxisAlignment: MainAxisAlignment.center,
-///                   mainAxisSize: MainAxisSize.min,
-///                   children: <Widget>[
-///                     const Text('Modal BottomSheet'),
-///                     ElevatedButton(
-///                       child: const Text('Close BottomSheet'),
-///                       onPressed: () => Navigator.pop(context),
-///                     )
-///                   ],
-///                 ),
-///               ),
-///             );
-///           },
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.0.dart **
 /// {@end-tool}
+///
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the

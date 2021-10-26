@@ -19,6 +19,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    // TODO(egarciad): Bump once https://github.com/flutter/flutter/issues/89578 is fixed.
     compileSdkVersion 30
 
     compileOptions {
@@ -29,7 +30,7 @@ android {
     defaultConfig {
         applicationId "com.yourcompany.flavors"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion flutter.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }

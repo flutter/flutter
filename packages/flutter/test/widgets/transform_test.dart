@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -386,15 +390,15 @@ void main() {
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
-    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/42767
+    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
   );
 
   testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(25.0, 25.0),
-        child: const SizedBox(width: 100, height: 100),
         filterQuality: FilterQuality.low,
+        child: const SizedBox(width: 100, height: 100),
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
@@ -404,8 +408,8 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 3.14159,
-        child: const SizedBox(width: 100, height: 100),
         filterQuality: FilterQuality.low,
+        child: const SizedBox(width: 100, height: 100),
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
@@ -415,8 +419,8 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
-        child: const SizedBox(width: 100, height: 100),
         filterQuality: FilterQuality.low,
+        child: const SizedBox(width: 100, height: 100),
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
@@ -426,8 +430,8 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
-        child: const SizedBox(width: 100, height: 100),
         filterQuality: FilterQuality.low,
+        child: const SizedBox(width: 100, height: 100),
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
@@ -451,8 +455,8 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
-        child: const SizedBox(width: 100, height: 100),
         filterQuality: FilterQuality.low,
+        child: const SizedBox(width: 100, height: 100),
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
@@ -479,18 +483,18 @@ void main() {
             ),
             Transform.rotate(
               angle: math.pi / 6,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
               filterQuality: FilterQuality.low,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
             Transform.scale(
               scale: 1.5,
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
               filterQuality: FilterQuality.low,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
             Transform.translate(
               offset: const Offset(20.0, 60.0),
-              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
               filterQuality: FilterQuality.low,
+              child: Center(child: Container(width: 100, height: 20, color: const Color(0xff00ff00))),
             ),
           ],
         ),

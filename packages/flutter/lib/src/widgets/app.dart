@@ -236,17 +236,22 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 /// It is used by both [MaterialApp] and [CupertinoApp] to implement base
 /// functionality for an app.
 ///
+/// Builds a [MediaQuery] using [MediaQuery.fromWindow]. To use an inherited
+/// [MediaQuery] instead, set [useInheritedMediaQuery] to true.
+///
 /// Find references to many of the widgets that [WidgetsApp] wraps in the "See
 /// also" section.
 ///
 /// See also:
 ///
 ///  * [CheckedModeBanner], which displays a [Banner] saying "DEBUG" when
-///    running in checked mode.
+///    running in debug mode.
 ///  * [DefaultTextStyle], the text style to apply to descendant [Text] widgets
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
+///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
+///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -327,6 +332,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.useInheritedMediaQuery = false,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -423,6 +429,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.useInheritedMediaQuery = false,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -610,7 +617,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [widgets.WidgetBuilder] is used to construct a [PageRoute] specified by
   /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
   /// animations, to the new route.
   ///
@@ -960,9 +967,9 @@ class WidgetsApp extends StatefulWidget {
 
   /// Turns on an overlay that enables inspecting the widget tree.
   ///
-  /// The inspector is only available in checked mode as it depends on
+  /// The inspector is only available in debug mode as it depends on
   /// [RenderObject.debugDescribeChildren] which should not be called outside of
-  /// checked mode.
+  /// debug mode.
   final bool debugShowWidgetInspector;
 
   /// Builds the widget the [WidgetInspector] uses to switch between view and
@@ -974,18 +981,18 @@ class WidgetsApp extends StatefulWidget {
   final InspectorSelectButtonBuilder? inspectorSelectButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
-  /// Turns on a little "DEBUG" banner in checked mode to indicate
-  /// that the app is in checked mode. This is on by default (in
-  /// checked mode), to turn it off, set the constructor argument to
+  /// Turns on a little "DEBUG" banner in debug mode to indicate
+  /// that the app is in debug mode. This is on by default (in
+  /// debug mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.
   ///
   /// To get this banner in your application if you're not using
   /// WidgetsApp, include a [CheckedModeBanner] widget in your app.
   ///
   /// This banner is intended to deter people from complaining that your
-  /// app is slow when it's in checked mode. In checked mode, Flutter
+  /// app is slow when it's in debug mode. In debug mode, Flutter
   /// enables a large number of expensive diagnostics to aid in
-  /// development, and so performance in checked mode is not
+  /// development, and so performance in debug mode is not
   /// representative of what will happen in release mode.
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
@@ -1111,6 +1118,14 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
+  /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  /// If true, an inherited MediaQuery will be used. If one is not available,
+  /// or this is false, one will be built from the window.
+  ///
+  /// Cannot be null, defaults to false.
+  /// {@endtemplate}
+  final bool useInheritedMediaQuery;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1137,6 +1152,7 @@ class WidgetsApp extends StatefulWidget {
   static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
 
@@ -1171,6 +1187,7 @@ class WidgetsApp extends StatefulWidget {
     ),
     // On the web, enter activates buttons, but not other controls.
     SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ButtonActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -1192,6 +1209,7 @@ class WidgetsApp extends StatefulWidget {
   static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
 
     // Dismissal
@@ -1635,6 +1653,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
+    Widget child = Localizations(
+      locale: appLocale,
+      delegates: _localizationsDelegates.toList(),
+      child: title,
+    );
+
+    final MediaQueryData? data = MediaQuery.maybeOf(context);
+    if (!widget.useInheritedMediaQuery || data == null) {
+      child = MediaQuery.fromWindow(
+        child: child,
+      );
+    }
+
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
@@ -1648,96 +1679,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             child: DefaultTextEditingActions(
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: _MediaQueryFromWindow(
-                  child: Localizations(
-                    locale: appLocale,
-                    delegates: _localizationsDelegates.toList(),
-                    child: title,
-                  ),
-                ),
+                child: child,
               ),
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-/// Builds [MediaQuery] from `window` by listening to [WidgetsBinding].
-///
-/// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire widget tree.
-class _MediaQueryFromWindow extends StatefulWidget {
-  const _MediaQueryFromWindow({Key? key, required this.child}) : super(key: key);
-
-  final Widget child;
-
-  @override
-  _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
-}
-
-class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance!.addObserver(this);
-  }
-
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
-    if (!kReleaseMode) {
-      data = data.copyWith(platformBrightness: debugBrightnessOverride);
-    }
-    return MediaQuery(
-      data: data,
-      child: widget.child,
-    );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
   }
 }

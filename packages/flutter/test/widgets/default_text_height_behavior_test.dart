@@ -12,7 +12,6 @@ void main() {
       applyHeightToFirstAscent: false,
     );
     const TextHeightBehavior behavior2 = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
 
@@ -38,7 +37,6 @@ void main() {
       applyHeightToFirstAscent: false,
     );
     const TextHeightBehavior behavior2 = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -90,24 +88,16 @@ void main() {
         locale: const Locale('en', 'us'),
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
-            child: Material(
-              child: Center(
-                child: Theme(
-                  data: theme,
-                  child: RawChip(
-                    showCheckmark: true,
-                    onDeleted: () { },
-                    tapEnabled: true,
-                    avatar: const Placeholder(),
-                    deleteIcon: const Placeholder(),
-                    isEnabled: true,
-                    selected: false,
-                    label: const Text('Chip'),
-                    onSelected: (bool newValue) { },
-                    onPressed: null,
-                  ),
+          child: Material(
+            child: Center(
+              child: Theme(
+                data: theme,
+                child: RawChip(
+                  onDeleted: () { },
+                  avatar: const Placeholder(),
+                  deleteIcon: const Placeholder(),
+                  label: const Text('Chip'),
+                  onSelected: (bool newValue) { },
                 ),
               ),
             ),
@@ -141,26 +131,18 @@ void main() {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
-            child: Material(
-              child: Center(
-                child: Theme(
-                  data: theme,
-                  child: ChipTheme(
-                    data: customTheme,
-                    child: RawChip(
-                      showCheckmark: true,
-                      onDeleted: () { },
-                      tapEnabled: true,
-                      avatar: const Placeholder(),
-                      deleteIcon: const Placeholder(),
-                      isEnabled: true,
-                      selected: value,
-                      label: const Text('$value'),
-                      onSelected: (bool newValue) { },
-                      onPressed: null,
-                    ),
+          child: Material(
+            child: Center(
+              child: Theme(
+                data: theme,
+                child: ChipTheme(
+                  data: customTheme,
+                  child: RawChip(
+                    onDeleted: () { },
+                    avatar: const Placeholder(),
+                    deleteIcon: const Placeholder(),
+                    label: const Text('$value'),
+                    onSelected: (bool newValue) { },
                   ),
                 ),
               ),
@@ -253,7 +235,7 @@ void main() {
       elevation: 1.0,
       labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
       shape: const StadiumBorder(),
-      side: const BorderSide(color: Colors.black),
+      side: const BorderSide(),
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
@@ -305,7 +287,7 @@ void main() {
     expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
     expect(lerpANull25.shadowColor, equals(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.selectedShadowColor, equals(Colors.white.withAlpha(0x40)));
-    expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 2.0, right: 0.0, bottom: 2.0)));
+    expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(top: 2.0, bottom: 2.0)));
     expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
     expect(lerpANull25.side!.color, equals(Colors.white.withAlpha(0x3f)));
     expect(lerpANull25.shape, isA<BeveledRectangleBorder>());
@@ -324,7 +306,7 @@ void main() {
     expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
     expect(lerpANull75.shadowColor, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.selectedShadowColor, equals(Colors.white.withAlpha(0xbf)));
-    expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 6.0, right: 0.0, bottom: 6.0)));
+    expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(top: 6.0, bottom: 6.0)));
     expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
     expect(lerpANull75.side!.color, equals(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.shape, isA<BeveledRectangleBorder>());
@@ -343,7 +325,7 @@ void main() {
     expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
     expect(lerpBNull25.shadowColor, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.selectedShadowColor, equals(Colors.black.withAlpha(0xbf)));
-    expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, top: 0.0, right: 6.0, bottom: 0.0)));
+    expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
     expect(lerpBNull25.side!.color, equals(Colors.black.withAlpha(0x3f)));
     expect(lerpBNull25.shape, isA<StadiumBorder>());
@@ -362,7 +344,7 @@ void main() {
     expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
     expect(lerpBNull75.shadowColor, equals(Colors.black.withAlpha(0x40)));
     expect(lerpBNull75.selectedShadowColor, equals(Colors.black.withAlpha(0x40)));
-    expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, top: 0.0, right: 2.0, bottom: 0.0)));
+    expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
     expect(lerpBNull75.side!.color, equals(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull75.shape, isA<StadiumBorder>());
@@ -478,7 +460,7 @@ void main() {
       if (states.contains(MaterialState.selected))
         color = selectedColor;
 
-      return BorderSide(color: color, width: 1);
+      return BorderSide(color: color);
     }
 
     Widget chipWidget({ bool selected = false }) {
@@ -517,7 +499,7 @@ void main() {
       if (states.contains(MaterialState.selected))
         color = selectedColor;
 
-      return BorderSide(color: color, width: 1);
+      return BorderSide(color: color);
     }
 
     Widget chipWidget({ bool selected = false }) {

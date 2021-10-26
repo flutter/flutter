@@ -113,6 +113,14 @@
 /// ```
 /// {@end-tool}
 ///
+/// {@tool snippet}
+/// snippet with trailing comma
+///
+/// ```dart
+/// const SizedBox(),
+/// ```
+/// {@end-tool}
+///
 /// {@tool dartpad --template=stateless_widget_material}
 /// Dartpad with null-safe syntax
 ///

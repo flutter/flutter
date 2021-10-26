@@ -31,7 +31,7 @@ void main([List<String> args = const <String>[]]) {
       await tester.pumpAndSettle();
       final int id = tester.getSemantics(find.bySemanticsLabel('Material')).id;
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics, semanticsEnabled: true);
+    }, skip: !withSemantics);
 
     testWidgets(
       'all demos',
@@ -48,7 +48,6 @@ void main([List<String> args = const <String>[]]) {
           ..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), tester);
       },
-      timeout: const Timeout(Duration(minutes: 5)),
       semanticsEnabled: withSemantics,
     );
   });

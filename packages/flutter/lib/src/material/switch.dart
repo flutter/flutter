@@ -260,9 +260,9 @@ class Switch extends StatelessWidget {
   ///
   /// | State    | Light theme                     | Dark theme                      |
   /// |----------|---------------------------------|---------------------------------|
-  /// | Default  | `Colors.grey.shade50`           | `Colors.grey.shade400`          |
+  /// | Default  | `Color(0x52000000)`             | `Colors.white30`                |
   /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
-  /// | Disabled | `Color(0x52000000)`             | `Colors.white30`                |
+  /// | Disabled | `Colors.black12`                | `Colors.white10`                |
   final MaterialStateProperty<Color?>? trackColor;
 
   /// {@template flutter.material.switch.materialTapTargetSize}
@@ -912,26 +912,69 @@ class _SwitchPainter extends ToggleablePainter {
       ? (currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError)
       : onInactiveThumbImageError;
 
-    // Paint the track
     final Paint paint = Paint()
       ..color = trackColor;
-    const double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
+
+    final Offset trackPaintOffset = _computeTrackPaintOffset(size, _kTrackWidth, _kTrackHeight);
+    final Offset thumbPaintOffset = _computeThumbPaintOffset(trackPaintOffset, visualPosition);
+    final Offset radialReactionOrigin = Offset(thumbPaintOffset.dx + _kThumbRadius, size.height / 2);
+
+    _paintTrackWith(canvas, paint, trackPaintOffset);
+    paintRadialReaction(canvas: canvas, origin: radialReactionOrigin);
+    _paintThumbWith(
+      thumbPaintOffset,
+      canvas,
+      currentValue,
+      thumbColor,
+      thumbImage,
+      thumbErrorListener,
+    );
+  }
+
+  /// Computes canvas offset for track's upper left corner
+  Offset _computeTrackPaintOffset(Size canvasSize, double trackWidth, double trackHeight) {
+    final double horizontalOffset = (canvasSize.width - _kTrackWidth) / 2.0;
+    final double verticalOffset = (canvasSize.height - _kTrackHeight) / 2.0;
+
+    return Offset(horizontalOffset, verticalOffset);
+  }
+
+  /// Computes canvas offset for thumb's upper left corner as if it were a
+  /// square
+  Offset _computeThumbPaintOffset(Offset trackPaintOffset, double visualPosition) {
+    // How much thumb radius extends beyond the track
+    const double additionalThumbRadius = _kThumbRadius - _kTrackRadius;
+
+    final double horizontalProgress = visualPosition * trackInnerLength;
+    final double thumbHorizontalOffset = trackPaintOffset.dx - additionalThumbRadius + horizontalProgress;
+    final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
+
+    return Offset(thumbHorizontalOffset, thumbVerticalOffset);
+  }
+
+  void _paintTrackWith(Canvas canvas, Paint paint, Offset trackPaintOffset) {
     final Rect trackRect = Rect.fromLTWH(
-      trackHorizontalPadding,
-      (size.height - _kTrackHeight) / 2.0,
-      size.width - 2.0 * trackHorizontalPadding,
+      trackPaintOffset.dx,
+      trackPaintOffset.dy,
+      _kTrackWidth,
       _kTrackHeight,
     );
-    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    canvas.drawRRect(trackRRect, paint);
-
-    final Offset thumbPosition = Offset(
-      kRadialReactionRadius + visualPosition * trackInnerLength,
-      size.height / 2.0,
+    final RRect trackRRect = RRect.fromRectAndRadius(
+      trackRect,
+      const Radius.circular(_kTrackRadius),
     );
 
-    paintRadialReaction(canvas: canvas, origin: thumbPosition);
+    canvas.drawRRect(trackRRect, paint);
+  }
 
+  void _paintThumbWith(
+    Offset thumbPaintOffset,
+    Canvas canvas,
+    double currentValue,
+    Color thumbColor,
+    ImageProvider? thumbImage,
+    ImageErrorListener? thumbErrorListener,
+  ) {
     try {
       _isPainting = true;
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
@@ -946,9 +989,10 @@ class _SwitchPainter extends ToggleablePainter {
       // The thumb contracts slightly during the animation
       final double inset = 1.0 - (currentValue - 0.5).abs() * 2.0;
       final double radius = _kThumbRadius - inset;
+
       thumbPainter.paint(
         canvas,
-        thumbPosition - Offset(radius, radius),
+        thumbPaintOffset + Offset(0, inset),
         configuration.copyWith(size: Size.fromRadius(radius)),
       );
     } finally {

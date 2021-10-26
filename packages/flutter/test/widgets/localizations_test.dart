@@ -21,11 +21,13 @@ void main() {
       child: const Text('loaded'),
     ));
     final dynamic state = tester.state(find.byType(Localizations));
+    // ignore: avoid_dynamic_calls
     expect(state!.locale, isNull);
     expect(find.text('loaded'), findsNothing);
 
     late Locale locale;
     binding.onAllowFrame = () {
+      // ignore: avoid_dynamic_calls
       locale = state.locale as Locale;
     };
     delegate.completer.complete('foo');

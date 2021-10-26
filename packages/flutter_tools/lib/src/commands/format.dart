@@ -30,6 +30,9 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more Dart files.';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   String get invocation => '${runner.executableName} $name <one or more paths>';
 
   @override
@@ -47,8 +50,8 @@ class FormatCommand extends FlutterCommand {
     } else {
       command.addAll(<String>[
         for (String arg in argResults.rest)
-          if (arg == '--dry-run')
-            '--output=show'
+          if (arg == '--dry-run' || arg == '-n')
+            '--output=none'
           else
             arg
       ]);

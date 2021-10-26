@@ -346,7 +346,6 @@ void main() {
           width: 100.0,
           height: 10.0,
           child: FittedBox(
-            fit: BoxFit.contain,
             child: SizedBox(
               width: 50.0,
               height: 50.0,
@@ -452,7 +451,6 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: FittedBox(
-            fit: BoxFit.contain,
             alignment: FractionalOffset.center,
             child: SizedBox(
               width: 1000.0,
@@ -588,6 +586,24 @@ void main() {
     await tester.pumpWidget(scaleDownWidget);
 
     expect(outsideBox.size.height, 50.0);
+  });
+
+  testWidgets('FittedBox without child does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 200.0,
+          child: FittedBox(),
+        ),
+      ),
+    );
+
+    expect(find.byType(FittedBox), findsOneWidget);
+
+    // Tapping it also should not throw.
+    await tester.tap(find.byType(FittedBox), warnIfMissed: false);
+    expect(tester.takeException(), isNull);
   });
 }
 

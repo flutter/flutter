@@ -1372,7 +1372,6 @@ void main() {
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1678,7 +1677,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext!).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1693,7 +1692,6 @@ void main() {
               Focus(focusNode: topNode, child: Container(height: 100)),
               Expanded(
                 child: ListView(
-                  scrollDirection: Axis.vertical,
                   controller: controller,
                   children: items.map<Widget>((int item) {
                     return Focus(
@@ -1776,7 +1774,7 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1874,7 +1872,7 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
@@ -1997,10 +1995,10 @@ void main() {
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<Object> events = <Object>[];
 
       await tester.pumpWidget(MaterialApp(home: Container()));
 
@@ -2013,6 +2011,14 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))));
+      final FocusNode? initialFocus = primaryFocus;
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(primaryFocus, equals(initialFocus));
     });
 
     testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
@@ -2039,7 +2045,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
   group(FocusTraversalGroup, () {
     testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {

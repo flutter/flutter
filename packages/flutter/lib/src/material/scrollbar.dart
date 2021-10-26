@@ -34,53 +34,19 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
 /// become larger when hovering, unless overridden by [hoverThickness].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
 /// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scrollbar(
-///     child: GridView.builder(
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/material/scrollbar/scrollbar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a ScrollController is provided to controller,
 /// or that the PrimaryScrollController is available.
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
 ///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scrollbar(
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: GridView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -91,7 +57,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-class Scrollbar extends StatefulWidget {
+class Scrollbar extends StatelessWidget {
   /// Creates a material design scrollbar that by default will connect to the
   /// closest Scrollable descendant of [child].
   ///
@@ -170,38 +136,31 @@ class Scrollbar extends StatefulWidget {
   final ScrollbarOrientation? scrollbarOrientation;
 
   @override
-  State<Scrollbar> createState() => _ScrollbarState();
-}
-
-class _ScrollbarState extends State<Scrollbar> {
-  bool get _useCupertinoScrollbar => Theme.of(context).platform == TargetPlatform.iOS;
-
-  @override
   Widget build(BuildContext context) {
-    if (_useCupertinoScrollbar) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
-        isAlwaysShown: widget.isAlwaysShown ?? false,
-        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
-        controller: widget.controller,
-        notificationPredicate: widget.notificationPredicate,
-        scrollbarOrientation: widget.scrollbarOrientation,
-        child: widget.child,
+        isAlwaysShown: isAlwaysShown ?? false,
+        thickness: thickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        radius: radius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        controller: controller,
+        notificationPredicate: notificationPredicate,
+        scrollbarOrientation: scrollbarOrientation,
+        child: child,
       );
     }
     return _MaterialScrollbar(
-      controller: widget.controller,
-      isAlwaysShown: widget.isAlwaysShown,
-      showTrackOnHover: widget.showTrackOnHover,
-      hoverThickness: widget.hoverThickness,
-      thickness: widget.thickness,
-      radius: widget.radius,
-      notificationPredicate: widget.notificationPredicate,
-      interactive: widget.interactive,
-      scrollbarOrientation: widget.scrollbarOrientation,
-      child: widget.child,
+      controller: controller,
+      isAlwaysShown: isAlwaysShown,
+      showTrackOnHover: showTrackOnHover,
+      hoverThickness: hoverThickness,
+      thickness: thickness,
+      radius: radius,
+      notificationPredicate: notificationPredicate,
+      interactive: interactive,
+      scrollbarOrientation: scrollbarOrientation,
+      child: child,
     );
   }
 }

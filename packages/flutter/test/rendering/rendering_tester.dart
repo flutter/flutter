@@ -305,7 +305,6 @@ class TestClipPaintingContext extends PaintingContext {
     ClipRectLayer? oldLayer,
   }) {
     this.clipBehavior = clipBehavior;
-    return null;
   }
 
   Clip clipBehavior = Clip.none;

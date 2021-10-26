@@ -147,7 +147,7 @@ void main() {
         ]);
       });
     });
-  }, skip: kIsWeb);
+  });
 }
 
 class MockHttpClientResponse extends Fake implements HttpClientResponse {

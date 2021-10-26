@@ -17975,7 +17975,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'तारीख श्रेणी';
 
   @override
-  String get viewLicensesButtonLabel => 'परवाने पाहा';
+  String get viewLicensesButtonLabel => 'परवाने पहा';
 }
 
 /// The translations for Malay (`ms`).
@@ -25238,7 +25238,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'మెనూను చూపు';
 
   @override
-  String get signedInLabel => 'సైన్ ఇన్ చేసారు';
+  String get signedInLabel => 'సైన్ ఇన్ చేశారు';
 
   @override
   String get tabLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';

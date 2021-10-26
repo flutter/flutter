@@ -363,6 +363,73 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('Custom Theme button fillColor in different states', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    const Color enabledFillColor = Colors.green;
+    const Color selectedFillColor = Colors.blue;
+    const Color disabledFillColor = Colors.yellow;
+
+    Color getColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedFillColor;
+      } else if (states.contains(MaterialState.disabled)) {
+        return disabledFillColor;
+      }
+      return enabledFillColor;
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            child: ToggleButtons(
+              isSelected: const <bool>[true, false],
+              onPressed: (int index) {},
+              children: const <Widget> [
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, selectedFillColor);
+    expect(buttonColor('Second child').color, enabledFillColor);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            child: ToggleButtons(
+              isSelected: const <bool>[true, false],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(buttonColor('First child').color, disabledFillColor);
+    expect(buttonColor('Second child').color, disabledFillColor);
+  });
+
   testWidgets('Theme InkWell colors', (WidgetTester tester) async {
     const Color splashColor = Color(0xff4caf50);
     const Color highlightColor = Color(0xffcddc39);

@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/invoker.dart';  // ignore: implementation_imports
+import 'package:test_api/src/backend/invoker.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/live_test.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/message.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
@@ -96,7 +96,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
   final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
-    print('Skip: ${skipped.metadata.skipReason}');
+    reporter.log('Skip: ${skipped.metadata.skipReason}');
   }
   final LiveTest liveTest = skipped.load(suiteConfig);
   reporter._onTestStarted(liveTest);
@@ -144,7 +144,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 ///       // This test is especially slow on Windows.
 ///       'windows': Timeout.factor(2),
 ///       'browser': [
-///         Skip('TODO: add browser support'),
+///         Skip('add browser support'),
 ///         // This will be slow on browsers once it works on them.
 ///         Timeout.factor(2)
 ///       ]
@@ -334,7 +334,7 @@ class _Reporter {
       if (message.type == MessageType.skip) {
         text = '  $_yellow$text$_noColor';
       }
-      print(text);
+      log(text);
     }));
   }
 
@@ -351,8 +351,8 @@ class _Reporter {
       return;
     }
     _progressLine(_description(liveTest), suffix: ' $_bold$_red[E]$_noColor');
-    print(_indent(error.toString()));
-    print(_indent('$stackTrace'));
+    log(_indent(error.toString()));
+    log(_indent('$stackTrace'));
   }
 
   /// A callback called when the engine is finished running tests.
@@ -421,7 +421,7 @@ class _Reporter {
     buffer.write(message);
     buffer.write(_noColor);
 
-    print(buffer.toString());
+    log(buffer.toString());
   }
 
   /// Returns a representation of [duration] as `MM:SS`.
@@ -441,6 +441,13 @@ class _Reporter {
       name = '${liveTest.suite.path}: $name';
     }
     return name;
+  }
+
+  /// Print the message to the console.
+  void log(String message) {
+    // We centralize all the prints in this file through this one method so that
+    // in principle we can reroute the output easily should we need to.
+    print(message); // ignore: avoid_print
   }
 }
 

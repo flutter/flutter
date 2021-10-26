@@ -35,7 +35,11 @@ class WebFlutterDriver extends FlutterDriver {
   })  : _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
         _startTime = DateTime.now(),
-        _driverId = _nextDriverId++;
+        _driverId = _nextDriverId++
+    {
+      _logFilePathName = path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
+    }
+
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
@@ -62,6 +66,12 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Whether to log communication between host and app to `flutter_driver_commands.log`.
   final bool _logCommunicationToFile;
+
+  /// Logs are written here when _logCommunicationToFile is true.
+  late final String _logFilePathName;
+
+  /// Getter for file pathname where logs are written when _logCommunicationToFile is true
+  String get logFilePathName => _logFilePathName;
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
@@ -105,9 +115,10 @@ class WebFlutterDriver extends FlutterDriver {
       response = data != null ? (json.decode(data as String) as Map<String, dynamic>?)! : <String, dynamic>{};
       _logCommunication('<<< $response');
     } catch (error, stackTrace) {
-      throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
-          error,
-          stackTrace
+      throw DriverError(
+        "Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
+        error,
+        stackTrace
       );
     }
     if (response['isError'] == true)
@@ -128,7 +139,8 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      final File file = fs.file(path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      assert(_logFilePathName != null);
+      final File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
     }
@@ -211,11 +223,7 @@ class WebFlutterDriver extends FlutterDriver {
 class FlutterWebConnection {
   /// Creates a FlutterWebConnection with WebDriver
   /// and whether the WebDriver supports timeline action.
-  FlutterWebConnection(this._driver, this.supportsTimelineAction) {
-    _driver.logs.get(async_io.LogType.browser).listen((async_io.LogEntry entry) {
-      print('[${entry.level}]: ${entry.message}');
-    });
-  }
+  FlutterWebConnection(this._driver, this.supportsTimelineAction);
 
   final async_io.WebDriver _driver;
 
@@ -254,8 +262,10 @@ class FlutterWebConnection {
     dynamic result;
     try {
       await _driver.execute(script, <void>[]);
-    } catch (_) {
-      // In case there is an exception, do nothing
+    } catch (error) {
+      // We should not just arbitrarily throw all exceptions on the ground.
+      // This is probably hiding real errors.
+      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
     }
 
     try {
@@ -264,7 +274,10 @@ class FlutterWebConnection {
         matcher: isNotNull,
         timeout: duration ?? const Duration(days: 30),
       );
-    } catch (_) {
+    } catch (error) {
+      // We should not just arbitrarily throw all exceptions on the ground.
+      // This is probably hiding real errors.
+      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
       // Returns null if exception thrown.
       return null;
     } finally {

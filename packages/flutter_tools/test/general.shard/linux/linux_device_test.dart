@@ -20,9 +20,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
-);
+final FakePlatform linux = FakePlatform();
 final FakePlatform windows = FakePlatform(
   operatingSystem: 'windows',
 );
@@ -78,7 +76,7 @@ void main() {
     expect(await LinuxDevices(
       fileSystem: MemoryFileSystem.test(),
       platform: linux,
-      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
+      featureFlags: TestFeatureFlags(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -94,6 +92,17 @@ void main() {
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     ).devices, hasLength(1));
+  });
+
+  testWithoutContext('LinuxDevice has well known id "linux"', () async {
+    expect(LinuxDevices(
+      fileSystem: MemoryFileSystem.test(),
+      platform: linux,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    ).wellKnownIds, <String>['linux']);
   });
 
   testWithoutContext('LinuxDevice: discoverDevices', () async {

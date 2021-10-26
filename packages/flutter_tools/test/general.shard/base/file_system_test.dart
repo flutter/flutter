@@ -137,7 +137,7 @@ void main() {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FileSystemUtils fsUtils = FileSystemUtils(
         fileSystem: fileSystem,
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
       );
       expect(fsUtils.escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
       expect(fsUtils.escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
@@ -183,4 +183,4 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
 }
-class FakeFile extends Fake implements File {}
+class FakeFile extends Fake implements File { }

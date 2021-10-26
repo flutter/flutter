@@ -29,57 +29,10 @@ import 'routes.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
-/// ```dart
-/// bool shouldPop = true;
-/// @override
-/// Widget build(BuildContext context) {
-///   return WillPopScope(
-///     onWillPop: () async {
-///       return shouldPop;
-///     },
-///     child: Scaffold(
-///       appBar: AppBar(
-///         title: const Text('Flutter WillPopScope demo'),
-///       ),
-///       body: Center(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             OutlinedButton(
-///               child: const Text('Push'),
-///               onPressed: () {
-///                 Navigator.of(context).push<void>(
-///                   MaterialPageRoute<void>(
-///                     builder: (BuildContext context) {
-///                       return const MyStatefulWidget();
-///                     },
-///                   ),
-///                 );
-///               },
-///             ),
-///             OutlinedButton(
-///               child: Text('shouldPop: $shouldPop'),
-///               onPressed: () {
-///                 setState(
-///                   () {
-///                     shouldPop = !shouldPop;
-///                   },
-///                 );
-///               },
-///             ),
-///             const Text('Push to a new screen, then tap on shouldPop '
-///                 'button to toggle its value. Press the back '
-///                 'button in the appBar to check its behaviour '
-///                 'for different values of shouldPop'),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// {@tool dartpad}
 ///
+///
+/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.1.dart **
 /// {@end-tool}
 ///
 /// See also:

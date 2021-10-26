@@ -5,12 +5,20 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+
+import 'constants.dart';
 
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
 final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
-final String dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
+String get dataRoot => testDataRoot ?? _dataRoot;
+String _dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
+
+/// Allows overriding of the [dataRoot] for testing purposes.
+@visibleForTesting
+String? testDataRoot;
 
 /// Converts `FOO_BAR` to `FooBar`.
 String shoutingToUpperCamel(String shouting) {
@@ -221,32 +229,63 @@ void addNameValue(List<String> names, List<int> values, String name, int value) 
   }
 }
 
+/// The information for a line used by [OutputLines].
+class OutputLine<T extends Comparable<Object>> {
+  const OutputLine(this.key, this.value);
+
+  final T key;
+  final String value;
+}
+
 /// A utility class to build join a number of lines in a sorted order.
 ///
 /// Use [add] to add a line and associate it with an index. Use [sortedJoin] to
 /// get the joined string of these lines joined sorting them in the order of the
 /// index.
 class OutputLines<T extends Comparable<Object>> {
-  OutputLines(this.mapName);
+  OutputLines(this.mapName, {this.checkDuplicate = true});
+
+  /// If true, then lines with duplicate keys will be warned and discarded.
+  ///
+  /// Default to true.
+  final bool checkDuplicate;
 
   /// The name for this map.
   ///
   /// Used in warning messages.
   final String mapName;
 
-  final Map<T, String> lines = <T, String>{};
+  final Set<T> keys = <T>{};
+  final List<OutputLine<T>> lines = <OutputLine<T>>[];
 
   void add(T code, String line) {
-    if (lines.containsKey(code)) {
-      print('Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${lines[code]}');
+    if (checkDuplicate) {
+      if (keys.contains(code)) {
+        final OutputLine<T> existing = lines.firstWhere((OutputLine<T> line) => line.key == code);
+        print('Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${existing.value}');
+        return;
+      }
+      keys.add(code);
     }
-    lines[code] = line;
+    lines.add(OutputLine<T>(code, line));
+  }
+
+  String join() {
+    return lines.map((OutputLine<T> line) => line.value).join('\n');
   }
 
   String sortedJoin() {
-    return (lines.entries.toList()
-      ..sort((MapEntry<T, String> a, MapEntry<T, String> b) => a.key.compareTo(b.key)))
-      .map((MapEntry<T, String> entry) => entry.value)
+    return (lines.sublist(0)
+      ..sort((OutputLine<T> a, OutputLine<T> b) => a.key.compareTo(b.key)))
+      .map((OutputLine<T> line) => line.value)
       .join('\n');
   }
+}
+
+int toPlane(int value, int plane) {
+  return (value & kValueMask.value) + (plane & kPlaneMask.value);
+}
+
+int getPlane(int value) {
+  return value & kPlaneMask.value;
 }

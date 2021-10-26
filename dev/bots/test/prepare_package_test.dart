@@ -74,16 +74,16 @@ void main() {
       });
     });
     group('ArchiveCreator for $platformName', () {
-      ArchiveCreator creator;
-      Directory tempDir;
+      late ArchiveCreator creator;
+      late Directory tempDir;
       Directory flutterDir;
       Directory cacheDir;
-      FakeProcessManager processManager;
+      late FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
-      String flutter;
+      late String flutter;
 
-      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String> headers}) {
+      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String>? headers}) {
         return Future<Uint8List>.value(Uint8List(0));
       }
 
@@ -118,7 +118,7 @@ void main() {
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
 
-        processManager.addCommands(convertResults(<String, List<ProcessResult>>{
+        processManager.addCommands(convertResults(<String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
@@ -147,7 +147,7 @@ void main() {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
@@ -197,7 +197,7 @@ void main() {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
@@ -239,7 +239,7 @@ void main() {
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final ProcessResult codesignFailure = ProcessResult(1, 1, '', 'code object is not signed at all');
         final String binPath = path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
@@ -266,7 +266,6 @@ void main() {
           tempDir,
           testRef,
           Branch.dev,
-          strict: true,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -282,14 +281,14 @@ void main() {
             contains('The binary $binPath was not codesigned!'),
           )),
         );
-      }, skip: !platform.isMacOS);
+      }, skip: !platform.isMacOS); // [intended] codesign is only available on macOS
     });
 
     group('ArchivePublisher for $platformName', () {
-      FakeProcessManager processManager;
-      Directory tempDir;
+      late FakeProcessManager processManager;
+      late Directory tempDir;
       final String gsutilCall = platform.isWindows
-          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
           : 'gsutil.py';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
@@ -346,7 +345,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
@@ -442,7 +441,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
@@ -495,7 +494,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
@@ -552,7 +551,7 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -567,10 +566,10 @@ void main() {
   }
 }
 
-List<FakeCommand> convertResults(Map<String, List<ProcessResult>> results) {
+List<FakeCommand> convertResults(Map<String, List<ProcessResult>?> results) {
   final List<FakeCommand> commands = <FakeCommand>[];
   for (final String key in results.keys) {
-    final List<ProcessResult> candidates = results[key];
+    final List<ProcessResult>? candidates = results[key];
     final List<String> args = key.split(' ');
     if (candidates == null) {
       commands.add(FakeCommand(
@@ -581,8 +580,8 @@ List<FakeCommand> convertResults(Map<String, List<ProcessResult>> results) {
         commands.add(FakeCommand(
           command: args,
           exitCode: result.exitCode,
-          stderr: result.stderr?.toString(),
-          stdout: result.stdout?.toString(),
+          stderr: result.stderr.toString(),
+          stdout: result.stdout.toString(),
         ));
       }
     }

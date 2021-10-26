@@ -11,7 +11,6 @@ import 'package:args/args.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart' show required;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
@@ -32,7 +31,7 @@ class PreparePackageException implements Exception {
   PreparePackageException(this.message, [this.result]);
 
   final String message;
-  final ProcessResult result;
+  final ProcessResult? result;
   int get exitCode => result?.exitCode ?? -1;
 
   @override
@@ -41,7 +40,7 @@ class PreparePackageException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr as String ?? '';
+    final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -60,7 +59,6 @@ String getBranchName(Branch branch) {
     case Branch.stable:
       return 'stable';
   }
-  return null;
 }
 
 Branch fromBranchName(String name) {
@@ -81,7 +79,7 @@ Branch fromBranchName(String name) {
 /// properly without dropping any.
 class ProcessRunner {
   ProcessRunner({
-    ProcessManager processManager,
+    ProcessManager? processManager,
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
@@ -102,10 +100,10 @@ class ProcessRunner {
 
   /// Sets the default directory used when `workingDirectory` is not specified
   /// to [runProcess].
-  final Directory defaultWorkingDirectory;
+  final Directory? defaultWorkingDirectory;
 
   /// The environment to run processes with.
-  Map<String, String> environment;
+  late Map<String, String> environment;
 
   /// Run the command and arguments in `commandLine` as a sub-process from
   /// `workingDirectory` if set, or the [defaultWorkingDirectory] if not. Uses
@@ -115,7 +113,7 @@ class ProcessRunner {
   /// command completes with a non-zero exit code.
   Future<String> runProcess(
     List<String> commandLine, {
-    Directory workingDirectory,
+    Directory? workingDirectory,
     bool failOk = false,
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
@@ -125,7 +123,7 @@ class ProcessRunner {
     final List<int> output = <int>[];
     final Completer<void> stdoutComplete = Completer<void>();
     final Completer<void> stderrComplete = Completer<void>();
-    Process process;
+    late Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
       await stdoutComplete.future;
@@ -197,10 +195,10 @@ class ArchiveCreator {
     this.revision,
     this.branch, {
     this.strict = true,
-    ProcessManager processManager,
+    ProcessManager? processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
-    HttpReader httpReader,
+    HttpReader? httpReader,
   })  : assert(revision.length == 40),
         flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
         httpReader = httpReader ?? http.readBytes,
@@ -252,9 +250,9 @@ class ArchiveCreator {
   /// [http.readBytes].
   final HttpReader httpReader;
 
-  File _outputFile;
-  String _version;
-  String _flutter;
+  late File _outputFile;
+  late String _version;
+  late String _flutter;
 
   /// Get the name of the channel as a string.
   String get branchName => getBranchName(branch);
@@ -446,14 +444,14 @@ class ArchiveCreator {
     }
   }
 
-  Future<String> _runFlutter(List<String> args, {Directory workingDirectory}) {
+  Future<String> _runFlutter(List<String> args, {Directory? workingDirectory}) {
     return _processRunner.runProcess(
       <String>[_flutter, ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
     );
   }
 
-  Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
+  Future<String> _runGit(List<String> args, {Directory? workingDirectory}) {
     return _processRunner.runProcess(
       <String>['git', ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
@@ -462,7 +460,7 @@ class ArchiveCreator {
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
-  Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
+  Future<String> _unzipArchive(File archive, {Directory? workingDirectory}) {
     workingDirectory ??= Directory(path.dirname(archive.absolute.path));
     List<String> commandLine;
     if (platform.isWindows) {
@@ -532,7 +530,7 @@ class ArchivePublisher {
     this.version,
     this.outputFile,
     this.dryRun, {
-    ProcessManager processManager,
+    ProcessManager? processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
@@ -662,7 +660,7 @@ class ArchivePublisher {
 
   Future<String> _runGsUtil(
     List<String> args, {
-    Directory workingDirectory,
+    Directory? workingDirectory,
     bool failOk = false,
   }) async {
     if (dryRun) {
@@ -671,7 +669,7 @@ class ArchivePublisher {
     }
     if (platform.isWindows) {
       return _processRunner.runProcess(
-        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--', ...args],
+        <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
         workingDirectory: workingDirectory,
         failOk: failOk,
       );
@@ -689,7 +687,6 @@ class ArchivePublisher {
     try {
       await _runGsUtil(
         <String>['stat', cloudPath],
-        failOk: false,
       );
     } on PreparePackageException {
       // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
@@ -699,14 +696,14 @@ class ArchivePublisher {
   }
 
   Future<String> _cloudCopy({
-    @required String src,
-    @required String dest,
-    int cacheSeconds,
+    required String src,
+    required String dest,
+    int? cacheSeconds,
   }) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);
-    String mimeType;
+    String? mimeType;
     if (dest.endsWith('.tar.xz')) {
       mimeType = 'application/x-gtar';
     }
@@ -739,7 +736,6 @@ Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. Will write a few GiB of data, '
         'so it should have sufficient free space. If a temp_dir is not '
@@ -747,18 +743,15 @@ Future<void> main(List<String> rawArguments) async {
         'removed automatically.',
   );
   argParser.addOption('revision',
-      defaultsTo: null,
       help: 'The Flutter git repo revision to build the '
           'archive with. Must be the full 40-character hash. Required.');
   argParser.addOption(
     'branch',
-    defaultsTo: null,
     allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(
     'output',
-    defaultsTo: null,
     help: 'The path to the directory where the output archive should be '
         'written. If --output is not specified, the archive will be written to '
         "the current directory. If the output directory doesn't exist, it, and "
@@ -766,7 +759,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'publish',
-    defaultsTo: false,
     help: 'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
         'directory: $baseUrl$releaseFolder',
@@ -774,18 +766,15 @@ Future<void> main(List<String> rawArguments) async {
   argParser.addFlag(
     'force',
     abbr: 'f',
-    defaultsTo: false,
     help: 'Overwrite a previously uploaded package.',
   );
   argParser.addFlag(
     'dry_run',
-    defaultsTo: false,
     negatable: false,
     help: 'Prints gsutil commands instead of executing them.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -841,7 +830,7 @@ Future<void> main(List<String> rawArguments) async {
   final Branch branch = fromBranchName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish'] as bool);
   int exitCode = 0;
-  String message;
+  late String message;
   try {
     final String version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();

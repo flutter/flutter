@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -500,6 +498,13 @@ void _validateIosPodfile(String appPath) {
     pluginSymlinks,
     'test_plugin_swift',
     'ios',
+  ));
+
+  // Make sure no Xcode build settings are leaking derived data/build directory into the ios directory.
+  checkDirectoryNotExists(path.join(
+    appPath,
+    'ios',
+    'build',
   ));
 }
 

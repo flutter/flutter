@@ -7,7 +7,7 @@ import 'actions.dart';
 /// An [Intent] to delete a character in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteTextIntent extends Intent{
+class DeleteTextIntent extends Intent {
   /// Creates an instance of DeleteTextIntent.
   const DeleteTextIntent();
 }
@@ -15,7 +15,7 @@ class DeleteTextIntent extends Intent{
 /// An [Intent] to delete a word in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteByWordTextIntent extends Intent{
+class DeleteByWordTextIntent extends Intent {
   /// Creates an instance of DeleteByWordTextIntent.
   const DeleteByWordTextIntent();
 }
@@ -23,7 +23,7 @@ class DeleteByWordTextIntent extends Intent{
 /// An [Intent] to delete a line in the backwards direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteByLineTextIntent extends Intent{
+class DeleteByLineTextIntent extends Intent {
   /// Creates an instance of DeleteByLineTextIntent.
   const DeleteByLineTextIntent();
 }
@@ -31,7 +31,7 @@ class DeleteByLineTextIntent extends Intent{
 /// An [Intent] to delete in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteForwardTextIntent extends Intent{
+class DeleteForwardTextIntent extends Intent {
   /// Creates an instance of DeleteForwardTextIntent.
   const DeleteForwardTextIntent();
 }
@@ -39,7 +39,7 @@ class DeleteForwardTextIntent extends Intent{
 /// An [Intent] to delete a word in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteForwardByWordTextIntent extends Intent{
+class DeleteForwardByWordTextIntent extends Intent {
   /// Creates an instance of DeleteByWordTextIntent.
   const DeleteForwardByWordTextIntent();
 }
@@ -47,7 +47,7 @@ class DeleteForwardByWordTextIntent extends Intent{
 /// An [Intent] to delete a line in the forward direction.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class DeleteForwardByLineTextIntent extends Intent{
+class DeleteForwardByLineTextIntent extends Intent {
   /// Creates an instance of DeleteByLineTextIntent.
   const DeleteForwardByLineTextIntent();
 }
@@ -61,7 +61,7 @@ class DeleteForwardByLineTextIntent extends Intent{
 ///   * [DefaultTextEditingActions], which responds to this [Intent].
 ///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
 /// {@endtemplate}
-class DoNothingAndStopPropagationTextIntent extends Intent{
+class DoNothingAndStopPropagationTextIntent extends Intent {
   /// Creates an instance of DoNothingAndStopPropagationTextIntent.
   const DoNothingAndStopPropagationTextIntent();
 }
@@ -79,7 +79,7 @@ class ExpandSelectionLeftByLineTextIntent extends Intent {
 /// field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExpandSelectionRightByLineTextIntent extends Intent{
+class ExpandSelectionRightByLineTextIntent extends Intent {
   /// Creates an instance of ExpandSelectionRightByLineTextIntent.
   const ExpandSelectionRightByLineTextIntent();
 }
@@ -87,7 +87,7 @@ class ExpandSelectionRightByLineTextIntent extends Intent{
 /// An [Intent] to expand the selection to the end of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExpandSelectionToEndTextIntent extends Intent{
+class ExpandSelectionToEndTextIntent extends Intent {
   /// Creates an instance of ExpandSelectionToEndTextIntent.
   const ExpandSelectionToEndTextIntent();
 }
@@ -95,7 +95,7 @@ class ExpandSelectionToEndTextIntent extends Intent{
 /// An [Intent] to expand the selection to the start of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExpandSelectionToStartTextIntent extends Intent{
+class ExpandSelectionToStartTextIntent extends Intent {
   /// Creates an instance of ExpandSelectionToStartTextIntent.
   const ExpandSelectionToStartTextIntent();
 }
@@ -103,7 +103,7 @@ class ExpandSelectionToStartTextIntent extends Intent{
 /// An [Intent] to extend the selection down by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionDownTextIntent extends Intent{
+class ExtendSelectionDownTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionDownTextIntent.
   const ExtendSelectionDownTextIntent();
 }
@@ -112,7 +112,7 @@ class ExtendSelectionDownTextIntent extends Intent{
 /// line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionLeftByLineTextIntent extends Intent{
+class ExtendSelectionLeftByLineTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionLeftByLineTextIntent.
   const ExtendSelectionLeftByLineTextIntent();
 }
@@ -122,7 +122,7 @@ class ExtendSelectionLeftByLineTextIntent extends Intent{
 /// [TextSelection.baseOffset] would reverse.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionLeftByWordAndStopAtReversalTextIntent extends Intent{
+class ExtendSelectionLeftByWordAndStopAtReversalTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionLeftByWordAndStopAtReversalTextIntent.
   const ExtendSelectionLeftByWordAndStopAtReversalTextIntent();
 }
@@ -130,7 +130,7 @@ class ExtendSelectionLeftByWordAndStopAtReversalTextIntent extends Intent{
 /// An [Intent] to extend the selection left past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionLeftByWordTextIntent extends Intent{
+class ExtendSelectionLeftByWordTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionLeftByWordTextIntent.
   const ExtendSelectionLeftByWordTextIntent();
 }
@@ -139,7 +139,7 @@ class ExtendSelectionLeftByWordTextIntent extends Intent{
 /// platform for the shift + arrow-left key event.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionLeftTextIntent extends Intent{
+class ExtendSelectionLeftTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionLeftTextIntent.
   const ExtendSelectionLeftTextIntent();
 }
@@ -148,7 +148,7 @@ class ExtendSelectionLeftTextIntent extends Intent{
 /// line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionRightByLineTextIntent extends Intent{
+class ExtendSelectionRightByLineTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionRightByLineTextIntent.
   const ExtendSelectionRightByLineTextIntent();
 }
@@ -158,7 +158,7 @@ class ExtendSelectionRightByLineTextIntent extends Intent{
 /// [TextSelection.baseOffset] would reverse.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionRightByWordAndStopAtReversalTextIntent extends Intent{
+class ExtendSelectionRightByWordAndStopAtReversalTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionRightByWordAndStopAtReversalTextIntent.
   const ExtendSelectionRightByWordAndStopAtReversalTextIntent();
 }
@@ -166,7 +166,7 @@ class ExtendSelectionRightByWordAndStopAtReversalTextIntent extends Intent{
 /// An [Intent] to extend the selection right past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionRightByWordTextIntent extends Intent{
+class ExtendSelectionRightByWordTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionRightByWordTextIntent.
   const ExtendSelectionRightByWordTextIntent();
 }
@@ -174,7 +174,7 @@ class ExtendSelectionRightByWordTextIntent extends Intent{
 /// An [Intent] to extend the selection right by one character.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionRightTextIntent extends Intent{
+class ExtendSelectionRightTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionRightTextIntent.
   const ExtendSelectionRightTextIntent();
 }
@@ -182,7 +182,7 @@ class ExtendSelectionRightTextIntent extends Intent{
 /// An [Intent] to extend the selection up by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ExtendSelectionUpTextIntent extends Intent{
+class ExtendSelectionUpTextIntent extends Intent {
   /// Creates an instance of ExtendSelectionUpTextIntent.
   const ExtendSelectionUpTextIntent();
 }
@@ -190,7 +190,7 @@ class ExtendSelectionUpTextIntent extends Intent{
 /// An [Intent] to move the selection down by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionDownTextIntent extends Intent{
+class MoveSelectionDownTextIntent extends Intent {
   /// Creates an instance of MoveSelectionDownTextIntent.
   const MoveSelectionDownTextIntent();
 }
@@ -198,7 +198,7 @@ class MoveSelectionDownTextIntent extends Intent{
 /// An [Intent] to move the selection left by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionLeftByLineTextIntent extends Intent{
+class MoveSelectionLeftByLineTextIntent extends Intent {
   /// Creates an instance of MoveSelectionLeftByLineTextIntent.
   const MoveSelectionLeftByLineTextIntent();
 }
@@ -206,7 +206,7 @@ class MoveSelectionLeftByLineTextIntent extends Intent{
 /// An [Intent] to move the selection left past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionLeftByWordTextIntent extends Intent{
+class MoveSelectionLeftByWordTextIntent extends Intent {
   /// Creates an instance of MoveSelectionLeftByWordTextIntent.
   const MoveSelectionLeftByWordTextIntent();
 }
@@ -214,7 +214,7 @@ class MoveSelectionLeftByWordTextIntent extends Intent{
 /// An [Intent] to move the selection left by one character.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionLeftTextIntent extends Intent{
+class MoveSelectionLeftTextIntent extends Intent {
   /// Creates an instance of MoveSelectionLeftTextIntent.
   const MoveSelectionLeftTextIntent();
 }
@@ -222,7 +222,7 @@ class MoveSelectionLeftTextIntent extends Intent{
 /// An [Intent] to move the selection to the start of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionToStartTextIntent extends Intent{
+class MoveSelectionToStartTextIntent extends Intent {
   /// Creates an instance of MoveSelectionToStartTextIntent.
   const MoveSelectionToStartTextIntent();
 }
@@ -230,7 +230,7 @@ class MoveSelectionToStartTextIntent extends Intent{
 /// An [Intent] to move the selection right by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionRightByLineTextIntent extends Intent{
+class MoveSelectionRightByLineTextIntent extends Intent {
   /// Creates an instance of MoveSelectionRightByLineTextIntent.
   const MoveSelectionRightByLineTextIntent();
 }
@@ -238,7 +238,7 @@ class MoveSelectionRightByLineTextIntent extends Intent{
 /// An [Intent] to move the selection right past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionRightByWordTextIntent extends Intent{
+class MoveSelectionRightByWordTextIntent extends Intent {
   /// Creates an instance of MoveSelectionRightByWordTextIntent.
   const MoveSelectionRightByWordTextIntent();
 }
@@ -246,7 +246,7 @@ class MoveSelectionRightByWordTextIntent extends Intent{
 /// An [Intent] to move the selection right by one character.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionRightTextIntent extends Intent{
+class MoveSelectionRightTextIntent extends Intent {
   /// Creates an instance of MoveSelectionRightTextIntent.
   const MoveSelectionRightTextIntent();
 }
@@ -254,7 +254,7 @@ class MoveSelectionRightTextIntent extends Intent{
 /// An [Intent] to move the selection to the end of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionToEndTextIntent extends Intent{
+class MoveSelectionToEndTextIntent extends Intent {
   /// Creates an instance of MoveSelectionToEndTextIntent.
   const MoveSelectionToEndTextIntent();
 }
@@ -262,7 +262,39 @@ class MoveSelectionToEndTextIntent extends Intent{
 /// An [Intent] to move the selection up by one character.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MoveSelectionUpTextIntent extends Intent{
+class MoveSelectionUpTextIntent extends Intent {
   /// Creates an instance of MoveSelectionUpTextIntent.
   const MoveSelectionUpTextIntent();
+}
+
+/// An [Intent] to select everything in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class SelectAllTextIntent extends Intent {
+  /// Creates an instance of SelectAllTextIntent.
+  const SelectAllTextIntent();
+}
+
+/// An [Intent] to copy selection in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class CopySelectionTextIntent extends Intent {
+  /// Creates an instance of CopyTextIntent.
+  const CopySelectionTextIntent();
+}
+
+/// An [Intent] to cut selection in the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class CutSelectionTextIntent extends Intent {
+  /// Creates an instance of CutTextIntent.
+  const CutSelectionTextIntent();
+}
+
+/// An [Intent] to paste text from [Clipboard] to the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class PasteTextIntent extends Intent {
+  /// Creates an instance of PasteTextIntent.
+  const PasteTextIntent();
 }

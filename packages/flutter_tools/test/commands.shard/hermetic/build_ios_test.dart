@@ -4,11 +4,13 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -40,7 +42,6 @@ final Platform macosPlatform = FakePlatform(
   }
 );
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
@@ -110,10 +111,15 @@ void main() {
         '-scheme', 'Runner',
         'BUILD_DIR=/build/ios',
         '-sdk',
-        if (simulator)
-          'iphonesimulator'
-        else
+        if (simulator) ...<String>[
+          'iphonesimulator',
+          '-destination',
+          'generic/platform=iOS Simulator',
+        ] else ...<String>[
           'iphoneos',
+          '-destination',
+          'generic/platform=iOS',
+        ],
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
@@ -160,9 +166,10 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
+    final bool supported = BuildIOSCommand(verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
-    ), throwsToolExit());
+    ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,

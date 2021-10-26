@@ -142,10 +142,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }
 
   @override
+  bool get supported => _platform.isMacOS;
+
+  @override
   Future<void> validateCommand() async {
     await super.validateCommand();
     _project = FlutterProject.current();
-    if (!_platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
@@ -176,7 +179,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     for (final BuildInfo buildInfo in buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
+      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -286,7 +289,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.platform              = :ios, '8.0'
+  s.platform              = :ios, '9.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -356,7 +359,7 @@ end
           projectDir: globals.fs.currentDirectory,
           outputDir: outputBuildDirectory,
           buildDir: _project.dartTool.childDirectory('flutter_build'),
-          cacheDir: null,
+          cacheDir: globals.cache.getRoot(),
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
@@ -443,7 +446,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = toTitleCase(getNameForBuildMode(BuildMode.debug));
+      final String simulatorConfiguration = sentenceCase(getNameForBuildMode(BuildMode.debug));
       pluginsBuildCommand = <String>[
         ...globals.xcode.xcrunCommand(),
         'xcodebuild',
@@ -454,7 +457,6 @@ end
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
         'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-        'ARCHS=x86_64',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];

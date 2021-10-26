@@ -21,6 +21,11 @@ import 'framework.dart';
 /// than [Widget] as the type of their `child` property.
 ///
 /// Use [PreferredSize] to give a preferred size to an arbitrary widget.
+// (We ignore `avoid_implementing_value_types` here because the superclass
+// doesn't really implement `operator ==`, it just overrides it to _prevent_ it
+// from being implemented, which is the exact opposite of the spirit of the
+// `avoid_implementing_value_types` lint.)
+// ignore: avoid_implementing_value_types
 abstract class PreferredSizeWidget implements Widget {
   /// The size this widget would prefer if it were otherwise unconstrained.
   ///
@@ -45,75 +50,13 @@ abstract class PreferredSizeWidget implements Widget {
 /// Widgets like [AppBar] implement a [PreferredSizeWidget], so that this
 /// [PreferredSize] widget is not necessary for them.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// This sample shows a custom widget, similar to an [AppBar], which uses a
 /// [PreferredSize] widget, with its height set to 80 logical pixels.
 /// Changing the [PreferredSize] can be used to change the height
 /// of the custom app bar.
 ///
-/// ```dart preamble
-/// class AppBarContent extends StatelessWidget {
-///   const AppBarContent({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Column(
-///       mainAxisAlignment: MainAxisAlignment.end,
-///       children: <Widget>[
-///         Padding(
-///           padding: const EdgeInsets.symmetric(horizontal: 10),
-///           child: Row(
-///             children: <Widget>[
-///               const Text(
-///                 'PreferredSize Sample',
-///                 style: TextStyle(color: Colors.white),
-///               ),
-///               const Spacer(),
-///               IconButton(
-///                 icon: const Icon(
-///                   Icons.search,
-///                   size: 20,
-///                 ),
-///                 color: Colors.white,
-///                 onPressed: () {},
-///               ),
-///               IconButton(
-///                 icon: const Icon(
-///                   Icons.more_vert,
-///                   size: 20,
-///                 ),
-///                 color: Colors.white,
-///                 onPressed: () {},
-///               ),
-///             ],
-///           ),
-///         ),
-///       ],
-///     );
-///   }
-/// }
-/// ```
-///```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: PreferredSize(
-///       preferredSize: const Size.fromHeight(80.0),
-///       child: Container(
-///         decoration: const BoxDecoration(
-///           gradient: LinearGradient(
-///             colors: <Color>[Colors.blue, Colors.pink],
-///           ),
-///         ),
-///         child: const AppBarContent(),
-///       ),
-///     ),
-///     body: const Center(
-///       child: Text('Content'),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/preferred_size/preferred_size.0.dart **
 /// {@end-tool}
 ///
 /// See also:

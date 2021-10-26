@@ -58,7 +58,6 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
   @visibleForTesting
   Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
     _logger.printTrace('Checking for advertised Dart observatories...');
@@ -205,7 +204,20 @@ class MDnsObservatoryDiscovery {
           'See https://github.com/flutter/flutter/issues/46698 for details.'
         );
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.darwin:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
+      case TargetPlatform.windows_x64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
         break;
     }

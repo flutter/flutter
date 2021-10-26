@@ -96,7 +96,7 @@ class MacOSDevice extends DesktopDevice {
       'open', package.applicationBundle(buildMode),
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
-        print('Failed to foreground app; open returned ${result.exitCode}');
+        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
   }
@@ -148,4 +148,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
+
+  @override
+  List<String> get wellKnownIds => const <String>['macos'];
 }

@@ -6,8 +6,8 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../project.dart';
 import '../../reporting/reporting.dart';
+import '../../xcode_project.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
 // This caused issues switching between a real device and simulator due to architecture mismatch.

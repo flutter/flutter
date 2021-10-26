@@ -27,9 +27,7 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
-);
+final FakePlatform linux = FakePlatform();
 
 void main() {
   testWithoutContext('default configuration', () async {
@@ -62,8 +60,8 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['release/executable'],
-          stdout: 'Hello World',
-          stderr: 'Goodnight, Moon',
+          stdout: 'Hello World\n',
+          stderr: 'Goodnight, Moon\n',
           completer: completer,
         )
       ]),
@@ -82,7 +80,7 @@ void main() {
 
     final DeviceLogReader logReader = device.getLogReader(app: package);
 
-    expect(logReader.logLines, emits('Hello WorldGoodnight, Moon'));
+    expect(logReader.logLines, emitsInAnyOrder(<String>['Hello World', 'Goodnight, Moon']));
     completer.complete();
   });
 
@@ -108,7 +106,7 @@ void main() {
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(isMacOSEnabled: false),
+        featureFlags: TestFeatureFlags(),
         platform: macOS,
       ),
     );
@@ -130,6 +128,22 @@ void main() {
     );
 
     expect(await macOSDevices.devices, hasLength(1));
+  });
+
+  testWithoutContext('has a well known device id macos', () async {
+    final MacOSDevices macOSDevices = MacOSDevices(
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      macOSWorkflow: MacOSWorkflow(
+        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+        platform: macOS,
+      ),
+    );
+
+    expect(macOSDevices.wellKnownIds, <String>['macos']);
   });
 
   testWithoutContext('can discover devices with a provided timeout', () async {

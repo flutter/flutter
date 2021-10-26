@@ -123,6 +123,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      'implementation-tests',
+      help:
+          'Include implementation tests that verify the template functions correctly. '
+          'This is only intended to enable testing of the tool itself.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -144,6 +151,7 @@ abstract class CreateBase extends FlutterCommand {
   void addPlatformsOptions({String customHelp}) {
     argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
+      aliases: <String>[ 'platform' ],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
         if (featureFlags.isWindowsUwpEnabled)
@@ -279,7 +287,7 @@ abstract class CreateBase extends FlutterCommand {
 
     final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
-    switch (type) {
+    switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
       case FileSystemEntityType.file:
         // Do not overwrite files.
         throwToolExit("Invalid project name: '$projectDirPath' - file exists.",
@@ -290,7 +298,9 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.",
             exitCode: 2);
         break;
-      default:
+      case FileSystemEntityType.directory:
+      case FileSystemEntityType.notFound:
+        break;
     }
   }
 
@@ -307,6 +317,7 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
+    assert(projectName != null);
     return projectName;
   }
 
@@ -315,8 +326,10 @@ abstract class CreateBase extends FlutterCommand {
   Map<String, Object> createTemplateContext({
     String organization,
     String projectName,
+    String titleCaseProjectName,
     String projectDescription,
     String androidLanguage,
+    String iosDevelopmentTeam,
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
@@ -328,6 +341,7 @@ abstract class CreateBase extends FlutterCommand {
     bool macos = false,
     bool windows = false,
     bool windowsUwp = false,
+    bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -349,6 +363,7 @@ abstract class CreateBase extends FlutterCommand {
     return <String, Object>{
       'organization': organization,
       'projectName': projectName,
+      'titleCaseProjectName': titleCaseProjectName,
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
@@ -362,12 +377,12 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
-      // TODO(jonahwilliams): update after google3 uuid is updated.
-      // ignore: prefer_const_constructors
-      'pluginProjectUUID': Uuid().v4().toUpperCase(),
+      'pluginProjectUUID': const Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+      'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
       'ios': ios,
@@ -379,6 +394,7 @@ abstract class CreateBase extends FlutterCommand {
       'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
+      'implementationTests': implementationTests,
     };
   }
 
@@ -400,16 +416,36 @@ abstract class CreateBase extends FlutterCommand {
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
+  /// Merges named templates into a single template, output to `directory`.
+  ///
+  /// `names` should match directory names under flutter_tools/template/.
+  ///
+  /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
+  @protected
+  Future<int> renderMerged(
+      List<String> names, Directory directory, Map<String, Object> context,
+      {bool overwrite = false}) async {
+    final Template template = await Template.merged(
+      names,
+      directory,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      templateManifest: _templateManifest,
+    );
+    return template.render(directory, context, overwriteExisting: overwrite);
+  }
+
   /// Generate application project in the `directory` using `templateContext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      Directory directory, Map<String, Object> templateContext,
+      String templateName, Directory directory, Map<String, Object> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderTemplate(
-      'app',
+    generatedCount += await renderMerged(
+      <String>[templateName, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
@@ -424,7 +460,9 @@ abstract class CreateBase extends FlutterCommand {
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
-        generateSyntheticPackage: false,
+        // For templates that use the l10n localization tooling, make sure
+        // importing the generated package works right after `flutter create`.
+        generateSyntheticPackage: true,
       );
 
       await project.ensureReadyForPlatformSpecificTooling(

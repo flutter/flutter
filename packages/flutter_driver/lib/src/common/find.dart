@@ -178,13 +178,14 @@ class BySemanticsLabel extends SerializableFinder {
   }
 }
 
-/// A Flutter Driver finder that finds widgets by [text] inside a [Text] or
-/// [EditableText] widget.
+/// A Flutter Driver finder that finds widgets by [text] inside a
+/// [widgets.Text] or [widgets.EditableText] widget.
 class ByText extends SerializableFinder {
   /// Creates a text finder given the text.
   const ByText(this.text);
 
-  /// The text that appears inside the [Text] or [EditableText] widget.
+  /// The text that appears inside the [widgets.Text] or [widgets.EditableText]
+  /// widget.
   final String text;
 
   @override

@@ -63,6 +63,8 @@ void main() {
 
   test('no unauthorized imports of dart:io', () {
     final List<String> allowedPaths = <String>[
+      // This is a standalone script invoked by xcode, not part of the tool
+      fileSystem.path.join(flutterTools, 'bin', 'xcode_backend.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),

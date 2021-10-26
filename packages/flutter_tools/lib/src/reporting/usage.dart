@@ -369,35 +369,35 @@ class LogToFileAnalytics extends AnalyticsMock {
     Map<String, String>? parameters,
   }) {
     if (!enabled) {
-      return Future<void>.value(null);
+      return Future<void>.value();
     }
     parameters ??= <String, String>{};
     parameters['viewName'] = viewName;
     parameters.addAll(_sessionValues);
     _sendController.add(parameters);
     logFile.writeAsStringSync('screenView $parameters\n', mode: FileMode.append);
-    return Future<void>.value(null);
+    return Future<void>.value();
   }
 
   @override
   Future<void> sendEvent(String category, String action,
       {String? label, int? value, Map<String, String>? parameters}) {
     if (!enabled) {
-      return Future<void>.value(null);
+      return Future<void>.value();
     }
     parameters ??= <String, String>{};
     parameters['category'] = category;
     parameters['action'] = action;
     _sendController.add(parameters);
     logFile.writeAsStringSync('event $parameters\n', mode: FileMode.append);
-    return Future<void>.value(null);
+    return Future<void>.value();
   }
 
   @override
   Future<void> sendTiming(String variableName, int time,
       {String? category, String? label}) {
     if (!enabled) {
-      return Future<void>.value(null);
+      return Future<void>.value();
     }
     final Map<String, String> parameters = <String, String>{
       'variableName': variableName,
@@ -407,7 +407,7 @@ class LogToFileAnalytics extends AnalyticsMock {
     };
     _sendController.add(parameters);
     logFile.writeAsStringSync('timing $parameters\n', mode: FileMode.append);
-    return Future<void>.value(null);
+    return Future<void>.value();
   }
 
   @override
@@ -486,7 +486,7 @@ class TestUsageCommand {
   }
 
   @override
-  int get hashCode => command.hashCode ^ parameters.hashCode;
+  int get hashCode => Object.hash(command, parameters);
 
   @override
   String toString() => 'TestUsageCommand($command, parameters:$parameters)';
@@ -514,11 +514,7 @@ class TestUsageEvent {
   }
 
   @override
-  int get hashCode => category.hashCode ^
-    parameter.hashCode ^
-    label.hashCode ^
-    value.hashCode ^
-    parameters.hashCode;
+  int get hashCode => Object.hash(category, parameter, label, value, parameters);
 
   @override
   String toString() => 'TestUsageEvent($category, $parameter, label:$label, value:$value, parameters:$parameters)';
@@ -544,10 +540,7 @@ class TestTimingEvent {
   }
 
   @override
-  int get hashCode => category.hashCode ^
-    variableName.hashCode ^
-    duration.hashCode ^
-    label.hashCode;
+  int get hashCode => Object.hash(category, variableName, duration, label);
 
   @override
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';

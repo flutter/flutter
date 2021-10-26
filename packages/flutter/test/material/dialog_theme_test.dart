@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,7 +51,7 @@ void main() {
     const DialogTheme(
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
-      shape: null,
+      alignment: Alignment.bottomLeft,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
     ).debugFillProperties(builder);
@@ -57,6 +61,7 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
+      'alignment: Alignment.bottomLeft',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
@@ -113,6 +118,47 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Custom dialog alignment', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 40.0);
+    expect(bottomLeft.dy, 576.0);
+  });
+
+  testWidgets('Dialog alignment takes priority over theme', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      actions: <Widget>[ ],
+      alignment: Alignment.topRight,
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
+    );
+    expect(bottomLeft.dx, 480.0);
+    expect(bottomLeft.dy, 104.0);
   });
 
   testWidgets('Custom dialog shape matches golden', (WidgetTester tester) async {

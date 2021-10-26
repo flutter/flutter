@@ -59,4 +59,20 @@ class Clipboard {
       return null;
     return ClipboardData(text: result['text'] as String?);
   }
+
+  /// Returns a future that resolves to true iff the clipboard contains string
+  /// data.
+  ///
+  /// See also:
+  ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
+  static Future<bool> hasStrings() async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
+      'Clipboard.hasStrings',
+      Clipboard.kTextPlain,
+    );
+    if (result == null) {
+      return false;
+    }
+    return result['value'] as bool;
+  }
 }

@@ -46,6 +46,7 @@ class FlutterDriverFactory {
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
+        logger: _logger,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
       );
@@ -224,9 +225,9 @@ class FlutterDriverService extends DriverService {
       try {
         await device.dds.startDartDevelopmentService(
           uri,
-          debuggingOptions.ddsPort,
-          ipv6,
-          debuggingOptions.disableServiceAuthCodes,
+          hostPort: debuggingOptions.ddsPort,
+          ipv6: ipv6,
+          disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
           logger: _logger,
         );
         _vmServiceUri = device.dds.uri.toString();
@@ -261,7 +262,7 @@ class FlutterDriverService extends DriverService {
     if (profileMemory != null) {
       unawaited(_devtoolsLauncher.launch(
         Uri.parse(_vmServiceUri),
-        additionalArguments: <String>['--profile-memory=$profileMemory'],
+        additionalArguments: <String>['--record-memory-profile=$profileMemory'],
       ));
       // When profiling memory the original launch future will never complete.
       await _devtoolsLauncher.processStart;

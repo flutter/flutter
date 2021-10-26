@@ -35,7 +35,7 @@ import 'theme_data.dart';
 /// ```dart
 /// ElevatedButton(
 ///   style: ButtonStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color>(
+///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
 ///       (Set<MaterialState> states) {
 ///         if (states.contains(MaterialState.pressed))
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
@@ -44,7 +44,7 @@ import 'theme_data.dart';
 ///     ),
 ///   ),
 /// )
-///```
+/// ```
 ///
 /// In this case the background color for all other button states would fallback
 /// to the ElevatedButton’s default values. To unconditionally set the button's
@@ -56,7 +56,7 @@ import 'theme_data.dart';
 ///     backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
 ///   ),
 /// )
-///```
+/// ```
 ///
 /// Configuring a ButtonStyle directly makes it possible to very
 /// precisely control the button’s visual attributes for all states.
@@ -77,7 +77,7 @@ import 'theme_data.dart';
 /// TextButton(
 ///   style: TextButton.styleFrom(primary: Colors.green),
 /// )
-///```
+/// ```
 ///
 /// To configure all of the application's text buttons in the same
 /// way, specify the overall theme's `textButtonTheme`:
@@ -90,7 +90,7 @@ import 'theme_data.dart';
 ///   ),
 ///   home: MyAppHome(),
 /// )
-///```
+/// ```
 /// See also:
 ///
 ///  * [TextButtonTheme], the theme for [TextButton]s.

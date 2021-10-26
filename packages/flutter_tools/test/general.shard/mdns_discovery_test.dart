@@ -261,7 +261,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     InternetAddress mDnsAddress,
   }) async {
     if (osErrorOnStart) {
-      throw const OSError('Operation not suppoted on socket', 102);
+      throw const OSError('Operation not supported on socket', 102);
     }
   }
 
@@ -288,6 +288,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   void stop() {}
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

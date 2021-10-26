@@ -142,7 +142,7 @@ import 'text_style.dart';
 ///     fontSize: 30,
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -183,7 +183,7 @@ import 'text_style.dart';
 ///     fontFamily: 'Roboto',
 ///     height: 1.5,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -226,7 +226,7 @@ import 'text_style.dart';
 ///     height: 1,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -282,7 +282,7 @@ import 'text_style.dart';
 ///     fontSize: 14,
 ///     forceStrutHeight: true,
 ///   ),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -616,7 +616,7 @@ class StrutStyle with Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);

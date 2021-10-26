@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -19,14 +17,14 @@ import 'package:vm_service/vm_service_io.dart';
 
 void main() {
   task(() async {
-    int vmServicePort;
+    int? vmServicePort;
 
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
-      bool ok;
+      late bool ok;
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -43,7 +41,7 @@ void main() {
             print('service protocol connection available at port $vmServicePort');
             print('run: ready!');
             ready.complete();
-            ok ??= true;
+            ok = true;
           }
         }
       });
@@ -60,7 +58,7 @@ void main() {
 
       final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
-      final IsolateRef isolate = vm.isolates.first;
+      final IsolateRef isolate = vm.isolates!.first;
 
       final StreamController<Event> frameEventsController = StreamController<Event>();
       final StreamController<Event> navigationEventsController = StreamController<Event>();
@@ -90,17 +88,17 @@ void main() {
 
       // validate the fields
       // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
-      print(event.extensionData.data);
-      expect(event.extensionData.data['number'] is int);
-      expect((event.extensionData.data['number'] as int) >= 0);
-      expect(event.extensionData.data['startTime'] is int);
-      expect((event.extensionData.data['startTime'] as int) >= 0);
-      expect(event.extensionData.data['elapsed'] is int);
-      expect((event.extensionData.data['elapsed'] as int) >= 0);
-      expect(event.extensionData.data['build'] is int);
-      expect((event.extensionData.data['build'] as int) >= 0);
-      expect(event.extensionData.data['raster'] is int);
-      expect((event.extensionData.data['raster'] as int) >= 0);
+      print(event.extensionData!.data);
+      expect(event.extensionData!.data['number'] is int);
+      expect((event.extensionData!.data['number'] as int) >= 0);
+      expect(event.extensionData!.data['startTime'] is int);
+      expect((event.extensionData!.data['startTime'] as int) >= 0);
+      expect(event.extensionData!.data['elapsed'] is int);
+      expect((event.extensionData!.data['elapsed'] as int) >= 0);
+      expect(event.extensionData!.data['build'] is int);
+      expect((event.extensionData!.data['build'] as int) >= 0);
+      expect(event.extensionData!.data['raster'] is int);
+      expect((event.extensionData!.data['raster'] as int) >= 0);
 
       final Future<Event> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
@@ -108,8 +106,8 @@ void main() {
 
       final Event navigationEvent = await navigationFuture;
       // validate the fields
-      expect(navigationEvent.extensionData.data['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route = navigationEvent.extensionData.data['route'] as Map<dynamic, dynamic>;
+      expect(navigationEvent.extensionData!.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.extensionData!.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
       final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;

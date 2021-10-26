@@ -228,7 +228,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return value.join('');
+    return value.join();
   }
 }
 
@@ -533,7 +533,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// dump this error to the console.
   ///
   /// If this is true, then the default error handler would only dump this error
-  /// to the console in checked mode. In release mode, the error is ignored.
+  /// to the console in debug mode. In release mode, the error is ignored.
   ///
   /// This is used by certain exception handlers that catch errors that could be
   /// triggered by environmental conditions (as opposed to logic errors). For
@@ -867,7 +867,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
-  /// For example, you could report all errors to your server.
+  /// For example, you could report all errors to your server. Consider calling
+  /// [presentError] from your custom error handler in order to see the logs in
+  /// the console as well.
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
@@ -877,6 +879,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
@@ -950,7 +957,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     assert(details.exception != null);
     bool isInDebugMode = false;
     assert(() {
-      // In checked mode, we ignore the "silent" flag.
+      // In debug mode, we ignore the "silent" flag.
       isInDebugMode = true;
       return true;
     }());
@@ -962,7 +969,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       if (isInDebugMode) {
         debugPrint(
           TextTreeRenderer(
-            wrapWidth: wrapWidth,
             wrapWidthProperties: wrapWidth,
             maxDescendentsTruncatableNode: 5,
           ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
@@ -1035,7 +1041,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         index -= 1;
       }
     }
-    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null, growable: false);
+    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null);
     for (final StackFilter filter in _stackFilters) {
       filter.filter(parsedFrames, reasons);
     }
@@ -1237,7 +1243,7 @@ class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
   @override
   DiagnosticPropertiesBuilder? get builder {
     final DiagnosticPropertiesBuilder? builder = super.builder;
-    if (builder == null){
+    if (builder == null) {
       return null;
     }
     Iterable<DiagnosticsNode> properties = builder.properties;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -242,13 +241,10 @@ void main() {
         isSemanticBoundary: true,
         child: TestRender(
           hasLongPressAction: true,
-          isSemanticBoundary: false,
           child: middle = TestRender(
             hasScrollLeftAction: true,
-            isSemanticBoundary: false,
             child: TestRender(
               hasScrollRightAction: true,
-              isSemanticBoundary: false,
               child: TestRender(
                 hasScrollUpAction: true,
                 isSemanticBoundary: true,
@@ -293,7 +289,7 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      root.toStringDeep(),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -379,7 +375,7 @@ void main() {
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
     );
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      root.toStringDeep(),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -434,7 +430,7 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      rootComplex.toStringDeep(),
       'SemanticsNode#7\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -556,7 +552,7 @@ void main() {
     final SemanticsNode allProperties = SemanticsNode()
       ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
-      ..updateWith(config: config, childrenInInversePaintOrder: null);
+      ..updateWith(config: config);
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(

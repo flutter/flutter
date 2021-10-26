@@ -485,7 +485,7 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius?,
+      borderRadius: _decoration.borderRadius?.resolve(textDirection),
       textDirection: configuration.textDirection,
     );
   }

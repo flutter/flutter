@@ -6,6 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Only check the initial lines of the message, since the message walks the
+// entire widget tree back, and any changes to the widget tree break these
+// tests if we check the entire message.
+void _expectStartsWith(List<String?> actual, List<String?> matcher) {
+  expect(actual.sublist(0, matcher.length), equals(matcher));
+}
+
 void main() {
   final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
 
@@ -14,8 +21,9 @@ void main() {
 
     int invocations = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
           child: GestureDetector(
             onTap: () {
               invocations++;
@@ -42,39 +50,87 @@ void main() {
     await tester.pump();
     expect(invocations, 0);
 
-    expect(printedMessages, equals('''
+    _expectStartsWith(printedMessages, '''
 Some possible finders for the widgets at Offset(400.0, 300.0):
   find.text('Test')
-  find.widgetWithText(RawGestureDetector, 'Test')
-  find.byType(GestureDetector)
-  find.byType(Center)
-  find.widgetWithText(IgnorePointer, 'Test')
-  find.byType(FadeTransition)
-  find.byType(FractionalTranslation)
-  find.byType(SlideTransition)
-  find.widgetWithText(PrimaryScrollController, 'Test')
-  find.widgetWithText(PageStorage, 'Test')
-  find.widgetWithText(Offstage, 'Test')
-'''.trim().split('\n')));
+'''.trim().split('\n'));
     printedMessages.clear();
 
     await binding.collectDebugPrints(printedMessages, () async {
       await tester.tapAt(const Offset(1, 1));
     });
     expect(printedMessages, equals('''
-Some possible finders for the widgets at Offset(1.0, 1.0):
-  find.byType(MouseRegion)
-  find.byType(ExcludeSemantics)
-  find.byType(BlockSemantics)
-  find.byType(ModalBarrier)
-  find.byType(Overlay)
+No widgets found at Offset(1.0, 1.0).
 '''.trim().split('\n')));
+  });
+
+  testWidgets('Should print message on pointer events with setSurfaceSize', (WidgetTester tester) async {
+    final List<String?> printedMessages = <String?>[];
+
+    int invocations = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child:GestureDetector(
+            onTap: () {
+              invocations++;
+            },
+            child: const Text('Test'),
+          ),
+        ),
+      ),
+    );
+
+    final Size originalSize = tester.binding.createViewConfiguration().size;
+    await tester.binding.setSurfaceSize(const Size(2000, 1800));
+    try {
+      await tester.pump();
+
+      final Offset widgetCenter = tester.getRect(find.byType(Text)).center;
+      expect(widgetCenter.dx, 1000);
+      expect(widgetCenter.dy, 900);
+
+      await binding.collectDebugPrints(printedMessages, () async {
+        await tester.tap(find.byType(Text));
+      });
+      await tester.pump();
+      expect(invocations, 0);
+
+      _expectStartsWith(printedMessages, '''
+Some possible finders for the widgets at Offset(1000.0, 900.0):
+  find.text('Test')
+'''.trim().split('\n'));
+      printedMessages.clear();
+
+      await binding.collectDebugPrints(printedMessages, () async {
+        await tester.tapAt(const Offset(1, 1));
+      });
+      expect(printedMessages, equals('''
+No widgets found at Offset(1.0, 1.0).
+'''.trim().split('\n')));
+    } finally {
+      await tester.binding.setSurfaceSize(originalSize);
+    }
   });
 }
 
 class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   @override
-  TestBindingEventSource get pointerEventSource => TestBindingEventSource.device;
+  void handlePointerEventForSource(
+    PointerEvent event, {
+    TestBindingEventSource source = TestBindingEventSource.device,
+  }) {
+    // In this test we use `WidgetTester.tap` to simulate real device touches.
+    // `WidgetTester.tap` sends events in the local coordinate system, while
+    // real devices touches sends event in the global coordinate system.
+    // See the documentation of [handlePointerEventForSource] for details.
+    if (source == TestBindingEventSource.test) {
+      final PointerEvent globalEvent = event.copyWith(position: localToGlobal(event.position));
+      return super.handlePointerEventForSource(globalEvent);
+    }
+    return super.handlePointerEventForSource(event, source: source);
+  }
 
   List<String?>? _storeDebugPrints;
 

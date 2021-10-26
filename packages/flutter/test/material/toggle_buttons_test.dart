@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -616,7 +620,6 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
-            onPressed: null,
             children: <Widget>[
               Row(children: const <Widget>[
                 Text('First child'),
@@ -663,6 +666,124 @@ void main() {
     ));
     expect(material.color, customFillColor);
     expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    final ThemeData theme = ThemeData();
+    const Color selectedFillColor = Colors.yellow;
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
+  });
+
+  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    const Color selectedFillColor = Colors.orange;
+    const Color defaultFillColor = Colors.blue;
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedFillColor;
+      }
+      return defaultFillColor;
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    // disabled
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, defaultFillColor);
   });
 
   testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
@@ -1368,7 +1489,6 @@ void main() {
           child: boilerplate(
             child: ToggleButtons(
               direction: Axis.vertical,
-              verticalDirection: VerticalDirection.down,
               isSelected: const <bool>[false, true, false],
               onPressed: (int index) {},
               children: const <Widget>[

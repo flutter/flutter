@@ -55,7 +55,7 @@ void main() {
         },
         <String, dynamic>{
           'name': 'listener',
-          'args': <String, dynamic>{'parentId': '1', 'isolateId': isolateId}
+          'args': <String, dynamic>{'isolateId': isolateId}
         },
         <String, dynamic>{
           'name': 'ImageCache.clear',
@@ -77,7 +77,7 @@ void main() {
         },
       ],
     );
-  }, skip: isBrowser); // uses dart:isolate and io
+  }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }
 
 void _expectTimelineEvents(List<TimelineEvent> events, List<Map<String, dynamic>> expected) {

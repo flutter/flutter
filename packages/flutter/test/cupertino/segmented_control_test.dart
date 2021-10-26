@@ -2,17 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-dynamic getRenderSegmentedControl(WidgetTester tester) {
+RenderBox getRenderSegmentedControl(WidgetTester tester) {
   return tester.allRenderObjects.firstWhere(
     (RenderObject currentObject) {
       return currentObject.toStringShort().contains('_RenderSegmentedControl');
     },
-  );
+  ) as RenderBox;
 }
 
 StatefulBuilder setupSimpleSegmentedControl() {
@@ -45,8 +52,41 @@ Widget boilerplate({ required Widget child }) {
   );
 }
 
+int getChildCount(WidgetTester tester) {
+  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList().length;
+}
+
+ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
+}
+
+Size getChildSize(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child]).size;
+}
+
+Color getBorderColor(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
+}
+
+int? getSelectedIndex(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
+}
+
 Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  return getRenderSegmentedControl(tester).backgroundColors[childIndex] as Color;
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).backgroundColors[childIndex] as Color;
 }
 
 void main() {
@@ -349,7 +389,7 @@ void main() {
     DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
+    expect(getBorderColor(tester), CupertinoColors.black);
     expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
     expect(iconTheme.data.color, CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen.color);
@@ -517,7 +557,7 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, 0);
+    expect(getSelectedIndex(tester), 0);
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
@@ -548,7 +588,7 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, null);
+    expect(getSelectedIndex(tester), null);
 
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
@@ -647,9 +687,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[0].parentData.surroundingRect.width);
-    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[1].parentData.surroundingRect.width);
-    expect(childWidth, getRenderSegmentedControl(tester).getChildrenAsList()[2].parentData.surroundingRect.width);
+    expect(childWidth, getSurroundingRect(tester).width);
+    expect(childWidth, getSurroundingRect(tester, child: 1).width);
+    expect(childWidth, getSurroundingRect(tester, child: 2).width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -874,7 +914,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width as double;
+    final double childWidth = getChildSize(tester).width;
     final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
 
     // Tap just inside segment bounds
@@ -1359,13 +1399,13 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
+    expect(getChildCount(tester), 3);
 
     await tester.tap(find.text('B'));
 
     await tester.pump();
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 2);
+    expect(getChildCount(tester), 2);
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
@@ -1405,12 +1445,12 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 3);
+    expect(getChildCount(tester), 3);
 
     await tester.tap(find.text('B'));
 
     await tester.pump();
-    expect(getRenderSegmentedControl(tester).getChildrenAsList().length, 2);
+    expect(getChildCount(tester), 2);
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));

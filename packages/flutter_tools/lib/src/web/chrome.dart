@@ -249,7 +249,9 @@ class ChromiumLauncher {
 
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
-    // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
+    // - The tool reached the maximum retry count, in which case we throw ToolExit.
+    const int kMaxRetries = 3;
+    int retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
 
@@ -263,6 +265,7 @@ class ChromiumLauncher {
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
       bool hitGlibcBug = false;
+      bool shouldRetry = false;
       await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -270,6 +273,7 @@ class ChromiumLauncher {
           _logger.printTrace('[CHROME]:$line');
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
+            shouldRetry = true;
           }
           return line;
         })
@@ -282,17 +286,22 @@ class ChromiumLauncher {
             // Return value unused.
             return '';
           }
-          _logger.printTrace('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
-          throw ToolExit(
-            'Failed to launch browser. Make sure you are using an up-to-date '
-            'Chrome or Edge. Otherwise, consider using -d web-server instead '
-            'and filing an issue at https://github.com/flutter/flutter/issues.',
-          );
+          if (retry >= kMaxRetries) {
+            _logger.printTrace('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
+            throw ToolExit(
+              'Failed to launch browser. Make sure you are using an up-to-date '
+              'Chrome or Edge. Otherwise, consider using -d web-server instead '
+              'and filing an issue at https://github.com/flutter/flutter/issues.',
+            );
+          }
+          shouldRetry = true;
+          return '';
         });
 
-      if (!hitGlibcBug) {
+      if (!hitGlibcBug && !shouldRetry) {
         return process;
       }
+      retry += 1;
 
       // A precaution that avoids accumulating browser processes, in case the
       // glibc bug doesn't cause the browser to quit and we keep looping and
@@ -387,10 +396,11 @@ class ChromiumLauncher {
     if (!skipCheck) {
       try {
         await chrome.chromeConnection.getTabs();
-      } on Exception catch (e) {
+      } on Exception catch (error, stackTrace) {
+        _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();
         throwToolExit(
-            'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
+            'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $error');
       }
     }
     currentCompleter.complete(chrome);

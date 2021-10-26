@@ -126,8 +126,6 @@ class GroupedValidator extends DoctorValidator {
             mergedType = ValidationType.partial;
           }
           break;
-        default:
-          throw 'Unrecognized validation type: ${result.type}';
       }
       mergedMessages.addAll(result.messages);
     }
@@ -278,7 +276,7 @@ class ValidationMessage {
   }
 
   @override
-  int get hashCode => type.hashCode ^ message.hashCode ^ contextUrl.hashCode;
+  int get hashCode => Object.hash(type, message, contextUrl);
 }
 
 class NoIdeValidator extends DoctorValidator {

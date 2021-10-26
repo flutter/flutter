@@ -4,10 +4,25 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
+import 'package:file/src/interface/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:test/fake.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
@@ -165,4 +180,116 @@ void main() {
 
     expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
   });
+
+  testUsingContext('WebDriverService starts and stops an app', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    await service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
+    await service.stop();
+    expect(FakeResidentRunner.instance.callLog, <String>[
+      'run',
+      'exitApp',
+      'cleanupAtFinish',
+    ]);
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
+  testUsingContext('WebDriverService forwards exception when run future fails before app starts', () async {
+    final WebDriverService service = setUpDriverService();
+    final Device device = FakeDevice();
+    await expectLater(
+      service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
+      throwsA('This is a test error'),
+    );
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(
+      doResolveToError: true,
+    ),
+  });
+}
+
+class FakeWebRunnerFactory implements WebRunnerFactory {
+  FakeWebRunnerFactory({
+    this.doResolveToError = false,
+  });
+
+  final bool doResolveToError;
+
+  @override
+  ResidentRunner createWebRunner(FlutterDevice device, {String target, bool stayResident, FlutterProject flutterProject, bool ipv6, DebuggingOptions debuggingOptions, UrlTunneller urlTunneller, Logger logger, FileSystem fileSystem, SystemClock systemClock, Usage usage, bool machine = false}) {
+    expect(stayResident, isTrue);
+    return FakeResidentRunner(
+      doResolveToError: doResolveToError,
+    );
+  }
+}
+
+class FakeResidentRunner extends Fake implements ResidentRunner {
+  FakeResidentRunner({
+    this.doResolveToError,
+  }) {
+    instance = this;
+  }
+
+  static FakeResidentRunner instance;
+
+  final bool doResolveToError;
+  final Completer<int> _exitCompleter = Completer<int>();
+  final List<String> callLog = <String>[];
+
+  @override
+  Uri get uri => Uri();
+
+  @override
+  Future<int> run({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
+    String route,
+  }) async {
+    callLog.add('run');
+
+    if (doResolveToError) {
+      return Future<int>.error('This is a test error');
+    }
+
+    appStartedCompleter.complete();
+    // Emulate stayResident by completing after exitApp is called.
+    return _exitCompleter.future;
+  }
+
+  @override
+  Future<void> exitApp() async {
+    callLog.add('exitApp');
+    _exitCompleter.complete();
+  }
+
+  @override
+  Future<void> cleanupAtFinish() async {
+    callLog.add('cleanupAtFinish');
+  }
+}
+
+WebDriverService setUpDriverService() {
+  final BufferLogger logger = BufferLogger.test();
+  return WebDriverService(
+    logger: logger,
+    processUtils: ProcessUtils(
+      logger: logger,
+      processManager: FakeProcessManager.any(),
+    ),
+    dartSdkPath: 'dart',
+  );
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeDevice extends Fake implements Device {
+  @override
+  final PlatformType platformType = PlatformType.web;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 }

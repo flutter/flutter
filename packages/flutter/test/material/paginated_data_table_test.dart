@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -219,7 +225,9 @@ void main() {
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
 
     expect(find.text('Gingerbread (0)'), findsOneWidget);
@@ -294,7 +302,6 @@ void main() {
         header: header != null ? Text(header) : null,
         actions: actions,
         source: TestDataSource(allowSelection: true),
-        showCheckboxColumn: true,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -344,7 +351,9 @@ void main() {
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), contains('A RenderFlex overflowed by'));
 
     expect(find.text('Rows per page:'), findsOneWidget);
@@ -852,7 +861,6 @@ void main() {
         home: PaginatedDataTable(
           header: const Text('Test table'),
           source: TestDataSource(allowSelection: true),
-          showCheckboxColumn: true,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -1001,5 +1009,33 @@ void main() {
     expect(icons.elementAt(1).color, arrowHeadColor);
     expect(icons.elementAt(2).color, arrowHeadColor);
     expect(icons.elementAt(3).color, arrowHeadColor);
+  });
+
+  testWidgets('OverflowBar header left alignment', (WidgetTester tester) async {
+    // Test an old special case that tried to align the first child of a ButtonBar
+    // and the left edge of a Text header widget. Still possible with OverflowBar
+    // albeit without any special case in the implementation's build method.
+    Widget buildFrame(Widget header) {
+      return MaterialApp(
+        home: PaginatedDataTable(
+          header: header,
+          rowsPerPage: 2,
+          source: TestDataSource(),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Text('HEADER')));
+    final double headerX = tester.getTopLeft(find.text('HEADER')).dx;
+    final Widget overflowBar = OverflowBar(
+      children: <Widget>[ElevatedButton(onPressed: () {}, child: const Text('BUTTON'))],
+    );
+    await tester.pumpWidget(buildFrame(overflowBar));
+    expect(headerX, tester.getTopLeft(find.byType(ElevatedButton)).dx);
   });
 }

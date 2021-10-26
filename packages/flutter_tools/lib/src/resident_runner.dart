@@ -47,8 +47,6 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     @required this.buildInfo,
-    this.fileSystemRoots,
-    this.fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
     this.targetPlatform,
     ResidentCompiler generator,
@@ -62,8 +60,8 @@ class FlutterDevice {
          ),
          buildMode: buildInfo.mode,
          trackWidgetCreation: buildInfo.trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots ?? <String>[],
-         fileSystemScheme: fileSystemScheme,
+         fileSystemRoots: buildInfo.fileSystemRoots ?? <String>[],
+         fileSystemScheme: buildInfo.fileSystemScheme,
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
          packagesPath: buildInfo.packagesPath,
@@ -81,8 +79,6 @@ class FlutterDevice {
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
@@ -100,7 +96,7 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
-      // TODO(jonahwilliams): consistently provide these flags across platforms.
+      // TODO(zanderso): consistently provide these flags across platforms.
       HostArtifact platformDillArtifact;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
@@ -121,7 +117,7 @@ class FlutterDevice {
         globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots ?? <String>[],
+        fileSystemRoots: buildInfo.fileSystemRoots ?? <String>[],
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
@@ -162,8 +158,8 @@ class FlutterDevice {
         ),
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
+        fileSystemRoots: buildInfo.fileSystemRoots,
+        fileSystemScheme: buildInfo.fileSystemScheme,
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -183,8 +179,6 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme:fileSystemScheme,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
@@ -204,8 +198,6 @@ class FlutterDevice {
   FlutterVmService vmService;
   DevFS devFS;
   ApplicationPackage package;
-  List<String> fileSystemRoots;
-  String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
 
@@ -271,9 +263,9 @@ class FlutterDevice {
         try {
           await device.dds.startDartDevelopmentService(
             observatoryUri,
-            ddsPort,
-            ipv6,
-            disableServiceAuthCodes,
+            hostPort: ddsPort,
+            ipv6: ipv6,
+            disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
@@ -343,7 +335,7 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/83127
+    // TODO(zanderso): https://github.com/flutter/flutter/issues/83127
     // When updating `flutter attach` to support running without a device,
     // this will need to be changed to fall back to io exit.
     return device.stopApp(package, userIdentifier: userIdentifier);
@@ -424,7 +416,9 @@ class FlutterDevice {
     }
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    final Map<String, dynamic> platformArgs = <String, dynamic>{
+      'multidex': hotRunner.multidexEnabled,
+    };
 
     await startEchoingDeviceLog();
 
@@ -500,6 +494,7 @@ class FlutterDevice {
     if (coldRunner.traceStartup != null) {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
+    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
@@ -568,7 +563,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -739,22 +734,6 @@ abstract class ResidentHandlers {
       final List<FlutterView> views = await device.vmService.getFlutterViews();
       for (final FlutterView view in views) {
         await device.vmService.flutterToggleDebugPaintSizeEnabled(
-          isolateId: view.uiIsolate.id,
-        );
-      }
-    }
-    return true;
-  }
-
-  /// Toggle the "elevation check" debugging feature.
-  Future<bool> debugToggleDebugCheckElevationsEnabled() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
-      for (final FlutterView view in views) {
-        await device.vmService.flutterToggleDebugCheckElevationsEnabled(
           isolateId: view.uiIsolate.id,
         );
       }
@@ -1125,6 +1104,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
+  /// True if the shared Dart plugin registry (which is different than the one
+  /// used for web) should be generated during source generation.
+  bool get generateDartPluginRegistry => true;
+
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
   //
@@ -1176,7 +1159,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
@@ -1376,7 +1359,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[
-      for (final FlutterDevice device in flutterDevices)  device.exitApps(),
+      for (final FlutterDevice device in flutterDevices) device.exitApps(),
     ];
     await Future.wait(futures);
     appFinished();
@@ -1409,7 +1392,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (uri != null) {
           globals.printStatus(
             'The Flutter DevTools debugger and profiler '
-            'on ${device.device.name} is available at: $uri',
+            'on ${device.device.name} is available at: ${urlToDisplayString(uri)}',
           );
         }
       }
@@ -1434,7 +1417,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.I.print();
         commandHelp.o.print();
         commandHelp.b.print();
-        commandHelp.z.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
@@ -1488,9 +1470,19 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }
 
 /// Redirects terminal commands to the correct resident runner methods.
@@ -1628,7 +1620,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        final OperationResult result = await residentRunner.restart();
         if (result.fatal) {
           throwToolExit(result.message);
         }
@@ -1667,9 +1659,6 @@ class TerminalHandler {
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
-      case 'z':
-      case 'Z':
-        return residentRunner.debugToggleDebugCheckElevationsEnabled();
     }
     return false;
   }

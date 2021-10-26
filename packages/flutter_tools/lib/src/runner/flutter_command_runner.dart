@@ -18,7 +18,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
 
@@ -171,8 +171,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
-    if (args.length == 1 && args.first == 'build') {
-      args = <String>['build', '-h'];
+    if (args.length == 1) {
+      if (args.first == 'build') {
+        args = <String>['build', '-h'];
+      } else if (args.first == 'custom-devices') {
+        args = <String>['custom-devices', '-h'];
+      }
     }
 
     return super.run(args);

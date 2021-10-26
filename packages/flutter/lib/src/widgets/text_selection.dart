@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -119,12 +120,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -199,74 +200,24 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
-  // TODO(justinmc): This and other methods should be ported to Actions and
-  // removed, along with their keyboard shortcut equivalents.
-  // https://github.com/flutter/flutter/issues/75004
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, remove the selected text from the
-  /// text field and hide the toolbar.
+  /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
   void handleCut(TextSelectionDelegate delegate) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.cutSelection(SelectionChangedCause.toolbar);
   }
 
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
-  /// text (collapsing the selection in the process), and hide the toolbar.
+  /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
+    delegate.copySelection(SelectionChangedCause.toolbar);
     clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        // Hide the toolbar, but keep the selection and keep the handles.
-        delegate.hideToolbar(false);
-        return;
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
-        delegate.userUpdateTextEditingValue(
-          TextEditingValue(
-            text: value.text,
-            selection: TextSelection.collapsed(offset: value.selection.end),
-          ),
-          SelectionChangedCause.toolBar,
-        );
-        delegate.hideToolbar();
-        return;
-    }
   }
 
-  /// Paste the current clipboard selection (obtained from [Clipboard]) into
-  /// the text field managed by the given `delegate`, replacing its current
-  /// selection, if any. Then, hide the toolbar.
+  /// Call [TextSelectionDelegate.pasteText] to paste text.
   ///
   /// This is called by subclasses when their paste affordance is activated by
   /// the user.
@@ -276,43 +227,18 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      delegate.userUpdateTextEditingValue(
-        TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length,
-          ),
-        ),
-        SelectionChangedCause.toolBar,
-      );
-    }
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
-  /// Adjust the selection of the text field managed by the given `delegate` so
-  /// that everything is selected.
+  /// Call [TextSelectionDelegate.selectAll] to set the current selection to
+  /// contain the entire text value.
   ///
   /// Does not hide the toolbar.
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: delegate.textEditingValue.text,
-        selection: TextSelection(
-          baseOffset: 0,
-          extentOffset: delegate.textEditingValue.text.length,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
+    delegate.selectAll(SelectionChangedCause.toolbar);
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
@@ -409,7 +335,7 @@ class TextSelectionOverlay {
   /// A callback that's optionally invoked when a selection handle is tapped.
   ///
   /// The [TextSelectionControls.buildHandle] implementation the text field
-  /// uses decides where the the handle's tap "hotspot" is, or whether the
+  /// uses decides where the handle's tap "hotspot" is, or whether the
   /// selection handle supports tap gestures at all. For instance,
   /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
   /// selection handle's "knob" is tapped, while
@@ -431,7 +357,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late AnimationController _toolbarController;
+  late final AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   /// Retrieve current value.
@@ -570,7 +496,7 @@ class TextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar!.remove();
+    _toolbar?.remove();
     _toolbar = null;
   }
 
@@ -601,6 +527,7 @@ class TextSelectionOverlay {
           selectionControls: selectionControls,
           position: position,
           dragStartBehavior: dragStartBehavior,
+          selectionDelegate: selectionDelegate!,
         ),
       );
     }
@@ -675,7 +602,7 @@ class TextSelectionOverlay {
         break;
     }
     selectionDelegate!.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
@@ -694,6 +621,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
+    required this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -706,6 +634,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
+  final TextSelectionDelegate selectionDelegate;
 
   @override
   _TextSelectionHandleOverlayState createState() => _TextSelectionHandleOverlayState();
@@ -824,9 +753,45 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    // On some platforms we may want to calculate the start and end handles
+    // separately so they scale for the selected content.
+    //
+    // For the start handle we compute the rectangles that encompass the range
+    // of the first full selected grapheme cluster at the beginning of the selection.
+    //
+    // For the end handle we compute the rectangles that encompass the range
+    // of the last full selected grapheme cluster at the end of the selection.
+    //
+    // Only calculate start/end handle rects if the text in the previous frame
+    // is the same as the text in the current frame. This is done because
+    // widget.renderObject contains the renderEditable from the previous frame.
+    // If the text changed between the current and previous frames then
+    // widget.renderObject.getRectForComposingRange might fail. In cases where
+    // the current frame is different from the previous we fall back to
+    // widget.renderObject.preferredLineHeight.
+    final InlineSpan span = widget.renderObject.text!;
+    final String prevText = span.toPlainText();
+    final String currText = widget.selectionDelegate.textEditingValue.text;
+    final int firstSelectedGraphemeExtent;
+    final int lastSelectedGraphemeExtent;
+    final TextSelection selection = widget.selection;
+    Rect? startHandleRect;
+    Rect? endHandleRect;
+
+    if (prevText == currText && selection != null && selection.isValid && !selection.isCollapsed) {
+      final String selectedGraphemes = selection.textInside(currText);
+      firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
+      lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
+      assert(firstSelectedGraphemeExtent <= selectedGraphemes.length && lastSelectedGraphemeExtent <= selectedGraphemes.length);
+      startHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.start, end: selection.start + firstSelectedGraphemeExtent));
+      endHandleRect = widget.renderObject.getRectForComposingRange(TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end));
+    }
+
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
+      startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+      endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
@@ -877,6 +842,8 @@ class _TextSelectionHandleOverlayState
                 type,
                 widget.renderObject.preferredLineHeight,
                 widget.onSelectionHandleTapped,
+                startHandleRect?.height ?? widget.renderObject.preferredLineHeight,
+                endHandleRect?.height ?? widget.renderObject.preferredLineHeight,
               ),
             ),
           ),
@@ -905,27 +872,27 @@ class _TextSelectionHandleOverlayState
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by textfield implementations wrapping
+/// The interface is usually implemented by text field implementations wrapping
 /// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
 /// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the textfield.
+/// the builder with information about the current state of the text field.
 /// Based on these information, the builder adds the correct gesture handlers
 /// to the gesture detector.
 ///
 /// See also:
 ///
-///  * [TextField], which implements this delegate for the Material textfield.
+///  * [TextField], which implements this delegate for the Material text field.
 ///  * [CupertinoTextField], which implements this delegate for the Cupertino
-///    textfield.
+///    text field.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
   GlobalKey<EditableTextState> get editableTextKey;
 
-  /// Whether the textfield should respond to force presses.
+  /// Whether the text field should respond to force presses.
   bool get forcePressEnabled;
 
-  /// Whether the user may select text in the textfield.
+  /// Whether the user may select text in the text field.
   bool get selectionEnabled;
 }
 
@@ -958,7 +925,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
   /// The delegate provides the builder with information about what actions can
-  /// currently be performed on the textfield. Based on this, the builder adds
+  /// currently be performed on the text field. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
@@ -1613,29 +1580,20 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
-    // iOS 14 added a notification that appears when an app accesses the
-    // clipboard. To avoid the notification, don't access the clipboard on iOS,
-    // and instead always show the paste button, even when the clipboard is
-    // empty.
-    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
-    // won't trigger the notification.
-    // https://github.com/flutter/flutter/issues/60145
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        value = ClipboardStatus.pasteable;
-        return;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        break;
+    if (_disposed) {
+      return;
     }
 
-    ClipboardData? data;
+    final bool hasStrings;
     try {
-      data = await Clipboard.getData(Clipboard.kTextPlain);
-    } catch (stacktrace) {
+      hasStrings = await Clipboard.hasStrings();
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking if the clipboard has strings'),
+      ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {
@@ -1645,13 +1603,14 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
-    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text!.isNotEmpty
+    final ClipboardStatus nextStatus = hasStrings
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
-    if (_disposed || clipboardStatus == value) {
+
+    if (_disposed || nextStatus == value) {
       return;
     }
-    value = clipboardStatus;
+    value = nextStatus;
   }
 
   @override

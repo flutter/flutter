@@ -59,6 +59,23 @@ void main() {
       expect(shouldNotFormatted, nonFormatted);
     });
 
+    testUsingContext('dry-run with -n', () async {
+      final String projectPath = await createProject(tempDir);
+
+      final File srcFile = globals.fs.file(
+          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
+          'main()', 'main(  )');
+      srcFile.writeAsStringSync(nonFormatted);
+
+      final FormatCommand command = FormatCommand(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['format', '-n', srcFile.path]);
+
+      final String shouldNotFormatted = srcFile.readAsStringSync();
+      expect(shouldNotFormatted, nonFormatted);
+    });
+
     testUsingContext('dry-run with set-exit-if-changed', () async {
       final String projectPath = await createProject(tempDir);
 

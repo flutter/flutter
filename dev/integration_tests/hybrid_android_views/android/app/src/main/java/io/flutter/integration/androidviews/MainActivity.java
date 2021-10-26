@@ -36,9 +36,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     private MethodChannel.Result permissionResult;
 
     private View getFlutterView() {
-        // TODO(egarciad): Set an unique ID in FlutterView, so it's easier to look it up.
-        ViewGroup root = (ViewGroup)findViewById(android.R.id.content);
-        return ((ViewGroup)root.getChildAt(0)).getChildAt(0);
+      return findViewById(FLUTTER_VIEW_ID);
     }
 
     private String getViewName(View view) {

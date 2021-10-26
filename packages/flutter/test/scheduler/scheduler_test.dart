@@ -134,6 +134,10 @@ void main() {
     for (final VoidCallback timer in timerQueueTasks) {
       timer();
     }
+
+    // As events are locked, make scheduleTask execute after the test or it
+    // will execute during following tests and risk failure.
+    addTearDown(() => scheduler.handleEventLoopCallback());
   });
 
   test('Flutter.Frame event fired', () async {
@@ -143,6 +147,7 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      rasterFinishWallTime: 20010,
       frameNumber: 1991
     )]);
 

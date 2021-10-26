@@ -11,12 +11,25 @@ import 'package:flutter_tools/src/template.dart';
 import '../src/common.dart';
 
 void main() {
+  testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+
+    expect(() => Template(
+      fileSystem.directory('doesNotExist'),
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      templateRenderer: FakeTemplateRenderer(),
+      templateManifest: null,
+    ), throwsToolExit());
+  });
+
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
     final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Template template = Template(
-      fileSystem.directory('examples'),
-      fileSystem.currentDirectory,
+      fileSystem.directory('examples')..createSync(recursive: true),
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -42,7 +55,6 @@ void main() {
     sourceImage.writeAsStringSync("Ceci n'est pas une pipe");
 
     final Template template = Template(
-      templateDir,
       templateDir,
       imageSourceDir,
       fileSystem: fileSystem,

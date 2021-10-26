@@ -60,6 +60,9 @@ class SymbolizeCommand extends FlutterCommand {
   String get name => 'symbolize';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override
@@ -87,7 +90,7 @@ class SymbolizeCommand extends FlutterCommand {
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-       output = outputFile.openWrite();
+      output = outputFile.openWrite();
     } else {
       final StreamController<List<int>> outputController = StreamController<List<int>>();
       outputController

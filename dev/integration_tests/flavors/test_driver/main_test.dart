@@ -17,7 +17,7 @@ void main() {
       final SerializableFinder flavorField = find.byValueKey('flavor');
       final String flavor = await driver.getText(flavorField);
       expect(flavor, 'paid');
-    });
+    }, timeout: Timeout.none);
 
     tearDownAll(() async {
       driver.close();

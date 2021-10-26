@@ -1,0 +1,40 @@
+name: No Response
+
+# Both `issue_comment` and `scheduled` event types are required for this Action
+# to work properly.
+on:
+  issue_comment:
+    types: [created]
+  schedule:
+    # Schedule for five minutes after the hour, every hour
+    - cron: '5 * * * *'
+
+# By specifying the access of one of the scopes, all of those that are not
+# specified are set to 'none'.
+permissions:
+  issues: write
+
+jobs:
+  noResponse:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+    steps:
+      - uses: lee-dohm/no-response@9bb0a4b5e6a45046f00353d5de7d90fb8bd773bb
+        with:
+          token: ${{ github.token }}
+          # Comment to post when closing an Issue for lack of response. Set to `false` to disable
+          closeComment: >
+            Without additional information, we are unfortunately not sure how to
+            resolve this issue. We are therefore reluctantly going to close this
+            bug for now.
+
+            If you find this problem please file a new issue with the same description,
+            what happens, logs and the output of 'flutter doctor -v'. All system setups
+            can be slightly different so it's always better to open new issues and reference
+            the related ones.
+
+            Thanks for your contribution.
+          # Number of days of inactivity before an issue is closed for lack of response.
+          daysUntilClose: 21
+          # Label requiring a response.
+          responseRequiredLabel: "waiting for customer response"

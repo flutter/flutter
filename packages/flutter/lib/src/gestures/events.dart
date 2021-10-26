@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'constants.dart';
+import 'gesture_settings.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
 
@@ -651,7 +652,7 @@ mixin _PointerEventDescription on PointerEvent {
   }
 }
 
-abstract class _AbstractPointerEvent implements PointerEvent {}
+abstract class _AbstractPointerEvent implements PointerEvent { }
 
 // The base class for transformed pointer event classes.
 //
@@ -1324,7 +1325,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
-/// not in contact with the device, and entered a target object.
+/// not in contact with the device, and exited a target object.
 ///
 /// See also:
 ///
@@ -2099,7 +2100,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
 }
 
 /// Determine the appropriate hit slop pixels based on the [kind] of pointer.
-double computeHitSlop(PointerDeviceKind kind) {
+double computeHitSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
   switch (kind) {
     case PointerDeviceKind.mouse:
       return kPrecisePointerHitSlop;
@@ -2107,12 +2108,12 @@ double computeHitSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.invertedStylus:
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
-      return kTouchSlop;
+      return settings?.touchSlop ?? kTouchSlop;
   }
 }
 
 /// Determine the appropriate pan slop pixels based on the [kind] of pointer.
-double computePanSlop(PointerDeviceKind kind) {
+double computePanSlop(PointerDeviceKind kind, DeviceGestureSettings? settings) {
   switch (kind) {
     case PointerDeviceKind.mouse:
       return kPrecisePointerPanSlop;
@@ -2120,7 +2121,7 @@ double computePanSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.invertedStylus:
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
-      return kPanSlop;
+      return settings?.panSlop ?? kPanSlop;
   }
 }
 

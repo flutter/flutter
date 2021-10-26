@@ -44,8 +44,15 @@ class WebCallbackManager implements CallbackManager {
   ///
   /// See: https://www.w3.org/TR/webdriver/#screen-capture.
   @override
-  Future<void> takeScreenshot(String screenshotName) async {
+  Future<Map<String, dynamic>> takeScreenshot(String screenshotName) async {
     await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName));
+    // Flutter Web doesn't provide the bytes.
+    return const <String, dynamic>{'bytes': <int>[]};
+  }
+
+  @override
+  Future<void> convertFlutterSurfaceToImage() async {
+    // Noop on Web.
   }
 
   Future<void> _sendWebDriverCommand(WebDriverCommand command) async {
@@ -58,8 +65,7 @@ class WebCallbackManager implements CallbackManager {
             'driver side');
       }
     } catch (exception) {
-      throw Exception('Web Driver Command failed: ${command.type} with '
-          'exception $exception');
+      throw Exception('Web Driver Command failed: ${command.type} with exception $exception');
     } finally {
       // Reset the completer.
       _driverCommandComplete = Completer<bool>();
@@ -118,7 +124,7 @@ class WebCallbackManager implements CallbackManager {
             'message': Response.webDriverCommand(data: data).toJson(),
           };
           break;
-        default:
+        case WebDriverCommandType.ack:
           throw UnimplementedError('${command.type} is not implemented');
       }
     } else {

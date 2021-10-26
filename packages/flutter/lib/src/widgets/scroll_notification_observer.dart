@@ -50,7 +50,7 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// To remove the listener from a [ScrollNotificationObserver] ancestor:
 /// ```dart
 /// ScrollNotificationObserver.of(context).removeListener(listener);
-///```
+/// ```
 ///
 /// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
 /// add a listener in [State.didChangeDependencies] (removing the old one

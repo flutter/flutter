@@ -101,6 +101,6 @@ void main() {
   });
 }
 
-class A {}
+class A { }
 
-class B extends A {}
+class B extends A { }

@@ -144,6 +144,9 @@ If the app or module is already running and the specific observatory port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
 
+  @override
+  final String category = FlutterCommandCategory.tools;
+
   int get debugPort {
     if (argResults['debug-port'] == null) {
       return null;
@@ -411,8 +414,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
-      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,

@@ -68,11 +68,11 @@ void validateEnglishLocalizations(File file) {
     }
 
     final bool optional = atResource.containsKey('optional');
-    final String description = atResource['description'] as String;
+    final String? description = atResource['description'] as String?;
     if (description == null && !optional)
       errorMessages.writeln('No description specified for $atResourceId');
 
-    final String plural = atResource['plural'] as String;
+    final String? plural = atResource['plural'] as String?;
     final String resourceId = atResourceId.substring(1);
     if (plural != null) {
       final String resourceIdOther = '${resourceId}Other';

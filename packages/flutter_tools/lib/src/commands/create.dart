@@ -10,12 +10,14 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals_null_migrated.dart' as globals;
+import '../ios/code_signing.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -41,7 +43,10 @@ class CreateCommand extends CreateBase {
       valueHelp: 'type',
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing only Dart code.',
+        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
+            'application that follows community best practices.',
+        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
+            'Dart code.',
         flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
             'in Dart code with a platform-specific implementation for Android, for iOS code, or '
             'for both.',
@@ -74,6 +79,9 @@ class CreateCommand extends CreateBase {
   @override
   final String description = 'Create a new Flutter project.\n\n'
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   String get invocation => '${runner.executableName} $name <output directory>';
@@ -227,15 +235,33 @@ class CreateCommand extends CreateBase {
       );
     }
 
+    final String dartSdk = globals.cache.dartSdkBuild;
+    final bool includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+    String developmentTeam;
+    if (includeIos) {
+      developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+        processManager: globals.processManager,
+        platform: globals.platform,
+        logger: globals.logger,
+        config: globals.config,
+        terminal: globals.terminal,
+      );
+    }
+
+    // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
+    final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
+
     final Map<String, Object> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
+      titleCaseProjectName: titleCaseProjectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      ios: featureFlags.isIOSEnabled && platforms.contains('ios'),
+      iosDevelopmentTeam: developmentTeam,
+      ios: includeIos,
       android: featureFlags.isAndroidEnabled && platforms.contains('android'),
       web: featureFlags.isWebEnabled && platforms.contains('web'),
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
@@ -243,7 +269,8 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null safety everywhere.
-      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
+      dartSdkVersionBounds: '">=$dartSdk <3.0.0"',
+      implementationTests: boolArg('implementation-tests'),
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -262,7 +289,10 @@ class CreateCommand extends CreateBase {
     int generatedFileCount = 0;
     switch (template) {
       case FlutterProjectType.app:
-        generatedFileCount += await generateApp(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await generateApp('app', relativeDir, templateContext, overwrite: overwrite);
+        break;
+      case FlutterProjectType.skeleton:
+        generatedFileCount += await generateApp('skeleton', relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: overwrite);
@@ -301,7 +331,7 @@ class CreateCommand extends CreateBase {
       _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
       if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
-      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
+      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty) {
         _printNoPluginMessage();
       }
 
@@ -431,7 +461,7 @@ Your $application code is in $relativeAppMain.
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await generateApp(project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
+    generatedCount += await generateApp('app', project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
     return generatedCount;
   }
 

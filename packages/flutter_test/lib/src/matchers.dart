@@ -265,12 +265,12 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
-/// and is normalized to #00000.
+/// and is normalized to `#00000`.
 ///
 /// See Also:
 ///
 ///  * [describeIdentity], a method that generates short descriptions of objects
-///    with ids that match the pattern #[0-9a-f]{5}.
+///    with ids that match the pattern `#[0-9a-f]{5}`.
 ///  * [shortHash], a method that generates a 5 character long hexadecimal
 ///    [String] based on [Object.hashCode].
 ///  * [DiagnosticableTree.toStringDeep], a method that returns a [String]
@@ -363,7 +363,8 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher
+matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -431,10 +432,15 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
 Matcher matchesSemantics({
   String? label,
+  AttributedString? attributedLabel,
   String? hint,
+  AttributedString? attributedHint,
   String? value,
+  AttributedString? attributedValue,
   String? increasedValue,
+  AttributedString? attributedIncreasedValue,
   String? decreasedValue,
+  AttributedString? attributedDecreasedValue,
   TextDirection? textDirection,
   Rect? rect,
   Size? size,
@@ -559,10 +565,15 @@ Matcher matchesSemantics({
 
   return _MatchesSemanticsData(
     label: label,
+    attributedLabel: attributedLabel,
     hint: hint,
+    attributedHint: attributedHint,
     value: value,
+    attributedValue: attributedValue,
     increasedValue: increasedValue,
+    attributedIncreasedValue: attributedIncreasedValue,
     decreasedValue: decreasedValue,
+    attributedDecreasedValue: attributedDecreasedValue,
     actions: actions,
     flags: flags,
     textDirection: textDirection,
@@ -1708,10 +1719,15 @@ class _MatchesReferenceImage extends AsyncMatcher {
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     this.label,
-    this.value,
-    this.increasedValue,
-    this.decreasedValue,
+    this.attributedLabel,
     this.hint,
+    this.attributedHint,
+    this.value,
+    this.attributedValue,
+    this.increasedValue,
+    this.attributedIncreasedValue,
+    this.decreasedValue,
+    this.attributedDecreasedValue,
     this.flags,
     this.actions,
     this.textDirection,
@@ -1728,10 +1744,15 @@ class _MatchesSemanticsData extends Matcher {
   });
 
   final String? label;
-  final String? value;
+  final AttributedString? attributedLabel;
   final String? hint;
+  final AttributedString? attributedHint;
+  final String? value;
+  final AttributedString? attributedValue;
   final String? increasedValue;
+  final AttributedString? attributedIncreasedValue;
   final String? decreasedValue;
+  final AttributedString? attributedDecreasedValue;
   final SemanticsHintOverrides? hintOverrides;
   final List<SemanticsAction>? actions;
   final List<CustomSemanticsAction>? customActions;
@@ -1751,14 +1772,24 @@ class _MatchesSemanticsData extends Matcher {
     description.add('has semantics');
     if (label != null)
       description.add(' with label: $label');
+    if (attributedLabel != null)
+      description.add(' with attributedLabel: $attributedLabel');
     if (value != null)
       description.add(' with value: $value');
+    if (attributedValue != null)
+      description.add(' with attributedValue: $attributedValue');
     if (hint != null)
       description.add(' with hint: $hint');
+    if (attributedHint != null)
+      description.add(' with attributedHint: $attributedHint');
     if (increasedValue != null)
       description.add(' with increasedValue: $increasedValue ');
+    if (attributedIncreasedValue != null)
+      description.add(' with attributedIncreasedValue: $attributedIncreasedValue');
     if (decreasedValue != null)
       description.add(' with decreasedValue: $decreasedValue ');
+    if (attributedDecreasedValue != null)
+      description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
     if (actions != null)
       description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
@@ -1791,24 +1822,71 @@ class _MatchesSemanticsData extends Matcher {
     return description;
   }
 
+  bool _stringAttributesEqual(List<StringAttribute> first, List<StringAttribute> second) {
+    if (first.length != second.length)
+      return false;
+    for (int i = 0; i < first.length; i++) {
+      if (first[i] is SpellOutStringAttribute &&
+          (second[i] is! SpellOutStringAttribute ||
+           second[i].range != first[i].range)) {
+        return false;
+      }
+      if (first[i] is LocaleStringAttribute &&
+          (second[i] is! LocaleStringAttribute ||
+           second[i].range != first[i].range ||
+           (second[i] as LocaleStringAttribute).locale != (second[i] as LocaleStringAttribute).locale)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   @override
   bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
-    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
     if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');
     final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : (node as SemanticsData);
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
+    if (attributedLabel != null &&
+        (attributedLabel!.string != data.attributedLabel.string ||
+         !_stringAttributesEqual(attributedLabel!.attributes, data.attributedLabel.attributes))) {
+      return failWithDescription(
+          matchState, 'attributedLabel was: ${data.attributedLabel}');
+    }
     if (hint != null && hint != data.hint)
       return failWithDescription(matchState, 'hint was: ${data.hint}');
+    if (attributedHint != null &&
+        (attributedHint!.string != data.attributedHint.string ||
+         !_stringAttributesEqual(attributedHint!.attributes, data.attributedHint.attributes))) {
+      return failWithDescription(
+          matchState, 'attributedHint was: ${data.attributedHint}');
+    }
     if (value != null && value != data.value)
       return failWithDescription(matchState, 'value was: ${data.value}');
+    if (attributedValue != null &&
+        (attributedValue!.string != data.attributedValue.string ||
+         !_stringAttributesEqual(attributedValue!.attributes, data.attributedValue.attributes))) {
+      return failWithDescription(
+          matchState, 'attributedValue was: ${data.attributedValue}');
+    }
     if (increasedValue != null && increasedValue != data.increasedValue)
       return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+    if (attributedIncreasedValue != null &&
+        (attributedIncreasedValue!.string != data.attributedIncreasedValue.string ||
+         !_stringAttributesEqual(attributedIncreasedValue!.attributes, data.attributedIncreasedValue.attributes))) {
+      return failWithDescription(
+          matchState, 'attributedIncreasedValue was: ${data.attributedIncreasedValue}');
+    }
     if (decreasedValue != null && decreasedValue != data.decreasedValue)
       return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
+    if (attributedDecreasedValue != null &&
+        (attributedDecreasedValue!.string != data.attributedDecreasedValue.string ||
+         !_stringAttributesEqual(attributedDecreasedValue!.attributes, data.attributedDecreasedValue.attributes))) {
+      return failWithDescription(
+          matchState, 'attributedDecreasedValue was: ${data.attributedDecreasedValue}');
+    }
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)

@@ -128,7 +128,7 @@ class TextSelectionThemeData with Diagnosticable {
 ///     selectionHandleColor: Colors.lightBlue,
 ///   ),
 ///   child: TextField(),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 class TextSelectionTheme extends InheritedTheme {

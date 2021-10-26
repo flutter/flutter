@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
-import 'package:flutter_gallery/demo/shrine/model/products_repository.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import 'product.dart';
+import 'products_repository.dart' as product_repository;
 
 double _salesTaxRate = 0.06;
 double _shippingCostPerItem = 7.0;
@@ -99,7 +100,7 @@ class AppStateModel extends Model {
 
   // Loads the list of available products from the repo.
   void loadProducts() {
-    _availableProducts = ProductsRepository.loadProducts(Category.all);
+    _availableProducts = product_repository.loadProducts(Category.all);
     notifyListeners();
   }
 

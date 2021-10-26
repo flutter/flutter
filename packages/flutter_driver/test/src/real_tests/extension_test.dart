@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -842,7 +848,7 @@ void main() {
     );
 
     // Widget
-    Map<String, dynamic> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0);
+    Map<String, dynamic> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'));
     expect(result['children'], isNull); // depth: 0
     expect(result['widgetRuntimeType'], 'Text');
 
@@ -851,7 +857,7 @@ void main() {
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
 
-    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0, properties: false);
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), properties: false);
     expect(result['widgetRuntimeType'], 'Text');
     expect(result['properties'], isNull); // properties: false
 
@@ -864,12 +870,12 @@ void main() {
     expect(children.single['children'], isEmpty);
 
     // RenderObject
-    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0);
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'));
     expect(result['children'], isNull); // depth: 0
     expect(result['properties'], isNotNull);
     expect(result['description'], startsWith('RenderParagraph'));
 
-    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0, properties: false);
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), properties: false);
     expect(result['properties'], isNull); // properties: false
     expect(result['description'], startsWith('RenderParagraph'));
 

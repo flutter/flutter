@@ -50,14 +50,13 @@ void main() {
       expect(LogicalKeyboardKey.isControlCharacter('\xa0'), isFalse); // NO-BREAK SPACE
     });
     test('Control characters are not using incorrect values', () async {
-      const int kUnprintablePlane = 0x01000000000;
       // Check some common control characters to make sure they're using
       // their char code values, and not something else.
-      expect(LogicalKeyboardKey.backspace.keyId, equals(kUnprintablePlane + 0x08));
-      expect(LogicalKeyboardKey.tab.keyId, equals(kUnprintablePlane + 0x09));
-      expect(LogicalKeyboardKey.enter.keyId, equals(kUnprintablePlane + 0x0d));
-      expect(LogicalKeyboardKey.escape.keyId, equals(kUnprintablePlane + 0x1b));
-      expect(LogicalKeyboardKey.delete.keyId, equals(kUnprintablePlane + 0x7f));
+      expect(LogicalKeyboardKey.backspace.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x08));
+      expect(LogicalKeyboardKey.tab.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x09));
+      expect(LogicalKeyboardKey.enter.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x0d));
+      expect(LogicalKeyboardKey.escape.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x1b));
+      expect(LogicalKeyboardKey.delete.keyId, equals(LogicalKeyboardKey.unprintablePlane + 0x7f));
     });
     test('Basic synonyms can be looked up.', () async {
       expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));

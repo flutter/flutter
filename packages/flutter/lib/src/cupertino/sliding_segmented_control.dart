@@ -149,7 +149,6 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
       child: IndexedStack(
-        index: 0,
         alignment: Alignment.center,
         children: <Widget>[
           AnimatedOpacity(
@@ -198,7 +197,7 @@ class _SegmentSeparator extends StatefulWidget {
   _SegmentSeparatorState createState() => _SegmentSeparatorState();
 }
 
-class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProviderStateMixin<_SegmentSeparator>  {
+class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProviderStateMixin<_SegmentSeparator> {
   late final AnimationController separatorOpacityController;
 
   @override
@@ -735,7 +734,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   }
 }
 
-class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> {}
+class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //

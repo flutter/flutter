@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -14,6 +13,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'hardware_keyboard.dart';
+import 'message_codec.dart';
+import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
@@ -30,9 +32,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
+    _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     readInitialLifecycleStateFromNativeWindow();
   }
 
@@ -40,13 +44,33 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
 
+  /// The global singleton instance of [HardwareKeyboard], which can be used to
+  /// query keyboard states.
+  HardwareKeyboard get keyboard => _keyboard;
+  late final HardwareKeyboard _keyboard;
+
+  /// The global singleton instance of [KeyEventManager], which is used
+  /// internally to dispatch key messages.
+  KeyEventManager get keyEventManager => _keyEventManager;
+  late final KeyEventManager _keyEventManager;
+
+  void _initKeyboard() {
+    _keyboard = HardwareKeyboard();
+    _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
+    window.onKeyData = _keyEventManager.handleKeyData;
+    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
+
   /// The default instance of [BinaryMessenger].
   ///
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
+  ///
+  /// The default implementation returns a [BinaryMessenger] that delivers the
+  /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  late BinaryMessenger _defaultBinaryMessenger;
+  late final BinaryMessenger _defaultBinaryMessenger;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -72,6 +96,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
+  ///
+  /// Many Flutter framework components that communicate with the platform
+  /// assume messages are received by the platform in the same order in which
+  /// they are sent. When overriding this method, be sure the [BinaryMessenger]
+  /// implementation guarantees FIFO delivery.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
@@ -84,7 +113,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
@@ -229,6 +260,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
+  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    // There is only one incoming method call currently possible.
+    assert(method == 'SystemChrome.systemUIChange');
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    if (_systemUiChangeCallback != null) {
+      await _systemUiChangeCallback!(args[0] as bool);
+    }
+  }
+
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
@@ -263,7 +304,32 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   RestorationManager createRestorationManager() {
     return RestorationManager();
   }
+
+  SystemUiChangeCallback? _systemUiChangeCallback;
+
+  /// Sets the callback for the `SystemChrome.systemUIChange` method call
+  /// received on the [SystemChannels.platform] channel.
+  ///
+  /// This is typically not called directly. System UI changes that this method
+  /// responds to are associated with [SystemUiMode]s, which are configured
+  /// using [SystemChrome]. Use [SystemChrome.setSystemUIChangeCallback] to configure
+  /// along with other SystemChrome settings.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
+  ///     [SystemUiMode] to have visible when the application is running.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
+  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
+    _systemUiChangeCallback = callback;
+  }
+
 }
+
+/// Signature for listening to changes in the [SystemUiMode].
+///
+/// Set by [SystemChrome.setSystemUIChangeCallback].
+typedef SystemUiChangeCallback = Future<void> Function(bool systemOverlaysAreVisible);
 
 /// The default implementation of [BinaryMessenger].
 ///
@@ -322,7 +388,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         try {
           response = await handler(data);
         } catch (exception, stack) {
-
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,

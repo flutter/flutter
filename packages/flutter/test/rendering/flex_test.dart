@@ -62,13 +62,13 @@ void main() {
     // By default, clipBehavior should be Clip.none
     final RenderFlex defaultFlex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
     layout(defaultFlex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultFlex.paint(context, Offset.zero);
+    context.paintChild(defaultFlex, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
 
     for (final Clip clip in Clip.values) {
       final RenderFlex flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip);
       layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      flex.paint(context, Offset.zero);
+      context.paintChild(flex, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
   });
@@ -79,7 +79,6 @@ void main() {
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
-      verticalDirection: VerticalDirection.down,
       children: <RenderBox>[
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0)),
         flexible,
@@ -101,7 +100,6 @@ void main() {
       additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
-      direction: Axis.horizontal,
       textDirection: TextDirection.ltr,
       children: <RenderBox>[
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200.0)),
@@ -122,7 +120,6 @@ void main() {
   test('Vertical Flipped Constraints', () {
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
-      verticalDirection: VerticalDirection.down,
       children: <RenderBox>[
         RenderAspectRatio(aspectRatio: 1.0),
       ],
@@ -161,9 +158,7 @@ void main() {
     final RenderDecoratedBox box2 = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 100.0,
-      minHeight: 0.0,
       maxHeight: 100.0,
     ));
     expect(box1.size.width, equals(0.0));
@@ -190,9 +185,7 @@ void main() {
     box2ParentData.flex = 2;
     flex.addAll(<RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 100.0,
-      minHeight: 0.0,
       maxHeight: 100.0,
     ));
     expect(box1.size.width, equals(0.0));
@@ -222,9 +215,7 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -255,9 +246,7 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -310,9 +299,7 @@ void main() {
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -434,7 +421,6 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(
       textDirection: TextDirection.ltr,
-      mainAxisSize: MainAxisSize.max,
     );
     final RenderConstrainedOverflowBox parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
@@ -664,6 +650,7 @@ void main() {
     // try to paint(), which also checks _hasOverflow, and it should be able to
     // do so without an ancillary error.
     expect(exceptions, hasLength(1));
+    // ignore: avoid_dynamic_calls
     expect(exceptions.first.message, isNot(contains('Null check operator')));
   });
 }

@@ -38,6 +38,8 @@ Future<String> capture(AsyncVoidCallback callback, { int exitCode = 0 }) async {
 
 void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
+  final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
+  final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), exitCode: 1);
@@ -69,6 +71,51 @@ void main() {
       'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
+  });
+
+  test('analyze.dart - verifyGoldenTags', () async {
+    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), exitCode: 1);
+    const String noTag = 'Files containing golden tests must be '
+        'tagged using `@Tags(...)` at the top of the file before import statements.';
+    const String missingTag = 'Files containing golden tests must be '
+        "tagged with 'reduced-test-set'.";
+    String lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+
+    try {
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    } catch (_) {
+      // This list of files may come up in one order or the other.
+      lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    }
   });
 
   test('analyze.dart - verifyNoMissingLicense', () async {
@@ -124,6 +171,21 @@ void main() {
     }
   });
 
+  test('analyze.dart - verifyInternationalizations - comparison fails', () async {
+    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), exitCode: 1);
+    final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
+    expect(result,
+        contains('$dartName $genLocalizationsScript --cupertino'));
+    expect(result,
+        contains('$dartName $genLocalizationsScript --material'));
+    final String generatedFile = path.join(testRootPath, 'packages', 'flutter_localizations',
+        'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+    expect(result,
+        contains('The contents of $generatedFile are different from that produced by gen_localizations.'));
+    expect(result,
+        contains(r'Did you forget to run gen_localizations.dart after updating a .arb file?'));
+  });
+
   test('analyze.dart - verifyNoBinaries - negative', () async {
     await capture(() => verifyNoBinaries(
       testRootPath,
@@ -131,6 +193,6 @@ void main() {
         const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
         const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
-    ), exitCode: 0);
+    ));
   });
 }

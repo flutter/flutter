@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
 import 'package:flutter_devicelab/command/test.dart';
-import 'package:flutter_devicelab/command/upload_metrics.dart';
+import 'package:flutter_devicelab/command/upload_results.dart';
 import 'package:flutter_devicelab/common.dart';
 
 final CommandRunner<void> runner =
-    CommandRunner<void>('devicelab_runner', 'DeviceLab test runner for recording performance metrics on applications')
+    CommandRunner<void>('devicelab_runner', 'DeviceLab test runner for recording test results')
       ..addCommand(TestCommand())
-      ..addCommand(UploadMetricsCommand());
+      ..addCommand(UploadResultsCommand());
 
 Future<void> main(List<String> rawArgs) async {
   unawaited(runner.run(rawArgs).catchError((dynamic error) {

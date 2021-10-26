@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +32,7 @@ void main() {
   testWidgets('cursor has expected width, height, and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
@@ -64,7 +68,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -82,6 +86,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -115,7 +121,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018().black.subtitle1!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -134,6 +140,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -328,6 +336,8 @@ void main() {
   });
 
   testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+
     const String testText = 'Some text long enough to move the cursor around';
     final TextEditingController controller = TextEditingController(text: testText);
     final Widget widget = MaterialApp(
@@ -335,10 +345,8 @@ void main() {
         controller: controller,
         focusNode: FocusNode(),
         style: const TextStyle(fontSize: 20.0),
-        maxLines: 1,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
-        cursorOpacityAnimates: false,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
         textAlign: TextAlign.left,
@@ -400,7 +408,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
+    debugDefaultTargetPlatformOverride = null;
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
@@ -453,7 +463,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -548,7 +558,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -605,7 +615,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -650,7 +660,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -717,7 +727,7 @@ void main() {
     controller.text = text;
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: FocusScope(
@@ -856,6 +866,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 
@@ -914,6 +926,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData')
         return const <String, dynamic>{'text': clipboardContent};
+      if (methodCall.method == 'Clipboard.hasStrings')
+        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       return null;
     });
 

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
@@ -122,7 +128,6 @@ void main() {
     crit = SpringSimulation(SpringDescription.withDampingRatio(
       mass: 1.0,
       stiffness: 100.0,
-      ratio: 1.0,
     ), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
@@ -153,7 +158,6 @@ void main() {
     final SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
       mass: 1.0,
       stiffness: 100.0,
-      ratio: 1.0,
     ), 0.0, 500.0, 0.0);
 
     crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
