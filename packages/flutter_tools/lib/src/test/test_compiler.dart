@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -43,7 +41,7 @@ class TestCompiler {
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    { String precompiledDillPath }
+    { String? precompiledDillPath }
   ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
@@ -74,9 +72,8 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
 
-
-  ResidentCompiler compiler;
-  File outputDill;
+  ResidentCompiler? compiler;
+  late File outputDill;
 
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
@@ -91,7 +88,7 @@ class TestCompiler {
     // Check for null in case this instance is shut down before the
     // lazily-created compiler has been created.
     if (compiler != null) {
-      await compiler.shutdown();
+      await compiler?.shutdown();
       compiler = null;
     }
   }
@@ -105,8 +102,9 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
     final ResidentCompiler residentCompiler = ResidentCompiler(
-      globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      artifacts: globals.artifacts,
+      globals.artifacts?.getArtifactPath(Artifact.flutterPatchedSdkPath) ??
+          Artifacts.test().getArtifactPath(Artifact.flutterPatchedSdkPath),
+      artifacts: globals.artifacts ?? Artifacts.test(),
       logger: globals.logger,
       processManager: globals.processManager,
       buildMode: buildInfo.mode,
@@ -148,8 +146,9 @@ class TestCompiler {
       final List<Uri> invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
-        final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
-          ?? request.mainUri.toString();
+        final String mainUriString =
+            buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+                request.mainUri.toString();
         await generateMainDartWithPluginRegistrant(
           flutterProject,
           buildInfo.packageConfig,
@@ -160,31 +159,35 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
       }
 
-      final CompilerOutput compilerOutput = await compiler.recompile(
+      final CompilerOutput? compilerOutput = await compiler?.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
-        projectRootPath: flutterProject?.directory?.absolute?.path,
+        projectRootPath: flutterProject.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
       );
-      final String outputPath = compilerOutput?.outputFilename;
+      final String? outputPath = compilerOutput?.outputFilename;
 
       // In case compiler didn't produce output or reported compilation
       // errors, pass [null] upwards to the consumer and shutdown the
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
-      if (outputPath == null || compilerOutput.errorCount > 0) {
+      final int errorCount = compilerOutput?.errorCount ?? 0;
+      if (outputPath == null || errorCount > 0) {
         request.result.complete(null);
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+          final String path =
+              request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
-          if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+          if (firstCompile ||
+              !testCache.existsSync() ||
+              (testCache.lengthSync() < outputFile.lengthSync())) {
             // The idea is to keep the cache file up-to-date and include as
             // much as possible in an effort to re-use as many packages as
             // possible.
@@ -197,10 +200,11 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        compiler.accept();
-        compiler.reset();
+        compiler?.accept();
+        compiler?.reset();
       }
-      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace(
+          'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
