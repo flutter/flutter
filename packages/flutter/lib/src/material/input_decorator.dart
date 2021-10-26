@@ -2951,7 +2951,7 @@ class InputDecoration {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// TextField(
+  /// const TextField(
   ///   decoration: InputDecoration(
   ///     border: OutlineInputBorder(),
   ///     labelText: 'Enter name',
@@ -3086,7 +3086,7 @@ class InputDecoration {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// TextField(
+  /// const TextField(
   ///   decoration: InputDecoration(
   ///     border: OutlineInputBorder(),
   ///     labelText: 'Enter name',
