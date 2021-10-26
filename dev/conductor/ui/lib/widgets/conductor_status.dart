@@ -6,6 +6,7 @@ import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/proto.dart' as pb;
 import 'package:flutter/material.dart';
 
+import 'common/dialog_prompt.dart';
 import 'common/tooltip.dart';
 
 /// Displays the current conductor state.
@@ -98,46 +99,60 @@ class ConductorStatusState extends State<ConductorStatus> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Table(
+          columnWidths: const <int, TableColumnWidth>{
+            0: FixedColumnWidth(200.0),
+          },
+          children: <TableRow>[
+            for (String headerElement in ConductorStatus.headerElements)
+              TableRow(
+                children: <Widget>[
+                  Text('$headerElement:'),
+                  SelectableText((currentStatus[headerElement] == null || currentStatus[headerElement] == '')
+                      ? 'Unknown'
+                      : currentStatus[headerElement]! as String),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 20.0),
+        Wrap(
           children: <Widget>[
-            Table(
-              columnWidths: const <int, TableColumnWidth>{
-                0: FixedColumnWidth(200.0),
-              },
-              children: <TableRow>[
-                for (String headerElement in ConductorStatus.headerElements)
-                  TableRow(
-                    children: <Widget>[
-                      Text('$headerElement:'),
-                      SelectableText((currentStatus[headerElement] == null || currentStatus[headerElement] == '')
-                          ? 'Unknown'
-                          : currentStatus[headerElement]! as String),
-                    ],
-                  ),
+            Column(
+              children: <Widget>[
+                RepoInfoExpansion(engineOrFramework: 'engine', currentStatus: currentStatus),
+                const SizedBox(height: 10.0),
+                CherrypickTable(engineOrFramework: 'engine', currentStatus: currentStatus),
               ],
             ),
-            const SizedBox(height: 20.0),
-            Wrap(
+            const SizedBox(width: 20.0),
+            Column(
               children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    RepoInfoExpansion(engineOrFramework: 'engine', currentStatus: currentStatus),
-                    const SizedBox(height: 10.0),
-                    CherrypickTable(engineOrFramework: 'engine', currentStatus: currentStatus),
-                  ],
-                ),
-                const SizedBox(width: 20.0),
-                Column(
-                  children: <Widget>[
-                    RepoInfoExpansion(engineOrFramework: 'framework', currentStatus: currentStatus),
-                    const SizedBox(height: 10.0),
-                    CherrypickTable(engineOrFramework: 'framework', currentStatus: currentStatus),
-                  ],
-                ),
+                RepoInfoExpansion(engineOrFramework: 'framework', currentStatus: currentStatus),
+                const SizedBox(height: 10.0),
+                CherrypickTable(engineOrFramework: 'framework', currentStatus: currentStatus),
               ],
-            )
+            ),
           ],
+        ),
+        const SizedBox(height: 30.0),
+        Center(
+          // TODO(Yugue): Add regex validation for each parameter input
+          // before Continue button is enabled, https://github.com/flutter/flutter/issues/91925.
+          child: ElevatedButton(
+            key: const Key('conductorClean'),
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
+            onPressed: () {
+              dialogPrompt(
+                context: context,
+                title: 'Are you sure you want to clean up the persistent state file?',
+                content: 'This will abort a work in progress release.',
+                leftOption: 'Yes',
+                rightOption: 'No',
+              );
+            },
+            child: const Text('Clean'),
+          ),
         ),
       ],
     );
