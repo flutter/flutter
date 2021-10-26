@@ -35,7 +35,6 @@ public class MethodChannel {
   private final BinaryMessenger messenger;
   private final String name;
   private final MethodCodec codec;
-  private final BinaryMessenger.TaskQueue taskQueue;
 
   /**
    * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
@@ -57,25 +56,6 @@ public class MethodChannel {
    * @param codec a {@link MessageCodec}.
    */
   public MethodChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
-    this(messenger, name, codec, null);
-  }
-
-  /**
-   * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
-   * specified name and {@link MethodCodec}.
-   *
-   * @param messenger a {@link BinaryMessenger}.
-   * @param name a channel name String.
-   * @param codec a {@link MessageCodec}.
-   * @param taskQueue a {@link BinaryMessenger.TaskQueue} that specifies what thread will execute
-   *     the handler. Specifying null means execute on the platform thread. See also {@link
-   *     BinaryMessenger#makeBackgroundTaskQueue()}.
-   */
-  public MethodChannel(
-      BinaryMessenger messenger,
-      String name,
-      MethodCodec codec,
-      @Nullable BinaryMessenger.TaskQueue taskQueue) {
     if (BuildConfig.DEBUG) {
       if (messenger == null) {
         Log.e(TAG, "Parameter messenger must not be null.");
@@ -90,7 +70,6 @@ public class MethodChannel {
     this.messenger = messenger;
     this.name = name;
     this.codec = codec;
-    this.taskQueue = taskQueue;
   }
 
   /**
@@ -138,7 +117,7 @@ public class MethodChannel {
   @UiThread
   public void setMethodCallHandler(final @Nullable MethodCallHandler handler) {
     messenger.setMessageHandler(
-        name, handler == null ? null : new IncomingMethodCallHandler(handler), taskQueue);
+        name, handler == null ? null : new IncomingMethodCallHandler(handler));
   }
 
   /**

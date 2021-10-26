@@ -625,7 +625,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   }
 
   platform_view_ = std::move(platform_view);
-  platform_message_handler_ = platform_view_->GetPlatformMessageHandler();
   engine_ = std::move(engine);
   rasterizer_ = std::move(rasterizer);
   io_manager_ = std::move(io_manager);
@@ -1193,17 +1192,13 @@ void Shell::OnEngineHandlePlatformMessage(
     return;
   }
 
-  if (platform_message_handler_) {
-    platform_message_handler_->HandlePlatformMessage(std::move(message));
-  } else {
-    task_runners_.GetPlatformTaskRunner()->PostTask(
-        fml::MakeCopyable([view = platform_view_->GetWeakPtr(),
-                           message = std::move(message)]() mutable {
-          if (view) {
-            view->HandlePlatformMessage(std::move(message));
-          }
-        }));
-  }
+  task_runners_.GetPlatformTaskRunner()->PostTask(
+      fml::MakeCopyable([view = platform_view_->GetWeakPtr(),
+                         message = std::move(message)]() mutable {
+        if (view) {
+          view->HandlePlatformMessage(std::move(message));
+        }
+      }));
 }
 
 void Shell::HandleEngineSkiaMessage(std::unique_ptr<PlatformMessage> message) {
@@ -1870,11 +1865,6 @@ void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
 
 fml::TimePoint Shell::GetCurrentTimePoint() {
   return fml::TimePoint::Now();
-}
-
-const std::shared_ptr<PlatformMessageHandler>&
-Shell::GetPlatformMessageHandler() const {
-  return platform_message_handler_;
 }
 
 }  // namespace flutter

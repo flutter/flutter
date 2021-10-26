@@ -16,7 +16,6 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
 namespace flutter {
@@ -96,11 +95,6 @@ class AndroidShellHolder {
   void UpdateAssetManager(fml::RefPtr<flutter::AssetManager> asset_manager);
 
   void NotifyLowMemoryWarning();
-
-  const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
-      const {
-    return shell_->GetPlatformMessageHandler();
-  }
 
  private:
   const flutter::Settings settings_;
