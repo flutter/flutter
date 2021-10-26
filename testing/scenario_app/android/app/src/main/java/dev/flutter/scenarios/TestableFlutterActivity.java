@@ -19,8 +19,7 @@ public abstract class TestableFlutterActivity extends FlutterActivity {
     // registration will fail and print a scary exception in the logs.
     flutterEngine
         .getDartExecutor()
-        .setMessageHandler(
-            "take_screenshot", (byteBuffer, binaryReply) -> notifyFlutterRendered(), null);
+        .setMessageHandler("take_screenshot", (byteBuffer, binaryReply) -> notifyFlutterRendered());
   }
 
   protected void notifyFlutterRendered() {
