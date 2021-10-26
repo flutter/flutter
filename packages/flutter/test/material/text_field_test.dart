@@ -1110,9 +1110,6 @@ void main() {
     );
 
     const String testValueOneLine = 'enough text to be exactly at the end of the line.';
-    // Enter a string with the same number of characters as testValueTwoLines,
-    // but where the overflowing part is all spaces. Assert that it only renders
-    // on one line.
     const String testValueSpaces = '$testValueOneLine          ';
 
     // Positioning the cursor at the end of a line overflowing with spaces puts
