@@ -78,8 +78,8 @@ FLUTTER_ASSERT_ARC
 
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
 
-  [binaryMessenger cleanupConnection:waitingForStatusConnection];
-  [binaryMessenger cleanupConnection:initialRoutTestChannelConnection];
+  [binaryMessenger cleanUpConnection:waitingForStatusConnection];
+  [binaryMessenger cleanUpConnection:initialRoutTestChannelConnection];
 }
 
 @end

@@ -33,6 +33,33 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
   return flutterLocale;
 }
 
+#pragma mark -
+
+// Records an active handler of the messenger (FlutterEngine) that listens to
+// platform messages on a given channel.
+@interface FlutterEngineHandlerInfo : NSObject
+
+- (instancetype)initWithConnection:(NSNumber*)connection
+                           handler:(FlutterBinaryMessageHandler)handler;
+
+@property(nonatomic, readonly) FlutterBinaryMessageHandler handler;
+@property(nonatomic, readonly) NSNumber* connection;
+
+@end
+
+@implementation FlutterEngineHandlerInfo
+- (instancetype)initWithConnection:(NSNumber*)connection
+                           handler:(FlutterBinaryMessageHandler)handler {
+  self = [super init];
+  NSAssert(self, @"Super init cannot be nil");
+  _connection = connection;
+  _handler = handler;
+  return self;
+}
+@end
+
+#pragma mark -
+
 /**
  * Private interface declaration for FlutterEngine.
  */
@@ -131,8 +158,12 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // The project being run by this engine.
   FlutterDartProject* _project;
 
-  // A mapping of channel names to the registered handlers for those channels.
-  NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
+  // A mapping of channel names to the registered information for those channels.
+  NSMutableDictionary<NSString*, FlutterEngineHandlerInfo*>* _messengerHandlers;
+
+  // A self-incremental integer to assign to newly assigned channels as
+  // identification.
+  FlutterBinaryMessengerConnection _currentMessengerConnection;
 
   // Whether the engine can continue running after the view controller is removed.
   BOOL _allowHeadlessExecution;
@@ -160,7 +191,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   NSAssert(self, @"Super init cannot be nil");
 
   _project = project ?: [[FlutterDartProject alloc] init];
-  _messageHandlers = [[NSMutableDictionary alloc] init];
+  _messengerHandlers = [[NSMutableDictionary alloc] init];
+  _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
 
@@ -544,9 +576,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     }
   };
 
-  FlutterBinaryMessageHandler channelHandler = _messageHandlers[channel];
-  if (channelHandler) {
-    channelHandler(messageData, binaryResponseHandler);
+  FlutterEngineHandlerInfo* handlerInfo = _messengerHandlers[channel];
+  if (handlerInfo) {
+    handlerInfo.handler(messageData, binaryResponseHandler);
   } else {
     binaryResponseHandler(nil);
   }
@@ -640,12 +672,27 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 - (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(nonnull NSString*)channel
                                           binaryMessageHandler:
                                               (nullable FlutterBinaryMessageHandler)handler {
-  _messageHandlers[channel] = [handler copy];
-  return 0;
+  _currentMessengerConnection += 1;
+  _messengerHandlers[channel] =
+      [[FlutterEngineHandlerInfo alloc] initWithConnection:@(_currentMessengerConnection)
+                                                   handler:[handler copy]];
+  return _currentMessengerConnection;
 }
 
-- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
-  // There hasn't been a need to implement this yet for macOS.
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
+  // Find the _messengerHandlers that has the required connection, and record its
+  // channel.
+  NSString* foundChannel = nil;
+  for (NSString* key in [_messengerHandlers allKeys]) {
+    FlutterEngineHandlerInfo* handlerInfo = [_messengerHandlers objectForKey:key];
+    if ([handlerInfo.connection isEqual:@(connection)]) {
+      foundChannel = key;
+      break;
+    }
+  }
+  if (foundChannel) {
+    [_messengerHandlers removeObjectForKey:foundChannel];
+  }
 }
 
 #pragma mark - FlutterPluginRegistry

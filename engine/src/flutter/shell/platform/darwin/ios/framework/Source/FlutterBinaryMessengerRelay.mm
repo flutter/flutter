@@ -46,9 +46,9 @@
   }
 }
 
-- (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
   if (self.parent) {
-    return [self.parent cleanupConnection:connection];
+    return [self.parent cleanUpConnection:connection];
   } else {
     FML_LOG(WARNING) << "Communicating on a dead channel.";
   }
