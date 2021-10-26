@@ -29,7 +29,9 @@ class SemanticsAction {
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
   static const int _kSetText = 1 << 21;
+
   final int index;
+
   static const SemanticsAction tap = SemanticsAction._(_kTapIndex);
   static const SemanticsAction longPress = SemanticsAction._(_kLongPressIndex);
   static const SemanticsAction scrollLeft = SemanticsAction._(_kScrollLeftIndex);
@@ -39,25 +41,20 @@ class SemanticsAction {
   static const SemanticsAction increase = SemanticsAction._(_kIncreaseIndex);
   static const SemanticsAction decrease = SemanticsAction._(_kDecreaseIndex);
   static const SemanticsAction showOnScreen = SemanticsAction._(_kShowOnScreenIndex);
-  static const SemanticsAction moveCursorForwardByCharacter =
-      SemanticsAction._(_kMoveCursorForwardByCharacterIndex);
-  static const SemanticsAction moveCursorBackwardByCharacter =
-      SemanticsAction._(_kMoveCursorBackwardByCharacterIndex);
+  static const SemanticsAction moveCursorForwardByCharacter = SemanticsAction._(_kMoveCursorForwardByCharacterIndex);
+  static const SemanticsAction moveCursorBackwardByCharacter = SemanticsAction._(_kMoveCursorBackwardByCharacterIndex);
+  static const SemanticsAction setText = SemanticsAction._(_kSetText);
   static const SemanticsAction setSelection = SemanticsAction._(_kSetSelectionIndex);
   static const SemanticsAction copy = SemanticsAction._(_kCopyIndex);
   static const SemanticsAction cut = SemanticsAction._(_kCutIndex);
   static const SemanticsAction paste = SemanticsAction._(_kPasteIndex);
-  static const SemanticsAction didGainAccessibilityFocus =
-      SemanticsAction._(_kDidGainAccessibilityFocusIndex);
-  static const SemanticsAction didLoseAccessibilityFocus =
-      SemanticsAction._(_kDidLoseAccessibilityFocusIndex);
+  static const SemanticsAction didGainAccessibilityFocus = SemanticsAction._(_kDidGainAccessibilityFocusIndex);
+  static const SemanticsAction didLoseAccessibilityFocus = SemanticsAction._(_kDidLoseAccessibilityFocusIndex);
   static const SemanticsAction customAction = SemanticsAction._(_kCustomAction);
   static const SemanticsAction dismiss = SemanticsAction._(_kDismissIndex);
-  static const SemanticsAction moveCursorForwardByWord =
-      SemanticsAction._(_kMoveCursorForwardByWordIndex);
-  static const SemanticsAction moveCursorBackwardByWord =
-      SemanticsAction._(_kMoveCursorBackwardByWordIndex);
-  static const SemanticsAction setText = SemanticsAction._(_kSetText);
+  static const SemanticsAction moveCursorForwardByWord = SemanticsAction._(_kMoveCursorForwardByWordIndex);
+  static const SemanticsAction moveCursorBackwardByWord = SemanticsAction._(_kMoveCursorBackwardByWordIndex);
+
   static const Map<int, SemanticsAction> values = <int, SemanticsAction>{
     _kTapIndex: tap,
     _kLongPressIndex: longPress,
@@ -131,12 +128,16 @@ class SemanticsAction {
       case _kSetText:
         return 'SemanticsAction.setText';
     }
-    assert(false, 'Unhandled index: $index');
+    assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');
     return '';
   }
 }
 
 class SemanticsFlag {
+  const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
+
+  final int index;
+
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
@@ -163,15 +164,15 @@ class SemanticsFlag {
   static const int _kIsSliderIndex = 1 << 23;
   static const int _kIsKeyboardKeyIndex = 1 << 24;
 
-  const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
-  final int index;
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(_kHasCheckedStateIndex);
   static const SemanticsFlag isChecked = SemanticsFlag._(_kIsCheckedIndex);
   static const SemanticsFlag isSelected = SemanticsFlag._(_kIsSelectedIndex);
   static const SemanticsFlag isButton = SemanticsFlag._(_kIsButtonIndex);
-  static const SemanticsFlag isLink = SemanticsFlag._(_kIsLinkIndex);
   static const SemanticsFlag isTextField = SemanticsFlag._(_kIsTextFieldIndex);
+  static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex);
+  static const SemanticsFlag isKeyboardKey = SemanticsFlag._(_kIsKeyboardKeyIndex);
   static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex);
+  static const SemanticsFlag isLink = SemanticsFlag._(_kIsLinkIndex);
   static const SemanticsFlag isFocusable = SemanticsFlag._(_kIsFocusableIndex);
   static const SemanticsFlag isFocused = SemanticsFlag._(_kIsFocusedIndex);
   static const SemanticsFlag hasEnabledState = SemanticsFlag._(_kHasEnabledStateIndex);
@@ -179,6 +180,7 @@ class SemanticsFlag {
   static const SemanticsFlag isInMutuallyExclusiveGroup = SemanticsFlag._(_kIsInMutuallyExclusiveGroupIndex);
   static const SemanticsFlag isHeader = SemanticsFlag._(_kIsHeaderIndex);
   static const SemanticsFlag isObscured = SemanticsFlag._(_kIsObscuredIndex);
+  static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex);
   static const SemanticsFlag scopesRoute = SemanticsFlag._(_kScopesRouteIndex);
   static const SemanticsFlag namesRoute = SemanticsFlag._(_kNamesRouteIndex);
   static const SemanticsFlag isHidden = SemanticsFlag._(_kIsHiddenIndex);
@@ -187,18 +189,13 @@ class SemanticsFlag {
   static const SemanticsFlag hasToggledState = SemanticsFlag._(_kHasToggledStateIndex);
   static const SemanticsFlag isToggled = SemanticsFlag._(_kIsToggledIndex);
   static const SemanticsFlag hasImplicitScrolling = SemanticsFlag._(_kHasImplicitScrollingIndex);
-  static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex);
-  static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex);
-  static const SemanticsFlag isKeyboardKey = SemanticsFlag._(_kIsKeyboardKeyIndex);
+
   static const Map<int, SemanticsFlag> values = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
     _kIsButtonIndex: isButton,
-    _kIsLinkIndex: isLink,
-    _kIsSliderIndex: isSlider,
     _kIsTextFieldIndex: isTextField,
-    _kIsFocusableIndex: isFocusable,
     _kIsFocusedIndex: isFocused,
     _kHasEnabledStateIndex: hasEnabledState,
     _kIsEnabledIndex: isEnabled,
@@ -215,6 +212,9 @@ class SemanticsFlag {
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
+    _kIsFocusableIndex: isFocusable,
+    _kIsLinkIndex: isLink,
+    _kIsSliderIndex: isSlider,
     _kIsKeyboardKeyIndex: isKeyboardKey,
   };
 
@@ -229,12 +229,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isSelected';
       case _kIsButtonIndex:
         return 'SemanticsFlag.isButton';
-      case _kIsLinkIndex:
-        return 'SemanticsFlag.isLink';
       case _kIsTextFieldIndex:
         return 'SemanticsFlag.isTextField';
-      case _kIsFocusableIndex:
-        return 'SemanticsFlag.isFocusable';
       case _kIsFocusedIndex:
         return 'SemanticsFlag.isFocused';
       case _kHasEnabledStateIndex:
@@ -267,20 +263,27 @@ class SemanticsFlag {
         return 'SemanticsFlag.isMultiline';
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
+      case _kIsFocusableIndex:
+        return 'SemanticsFlag.isFocusable';
+      case _kIsLinkIndex:
+        return 'SemanticsFlag.isLink';
+      case _kIsSliderIndex:
+        return 'SemanticsFlag.isSlider';
       case _kIsKeyboardKeyIndex:
         return 'SemanticsFlag.isKeyboardKey';
     }
-    assert(false, 'Unhandled index: $index');
+    assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');
     return '';
   }
 }
-
 
 // When adding a new StringAttributeType, the classes in these file must be
 // updated as well.
 //  * engine/src/flutter/lib/ui/semantics.dart
 //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
 //  * engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
+//  * engine/src/flutter/lib/web_ui/test/engine/semantics/semantics_api_test.dart
+//  * engine/src/flutter/testing/dart/semantics_test.dart
 
 abstract class StringAttribute {
   StringAttribute._({
@@ -304,7 +307,7 @@ class SpellOutStringAttribute extends StringAttribute {
 
   @override
   String toString() {
-    return 'SpellOutStringAttribute(range: $range)';
+    return 'SpellOutStringAttribute($range)';
   }
 }
 
@@ -323,7 +326,7 @@ class LocaleStringAttribute extends StringAttribute {
 
   @override
   String toString() {
-    return 'LocaleStringAttribute(range: $range, locale: ${locale.toLanguageTag()})';
+    return 'LocaleStringAttribute($range, ${locale.toLanguageTag()})';
   }
 }
 

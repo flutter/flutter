@@ -20,6 +20,8 @@ using StringAttributes = std::vector<StringAttributePtr>;
 //  * engine/src/flutter/lib/ui/semantics.dart
 //  * engine/src/flutter/lib/web_ui/lib/src/ui/semantics.dart
 //  * engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
+//  * engine/src/flutter/lib/web_ui/test/engine/semantics/semantics_api_test.dart
+//  * engine/src/flutter/testing/dart/semantics_test.dart
 
 enum class StringAttributeType : int32_t {
   kSpellOut,
