@@ -34,9 +34,8 @@ struct IxnHasher {
 // processing and dispatch.
 class PointerDelegate {
  public:
-  PointerDelegate(
-      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source)
+  PointerDelegate(fuchsia::ui::pointer::TouchSourceHandle touch_source,
+                  fuchsia::ui::pointer::MouseSourceHandle mouse_source)
       : touch_source_(touch_source.Bind()),
         mouse_source_(mouse_source.Bind()) {}
 

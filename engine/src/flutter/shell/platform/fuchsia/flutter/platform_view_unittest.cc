@@ -194,10 +194,9 @@ class MockKeyboard : public fuchsia::ui::input3::testing::Keyboard_TestBase {
       : keyboard_(this, std::move(keyboard)) {}
   ~MockKeyboard() = default;
 
-  void AddListener(
-      fuchsia::ui::views::ViewRef view_ref,
-      fidl::InterfaceHandle<fuchsia::ui::input3::KeyboardListener> listener,
-      AddListenerCallback callback) override {
+  void AddListener(fuchsia::ui::views::ViewRef view_ref,
+                   fuchsia::ui::input3::KeyboardListenerHandle listener,
+                   AddListenerCallback callback) override {
     FML_CHECK(!listener_.is_bound());
 
     listener_ = listener.Bind();
@@ -235,38 +234,36 @@ class PlatformViewBuilder {
   }
 
   PlatformViewBuilder& SetImeService(
-      fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service) {
+      fuchsia::ui::input::ImeServiceHandle ime_service) {
     ime_service_ = std::move(ime_service);
     return *this;
   }
 
   PlatformViewBuilder& SetKeyboard(
-      fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard) {
+      fuchsia::ui::input3::KeyboardHandle keyboard) {
     keyboard_ = std::move(keyboard);
     return *this;
   }
 
   PlatformViewBuilder& SetTouchSource(
-      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source) {
+      fuchsia::ui::pointer::TouchSourceHandle touch_source) {
     touch_source_ = std::move(touch_source);
     return *this;
   }
 
   PlatformViewBuilder& SetMouseSource(
-      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source) {
+      fuchsia::ui::pointer::MouseSourceHandle mouse_source) {
     mouse_source_ = std::move(mouse_source);
     return *this;
   }
 
-  PlatformViewBuilder& SetFocuser(
-      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser) {
+  PlatformViewBuilder& SetFocuser(fuchsia::ui::views::FocuserHandle focuser) {
     focuser_ = std::move(focuser);
     return *this;
   }
 
   PlatformViewBuilder& SetViewRefFocused(
-      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
-          view_ref_focused) {
+      fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused) {
     view_ref_focused_ = std::move(view_ref_focused);
     return *this;
   }
@@ -337,12 +334,12 @@ class PlatformViewBuilder {
 
   std::shared_ptr<flutter::ExternalViewEmbedder>
       external_external_view_embedder_;
-  fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service_;
-  fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard_;
-  fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source_;
-  fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source_;
-  fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused> view_ref_focused_;
-  fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser_;
+  fuchsia::ui::input::ImeServiceHandle ime_service_;
+  fuchsia::ui::input3::KeyboardHandle keyboard_;
+  fuchsia::ui::pointer::TouchSourceHandle touch_source_;
+  fuchsia::ui::pointer::MouseSourceHandle mouse_source_;
+  fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused_;
+  fuchsia::ui::views::FocuserHandle focuser_;
   fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
       session_listener_request_;
   fit::closure on_session_listener_error_callback_;
@@ -1242,7 +1239,7 @@ TEST_F(PlatformViewTests, OnKeyEvent) {
   flutter::TaskRunners task_runners =
       flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
 
-  fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard_service;
+  fuchsia::ui::input3::KeyboardHandle keyboard_service;
   MockKeyboard keyboard(keyboard_service.NewRequest());
 
   flutter_runner::GfxPlatformView platform_view =

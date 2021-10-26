@@ -218,8 +218,7 @@ std::string NodeChildrenToString(const flutter::SemanticsNode& node) {
 AccessibilityBridge::AccessibilityBridge(
     SetSemanticsEnabledCallback set_semantics_enabled_callback,
     DispatchSemanticsActionCallback dispatch_semantics_action_callback,
-    fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
-        semantics_manager,
+    fuchsia::accessibility::semantics::SemanticsManagerHandle semantics_manager,
     fuchsia::ui::views::ViewRef view_ref,
     inspect::Node inspect_node)
     : set_semantics_enabled_callback_(

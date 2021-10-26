@@ -30,13 +30,12 @@ static constexpr fml::TimeDelta kDefaultFlatlandPresentationInterval =
 // maintaining the Flatland instance connection and presenting updates.
 class FlatlandConnection final {
  public:
-  FlatlandConnection(
-      std::string debug_label,
-      fidl::InterfaceHandle<fuchsia::ui::composition::Flatland> flatland,
-      fml::closure error_callback,
-      on_frame_presented_event on_frame_presented_callback,
-      uint64_t max_frames_in_flight,
-      fml::TimeDelta vsync_offset);
+  FlatlandConnection(std::string debug_label,
+                     fuchsia::ui::composition::FlatlandHandle flatland,
+                     fml::closure error_callback,
+                     on_frame_presented_event on_frame_presented_callback,
+                     uint64_t max_frames_in_flight,
+                     fml::TimeDelta vsync_offset);
 
   ~FlatlandConnection();
 

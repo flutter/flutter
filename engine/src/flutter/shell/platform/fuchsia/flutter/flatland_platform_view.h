@@ -27,14 +27,13 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
       flutter::TaskRunners task_runners,
       fuchsia::ui::views::ViewRef view_ref,
       std::shared_ptr<flutter::ExternalViewEmbedder> external_view_embedder,
-      fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service,
-      fidl::InterfaceHandle<fuchsia::ui::input3::Keyboard> keyboard,
-      fidl::InterfaceHandle<fuchsia::ui::pointer::TouchSource> touch_source,
-      fidl::InterfaceHandle<fuchsia::ui::pointer::MouseSource> mouse_source,
-      fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
-      fidl::InterfaceHandle<fuchsia::ui::views::ViewRefFocused>
-          view_ref_focused,
-      fidl::InterfaceHandle<fuchsia::ui::composition::ParentViewportWatcher>
+      fuchsia::ui::input::ImeServiceHandle ime_service,
+      fuchsia::ui::input3::KeyboardHandle keyboard,
+      fuchsia::ui::pointer::TouchSourceHandle touch_source,
+      fuchsia::ui::pointer::MouseSourceHandle mouse_source,
+      fuchsia::ui::views::FocuserHandle focuser,
+      fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+      fuchsia::ui::composition::ParentViewportWatcherHandle
           parent_viewport_watcher,
       OnEnableWireframe wireframe_enabled_callback,
       OnCreateFlatlandView on_create_view_callback,
