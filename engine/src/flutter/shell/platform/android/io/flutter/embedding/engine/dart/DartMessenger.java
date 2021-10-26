@@ -13,11 +13,6 @@ import io.flutter.plugin.common.BinaryMessenger;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -31,104 +26,25 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   private static final String TAG = "DartMessenger";
 
   @NonNull private final FlutterJNI flutterJNI;
-
-  @NonNull private final ConcurrentHashMap<String, HandlerInfo> messageHandlers;
-
+  @NonNull private final Map<String, BinaryMessenger.BinaryMessageHandler> messageHandlers;
   @NonNull private final Map<Integer, BinaryMessenger.BinaryReply> pendingReplies;
   private int nextReplyId = 1;
 
-  @NonNull private final DartMessengerTaskQueue platformTaskQueue = new PlatformTaskQueue();
-
-  @NonNull private WeakHashMap<TaskQueue, DartMessengerTaskQueue> createdTaskQueues;
-
-  @NonNull private TaskQueueFactory taskQueueFactory;
-
-  DartMessenger(@NonNull FlutterJNI flutterJNI, @NonNull TaskQueueFactory taskQueueFactory) {
-    this.flutterJNI = flutterJNI;
-    this.messageHandlers = new ConcurrentHashMap<>();
-    this.pendingReplies = new HashMap<>();
-    this.createdTaskQueues = new WeakHashMap<TaskQueue, DartMessengerTaskQueue>();
-    this.taskQueueFactory = taskQueueFactory;
-  }
-
   DartMessenger(@NonNull FlutterJNI flutterJNI) {
-    this(flutterJNI, new DefaultTaskQueueFactory());
-  }
-
-  private static class TaskQueueToken implements TaskQueue {}
-
-  interface DartMessengerTaskQueue {
-    void dispatch(@NonNull Runnable runnable);
-  }
-
-  interface TaskQueueFactory {
-    DartMessengerTaskQueue makeBackgroundTaskQueue();
-  }
-
-  private static class DefaultTaskQueueFactory implements TaskQueueFactory {
-    public DartMessengerTaskQueue makeBackgroundTaskQueue() {
-      return new DefaultTaskQueue();
-    }
-  }
-
-  private static class HandlerInfo {
-    @NonNull public final BinaryMessenger.BinaryMessageHandler handler;
-    @Nullable public final DartMessengerTaskQueue taskQueue;
-
-    HandlerInfo(
-        @NonNull BinaryMessenger.BinaryMessageHandler handler,
-        @Nullable DartMessengerTaskQueue taskQueue) {
-      this.handler = handler;
-      this.taskQueue = taskQueue;
-    }
-  }
-
-  private static class DefaultTaskQueue implements DartMessengerTaskQueue {
-    @NonNull private final ExecutorService executor;
-
-    DefaultTaskQueue() {
-      // TODO(gaaclarke): Use a shared thread pool with serial queues instead of
-      // making a thread for each TaskQueue.
-      ThreadFactory threadFactory =
-          (Runnable runnable) -> {
-            return new Thread(runnable, "DartMessenger.DefaultTaskQueue");
-          };
-      this.executor = Executors.newSingleThreadExecutor(threadFactory);
-    }
-
-    @Override
-    public void dispatch(@NonNull Runnable runnable) {
-      executor.execute(runnable);
-    }
-  }
-
-  @Override
-  public TaskQueue makeBackgroundTaskQueue() {
-    DartMessengerTaskQueue taskQueue = taskQueueFactory.makeBackgroundTaskQueue();
-    TaskQueueToken token = new TaskQueueToken();
-    createdTaskQueues.put(token, taskQueue);
-    return token;
+    this.flutterJNI = flutterJNI;
+    this.messageHandlers = new HashMap<>();
+    this.pendingReplies = new HashMap<>();
   }
 
   @Override
   public void setMessageHandler(
-      @NonNull String channel,
-      @Nullable BinaryMessenger.BinaryMessageHandler handler,
-      @Nullable TaskQueue taskQueue) {
+      @NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
     if (handler == null) {
       Log.v(TAG, "Removing handler for channel '" + channel + "'");
       messageHandlers.remove(channel);
     } else {
-      DartMessengerTaskQueue dartMessengerTaskQueue = null;
-      if (taskQueue != null) {
-        dartMessengerTaskQueue = createdTaskQueues.get(taskQueue);
-        if (dartMessengerTaskQueue == null) {
-          throw new IllegalArgumentException(
-              "Unrecognized TaskQueue, use BinaryMessenger to create your TaskQueue (ex makeBackgroundTaskQueue).");
-        }
-      }
       Log.v(TAG, "Setting handler for channel '" + channel + "'");
-      messageHandlers.put(channel, new HandlerInfo(handler, dartMessengerTaskQueue));
+      messageHandlers.put(channel, handler);
     }
   }
 
@@ -156,13 +72,20 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     }
   }
 
-  private void invokeHandler(
-      @Nullable HandlerInfo handlerInfo, @Nullable ByteBuffer message, final int replyId) {
-    // Called from any thread.
-    if (handlerInfo != null) {
+  @Override
+  public void handleMessageFromDart(
+      @NonNull final String channel, @Nullable ByteBuffer message, final int replyId) {
+    Log.v(TAG, "Received message from Dart over channel '" + channel + "'");
+    BinaryMessenger.BinaryMessageHandler handler = messageHandlers.get(channel);
+    if (handler != null) {
       try {
         Log.v(TAG, "Deferring to registered handler to process message.");
-        handlerInfo.handler.onMessage(message, new Reply(flutterJNI, replyId));
+        handler.onMessage(message, new Reply(flutterJNI, replyId));
+        if (message != null && message.isDirect()) {
+          // This ensures that if a user retains an instance to the ByteBuffer and it happens to
+          // be direct they will get a deterministic error.
+          message.limit(0);
+        }
       } catch (Exception ex) {
         Log.e(TAG, "Uncaught exception in binary message listener", ex);
         flutterJNI.invokePlatformMessageEmptyResponseCallback(replyId);
@@ -173,37 +96,6 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       Log.v(TAG, "No registered handler for message. Responding to Dart with empty reply message.");
       flutterJNI.invokePlatformMessageEmptyResponseCallback(replyId);
     }
-  }
-
-  @Override
-  public void handleMessageFromDart(
-      @NonNull final String channel,
-      @Nullable ByteBuffer message,
-      final int replyId,
-      long messageData) {
-    // Called from the ui thread.
-    Log.v(TAG, "Received message from Dart over channel '" + channel + "'");
-    @Nullable final HandlerInfo handlerInfo = messageHandlers.get(channel);
-    @Nullable
-    final DartMessengerTaskQueue taskQueue = (handlerInfo != null) ? handlerInfo.taskQueue : null;
-    Runnable myRunnable =
-        () -> {
-          try {
-            invokeHandler(handlerInfo, message, replyId);
-            if (message != null && message.isDirect()) {
-              // This ensures that if a user retains an instance to the ByteBuffer and it happens to
-              // be direct they will get a deterministic error.
-              message.limit(0);
-            }
-          } finally {
-            // This is deleting the data underneath the message object.
-            flutterJNI.cleanupMessageData(messageData);
-          }
-        };
-    @NonNull
-    final DartMessengerTaskQueue nonnullTaskQueue =
-        taskQueue == null ? platformTaskQueue : taskQueue;
-    nonnullTaskQueue.dispatch(myRunnable);
   }
 
   @Override

@@ -184,9 +184,4 @@ PlatformView::CreateSnapshotSurfaceProducer() {
   return nullptr;
 }
 
-std::shared_ptr<PlatformMessageHandler>
-PlatformView::GetPlatformMessageHandler() const {
-  return nullptr;
-}
-
 }  // namespace flutter

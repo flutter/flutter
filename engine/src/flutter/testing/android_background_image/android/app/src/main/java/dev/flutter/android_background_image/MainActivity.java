@@ -31,10 +31,7 @@ public class MainActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    flutterEngine
-        .getDartExecutor()
-        .getBinaryMessenger()
-        .setMessageHandler("finish", finishHandler, null);
+    flutterEngine.getDartExecutor().getBinaryMessenger().setMessageHandler("finish", finishHandler);
 
     final boolean moved = moveTaskToBack(true);
     if (!moved) {

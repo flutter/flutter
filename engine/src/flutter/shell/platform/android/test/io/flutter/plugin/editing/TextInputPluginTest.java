@@ -1884,7 +1884,7 @@ public class TextInputPluginTest {
     textInputChannel.setTextInputMethodHandler(mockHandler);
 
     verify(mockBinaryMessenger, times(1))
-        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture(), eq(null));
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
 
     BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
         binaryMessageHandlerCaptor.getValue();
@@ -1917,7 +1917,7 @@ public class TextInputPluginTest {
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
 
     verify(mockBinaryMessenger, times(1))
-        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture(), eq(null));
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
 
     JSONObject arguments = new JSONObject();
     arguments.put("action", "actionCommand");
@@ -1948,7 +1948,7 @@ public class TextInputPluginTest {
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
 
     verify(mockBinaryMessenger, times(1))
-        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture(), eq(null));
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
 
     JSONObject arguments = new JSONObject();
     arguments.put("action", "actionCommand");

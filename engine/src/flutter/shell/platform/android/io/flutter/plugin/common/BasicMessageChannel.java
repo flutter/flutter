@@ -36,7 +36,6 @@ public final class BasicMessageChannel<T> {
   @NonNull private final BinaryMessenger messenger;
   @NonNull private final String name;
   @NonNull private final MessageCodec<T> codec;
-  @Nullable private final BinaryMessenger.TaskQueue taskQueue;
 
   /**
    * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
@@ -48,25 +47,6 @@ public final class BasicMessageChannel<T> {
    */
   public BasicMessageChannel(
       @NonNull BinaryMessenger messenger, @NonNull String name, @NonNull MessageCodec<T> codec) {
-    this(messenger, name, codec, null);
-  }
-
-  /**
-   * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
-   * specified name and {@link MessageCodec}.
-   *
-   * @param messenger a {@link BinaryMessenger}.
-   * @param name a channel name String.
-   * @param codec a {@link MessageCodec}.
-   * @param taskQueue a {@link BinaryMessenger.TaskQueue} that specifies what thread will execute
-   *     the handler. Specifying null means execute on the platform thread. See also {@link
-   *     BinaryMessenger#makeBackgroundTaskQueue()}.
-   */
-  public BasicMessageChannel(
-      @NonNull BinaryMessenger messenger,
-      @NonNull String name,
-      @NonNull MessageCodec<T> codec,
-      BinaryMessenger.TaskQueue taskQueue) {
     if (BuildConfig.DEBUG) {
       if (messenger == null) {
         Log.e(TAG, "Parameter messenger must not be null.");
@@ -81,7 +61,6 @@ public final class BasicMessageChannel<T> {
     this.messenger = messenger;
     this.name = name;
     this.codec = codec;
-    this.taskQueue = taskQueue;
   }
 
   /**
@@ -122,8 +101,7 @@ public final class BasicMessageChannel<T> {
    */
   @UiThread
   public void setMessageHandler(@Nullable final MessageHandler<T> handler) {
-    messenger.setMessageHandler(
-        name, handler == null ? null : new IncomingMessageHandler(handler), taskQueue);
+    messenger.setMessageHandler(name, handler == null ? null : new IncomingMessageHandler(handler));
   }
 
   /**
