@@ -12,7 +12,7 @@ modify the dependencies in `build.gradle` and run `gradle updateDependencies`.
 
 Once you have updated the dependencies, you can upload a new version by running
 `cipd create --pkg-def cipd.yaml`. For more, see the Chromium instructions on ["Updating a CIPD
-dependency"](https://chromium.googlesource.com/chromium/src/+/master/docs/cipd.md#Updating-a-CIPD-dependency) for how to upload a package update to CIPD.
+dependency"](https://chromium.googlesource.com/chromium/src/+/main/docs/cipd_and_3pp.md#Updating-a-CIPD-dependency) for how to upload a package update to CIPD.
 
 On successful upload, you will receive a hash for the upload such as
 

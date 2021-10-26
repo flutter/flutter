@@ -17,7 +17,7 @@ import androidx.annotation.VisibleForTesting;
 import java.util.List;
 
 // Loosely based off of
-// https://github.com/android/user-interface-samples/blob/master/WindowInsetsAnimation/app/src/main/java/com/google/android/samples/insetsanimation/RootViewDeferringInsetsCallback.kt
+// https://github.com/android/user-interface-samples/blob/main/WindowInsetsAnimation/app/src/main/java/com/google/android/samples/insetsanimation/RootViewDeferringInsetsCallback.kt
 //
 // When the IME is shown or hidden, it immediately sends an onApplyWindowInsets call
 // with the final state of the IME. This initial call disrupts the animation, which

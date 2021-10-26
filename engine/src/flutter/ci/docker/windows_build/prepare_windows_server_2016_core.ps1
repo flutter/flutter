@@ -41,7 +41,7 @@ setx DEPOT_TOOLS_WIN_TOOLCHAIN 0
 setx GYP_MSVS_OVERRIDE_PATH "c:/Program Files (x86)/Microsoft Visual Studio/2017/Community"
 
 mkdir c:/flutter/engine
-curl https://raw.githubusercontent.com/flutter/engine/master/ci/docker/build/engine_gclient `
+curl https://raw.githubusercontent.com/flutter/engine/main/ci/docker/build/engine_gclient `
     -o c:/flutter/engine/.gclient
 
 # Once the above script finishes successfully, one can make an image of the VM

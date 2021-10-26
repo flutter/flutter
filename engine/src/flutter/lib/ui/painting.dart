@@ -3756,7 +3756,7 @@ class ImageShader extends Shader {
 /// This API is in beta and does not yet work on web.
 /// See https://github.com/flutter/flutter/projects/207 for roadmap.
 ///
-/// [A current specification of valid SPIR-V is here.](https://github.com/flutter/engine/blob/master/lib/spirv/README.md)
+/// [A current specification of valid SPIR-V is here.](https://github.com/flutter/engine/blob/main/lib/spirv/README.md)
 ///
 /// When initializing or updating the `floatUniforms`, the length of float
 /// uniforms must match the total number of floats defined as uniforms in

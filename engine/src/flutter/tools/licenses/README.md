@@ -20,7 +20,7 @@ We look at changes to the goldens to determine if there are any actual
 changes to the licenses.
 
 To update the goldens, make sure you've rebased your branch to the
-latest upstream master and then run the following in this directory:
+latest upstream main and then run the following in this directory:
 
 ```
 pub get

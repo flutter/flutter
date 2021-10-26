@@ -15,7 +15,7 @@ import 'path_utils.dart';
 /// See "High order approximation of conic sections by quadratic splines"
 /// by Michael Floater, 1993.
 /// Skia implementation reference:
-/// https://github.com/google/skia/blob/master/src/core/SkGeometry.cpp
+/// https://github.com/google/skia/blob/main/src/core/SkGeometry.cpp
 class Conic {
   double p0x, p0y, p1x, p1y, p2x, p2y;
   final double fW;

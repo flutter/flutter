@@ -86,7 +86,7 @@ To run tests on Firefox (this will work only on a Linux device):
 felt test --browser=firefox
 ```
 
-For Chrome and Firefox, the tests run on a version locked on the [browser_lock.yaml](https://github.com/flutter/engine/blob/master/lib/web_ui/dev/browser_lock.yaml). In order to use another version, add the version argument:
+For Chrome and Firefox, the tests run on a version locked on the [browser_lock.yaml](https://github.com/flutter/engine/blob/main/lib/web_ui/dev/browser_lock.yaml). In order to use another version, add the version argument:
 
 ```
 felt test --browser=firefox --firefox-version=70.0.1
@@ -184,8 +184,8 @@ Some useful links:
 
 1. For Chrome downloads [link](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html)
 2. Browser and driver CIPD [packages](https://chrome-infra-packages.appspot.com/p/flutter_internal) (note: access is restricted for these packages)
-3. LUCI web [recipe](https://flutter.googlesource.com/recipes/+/refs/heads/master/recipes/web_engine.py)
-4. More general reading on CIPD packages [link](https://chromium.googlesource.com/chromium/src.git/+/master/docs/cipd.md#What-is-CIPD)
+3. LUCI web [recipe](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/web_engine.py)
+4. More general reading on CIPD packages [link](https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD)
 
 ## Troubleshooting
 

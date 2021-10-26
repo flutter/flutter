@@ -63,7 +63,7 @@ class FlutterWindowController : public PluginRegistry {
   // application to be run.
   //
   // The |arguments| are passed to the Flutter engine. See:
-  // https://github.com/flutter/engine/blob/master/shell/common/switches.h for
+  // https://github.com/flutter/engine/blob/main/shell/common/switches.h for
   // for details. Not all arguments will apply to desktop.
   //
   // The |aot_library_path| is the path to the libapp.so file for the Flutter

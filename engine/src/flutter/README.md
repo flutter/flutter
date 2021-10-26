@@ -17,7 +17,7 @@ Framework](https://github.com/flutter/flutter), which provides a modern,
 reactive framework, and a rich set of platform, layout and foundation widgets.
 
 If you want to run/contribute to Flutter Web engine, more tooling can be
-found at [felt](https://github.com/flutter/engine/tree/master/lib/web_ui/dev#whats-felt).
+found at [felt](https://github.com/flutter/engine/tree/main/lib/web_ui/dev#whats-felt).
 This is a tool written to make web engine development experience easy.
 
 If you are new to Flutter, then you will find more general information
@@ -30,7 +30,7 @@ Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
 [contributor guide](CONTRIBUTING.md).
 
-[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/engine.svg?branch=master
+[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/engine.svg?branch=main
 
 [Build status]: https://cirrus-ci.com/github/flutter/engine
 

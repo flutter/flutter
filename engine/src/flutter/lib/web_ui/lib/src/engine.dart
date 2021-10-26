@@ -12,7 +12,7 @@ library engine;
 // 2. Exports of engine/* files are replaced with a part directive.
 //
 // The code that performs the transformations lives in:
-// - https://github.com/flutter/engine/blob/master/web_sdk/sdk_rewriter.dart
+// - https://github.com/flutter/engine/blob/main/web_sdk/sdk_rewriter.dart
 
 import 'dart:async';
 // Some of these names are used in services/buffers.dart for example.

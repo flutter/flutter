@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 """
-This script is based on chromium/chromium/master/tools/clang/scripts/update.py.
+This script is based on chromium/chromium/main/tools/clang/scripts/update.py.
 
 It is used on Windows platforms to copy the correct msdia*.dll to the
 clang folder, as a "gclient hook".
