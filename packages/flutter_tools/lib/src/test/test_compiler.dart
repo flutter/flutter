@@ -78,7 +78,7 @@ class TestCompiler {
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
-      return Future<String>.value();
+      return Future<String>.value('');
     }
     compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;
@@ -154,7 +154,6 @@ class TestCompiler {
           buildInfo.packageConfig,
           mainUriString,
           globals.fs.file(request.mainUri),
-          throwOnPluginPubspecError: false,
         );
         invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
       }
@@ -176,7 +175,7 @@ class TestCompiler {
       // a weird state.
       final int errorCount = compilerOutput?.errorCount ?? 0;
       if (outputPath == null || errorCount > 0) {
-        request.result.complete(null);
+        request.result.complete('');
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
