@@ -2,14 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+@TestOn('chrome || safari || firefox')
 
-import 'package:litetest/litetest.dart';
-
-// The body of this file is the same as ../../lib/web_ui/test/engine/semantics/semantics_api_test.dart
-// Please keep them in sync.
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
+import 'package:ui/ui.dart';
 
 void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+// The body of this file is the same as ../../../../../testing/dart/semantics_test.dart
+// Please keep them in sync.
+
+void testMain() {
   // This must match the number of flags in lib/ui/semantics.dart
   const int numSemanticsFlags = 25;
   test('SemanticsFlag.values refers to all flags.', () async {

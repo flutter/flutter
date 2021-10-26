@@ -278,7 +278,7 @@ class SemanticsAction {
       case _kSetText:
         return 'SemanticsAction.setText';
     }
-    assert(false, 'Unhandled index: $index');
+    assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');
     return '';
   }
 }
@@ -289,6 +289,13 @@ class SemanticsAction {
 // `lib/ui/semantics/semantics_node.h` and in each of the embedders *must* be
 // updated.
 class SemanticsFlag {
+  const SemanticsFlag._(this.index) : assert(index != null);
+
+  /// The numerical value for this flag.
+  ///
+  /// Each flag has one bit set in this bit field.
+  final int index;
+
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
@@ -300,7 +307,7 @@ class SemanticsFlag {
   static const int _kIsInMutuallyExclusiveGroupIndex = 1 << 8;
   static const int _kIsHeaderIndex = 1 << 9;
   static const int _kIsObscuredIndex = 1 << 10;
-  static const int _kScopesRouteIndex= 1 << 11;
+  static const int _kScopesRouteIndex = 1 << 11;
   static const int _kNamesRouteIndex = 1 << 12;
   static const int _kIsHiddenIndex = 1 << 13;
   static const int _kIsImageIndex = 1 << 14;
@@ -319,13 +326,6 @@ class SemanticsFlag {
   // please update the Flag enum in
   // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
   // and the SemanticsFlag class in lib/web_ui/lib/src/ui/semantics.dart.
-
-  const SemanticsFlag._(this.index) : assert(index != null);
-
-  /// The numerical value for this flag.
-  ///
-  /// Each flag has one bit set in this bit field.
-  final int index;
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
@@ -580,7 +580,7 @@ class SemanticsFlag {
     _kIsLinkIndex: isLink,
     _kIsSliderIndex: isSlider,
     _kIsKeyboardKeyIndex: isKeyboardKey,
-};
+  };
 
   @override
   String toString() {
@@ -636,7 +636,7 @@ class SemanticsFlag {
       case _kIsKeyboardKeyIndex:
         return 'SemanticsFlag.isKeyboardKey';
     }
-    assert(false, 'Unhandled index: $index');
+    assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');
     return '';
   }
 }
@@ -646,6 +646,8 @@ class SemanticsFlag {
 //  * engine/src/flutter/lib/web_ui/lib/src/ui/semantics.dart
 //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
 //  * engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
+//  * engine/src/flutter/lib/web_ui/test/engine/semantics/semantics_api_test.dart
+//  * engine/src/flutter/testing/dart/semantics_test.dart
 
 /// An abstract interface for string attributes that affects how assistive
 /// technologies, e.g. VoiceOver or TalkBack, treat the text.
