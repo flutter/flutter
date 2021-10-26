@@ -97,6 +97,7 @@ class FlutterTesterTestDevice extends TestDevice {
     final List<String> command = <String>[
       // Until an arm64 flutter tester binary is available, force to run in Rosetta
       // to avoid "unexpectedly got a signal in sigtramp" crash.
+      // https://github.com/flutter/flutter/issues/88106
       if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) ...<String>[
         '/usr/bin/arch',
         '-x86_64',
