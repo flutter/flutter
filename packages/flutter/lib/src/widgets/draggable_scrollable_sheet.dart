@@ -68,7 +68,7 @@ class DraggableScrollableController {
   double pixelsToSize(double pixels) => _singleController.extent.pixelsToSize(pixels);
 
   /// Animates all attached sheets from their respective current sizes to
-  /// [size], a fractional value of parent container height.
+  /// [size], a fractional value of the parent container height.
   ///
   /// If [size] is outside of an attached sheets min and max child size,
   /// [animateTo] will animate that sheet to the nearest valid size instead. As
