@@ -2948,24 +2948,11 @@ class InputDecoration {
   /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
-  /// {@tool snippet}
+  /// {@tool dartpad}
+  /// This example shows how the prefix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
   ///
-  /// ```dart
-  /// const TextField(
-  ///   decoration: InputDecoration(
-  ///     border: OutlineInputBorder(),
-  ///     labelText: 'Enter name',
-  ///     prefixIcon: Align(
-  ///       alignment: Alignment.center,
-  ///       widthFactor: 1.0,
-  ///       heightFactor: 1.0,
-  ///       child: Icon(
-  ///         Icons.person,
-  ///       ),
-  ///     ),
-  ///   )
-  /// )
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -3083,24 +3070,11 @@ class InputDecoration {
   /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
-  /// {@tool snippet}
+  /// {@tool dartpad}
+  /// This example shows how the suffix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
   ///
-  /// ```dart
-  /// const TextField(
-  ///   decoration: InputDecoration(
-  ///     border: OutlineInputBorder(),
-  ///     labelText: 'Enter name',
-  ///     suffixIcon: Align(
-  ///       alignment: Alignment.center,
-  ///       widthFactor: 1.0,
-  ///       heightFactor: 1.0,
-  ///       child: Icon(
-  ///         Icons.remove_red_eye,
-  ///       ),
-  ///     ),
-  ///   )
-  /// )
-  /// ```
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon.0.dart **
   /// {@end-tool}
   /// See also:
   ///
