@@ -3627,5 +3627,7 @@ void main() {
 
     await tester.tap(find.text(value));
     await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
   });
 }
