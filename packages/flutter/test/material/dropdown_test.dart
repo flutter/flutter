@@ -3595,4 +3595,37 @@ void main() {
       }
     }
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/92438
+  testWidgets('Do not throw due to the double precision', (WidgetTester tester) async {
+    const String value = 'One';
+    const double itemHeight = 77.701;
+    final List<DropdownMenuItem<String>> menuItems = <String>[
+      value,
+      'Two',
+      'Free',
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              itemHeight: itemHeight,
+              onChanged: (_) {},
+              items: menuItems,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+  });
 }
