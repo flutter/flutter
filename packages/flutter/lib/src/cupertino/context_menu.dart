@@ -9,9 +9,17 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
 const double _kOpenScale = 1.1;
+
+// static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
+const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFDDDDDD),
+  darkColor: Color(0xFF373738),
+);
 
 typedef _DismissCallback = void Function(
   BuildContext context,
@@ -1151,7 +1159,7 @@ class _ContextMenuSheet extends StatelessWidget {
 
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
-  List<Widget> get children {
+  List<Widget> getChildren(BuildContext context) {
     final Flexible menu = Flexible(
       fit: FlexFit.tight,
       flex: 2,
@@ -1160,7 +1168,22 @@ class _ContextMenuSheet extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: actions,
+            children: <Widget>[
+              for (int i = 0; i < actions.length - 1; i++)
+                 Column(
+                   children: <Widget>[
+                      DecoratedBox(
+                        decoration: const BoxDecoration(
+                          border:  Border(
+                            bottom: BorderSide(color: _kBackgroundColorPressed),
+                          ),
+                        ),
+                        child: actions[i],
+                      ),
+                   ],
+                 ),
+              actions.last,
+            ],
           ),
         ),
       ),
@@ -1195,7 +1218,7 @@ class _ContextMenuSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
+      children: getChildren(context),
     );
   }
 }

@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding =
     TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   const double _kOpenScale = 1.1;
-
   Widget _getChild() {
     return Container(
       width: 300.0,
@@ -63,6 +64,13 @@ void main() {
     return find.descendant(
       of: _findStatic(),
       matching: find.byWidget(child),
+    );
+  }
+
+  Finder _findStaticChildDecoration(WidgetTester tester) {
+    return find.descendant(
+      of: _findStatic(),
+      matching: find.byType(DecoratedBox),
     );
   }
 
@@ -190,6 +198,49 @@ void main() {
   });
 
   group('CupertinoContextMenu when open', () {
+    testWidgets('Last action does not have border', (WidgetTester tester) async {
+      final Widget child  = _getChild();
+      const Size screenSize = Size(800.0, 600.0);
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: MediaQuery(
+            data: const MediaQueryData(size: screenSize),
+            child: Align(
+              child: CupertinoContextMenu(
+                actions: const <CupertinoContextMenuAction>[
+                  CupertinoContextMenuAction(
+                    child: Text('CupertinoContextMenuAction One'),
+                  ),
+                  CupertinoContextMenuAction(
+                    child: Text('CupertinoContextMenuAction Two'),
+                  ),
+                ],
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Open the CupertinoContextMenu
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsOneWidget);
+
+      // We expected three DecoratedBox
+      // First child has two DecoratedBox, for border and background color.
+      // Last child should only have one DecoratedBox for background color, no border.
+      expect(_findStaticChildDecoration(tester), findsNWidgets(3));
+
+      // Close the CupertinoContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+    });
+
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(child: child));
