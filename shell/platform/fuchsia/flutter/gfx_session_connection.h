@@ -74,14 +74,13 @@ class GfxSessionConnection final {
       fuchsia::scenic::scheduling::FuturePresentationTimes future_info,
       fuchsia::scenic::scheduling::PresentationInfo& presentation_info);
 
-  GfxSessionConnection(
-      std::string debug_label,
-      inspect::Node inspect_node,
-      fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-      fml::closure session_error_callback,
-      on_frame_presented_event on_frame_presented_callback,
-      uint64_t max_frames_in_flight,
-      fml::TimeDelta vsync_offset);
+  GfxSessionConnection(std::string debug_label,
+                       inspect::Node inspect_node,
+                       fuchsia::ui::scenic::SessionHandle session,
+                       fml::closure session_error_callback,
+                       on_frame_presented_event on_frame_presented_callback,
+                       uint64_t max_frames_in_flight,
+                       fml::TimeDelta vsync_offset);
 
   ~GfxSessionConnection();
 

@@ -12,7 +12,7 @@ namespace flutter_runner {
 
 FlatlandConnection::FlatlandConnection(
     std::string debug_label,
-    fidl::InterfaceHandle<fuchsia::ui::composition::Flatland> flatland,
+    fuchsia::ui::composition::FlatlandHandle flatland,
     fml::closure error_callback,
     on_frame_presented_event on_frame_presented_callback,
     uint64_t max_frames_in_flight,

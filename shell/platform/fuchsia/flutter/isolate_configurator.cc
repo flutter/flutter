@@ -15,7 +15,7 @@ namespace flutter_runner {
 
 IsolateConfigurator::IsolateConfigurator(
     UniqueFDIONS fdio_ns,
-    fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
+    fuchsia::sys::EnvironmentHandle environment,
     zx::channel directory_request,
     zx::eventpair view_ref)
     : fdio_ns_(std::move(fdio_ns)),

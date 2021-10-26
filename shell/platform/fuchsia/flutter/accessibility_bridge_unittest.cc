@@ -89,8 +89,7 @@ class AccessibilityBridgeTest : public testing::Test {
  protected:
   void SetUp() override {
     // Connect to SemanticsManager service.
-    fidl::InterfaceHandle<fuchsia::accessibility::semantics::SemanticsManager>
-        semantics_manager;
+    fuchsia::accessibility::semantics::SemanticsManagerHandle semantics_manager;
     zx_status_t semantics_status =
         services_provider_.service_directory()
             ->Connect<fuchsia::accessibility::semantics::SemanticsManager>(

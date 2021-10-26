@@ -187,7 +187,7 @@ fml::TimePoint GfxSessionConnection::SnapToNextPhase(
 GfxSessionConnection::GfxSessionConnection(
     std::string debug_label,
     inspect::Node inspect_node,
-    fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
+    fuchsia::ui::scenic::SessionHandle session,
     fml::closure session_error_callback,
     on_frame_presented_event on_frame_presented_callback,
     uint64_t max_frames_in_flight,
