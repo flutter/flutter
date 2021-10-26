@@ -125,8 +125,6 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
-    // TODO(liyuqian): Remove isAndroid restriction once
-    // https://github.com/flutter/flutter/issues/61567 is fixed.
     final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
     return TaskResult.success(summary,
       detailFiles: <String>[
