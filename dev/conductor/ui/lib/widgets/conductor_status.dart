@@ -137,8 +137,6 @@ class ConductorStatusState extends State<ConductorStatus> {
         ),
         const SizedBox(height: 30.0),
         Center(
-          // TODO(Yugue): Add regex validation for each parameter input
-          // before Continue button is enabled, https://github.com/flutter/flutter/issues/91925.
           child: ElevatedButton(
             key: const Key('conductorClean'),
             style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
