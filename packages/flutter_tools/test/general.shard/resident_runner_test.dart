@@ -1223,7 +1223,7 @@ dependencies:
   "packages": [
     {
       "name": "path_provider_linux",
-      "rootUri": "/path_provider_linux",
+      "rootUri": "../path_provider_linux",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     }
