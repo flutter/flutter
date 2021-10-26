@@ -80,7 +80,13 @@ abstract class AnalyzeBase {
   }
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
-  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+  String get sdkPath {
+    if (argResults['dart-sdk'] != null) {
+      return argResults['dart-sdk'] as String;
+    } else {
+      return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    }
+  }
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
 
