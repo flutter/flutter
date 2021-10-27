@@ -203,6 +203,8 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
 }
 
 static bool fl_engine_gl_present(void* user_data) {
+  // No action required, as this is handled in
+  // compositor_present_layers_callback.
   return true;
 }
 
