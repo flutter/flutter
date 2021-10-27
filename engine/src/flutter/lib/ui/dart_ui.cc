@@ -13,7 +13,7 @@
 #include "flutter/lib/ui/painting/codec.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/engine_layer.h"
-#include "flutter/lib/ui/painting/fragment_shader.h"
+#include "flutter/lib/ui/painting/fragment_program.h"
 #include "flutter/lib/ui/painting/gradient.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_descriptor.h"
@@ -67,7 +67,7 @@ void DartUI::InitForGlobal() {
     DartRuntimeHooks::RegisterNatives(g_natives);
     EngineLayer::RegisterNatives(g_natives);
     FontCollection::RegisterNatives(g_natives);
-    FragmentShader::RegisterNatives(g_natives);
+    FragmentProgram::RegisterNatives(g_natives);
     ImageDescriptor::RegisterNatives(g_natives);
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);

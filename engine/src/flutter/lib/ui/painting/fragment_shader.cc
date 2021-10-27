@@ -19,60 +19,35 @@ using tonic::ToDart;
 
 namespace flutter {
 
-static void FragmentShader_constructor(Dart_NativeArguments args) {
-  DartCallConstructor(&FragmentShader::Create, args);
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentShader);
-
-#define FOR_EACH_BINDING(V) \
-  V(FragmentShader, init)   \
-  V(FragmentShader, update)
-
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+// Since _FragmentShader is a private class, we can't use
+// IMPLEMENT_WRAPPERTYPEINFO
+static const tonic::DartWrapperInfo kDartWrapperInfo_ui_FragmentShader = {
+    "ui",
+    "_FragmentShader",
+    sizeof(FragmentShader),
+};
+const tonic::DartWrapperInfo& FragmentShader::dart_wrapper_info_ =
+    kDartWrapperInfo_ui_FragmentShader;
 
 void FragmentShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"FragmentShader_constructor", FragmentShader_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+  natives->Register({});
 }
 
 sk_sp<SkShader> FragmentShader::shader(SkSamplingOptions sampling) {
-  // TODO(antrob): Use sampling?
-  // https://github.com/flutter/flutter/issues/88303
+  // Sampling options are ignored, since sampling options don't make sense for
+  // generative shaders.
   return shader_;
 }
 
-void FragmentShader::init(std::string sksl, bool debugPrintSksl) {
-  SkRuntimeEffect::Result result =
-      SkRuntimeEffect::MakeForShader(SkString(sksl));
-  runtime_effect_ = result.effect;
-
-  if (runtime_effect_ == nullptr) {
-    Dart_ThrowException(tonic::ToDart(
-        std::string("Invalid SkSL:\n") + sksl.c_str() +
-        std::string("\nSkSL Error:\n") + result.errorText.c_str()));
-    return;
-  }
-  if (debugPrintSksl) {
-    FML_DLOG(INFO) << std::string("debugPrintSksl:\n") + sksl.c_str();
-  }
+fml::RefPtr<FragmentShader> FragmentShader::Create(Dart_Handle dart_handle,
+                                                   sk_sp<SkShader> shader) {
+  auto fragment_shader = fml::MakeRefCounted<FragmentShader>(std::move(shader));
+  fragment_shader->AssociateWithDartWrapper(dart_handle);
+  return fragment_shader;
 }
 
-// TODO(https://github.com/flutter/flutter/issues/85240):
-// Add `Dart_Handle children` as a paramter.
-void FragmentShader::update(const tonic::Float32List& uniforms) {
-  shader_ = runtime_effect_->makeShader(
-      SkData::MakeWithCopy(uniforms.data(),
-                           uniforms.num_elements() * sizeof(float)),
-      0, 0, nullptr, false);
-}
-
-fml::RefPtr<FragmentShader> FragmentShader::Create() {
-  return fml::MakeRefCounted<FragmentShader>();
-}
-
-FragmentShader::FragmentShader() = default;
+FragmentShader::FragmentShader(sk_sp<SkShader> shader)
+    : shader_(std::move(shader)) {}
 
 FragmentShader::~FragmentShader() = default;
 

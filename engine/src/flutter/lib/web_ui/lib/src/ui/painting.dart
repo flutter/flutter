@@ -789,16 +789,16 @@ class ImageDescriptor {
   }
 }
 
-class FragmentShader extends Shader {
-  FragmentShader({
+class FragmentProgram {
+  FragmentProgram({
     required ByteBuffer spirv, // ignore: avoid_unused_constructor_parameters
-    Float32List? floatUniforms, // ignore: avoid_unused_constructor_parameters
     bool debugPrint = false, // ignore: avoid_unused_constructor_parameters
-  }) : super._() {
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  }) {
+    throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
 
-  void update({Float32List? floatUniforms}) =>
-    throw UnsupportedError('FragmentShader is not supported for the CanvasKit or HTML renderers.');
+  Shader shader({
+    required Float32List floatUniforms,
+  }) => throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
 }
 

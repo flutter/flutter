@@ -362,6 +362,8 @@ FILE: ../../../flutter/lib/ui/painting/color_filter.cc
 FILE: ../../../flutter/lib/ui/painting/color_filter.h
 FILE: ../../../flutter/lib/ui/painting/engine_layer.cc
 FILE: ../../../flutter/lib/ui/painting/engine_layer.h
+FILE: ../../../flutter/lib/ui/painting/fragment_program.cc
+FILE: ../../../flutter/lib/ui/painting/fragment_program.h
 FILE: ../../../flutter/lib/ui/painting/fragment_shader.cc
 FILE: ../../../flutter/lib/ui/painting/fragment_shader.h
 FILE: ../../../flutter/lib/ui/painting/gradient.cc
