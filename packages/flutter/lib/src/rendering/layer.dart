@@ -2131,7 +2131,7 @@ class LayerLink {
   ///
   /// Valid in debug mode only. Returns null in all other modes.
   ///
-  /// Use [connect] to obtain the connected [LeaderLayer] for non-debug
+  /// Use [registerFollower] to obtain the connected [LeaderLayer] for non-debug
   /// purposes.
   LeaderLayer? get debugLeader {
     LeaderLayer? result;
