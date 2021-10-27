@@ -708,6 +708,7 @@ FILE: ../../../flutter/shell/common/persistent_cache_unittests.cc
 FILE: ../../../flutter/shell/common/pipeline.cc
 FILE: ../../../flutter/shell/common/pipeline.h
 FILE: ../../../flutter/shell/common/pipeline_unittests.cc
+FILE: ../../../flutter/shell/common/platform_message_handler.h
 FILE: ../../../flutter/shell/common/platform_view.cc
 FILE: ../../../flutter/shell/common/platform_view.h
 FILE: ../../../flutter/shell/common/pointer_data_dispatcher.cc
@@ -842,6 +843,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/Flutte
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformTaskQueue.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ApplicationInfoLoader.java
@@ -939,6 +941,8 @@ FILE: ../../../flutter/shell/platform/android/jni/jni_mock_unittest.cc
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/library_loader.cc
+FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.cc
+FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc

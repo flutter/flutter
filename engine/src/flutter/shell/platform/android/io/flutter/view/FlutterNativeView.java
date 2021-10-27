@@ -126,6 +126,12 @@ public class FlutterNativeView implements BinaryMessenger {
 
   @Override
   @UiThread
+  public TaskQueue makeBackgroundTaskQueue() {
+    return dartExecutor.getBinaryMessenger().makeBackgroundTaskQueue();
+  }
+
+  @Override
+  @UiThread
   public void send(String channel, ByteBuffer message) {
     dartExecutor.getBinaryMessenger().send(channel, message);
   }
@@ -145,6 +151,12 @@ public class FlutterNativeView implements BinaryMessenger {
   @UiThread
   public void setMessageHandler(String channel, BinaryMessageHandler handler) {
     dartExecutor.getBinaryMessenger().setMessageHandler(channel, handler);
+  }
+
+  @Override
+  @UiThread
+  public void setMessageHandler(String channel, BinaryMessageHandler handler, TaskQueue taskQueue) {
+    dartExecutor.getBinaryMessenger().setMessageHandler(channel, handler, taskQueue);
   }
 
   /*package*/ FlutterJNI getFlutterJNI() {

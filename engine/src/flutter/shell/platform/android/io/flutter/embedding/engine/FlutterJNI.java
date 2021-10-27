@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Interface between Flutter embedding's Java code and Flutter engine's C/C++ code.
@@ -98,6 +99,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Keep
 public class FlutterJNI {
   private static final String TAG = "FlutterJNI";
+  // This serializes the invocation of platform message responses and the
+  // attachment and detachment of the shell holder.  This ensures that we don't
+  // detach FlutterJNI on the platform thread while a background thread invokes
+  // a message response.  Typically accessing the shell holder happens on the
+  // platform thread and doesn't require locking.
+  private ReentrantReadWriteLock shellHolderLock = new ReentrantReadWriteLock();
 
   // BEGIN Methods related to loading for FlutterLoader.
   /**
@@ -304,7 +311,12 @@ public class FlutterJNI {
   public void attachToNative() {
     ensureRunningOnMainThread();
     ensureNotAttachedToNative();
-    nativeShellHolderId = performNativeAttach(this);
+    shellHolderLock.writeLock().lock();
+    try {
+      nativeShellHolderId = performNativeAttach(this);
+    } finally {
+      shellHolderLock.writeLock().unlock();
+    }
   }
 
   @VisibleForTesting
@@ -368,8 +380,13 @@ public class FlutterJNI {
   public void detachFromNativeAndReleaseResources() {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeDestroy(nativeShellHolderId);
-    nativeShellHolderId = null;
+    shellHolderLock.writeLock().lock();
+    try {
+      nativeDestroy(nativeShellHolderId);
+      nativeShellHolderId = null;
+    } finally {
+      shellHolderLock.writeLock().unlock();
+    }
   }
 
   private native void nativeDestroy(long nativeShellHolderId);
@@ -858,14 +875,33 @@ public class FlutterJNI {
     this.platformMessageHandler = platformMessageHandler;
   }
 
-  // Called by native.
+  private native void nativeCleanupMessageData(long messageData);
+
+  /**
+   * Destroys the resources provided sent to `handlePlatformMessage`.
+   *
+   * <p>This can be called on any thread.
+   *
+   * @param messageData the argument sent to handlePlatformMessage.
+   */
+  public void cleanupMessageData(long messageData) {
+    // This doesn't rely on being attached like other methods.
+    nativeCleanupMessageData(messageData);
+  }
+
+  // Called by native on the ui thread.
   // TODO(mattcarroll): determine if message is nonull or nullable
   @SuppressWarnings("unused")
   @VisibleForTesting
   public void handlePlatformMessage(
-      @NonNull final String channel, ByteBuffer message, final int replyId) {
+      @NonNull final String channel,
+      ByteBuffer message,
+      final int replyId,
+      final long messageData) {
     if (platformMessageHandler != null) {
-      platformMessageHandler.handleMessageFromDart(channel, message, replyId);
+      platformMessageHandler.handleMessageFromDart(channel, message, replyId, messageData);
+    } else {
+      nativeCleanupMessageData(messageData);
     }
     // TODO(mattcarroll): log dropped messages when in debug mode
     // (https://github.com/flutter/flutter/issues/25391)
@@ -931,16 +967,20 @@ public class FlutterJNI {
       int responseId);
 
   // TODO(mattcarroll): differentiate between channel responses and platform responses.
-  @UiThread
   public void invokePlatformMessageEmptyResponseCallback(int responseId) {
-    ensureRunningOnMainThread();
-    if (isAttached()) {
-      nativeInvokePlatformMessageEmptyResponseCallback(nativeShellHolderId, responseId);
-    } else {
-      Log.w(
-          TAG,
-          "Tried to send a platform message response, but FlutterJNI was detached from native C++. Could not send. Response ID: "
-              + responseId);
+    // Called on any thread.
+    shellHolderLock.readLock().lock();
+    try {
+      if (isAttached()) {
+        nativeInvokePlatformMessageEmptyResponseCallback(nativeShellHolderId, responseId);
+      } else {
+        Log.w(
+            TAG,
+            "Tried to send a platform message response, but FlutterJNI was detached from native C++. Could not send. Response ID: "
+                + responseId);
+      }
+    } finally {
+      shellHolderLock.readLock().unlock();
     }
   }
 
@@ -949,21 +989,25 @@ public class FlutterJNI {
       long nativeShellHolderId, int responseId);
 
   // TODO(mattcarroll): differentiate between channel responses and platform responses.
-  @UiThread
   public void invokePlatformMessageResponseCallback(
       int responseId, @NonNull ByteBuffer message, int position) {
-    ensureRunningOnMainThread();
+    // Called on any thread.
     if (!message.isDirect()) {
       throw new IllegalArgumentException("Expected a direct ByteBuffer.");
     }
-    if (isAttached()) {
-      nativeInvokePlatformMessageResponseCallback(
-          nativeShellHolderId, responseId, message, position);
-    } else {
-      Log.w(
-          TAG,
-          "Tried to send a platform message response, but FlutterJNI was detached from native C++. Could not send. Response ID: "
-              + responseId);
+    shellHolderLock.readLock().lock();
+    try {
+      if (isAttached()) {
+        nativeInvokePlatformMessageResponseCallback(
+            nativeShellHolderId, responseId, message, position);
+      } else {
+        Log.w(
+            TAG,
+            "Tried to send a platform message response, but FlutterJNI was detached from native C++. Could not send. Response ID: "
+                + responseId);
+      }
+    } finally {
+      shellHolderLock.readLock().unlock();
     }
   }
 
