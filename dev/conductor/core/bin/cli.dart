@@ -26,7 +26,7 @@ Future<void> main(List<String> args) async {
   );
   final Checkouts checkouts = Checkouts(
     fileSystem: fileSystem,
-    parentDirectory: localFlutterRoot.parent,
+    parentDirectory: _localFlutterRoot.parent,
     platform: platform,
     processManager: processManager,
     stdio: stdio,
@@ -42,7 +42,7 @@ Future<void> main(List<String> args) async {
   final String conductorVersion = (await const Git(processManager).getOutput(
     <String>['rev-parse'],
     'Get the revision of the current Flutter SDK',
-    workingDirectory: localFlutterRoot.path,
+    workingDirectory: _localFlutterRoot.path,
   )).trim();
 
   <Command<void>>[
@@ -54,7 +54,7 @@ Future<void> main(List<String> args) async {
     ),
     CodesignCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      flutterRoot: _localFlutterRoot,
     ),
     StatusCommand(
       checkouts: checkouts,
@@ -68,7 +68,7 @@ Future<void> main(List<String> args) async {
     ),
     CandidatesCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      flutterRoot: _localFlutterRoot,
     ),
     NextCommand(
       checkouts: checkouts,
@@ -88,7 +88,7 @@ Future<void> main(List<String> args) async {
   }
 }
 
-Directory get localFlutterRoot {
+Directory get _localFlutterRoot {
   String filePath;
   const FileSystem fileSystem = LocalFileSystem();
   const Platform platform = LocalPlatform();
