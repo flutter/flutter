@@ -32,7 +32,7 @@ java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/rele
 
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
-sleep 20
+sleep 30
 exit
 "
 $adb_path logcat -d -t "$script_start_time" -s "flutter" > build/app/outputs/bundle/release/run_logcat.log
@@ -41,5 +41,6 @@ if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferr
   echo "All tests passed."
   exit 0
 fi
+cat build/app/outputs/bundle/release/run_logcat.log
 echo "Failure: Deferred component did not load."
 exit 1
