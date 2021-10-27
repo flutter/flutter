@@ -22,6 +22,7 @@ DiffContext::DiffContext(SkISize frame_size,
 void DiffContext::BeginSubtree() {
   state_stack_.push_back(state_);
   state_.rect_index_ = rects_->size();
+  state_.has_filter_bounds_adjustment = false;
   if (state_.transform_override) {
     state_.transform = *state_.transform_override;
     state_.transform_override = std::nullopt;
@@ -30,12 +31,18 @@ void DiffContext::BeginSubtree() {
 
 void DiffContext::EndSubtree() {
   FML_DCHECK(!state_stack_.empty());
+  if (state_.has_filter_bounds_adjustment) {
+    filter_bounds_adjustment_stack_.pop_back();
+  }
   state_ = std::move(state_stack_.back());
   state_stack_.pop_back();
 }
 
 DiffContext::State::State()
-    : dirty(false), cull_rect(kGiantRect), rect_index_(0) {}
+    : dirty(false),
+      cull_rect(kGiantRect),
+      rect_index_(0),
+      has_filter_bounds_adjustment(false) {}
 
 void DiffContext::PushTransform(const SkMatrix& transform) {
   state_.transform.preConcat(transform);
@@ -43,6 +50,21 @@ void DiffContext::PushTransform(const SkMatrix& transform) {
 
 void DiffContext::SetTransform(const SkMatrix& transform) {
   state_.transform_override = transform;
+}
+
+void DiffContext::PushFilterBoundsAdjustment(FilterBoundsAdjustment filter) {
+  FML_DCHECK(state_.has_filter_bounds_adjustment == false);
+  state_.has_filter_bounds_adjustment = true;
+  filter_bounds_adjustment_stack_.push_back(filter);
+}
+
+SkRect DiffContext::ApplyFilterBoundsAdjustment(SkRect rect) const {
+  // Apply filter bounds adjustment in reverse order
+  for (auto i = filter_bounds_adjustment_stack_.rbegin();
+       i != filter_bounds_adjustment_stack_.rend(); ++i) {
+    rect = (*i)(rect);
+  }
+  return rect;
 }
 
 Damage DiffContext::ComputeDamage(
@@ -100,10 +122,12 @@ void DiffContext::AddLayerBounds(const SkRect& rect) {
   // During painting we cull based on non-overriden transform and then
   // override the transform right before paint. Do the same thing here to get
   // identical paint rect.
-  auto transformed_rect = state_.transform.mapRect(rect);
+  auto transformed_rect =
+      ApplyFilterBoundsAdjustment(state_.transform.mapRect(rect));
   if (transformed_rect.intersects(state_.cull_rect)) {
     auto paint_rect = state_.transform_override
-                          ? state_.transform_override->mapRect(rect)
+                          ? ApplyFilterBoundsAdjustment(
+                                state_.transform_override->mapRect(rect))
                           : transformed_rect;
     rects_->push_back(paint_rect);
     if (IsSubtreeDirty()) {
