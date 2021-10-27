@@ -397,7 +397,7 @@ class StartContext {
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 
-    state.conductorVersion = await conductorVersion;
+    state.conductorVersion = conductorVersion;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 

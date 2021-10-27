@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:file/file.dart';
-import 'package:file/local.dart';
-import 'package:platform/platform.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
 
