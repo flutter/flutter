@@ -1,4 +1,4 @@
-Signature: 20a4951e5d98d843528ea8fce49352f5
+Signature: d0331a26e60d22ec3fa0ae989ae03a89
 
 UNUSED LICENSES:
 
@@ -6712,6 +6712,7 @@ FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
 FILE: ../../../third_party/skia/src/core/SkTBlockList.h
+FILE: ../../../third_party/skia/src/gpu/BufferWriter.h
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.h
 FILE: ../../../third_party/skia/src/gpu/GrClip.h
@@ -6722,7 +6723,6 @@ FILE: ../../../third_party/skia/src/gpu/GrGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.cpp
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
-FILE: ../../../third_party/skia/src/gpu/VertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrRect.h
 FILE: ../../../third_party/skia/src/gpu/v1/Device_v1.h
 FILE: ../../../third_party/skia/src/ports/SkDebug_win.cpp
