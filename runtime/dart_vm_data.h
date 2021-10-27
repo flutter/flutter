@@ -71,14 +71,32 @@ class DartVMData {
   ///
   fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the isolate snapshot used to launch the service isolate
+  ///             in the Dart VM.
+  ///
+  /// @return     The service isolate snapshot.
+  ///
+  fml::RefPtr<const DartSnapshot> GetServiceIsolateSnapshot() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns whether the service isolate snapshot requires null
+  ///             safety in the Dart_IsolateFlags used to create the isolate.
+  ///
+  /// @return     True if the snapshot requires null safety.
+  ///
+  bool GetServiceIsolateSnapshotNullSafety() const;
+
  private:
   const Settings settings_;
   const fml::RefPtr<const DartSnapshot> vm_snapshot_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
+  const fml::RefPtr<const DartSnapshot> service_isolate_snapshot_;
 
   DartVMData(Settings settings,
              fml::RefPtr<const DartSnapshot> vm_snapshot,
-             fml::RefPtr<const DartSnapshot> isolate_snapshot);
+             fml::RefPtr<const DartSnapshot> isolate_snapshot,
+             fml::RefPtr<const DartSnapshot> service_isolate_snapshot);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartVMData);
 };

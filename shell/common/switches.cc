@@ -334,6 +334,13 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   std::vector<std::string_view> aot_shared_library_name =
       command_line.GetOptionValues(FlagForSwitch(Switch::AotSharedLibraryName));
 
+  std::vector<std::string_view> vmservice_shared_library_name =
+      command_line.GetOptionValues(
+          FlagForSwitch(Switch::AotVMServiceSharedLibraryName));
+  for (auto path : vmservice_shared_library_name) {
+    settings.vmservice_snapshot_library_path.emplace_back(path);
+  }
+
   std::string snapshot_asset_path;
   command_line.GetOptionValue(FlagForSwitch(Switch::SnapshotAssetPath),
                               &snapshot_asset_path);
