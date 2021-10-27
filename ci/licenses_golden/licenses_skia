@@ -1,4 +1,4 @@
-Signature: cffaceee171680fc90b8aad31fa923fc
+Signature: 88cd69fbe26d212409532dbbffd28689
 
 UNUSED LICENSES:
 
@@ -5382,6 +5382,8 @@ FILE: ../../../third_party/skia/bench/graphite/IntersectionTreeBench.cpp
 FILE: ../../../third_party/skia/experimental/graphite/include/private/MtlTypesPriv.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Buffer.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawBufferManager.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawBufferManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBlitCommandEncoder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlBuffer.mm
