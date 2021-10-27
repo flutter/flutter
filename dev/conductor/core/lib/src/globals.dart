@@ -42,6 +42,7 @@ class ConductorException implements Exception {
 }
 
 Directory? _flutterRoot;
+// TODO(fujino): this shouldn't be global
 Directory get localFlutterRoot {
   if (_flutterRoot != null) {
     return _flutterRoot!;

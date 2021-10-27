@@ -39,6 +39,12 @@ Future<void> main(List<String> args) async {
     usageLineLength: 80,
   );
 
+  final String conductorVersion = (await const Git(processManager).getOutput(
+    <String>['rev-parse'],
+    'Get the revision of the current Flutter SDK',
+    workingDirectory: localFlutterRoot.path,
+  )).trim();
+
   <Command<void>>[
     RollDevCommand(
       checkouts: checkouts,
@@ -55,7 +61,7 @@ Future<void> main(List<String> args) async {
     ),
     StartCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      conductorVersion: conductorVersion,
     ),
     CleanCommand(
       checkouts: checkouts,

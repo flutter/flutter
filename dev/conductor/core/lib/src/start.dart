@@ -34,7 +34,7 @@ const String kStateOption = 'state-file';
 class StartCommand extends Command<void> {
   StartCommand({
     required this.checkouts,
-    required this.flutterRoot,
+    required this.conductorVersion,
   })  : platform = checkouts.platform,
         processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
@@ -105,10 +105,7 @@ class StartCommand extends Command<void> {
 
   final Checkouts checkouts;
 
-  /// The root directory of the Flutter repository that houses the Conductor.
-  ///
-  /// This directory is used to check the git revision of the Conductor.
-  final Directory flutterRoot;
+  final String conductorVersion;
   final FileSystem fileSystem;
   final Platform platform;
   final ProcessManager processManager;
@@ -191,7 +188,7 @@ class StartCommand extends Command<void> {
       engineCherrypickRevisions: engineCherrypickRevisions,
       engineMirror: engineMirror,
       engineUpstream: engineUpstream,
-      flutterRoot: flutterRoot,
+      conductorVersion: conductorVersion,
       frameworkCherrypickRevisions: frameworkCherrypickRevisions,
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
@@ -219,7 +216,7 @@ class StartContext {
     required this.frameworkCherrypickRevisions,
     required this.frameworkMirror,
     required this.frameworkUpstream,
-    required this.flutterRoot,
+    required this.conductorVersion,
     required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
@@ -236,33 +233,13 @@ class StartContext {
   final List<String> frameworkCherrypickRevisions;
   final String frameworkMirror;
   final String frameworkUpstream;
-  final Directory flutterRoot;
+  final String conductorVersion;
   final String incrementLetter;
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
   final File stateFile;
   final Stdio stdio;
-
-  /// Git revision for the currently running Conductor.
-  Future<String> get conductorVersion async {
-    if (_conductorVersion != null) {
-      return Future<String>.value(_conductorVersion);
-    }
-    _conductorVersion = (await git.getOutput(
-      <String>['rev-parse', 'HEAD'],
-      'look up the current revision.',
-      workingDirectory: flutterRoot.path,
-    )).trim();
-    if (_conductorVersion == null || _conductorVersion!.isEmpty) {
-      throw ConductorException(
-        'Failed to determine the git revision of the Flutter SDK\n'
-        'Working directory: ${flutterRoot.path}'
-      );
-    }
-    return _conductorVersion!;
-  }
-  String? _conductorVersion;
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
