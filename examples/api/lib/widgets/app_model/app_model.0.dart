@@ -6,9 +6,24 @@
 
 import 'package:flutter/material.dart';
 
-// Demonstrates that changes to the AppModel _only_ cause the dependent widgets
-// to be rebuilt.
+class ShowAppModelValue extends StatelessWidget {
+  const ShowAppModelValue({ Key? key, required this.appModelKey }) : super(key: key);
 
+  final String appModelKey;
+
+  @override
+  Widget build(BuildContext context) {
+    // The AppModel.get() call here causes this widget to depend
+    // on the value of the AppModel's 'foo' key. If it's changed, with
+    // AppModel.set(), then this widget will be rebuilt.
+    final String? value = AppModel.get<String, String>(context, appModelKey);
+    return Text('$appModelKey: $value');
+  }
+}
+
+// Demonstrates that changes to the AppModel _only_ cause the dependent widgets
+// to be rebuilt. In this case that's the ShowAppModelValue widget that's
+// displaying the value of a key whose value has been updated.
 class Home extends StatefulWidget {
   const Home({ Key? key }) : super(key: key);
 
@@ -17,8 +32,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _fooCount = 0;
-  int _barCount = 0;
+  int _fooVersion = 0;
+  int _barVersion = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,38 +42,25 @@ class _HomeState extends State<Home> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Builder(
-              builder: (BuildContext context) {
-                // The AppModel.get() call here causes this widget to depend
-                // on the value of the AppModel's 'foo' key. If it's changed, with
-                // AppModel.set() (see below), then this widget will be rebuilt.
-                final String? value = AppModel.get<String, String>(context, 'foo');
-                return Text('foo: $value [$_fooCount]');
-              },
-            ),
+            const ShowAppModelValue(appModelKey: 'foo'),
             const SizedBox(height: 16),
-            Builder(
-              builder: (BuildContext context) {
-                final String? value = AppModel.get<String, String>(context, 'bar');
-                return Text('bar: $value [$_barCount]');
-              },
-            ),
+            const ShowAppModelValue(appModelKey: 'bar'),
             const SizedBox(height: 16),
             ElevatedButton(
               child: const Text('change foo'),
               onPressed: () {
-                _fooCount += 1;
+                _fooVersion += 1;
                 // Changing the AppModel's value for 'foo' causes the widgets that
-                // depend on 'foo' to be rebuilt (see above).
-                AppModel.set<String, String?>(context, 'foo', 'FOO $_fooCount'); // note: no setState()
+                // depend on 'foo' to be rebuilt.
+                AppModel.set<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
               },
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               child: const Text('change bar'),
               onPressed: () {
-                _barCount += 1;
-                AppModel.set<String, String?>(context, 'bar', 'BAR $_barCount');  // note: no setState()
+                _barVersion += 1;
+                AppModel.set<String, String?>(context, 'bar', 'BAR $_barVersion');  // note: no setState()
               },
             ),
           ],
