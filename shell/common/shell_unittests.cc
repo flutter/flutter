@@ -45,6 +45,10 @@
 
 namespace flutter {
 namespace testing {
+
+using ::testing::_;
+using ::testing::Return;
+
 namespace {
 class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD1(OnPlatformViewCreated, void(std::unique_ptr<Surface> surface));
@@ -119,6 +123,27 @@ class MockPlatformView : public PlatformView {
   MockPlatformView(MockPlatformViewDelegate& delegate, TaskRunners task_runners)
       : PlatformView(delegate, task_runners) {}
   MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
+  MOCK_CONST_METHOD0(GetPlatformMessageHandler,
+                     std::shared_ptr<PlatformMessageHandler>());
+};
+
+class MockPlatformMessageHandler : public PlatformMessageHandler {
+ public:
+  MOCK_METHOD1(HandlePlatformMessage,
+               void(std::unique_ptr<PlatformMessage> message));
+  MOCK_METHOD2(InvokePlatformMessageResponseCallback,
+               void(int response_id, std::unique_ptr<fml::Mapping> mapping));
+  MOCK_METHOD1(InvokePlatformMessageEmptyResponseCallback,
+               void(int response_id));
+};
+
+class MockPlatformMessageResponse : public PlatformMessageResponse {
+ public:
+  static fml::RefPtr<MockPlatformMessageResponse> Create() {
+    return fml::AdoptRef(new MockPlatformMessageResponse());
+  }
+  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
+  MOCK_METHOD0(CompleteEmpty, void());
 };
 }  // namespace
 
@@ -3162,7 +3187,52 @@ TEST_F(ShellTest, UIWorkAfterOnPlatformViewDestroyed) {
       shell->GetTaskRunners().GetUITaskRunner(),
       [&ui_flush_latch]() { ui_flush_latch.Signal(); });
   ui_flush_latch.Wait();
+  DestroyShell(std::move(shell));
+}
 
+TEST_F(ShellTest, UsesPlatformMessageHandler) {
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  auto settings = CreateSettingsForFixture();
+  MockPlatformViewDelegate platform_view_delegate;
+  auto platform_message_handler =
+      std::make_shared<MockPlatformMessageHandler>();
+  int message_id = 1;
+  EXPECT_CALL(*platform_message_handler, HandlePlatformMessage(_));
+  EXPECT_CALL(*platform_message_handler,
+              InvokePlatformMessageEmptyResponseCallback(message_id));
+  Shell::CreateCallback<PlatformView> platform_view_create_callback =
+      [&platform_view_delegate, task_runners,
+       platform_message_handler](flutter::Shell& shell) {
+        auto result = std::make_unique<MockPlatformView>(platform_view_delegate,
+                                                         task_runners);
+        EXPECT_CALL(*result, GetPlatformMessageHandler())
+            .WillOnce(Return(platform_message_handler));
+        return result;
+      };
+  auto shell = CreateShell(
+      /*settings=*/std::move(settings),
+      /*task_runners=*/task_runners,
+      /*simulate_vsync=*/false,
+      /*shell_test_external_view_embedder=*/nullptr,
+      /*is_gpu_disabled=*/false,
+      /*rendering_backend=*/
+      ShellTestPlatformView::BackendType::kDefaultBackend,
+      /*platform_view_create_callback=*/platform_view_create_callback);
+
+  EXPECT_EQ(platform_message_handler, shell->GetPlatformMessageHandler());
+  PostSync(task_runners.GetUITaskRunner(), [&shell]() {
+    size_t data_size = 4;
+    fml::MallocMapping bytes =
+        fml::MallocMapping(static_cast<uint8_t*>(malloc(data_size)), data_size);
+    fml::RefPtr<MockPlatformMessageResponse> response =
+        MockPlatformMessageResponse::Create();
+    auto message = std::make_unique<PlatformMessage>(
+        /*channel=*/"foo", /*data=*/std::move(bytes), /*response=*/response);
+    (static_cast<Engine::Delegate*>(shell.get()))
+        ->OnEngineHandlePlatformMessage(std::move(message));
+  });
+  shell->GetPlatformMessageHandler()
+      ->InvokePlatformMessageEmptyResponseCallback(message_id);
   DestroyShell(std::move(shell));
 }
 
