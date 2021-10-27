@@ -9,10 +9,16 @@ import 'inherited_model.dart';
 
 /// Enables sharing key/value data with the all of the widgets below [child].
 ///
-/// `AppModel.set(context, key, value)` adds an entry to the shared data table.
+/// - `AppModel.set(context, key, value)` changes the value of an entry
+/// in the shared data table and forces widgets that depend on that entry
+/// to be rebuilt.
 ///
-/// `AppModel.get(context, key)` returns the value for key from the
-/// shared data table, or null if there is no table entry for the key.
+/// - `AppModel.get(context, key)` creates a dependency on the key and
+/// returns the value for the key from the shared data table.
+///
+/// - `AppModel.init(context, key, value)` changes the value of an entry
+/// in the shared data table but does not force dependent widgets to be
+/// rebuilt.
 ///
 /// A widget whose build method uses AppModel.get(context, keyword)
 /// creates a dependency on the AppModel: when the value of keyword
@@ -31,8 +37,8 @@ import 'inherited_model.dart';
 /// {@tool dartpad}
 /// The following sample demonstrates using the automatically created
 /// `AppModel`. Button presses cause changes to the values for keys
-/// 'foo', and 'bar', and that only causes the widgets that depend on
-/// those keys to be rebuilt.
+/// 'foo', and 'bar', and those changes only cause the widgets that
+/// depend on those keys to be rebuilt.
 ///
 /// ** See code in examples/api/lib/widgets/app_model/app_model.0.dart **
 /// {@end-tool}
