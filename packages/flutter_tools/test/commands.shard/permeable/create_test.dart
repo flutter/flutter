@@ -1399,7 +1399,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1423,7 +1423,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--offline', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
 
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
@@ -1439,7 +1439,7 @@ void main() {
       botDetector: globals.botDetector,
       platform: globals.platform,
     ),
-  }, skip: true); // TODO(fujino): https://github.com/flutter/flutter/issues/92522
+  });
 
   testUsingContext('display name is Title Case for swift iOS plugin.', () async {
     Cache.flutterRoot = '../..';
