@@ -215,11 +215,25 @@ static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
   // the VM enables the same by default. In either case, we have some profiling
   // flags.
   if (enable_profiling) {
-    return {// This is the default. But just be explicit.
-            "--profiler",
-            // This instructs the profiler to walk C++ frames, and to include
-            // them in the profile.
-            "--profile-vm"};
+    return {
+      // This is the default. But just be explicit.
+      "--profiler",
+          // This instructs the profiler to walk C++ frames, and to include
+          // them in the profile.
+          "--profile-vm",
+#if OS_IOS && ARCH_CPU_ARM_FAMILY && ARCH_CPU_ARMEL
+          // Set the profiler interrupt period to 500Hz instead of the
+          // default 1000Hz on 32-bit iOS devices to reduce average and worst
+          // case frame build times.
+          //
+          // Note: profile_period is time in microseconds between sampling
+          // events, not frequency. Frequency is calculated 1/period (or
+          // 1,000,000 / 2,000 -> 500Hz in this case).
+          "--profile_period=2000",
+#else
+          "--profile_period=1000",
+#endif  // OS_IOS && ARCH_CPU_ARM_FAMILY && ARCH_CPU_ARMEL
+    };
   } else {
     return {"--no-profiler"};
   }
