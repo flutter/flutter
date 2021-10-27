@@ -35,19 +35,31 @@ class SharedObject {
   }
 }
 
+// An example of a widget which depends on the SharedObject's value,
+// which might be provided - along with SharedObject - in a Dart package.
+class CustomWidget extends StatelessWidget {
+  const CustomWidget({ Key? key }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Will be rebuilt if the shared object's value is changed.
+    return ElevatedButton(
+      child: Text('Replace ${SharedObject.of(context)}'),
+      onPressed: () {
+        SharedObject.reset(context);
+      },
+    );
+  }
+}
+
 class Home extends StatelessWidget {
   const Home({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: ElevatedButton(
-          child: Text('Replace ${SharedObject.of(context)}'),
-          onPressed: () {
-            SharedObject.reset(context);
-          },
-        ),
+        child: CustomWidget()
       ),
     );
   }
