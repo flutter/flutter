@@ -50,6 +50,40 @@ void main() {
     expect(false, isEndDrawerOpen);
   });
 
+  testWidgets('Scaffold drawer callback test - only call when changed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/87914
+    bool onDrawerChangedCalled = false;
+    bool onEndDrawerChangedCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        drawer: Container(
+          color: Colors.blue,
+        ),
+        onDrawerChanged: (bool isOpen) {
+          onDrawerChangedCalled = true;
+        },
+        endDrawer: Container(
+          color: Colors.green,
+        ),
+        onEndDrawerChanged: (bool isOpen) {
+          onEndDrawerChangedCalled = true;
+        },
+        body: Container(),
+      ),
+    ));
+
+    await tester.flingFrom(Offset.zero, const Offset(10.0, 0.0), 10.0);
+    expect(false, onDrawerChangedCalled);
+
+    await tester.pumpAndSettle();
+
+    final double width = tester.getSize(find.byType(MaterialApp)).width;
+    await tester.flingFrom(Offset(width - 1, 0.0), const Offset(-10.0, 0.0), 10.0);
+    await tester.pumpAndSettle();
+    expect(false, onEndDrawerChangedCalled);
+  });
+
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
     Widget boilerplate(Widget child) {

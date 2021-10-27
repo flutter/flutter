@@ -1439,7 +1439,7 @@ void main() {
       botDetector: globals.botDetector,
       platform: globals.platform,
     ),
-  });
+  }, skip: true); // TODO(fujino): https://github.com/flutter/flutter/issues/92522
 
   testUsingContext('display name is Title Case for swift iOS plugin.', () async {
     Cache.flutterRoot = '../..';
