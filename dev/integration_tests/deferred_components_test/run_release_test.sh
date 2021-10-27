@@ -35,7 +35,7 @@ am start -n io.flutter.integration.deferred_components_test/.MainActivity
 sleep 30
 exit
 "
-$adb_path logcat -d -t "$script_start_time" -s "flutter" > build/app/outputs/bundle/release/run_logcat.log
+$adb_path logcat -d -t "$script_start_time" > build/app/outputs/bundle/release/run_logcat.log
 echo ""
 if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferred code"; then
   echo "All tests passed."
