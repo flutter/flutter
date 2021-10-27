@@ -2144,7 +2144,7 @@ class LayerLink {
   /// The total size of the content of the connected [LeaderLayer].
   ///
   /// Generally this should be set by the [RenderObject] that paints on the
-  /// registered [leader] layer (for instance a [RenderLeaderLayer] that shares
+  /// registered [LeaderLayer] (for instance a [RenderLeaderLayer] that shares
   /// this link with its followers). This size may be outdated before and during
   /// layout.
   Size? leaderSize;
