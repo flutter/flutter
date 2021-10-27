@@ -4,7 +4,14 @@ This document is Flutter-specific. For information on the standard Dart DAP impl
 
 Flutter includes support for debugging using [the Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) as an alternative to using the [VM Service](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md) directly, simplying the integration for new editors.
 
-The debug adapter is started with the `flutter debug-adapter` command and is intended to be consumed by DAP-compliant tools such as Flutter-specific extensions for editors, or configured by users whose editors include generic configurable DAP clients.
+The debug adapters are started with the `flutter debug-adapter` command and are intended to be consumed by DAP-compliant tools such as Flutter-specific extensions for editors, or configured by users whose editors include generic configurable DAP clients.
+
+Two adapters are available:
+
+- `flutter debug_adapter`
+- `flutter debug_adapter --test`
+
+The standard adapter will run applications using `flutter run` while the `--test` adapter will cause scripts to be run using `flutter test` and will emit custom `dart.testNotification` events (described in the [Dart DAP documentation](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#darttestnotification)).
 
 Because in the DAP protocol the client speaks first, running this command from the terminal will result in no output (nor will the process terminate). This is expected behaviour.
 
