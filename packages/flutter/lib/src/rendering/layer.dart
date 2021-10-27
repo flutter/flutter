@@ -2167,7 +2167,9 @@ class LayerLinkHandle {
   LeaderLayer? get leader => _link!._leader;
 
   /// Disconnects the link between the [FollowerLayer] owning this handle and
-  /// the [leader];
+  /// the [leader].
+  ///
+  /// The [LayerLinkHandle] becomes unusable after calling this method.
   void dispose() {
     assert(_link!._connectedFollowers > 0);
     _link!._connectedFollowers--;
