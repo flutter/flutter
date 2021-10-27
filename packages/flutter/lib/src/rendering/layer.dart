@@ -291,7 +291,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Subclasses may override this to true to disable retained rendering.
   @protected
-  @visibleForTesting
   bool get alwaysNeedsAddToScene => false;
 
   /// Whether this or any descendant layer in the subtree needs [addToScene].
