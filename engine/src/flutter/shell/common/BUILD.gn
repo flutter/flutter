@@ -73,6 +73,7 @@ source_set("common") {
     "engine.h",
     "pipeline.cc",
     "pipeline.h",
+    "platform_message_handler.h",
     "platform_view.cc",
     "platform_view.h",
     "pointer_data_dispatcher.cc",

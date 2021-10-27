@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
@@ -34,6 +35,7 @@ public final class EventChannel {
   private final BinaryMessenger messenger;
   private final String name;
   private final MethodCodec codec;
+  @Nullable private final BinaryMessenger.TaskQueue taskQueue;
 
   /**
    * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
@@ -55,6 +57,25 @@ public final class EventChannel {
    * @param codec a {@link MessageCodec}.
    */
   public EventChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
+    this(messenger, name, codec, null);
+  }
+
+  /**
+   * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
+   * specified name and {@link MethodCodec}.
+   *
+   * @param messenger a {@link BinaryMessenger}.
+   * @param name a channel name String.
+   * @param codec a {@link MessageCodec}.
+   * @param taskQueue a {@link BinaryMessenger.TaskQueue} that specifies what thread will execute
+   *     the handler. Specifying null means execute on the platform thread. See also {@link
+   *     BinaryMessenger#makeBackgroundTaskQueue()}.
+   */
+  public EventChannel(
+      BinaryMessenger messenger,
+      String name,
+      MethodCodec codec,
+      BinaryMessenger.TaskQueue taskQueue) {
     if (BuildConfig.DEBUG) {
       if (messenger == null) {
         Log.e(TAG, "Parameter messenger must not be null.");
@@ -69,6 +90,7 @@ public final class EventChannel {
     this.messenger = messenger;
     this.name = name;
     this.codec = codec;
+    this.taskQueue = taskQueue;
   }
 
   /**
@@ -83,8 +105,16 @@ public final class EventChannel {
    */
   @UiThread
   public void setStreamHandler(final StreamHandler handler) {
-    messenger.setMessageHandler(
-        name, handler == null ? null : new IncomingStreamRequestHandler(handler));
+    // We call the 2 parameter variant specifically to avoid breaking changes in
+    // mock verify calls.
+    // See https://github.com/flutter/flutter/issues/92582.
+    if (taskQueue != null) {
+      messenger.setMessageHandler(
+          name, handler == null ? null : new IncomingStreamRequestHandler(handler), taskQueue);
+    } else {
+      messenger.setMessageHandler(
+          name, handler == null ? null : new IncomingStreamRequestHandler(handler));
+    }
   }
 
   /**
