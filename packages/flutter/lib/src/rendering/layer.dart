@@ -2121,10 +2121,10 @@ class LayerLink {
   ///
   /// When the [FollowerLayer] no longer wants to follow the [LeaderLayer],
   /// [LayerLinkHandle.dispose] must be called to disconnect the link.
-  LayerLinkHandle registerFollower() {
+  _LayerLinkHandle _registerFollower() {
     assert(_connectedFollowers >= 0);
     _connectedFollowers++;
-    return LayerLinkHandle._(this);
+    return _LayerLinkHandle(this);
   }
 
   /// Returns the [LeaderLayer] currently connected to this link.
@@ -2158,8 +2158,8 @@ class LayerLink {
 /// [LeaderLayer].
 ///
 /// If the link is no longer needed, [dispose] must be called to disconnect it.
-class LayerLinkHandle {
-  LayerLinkHandle._(this._link);
+class _LayerLinkHandle {
+  _LayerLinkHandle(this._link);
 
   LayerLink? _link;
 
@@ -2330,7 +2330,7 @@ class FollowerLayer extends ContainerLayer {
     assert(value != null);
     if (value != _link && _leaderHandle != null) {
       _leaderHandle!.dispose();
-      _leaderHandle = value.registerFollower();
+      _leaderHandle = value._registerFollower();
     }
     _link = value;
   }
@@ -2378,12 +2378,12 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
-  LayerLinkHandle? _leaderHandle;
+  _LayerLinkHandle? _leaderHandle;
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    _leaderHandle = _link.registerFollower();
+    _leaderHandle = _link._registerFollower();
   }
 
   @override

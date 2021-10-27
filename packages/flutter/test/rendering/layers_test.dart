@@ -182,8 +182,10 @@ void main() {
   });
 
   test('leader layers are not dirty when all followers disconnects', () {
+    final ContainerLayer root = ContainerLayer()..attach(Object());
     final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer = LeaderLayer(link: link)..attach(Object());
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    root.append(leaderLayer);
 
     // Does not need add to scene when nothing is connected to link.
     leaderLayer.debugMarkClean();
@@ -191,24 +193,26 @@ void main() {
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     // Connecting a follower requires adding to scene.
-    final LayerLinkHandle handle1 = link.registerFollower();
+    final FollowerLayer follower1 = FollowerLayer(link: link);
+    root.append(follower1);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
 
-    final LayerLinkHandle handle2 = link.registerFollower();
+    final FollowerLayer follower2 = FollowerLayer(link: link);
+    root.append(follower2);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
 
     // Disconnecting one follower, still needs add to scene.
-    handle2.dispose();
+    follower2.remove();
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
 
     // Disconnecting all followers goes back to not requiring add to scene.
-    handle1.dispose();
+    follower1.remove();
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
