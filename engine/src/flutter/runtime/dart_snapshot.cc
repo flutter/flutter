@@ -192,6 +192,25 @@ fml::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromMappings(
   return nullptr;
 }
 
+fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(
+    const Settings& settings) {
+#if DART_SNAPSHOT_STATIC_LINK
+  return nullptr;
+#else   // DART_SNAPSHOT_STATIC_LINK
+  if (settings.vmservice_snapshot_library_path.empty()) {
+    return nullptr;
+  }
+
+  std::shared_ptr<const fml::Mapping> snapshot_data =
+      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
+                    DartSnapshot::kIsolateDataSymbol, false);
+  std::shared_ptr<const fml::Mapping> snapshot_instructions =
+      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
+                    DartSnapshot::kIsolateInstructionsSymbol, true);
+  return IsolateSnapshotFromMappings(snapshot_data, snapshot_instructions);
+#endif  // DART_SNAPSHOT_STATIC_LINK
+}
+
 DartSnapshot::DartSnapshot(std::shared_ptr<const fml::Mapping> data,
                            std::shared_ptr<const fml::Mapping> instructions)
     : data_(std::move(data)), instructions_(std::move(instructions)) {}
