@@ -41,30 +41,6 @@ class ConductorException implements Exception {
   String toString() => 'Exception: $message';
 }
 
-Directory? _flutterRoot;
-// TODO(fujino): this shouldn't be global
-Directory get localFlutterRoot {
-  if (_flutterRoot != null) {
-    return _flutterRoot!;
-  }
-  String filePath;
-  const FileSystem fileSystem = LocalFileSystem();
-  const Platform platform = LocalPlatform();
-
-  filePath = platform.script.toFilePath();
-  final String checkoutsDirname = fileSystem.path.normalize(
-    fileSystem.path.join(
-      fileSystem.path.dirname(filePath),
-      '..', // flutter/dev/conductor/core
-      '..', // flutter/dev/conductor
-      '..', // flutter/dev
-      '..', // flutter
-    ),
-  );
-  _flutterRoot = fileSystem.directory(checkoutsDirname);
-  return _flutterRoot!;
-}
-
 bool assertsEnabled() {
   // Verify asserts enabled
   bool assertsEnabled = false;

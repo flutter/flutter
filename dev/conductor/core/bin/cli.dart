@@ -87,3 +87,21 @@ Future<void> main(List<String> args) async {
     io.exit(1);
   }
 }
+
+Directory get localFlutterRoot {
+  String filePath;
+  const FileSystem fileSystem = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+
+  filePath = platform.script.toFilePath();
+  final String checkoutsDirname = fileSystem.path.normalize(
+    fileSystem.path.join(
+      fileSystem.path.dirname(filePath), // flutter/dev/conductor/core/bin
+      '..', // flutter/dev/conductor/core
+      '..', // flutter/dev/conductor
+      '..', // flutter/dev
+      '..', // flutter
+    ),
+  );
+  return fileSystem.directory(checkoutsDirname);
+}
