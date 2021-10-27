@@ -838,8 +838,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   // TODO(68663): The service isolate in debug mode is always launched without
   // sound null safety. Fix after the isolate snapshot data is created with the
   // right flags.
-  flags->null_safety =
-      vm_data->GetIsolateSnapshot()->IsNullSafetyEnabled(nullptr);
+  flags->null_safety = vm_data->GetServiceIsolateSnapshotNullSafety();
 #endif
 
   UIDartState::Context context(
@@ -848,13 +847,13 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   context.advisory_script_uri = DART_VM_SERVICE_ISOLATE_NAME;
   context.advisory_script_entrypoint = DART_VM_SERVICE_ISOLATE_NAME;
   std::weak_ptr<DartIsolate> weak_service_isolate =
-      DartIsolate::CreateRootIsolate(vm_data->GetSettings(),         //
-                                     vm_data->GetIsolateSnapshot(),  //
-                                     nullptr,                        //
-                                     DartIsolate::Flags{flags},      //
-                                     nullptr,                        //
-                                     nullptr,                        //
-                                     context);                       //
+      DartIsolate::CreateRootIsolate(vm_data->GetSettings(),                //
+                                     vm_data->GetServiceIsolateSnapshot(),  //
+                                     nullptr,                               //
+                                     DartIsolate::Flags{flags},             //
+                                     nullptr,                               //
+                                     nullptr,                               //
+                                     context);                              //
 
   std::shared_ptr<DartIsolate> service_isolate = weak_service_isolate.lock();
   if (!service_isolate) {

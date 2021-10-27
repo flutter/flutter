@@ -28,6 +28,10 @@ DEF_SWITCHES_START
 DEF_SWITCH(AotSharedLibraryName,
            "aot-shared-library-name",
            "Name of the *.so containing AOT compiled Dart assets.")
+DEF_SWITCH(AotVMServiceSharedLibraryName,
+           "aot-vmservice-shared-library-name",
+           "Name of the *.so containing AOT compiled Dart assets for "
+           "launching the service isolate.")
 DEF_SWITCH(SnapshotAssetPath,
            "snapshot-asset-path",
            "Path to the directory containing the four files specified by "

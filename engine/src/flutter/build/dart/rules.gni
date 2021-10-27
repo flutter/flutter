@@ -31,6 +31,9 @@ frontend_server_files +=
 #
 # Invoker must supply dart_main and package_config. Invoker may optionally
 # supply aot as a boolean and product as a boolean.
+#
+# On Android, the invoker may provide output_aot_lib as a string to override
+# the default filename for the aot-elf snapshot.
 template("flutter_snapshot") {
   assert(!is_fuchsia)
   assert(defined(invoker.main_dart), "main_dart is a required parameter.")
@@ -134,7 +137,12 @@ template("flutter_snapshot") {
           "--assembly=" + rebase_path(snapshot_assembly),
         ]
       } else if (is_android) {
-        libapp = "$target_gen_dir/android/libs/$android_app_abi/libapp.so"
+        if (defined(invoker.output_aot_lib)) {
+          output_aot_lib = invoker.output_aot_lib
+        } else {
+          output_aot_lib = "libapp.so"
+        }
+        libapp = "$target_gen_dir/android/libs/$android_app_abi/$output_aot_lib"
         outputs += [ libapp ]
         args += [
           "--snapshot_kind=app-aot-elf",

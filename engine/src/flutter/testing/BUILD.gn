@@ -88,6 +88,18 @@ source_set("skia") {
   ]
 }
 
+dart_snapshot_kernel("vmservice_kernel") {
+  dart_main =
+      rebase_path("//flutter/shell/vmservice/empty.dart", root_build_dir)
+  dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
+}
+
+dart_snapshot_aot("vmservice_snapshot") {
+  dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
+  dart_elf_filename = "libvmservice_snapshot.so"
+  deps = [ ":vmservice_kernel" ]
+}
+
 source_set("fixture_test") {
   testonly = true
 
@@ -103,6 +115,10 @@ source_set("fixture_test") {
     "//flutter/common",
     "//flutter/runtime",
   ]
+
+  if (flutter_runtime_mode == "profile") {
+    public_deps += [ ":vmservice_snapshot" ]
+  }
 }
 
 if (enable_unittests) {

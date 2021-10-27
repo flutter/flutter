@@ -444,6 +444,17 @@ action("android_jar") {
     ":pom_embedding",
     ":pom_libflutter",
   ]
+
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+    args += [
+      "--native_lib",
+      rebase_path(
+          "$root_gen_dir/flutter/shell/vmservice/android/libs/$android_app_abi/libvmservice_snapshot.so",
+          root_build_dir,
+          root_build_dir),
+    ]
+  }
 }
 
 action("pom_libflutter") {
