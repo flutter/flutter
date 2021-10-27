@@ -39,7 +39,6 @@ G_DEFINE_TYPE_WITH_CODE(
 static void fl_mock_plugin_registrar_dispose(GObject* object) {
   FlMockPluginRegistrar* self = FL_MOCK_PLUGIN_REGISTRAR(object);
 
-  g_clear_object(&self->view);
   g_clear_object(&self->messenger);
   g_clear_object(&self->texture_registrar);
 
@@ -81,7 +80,7 @@ static FlPluginRegistrar* fl_mock_plugin_registrar_new(
     FlTextureRegistrar* texture_registrar) {
   FlMockPluginRegistrar* registrar = FL_MOCK_PLUGIN_REGISTRAR(
       g_object_new(fl_mock_plugin_registrar_get_type(), NULL));
-  registrar->view = FL_VIEW(g_object_ref(view));
+  registrar->view = view;
   registrar->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
   registrar->texture_registrar =
       FL_TEXTURE_REGISTRAR(g_object_ref(texture_registrar));
@@ -94,7 +93,7 @@ TEST(FlPluginRegistrarTest, FlMockRegistrar) {
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlView) view = fl_view_new(project);
+  FlView* view = fl_view_new(project);
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlTextureRegistrar) texture_registrar =
       fl_texture_registrar_new(engine);
