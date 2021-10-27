@@ -291,6 +291,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Subclasses may override this to true to disable retained rendering.
   @protected
+  @visibleForTesting
   bool get alwaysNeedsAddToScene => false;
 
   /// Whether this or any descendant layer in the subtree needs [addToScene].
@@ -2104,11 +2105,44 @@ class PhysicalModelLayer extends ContainerLayer {
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
 class LayerLink {
-  /// The currently-registered [LeaderLayer], if any.
-  LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
-  /// The total size of [leader]'s contents.
+  int _connectedFollowers = 0;
+
+  /// Whether a [LeaderLayer] is currently connected to this link.
+  ///
+  /// The connected [LeaderLayer] can be obtained from the [LayerLinkHandle]
+  /// returned by [registerFollower].
+  bool get leaderConnected => _leader != null;
+
+  /// Called by the [FollowerLayer] to establish a link to a [LeaderLayer].
+  ///
+  /// The returned [LayerLinkHandle] provides access to the leader via
+  /// [LayerLinkHandle.leader].
+  ///
+  /// When the [FollowerLayer] no longer wants to follow the [LeaderLayer],
+  /// [LayerLinkHandle.dispose] must be called to disconnect the link.
+  LayerLinkHandle registerFollower() {
+    assert(_connectedFollowers >= 0);
+    _connectedFollowers++;
+    return LayerLinkHandle._(this);
+  }
+
+  /// Returns the [LeaderLayer] currently connected to this link.
+  ///
+  /// Valid in debug mode only. Returns null in all other modes.
+  ///
+  /// Use [connect] to obtain the connected [LeaderLayer] for non-debug
+  /// purposes.
+  LeaderLayer? get debugLeader {
+    LeaderLayer? result;
+    if (kDebugMode) {
+      result = _leader;
+    }
+    return result;
+  }
+
+  /// The total size of the content of the connected [LeaderLayer].
   ///
   /// Generally this should be set by the [RenderObject] that paints on the
   /// registered [leader] layer (for instance a [RenderLeaderLayer] that shares
@@ -2118,6 +2152,28 @@ class LayerLink {
 
   @override
   String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+}
+
+/// A handle provided by [LayerLink.registerFollower] to a calling
+/// [FollowerLayer] to establish a link between that [FollowerLayer] and a
+/// [LeaderLayer].
+///
+/// If the link is no longer needed, [dispose] must be called to disconnect it.
+class LayerLinkHandle {
+  LayerLinkHandle._(this._link);
+
+  LayerLink? _link;
+
+  /// The currently-registered [LeaderLayer], if any.
+  LeaderLayer? get leader => _link!._leader;
+
+  /// Disconnects the link between the [FollowerLayer] owning this handle and
+  /// the [leader];
+  void dispose() {
+    assert(_link!._connectedFollowers > 0);
+    _link!._connectedFollowers--;
+    _link = null;
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2134,18 +2190,22 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
+  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : assert(link != null), _link = link, _offset = offset;
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
   LayerLink get link => _link;
+  LayerLink _link;
   set link(LayerLink value) {
     assert(value != null);
+    if (_link == value) {
+      return;
+    }
+    _link._leader = null;
     _link = value;
   }
-  LayerLink _link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -2154,23 +2214,34 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  Offset offset;
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    assert(value != null);
+    if (value == _offset) {
+      return;
+    }
+    _offset = value;
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
+  }
 
   /// {@macro flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
   @override
-  bool get alwaysNeedsAddToScene => true;
+  bool get alwaysNeedsAddToScene => _link._connectedFollowers > 0;
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link.leader == null);
+    assert(link._leader == null);
     _lastOffset = null;
     link._leader = this;
   }
 
   @override
   void detach() {
-    assert(link.leader == this);
+    assert(link._leader == this);
     link._leader = null;
     _lastOffset = null;
     super.detach();
@@ -2256,6 +2327,10 @@ class FollowerLayer extends ContainerLayer {
   LayerLink get link => _link;
   set link(LayerLink value) {
     assert(value != null);
+    if (value != _link && _leaderHandler != null) {
+      _leaderHandler!.dispose();
+      _leaderHandler = value.registerFollower();
+    }
     _link = value;
   }
   LayerLink _link;
@@ -2302,6 +2377,21 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
+  LayerLinkHandle? _leaderHandler;
+
+  @override
+  void attach(Object owner) {
+    super.attach(owner);
+    _leaderHandler = _link.registerFollower();
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    _leaderHandler?.dispose();
+    _leaderHandler = null;
+  }
+
   Offset? _lastOffset;
   Matrix4? _lastTransform;
   Matrix4? _invertedTransform;
@@ -2321,7 +2411,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (link.leader == null) {
+    if (_leaderHandler!.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2400,7 +2490,7 @@ class FollowerLayer extends ContainerLayer {
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = link.leader;
+    final LeaderLayer? leader = _leaderHandler!.leader;
     // Check to see if we are linked.
     if (leader == null)
       return;
@@ -2462,7 +2552,7 @@ class FollowerLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(link != null);
     assert(showWhenUnlinked != null);
-    if (link.leader == null && !showWhenUnlinked!) {
+    if (_leaderHandler!.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
