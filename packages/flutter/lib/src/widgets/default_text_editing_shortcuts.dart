@@ -160,13 +160,6 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     child: child,
   );
 
-  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
-    // Allows space and enter to be used as input instead of a shortcut by
-    // another widget. See https://github.com/flutter/flutter/issues/90907
-    SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.enter): DoNothingAndStopPropagationTextIntent(),
-  };
-
   static const Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.backspace): DeleteTextIntent(),
     SingleActivator(LogicalKeyboardKey.backspace, control: true): DeleteByWordTextIntent(),
@@ -539,7 +532,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyA, meta: true): DoNothingAndStopPropagationTextIntent(),
   };
 
-  static Map<ShortcutActivator, Intent> get _platformShortcuts {
+  static Map<ShortcutActivator, Intent> get _shortcuts {
     if (kIsWeb) {
       return _webShortcuts;
     }
@@ -558,12 +551,5 @@ class DefaultTextEditingShortcuts extends Shortcuts {
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }
-  }
-
-  static Map<ShortcutActivator, Intent> get _shortcuts {
-    return <ShortcutActivator, Intent>{
-      ..._commonShortcuts,
-      ..._platformShortcuts,
-    };
   }
 }

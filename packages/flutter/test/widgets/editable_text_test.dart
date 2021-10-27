@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -8635,71 +8634,6 @@ void main() {
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
     await tester.pump();
     expect(scrollController.offset.roundToDouble(), 0.0);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/90907.
-  testWidgets("ActivateIntent doesn't block space entry", (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    bool invoked = false;
-
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Align(
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 100,
-            child: ListTile(
-              title: Actions(
-                actions: <Type, Action<Intent>>{
-                  ActivateIntent: CallbackAction<ActivateIntent>(
-                    onInvoke: (ActivateIntent intent) {
-                      invoked = true;
-                    },
-                  ),
-                },
-                child: Column(
-                  children: <Widget>[
-                    EditableText(
-                      autofocus: true,
-                      showSelectionHandles: true,
-                      maxLines: 2,
-                      controller: TextEditingController(),
-                      focusNode: FocusNode(),
-                      cursorColor: Colors.red,
-                      backgroundCursorColor: Colors.blue,
-                      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!.copyWith(fontFamily: 'Roboto'),
-                      keyboardType: TextInputType.text,
-                    ),
-                    Focus(
-                      focusNode: focusNode,
-                      child: const Text('Hello'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ));
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(invoked, isFalse);
-
-    focusNode.requestFocus();
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pump();
-    expect(invoked, isTrue);
-
-    invoked = false;
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    // On the web, enter doesn't activate any controls except for buttons.
-    expect(invoked, kIsWeb ? isFalse : isTrue);
   });
 }
 

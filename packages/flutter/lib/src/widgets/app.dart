@@ -1149,10 +1149,6 @@ class WidgetsApp extends StatefulWidget {
   /// with "s".
   static bool debugAllowBannerOverride = true;
 
-  // Any shortcuts added here have the potential to conflict with normal text
-  // input. If this should not happen and text input should take preference,
-  // then add a shortcut for the relevant key in DefaultTextEditingShortcuts
-  // mapped to DoNothingAndStopPropagationTextIntent.
   static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
@@ -1210,11 +1206,6 @@ class WidgetsApp extends StatefulWidget {
   };
 
   // Default shortcuts for the macOS platform.
-  //
-  // Any shortcuts added here have the potential to conflict with normal text
-  // input. If this should not happen and text input should take preference,
-  // then add a shortcut for the relevant key in DefaultTextEditingShortcuts
-  // mapped to DoNothingAndStopPropagationTextIntent.
   static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts = <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
