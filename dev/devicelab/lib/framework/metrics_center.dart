@@ -54,7 +54,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///     "host_type": "linux",
 ///     "host_version": "debian-10.11"
 ///   }
-List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags) {
+List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags, String taskName) {
   print('Results to upload to skia perf: $resultsJson');
   print('Benchmark tags to upload to skia perf: $benchmarkTags');
   final List<String> scoreKeys =
@@ -82,6 +82,18 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> b
         tags,
       ),
     );
+
+    // Add an extra entry under test name. This way we have duplicate metrics
+    // under both builder name and test name. Once we have enough data and update
+    // existing alerts to point to test name, we can deprecate builder name ones.
+    // https://github.com/flutter/flutter/issues/74522#issuecomment-942575581
+    tags[kNameKey] = taskName;
+    metricPoints.add(
+      MetricPoint(
+        (resultData[scoreKey] as num).toDouble(),
+        tags,
+      ),
+    );
   }
   return metricPoints;
 }
@@ -99,7 +111,7 @@ Future<void> upload(
   FlutterDestination metricsDestination,
   List<MetricPoint> metricPoints,
   int commitTimeSinceEpoch,
-  String? taskName,
+  String taskName,
 ) async {
   await metricsDestination.update(
     metricPoints,
@@ -107,7 +119,7 @@ Future<void> upload(
       commitTimeSinceEpoch,
       isUtc: true,
     ),
-    taskName ?? 'default',
+    taskName,
   );
 }
 
@@ -127,11 +139,12 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
+  taskName = taskName ?? 'default';
   final Map<String, dynamic> benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-  final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap);
+  final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap, taskName);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
   await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }
