@@ -2328,9 +2328,9 @@ class FollowerLayer extends ContainerLayer {
   LayerLink get link => _link;
   set link(LayerLink value) {
     assert(value != null);
-    if (value != _link && _leaderHandler != null) {
-      _leaderHandler!.dispose();
-      _leaderHandler = value.registerFollower();
+    if (value != _link && _leaderHandle != null) {
+      _leaderHandle!.dispose();
+      _leaderHandle = value.registerFollower();
     }
     _link = value;
   }
@@ -2378,19 +2378,19 @@ class FollowerLayer extends ContainerLayer {
   ///  * [unlinkedOffset], for when the layer is not linked.
   Offset? linkedOffset;
 
-  LayerLinkHandle? _leaderHandler;
+  LayerLinkHandle? _leaderHandle;
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    _leaderHandler = _link.registerFollower();
+    _leaderHandle = _link.registerFollower();
   }
 
   @override
   void detach() {
     super.detach();
-    _leaderHandler?.dispose();
-    _leaderHandler = null;
+    _leaderHandle?.dispose();
+    _leaderHandle = null;
   }
 
   Offset? _lastOffset;
@@ -2412,7 +2412,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (_leaderHandler!.leader == null) {
+    if (_leaderHandle!.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2491,7 +2491,7 @@ class FollowerLayer extends ContainerLayer {
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = _leaderHandler!.leader;
+    final LeaderLayer? leader = _leaderHandle!.leader;
     // Check to see if we are linked.
     if (leader == null)
       return;
@@ -2553,7 +2553,7 @@ class FollowerLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(link != null);
     assert(showWhenUnlinked != null);
-    if (_leaderHandler!.leader == null && !showWhenUnlinked!) {
+    if (_leaderHandle!.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
