@@ -1160,6 +1160,10 @@ abstract class ResidentRunner extends ResidentHandlers {
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: generateDartPluginRegistry,
+      defines: <String, String>{
+        // Needed for Dart plugin registry generation.
+        kTargetFile: mainPath,
+      },
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
