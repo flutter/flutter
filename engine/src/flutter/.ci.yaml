@@ -298,6 +298,33 @@ targets:
       - ci/**
       - flutter_frontend_server/**
 
+  - name: Mac mac_ios_engine
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 60
+    properties:
+      config_name: mac_ios_engine
+      environment: Staging
+    scheduler: luci
+
+  - name:  Mac mac_ios_engine_profile
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 60
+    properties:
+      config_name: mac_ios_engine_profile
+      environment: Staging
+    scheduler: luci
+
+  - name:  Mac mac_ios_engine_release
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 60
+    properties:
+      config_name: mac_ios_engine_release
+      environment: Staging
+    scheduler: luci
+
   - name: Windows Android AOT Engine
     recipe: engine
     properties:
