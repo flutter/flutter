@@ -2945,12 +2945,24 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// `heightFactor`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how the prefix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [prefix] and [prefixText], which are other ways to show content
   ///    before the text field (but after the icon).
   ///  * [suffixIcon], which is the same but on the trailing edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? prefixIcon;
 
   /// The constraints for the prefix icon.
@@ -3055,12 +3067,24 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// `heightFactor`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how the suffix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [suffix] and [suffixText], which are other ways to show content
   ///    after the text field (but before the icon).
   ///  * [prefixIcon], which is the same but on the leading edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? suffixIcon;
 
   /// Optional widget to place on the line after the input.
