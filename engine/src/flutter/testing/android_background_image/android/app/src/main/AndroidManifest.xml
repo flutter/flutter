@@ -3,7 +3,6 @@
     package="dev.flutter.android_background_image">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:name="io.flutter.app.FlutterApplication"
         android:allowBackup="false"
         android:label="Background Image Tester"
         android:supportsRtl="true">
