@@ -11,39 +11,14 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/mock_binary_messenger_response_handle.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
-
-G_DECLARE_FINAL_TYPE(FlMockBinaryMessengerResponseHandle,
-                     fl_mock_binary_messenger_response_handle,
-                     FL,
-                     MOCK_BINARY_MESSENGER_RESPONSE_HANDLE,
-                     FlBinaryMessengerResponseHandle)
 
 G_DECLARE_FINAL_TYPE(FlMockBinaryMessenger,
                      fl_mock_binary_messenger,
                      FL,
                      MOCK_BINARY_MESSENGER,
                      GObject)
-
-struct _FlMockBinaryMessengerResponseHandle {
-  FlBinaryMessengerResponseHandle parent_instance;
-};
-
-G_DEFINE_TYPE(FlMockBinaryMessengerResponseHandle,
-              fl_mock_binary_messenger_response_handle,
-              fl_binary_messenger_response_handle_get_type());
-
-static void fl_mock_binary_messenger_response_handle_class_init(
-    FlMockBinaryMessengerResponseHandleClass* klass) {}
-
-static void fl_mock_binary_messenger_response_handle_init(
-    FlMockBinaryMessengerResponseHandle* self) {}
-
-static FlMockBinaryMessengerResponseHandle*
-fl_mock_binary_messenger_response_handle_new() {
-  return FL_MOCK_BINARY_MESSENGER_RESPONSE_HANDLE(
-      g_object_new(fl_mock_binary_messenger_response_handle_get_type(), NULL));
-}
 
 struct _FlMockBinaryMessenger {
   GObject parent_instance;
