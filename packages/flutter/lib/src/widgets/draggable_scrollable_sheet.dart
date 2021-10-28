@@ -65,7 +65,7 @@ class DraggableScrollableController {
   /// Convert a sheet's pixel height to size (fractional value of parent container height).
   double pixelsToSize(double pixels) => _attachedController!.extent.pixelsToSize(pixels);
 
-  /// Animates the attached sheet from the current sizes to [size], a fractional
+  /// Animates the attached sheet from its current size to [size], a fractional
   /// value of the parent container's height.
   ///
   /// Any active sheet animation is canceled. If the sheet's internal scrollable
@@ -122,8 +122,8 @@ class DraggableScrollableController {
   /// Jumps the attached sheet from its current size to the given [size], a
   /// fractional value of the parent container's height.
   ///
-  /// If [size] is outside of an attached sheet's min and max child size,
-  /// [jumpTo] will jump that sheet to the nearest valid size instead.
+  /// If [size] is outside of a the attached sheet's min or max child size,
+  /// [jumpTo] will jump the sheet to the nearest valid size instead.
   ///
   /// Any active sheet animation is canceled. If the sheet's inner scrollable
   /// is currently animating (eg responding to a user fling), that animation is
