@@ -7,22 +7,22 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'inherited_model.dart';
 
-/// Enables sharing key/value data with the all of the widgets below [child].
+/// Enables sharing key/value data with the all of the widgets below `child`.
 ///
-/// - `AppModel.set(context, key, value)` changes the value of an entry
+/// - `AppModel.setValue(context, key, value)` changes the value of an entry
 /// in the shared data table and forces widgets that depend on that entry
 /// to be rebuilt.
 ///
-/// - `AppModel.get(context, key)` creates a dependency on the key and
+/// - `AppModel.getValue(context, key)` creates a dependency on the key and
 /// returns the value for the key from the shared data table.
 ///
-/// - `AppModel.init(context, key, value)` changes the value of an entry
+/// - `AppModel.initValue(context, key, value)` changes the value of an entry
 /// in the shared data table but does not force dependent widgets to be
 /// rebuilt.
 ///
-/// A widget whose build method uses AppModel.get(context, keyword)
+/// A widget whose build method uses AppModel.getValue(context, keyword)
 /// creates a dependency on the AppModel: when the value of keyword
-/// changes with AppModel.set(), the widget will be rebuilt.
+/// changes with AppModel.setValue(), the widget will be rebuilt.
 ///
 /// An instance of this widget is created automatically by [WidgetsApp].
 ///
@@ -55,8 +55,8 @@ import 'inherited_model.dart';
 class AppModel extends StatefulWidget {
   /// Creates a widget based on [InheritedModel] that supports build
   /// dependencies qualified by keywords. Descendant widgets create
-  /// such dependencies with [AppModel.get] and they trigger
-  /// rebuilds with [AppModel.set].
+  /// such dependencies with [AppModel.getValue] and they trigger
+  /// rebuilds with [AppModel.setValue].
   ///
   /// This widget is automatically created by the [WidgetsApp].
   const AppModel({ Key? key, required this.child }) : super(key: key);
@@ -69,60 +69,74 @@ class AppModel extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _AppModelState();
 
-  /// Returns the app model's value for [key] and ensures that each
-  /// time the value of [key] is changed with [AppModel.set], the
+  /// Returns the app model's value for `key` and ensures that each
+  /// time the value of `key` is changed with [AppModel.setValue], the
   /// specified context will be rebuilt.
   ///
-  /// If no value for [key] is found then null is returned.
+  /// If no value for `key` is found then null is returned.
   ///
-  /// A Widget that depends on the app model's value for [key] should use this method
-  /// in their `build` methods to ensure that they are rebuilt if the value
-  /// changes.
-  static V? get<K extends Object, V>(BuildContext context, K key) {
+  /// A Widget that depends on the app model's value for `key` should use
+  /// this method in their `build` methods to ensure that they are rebuilt
+  /// if the value changes.
+  ///
+  /// The type parameter `K` is the type of the value's keyword and `V`
+  /// is the type of the value. The value type is nullable, for example
+  /// `AppModel.getValue<String, String>(key,value)` means that the key parameter
+  /// must non-null but the value parameter can be null or a string.
+  static V? getValue<K extends Object, V>(BuildContext context, K key) {
     final _AppModelData model = InheritedModel.inheritFrom<_AppModelData>(context, aspect: key)!;
-    return model.appModelState.get<K, V>(key);
+    return model.appModelState.getValue<K, V>(key);
   }
 
-  /// Changes the app model's [value] for [key] and rebuilds any widgets
-  /// that have created a dependency on [key] with [AppModel.get].
+  /// Changes the app model's `value` for `key` and rebuilds any widgets
+  /// that have created a dependency on `key` with [AppModel.getValue].
   ///
-  /// If [value] is `==` to the current value of [key] then nothing
+  /// If `value` is `==` to the current value of `key` then nothing
   /// is rebuilt.
   ///
-  /// Unlike [AppModel.get], this method does _not_ create a dependency
-  /// between [context] and [key].
-  static void set<K extends Object, V>(BuildContext context, K key, V? value) {
+  /// Unlike [AppModel.getValue], this method does _not_ create a dependency
+  /// between `context` and `key`.
+  ///
+  /// The type parameter `K` is the type of the value's keyword and `V`
+  /// is the type of the value. The value type is nullable, for example
+  /// `AppModel.setValue<String, String>(key,value)` means that the key parameter
+  /// must non-null but the value parameter can be null or a string.
+  static void setValue<K extends Object, V>(BuildContext context, K key, V? value) {
     final _AppModelData model = context.findAncestorWidgetOfExactType<_AppModelData>()!;
-    model.appModelState.set<K, V>(key, value);
+    model.appModelState.setValue<K, V>(key, value);
   }
 
-  /// Unconditionally changes the app model's [value] for [key].
+  /// Unconditionally changes the app model's `value` for `key`.
   ///
-  /// Unlike [AppModel.set], this method does _not_ cause dependent widgets
+  /// This method should be used to lazily initialize a value that's
+  /// needed at build time, when rebuilding dependent widgets isn't
+  /// allowed or necessary. The `SharedObject` example above
+  /// demonstrates this.
+  ///
+  /// Unlike [AppModel.setValue], this method does _not_ cause dependent widgets
   /// to be rebuilt.
-  static void init<K extends Object, V>(BuildContext context, K key, V? value) {
+  ///
+  /// The type parameter `K` is the type of the value's keyword and `V`
+  /// is the type of the value. The value type is nullable, for example
+  /// `AppModel.initValue<String, String>(key,value)` means that the key parameter
+  /// must non-null but the value parameter can be null or a string.
+  static void initValue<K extends Object, V>(BuildContext context, K key, V? value) {
     final _AppModelData model = context.findAncestorWidgetOfExactType<_AppModelData>()!;
-    model.appModelState.init<K, V>(key, value);
+    model.appModelState.initValue<K, V>(key, value);
   }
 }
 
 class _AppModelState extends State<AppModel> {
-  late Map<Object, Object?> data;
-
-  @override
-  void initState() {
-    super.initState();
-    data = <Object, Object?>{};
-  }
+  late Map<Object, Object?> data = <Object, Object?>{};
 
   @override
   Widget build(BuildContext context) {
     return _AppModelData(appModelState: this, child: widget.child);
   }
 
-  V? get<K extends Object, V>(K key) => data[key] as V?;
+  V? getValue<K extends Object, V>(K key) => data[key] as V?;
 
-  void set<K extends Object, V>(K key, V? value) {
+  void setValue<K extends Object, V>(K key, V? value) {
     if (data[key] != value) {
       setState(() {
         data = Map<Object, Object?>.from(data);
@@ -131,7 +145,7 @@ class _AppModelState extends State<AppModel> {
     }
   }
 
-  void init<K extends Object, V>(K key, V? value) {
+  void initValue<K extends Object, V>(K key, V? value) {
     data = Map<Object, Object?>.from(data);
     data[key] = value;
   }

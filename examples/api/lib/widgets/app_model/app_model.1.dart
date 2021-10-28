@@ -4,6 +4,7 @@
 
 // Flutter code sample for AppModel
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // A single lazily constructed object that's shared with the entire
@@ -16,20 +17,20 @@ class SharedObject {
   static final Object _sharedObjectKey = Object();
 
   @override
-  String toString() => 'SharedObject#$hashCode';
+  String toString() => describeIdentity(this);
 
   static void reset(BuildContext context) {
-    // Calling AppModel.set() causes dependent widgets to be rebuilt.
-    AppModel.set<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
+    // Calling AppModel.setValue() causes dependent widgets to be rebuilt.
+    AppModel.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
   static SharedObject of(BuildContext context) {
-    SharedObject? value = AppModel.get<Object, SharedObject>(context, _sharedObjectKey);
+    SharedObject? value = AppModel.getValue<Object, SharedObject>(context, _sharedObjectKey);
     if (value == null) {
       value = SharedObject._();
       // Calling AppModel.init() does not cause dependent widgets to
       // be rebuilt, so it's safe to call it from within a build method.
-      AppModel.init<Object, SharedObject>(context, _sharedObjectKey, value);
+      AppModel.initValue<Object, SharedObject>(context, _sharedObjectKey, value);
     }
     return value;
   }

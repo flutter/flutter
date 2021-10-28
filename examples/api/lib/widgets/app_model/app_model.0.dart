@@ -13,10 +13,10 @@ class ShowAppModelValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The AppModel.get() call here causes this widget to depend
+    // The AppModel.getValue() call here causes this widget to depend
     // on the value of the AppModel's 'foo' key. If it's changed, with
-    // AppModel.set(), then this widget will be rebuilt.
-    final String? value = AppModel.get<String, String>(context, appModelKey);
+    // AppModel.setValue(), then this widget will be rebuilt.
+    final String? value = AppModel.getValue<String, String>(context, appModelKey);
     return Text('$appModelKey: $value');
   }
 }
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
                 _fooVersion += 1;
                 // Changing the AppModel's value for 'foo' causes the widgets that
                 // depend on 'foo' to be rebuilt.
-                AppModel.set<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
+                AppModel.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // note: no setState()
               },
             ),
             const SizedBox(height: 16),
@@ -60,7 +60,7 @@ class _HomeState extends State<Home> {
               child: const Text('change bar'),
               onPressed: () {
                 _barVersion += 1;
-                AppModel.set<String, String?>(context, 'bar', 'BAR $_barVersion');  // note: no setState()
+                AppModel.setValue<String, String?>(context, 'bar', 'BAR $_barVersion');  // note: no setState()
               },
             ),
           ],
