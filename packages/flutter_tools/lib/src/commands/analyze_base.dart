@@ -80,8 +80,9 @@ abstract class AnalyzeBase {
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
-    if (argResults['dart-sdk'] != null) {
-      return argResults['dart-sdk'] as String;
+    final String? dartSdk = argResults['dart-sdk'] as String?;
+    if (dartSdk is String) {
+      return dartSdk;
     } else {
       return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
     }
@@ -122,7 +123,7 @@ class PackageDependency {
   // This is a map from dependency targets (lib directories) to a list
   // of places that ask for that target (.packages or pubspec.yaml files)
   Map<String, List<String>> values = <String, List<String>>{};
-  late String canonicalSource;
+  String? canonicalSource;
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
@@ -133,11 +134,12 @@ class PackageDependency {
   }
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    assert(globals.fs.path.isAbsolute(Cache.flutterRoot ?? ''));
+    final String? flutterRoot = Cache.flutterRoot;
+    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
-        if (globals.fs.path.isWithin(Cache.flutterRoot ?? '', source)) {
+        if (flutterRoot != null && globals.fs.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }
