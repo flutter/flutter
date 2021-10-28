@@ -90,7 +90,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Returns the frame buffer id for the engine to render to.
   uint32_t GetFrameBufferId(size_t width, size_t height);
 
-  // Called when the engine is restarted.
+  // Invoked by the engine right before the engine is restarted.
   //
   // This should reset necessary states to as if the view has just been
   // created. This is typically caused by a hot restart (Shift-R in CLI.)

@@ -20,6 +20,7 @@
 - (bool)testKeyEventsAreNotPropagatedIfHandled;
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
 - (bool)testPerformKeyEquivalentSynthesizesKeyUp;
+- (bool)testKeyboardIsRestartedOnEngineRestart;
 
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
@@ -169,6 +170,10 @@ TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled)
 
 TEST(FlutterViewControllerTest, TestPerformKeyEquivalentSynthesizesKeyUp) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testPerformKeyEquivalentSynthesizesKeyUp]);
+}
+
+TEST(FlutterViewControllerTest, TestKeyboardIsRestartedOnEngineRestart) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyboardIsRestartedOnEngineRestart]);
 }
 
 }  // namespace flutter::testing
@@ -453,6 +458,60 @@ TEST(FlutterViewControllerTest, TestPerformKeyEquivalentSynthesizesKeyUp) {
   } @catch (...) {
     return false;
   }
+  return true;
+}
+
+- (bool)testKeyboardIsRestartedOnEngineRestart {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  __block bool called = false;
+  __block FlutterKeyEvent last_event;
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterKeyEvent* event;
+        [invocation getArgument:&event atIndex:2];
+        called = true;
+        last_event = *event;
+      }));
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  [viewController viewWillAppear];
+  NSEvent* keyADown = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                                       location:NSZeroPoint
+                                  modifierFlags:0x100
+                                      timestamp:0
+                                   windowNumber:0
+                                        context:nil
+                                     characters:@"a"
+                    charactersIgnoringModifiers:@"a"
+                                      isARepeat:FALSE
+                                        keyCode:0];
+  const uint64_t kPhysicalKeyA = 0x70004;
+
+  // Send KeyA key down event twice. Without restarting the keyboard during
+  // onPreEngineRestart, the second event received will be an empty event with
+  // physical key 0x0 because duplicate key down events are ignored.
+
+  called = false;
+  [viewController keyDown:keyADown];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(last_event.physical, kPhysicalKeyA);
+
+  [viewController onPreEngineRestart];
+
+  called = false;
+  [viewController keyDown:keyADown];
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(last_event.physical, kPhysicalKeyA);
   return true;
 }
 
