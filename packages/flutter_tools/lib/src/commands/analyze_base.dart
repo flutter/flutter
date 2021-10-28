@@ -135,7 +135,8 @@ class PackageDependency {
   }
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    assert(globals.fs.path.isAbsolute(Cache.flutterRoot ?? ''));
+    final String? flutterRoot = Cache.flutterRoot;
+    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
