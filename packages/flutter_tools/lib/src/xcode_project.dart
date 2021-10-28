@@ -94,7 +94,7 @@ class IosProject extends XcodeBasedProject {
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static final RegExp _watchAppCompanionAppIdPattern = RegExp(r'''^\s*INFOPLIST_KEY_WKCompanionAppBundleIdentifier\s*=\s*(["']?)(.*?)\1;\s*$''');
-  
+
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
@@ -354,7 +354,7 @@ class IosProject extends XcodeBasedProject {
     }
 
     //When we add a watchOS target from Xcode 13, there is no Info.plist file inside the watchOS target folder.
-    //WkCompanionAppBundleIdentifier has been moved to project.pbxproj 
+    //WkCompanionAppBundleIdentifier has been moved to project.pbxproj
     final String? wkCompanionAppBundleIdentifier = firstMatchInFile(xcodeProjectInfoFile, _watchAppCompanionAppIdPattern)?.group(2);
     if (wkCompanionAppBundleIdentifier != null) {
       if (wkCompanionAppBundleIdentifier == bundleIdentifier){
