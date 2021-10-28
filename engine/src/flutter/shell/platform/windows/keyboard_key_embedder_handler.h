@@ -107,10 +107,10 @@ class KeyboardKeyEmbedderHandler
                                 uint64_t logical_key);
   // Check each key's state from |get_key_state_| and synthesize events
   // if their toggling states have been desynchronized.
-  void SynchronizeCritialToggledStates(int this_virtual_key);
+  void SynchronizeCritialToggledStates(int virtual_key, bool is_down);
   // Check each key's state from |get_key_state_| and synthesize events
   // if their pressing states have been desynchronized.
-  void SynchronizeCritialPressedStates();
+  void SynchronizeCritialPressedStates(int virtual_key, bool was_down);
 
   // Wraps perform_send_event_ with state tracking. Use this instead of
   // |perform_send_event_| to send events to the framework.

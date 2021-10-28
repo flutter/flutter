@@ -323,8 +323,9 @@ TEST(KeyboardKeyEmbedderHandlerTest, ImeEventsAreIgnored) {
   EXPECT_EQ(last_handled, true);
 }
 
-// Test if modifier keys that are told apart by the extended bit
-// can be identified.
+// Test if modifier keys that are told apart by the extended bit can be
+// identified. (Their physical keys must be searched with the extended bit
+// considered.)
 TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByExtendedBit) {
   TestKeystate key_state;
   std::vector<TestFlutterKeyEvent> results;
@@ -343,7 +344,7 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByExtendedBit) {
   last_handled = false;
   key_state.Set(VK_LCONTROL, true);
   handler->KeyboardHook(
-      VK_CONTROL, kScanCodeControl, WM_KEYDOWN, 0, false, false,
+      VK_LCONTROL, kScanCodeControl, WM_KEYDOWN, 0, false, false,
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
   EXPECT_EQ(results.size(), 1);
@@ -362,7 +363,7 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByExtendedBit) {
   last_handled = false;
   key_state.Set(VK_RCONTROL, true);
   handler->KeyboardHook(
-      VK_CONTROL, kScanCodeControl, WM_KEYDOWN, 0, true, true,
+      VK_RCONTROL, kScanCodeControl, WM_KEYDOWN, 0, true, true,
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
   EXPECT_EQ(results.size(), 1);
@@ -381,7 +382,7 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByExtendedBit) {
   last_handled = false;
   key_state.Set(VK_LCONTROL, false);
   handler->KeyboardHook(
-      VK_CONTROL, kScanCodeControl, WM_KEYUP, 0, false, true,
+      VK_LCONTROL, kScanCodeControl, WM_KEYUP, 0, false, true,
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
   EXPECT_EQ(results.size(), 1);
@@ -400,7 +401,7 @@ TEST(KeyboardKeyEmbedderHandlerTest, ModifierKeysByExtendedBit) {
   last_handled = false;
   key_state.Set(VK_RCONTROL, false);
   handler->KeyboardHook(
-      VK_CONTROL, kScanCodeControl, WM_KEYUP, 0, true, true,
+      VK_RCONTROL, kScanCodeControl, WM_KEYUP, 0, true, true,
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(last_handled, false);
   EXPECT_EQ(results.size(), 1);
@@ -852,7 +853,8 @@ TEST(KeyboardKeyEmbedderHandlerTest, SynthesizeForDesyncToggledState) {
   event->callback(false, event->user_data);
 }
 
-TEST(KeyboardKeyEmbedderHandlerTest, SynthesizeForDesyncToggledStateByItself) {
+TEST(KeyboardKeyEmbedderHandlerTest,
+     SynthesizeForDesyncToggledStateByItselfsUp) {
   TestKeystate key_state;
   std::vector<TestFlutterKeyEvent> results;
   TestFlutterKeyEvent* event;
@@ -901,6 +903,61 @@ TEST(KeyboardKeyEmbedderHandlerTest, SynthesizeForDesyncToggledStateByItself) {
 
   event = &results[2];
   EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalNumLock);
+  EXPECT_EQ(event->logical, kLogicalNumLock);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, false);
+
+  last_handled = false;
+  event->callback(true, event->user_data);
+  EXPECT_EQ(last_handled, true);
+}
+
+TEST(KeyboardKeyEmbedderHandlerTest,
+     SynthesizeForDesyncToggledStateByItselfsDown) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  TestFlutterKeyEvent* event;
+  bool last_handled = false;
+
+  // NumLock is started up and disabled
+  key_state.Set(VK_NUMLOCK, false, false);
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter());
+
+  // NumLock is toggled somewhere else
+  // key_state.Set(VK_NUMLOCK, false, true);
+
+  // NumLock is pressed
+  key_state.Set(VK_NUMLOCK, true, false);
+  handler->KeyboardHook(
+      VK_NUMLOCK, kScanCodeNumLock, WM_KEYDOWN, 0, true, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, false);
+  EXPECT_EQ(results.size(), 3);
+  event = &results[0];
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalNumLock);
+  EXPECT_EQ(event->logical, kLogicalNumLock);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, true);
+  EXPECT_EQ(event->callback, nullptr);
+
+  event = &results[1];
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalNumLock);
+  EXPECT_EQ(event->logical, kLogicalNumLock);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, true);
+  EXPECT_EQ(event->callback, nullptr);
+
+  event = &results[2];
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
   EXPECT_EQ(event->physical, kPhysicalNumLock);
   EXPECT_EQ(event->logical, kLogicalNumLock);
   EXPECT_STREQ(event->character, "");
