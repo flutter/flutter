@@ -382,7 +382,8 @@ class StartContext {
     // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
         framework.upstreamRemote.name, candidateBranch,
-        exact: false));
+        exact: false,
+    ))..ensureValid(candidateBranch, incrementLetter);
     Version nextVersion;
     if (incrementLetter == 'm') {
       nextVersion = Version.fromCandidateBranch(candidateBranch);

@@ -119,7 +119,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
 
   await buildDir.create(recursive: true);
 
-  final String buildFlag = toTitleCase(buildModeName);
+  final String buildFlag = sentenceCase(buildModeName);
   final bool needCrossBuildOptionsForArm64 = needCrossBuild
       && targetPlatform == TargetPlatform.linux_arm64;
   int result;

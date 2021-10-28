@@ -15,6 +15,17 @@ void main() {
           (WidgetTester tester) async {
     await app.main();
     await tester.pumpAndSettle();
+
+    // `pumpAndSettle` only waits until no more frames are scheduled, but the
+    // test must wait for the image network requests to finish.
+    await app.whenAssetImageLoads;
+    await app.whenNetworkImageLoads;
+
+    // At the time the network requests are finished the engine may not have
+    // updated the DOM yet. Delay checking the DOM until the next event, which
+    // will guarantee that the current frame is done rendering.
+    await Future<void>.delayed(Duration.zero);
+
     final List<html.ImageElement> imageElements = findElements('img').cast<html.ImageElement>();
     expect(imageElements.length, 2);
     expect(imageElements[0].naturalWidth, 1.5 * 64);
