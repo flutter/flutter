@@ -164,9 +164,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final List<String> toolArgs = <String>[
       'run',
       '--machine',
-      if (debug) ...<String>[
-        '--start-paused',
-      ],
+      if (debug) '--start-paused',
     ];
     final List<String> processArgs = <String>[
       ...toolArgs,

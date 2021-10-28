@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../debug_adapters/flutter_adapter.dart';
 import '../debug_adapters/flutter_adapter_args.dart';
+import 'flutter_test_adapter.dart';
 
 /// A DAP server that communicates over a [ByteStreamServerChannel], usually constructed from the processes stdin/stdout streams.
 ///
@@ -27,15 +28,23 @@ class DapServer {
     this.ipv6 = false,
     this.enableDds = true,
     this.enableAuthCodes = true,
+    bool test = false,
     this.logger,
   }) : channel = ByteStreamServerChannel(_input, _output, logger) {
-    adapter = FlutterDebugAdapter(channel,
-        fileSystem: fileSystem,
-        platform: platform,
-        ipv6: ipv6,
-        enableDds: enableDds,
-        enableAuthCodes: enableAuthCodes,
-        logger: logger);
+    adapter = test
+        ? FlutterTestDebugAdapter(channel,
+            fileSystem: fileSystem,
+            platform: platform,
+            ipv6: ipv6,
+            enableDds: enableDds,
+            enableAuthCodes: enableAuthCodes,
+            logger: logger)
+        : FlutterDebugAdapter(channel,
+            fileSystem: fileSystem,
+            platform: platform,
+            enableDds: enableDds,
+            enableAuthCodes: enableAuthCodes,
+            logger: logger);
   }
 
   final ByteStreamServerChannel channel;

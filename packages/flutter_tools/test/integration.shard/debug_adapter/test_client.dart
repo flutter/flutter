@@ -74,6 +74,12 @@ class DapTestClient {
     return _eventController.stream.where((Event e) => e.event == event);
   }
 
+  /// Returns a stream of 'dart.testNotification' custom events from the
+  /// package:test JSON reporter.
+  Stream<Map<String, Object?>> get testNotificationEvents =>
+      events('dart.testNotification')
+          .map((Event e) => e.body! as Map<String, Object?>);
+
   /// Sends a custom request to the debug adapter to trigger a Hot Reload.
   Future<Response> hotReload() {
     return custom('hotReload');
@@ -220,6 +226,17 @@ class DapTestClient {
   }
 }
 
+/// Useful events produced by the debug adapter during a debug session.
+class TestEvents {
+  TestEvents({
+    required this.output,
+    required this.testNotifications,
+  });
+
+  final List<OutputEventBody> output;
+  final List<Map<String, Object?>> testNotifications;
+}
+
 class _OutgoingRequest {
   _OutgoingRequest(this.completer, this.name, this.allowFailure);
 
@@ -273,4 +290,39 @@ extension DapTestClientExtension on DapTestClient {
         ? output.skipWhile((OutputEventBody output) => output.output.startsWith('Running "flutter pub get"')).toList()
         : output;
   }
+
+  /// Collects all output and test events until the program terminates.
+  ///
+  /// These results include all events in the order they are recieved, including
+  /// console, stdout, stderr and test notifications from the test JSON reporter.
+  ///
+  /// Only one of [start] or [launch] may be provided. Use [start] to customise
+  /// the whole start of the session (including initialise) or [launch] to only
+  /// customise the [launchRequest].
+  Future<TestEvents> collectTestOutput({
+    String? program,
+    String? cwd,
+    Future<Response> Function()? start,
+    Future<Object?> Function()? launch,
+  }) async {
+    assert(
+      start == null || launch == null,
+      'Only one of "start" or "launch" may be provided',
+    );
+
+    final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
+    final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents.toList();
+
+    if (start != null) {
+      await start();
+    } else {
+      await this.start(program: program, cwd: cwd, launch: launch);
+    }
+
+    return TestEvents(
+      output: await outputEventsFuture,
+      testNotifications: await testNotificationEventsFuture,
+    );
+  }
+
 }

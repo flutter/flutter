@@ -27,7 +27,7 @@ void main() {
   });
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync('debug_adapter_test.');
+    tempDir = createResolvedTempDirectorySync('flutter_adapter_test.');
     dap = await DapTestSession.setUp();
   });
 

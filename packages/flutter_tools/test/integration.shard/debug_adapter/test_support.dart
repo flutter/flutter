@@ -29,11 +29,22 @@ final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
 /// ignoring differences in line endings and trailing whitespace.
-void expectLines(String actual, List<Object> expected) {
-  expect(
-    actual.replaceAll('\r\n', '\n').trim().split('\n'),
-    equals(expected),
-  );
+void expectLines(
+  String actual,
+  List<Object> expected, {
+  bool allowExtras = false,
+}) {
+  if (allowExtras) {
+    expect(
+      actual.replaceAll('\r\n', '\n').trim().split('\n'),
+      containsAllInOrder(expected),
+    );
+  } else {
+    expect(
+      actual.replaceAll('\r\n', '\n').trim().split('\n'),
+      equals(expected),
+    );
+  }
 }
 
 /// A helper class containing the DAP server/client for DAP integration tests.

@@ -34,8 +34,13 @@ class TestsProject extends Project {
   import 'package:flutter_test/flutter_test.dart';
 
   void main() {
-    testWidgets('Hello world test', (WidgetTester tester) async {
-      expect(true, isTrue); // BREAKPOINT
+    group('Flutter tests', () {
+      testWidgets('can pass', (WidgetTester tester) async {
+        expect(true, isTrue); // BREAKPOINT
+      });
+      testWidgets('can fail', (WidgetTester tester) async {
+        expect(true, isFalse);
+      });
     });
   }
   ''';
