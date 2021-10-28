@@ -8,7 +8,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
@@ -32,15 +31,6 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine);
-
-        val shimPluginRegistry = ShimPluginRegistry(flutterEngine);
-        shimPluginRegistry.registrarFor("com.example.abstract_method_smoke_test")
-                .platformViewRegistry()
-                .registerViewFactory("simple", object : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-                    override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
-                        return SimplePlatformView(this@MainActivity)
-                    }
-                })
 
         // Triggers the Android keyboard, which causes the resize of the Flutter view.
         // We need to wait for the app to complete.
