@@ -358,6 +358,8 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
+    final String pluginClassLowerCamelCase =
+        pluginClass[0].toLowerCase() + pluginClass.substring(1);
     final String appleIdentifier =
         createUTIIdentifier(organization, projectName);
     final String androidIdentifier =
@@ -389,6 +391,7 @@ abstract class CreateBase extends FlutterCommand {
       'androidSdkVersion': kAndroidSdkMinVersion,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),

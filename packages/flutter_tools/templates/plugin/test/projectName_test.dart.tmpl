@@ -1,23 +1,27 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:{{projectName}}/{{projectName}}.dart';
+import 'package:{{projectName}}/{{projectName}}_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class Mock{{pluginDartClass}}Platform 
+    with MockPlatformInterfaceMixin
+    implements {{pluginDartClass}}Platform {
+
+  @override
+  Future<String?> get platformVersion => Future.value('42');
+}
 
 void main() {
-  const MethodChannel channel = MethodChannel('{{projectName}}');
-
-  TestWidgetsFlutterBinding.ensureInitialized();
-
+  late {{pluginDartClass}} {{pluginClassLowerCamelCase}};
+  late Mock{{pluginDartClass}}Platform fakePlatform;
+  
   setUp(() {
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
-    });
-  });
-
-  tearDown(() {
-    channel.setMockMethodCallHandler(null);
+    fakePlatform = Mock{{pluginDartClass}}Platform();
+    {{pluginDartClass}}Platform.instance = fakePlatform;
+    {{pluginClassLowerCamelCase}} = {{pluginDartClass}}();
   });
 
   test('getPlatformVersion', () async {
-    expect(await {{pluginDartClass}}.platformVersion, '42');
+    expect(await {{pluginClassLowerCamelCase}}.platformVersion, '42');
   });
 }
