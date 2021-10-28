@@ -133,22 +133,22 @@ class AppModel extends StatefulWidget {
 
   static bool _debugHasAppModel(_AppModelData? model, BuildContext context, String methodName) {
     assert(() {
-      if (model != null)
-        return true;
-      throw FlutterError.fromParts(
-        <DiagnosticsNode>[
-          ErrorSummary('No AppModel widget found.'),
-          ErrorDescription('AppModel.$methodName requires an AppModel widget ancestor.\n'),
-          context.describeWidget('The specific widget that could not find an AppModel ancestor was'),
-          context.describeOwnershipChain('The ownership chain for the affected widget is'),
-          ErrorHint(
-            'Typically, the AppModel widget is introduced by the MaterialApp '
-            'or WidgetsApp widget at the top of your application widget tree. It '
-            'provides a key/value map of data that is shared with the entire '
-            'application.',
-          ),
-        ],
-      );
+      if (model == null) {
+        throw FlutterError.fromParts(
+          <DiagnosticsNode>[
+            ErrorSummary('No AppModel widget found.'),
+            ErrorDescription('AppModel.$methodName requires an AppModel widget ancestor.\n'),
+            context.describeWidget('The specific widget that could not find an AppModel ancestor was'),
+            context.describeOwnershipChain('The ownership chain for the affected widget is'),
+            ErrorHint(
+              'Typically, the AppModel widget is introduced by the MaterialApp '
+              'or WidgetsApp widget at the top of your application widget tree. It '
+              'provides a key/value map of data that is shared with the entire '
+              'application.',
+            ),
+          ],
+        );
+      }
       return true;
     }());
     return true;
