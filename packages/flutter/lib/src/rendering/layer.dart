@@ -2109,9 +2109,6 @@ class LayerLink {
   int _connectedFollowers = 0;
 
   /// Whether a [LeaderLayer] is currently connected to this link.
-  ///
-  /// The connected [LeaderLayer] can be obtained from the [LayerLinkHandle]
-  /// returned by [registerFollower].
   bool get leaderConnected => _leader != null;
 
   /// Called by the [FollowerLayer] to establish a link to a [LeaderLayer].
@@ -2130,9 +2127,6 @@ class LayerLink {
   /// Returns the [LeaderLayer] currently connected to this link.
   ///
   /// Valid in debug mode only. Returns null in all other modes.
-  ///
-  /// Use [registerFollower] to obtain the connected [LeaderLayer] for non-debug
-  /// purposes.
   LeaderLayer? get debugLeader {
     LeaderLayer? result;
     if (kDebugMode) {
