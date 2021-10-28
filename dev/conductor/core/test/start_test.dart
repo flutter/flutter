@@ -25,6 +25,7 @@ void main() {
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
     const String revision = 'abcd1234';
+    const String conductorVersion = 'deadbeef';
     late Checkouts checkouts;
     late MemoryFileSystem fileSystem;
     late FakePlatform platform;
@@ -66,7 +67,7 @@ void main() {
       );
       final StartCommand command = StartCommand(
         checkouts: checkouts,
-        flutterRoot: fileSystem.directory(flutterRoot),
+        conductorVersion: conductorVersion,
       );
       return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
@@ -252,10 +253,6 @@ void main() {
         commands: <FakeCommand>[
           ...engineCommands,
           ...frameworkCommands,
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision,
-          ),
         ],
       );
 
@@ -301,7 +298,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
-      expect(state.conductorVersion, revision);
+      expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
     });
 
@@ -436,10 +433,6 @@ void main() {
         commands: <FakeCommand>[
           ...engineCommands,
           ...frameworkCommands,
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision,
-          ),
         ],
       );
 
@@ -483,7 +476,7 @@ void main() {
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
-      expect(state.conductorVersion, revision);
+      expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
     });
   }, onPlatform: <String, dynamic>{
