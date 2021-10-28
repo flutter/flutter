@@ -10035,5 +10035,5 @@ void main() {
     expect(find.text('Copy'), findsNothing); // Toolbar is not visible
 
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
-  });
+  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 }
