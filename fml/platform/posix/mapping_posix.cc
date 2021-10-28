@@ -100,6 +100,10 @@ const uint8_t* FileMapping::GetMapping() const {
   return mapping_;
 }
 
+bool FileMapping::IsDontNeedSafe() const {
+  return mutable_mapping_ == nullptr;
+}
+
 bool FileMapping::IsValid() const {
   return valid_;
 }

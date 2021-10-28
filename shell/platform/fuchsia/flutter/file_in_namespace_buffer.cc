@@ -70,6 +70,10 @@ size_t FileInNamespaceBuffer::GetSize() const {
   return size_;
 }
 
+bool FileInNamespaceBuffer::IsDontNeedSafe() const {
+  return true;
+}
+
 std::unique_ptr<fml::Mapping> LoadFile(int namespace_fd,
                                        const char* path,
                                        bool executable) {

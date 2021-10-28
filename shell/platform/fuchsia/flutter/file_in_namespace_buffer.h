@@ -25,6 +25,9 @@ class FileInNamespaceBuffer final : public fml::Mapping {
   // |fml::Mapping|
   size_t GetSize() const override;
 
+  // |fml::Mapping|
+  bool IsDontNeedSafe() const override;
+
  private:
   /// The address that was mapped to the buffer.
   void* address_;
