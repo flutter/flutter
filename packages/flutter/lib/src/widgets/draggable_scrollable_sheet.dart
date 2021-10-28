@@ -38,45 +38,39 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// Controls a [DraggableScrollableSheet].
 ///
 /// Draggable scrollable controllers are typically stored as member variables in
-/// [State] objects and are reused in each [State.build]. A single controller can
-/// be used to control multiple sheets.
+/// [State] objects and are reused in each [State.build]. Controllers can only
+/// be used to control one sheet at a time. A controller can be reused with a
+/// new sheet if the previous sheet has been disposed.
+///
+/// The controller's methods cannot be used until after the controller has been
+/// passed into a [DraggableScrollableSheet] and the sheet has run initState.
 class DraggableScrollableController {
   /// Creates a draggable scrollable controller.
   DraggableScrollableController();
 
-  final List<_DraggableScrollableSheetScrollController> _attachedInternalControllers =
-    <_DraggableScrollableSheetScrollController>[];
+  _DraggableScrollableSheetScrollController? _attachedController;
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
-  ///
-  /// This controller must be attached to exactly one draggable sheet.
-  double get size => _singleController.extent.currentSize;
+  double get size {
+    _assertAttached();
+    return _attachedController!.extent.currentSize;
+  }
 
   /// Get the current pixel height of the attached sheet.
-  ///
-  /// This controller must be attached to exactly one draggable sheet.
-  double get pixels => _singleController.extent.currentPixels;
+  double get pixels => _attachedController!.extent.currentPixels;
 
   /// Convert a sheet's size (fractional value of parent container height) to pixels.
-  ///
-  /// This controller must be attached to exactly one draggable sheet.
-  double sizeToPixels(double size) => _singleController.extent.sizeToPixels(size);
+  double sizeToPixels(double size) => _attachedController!.extent.sizeToPixels(size);
 
   /// Convert a sheet's pixel height to size (fractional value of parent container height).
-  ///
-  /// This controller must be attached to exactly one draggable sheet.
-  double pixelsToSize(double pixels) => _singleController.extent.pixelsToSize(pixels);
+  double pixelsToSize(double pixels) => _attachedController!.extent.pixelsToSize(pixels);
 
-  /// Animates all attached sheets from their respective current sizes to
-  /// [size], a fractional value of the parent container height.
+  /// Animates the attached sheet from the current sizes to [size], a fractional
+  /// value of the parent container's height.
   ///
-  /// If [size] is outside of an attached sheets min and max child size,
-  /// [animateTo] will animate that sheet to the nearest valid size instead. As
-  /// a result, the animation may finish before [duration] time has elapsed.
-  ///
-  /// Any active sheet animation is canceled. If the sheet's internal controller
+  /// Any active sheet animation is canceled. If the sheet's internal scrollable
   /// is currently animating (eg responding to a user fling), that animation is
-  /// canceled as well. This animation is canceled by user drag events.
+  /// canceled as well.
   ///
   /// An animation will be interrupted whenever the user attempts to scroll
   /// manually, whenever another activity is started, or when the sheet hits its
@@ -97,43 +91,36 @@ class DraggableScrollableController {
     _assertAttached();
     assert(size >= 0 && size <= 1);
     assert(duration != Duration.zero);
-    await Future.wait(
-      // Use map so that we can easily wait on the result
-      _attachedInternalControllers.map((_DraggableScrollableSheetScrollController controller) async {
-        final AnimationController animationController = AnimationController.unbounded(
-          vsync: controller.position.context.vsync,
-          value: controller.extent.currentSize,
-        );
-        controller.position.goIdle();
-        // This disables any snapping until the next user interaction with the sheet.
-        controller.extent.hasDragged = false;
-        controller.extent.startActivity(onCanceled: () {
-          // Don't stop the controller if it's already finished and may have been disposed.
-          if (animationController.isAnimating) {
-            animationController.stop();
-          }
-        });
-        CurvedAnimation(parent: animationController, curve: curve).addListener(() {
-          controller.extent.updateSize(animationController.value, controller.position.context.notificationContext!);
-          if (animationController.value > controller.extent.maxSize ||
-              animationController.value < controller.extent.minSize) {
-            // Animation hit the max or min size, stop animating.
-            animationController.stop(canceled: false);
-          }
-        });
-        await animationController
-            .animateTo(size, duration: duration)
-            .whenComplete(() {
-              controller.position.goBallistic(0);
-            });
-        animationController.dispose();
-        controller.position.goBallistic(0.0);
-      }),
+    final AnimationController animationController = AnimationController.unbounded(
+      vsync: _attachedController!.position.context.vsync,
+      value: _attachedController!.extent.currentSize,
     );
+    _attachedController!.position.goIdle();
+    // This disables any snapping until the next user interaction with the sheet.
+    _attachedController!.extent.hasDragged = false;
+    _attachedController!.extent.startActivity(onCanceled: () {
+      // Don't stop the controller if it's already finished and may have been disposed.
+      if (animationController.isAnimating) {
+        animationController.stop();
+      }
+    });
+    CurvedAnimation(parent: animationController, curve: curve).addListener(() {
+      _attachedController!.extent.updateSize(
+        animationController.value,
+        _attachedController!.position.context.notificationContext!,
+      );
+      if (animationController.value > _attachedController!.extent.maxSize ||
+          animationController.value < _attachedController!.extent.minSize) {
+        // Animation hit the max or min size, stop animating.
+        animationController.stop(canceled: false);
+      }
+    });
+    await animationController.animateTo(size, duration: duration);
+    animationController.dispose();
   }
 
-  /// Jumps all attached sheets from their current size to the given [size], a
-  /// fractional value of the sheet's parent container height.
+  /// Jumps the attached sheet from its current size to the given [size], a
+  /// fractional value of the parent container's height.
   ///
   /// If [size] is outside of an attached sheet's min and max child size,
   /// [jumpTo] will jump that sheet to the nearest valid size instead.
@@ -141,51 +128,37 @@ class DraggableScrollableController {
   /// Any active sheet animation is canceled. If the sheet's inner scrollable
   /// is currently animating (eg responding to a user fling), that animation is
   /// canceled as well.
-  ///
-  /// Immediately after the jump, a ballistic activity is started, in case the
-  /// value was out of range.
   void jumpTo(double size) {
     _assertAttached();
     assert(size >= 0 && size <= 1);
-    for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
-      // Call start activity to interrupt any other playing activities.
-      controller.extent.startActivity(onCanceled: () {});
-      controller.position.goIdle();
-      controller.extent.hasDragged = false;
-      controller.extent.updateSize(size, controller.position.context.notificationContext!);
-      controller.position.goBallistic(0.0);
-    }
+    // Call start activity to interrupt any other playing activities.
+    _attachedController!.extent.startActivity(onCanceled: () {});
+    _attachedController!.position.goIdle();
+    _attachedController!.extent.hasDragged = false;
+    _attachedController!.extent.updateSize(size, _attachedController!.position.context.notificationContext!);
   }
 
-  /// Reset all attached sheets to their respective [DraggableScrollableSheet.initialChildSize]'s.
+  /// Reset the attached sheet to its initial size (see: [DraggableScrollableSheet.initialChildSize]).
   void reset() {
     _assertAttached();
-    for (final _DraggableScrollableSheetScrollController controller in _attachedInternalControllers) {
-      controller.reset();
-    }
+    _attachedController!.reset();
   }
 
   void _assertAttached() {
     assert(
-      _attachedInternalControllers.isNotEmpty,
-      'DraggableScrollableController not attached to any sheets. A DraggableScrollableController '
+      _attachedController != null,
+      'DraggableScrollableController is not attached to a sheet. A DraggableScrollableController '
         'must be used in a DraggableScrollableSheet before any of its methods are called.',
     );
   }
 
   void _attach(_DraggableScrollableSheetScrollController scrollController) {
-    _attachedInternalControllers.add(scrollController);
+    assert(_attachedController == null, 'Draggable scrollable controller is already attached to a sheet.');
+    _attachedController = scrollController;
   }
 
-  void _detach(_DraggableScrollableSheetScrollController scrollController) {
-    _attachedInternalControllers.remove(scrollController);
-  }
-
-  _DraggableScrollableSheetScrollController get _singleController {
-    _assertAttached();
-    assert(_attachedInternalControllers.length == 1, 'DraggableScrollableController attached to multiple sheets. '
-        'Size and pixel getters can only be used with controllers attached to a single sheet.');
-    return _attachedInternalControllers.single;
+  void _detach() {
+    _attachedController = null;
   }
 }
 
@@ -648,7 +621,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach(_scrollController);
+    widget.controller?._detach();
     _scrollController.dispose();
     _extent.dispose();
     super.dispose();

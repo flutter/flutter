@@ -785,28 +785,24 @@ void main() {
     });
   }
 
-  testWidgets('Can control multiple sheets with one controller', (WidgetTester tester) async {
+  testWidgets('Can reuse a controller after the old controller is disposed', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
-    const Key containerKeyA = ValueKey<String>('containerA');
-    const Key containerKeyB = ValueKey<String>('containerB');
+    const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
-        key: stackKey,
-        children: <Widget>[
-          _boilerplate(
-            null,
-            controller: controller,
-            containerKey: containerKeyA,
-          ),
-          _boilerplate(
-            null,
-            controller: controller,
-            containerKey: containerKeyB,
-          )
-        ],
-      ),
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+
+    // Pump a new sheet with the same controller. This will dispose of the old sheet first.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
     ));
     await tester.pumpAndSettle();
     final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
@@ -814,34 +810,8 @@ void main() {
     controller.jumpTo(.6);
     await tester.pumpAndSettle();
     expect(
-      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.6, precisionErrorTolerance),
-    );
-    expect(
-      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
-      closeTo(.6, precisionErrorTolerance),
-    );
-
-    controller.animateTo(.8, duration: const Duration(milliseconds: 200), curve: Curves.linear);
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
-      closeTo(.8, precisionErrorTolerance),
-    );
-    expect(
-      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
-      closeTo(.8, precisionErrorTolerance),
-    );
-
-    controller.reset();
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKeyA)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
-    );
-    expect(
-      tester.getSize(find.byKey(containerKeyB)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
     );
   });
 
@@ -986,6 +956,26 @@ void main() {
     expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
   });
 
+  testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          _boilerplate(
+            null,
+            controller: controller,
+          ),
+          _boilerplate(
+            null,
+            controller: controller,
+          )
+        ],
+      ),
+    ), null, EnginePhase.build);
+    expect(tester.takeException(), isAssertionError);
+  });
+
   testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     // Can't use a controller before attaching it.
@@ -1006,32 +996,6 @@ void main() {
       () => controller.animateTo(1.1, duration: const Duration(milliseconds: 1), curve: Curves.linear),
       throwsAssertionError,
     );
-
-    // Can't use animateTo with a zero duration.
-    expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
-        children: <Widget>[
-          _boilerplate(
-            null,
-            controller: controller,
-          ),
-          _boilerplate(
-            null,
-            controller: controller,
-          )
-        ],
-      ),
-    ));
-    await tester.pumpAndSettle();
-
-    // Can't access getters when attached to multiple controllers.
-    expect(() => controller.size, throwsAssertionError);
-    expect(() => controller.pixels, throwsAssertionError);
-    expect(() => controller.sizeToPixels(0), throwsAssertionError);
-    expect(() => controller.pixelsToSize(0), throwsAssertionError);
 
     // Can't use animateTo with a zero duration.
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
