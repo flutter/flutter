@@ -22,7 +22,7 @@ namespace flutter {
 ///             contexts on iOS. On-screen contexts are used by Flutter for
 ///             rendering into the surface. The lifecycle of this context may be
 ///             tied to the lifecycle of the surface. On the other hand, the
-///             lifecycle of the the off-screen context it tied to that of the
+///             lifecycle of the off-screen context it tied to that of the
 ///             platform view. This one object used to manage both context
 ///             because GPU handles may need to be shared between the two
 ///             context. To achieve this, context may need references to one

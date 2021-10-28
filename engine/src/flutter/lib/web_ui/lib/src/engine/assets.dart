@@ -83,7 +83,7 @@ class AssetManager {
 class AssetManagerException implements Exception {
   /// Http request url for asset.
   final String url;
-  /// Http status of of response.
+  /// Http status of response.
   final int httpStatus;
 
   /// Initializes exception with request url and http status.

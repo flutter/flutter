@@ -1157,7 +1157,7 @@ class FontFeature {
   ///
   /// {@tool sample --template=stateless_widget}
   ///
-  /// The Piazzolla font supports the `ssXX` feature for for more
+  /// The Piazzolla font supports the `ssXX` feature for more
   /// elaborate stylistic effects. Set 1 turns some Latin characters
   /// into Roman numerals, set 2 enables some ASCII characters to be
   /// used to create pretty arrows, and so forth.
@@ -3479,7 +3479,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   /// [PlaceholderAlignment.aboveBaseline], and [PlaceholderAlignment.belowBaseline]
   /// alignment modes are used, the baseline needs to be set with the `baseline`.
   /// When using [PlaceholderAlignment.baseline], `baselineOffset` indicates the distance
-  /// of the baseline down from the top of of the rectangle. The default `baselineOffset`
+  /// of the baseline down from the top of the rectangle. The default `baselineOffset`
   /// is the `height`.
   ///
   /// Examples:

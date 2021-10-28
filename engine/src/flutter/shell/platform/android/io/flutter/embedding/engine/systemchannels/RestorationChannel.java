@@ -62,7 +62,7 @@ public class RestorationChannel {
    */
   public final boolean waitForRestorationData;
 
-  // Holds the the most current restoration data which may have been provided by the engine
+  // Holds the most current restoration data which may have been provided by the engine
   // via "setRestorationData" or by the framework via the method channel. This is the data the
   // framework should be restored to in case the app is terminated.
   private byte[] restorationData;

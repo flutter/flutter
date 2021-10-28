@@ -202,7 +202,7 @@ def main():
                       default=[])
   parser.add_argument('--sdk-ext-files',
                       metavar='sdk_ext_files',
-                      help='List of .dart files that are part of of sdk_ext.',
+                      help='List of .dart files that are part of sdk_ext.',
                       nargs='*',
                       default=[])
   parser.add_argument('--sdk-ext-mappings',

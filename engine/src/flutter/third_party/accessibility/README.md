@@ -14,7 +14,7 @@ For the main ax code, the following parts were not imported:
 
 Update to this Library
 ==============
-Bug fixes to the forked files in the the four directories should proceed as usual.
+Bug fixes to the forked files in the four directories should proceed as usual.
 New features or changes that change the behaviors of these classes are discouraged.
 
 If you do need to make such change, please log the change at the end of this file.
