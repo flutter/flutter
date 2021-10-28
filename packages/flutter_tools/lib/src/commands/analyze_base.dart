@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -150,20 +149,20 @@ class PackageDependency {
     final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b]?.length ?? 0 .compareTo(values[a]?.length ?? 0));
     for (final String target in targets) {
-      if (values[target] == null) {
-        break;
-      }
-      final int count = values[target]!.length;
-      result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
-      bool canonical = false;
-      for (final String source in values[target]!) {
-        result.writeln('    $source');
-        if (source == canonicalSource) {
-          canonical = true;
+      final List<String>? targetList = values[target];
+      if (targetList != null) {
+        final int count = targetList.length;
+        result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
+        bool canonical = false;
+        for (final String source in targetList) {
+          result.writeln('    $source');
+          if (source == canonicalSource) {
+            canonical = true;
+          }
         }
-      }
-      if (canonical) {
-        result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
+        if (canonical) {
+          result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
+        }
       }
     }
   }
@@ -271,10 +270,12 @@ class PackageDependencyTracker {
   String generateConflictReport() {
     assert(hasConflicts);
     final StringBuffer result = StringBuffer();
-    for (final String package in packages.keys.where((String package) => packages[package]?.hasConflict ?? false)) {
-      result.writeln('Package "$package" has conflicts:');
-      packages[package]?.describeConflict(result);
-    }
+    packages.forEach((String package, PackageDependency dependency) {
+      if (dependency.hasConflict) {
+        result.writeln('Package "$package" has conflicts:');
+        dependency.describeConflict(result);
+      }
+    });
     return result.toString();
   }
 
@@ -286,6 +287,9 @@ class PackageDependencyTracker {
         result[package] = target;
       }
     }
+    packages.forEach((String package, PackageDependency dependency) {
+      result[package] = dependency.target;
+    });
     return result;
   }
 }
