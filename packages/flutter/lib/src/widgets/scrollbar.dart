@@ -622,6 +622,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
+    // The thumb is not able to be hit when invisible.
+    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+      return false;
+    }
+
     final Rect interactiveRect = _trackRect ?? _thumbRect!;
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
@@ -657,6 +662,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
+    // The thumb is not able to be hit when invisible.
+    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+      return false;
+    }
 
     switch (kind) {
       case PointerDeviceKind.touch:
@@ -682,6 +691,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
+
+    // The thumb is not able to be hit when invisible.
+    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+      return false;
+    }
+
     return _thumbRect!.contains(position!);
   }
 
@@ -1347,6 +1362,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _updateScrollPosition(Offset updatedOffset) {
     assert(_currentController != null);
     assert(_dragScrollbarAxisOffset != null);
+
     final ScrollPosition position = _currentController!.position;
     late double primaryDelta;
     switch (position.axisDirection) {
