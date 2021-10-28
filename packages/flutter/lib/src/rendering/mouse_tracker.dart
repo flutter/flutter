@@ -168,9 +168,8 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 /// An instance of [MouseTracker] is owned by the global singleton
 /// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
-  final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
-    SystemMouseCursors.basic,
-  );
+  /// Manages states of cursors.
+  final MouseCursorManager cursorManager = MouseCursorManager(SystemMouseCursors.basic);
 
   // Tracks the state of connected mouse devices.
   //

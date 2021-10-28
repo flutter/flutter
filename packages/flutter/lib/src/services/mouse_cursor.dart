@@ -2,10 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'system_channels.dart';
+
+@immutable
+class ParsedImage {
+  const ParsedImage(this.data, this.width, this.height);
+
+  final Uint8List data;
+  final int width;
+  final int height;
+}
 
 /// Maintains the state of mouse cursors and manages how cursors are searched
 /// for.
@@ -42,8 +54,6 @@ class MouseCursorManager {
     return result;
   }
 
-  final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
-
   /// Handles the changes that cause a pointer device to have a new list of mouse
   /// cursor candidates.
   ///
@@ -75,6 +85,40 @@ class MouseCursorManager {
     lastSession?.dispose();
     nextSession.activate();
   }
+
+  Future<int> createImageCursor(
+      Future<Object> getImageKey,
+      AsyncValueGetter<ParsedImage> getImage,
+      Offset offset,
+    ) async {
+    final Object key = await getImageKey;
+    if (!_imageCursorCache.containsKey(key)) {
+      Future<int> getImageId() async {
+        final ParsedImage image = await getImage();
+        return (await SystemChannels.mouseCursor.invokeMethod<int>(
+          'createImageCursor',
+          <String, dynamic>{
+            'data': image.data,
+            'width': image.width,
+            'height': image.height,
+            'offsetX': offset.dx.round(),
+            'offsetY': offset.dy.round(),
+          },
+        ))!;
+      }
+      _imageCursorCache[key] = getImageId();
+    }
+    return _imageCursorCache[key]!;
+  }
+
+  bool verifyCurrentCursor(int device, MouseCursor cursor) {
+    return _lastSession[device]?.cursor == cursor;
+  }
+
+  // Future<int>
+
+  final Map<Object, Future<int>> _imageCursorCache = <Object, Future<int>>{};
+  final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 }
 
 /// Manages the duration that a pointing device should display a specific mouse
