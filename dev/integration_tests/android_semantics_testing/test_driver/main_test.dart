@@ -20,10 +20,6 @@ String adbPath() {
   }
 }
 
-extension IntConversion on String {
-  int get asInt => int.parse(this);
-}
-
 void main() {
   group('AccessibilityBridge', () {
     FlutterDriver driver;
@@ -41,7 +37,7 @@ void main() {
 
 
     Future<Version> getTalkbackVersion() async {
-      final io.ProcessResult result = io.Process.runSync(adbPath(), const <String>[
+      final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
         'shell',
         'dumpsys',
         'package',
@@ -69,9 +65,9 @@ void main() {
         return Version(0, 0, 0);
       }
       return Version(
-        match.namedGroup('major').asInt,
-        match.namedGroup('minor').asInt,
-        match.namedGroup('patch').asInt,
+        int.parse(match.namedGroup('major')),
+        int.parse(match.namedGroup('minor')),
+        int.parse(match.namedGroup('patch')),
         build: match.namedGroup('build'),
       );
     }
@@ -79,7 +75,7 @@ void main() {
     setUpAll(() async {
       driver = await FlutterDriver.connect();
       talkbackVersion ??= await getTalkbackVersion();
-      print('<><><> TalkBack version is $talkbackVersion vs $fixedTalkback <><><>');
+      print('TalkBack version is $talkbackVersion');
 
       // Say the magic words..
       final io.Process run = await io.Process.start(adbPath(), const <String>[
