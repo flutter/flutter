@@ -58,13 +58,6 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/view/AccessibilityBridgeTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/FlutterInjectorTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/external/FlutterLaunchTests.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterApplication.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/ViewUtils.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/util/Predicate.java" />
@@ -182,11 +175,8 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/Log.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterNativeView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java" />
