@@ -81,8 +81,9 @@ abstract class AnalyzeBase {
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
-    if (argResults['dart-sdk'] != null) {
-      return argResults['dart-sdk'] as String;
+    final String? dartSdk = argResults['dart-sdk'] as String?;
+    if (dartSdk is String) {
+      return dartSdk;
     } else {
       return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
     }
