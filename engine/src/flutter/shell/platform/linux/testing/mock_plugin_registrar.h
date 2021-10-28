@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registrar.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_registrar.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 G_BEGIN_DECLS
 
@@ -16,7 +15,6 @@ G_DECLARE_FINAL_TYPE(FlMockPluginRegistrar,
                      GObject)
 
 FlPluginRegistrar* fl_mock_plugin_registrar_new(
-    FlView* view,
     FlBinaryMessenger* messenger,
     FlTextureRegistrar* texture_registrar);
 
