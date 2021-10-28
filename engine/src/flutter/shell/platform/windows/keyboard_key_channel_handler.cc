@@ -204,7 +204,7 @@ void KeyboardKeyChannelHandler::KeyboardHook(
                                                          size_t reply_size) {
     auto decoded = flutter::JsonMessageCodec::GetInstance().DecodeMessage(
         reply, reply_size);
-    bool handled = (*decoded)[kHandledKey].GetBool();
+    bool handled = decoded ? (*decoded)[kHandledKey].GetBool() : false;
     callback(handled);
   });
 }
