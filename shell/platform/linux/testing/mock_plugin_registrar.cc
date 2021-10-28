@@ -7,7 +7,6 @@
 struct _FlMockPluginRegistrar {
   GObject parent_instance;
 
-  FlView* view;
   FlBinaryMessenger* messenger;
   FlTextureRegistrar* texture_registrar;
 };
@@ -47,8 +46,7 @@ static FlTextureRegistrar* get_texture_registrar(FlPluginRegistrar* registrar) {
 }
 
 static FlView* get_view(FlPluginRegistrar* registrar) {
-  FlMockPluginRegistrar* self = FL_MOCK_PLUGIN_REGISTRAR(registrar);
-  return self->view;
+  return NULL;
 }
 
 static void fl_mock_plugin_registrar_iface_init(
@@ -61,12 +59,10 @@ static void fl_mock_plugin_registrar_iface_init(
 static void fl_mock_plugin_registrar_init(FlMockPluginRegistrar* self) {}
 
 FlPluginRegistrar* fl_mock_plugin_registrar_new(
-    FlView* view,
     FlBinaryMessenger* messenger,
     FlTextureRegistrar* texture_registrar) {
   FlMockPluginRegistrar* registrar = FL_MOCK_PLUGIN_REGISTRAR(
       g_object_new(fl_mock_plugin_registrar_get_type(), NULL));
-  registrar->view = view;
   registrar->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
   registrar->texture_registrar =
       FL_TEXTURE_REGISTRAR(g_object_ref(texture_registrar));
