@@ -50,7 +50,7 @@ FLUTTER_DARWIN_EXPORT
 - (void)textureFrameAvailable:(int64_t)textureId;
 /**
  * Unregisters a `FlutterTexture` that has previously regeistered with `registerTexture:`. Textures
- * must be unregistered on the the platform thread.
+ * must be unregistered on the platform thread.
  *
  * @param textureId The result that was previously returned from `registerTexture:`.
  */

@@ -30,11 +30,11 @@ def main():
         description="Generate response file for FIDL frontend")
     parser.add_argument(
         "--out-response-file",
-        help="The path for for the response file to generate",
+        help="The path for the response file to generate",
         required=True)
     parser.add_argument(
         "--out-libraries",
-        help="The path for for the libraries file to generate",
+        help="The path for the libraries file to generate",
         required=True)
     parser.add_argument(
         "--json", help="The path for the JSON file to generate, if any")

@@ -31,10 +31,10 @@ struct CpuUsageInfo {
 };
 
 /**
- * @brief Memory usage stats. `dirty_memory_usage` is the the memory usage (in
+ * @brief Memory usage stats. `dirty_memory_usage` is the memory usage (in
  * MB) such that the app uses its physical memory for dirty memory. Dirty memory
  * is the memory data that cannot be paged to disk. `owned_shared_memory_usage`
- * is the memory usage (in MB) such that the app uses its physicaal memory for
+ * is the memory usage (in MB) such that the app uses its physical memory for
  * shared memory, including loaded frameworks and executables. On iOS, it's
  * `physical memory - dirty memory`.
  */

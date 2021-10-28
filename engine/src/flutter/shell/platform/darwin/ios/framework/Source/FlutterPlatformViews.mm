@@ -611,7 +611,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
 
   UIView* overlay_view = layer->overlay_view.get();
   // Set the size of the overlay view.
-  // This size is equal to the the device screen size.
+  // This size is equal to the device screen size.
   overlay_view.frame = flutter_view_.get().bounds;
 
   std::unique_ptr<SurfaceFrame> frame = layer->surface->AcquireFrame(frame_size_);
