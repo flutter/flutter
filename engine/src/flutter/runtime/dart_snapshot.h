@@ -160,6 +160,11 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   ///
   const uint8_t* GetInstructionsMapping() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Returns whether both the data and instructions mappings are
+  ///             safe to use with madvise(DONTNEED).
+  bool IsDontNeedSafe() const;
+
   bool IsNullSafetyEnabled(
       const fml::Mapping* application_kernel_mapping) const;
 

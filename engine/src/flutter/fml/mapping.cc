@@ -81,11 +81,19 @@ const uint8_t* DataMapping::GetMapping() const {
   return data_.data();
 }
 
+bool DataMapping::IsDontNeedSafe() const {
+  return false;
+}
+
 // NonOwnedMapping
 NonOwnedMapping::NonOwnedMapping(const uint8_t* data,
                                  size_t size,
-                                 const ReleaseProc& release_proc)
-    : data_(data), size_(size), release_proc_(release_proc) {}
+                                 const ReleaseProc& release_proc,
+                                 bool dontneed_safe)
+    : data_(data),
+      size_(size),
+      release_proc_(release_proc),
+      dontneed_safe_(dontneed_safe) {}
 
 NonOwnedMapping::~NonOwnedMapping() {
   if (release_proc_) {
@@ -99,6 +107,10 @@ size_t NonOwnedMapping::GetSize() const {
 
 const uint8_t* NonOwnedMapping::GetMapping() const {
   return data_;
+}
+
+bool NonOwnedMapping::IsDontNeedSafe() const {
+  return dontneed_safe_;
 }
 
 // MallocMapping
@@ -132,6 +144,10 @@ size_t MallocMapping::GetSize() const {
 
 const uint8_t* MallocMapping::GetMapping() const {
   return data_;
+}
+
+bool MallocMapping::IsDontNeedSafe() const {
+  return false;
 }
 
 uint8_t* MallocMapping::Release() {
@@ -172,6 +188,10 @@ size_t SymbolMapping::GetSize() const {
 
 const uint8_t* SymbolMapping::GetMapping() const {
   return mapping_;
+}
+
+bool SymbolMapping::IsDontNeedSafe() const {
+  return true;
 }
 
 }  // namespace fml

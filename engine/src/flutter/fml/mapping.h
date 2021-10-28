@@ -28,6 +28,10 @@ class Mapping {
 
   virtual const uint8_t* GetMapping() const = 0;
 
+  // Whether calling madvise(DONTNEED) on the mapping is non-destructive.
+  // Generally true for file-mapped memory and false for anonymous memory.
+  virtual bool IsDontNeedSafe() const = 0;
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Mapping);
 };
@@ -65,6 +69,9 @@ class FileMapping final : public Mapping {
   // |Mapping|
   const uint8_t* GetMapping() const override;
 
+  // |Mapping|
+  bool IsDontNeedSafe() const override;
+
   uint8_t* GetMutableMapping();
 
   bool IsValid() const;
@@ -96,6 +103,9 @@ class DataMapping final : public Mapping {
   // |Mapping|
   const uint8_t* GetMapping() const override;
 
+  // |Mapping|
+  bool IsDontNeedSafe() const override;
+
  private:
   std::vector<uint8_t> data_;
 
@@ -107,7 +117,8 @@ class NonOwnedMapping final : public Mapping {
   using ReleaseProc = std::function<void(const uint8_t* data, size_t size)>;
   NonOwnedMapping(const uint8_t* data,
                   size_t size,
-                  const ReleaseProc& release_proc = nullptr);
+                  const ReleaseProc& release_proc = nullptr,
+                  bool dontneed_safe = false);
 
   ~NonOwnedMapping() override;
 
@@ -117,10 +128,14 @@ class NonOwnedMapping final : public Mapping {
   // |Mapping|
   const uint8_t* GetMapping() const override;
 
+  // |Mapping|
+  bool IsDontNeedSafe() const override;
+
  private:
   const uint8_t* const data_;
   const size_t size_;
   const ReleaseProc release_proc_;
+  const bool dontneed_safe_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(NonOwnedMapping);
 };
@@ -162,6 +177,9 @@ class MallocMapping final : public Mapping {
   // |Mapping|
   const uint8_t* GetMapping() const override;
 
+  // |Mapping|
+  bool IsDontNeedSafe() const override;
+
   /// Removes ownership of the data buffer.
   /// After this is called; the mapping will point to nullptr.
   [[nodiscard]] uint8_t* Release();
@@ -185,6 +203,9 @@ class SymbolMapping final : public Mapping {
 
   // |Mapping|
   const uint8_t* GetMapping() const override;
+
+  // |Mapping|
+  bool IsDontNeedSafe() const override;
 
  private:
   fml::RefPtr<fml::NativeLibrary> native_library_;

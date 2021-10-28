@@ -70,6 +70,7 @@ class DartIsolate : public UIDartState {
     ~Flags();
 
     void SetNullSafetyEnabled(bool enabled);
+    void SetIsDontNeedSafe(bool value);
 
     Dart_IsolateFlags Get() const;
 

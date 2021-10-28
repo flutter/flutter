@@ -97,7 +97,11 @@ static std::shared_ptr<const fml::Mapping> SearchMapping(
 static std::shared_ptr<const fml::Mapping> ResolveVMData(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
-  return std::make_unique<fml::NonOwnedMapping>(kDartVmSnapshotData, 0);
+  return std::make_unique<fml::NonOwnedMapping>(kDartVmSnapshotData,
+                                                0,        // size
+                                                nullptr,  // release_func
+                                                true      // dontneed_safe
+  );
 #else   // DART_SNAPSHOT_STATIC_LINK
   return SearchMapping(
       settings.vm_snapshot_data,          // embedder_mapping_callback
@@ -112,7 +116,11 @@ static std::shared_ptr<const fml::Mapping> ResolveVMData(
 static std::shared_ptr<const fml::Mapping> ResolveVMInstructions(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
-  return std::make_unique<fml::NonOwnedMapping>(kDartVmSnapshotInstructions, 0);
+  return std::make_unique<fml::NonOwnedMapping>(kDartVmSnapshotInstructions,
+                                                0,        // size
+                                                nullptr,  // release_func
+                                                true      // dontneed_safe
+  );
 #else   // DART_SNAPSHOT_STATIC_LINK
   return SearchMapping(
       settings.vm_snapshot_instr,           // embedder_mapping_callback
@@ -127,7 +135,11 @@ static std::shared_ptr<const fml::Mapping> ResolveVMInstructions(
 static std::shared_ptr<const fml::Mapping> ResolveIsolateData(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
-  return std::make_unique<fml::NonOwnedMapping>(kDartIsolateSnapshotData, 0);
+  return std::make_unique<fml::NonOwnedMapping>(kDartIsolateSnapshotData,
+                                                0,        // size
+                                                nullptr,  // release_func
+                                                true      // dontneed_safe
+  );
 #else   // DART_SNAPSHOT_STATIC_LINK
   return SearchMapping(
       settings.isolate_snapshot_data,       // embedder_mapping_callback
@@ -143,7 +155,11 @@ static std::shared_ptr<const fml::Mapping> ResolveIsolateInstructions(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
   return std::make_unique<fml::NonOwnedMapping>(
-      kDartIsolateSnapshotInstructions, 0);
+      kDartIsolateSnapshotInstructions,
+      0,        // size
+      nullptr,  // release_func
+      true      // dontneed_safe
+  );
 #else   // DART_SNAPSHOT_STATIC_LINK
   return SearchMapping(
       settings.isolate_snapshot_instr,           // embedder_mapping_callback
@@ -231,6 +247,14 @@ const uint8_t* DartSnapshot::GetDataMapping() const {
 
 const uint8_t* DartSnapshot::GetInstructionsMapping() const {
   return instructions_ ? instructions_->GetMapping() : nullptr;
+}
+
+bool DartSnapshot::IsDontNeedSafe() const {
+  if (data_ && !data_->IsDontNeedSafe())
+    return false;
+  if (instructions_ && !instructions_->IsDontNeedSafe())
+    return false;
+  return true;
 }
 
 bool DartSnapshot::IsNullSafetyEnabled(const fml::Mapping* kernel) const {

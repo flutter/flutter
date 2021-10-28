@@ -269,6 +269,36 @@ TEST(FileTest, EmptyMappingTest) {
   ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "my_contents"));
 }
 
+TEST(FileTest, MappingDontNeedSafeTest) {
+  fml::ScopedTemporaryDirectory dir;
+
+  {
+    auto file = fml::OpenFile(dir.fd(), "my_contents", true,
+                              fml::FilePermission::kReadWrite);
+    WriteStringToFile(file, "some content");
+  }
+
+  {
+    auto file = fml::OpenFile(dir.fd(), "my_contents", false,
+                              fml::FilePermission::kRead);
+    fml::FileMapping mapping(file);
+    ASSERT_TRUE(mapping.IsValid());
+    ASSERT_EQ(mapping.GetMutableMapping(), nullptr);
+    ASSERT_TRUE(mapping.IsDontNeedSafe());
+  }
+
+  {
+    auto file = fml::OpenFile(dir.fd(), "my_contents", false,
+                              fml::FilePermission::kReadWrite);
+    fml::FileMapping mapping(file, {fml::FileMapping::Protection::kRead,
+                                    fml::FileMapping::Protection::kWrite});
+    ASSERT_TRUE(mapping.IsValid());
+    ASSERT_NE(mapping.GetMutableMapping(), nullptr);
+    ASSERT_FALSE(mapping.IsDontNeedSafe());
+  }
+  ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "my_contents"));
+}
+
 TEST(FileTest, FileTestsWork) {
   fml::ScopedTemporaryDirectory dir;
   ASSERT_TRUE(dir.fd().is_valid());

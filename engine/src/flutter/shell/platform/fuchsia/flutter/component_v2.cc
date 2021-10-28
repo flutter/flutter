@@ -310,27 +310,28 @@ ComponentV2::ComponentV2(
       }
       auto hold_snapshot = [snapshot](const uint8_t* _, size_t __) {};
       settings_.vm_snapshot_data = [hold_snapshot, vm_data]() {
-        return std::make_unique<fml::NonOwnedMapping>(vm_data, 0,
-                                                      hold_snapshot);
+        return std::make_unique<fml::NonOwnedMapping>(vm_data, 0, hold_snapshot,
+                                                      true /* dontneed_safe */);
       };
       settings_.vm_snapshot_instr = [hold_snapshot, vm_instructions]() {
-        return std::make_unique<fml::NonOwnedMapping>(vm_instructions, 0,
-                                                      hold_snapshot);
+        return std::make_unique<fml::NonOwnedMapping>(
+            vm_instructions, 0, hold_snapshot, true /* dontneed_safe */);
       };
       settings_.isolate_snapshot_data = [hold_snapshot, isolate_data]() {
-        return std::make_unique<fml::NonOwnedMapping>(isolate_data, 0,
-                                                      hold_snapshot);
+        return std::make_unique<fml::NonOwnedMapping>(
+            isolate_data, 0, hold_snapshot, true /* dontneed_safe */);
       };
       settings_.isolate_snapshot_instr = [hold_snapshot,
                                           isolate_instructions]() {
-        return std::make_unique<fml::NonOwnedMapping>(isolate_instructions, 0,
-                                                      hold_snapshot);
+        return std::make_unique<fml::NonOwnedMapping>(
+            isolate_instructions, 0, hold_snapshot, true /* dontneed_safe */);
       };
       isolate_snapshot_ = fml::MakeRefCounted<flutter::DartSnapshot>(
-          std::make_shared<fml::NonOwnedMapping>(isolate_data, 0,
-                                                 hold_snapshot),
+          std::make_shared<fml::NonOwnedMapping>(isolate_data, 0, hold_snapshot,
+                                                 true /* dontneed_safe */),
           std::make_shared<fml::NonOwnedMapping>(isolate_instructions, 0,
-                                                 hold_snapshot));
+                                                 hold_snapshot,
+                                                 true /* dontneed_safe */));
     } else {
       const int namespace_fd = component_data_directory_.get();
       settings_.vm_snapshot_data = [namespace_fd]() {

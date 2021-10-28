@@ -74,6 +74,10 @@ void DartIsolate::Flags::SetNullSafetyEnabled(bool enabled) {
   flags_.null_safety = enabled;
 }
 
+void DartIsolate::Flags::SetIsDontNeedSafe(bool value) {
+  flags_.snapshot_is_dontneed_safe = value;
+}
+
 Dart_IsolateFlags DartIsolate::Flags::Get() const {
   return flags_;
 }
@@ -139,6 +143,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
 
   isolate_flags.SetNullSafetyEnabled(
       isolate_configration->IsNullSafetyEnabled(*isolate_snapshot));
+  isolate_flags.SetIsDontNeedSafe(isolate_snapshot->IsDontNeedSafe());
 
   auto isolate = CreateRootIsolate(settings,                           //
                                    isolate_snapshot,                   //
