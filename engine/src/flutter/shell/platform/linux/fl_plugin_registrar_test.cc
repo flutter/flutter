@@ -15,21 +15,16 @@
 
 // Checks can make a mock registrar.
 TEST(FlPluginRegistrarTest, FlMockRegistrar) {
-  gtk_init(NULL, NULL);
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlView* view = fl_view_new(project);
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlTextureRegistrar) texture_registrar =
       fl_texture_registrar_new(engine);
 
   g_autoptr(FlPluginRegistrar) registrar =
-      fl_mock_plugin_registrar_new(view, messenger, texture_registrar);
+      fl_mock_plugin_registrar_new(messenger, texture_registrar);
   EXPECT_TRUE(FL_IS_MOCK_PLUGIN_REGISTRAR(registrar));
 
   EXPECT_EQ(fl_plugin_registrar_get_messenger(registrar), messenger);
   EXPECT_EQ(fl_plugin_registrar_get_texture_registrar(registrar),
             texture_registrar);
-  EXPECT_EQ(fl_plugin_registrar_get_view(registrar), view);
 }
