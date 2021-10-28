@@ -477,7 +477,7 @@ class _DraggableSheetExtent {
   /// The scroll position gets inputs in terms of pixels, but the size is
   /// expected to be expressed as a number between 0..1.
   ///
-  /// This should only be called to response to a user drag. To update the
+  /// This should only be called to respond to a user drag. To update the
   /// size in response to a programmatic call, use [updateSize] directly.
   void addPixelDelta(double delta, BuildContext context) {
     // Stop any playing sheet animations.
