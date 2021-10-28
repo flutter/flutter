@@ -169,7 +169,7 @@ public class FlutterNativeView implements BinaryMessenger {
   }
 
   private final class EngineLifecycleListenerImpl implements EngineLifecycleListener {
-    // Called by native to notify when the engine is restarted (cold reload).
+    // Called by native to notify right before the engine is restarted (cold reload).
     @SuppressWarnings("unused")
     public void onPreEngineRestart() {
       if (mFlutterView != null) {

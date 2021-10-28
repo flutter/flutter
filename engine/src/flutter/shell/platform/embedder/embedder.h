@@ -1580,7 +1580,7 @@ typedef struct {
   // callbacks on `log_message_callback`. Defaults to "flutter" if unspecified.
   const char* log_tag;
 
-  // A callback that is invoked when the engine is restarted.
+  // A callback that is invoked right before the engine is restarted.
   //
   // This optional callback is typically used to reset states to as if the
   // engine has just been started, and usually indicates the user has requested
