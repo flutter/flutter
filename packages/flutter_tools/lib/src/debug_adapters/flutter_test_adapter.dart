@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
@@ -179,15 +178,12 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.
   void _handleStdout(String data) {
-    // Output intended for us to parse is JSON wrapped in brackets:
-    // [{"event":"app.foo","params":{"bar":"baz"}}]
-    // However, it's also possible a user printed things that look a little like
-    // this so try to detect only things we're interested in:
-    // - parses as JSON
-    // - is a List of only a single item that is a Map<String, Object?>
-    // - the item has an "event" field that is a String
-    // - the item has a "params" field that is a Map<String, Object?>?
-
+    // Output to stdout from `flutter test --machine` is either:
+    //   1. JSON output from flutter_tools (eg. "test.startedProcess") which is
+    //      wrapped in [] brackets and has an event/params.
+    //   2. JSON output from package:test (not wrapped in brackets).
+    //   3. Non-JSON output (user messages, or flutter_tools printing things like
+    //      call stacks/error information).
     logger?.call('stdout: $data');
 
     Object? jsonData;
@@ -200,8 +196,7 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       return;
     }
 
-    // Flutter output is are wrapped in brackets so comes through as a List
-    // whereas other test data comes through as simple JSON.
+    // Check for valid flutter_tools JSON output (1) first.
     final Map<String, Object?>? flutterPayload = jsonData is List &&
             jsonData.length == 1 &&
             jsonData.first is Map<String, Object?>
@@ -213,8 +208,10 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     if (event is String && params is Map<String, Object?>?) {
       _handleJsonEvent(event, params);
     } else if (jsonData != null) {
+      // Handle package:test output (2).
       sendTestEvents(jsonData);
     } else {
+      // Other output should just be passed straight through.
       sendOutput('stdout', data);
     }
   }
