@@ -532,7 +532,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 ///
 /// The first [skipCount] children are considered "offstage".
 class _Theatre extends MultiChildRenderObjectWidget {
-  _Theatre({
+  const _Theatre({
     Key? key,
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,

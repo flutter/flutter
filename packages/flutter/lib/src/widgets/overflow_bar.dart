@@ -60,7 +60,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// [overflowDirection], and [clipBehavior] parameters must not be
   /// null. The [children] argument must not be null and must not contain
   /// any null objects.
-  OverflowBar({
+  const OverflowBar({
     Key? key,
     this.spacing = 0.0,
     this.alignment,

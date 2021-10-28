@@ -410,9 +410,9 @@ void main() {
   });
 
   testWidgets('ModalBarrier uses default mouse cursor', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[
+      children: <Widget>[
         MouseRegion(cursor: SystemMouseCursors.click),
         ModalBarrier(dismissible: false),
       ],

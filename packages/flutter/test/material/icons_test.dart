@@ -63,11 +63,11 @@ void main() {
   testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: IconTheme(
-        data: const IconThemeData(size: 200),
+        data: IconThemeData(size: 200),
         child: Wrap(
-          children: const <Icon>[
+          children: <Icon>[
             Icon(Icons.ten_k),
             Icon(Icons.ac_unit),
             Icon(Icons.local_taxi),

@@ -51,9 +51,9 @@ final TestParentData kNonPositioned = TestParentData();
 void main() {
   testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           Positioned(
             top: 10.0,
@@ -72,9 +72,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             bottom: 5.0,
             right: 7.0,
@@ -101,9 +101,9 @@ void main() {
     const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             bottom: 5.0,
             right: 7.0,
@@ -126,9 +126,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             bottom: 6.0,
             right: 8.0,
@@ -197,9 +197,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             right: 10.0,
             child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
@@ -220,9 +220,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             top: 7.0,
             child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
@@ -243,7 +243,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr),
+      const Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -251,11 +251,11 @@ void main() {
 
   testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           textDirection: TextDirection.ltr,
-          children: const <Widget>[
+          children: <Widget>[
             Positioned(
               top: 5.0,
               bottom: 8.0,
@@ -287,7 +287,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
 
@@ -325,7 +325,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr),
+      const Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <TestParentData>[]);

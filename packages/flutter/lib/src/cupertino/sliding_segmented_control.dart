@@ -700,7 +700,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 }
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedControlRenderWidget({
+  const _SegmentedControlRenderWidget({
     Key? key,
     List<Widget> children = const <Widget>[],
     required this.highlightedIndex,

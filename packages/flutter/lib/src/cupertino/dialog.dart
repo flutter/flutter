@@ -1869,7 +1869,7 @@ class CupertinoDialogAction extends StatelessWidget {
 //
 // See [_RenderCupertinoDialogActions] for specific layout policy details.
 class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
-  _CupertinoDialogActionsRenderWidget({
+  const _CupertinoDialogActionsRenderWidget({
     Key? key,
     required List<Widget> actionButtons,
     double dividerThickness = 0.0,

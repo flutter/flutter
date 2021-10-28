@@ -5047,14 +5047,14 @@ void main() {
     };
     try {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: InputDecorator(
-                decoration: const InputDecoration(),
+                decoration: InputDecoration(),
                 child: Stack(
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(height: 0),
                     Positioned(
                       bottom: 5,

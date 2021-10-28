@@ -253,10 +253,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -266,12 +266,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             selectButtonBuilder: null,
             child: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
                 Text('b', textDirection: TextDirection.ltr),
                 Text('c', textDirection: TextDirection.ltr),
@@ -371,8 +371,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             selectButtonBuilder: null,
             child: Transform(
               transform: Matrix4.identity()..scale(0.0),
-              child: Stack(
-                children: const <Widget>[
+              child: const Stack(
+                children: <Widget>[
                   Text('a', textDirection: TextDirection.ltr),
                   Text('b', textDirection: TextDirection.ltr),
                   Text('c', textDirection: TextDirection.ltr),
@@ -735,10 +735,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService maybeSetSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -782,10 +782,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService defunct selection regression test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
             ],
           ),
@@ -837,10 +837,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -908,10 +908,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -935,10 +935,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -983,10 +983,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1046,10 +1046,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('test transformDebugCreator will not re-order if before stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1112,10 +1112,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1146,10 +1146,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1178,10 +1178,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       setupDefaultPubRootDirectory(service);
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1206,10 +1206,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1316,10 +1316,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1365,10 +1365,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1434,10 +1434,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1462,10 +1462,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1498,10 +1498,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1585,10 +1585,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1669,10 +1669,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1722,10 +1722,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1765,10 +1765,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
@@ -1846,10 +1846,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Ensure that passing the isolate id as an argument won't break
       // setPubRootDirectories command.
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
               Text('c', textDirection: TextDirection.ltr),
