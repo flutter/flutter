@@ -38,7 +38,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-/** Manages platform views. */
+/**
+ * Manages platform views.
+ *
+ * <p>Each {@link io.flutter.app.FlutterPluginRegistry} has a single platform views controller. A
+ * platform views controller can be attached to at most one Flutter view.
+ */
 public class PlatformViewsController implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController";
 

@@ -156,6 +156,17 @@
     </issue>
 
     <issue
+        id="ClickableViewAccessibility"
+        message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
+        errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
+        errorLine2="                   ~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="391"
+            column="20"/>
+    </issue>
+
+    <issue
         id="UseValueOf"
         message="Use `Boolean.valueOf(true)` instead"
         errorLine1="    messageContent.add(new Boolean(true));"
@@ -185,6 +196,17 @@
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java"
             line="97"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="Recycle"
+        message="This `SurfaceTexture` should be freed up after use with `#release()`"
+        errorLine1="    final SurfaceTexture surfaceTexture = new SurfaceTexture(0);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
+            line="876"
             column="43"/>
     </issue>
 

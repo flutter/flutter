@@ -805,6 +805,13 @@ FILE: ../../../flutter/shell/platform/android/flutter_main.h
 FILE: ../../../flutter/shell/platform/android/flutter_shell_native_unittests.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/Log.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterApplication.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/ExclusiveAppComponent.java
@@ -862,6 +869,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugin
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceAware.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/shim/ShimPluginRegistry.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/shim/ShimRegistrar.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java
@@ -923,7 +932,10 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/util/ViewUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterNativeView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
 FILE: ../../../flutter/shell/platform/android/jni/jni_mock.h
