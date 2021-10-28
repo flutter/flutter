@@ -409,7 +409,7 @@ class ThemeData with Diagnosticable {
     scaffoldBackgroundColor ??= canvasColor;
     bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
     cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    
+
     // Create a ColorScheme that is backwards compatible as possible
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
@@ -421,7 +421,7 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor,
       brightness: _brightness,
     );
-    
+
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
