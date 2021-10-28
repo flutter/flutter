@@ -70,7 +70,7 @@ class PluginPlatformInterfaceMacOS {
       );
       pluginImplPubspecContent = pluginImplPubspecContent.replaceFirst(
           '    platforms:\n',
-          '    implements: plugin_platform_interface\n'
+          '    implements: plugin_platform_base\n'
               '    platforms:\n');
       await pluginImplPubspec.writeAsString(pluginImplPubspecContent,
           flush: true);
@@ -85,21 +85,21 @@ class PluginPlatformInterfaceMacOS {
             'io.flutter.devicelab',
             '--platforms',
             'macos',
-            'plugin_platform_interface',
+            'plugin_platform_base',
           ],
           environment: environment,
         );
       });
       final File pluginInterfacePubspec = File(path.join(
         tempDir.absolute.path,
-        'plugin_platform_interface',
+        'plugin_platform_base',
         'pubspec.yaml',
       ));
       String pluginInterfacePubspecContent =
           await pluginInterfacePubspec.readAsString();
       pluginInterfacePubspecContent =
           pluginInterfacePubspecContent.replaceFirst(
-              '        pluginClass: PluginPlatformInterfacePlugin',
+              '        pluginClass: PluginPlatformBasePlugin',
               '        default_package: plugin_platform_implementation\n');
       pluginInterfacePubspecContent =
           pluginInterfacePubspecContent.replaceFirst(
@@ -136,8 +136,8 @@ class PluginPlatformInterfaceMacOS {
       appPubspecContent = appPubspecContent.replaceFirst(
           'dependencies:',
           'dependencies:\n'
-              '  plugin_platform_interface:\n'
-              '    path: ../plugin_platform_interface\n');
+              '  plugin_platform_base:\n'
+              '    path: ../plugin_platform_base\n');
       await appPubspec.writeAsString(appPubspecContent, flush: true);
 
       section('Flutter run for macos');
