@@ -1072,5 +1072,50 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
   }
 }
 
+TEST(DisplayList, NestedOpCountMetricsSameAsSkPicture) {
+  SkPictureRecorder recorder;
+  recorder.beginRecording(SkRect::MakeWH(150, 100));
+  SkCanvas* canvas = recorder.getRecordingCanvas();
+  SkPaint paint;
+  for (int y = 10; y <= 60; y += 10) {
+    for (int x = 10; x <= 60; x += 10) {
+      paint.setColor(((x + y) % 20) == 10 ? SK_ColorRED : SK_ColorBLUE);
+      canvas->drawRect(SkRect::MakeXYWH(x, y, 80, 80), paint);
+    }
+  }
+  SkPictureRecorder outer_recorder;
+  outer_recorder.beginRecording(SkRect::MakeWH(150, 100));
+  canvas = outer_recorder.getRecordingCanvas();
+  canvas->drawPicture(recorder.finishRecordingAsPicture());
+
+  auto picture = outer_recorder.finishRecordingAsPicture();
+  ASSERT_EQ(picture->approximateOpCount(), 1);
+  ASSERT_EQ(picture->approximateOpCount(true), 36);
+
+  DisplayListBuilder builder(SkRect::MakeWH(150, 100));
+  for (int y = 10; y <= 60; y += 10) {
+    for (int x = 10; x <= 60; x += 10) {
+      builder.setColor(((x + y) % 20) == 10 ? SK_ColorRED : SK_ColorBLUE);
+      builder.drawRect(SkRect::MakeXYWH(x, y, 80, 80));
+    }
+  }
+  DisplayListBuilder outer_builder(SkRect::MakeWH(150, 100));
+  outer_builder.drawDisplayList(builder.Build());
+
+  auto display_list = outer_builder.Build();
+  ASSERT_EQ(display_list->op_count(), 1);
+  ASSERT_EQ(display_list->op_count(true), 36);
+
+  ASSERT_EQ(picture->approximateOpCount(), display_list->op_count());
+  ASSERT_EQ(picture->approximateOpCount(true), display_list->op_count(true));
+
+  DisplayListCanvasRecorder dl_recorder(SkRect::MakeWH(150, 100));
+  picture->playback(&dl_recorder);
+
+  auto sk_display_list = dl_recorder.Build();
+  ASSERT_EQ(display_list->op_count(), 1);
+  ASSERT_EQ(display_list->op_count(true), 36);
+}
+
 }  // namespace testing
 }  // namespace flutter
