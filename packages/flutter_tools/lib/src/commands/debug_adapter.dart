@@ -28,6 +28,13 @@ class DebugAdapterCommand extends FlutterCommand {
   DebugAdapterCommand({ bool verboseHelp = false}) : hidden = !verboseHelp {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
+    argParser
+      .addFlag(
+        'test',
+        defaultsTo: false,
+        help: 'Whether to use the "flutter test" debug adapter to run tests'
+            ' and emit custom events for test progress/results.',
+      );
   }
 
   @override
@@ -54,6 +61,7 @@ class DebugAdapterCommand extends FlutterCommand {
       platform: globals.platform,
       ipv6: ipv6,
       enableDds: enableDds,
+      test: boolArg('test') ?? false,
     );
 
     await server.channel.closed;
