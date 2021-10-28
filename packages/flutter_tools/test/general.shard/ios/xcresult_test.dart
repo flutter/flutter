@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -10,15 +9,19 @@ import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/test.dart';
 
+import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
-  FakeCommand _setUpFakeXCResultGetCommand(
-      {required String stdout,
-      required String tempResultPath,
-      required Xcode xcode}) {
+  FakeCommand _setUpFakeXCResultGetCommand({
+    required String stdout,
+    required String tempResultPath,
+    required Xcode xcode,
+    int exitCode = 0,
+    String stderr = '',
+  }) {
     return FakeCommand(
       command: <String>[
         ...xcode.xcrunCommand(),
@@ -27,9 +30,11 @@ void main() {
         '--path',
         tempResultPath,
         '--format',
-        'json'
+        'json',
       ],
       stdout: stdout,
+      stderr: stderr,
+      exitCode: exitCode,
       onRun: () {},
     );
   }
@@ -49,133 +54,153 @@ void main() {
     exitCode: 1,
   );
 
-  XCResultGenerator _setupGeneratorWithResultJson(String resultJson) {
-    final FakeProcessManager fakeProcessManager =
-        FakeProcessManager.list(<FakeCommand>[
+  XCResultGenerator _setupGenerator({
+    required String resultJson,
+    int exitCode = 0,
+    String stderr = '',
+  }) {
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       _kWhichSysctlCommand,
       _kx64CheckCommand,
     ]);
     final Xcode xcode = Xcode.test(
+      processManager: fakeProcessManager,
+      xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: fakeProcessManager, version: null));
-    fakeProcessManager.addCommands(<FakeCommand>[
-      _setUpFakeXCResultGetCommand(
-          stdout: resultJson, tempResultPath: _tempResultPath, xcode: xcode),
-    ]);
+        version: null,
+      ),
+    );
+    fakeProcessManager.addCommands(
+      <FakeCommand>[
+        _setUpFakeXCResultGetCommand(
+          stdout: resultJson,
+          tempResultPath: _tempResultPath,
+          xcode: xcode,
+        ),
+      ],
+    );
     final ProcessUtils processUtils = ProcessUtils(
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
     return XCResultGenerator(
-        resultPath: _tempResultPath,
-        xcode: xcode,
-        processUtils: processUtils);
+      resultPath: _tempResultPath,
+      xcode: xcode,
+      processUtils: processUtils,
+    );
   }
 
-  group('$XCResultGenerator', () {
-    test('correctly parse sample result json when there are isseus.', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonWithIssues);
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 2);
-      expect(result.issues.first.type, 'Semantic Issue');
-      expect(
-          result.issues.first.message, "Use of undeclared identifier 'asdas'");
-      expect(result.issues.last.type, 'Warning');
-      expect(result.issues.last.message,
-          "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.");
-      expect(result.parseSuccess, isTrue);
-      expect(result.parsingErrorMessage, isEmpty);
-    });
+  testWithoutContext('correctly parse sample result json when there are issues.', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonWithIssues);
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 2);
+    expect(result.issues.first.type, 'Semantic Issue');
+    expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
+    expect(result.issues.last.type, 'Warning');
+    expect(result.issues.last.message,
+        "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.");
+    expect(result.parseSuccess, isTrue);
+    expect(result.parsingErrorMessage, isNull);
+  });
 
-    test('correctly parse sample result json when no issues.', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonNoIssues);
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, isTrue);
-      expect(result.parsingErrorMessage, isEmpty);
-    });
+  testWithoutContext('correctly parse sample result json when no issues.', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonNoIssues);
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, isTrue);
+    expect(result.parsingErrorMessage, isNull);
+  });
 
-    test('error: wrong top level json format.', () async {
-      final XCResultGenerator generator = _setupGeneratorWithResultJson('[]');
+  testWithoutContext(
+      'error: `xcresulttool get` process fail should return an `XCResult with `parsingErrorMessage` as stderr.',
+      () async {
+    const String fakeStderr = 'Fake: fail to parse result json.';
+    final XCResultGenerator generator = _setupGenerator(
+      resultJson: '',
+      exitCode: 1,
+      stderr: fakeStderr,
+    );
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Unrecognized top level json format.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, fakeStderr);
+  });
 
-    test('error: fail to parse actions map', () async {
-      final XCResultGenerator generator = _setupGeneratorWithResultJson('{}');
+  testWithoutContext('error: `xcresulttool get` no stdout', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: '');
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the actions map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Unrecognized top level json format.');
+  });
 
-    test('error: empty actions map', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonEmptyActionsMap);
+  testWithoutContext('error: wrong top level json format.', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: '[]');
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the actions map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Unrecognized top level json format.');
+  });
 
-    test('error: empty actions map', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonEmptyActionsMap);
+  testWithoutContext('error: fail to parse actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: '{}');
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the actions map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the actions map.');
+  });
 
-    test('error: empty actions map', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonInvalidActionMap);
+  testWithoutContext('error: empty actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonEmptyActionsMap);
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the first action map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the actions map.');
+  });
 
-    test('error: empty actions map', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonInvalidBuildResultMap);
+  testWithoutContext('error: empty actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonEmptyActionsMap);
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the buildResult map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the actions map.');
+  });
 
-    test('error: empty actions map', () async {
-      final XCResultGenerator generator =
-          _setupGeneratorWithResultJson(_sampleResultJsonInvalidIssuesMap);
+  testWithoutContext('error: empty actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidActionMap);
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage,
-          'xcresult parser: Failed to parse the issues map.');
-    });
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the first action map.');
+  });
+
+  testWithoutContext('error: empty actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidBuildResultMap);
+
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the buildResult map.');
+  });
+
+  testWithoutContext('error: empty actions map', () async {
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidIssuesMap);
+
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, 'xcresult parser: Failed to parse the issues map.');
   });
 }
 
-const String _sampleResultJsonInvalidIssuesMap= r'''
+const String _sampleResultJsonInvalidIssuesMap = r'''
 {
   "_type" : {
     "_name" : "ActionsInvocationRecord"

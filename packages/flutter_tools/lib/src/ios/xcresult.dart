@@ -8,29 +8,23 @@ import '../../src/base/process.dart';
 import '../../src/macos/xcode.dart';
 import '../convert.dart';
 
-const int _kDefaultResultBundleVersion = 3;
-
 /// The generator of xcresults.
 ///
 /// Call [generate] after an iOS/MacOS build will generate a [XCResult].
+/// This only works when the `-resultBundleVersion` is set to 3.
 /// * See also: [XCResult].
 class XCResultGenerator {
   /// Construct the [XCResultGenerator].
-  ///
-  /// The `resultBundleVersion` is set to 3 by default.
-  XCResultGenerator(
-      {required this.resultPath,
-      this.resultBundleVersion = _kDefaultResultBundleVersion,
-      required this.xcode,
-      required this.processUtils});
+  XCResultGenerator({
+    required this.resultPath,
+    required this.xcode,
+    required this.processUtils,
+  });
 
   /// The file path that used to store the xcrun result.
   ///
   /// There's usually a `resultPath.xcresult` file in the same folder.
   final String resultPath;
-
-  /// The version that is specified in `-resultBundleVersion` when generating the result.
-  final int resultBundleVersion;
 
   /// The [ProcessUtils] to run commands.
   final ProcessUtils processUtils;
@@ -43,7 +37,7 @@ class XCResultGenerator {
   /// Calls `xcrun xcresulttool get --path <resultPath> --format json`,
   /// then stores the useful information the json into an [XCResult] object.
   Future<XCResult> generate() async {
-    RunResult result = await processUtils.run(
+    final RunResult result = await processUtils.run(
       <String>[
         ...xcode.xcrunCommand(),
         'xcresulttool',
@@ -51,12 +45,18 @@ class XCResultGenerator {
         '--path',
         resultPath,
         '--format',
-        'json'
+        'json',
       ],
     );
-    final dynamic resultJson =
-        json.decode(result.stdout);
-    if (resultJson == null || resultJson is! Map<String, dynamic>) {
+    if (result.exitCode != 0) {
+      return XCResult.failed(errorMessage: result.stderr);
+    }
+    if (result.stdout.isEmpty) {
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Unrecognized top level json format.');
+    }
+    final Object? resultJson = json.decode(result.stdout);
+    if (resultJson == null || resultJson is! Map<String, Object?>) {
       // If json parsing failed, indicate such error.
       // This also includes the top level json object is an array, which indicates
       // the structure of the json is changed and this parser class possibly needs to update for this change.
@@ -67,49 +67,50 @@ class XCResultGenerator {
   }
 }
 
-const List<XCResultIssue> _kEmptyIssueResultList = <XCResultIssue>[];
-
 /// The xcresult of an `xcodebuild` command.
 ///
 /// This is the result from an `xcrun xcresulttool get --path <resultPath> --format json` run.
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
-  factory XCResult({required Map<String, dynamic> resultJson}) {
+  factory XCResult({required Map<String, Object?> resultJson}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
-    final dynamic actionsMap =
-        resultJson['actions'];
-    if (actionsMap == null || actionsMap is! Map<String, dynamic>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the actions map.');
+    final Object? actionsMap = resultJson['actions'];
+    if (actionsMap == null || actionsMap is! Map<String, Object?>) {
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Failed to parse the actions map.');
     }
-    final dynamic actionValueList =
-        actionsMap['_values'];
-    if (actionValueList == null || actionValueList is! List<dynamic> || actionValueList.isEmpty) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the actions map.');
+    final Object? actionValueList = actionsMap['_values'];
+    if (actionValueList == null ||
+        actionValueList is! List<Object?> ||
+        actionValueList.isEmpty) {
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Failed to parse the actions map.');
     }
-    final dynamic actionMap =
-        actionValueList.first;
-    if (actionMap == null || actionMap is! Map<String, dynamic>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the first action map.');
+    final Object? actionMap = actionValueList.first;
+    if (actionMap == null || actionMap is! Map<String, Object?>) {
+      return XCResult.failed(
+          errorMessage:
+              'xcresult parser: Failed to parse the first action map.');
     }
-    final dynamic buildResultMap =
-        actionMap['buildResult'];
-    if (buildResultMap == null || buildResultMap is! Map<String, dynamic>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the buildResult map.');
+    final Object? buildResultMap = actionMap['buildResult'];
+    if (buildResultMap == null || buildResultMap is! Map<String, Object?>) {
+      return XCResult.failed(
+          errorMessage:
+              'xcresult parser: Failed to parse the buildResult map.');
     }
-    final dynamic issuesMap =
-        buildResultMap['issues'];
-    if (issuesMap == null || issuesMap is! Map<String, dynamic>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
+    final Object? issuesMap = buildResultMap['issues'];
+    if (issuesMap == null || issuesMap is! Map<String, Object?>) {
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
     List<XCResultIssue> _parseIssuesFromIssueSummariesJson(
-        Map<String, dynamic> issueSummariesJson) {
+        Map<String, Object?> issueSummariesJson) {
       final List<XCResultIssue> issues = <XCResultIssue>[];
-      final dynamic errorsList =
-          issueSummariesJson['_values'];
-      if (errorsList != null && errorsList is List<dynamic>) {
-        for (final dynamic issueJson in errorsList) {
-          if (issueJson is! Map<String, dynamic>) {
+      final Object? errorsList = issueSummariesJson['_values'];
+      if (errorsList is List<Object?>) {
+        for (final Object? issueJson in errorsList) {
+          if (issueJson == null || issueJson is! Map<String, Object?>) {
             continue;
           }
           final XCResultIssue resultIssue = XCResultIssue(issueJson: issueJson);
@@ -119,28 +120,30 @@ class XCResult {
       return issues;
     }
 
-    final dynamic errorSummaries =
-        issuesMap['errorSummaries'];
-    if (errorSummaries != null && errorSummaries is Map<String, dynamic>) {
+    final Object? errorSummaries = issuesMap['errorSummaries'];
+    if (errorSummaries is Map<String, Object?>) {
       issues.addAll(_parseIssuesFromIssueSummariesJson(errorSummaries));
     }
 
-    final dynamic warningSummaries =
-        issuesMap['warningSummaries'];
-    if (warningSummaries != null && warningSummaries is Map<String, dynamic>) {
+    final Object? warningSummaries = issuesMap['warningSummaries'];
+    if (warningSummaries is Map<String, Object?>) {
       issues.addAll(_parseIssuesFromIssueSummariesJson(warningSummaries));
     }
     return XCResult._(issues: issues);
   }
 
   factory XCResult.failed({required String errorMessage}) {
-    return XCResult._(parseSuccess: false, parsingErrorMessage: errorMessage);
+    return XCResult._(
+      parseSuccess: false,
+      parsingErrorMessage: errorMessage,
+    );
   }
 
-  XCResult._(
-      {this.issues = _kEmptyIssueResultList,
-      this.parseSuccess = true,
-      this.parsingErrorMessage = ''});
+  XCResult._({
+    this.issues = const <XCResultIssue>[],
+    this.parseSuccess = true,
+    this.parsingErrorMessage,
+  });
 
   /// The issues in the xcresult file.
   final List<XCResultIssue> issues;
@@ -152,8 +155,8 @@ class XCResult {
 
   /// The error message describes why the parse if unsuccessful.
   ///
-  /// This is empty if [parseSuccess] is `true`.
-  final String parsingErrorMessage;
+  /// This is `null` if [parseSuccess] is `true`.
+  final String? parsingErrorMessage;
 }
 
 /// An issue object in the XCResult
@@ -161,35 +164,39 @@ class XCResultIssue {
   /// Construct an `XCResultIssue` object from `issueJson`.
   ///
   /// `issueJson` is the object at xcresultJson[['actions']['_values'][0]['buildResult']['issues']['errorSummaries'/'warningSummaries']['_values'].
-  factory XCResultIssue({required Map<String, dynamic> issueJson}) {
-    final Map<String, dynamic>? issueTypeMap =
-        issueJson['issueType'] as Map<String, dynamic>?;
+  factory XCResultIssue({required Map<String, Object?> issueJson}) {
+    final Object? issueTypeMap = issueJson['issueType'];
     String type = '';
-    if (issueTypeMap != null) {
-      final String? typeValue = issueTypeMap['_value'] as String?;
-      if (typeValue != null) {
+    if (issueTypeMap is Map<String, Object?>) {
+      final Object? typeValue = issueTypeMap['_value'];
+      if (typeValue is String) {
         type = typeValue;
       }
     }
 
     String message = '';
-    final Map<String, dynamic>? messageMap =
-        issueJson['message'] as Map<String, dynamic>?;
-    if (messageMap != null) {
-      final String? messageValue = messageMap['_value'] as String?;
-      if (messageValue != null) {
+    final Object? messageMap = issueJson['message'];
+    if (messageMap is Map<String, Object?>) {
+      final Object? messageValue = messageMap['_value'];
+      if (messageValue is String) {
         message = messageValue;
       }
     }
 
-    return XCResultIssue._(type: type, message: message);
+    return XCResultIssue._(
+      type: type,
+      message: message,
+    );
   }
 
-  XCResultIssue._({required this.type, required this.message});
+  XCResultIssue._({
+    required this.type,
+    required this.message,
+  });
 
   /// The type of the issue.
   ///
-  /// The possible values are `warning`, `error` etc.
+  /// The possible values are `Warning`, `Semantic Issue'` etc.
   final String type;
 
   /// Human readable message for the issue.
