@@ -52,4 +52,11 @@ TEST(MallocMapping, Release) {
   ASSERT_EQ(0u, mapping.GetSize());
 }
 
+TEST(MallocMapping, IsDontNeedSafe) {
+  size_t length = 10;
+  MallocMapping mapping(reinterpret_cast<uint8_t*>(malloc(length)), length);
+  ASSERT_NE(nullptr, mapping.GetMapping());
+  ASSERT_FALSE(mapping.IsDontNeedSafe());
+}
+
 }  // namespace fml

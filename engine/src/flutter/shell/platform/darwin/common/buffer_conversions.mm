@@ -18,6 +18,8 @@ class NSDataMapping : public fml::Mapping {
     return static_cast<const uint8_t*>([data_.get() bytes]);
   }
 
+  bool IsDontNeedSafe() const override { return false; }
+
  private:
   fml::scoped_nsobject<NSData> data_;
   FML_DISALLOW_COPY_AND_ASSIGN(NSDataMapping);
