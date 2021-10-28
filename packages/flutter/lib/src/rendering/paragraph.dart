@@ -9,6 +9,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, Tex
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -64,7 +65,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
-                  RelayoutWhenSystemFontsChangeMixin {
+                  RelayoutWhenSystemFontsChangeMixin implements TextLayoutMetrics {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -846,6 +847,7 @@ class RenderParagraph extends RenderBox
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   ///
   /// Valid only after [layout].
+  @override
   TextRange getWordBoundary(TextPosition position) {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
@@ -1068,5 +1070,50 @@ class RenderParagraph extends RenderBox
       ),
     );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+  }
+
+  // Start TextLayoutMetrics.
+
+  /// {@macro flutter.services.TextLayoutMetrics.getLineAtOffset}
+  @override
+  TextSelection getLineAtOffset(TextPosition position) {
+    final TextRange line = _textPainter.getLineBoundary(position);
+    return TextSelection(baseOffset: line.start, extentOffset: line.end);
+  }
+
+  /// {@macro flutter.services.TextLayoutMetrics.getTextPositionAbove}
+  @override
+  TextPosition getTextPositionAbove(TextPosition position) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = -0.5 * preferredLineHeight;
+    return _getTextPositionVertical(position, verticalOffset);
+  }
+
+  /// {@macro flutter.services.TextLayoutMetrics.getTextPositionBelow}
+  @override
+  TextPosition getTextPositionBelow(TextPosition position) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = 1.5 * preferredLineHeight;
+    return _getTextPositionVertical(position, verticalOffset);
+  }
+
+  /// Assert that the last layout still matches the constraints.
+  @override
+  void debugAssertLayoutUpToDate() {}
+
+  // End TextLayoutMetrics.
+
+  /// Returns the TextPosition above or below the given offset.
+  TextPosition _getTextPositionVertical(TextPosition position, double verticalOffset) {
+    final Rect caretRect = Rect.fromLTWH(0.0, 0.0, 1.0, _textPainter.preferredLineHeight);
+    final Offset caretOffset = _textPainter.getOffsetForCaret(position, caretRect);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    return _textPainter.getPositionForOffset(caretOffsetTranslated);
   }
 }
