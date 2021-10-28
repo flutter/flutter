@@ -1427,14 +1427,26 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
       ? Push<DrawSkPictureMatrixOp>(0, 1, std::move(picture), *matrix,
                                     render_with_attributes)
       : Push<DrawSkPictureOp>(0, 1, std::move(picture), render_with_attributes);
+  // The non-nested op count accumulated in the |Push| method will include
+  // this call to |drawPicture| for non-nested op count metrics.
+  // But, for nested op count metrics we want the |drawPicture| call itself
+  // to be transparent. So we subtract 1 from our accumulated nested count to
+  // balance out against the 1 that was accumulated into the regular count.
+  // This behavior is identical to the way SkPicture computes nested op counts.
+  nested_op_count_ += picture->approximateOpCount(true) - 1;
   nested_bytes_ += picture->approximateBytesUsed();
-  nested_op_count_ += picture->approximateOpCount(true);
 }
 void DisplayListBuilder::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
   Push<DrawDisplayListOp>(0, 1, std::move(display_list));
+  // The non-nested op count accumulated in the |Push| method will include
+  // this call to |drawDisplayList| for non-nested op count metrics.
+  // But, for nested op count metrics we want the |drawDisplayList| call itself
+  // to be transparent. So we subtract 1 from our accumulated nested count to
+  // balance out against the 1 that was accumulated into the regular count.
+  // This behavior is identical to the way SkPicture computes nested op counts.
+  nested_op_count_ += display_list->op_count(true) - 1;
   nested_bytes_ += display_list->bytes(true);
-  nested_op_count_ += display_list->op_count(true);
 }
 void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar x,
