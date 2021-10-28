@@ -34,6 +34,10 @@ import 'inherited_model.dart';
 /// data sharing "umbrella" widgets to enable the use of such
 /// packages.
 ///
+/// A good way to create an AppModel key that avoids potential
+/// collisions with other packages is to use a static `Object()` value.
+/// The `SharedObject` example below does this.
+///
 /// {@tool dartpad}
 /// The following sample demonstrates using the automatically created
 /// `AppModel`. Button presses cause changes to the values for keys
