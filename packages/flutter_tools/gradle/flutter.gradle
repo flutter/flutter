@@ -400,7 +400,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginName} requires a higher Android SDK version.\nFix this issue by adding the following to the file /android/app/build.gradle:\n android {\n    compileSdkVersion ${pluginProject.android.compileSdkVersion.substring(8)}\n  }\nNote that further updates may be needed to comply with this SDK version.\n")
+                project.logger.error("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
             }
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }

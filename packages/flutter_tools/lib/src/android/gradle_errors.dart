@@ -72,6 +72,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   flavorUndefinedHandler,
   r8FailureHandler,
   minSdkVersion,
+  compileSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
   multidexErrorHandler,
@@ -407,6 +408,46 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'plugin-min-sdk',
+);
+
+final RegExp _compileSdkVersionPattern = RegExp(
+    'Warning: The plugin ([A-Za-z]+) requires Android SDK version ([0-9]+).');
+
+/// Handler when a plugin requires a higher compileSdkVersion than the project itself.
+@visibleForTesting
+final GradleHandledError compileSdkVersion = GradleHandledError(
+  test: (String line) {
+    return _compileSdkVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+
+    final Match? compileSdkVersionMatch =
+        _compileSdkVersionPattern.firstMatch(line);
+    assert(compileSdkVersionMatch?.groupCount == 2);
+
+    final String bold = globals.logger.terminal.bolden(
+        'Fix this issue by adding the following to ${gradleFile.path}:\n'
+        'android {\n'
+        '  compileSdkVersion ${compileSdkVersionMatch?.group(2)}\n'
+        '  ...\n'
+        '}');
+    globals.printStatus('\n'
+        'The plugin ${compileSdkVersionMatch?.group(1)} requires a higher Android SDK version.'
+        '$bold\n'
+        'Note: Other plugins may require a higher version than this; check warnings above.\n'
+        'Note: Further updates may be needed to comply with this SDK version.\n');
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'plugin-compile-sdk',
 );
 
 /// Handler when https://issuetracker.google.com/issues/141126614 or

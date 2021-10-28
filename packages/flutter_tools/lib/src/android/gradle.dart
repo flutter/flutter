@@ -350,6 +350,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     GradleHandledError? detectedGradleError;
     String? detectedGradleErrorLine;
+    bool compileSdkWarningFound = false;
     String? consumeLog(String line) {
       if (detectedGradleError != null) {
         // Pipe stdout/stderr from Gradle.
@@ -357,6 +358,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       }
       for (final GradleHandledError gradleError in localGradleErrors) {
         if (gradleError.test(line)) {
+          if (gradleError.eventLabel! == 'plugin-compile-sdk') {
+            compileSdkWarningFound = true;
+          }
           detectedGradleErrorLine = line;
           detectedGradleError = gradleError;
           // The first error match wins.
@@ -394,7 +398,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     _usage.sendTiming('build', 'gradle', sw.elapsed);
 
-    if (exitCode != 0) {
+    if (exitCode != 0 || compileSdkWarningFound) {
       if (detectedGradleError == null) {
         BuildEvent('gradle-unknown-failure', type: 'gradle', flutterUsage: _usage).send();
         throwToolExit(
@@ -427,11 +431,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
             // noop.
           }
         }
-        BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
-        throwToolExit(
-          'Gradle task $assembleTask failed with exit code $exitCode',
-          exitCode: exitCode,
-        );
+        if (exitCode == 0) {
+          BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
+          throwToolExit(
+            'Gradle task $assembleTask failed with exit code $exitCode',
+            exitCode: exitCode,
+          );
+        }
       }
     }
 

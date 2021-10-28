@@ -782,6 +782,8 @@ assembleProfile
     });
   });
 
+  //TODO in upcoming commit: add test for compileSdkVersion
+
   // https://issuetracker.google.com/issues/141126614
   group('transform input issue', () {
     testWithoutContext('pattern', () {
