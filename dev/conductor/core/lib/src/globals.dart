@@ -20,7 +20,7 @@ const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki
 const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
 
 final RegExp releaseCandidateBranchRegex = RegExp(
-  r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
+  r'^flutter-(\d+)\.(\d+)-candidate\.(\d+)$',
 );
 
 /// Cast a dynamic to String and trim.
