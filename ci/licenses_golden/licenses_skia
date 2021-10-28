@@ -1,4 +1,4 @@
-Signature: c2af5fa0584ee8f2ae76c083645a4845
+Signature: 9da99cf668bd054f5ae7ab211c916099
 
 UNUSED LICENSES:
 
@@ -2350,6 +2350,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Device.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Device.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawContext.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawContext.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawList.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawList.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawOrder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
@@ -2359,6 +2360,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/GpuWorkSubmission.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Recording.cpp
@@ -2385,6 +2388,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Uniform.h
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BoundsManager.h
