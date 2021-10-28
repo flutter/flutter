@@ -785,7 +785,6 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'conductor', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
