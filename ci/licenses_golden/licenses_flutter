@@ -1623,6 +1623,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_platform_plugin.cc
 FILE: ../../../flutter/shell/platform/linux/fl_platform_plugin.h
 FILE: ../../../flutter/shell/platform/linux/fl_plugin_registrar.cc
 FILE: ../../../flutter/shell/platform/linux/fl_plugin_registrar_private.h
+FILE: ../../../flutter/shell/platform/linux/fl_plugin_registrar_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_plugin_registry.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer.h
