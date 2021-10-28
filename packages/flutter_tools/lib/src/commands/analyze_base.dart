@@ -140,7 +140,7 @@ class PackageDependency {
     for (final List<String> targetSources in values.values) {
       for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
-        if (globals.fs.path.isWithin(Cache.flutterRoot ?? '', source)) {
+        if (flutterRoot != null && globals.fs.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }
