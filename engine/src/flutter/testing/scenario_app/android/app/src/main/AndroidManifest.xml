@@ -3,6 +3,7 @@
     package="dev.flutter.scenarios">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:name="io.flutter.app.FlutterApplication"
         android:allowBackup="false"
         android:label="Scenarios App"
         android:supportsRtl="true"
