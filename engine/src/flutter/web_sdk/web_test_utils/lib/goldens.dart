@@ -234,7 +234,7 @@ class GoldensRepoFetcher {
     }
 
     await _runGit(
-      <String>['fetch', 'origin', 'master'],
+      <String>['fetch', 'origin', 'main'],
       _webUiGoldensRepositoryDirectory.path,
     );
     await _runGit(
