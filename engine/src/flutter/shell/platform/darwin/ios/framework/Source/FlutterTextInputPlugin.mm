@@ -900,6 +900,15 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   return _textInputClient != 0;
 }
 
+- (BOOL)canPerformAction:(SEL)action withSender:(nullable id)sender {
+  if (action == @selector(paste:)) {
+    // Forbid pasting images, memojis, or other non-string content.
+    return [UIPasteboard generalPasteboard].string != nil;
+  }
+
+  return [super canPerformAction:action withSender:sender];
+}
+
 #pragma mark - UIResponderStandardEditActions Overrides
 
 - (void)cut:(id)sender {
@@ -912,7 +921,10 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (void)paste:(id)sender {
-  [self insertText:[UIPasteboard generalPasteboard].string];
+  NSString* pasteboardString = [UIPasteboard generalPasteboard].string;
+  if (pasteboardString != nil) {
+    [self insertText:pasteboardString];
+  }
 }
 
 - (void)delete:(id)sender {
