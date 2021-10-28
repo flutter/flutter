@@ -60,9 +60,9 @@ public class KeyboardManager {
    * Constructor for {@link KeyboardManager} that takes a list of {@link
    * KeyboardManager.Responder}s.
    *
-   * <p>The view is used as the destination to send the synthesized key to. This means that the the
-   * next thing in the focus chain will get the event when the {@link KeyboardManager.Responder}s
-   * return false from onKeyDown/onKeyUp.
+   * <p>The view is used as the destination to send the synthesized key to. This means that the next
+   * thing in the focus chain will get the event when the {@link KeyboardManager.Responder}s return
+   * false from onKeyDown/onKeyUp.
    *
    * <p>It is possible that that in the middle of the async round trip, the focus chain could
    * change, and instead of the native widget that was "next" when the event was fired getting the

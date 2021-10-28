@@ -30,7 +30,7 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
 
   /// Initializes a new ImmutableData from a Dart Uint8List.
   ///
-  /// The zero indexed argument is the the caller that will be registered as the
+  /// The zero indexed argument is the caller that will be registered as the
   /// Dart peer of the native ImmutableBuffer object.
   ///
   /// The first indexed argumented is a tonic::Uint8List of bytes to copy.

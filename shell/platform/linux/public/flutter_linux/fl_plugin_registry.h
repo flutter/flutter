@@ -35,7 +35,7 @@ struct _FlPluginRegistryInterface {
    * @registry: an #FlPluginRegistry.
    * @name: plugin name.
    *
-   * Gets the plugin registrar for the the plugin with @name.
+   * Gets the plugin registrar for the plugin with @name.
    *
    * Returns: (transfer full): an #FlPluginRegistrar.
    */
@@ -48,7 +48,7 @@ struct _FlPluginRegistryInterface {
  * @registry: an #FlPluginRegistry.
  * @name: plugin name.
  *
- * Gets the plugin registrar for the the plugin with @name.
+ * Gets the plugin registrar for the plugin with @name.
  *
  * Returns: (transfer full): an #FlPluginRegistrar.
  */
