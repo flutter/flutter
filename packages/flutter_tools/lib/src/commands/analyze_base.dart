@@ -124,7 +124,7 @@ class PackageDependency {
   // This is a map from dependency targets (lib directories) to a list
   // of places that ask for that target (.packages or pubspec.yaml files)
   Map<String, List<String>> values = <String, List<String>>{};
-  late String canonicalSource;
+  String? canonicalSource;
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
