@@ -186,7 +186,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [unsafeSelf handleMethodCall:call result:result];
     }];
-    _textInputContext = [[NSTextInputContext alloc] initWithClient:self];
+    _textInputContext = [[NSTextInputContext alloc] initWithClient:unsafeSelf];
     _previouslyPressedFlags = 0;
 
     _flutterViewController = viewController;
@@ -208,6 +208,11 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 
 - (void)dealloc {
   [_channel setMethodCallHandler:nil];
+  if (_textInputContext) {
+    [_textInputContext deactivate];
+    [_textInputContext discardMarkedText];
+    _textInputContext = nil;
+  }
 }
 
 #pragma mark - Private

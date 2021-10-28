@@ -133,7 +133,7 @@ void fl_engine_set_update_semantics_node_handler(
  * @destroy_notify: (allow-none): a function which gets called to free
  * @user_data, or %NULL.
  *
- * Registers the function called when the engine is restarted.
+ * Registers the function called right before the engine is restarted.
  */
 void fl_engine_set_on_pre_engine_restart_handler(
     FlEngine* engine,

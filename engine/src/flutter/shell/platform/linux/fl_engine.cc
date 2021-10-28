@@ -48,7 +48,7 @@ struct _FlEngine {
   gpointer update_semantics_node_handler_data;
   GDestroyNotify update_semantics_node_handler_destroy_notify;
 
-  // Function to call when the engine is restarted.
+  // Function to call right before the engine is restarted.
   FlEngineOnPreEngineRestartHandler on_pre_engine_restart_handler;
   gpointer on_pre_engine_restart_handler_data;
   GDestroyNotify on_pre_engine_restart_handler_destroy_notify;
@@ -284,7 +284,7 @@ static void fl_engine_update_semantics_node_cb(const FlutterSemanticsNode* node,
   }
 }
 
-// Called when the engine is restarted.
+// Called right before the engine is restarted.
 //
 // This method should reset states to as if the engine has just been started,
 // which usually indicates the user has requested a hot restart (Shift-R in the

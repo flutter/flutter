@@ -102,7 +102,7 @@ static void fl_view_init_keyboard(FlView* self) {
       FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger)));
 }
 
-// Called when the engine is restarted.
+// Invoked by the engine right before the engine is restarted.
 //
 // This method should reset states to be as if the engine had just been started,
 // which usually indicates the user has requested a hot restart (Shift-R in the
