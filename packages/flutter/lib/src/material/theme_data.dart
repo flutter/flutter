@@ -466,8 +466,6 @@ class ThemeData with Diagnosticable {
       disabledColor: disabledColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
-      highlightColor: highlightColor,
-      splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
     cardTheme ??= const CardTheme();
