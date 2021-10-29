@@ -19,6 +19,7 @@ import android.view.Display;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.tracing.Trace;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
@@ -136,51 +137,63 @@ public class FlutterLoader {
       throw new IllegalStateException("startInitialization must be called on the main thread");
     }
 
-    // Ensure that the context is actually the application context.
-    final Context appContext = applicationContext.getApplicationContext();
+    Trace.beginSection("FlutterLoader#startInitialization");
 
-    this.settings = settings;
+    try {
+      // Ensure that the context is actually the application context.
+      final Context appContext = applicationContext.getApplicationContext();
 
-    initStartTimestampMillis = SystemClock.uptimeMillis();
-    flutterApplicationInfo = ApplicationInfoLoader.load(appContext);
+      this.settings = settings;
 
-    float fps;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      final DisplayManager dm = appContext.getSystemService(DisplayManager.class);
-      final Display primaryDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
-      fps = primaryDisplay.getRefreshRate();
-    } else {
-      fps =
-          ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
-              .getDefaultDisplay()
-              .getRefreshRate();
-    }
-    VsyncWaiter.getInstance(fps).init();
+      initStartTimestampMillis = SystemClock.uptimeMillis();
+      flutterApplicationInfo = ApplicationInfoLoader.load(appContext);
 
-    // Use a background thread for initialization tasks that require disk access.
-    Callable<InitResult> initTask =
-        new Callable<InitResult>() {
-          @Override
-          public InitResult call() {
-            ResourceExtractor resourceExtractor = initResources(appContext);
+      float fps;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        final DisplayManager dm = appContext.getSystemService(DisplayManager.class);
+        final Display primaryDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        fps = primaryDisplay.getRefreshRate();
+      } else {
+        fps =
+            ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay()
+                .getRefreshRate();
+      }
+      VsyncWaiter.getInstance(fps).init();
 
-            flutterJNI.loadLibrary();
+      // Use a background thread for initialization tasks that require disk access.
+      Callable<InitResult> initTask =
+          new Callable<InitResult>() {
+            @Override
+            public InitResult call() {
+              Trace.beginSection("FlutterLoader initTask");
 
-            // Prefetch the default font manager as soon as possible on a background thread.
-            // It helps to reduce time cost of engine setup that blocks the platform thread.
-            executorService.execute(() -> flutterJNI.prefetchDefaultFontManager());
+              try {
+                ResourceExtractor resourceExtractor = initResources(appContext);
 
-            if (resourceExtractor != null) {
-              resourceExtractor.waitForCompletion();
+                flutterJNI.loadLibrary();
+
+                // Prefetch the default font manager as soon as possible on a background thread.
+                // It helps to reduce time cost of engine setup that blocks the platform thread.
+                executorService.execute(() -> flutterJNI.prefetchDefaultFontManager());
+
+                if (resourceExtractor != null) {
+                  resourceExtractor.waitForCompletion();
+                }
+
+                return new InitResult(
+                    PathUtils.getFilesDir(appContext),
+                    PathUtils.getCacheDirectory(appContext),
+                    PathUtils.getDataDirectory(appContext));
+              } finally {
+                Trace.endSection();
+              }
             }
-
-            return new InitResult(
-                PathUtils.getFilesDir(appContext),
-                PathUtils.getCacheDirectory(appContext),
-                PathUtils.getDataDirectory(appContext));
-          }
-        };
-    initResultFuture = executorService.submit(initTask);
+          };
+      initResultFuture = executorService.submit(initTask);
+    } finally {
+      Trace.endSection();
+    }
   }
 
   /**
@@ -204,6 +217,8 @@ public class FlutterLoader {
       throw new IllegalStateException(
           "ensureInitializationComplete must be called after startInitialization");
     }
+    Trace.beginSection("FlutterLoader#ensureInitializationComplete");
+
     try {
       InitResult result = initResultFuture.get();
 
@@ -298,6 +313,8 @@ public class FlutterLoader {
     } catch (Exception e) {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
+    } finally {
+      Trace.endSection();
     }
   }
 
