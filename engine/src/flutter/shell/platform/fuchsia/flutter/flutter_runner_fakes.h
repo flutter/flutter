@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TOPAZ_RUNTIME_FLUTTER_RUNNER_PLATFORM_VIEW_FAKES_H_
-#define TOPAZ_RUNTIME_FLUTTER_RUNNER_PLATFORM_VIEW_FAKES_H_
+#ifndef SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
+#define SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
 
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 
@@ -118,4 +118,4 @@ class MockSemanticsManager
 
 }  // namespace flutter_runner_test
 
-#endif  // TOPAZ_RUNTIME_FLUTTER_RUNNER_PLATFORM_VIEW_FAKES_H_
+#endif  // SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
