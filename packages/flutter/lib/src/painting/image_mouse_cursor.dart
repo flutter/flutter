@@ -56,7 +56,7 @@ class ImageMouseCursorSession extends MouseCursorSession {
         stream.removeListener(streamListener);
         late final ParsedImage image;
         try {
-          final Uint8List byteArray = Uint8List.sublistView((await info.image.toByteData())!);
+          final Uint8List byteArray = Uint8List.sublistView((await info.image.toByteData(format: ui.ImageByteFormat.rawStraightRgba))!);
           image = ParsedImage(
             byteArray,
             info.image.width,
