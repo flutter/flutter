@@ -94,8 +94,7 @@ void main() {
 
   testWithoutContext(
       'correctly parse sample result json when there are issues.', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonWithIssues);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonWithIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 2);
     expect(result.issues.first.type, 'Semantic Issue');
@@ -109,8 +108,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json when no issues.',
       () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonNoIssues);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonNoIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
     expect(result.parseSuccess, isTrue);
@@ -175,8 +173,7 @@ void main() {
   });
 
   testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonEmptyActionsMap);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonEmptyActionsMap);
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
@@ -186,8 +183,7 @@ void main() {
   });
 
   testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonInvalidActionMap);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidActionMap);
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
@@ -197,8 +193,7 @@ void main() {
   });
 
   testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonInvalidBuildResultMap);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidBuildResultMap);
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
@@ -208,8 +203,7 @@ void main() {
   });
 
   testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: _sampleResultJsonInvalidIssuesMap);
+    final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonInvalidIssuesMap);
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);

@@ -104,8 +104,7 @@ class XCResult {
       return XCResult.failed(
           errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
-    List<XCResultIssue> _parseIssuesFromIssueSummariesJson(
-        Map<String, Object?> issueSummariesJson) {
+    List<XCResultIssue> _parseIssuesFromIssueSummariesJson(Map<String, Object?> issueSummariesJson) {
       final List<XCResultIssue> issues = <XCResultIssue>[];
       final Object? errorsList = issueSummariesJson['_values'];
       if (errorsList is List<Object?>) {
