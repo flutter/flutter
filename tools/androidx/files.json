@@ -49,5 +49,13 @@
       "androidx.annotation.UiThread",
       "androidx.annotation.VisibleForTesting"
     ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/tracing/tracing/1.0.0/tracing-1.0.0.aar",
+    "out_file_name": "androidx_tracing.aar",
+    "maven_dependency": "androidx.tracing:tracing:1.0.0",
+    "provides": [
+      "androidx.tracing.Trace"
+    ]
   }
 ]
