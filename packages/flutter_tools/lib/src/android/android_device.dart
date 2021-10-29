@@ -124,16 +124,16 @@ class AndroidDevice extends Device {
 
   @override
   late final Future<bool> isLocalEmulator = () async {
-      final String? hardware = await _getProperty('ro.hardware');
-      _logger.printTrace('ro.hardware = $hardware');
-      if (kKnownHardware.containsKey(hardware)) {
-        // Look for known hardware models.
-        return kKnownHardware[hardware] == HardwareType.emulator;
-      }
-      // Fall back to a best-effort heuristic-based approach.
-      final String? characteristics = await _getProperty('ro.build.characteristics');
-      _logger.printTrace('ro.build.characteristics = $characteristics');
-      return characteristics != null && characteristics.contains('emulator');
+    final String? hardware = await _getProperty('ro.hardware');
+    _logger.printTrace('ro.hardware = $hardware');
+    if (kKnownHardware.containsKey(hardware)) {
+      // Look for known hardware models.
+      return kKnownHardware[hardware] == HardwareType.emulator;
+    }
+    // Fall back to a best-effort heuristic-based approach.
+    final String? characteristics = await _getProperty('ro.build.characteristics');
+    _logger.printTrace('ro.build.characteristics = $characteristics');
+    return characteristics != null && characteristics.contains('emulator');
   }();
 
   /// The unique identifier for the emulator that corresponds to this device, or
@@ -744,7 +744,7 @@ class AndroidDevice extends Device {
   Future<MemoryInfo> queryMemoryInfo() async {
     final AndroidApk? package = _package;
     if (package == null) {
-      _logger.printTrace('Android package unknown, skipping dumpsys meminfo.');
+      _logger.printError('Android package unknown, skipping dumpsys meminfo.');
       return const MemoryInfo.empty();
     }
     final RunResult runResult = await _processUtils.run(adbCommandForDevice(<String>[
@@ -1147,7 +1147,7 @@ class AdbLogReader extends DeviceLogReader {
 
           line = fatalMatch[1]!;
 
-          if (_tombstoneTerminator.hasMatch(fatalMatch[1]!)) {
+          if (_tombstoneTerminator.hasMatch(line)) {
             // Hit crash terminator, stop logging the crash info
             _fatalCrash = false;
           }
