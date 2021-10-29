@@ -126,7 +126,10 @@ class AnalyzeOnce extends AnalyzeBase {
       unawaited(server.onExit.then<void>((int exitCode) {
         if (!analysisCompleter.isCompleted) {
           analysisCompleter.completeError(
-            Exception('analysis server exited: $exitCode'),
+            // Include the last 20 lines of server output in exception message
+            Exception(
+              'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+            ),
           );
         }
       }));

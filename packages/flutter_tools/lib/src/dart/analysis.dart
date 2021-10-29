@@ -95,7 +95,21 @@ class AnalysisServer {
   }
 
   final List<String> _logs = <String>[];
-  String get logs => _logs.join('\n');
+
+  /// Aggregated STDOUT and STDERR logs from the server.
+  ///
+  /// This can be surfaced to the user if the server crashes. If [tail] is null,
+  /// returns all logs, else only the last [tail] lines.
+  String getLogs([int? tail]) {
+    if (tail == null) {
+      return _logs.join('\n');
+    }
+    // Since List doesn't implement a .tail() method, we reverse it then use
+    // .take()
+    final Iterable<String> reversedLogs = _logs.reversed;
+    final List<String> firstTailLogs = reversedLogs.take(tail).toList();
+    return firstTailLogs.reversed.join('\n');
+  }
 
   void _handleError(String message) {
     _logs.add('[stderr] $message');

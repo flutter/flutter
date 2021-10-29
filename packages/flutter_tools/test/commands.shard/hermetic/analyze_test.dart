@@ -22,6 +22,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String _kFlutterRoot = '/data/flutter';
+const int SIGABRT = -6;
 
 void main() {
   testWithoutContext('analyze generate correct errors message', () async {
@@ -82,7 +83,7 @@ void main() {
     });
 
     testUsingContext('SIGABRT throws Exception', () async {
-      const int SIGABRT = -6;
+      const String stderr = 'Something bad happened!';
       processManager.addCommands(
         <FakeCommand>[
           const FakeCommand(
@@ -97,6 +98,7 @@ void main() {
               'HostArtifact.engineDartSdkPath',
             ],
             exitCode: SIGABRT,
+            stderr: stderr,
           ),
         ],
       );
@@ -106,7 +108,7 @@ void main() {
           isA<Exception>().having(
             (Exception e) => e.toString(),
             'description',
-            contains('analysis server exited: $SIGABRT'),
+            contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
           ),
         ),
       );
