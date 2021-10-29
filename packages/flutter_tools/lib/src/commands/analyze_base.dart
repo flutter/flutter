@@ -283,12 +283,6 @@ class PackageDependencyTracker {
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    for (final String package in packages.keys) {
-      final String? target = packages[package]?.target;
-      if (target != null) {
-        result[package] = target;
-      }
-    }
     packages.forEach((String package, PackageDependency dependency) {
       result[package] = dependency.target;
     });
