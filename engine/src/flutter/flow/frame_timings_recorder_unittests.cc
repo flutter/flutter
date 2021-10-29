@@ -91,10 +91,10 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimesWithCache) {
   using namespace std::chrono_literals;
 
   MockRasterCache cache(1, 10);
-  cache.SweepAfterFrame();
+  cache.PrepareNewFrame();
 
   const auto raster_start = fml::TimePoint::Now();
-  recorder->RecordRasterStart(raster_start, &cache);
+  recorder->RecordRasterStart(raster_start);
 
   cache.AddMockLayer(100, 100);
   size_t layer_bytes = cache.EstimateLayerCacheByteSize();
@@ -102,6 +102,8 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimesWithCache) {
   cache.AddMockPicture(100, 100);
   size_t picture_bytes = cache.EstimatePictureCacheByteSize();
   EXPECT_GT(picture_bytes, 0u);
+
+  cache.CleanupAfterFrame();
 
   const auto before_raster_end_wall_time = fml::TimePoint::CurrentWallTime();
   std::this_thread::sleep_for(1ms);
@@ -122,32 +124,6 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimesWithCache) {
 // Windows and Fuchsia don't allow testing with killed by signal.
 #if !defined(OS_FUCHSIA) && !defined(OS_WIN) && \
     (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
-
-TEST(FrameTimingsRecorderTest, ThrowAfterUnexpectedCacheSweep) {
-  auto recorder = std::make_unique<FrameTimingsRecorder>();
-
-  const auto st = fml::TimePoint::Now();
-  const auto en = st + fml::TimeDelta::FromMillisecondsF(16);
-  recorder->RecordVsync(st, en);
-
-  const auto build_start = fml::TimePoint::Now();
-  const auto build_end = build_start + fml::TimeDelta::FromMillisecondsF(16);
-  recorder->RecordBuildStart(build_start);
-  recorder->RecordBuildEnd(build_end);
-
-  using namespace std::chrono_literals;
-
-  MockRasterCache cache;
-
-  const auto raster_start = fml::TimePoint::Now();
-  recorder->RecordRasterStart(raster_start, &cache);
-  std::this_thread::sleep_for(1ms);
-  cache.SweepAfterFrame();
-  EXPECT_EXIT(recorder->RecordRasterEnd(&cache),
-              ::testing::KilledBySignal(SIGABRT),
-              "Check failed: sweep_count_at_raster_start_ == \\(cache \\? "
-              "cache->sweep_count\\(\\) : -1\\).");
-}
 
 TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
@@ -276,13 +252,13 @@ TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEnd) {
 TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEndWithCache) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
   MockRasterCache cache(1, 10);
-  cache.SweepAfterFrame();
+  cache.PrepareNewFrame();
 
   const auto now = fml::TimePoint::Now();
   recorder->RecordVsync(now, now + fml::TimeDelta::FromMilliseconds(16));
   recorder->RecordBuildStart(fml::TimePoint::Now());
   recorder->RecordBuildEnd(fml::TimePoint::Now());
-  recorder->RecordRasterStart(fml::TimePoint::Now(), &cache);
+  recorder->RecordRasterStart(fml::TimePoint::Now());
 
   cache.AddMockLayer(100, 100);
   size_t layer_bytes = cache.EstimateLayerCacheByteSize();
@@ -291,6 +267,7 @@ TEST(FrameTimingsRecorderTest, ClonedHasSameRasterEndWithCache) {
   size_t picture_bytes = cache.EstimatePictureCacheByteSize();
   EXPECT_GT(picture_bytes, 0u);
 
+  cache.CleanupAfterFrame();
   recorder->RecordRasterEnd(&cache);
 
   auto cloned = recorder->CloneUntil(FrameTimingsRecorder::State::kRasterEnd);
