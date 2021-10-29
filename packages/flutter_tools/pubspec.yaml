@@ -24,13 +24,13 @@ dependencies:
   multicast_dns: 0.3.2
   mustache_template: 2.0.0
   package_config: 2.0.2
-  process: 4.2.4
+  process: 4.2.3
   fake_async: 1.2.0
   stack_trace: 1.10.0
   usage: 4.0.2
   webdriver: 3.0.0
   webkit_inspection_protocol: 1.0.0
-  xml: 5.3.1
+  xml: 5.3.0
   yaml: 3.1.0
   native_stack_traces: 0.4.5
   shelf: 1.1.4
