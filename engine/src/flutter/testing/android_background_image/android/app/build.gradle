@@ -45,4 +45,5 @@ dependencies {
     implementation files(project.property('flutter_jar'))
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01'
+    implementation 'androidx.tracing:tracing:1.0.0'
 }
