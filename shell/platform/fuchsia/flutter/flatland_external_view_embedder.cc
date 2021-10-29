@@ -11,10 +11,7 @@
 
 namespace flutter_runner {
 
-constexpr uint32_t kFlatlandDefaultViewportSize = 32;
-
 FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
-    std::string debug_label,
     fuchsia::ui::views::ViewCreationToken view_creation_token,
     fuchsia::ui::views::ViewIdentityOnCreation view_identity,
     fuchsia::ui::composition::ViewBoundProtocols view_protocols,

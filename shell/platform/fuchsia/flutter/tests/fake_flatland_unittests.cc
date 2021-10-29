@@ -32,10 +32,10 @@ class FakeFlatlandTest : public ::testing::Test {
   FakeFlatland& fake_flatland() { return fake_flatland_; }
 
   fuchsia::ui::composition::FlatlandPtr ConnectFlatland() {
-    FML_CHECK(!fake_flatland_.is_bound());
+    FML_CHECK(!fake_flatland_.is_flatland_connected());
 
     auto flatland_handle =
-        fake_flatland_.Connect(flatland_subloop_->dispatcher());
+        fake_flatland_.ConnectFlatland(flatland_subloop_->dispatcher());
     return flatland_handle.Bind();
   }
 

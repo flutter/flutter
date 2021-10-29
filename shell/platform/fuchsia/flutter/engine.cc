@@ -257,10 +257,10 @@ void Engine::Initialize(
               .view_ref_control = std::move(view_ref_pair.control_ref)};
           flatland_view_embedder_ =
               std::make_shared<FlatlandExternalViewEmbedder>(
-                  thread_label_, std::move(view_creation_token),
-                  std::move(view_identity), std::move(flatland_view_protocols),
-                  std::move(request), *flatland_connection_.get(),
-                  surface_producer_.value(), intercept_all_input_);
+                  std::move(view_creation_token), std::move(view_identity),
+                  std::move(flatland_view_protocols), std::move(request),
+                  *flatland_connection_.get(), surface_producer_.value(),
+                  intercept_all_input_);
         } else {
           session_connection_ = std::make_shared<GfxSessionConnection>(
               thread_label_, std::move(session_inspect_node),

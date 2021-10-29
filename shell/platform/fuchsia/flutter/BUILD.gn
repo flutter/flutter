@@ -480,6 +480,7 @@ executable("flutter_runner_unittests") {
     "tests/fake_flatland_unittests.cc",
     "tests/fake_session_unittests.cc",
     "tests/flatland_connection_unittests.cc",
+    "tests/flatland_external_view_embedder_unittests.cc",
     "tests/flutter_runner_product_configuration_unittests.cc",
     "tests/gfx_external_view_embedder_unittests.cc",
     "tests/gfx_session_connection_unittests.cc",

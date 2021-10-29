@@ -44,8 +44,9 @@ using FlatlandViewIdCallback =
 class FlatlandExternalViewEmbedder final
     : public flutter::ExternalViewEmbedder {
  public:
+  constexpr static uint32_t kFlatlandDefaultViewportSize = 32;
+
   FlatlandExternalViewEmbedder(
-      std::string debug_label,
       fuchsia::ui::views::ViewCreationToken view_creation_token,
       fuchsia::ui::views::ViewIdentityOnCreation view_identity,
       fuchsia::ui::composition::ViewBoundProtocols endpoints,
