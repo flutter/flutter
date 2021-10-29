@@ -41,6 +41,7 @@ android {
 
   dependencies {
     embedding "androidx.annotation:annotation:1.1.0"
+    embedding "androidx.core:core:1.6.0"
     embedding "androidx.fragment:fragment:1.1.0"
     embedding "androidx.tracing:tracing:1.0.0"
 

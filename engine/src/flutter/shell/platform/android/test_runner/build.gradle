@@ -37,6 +37,7 @@ android {
   dependencies {
     testImplementation files(project.property("flutter_jar"))
     testImplementation "androidx.annotation:annotation:1.1.0"
+    testImplementation "androidx.core:core:1.6.0"
     testImplementation "androidx.fragment:fragment:1.1.0"
     testImplementation "androidx.lifecycle:lifecycle-runtime:2.2.0"
     testImplementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
