@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <hb-subset.h>
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -59,16 +58,12 @@ struct HarfBuzzSubset {
     // The prior version of harfbuzz automatically dropped layout tables,
     // but in the new version they are kept by default. So re-add them to the
     // drop list to retain the same behaviour.
-
-    hb_set_add(
-        hb_subset_input_set(input, 3 /* HB_SUBSET_SETS_DROP_TABLE_TAG */),
-        HB_TAG('G', 'S', 'U', 'B'));
-    hb_set_add(
-        hb_subset_input_set(input, 3 /* HB_SUBSET_SETS_DROP_TABLE_TAG */),
-        HB_TAG('G', 'P', 'O', 'S'));
-    hb_set_add(
-        hb_subset_input_set(input, 3 /* HB_SUBSET_SETS_DROP_TABLE_TAG */),
-        HB_TAG('G', 'D', 'E', 'F'));
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'S', 'U', 'B'));
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'P', 'O', 'S'));
+    hb_set_add(hb_subset_input_drop_tables_set(input),
+               HB_TAG('G', 'D', 'E', 'F'));
 
     return HarfbuzzWrappers::HbFacePtr(hb_subset_or_fail(face, input));
   }
