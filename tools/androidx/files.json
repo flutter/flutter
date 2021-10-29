@@ -57,5 +57,13 @@
     "provides": [
       "androidx.tracing.Trace"
     ]
+  },
+  {
+    "url": "https://dl.google.com/android/maven2/androidx/core/core/1.6.0/core-1.6.0.aar",
+    "out_file_name": "androidx_core.aar",
+    "maven_dependency": "androidx.core:core:1.6.0",
+    "provides": [
+      "androidx.core.view.WindowInsetsControllerCompat"
+    ]
   }
 ]
