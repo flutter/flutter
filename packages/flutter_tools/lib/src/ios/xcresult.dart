@@ -174,9 +174,10 @@ class XCResultIssue {
   /// Construct an `XCResultIssue` object from `issueJson`.
   ///
   /// `issueJson` is the object at xcresultJson[['actions']['_values'][0]['buildResult']['issues']['errorSummaries'/'warningSummaries']['_values'].
-  factory XCResultIssue(
-      {required XCResultIssueType type,
-      required Map<String, Object?> issueJson}) {
+  factory XCResultIssue({
+    required XCResultIssueType type,
+    required Map<String, Object?> issueJson,
+  }) {
     final Object? issueSubTypeMap = issueJson['issueType'];
     String subType = '';
     if (issueSubTypeMap is Map<String, Object?>) {
