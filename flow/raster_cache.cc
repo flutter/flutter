@@ -380,20 +380,26 @@ bool RasterCache::Draw(const Layer* layer,
   return false;
 }
 
-void RasterCache::SweepAfterFrame() {
-  TraceStatsToTimeline();
-  SweepOneCacheAfterFrame(picture_cache_);
-  SweepOneCacheAfterFrame(display_list_cache_);
-  SweepOneCacheAfterFrame(layer_cache_);
+void RasterCache::PrepareNewFrame() {
   picture_cached_this_frame_ = 0;
   display_list_cached_this_frame_ = 0;
-  sweep_count_++;
+}
+
+void RasterCache::CleanupAfterFrame() {
+  picture_metrics_ = {};
+  layer_metrics_ = {};
+  SweepOneCacheAfterFrame(picture_cache_, picture_metrics_);
+  SweepOneCacheAfterFrame(display_list_cache_, picture_metrics_);
+  SweepOneCacheAfterFrame(layer_cache_, layer_metrics_);
+  TraceStatsToTimeline();
 }
 
 void RasterCache::Clear() {
   picture_cache_.clear();
   display_list_cache_.clear();
   layer_cache_.clear();
+  picture_metrics_ = {};
+  layer_metrics_ = {};
 }
 
 size_t RasterCache::GetCachedEntriesCount() const {
@@ -426,10 +432,10 @@ void RasterCache::TraceStatsToTimeline() const {
   FML_TRACE_COUNTER(
       "flutter",                                                           //
       "RasterCache", reinterpret_cast<int64_t>(this),                      //
-      "LayerCount", GetLayerCachedEntriesCount(),                          //
-      "LayerMBytes", EstimateLayerCacheByteSize() / kMegaByteSizeInBytes,  //
-      "PictureCount", GetPictureCachedEntriesCount(),                      //
-      "PictureMBytes", EstimatePictureCacheByteSize() / kMegaByteSizeInBytes);
+      "LayerCount", layer_metrics_.total_count(),                          //
+      "LayerMBytes", layer_metrics_.total_bytes() / kMegaByteSizeInBytes,  //
+      "PictureCount", picture_metrics_.total_count(),                      //
+      "PictureMBytes", picture_metrics_.total_bytes() / kMegaByteSizeInBytes);
 
 #endif  // !FLUTTER_RELEASE
 }

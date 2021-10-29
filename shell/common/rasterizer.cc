@@ -147,8 +147,6 @@ void Rasterizer::DrawLastLayerTree(
   if (!last_layer_tree_ || !surface_) {
     return;
   }
-  frame_timings_recorder->RecordRasterStart(
-      fml::TimePoint::Now(), &compositor_context_->raster_cache());
   DrawToSurface(*frame_timings_recorder, *last_layer_tree_);
 }
 
@@ -381,9 +379,6 @@ RasterStatus Rasterizer::DoDraw(
     return RasterStatus::kFailed;
   }
 
-  frame_timings_recorder->RecordRasterStart(
-      fml::TimePoint::Now(), &compositor_context_->raster_cache());
-
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   persistent_cache->ResetStoredNewShaders();
 
@@ -541,6 +536,9 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       raster_thread_merger_           // thread merger
   );
   if (compositor_frame) {
+    compositor_context_->raster_cache().PrepareNewFrame();
+    frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
+
     RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
     if (raster_status == RasterStatus::kFailed ||
         raster_status == RasterStatus::kSkipAndRetry) {
@@ -555,6 +553,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       frame->Submit();
     }
 
+    compositor_context_->raster_cache().CleanupAfterFrame();
     frame_timings_recorder.RecordRasterEnd(
         &compositor_context_->raster_cache());
     FireNextFrameCallbackIfPresent();

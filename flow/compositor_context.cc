@@ -24,7 +24,6 @@ void CompositorContext::BeginFrame(ScopedFrame& frame,
 
 void CompositorContext::EndFrame(ScopedFrame& frame,
                                  bool enable_instrumentation) {
-  raster_cache_.SweepAfterFrame();
   if (enable_instrumentation) {
     raster_time_.Stop();
   }

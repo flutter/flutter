@@ -93,8 +93,7 @@ class FrameTimingsRecorder {
   void RecordBuildEnd(fml::TimePoint build_end);
 
   /// Records a raster start event.
-  void RecordRasterStart(fml::TimePoint raster_start,
-                         const RasterCache* cache = nullptr);
+  void RecordRasterStart(fml::TimePoint raster_start);
 
   /// Clones the recorder until (and including) the specified state.
   std::unique_ptr<FrameTimingsRecorder> CloneUntil(State state);
@@ -131,7 +130,6 @@ class FrameTimingsRecorder {
   fml::TimePoint raster_end_;
   fml::TimePoint raster_end_wall_time_;
 
-  int sweep_count_at_raster_start_;
   size_t layer_cache_count_;
   size_t layer_cache_bytes_;
   size_t picture_cache_count_;
