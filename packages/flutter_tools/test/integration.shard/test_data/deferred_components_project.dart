@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../src/common.dart';
 import 'deferred_components_config.dart';
 import 'project.dart';
@@ -84,7 +82,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get deferredComponentsGolden => r'''
+  String? get deferredComponentsGolden => r'''
   loading-units:
     - id: 2
       libraries:
@@ -604,7 +602,7 @@ class NoAndroidDynamicFeatureModuleDeferredComponentsConfig extends BasicDeferre
 /// Missing golden
 class NoGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
-  String get deferredComponentsGolden => null;
+  String? get deferredComponentsGolden => null;
 }
 
 /// Missing golden
