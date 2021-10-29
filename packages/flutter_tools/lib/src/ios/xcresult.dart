@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show json;
-
 import '../../src/base/process.dart';
+import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
 import '../convert.dart';
 
