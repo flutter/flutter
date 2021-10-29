@@ -6,6 +6,7 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_host_bundle.gni")
 
@@ -84,8 +85,10 @@ group("fuchsia") {
   ]
 }
 
-group("tests") {
-  testonly = true
+if (enable_unittests) {
+  group("tests") {
+    testonly = true
 
-  deps = [ "flutter:tests" ]
+    deps = [ "flutter:tests" ]
+  }
 }

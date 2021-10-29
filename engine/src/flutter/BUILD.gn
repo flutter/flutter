@@ -227,7 +227,7 @@ group("dist") {
   deps = [ "//flutter/sky/dist" ]
 }
 
-if (is_fuchsia) {
+if (is_fuchsia && enable_unittests) {
   group("fuchsia_tests") {
     testonly = true
 
