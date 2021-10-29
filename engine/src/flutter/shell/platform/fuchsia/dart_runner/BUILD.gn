@@ -144,7 +144,7 @@ template("aot_runner_package") {
         "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
 
         # TODO(kaushikiska): Figure out how to get the profiler symbols for `libdart_precompiled_runtime`
-        # "//topaz/runtime/dart/profiler_symbols:libdart_precompiled_runtime",
+        # "//third_party/dart/runtime:libdart_precompiled_runtime",
         observatory_target,
       ]
     }
