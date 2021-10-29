@@ -15,87 +15,6 @@ import 'package:flutter/services.dart';
 import 'image_provider.dart';
 import 'image_resolution.dart';
 
-typedef _ImageListener = void Function(ImageInfo? image);
-
-// Loads the first frame of the given image and dispatch to the added listeners.
-//
-// All later frames of a multi-frame image are discarded, because few platforms
-// support animating mouse cursors.
-class _SingleImagePromise {
-  // Creates a _SingleImagePromise and starts loading an image.
-  _SingleImagePromise(ImageProvider provider)
-      : _provider = provider,
-        _stream = provider.resolve(ImageConfiguration.empty),
-        _listeners = <_ImageListener>[],
-        _error = false {
-    _streamListener = ImageStreamListener(
-      _handleImage,
-      onError: _handleError,
-    );
-    _stream.addListener(_streamListener);
-  }
-
-  // Add a listener that will be called once with the result.
-  //
-  // If the result is ready, the listener will be called immediately.
-  // Otherwise, it will be called when it's ready.
-  //
-  // A listener will be and only be called once. If an error occured during
-  // loading, the result will be null. Otherwise, the result is never null.
-  void addListener(_ImageListener listener) {
-    if (_error) {
-      listener(null);
-    } else if (_info != null) {
-      listener(_info);
-    } else {
-      _listeners.add(listener);
-    }
-  }
-
-  void dispose() {
-    _stream.removeListener(_streamListener);
-    _info?.dispose();
-  }
-
-  void _handleImage(ImageInfo image, bool synchronousCall) {
-    _stream.removeListener(_streamListener);
-    assert(!_error);
-    _info = image;
-    _listeners
-      ..forEach((_ImageListener listener) { listener(_info); })
-      ..clear();
-  }
-
-  void _handleError(Object exception, StackTrace? stack) {
-    _stream.removeListener(_streamListener);
-    assert(_info == null);
-    _error = true;
-    InformationCollector? collector;
-    assert(() {
-      collector = () sync* {
-        yield DiagnosticsProperty<ImageProvider>('image', _provider);
-      };
-      return true;
-    }());
-    FlutterError.reportError(FlutterErrorDetails(
-      exception: exception,
-      stack: stack,
-      context: ErrorDescription('while loading an image mouse cursor'),
-      informationCollector: collector,
-    ));
-    _listeners
-      ..forEach((_ImageListener listener) { listener(null); })
-      ..clear();
-  }
-
-  final ImageProvider _provider;
-  final ImageStream _stream;
-  late final ImageStreamListener _streamListener;
-  ImageInfo? _info;
-  bool _error;
-  final List<_ImageListener> _listeners;
-}
-
 class ImageMouseCursorSession extends MouseCursorSession {
   /// TODO
   ImageMouseCursorSession(ImageMouseCursor cursor, int device)
@@ -116,7 +35,7 @@ class ImageMouseCursorSession extends MouseCursorSession {
 
     if (manager.verifyCurrentCursor(device, cursor)) {
       await SystemChannels.mouseCursor.invokeMethod<int>(
-        'setImageCursor',
+        'activateImageCursor',
         <String, dynamic>{
           'device': device,
           'cursorId': cursorId,
@@ -152,6 +71,7 @@ class ImageMouseCursorSession extends MouseCursorSession {
         completer.completeError(exception, stackTrace);
       },
     );
+    stream.addListener(streamListener);
     return completer.future;
   }
 

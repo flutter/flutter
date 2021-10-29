@@ -275,7 +275,7 @@ class MouseTracker extends ChangeNotifier {
   void _handleDeviceUpdate(_MouseTrackerUpdateDetails details) {
     assert(_debugDuringDeviceUpdate);
     _handleDeviceUpdateMouseEvents(details);
-    _mouseCursorMixin.handleDeviceCursorUpdate(
+    cursorManager.handleDeviceCursorUpdate(
       details.device,
       details.triggeringEvent,
       details.nextAnnotations.keys.map((MouseTrackerAnnotation annotation) => annotation.cursor),
@@ -373,7 +373,7 @@ class MouseTracker extends ChangeNotifier {
   /// it always returns null.
   @visibleForTesting
   MouseCursor? debugDeviceActiveCursor(int device) {
-    return _mouseCursorMixin.debugDeviceActiveCursor(device);
+    return cursorManager.debugDeviceActiveCursor(device);
   }
 
   // Handles device update and dispatches mouse event callbacks.

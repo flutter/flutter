@@ -43,6 +43,7 @@ export 'src/painting/geometry.dart';
 export 'src/painting/gradient.dart';
 export 'src/painting/image_cache.dart';
 export 'src/painting/image_decoder.dart';
+export 'src/painting/image_mouse_cursor.dart';
 export 'src/painting/image_provider.dart';
 export 'src/painting/image_resolution.dart';
 export 'src/painting/image_stream.dart';
