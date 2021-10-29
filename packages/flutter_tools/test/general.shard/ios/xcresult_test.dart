@@ -97,9 +97,11 @@ void main() {
     final XCResultGenerator generator = _setupGenerator(resultJson: _sampleResultJsonWithIssues);
     final XCResult result = await generator.generate();
     expect(result.issues.length, 2);
-    expect(result.issues.first.type, 'Semantic Issue');
+    expect(result.issues.first.type, XCResultIssueType.error);
+    expect(result.issues.first.subType, 'Semantic Issue');
     expect(result.issues.first.message, "Use of undeclared identifier 'asdas'");
-    expect(result.issues.last.type, 'Warning');
+    expect(result.issues.last.type, XCResultIssueType.warning);
+    expect(result.issues.last.subType, 'Warning');
     expect(result.issues.last.message,
         "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.");
     expect(result.parseSuccess, isTrue);

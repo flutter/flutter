@@ -103,7 +103,10 @@ class XCResult {
       return XCResult.failed(
           errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
-    List<XCResultIssue> _parseIssuesFromIssueSummariesJson(Map<String, Object?> issueSummariesJson) {
+    List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
+      required XCResultIssueType type,
+      required Map<String, Object?> issueSummariesJson,
+    }) {
       final List<XCResultIssue> issues = <XCResultIssue>[];
       final Object? errorsList = issueSummariesJson['_values'];
       if (errorsList is List<Object?>) {
@@ -111,7 +114,10 @@ class XCResult {
           if (issueJson == null || issueJson is! Map<String, Object?>) {
             continue;
           }
-          final XCResultIssue resultIssue = XCResultIssue(issueJson: issueJson);
+          final XCResultIssue resultIssue = XCResultIssue(
+            type: type,
+            issueJson: issueJson,
+          );
           issues.add(resultIssue);
         }
       }
@@ -120,12 +126,18 @@ class XCResult {
 
     final Object? errorSummaries = issuesMap['errorSummaries'];
     if (errorSummaries is Map<String, Object?>) {
-      issues.addAll(_parseIssuesFromIssueSummariesJson(errorSummaries));
+      issues.addAll(_parseIssuesFromIssueSummariesJson(
+        type: XCResultIssueType.error,
+        issueSummariesJson: errorSummaries,
+      ));
     }
 
     final Object? warningSummaries = issuesMap['warningSummaries'];
     if (warningSummaries is Map<String, Object?>) {
-      issues.addAll(_parseIssuesFromIssueSummariesJson(warningSummaries));
+      issues.addAll(_parseIssuesFromIssueSummariesJson(
+        type: XCResultIssueType.warning,
+        issueSummariesJson: warningSummaries,
+      ));
     }
     return XCResult._(issues: issues);
   }
@@ -162,13 +174,15 @@ class XCResultIssue {
   /// Construct an `XCResultIssue` object from `issueJson`.
   ///
   /// `issueJson` is the object at xcresultJson[['actions']['_values'][0]['buildResult']['issues']['errorSummaries'/'warningSummaries']['_values'].
-  factory XCResultIssue({required Map<String, Object?> issueJson}) {
-    final Object? issueTypeMap = issueJson['issueType'];
-    String type = '';
-    if (issueTypeMap is Map<String, Object?>) {
-      final Object? typeValue = issueTypeMap['_value'];
-      if (typeValue is String) {
-        type = typeValue;
+  factory XCResultIssue(
+      {required XCResultIssueType type,
+      required Map<String, Object?> issueJson}) {
+    final Object? issueSubTypeMap = issueJson['issueType'];
+    String subType = '';
+    if (issueSubTypeMap is Map<String, Object?>) {
+      final Object? subTypeValue = issueSubTypeMap['_value'];
+      if (subTypeValue is String) {
+        subType = subTypeValue;
       }
     }
 
@@ -183,22 +197,41 @@ class XCResultIssue {
 
     return XCResultIssue._(
       type: type,
+      subType: subType,
       message: message,
     );
   }
 
   XCResultIssue._({
     required this.type,
+    required this.subType,
     required this.message,
   });
 
   /// The type of the issue.
+  final XCResultIssueType type;
+
+  /// The sub type of the issue.
   ///
+  /// This is a more detailed category about the issue.
   /// The possible values are `Warning`, `Semantic Issue'` etc.
-  final String type;
+  final String subType;
 
   /// Human readable message for the issue.
   ///
   /// This can be displayed to user for their information.
   final String message;
+}
+
+/// The type of an `XCResultIssue`.
+enum XCResultIssueType {
+  /// The issue is an warning.
+  ///
+  /// This is for all the issues under the `warningSummaries` key in the xcresult.
+  warning,
+
+  /// The issue is an warning.
+  ///
+  /// This is for all the issues under the `errorSummaries` key in the xcresult.
+  error,
 }
