@@ -355,12 +355,17 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
-        getPluginList().each this.&configurePluginProject
+        boolean canShowCompileSdkWarning = true;
+        getPluginList().each { plugin ->
+            String pluginName = plugin.key
+            this.&configurePluginProject(pluginName, canShowCompileSdkWarning)
+            if (canShowCompileSdkWarning) canShowCompileSdkWarning = false;
+        }
         getPluginDependencies().each this.&configurePluginDependencies
     }
 
     /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(String pluginName, String _) {
+    private void configurePluginProject(String pluginName, boolean canShowCompileSdkWarning) {
         Project pluginProject = project.rootProject.findProject(":$pluginName")
         if (pluginProject == null) {
             project.logger.error("Plugin project :$pluginName not found. Please update settings.gradle.")
@@ -397,13 +402,45 @@ class FlutterPlugin implements Plugin<Project> {
               "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
+        boolean test = false;
+        if (canShowCompileSdkWarning) {
+            test = true;
+        }
+
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
                 project.logger.error("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+                if (test) {
+                    project.logger.quiet("Fix this issue by adding the following to ${pluginProject.android.compileSdkVersion}:\nandroid {\n'          compileSdkVersion ${compileSdkVersionMatch?.group(2)}\n          ...\n        }\nNote: Other plugins may require a higher version than this; check warnings below.\nNote: Further updates may be needed to comply with this SDK version.\n");
+                }
             }
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
+    }
+
+    private void detectLowCompileSdkVersion() {
+        String maxPluginCompileSdkVersion = 'android-1' //TODO: change to int (all around not just here...)
+        boolean firstWarning = true //For experimentation purposes
+        getPluginList().each { plugin ->
+            Project pluginProject = project.rootProject.findProject(plugin.key)
+            pluginProject.afterEvaluate {
+            if (pluginProject.android.compileSdkVersion > maxPluginCompileSdkVersion) { // will change to max function
+                maxPluginCompileSdkVersion = pluginProject.android.compileSdkVersion
+                if (firstWarning) {
+                    project.logger.error("Could put fix only for first plugin here")
+                    firstWarning = false
+                }
+            }
+        }
+
+        project.afterEvaluate {
+            if (maxPluginCompileSdkVersion > project.android.compileSdkVersion) {
+                project.logger.error("This will never be true because it runs before mapping over plugins list finishes")
+            }
+        }
+
+        }  
     }
 
     /**
@@ -936,6 +973,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             configurePlugins()
+            detectLowCompileSdkVersion()
             return
         }
         // Flutter host module project (Add-to-app).
@@ -987,6 +1025,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         configurePlugins()
+        detectLowCompileSdkVersion()
     }
 }
 
