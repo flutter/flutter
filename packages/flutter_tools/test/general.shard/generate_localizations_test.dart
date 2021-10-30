@@ -2345,7 +2345,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'${six}m'));
       expect(localizationsFile, contains(r'$seven'));
       expect(localizationsFile, contains(r'$eight'));
-      expect(localizationsFile, contains(r'${nine}'));
+      expect(localizationsFile, contains(r'$nine'));
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
