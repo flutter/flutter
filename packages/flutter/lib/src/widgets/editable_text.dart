@@ -472,7 +472,7 @@ class EditableText extends StatefulWidget {
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
+       assert(obscureText != null || obscureTextBehavior != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
