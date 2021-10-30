@@ -1264,9 +1264,9 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scaleX` and `scaleY` provide the scalars to multply the `x` and `y` axes.
+  /// The `scaleX` and `scaleY` provide the scalars to multiply the `x` and `y` axes.
   ///
-  /// If `scale` is set then it overrides `scaleX` and `scaleY` and the child is scaled uniformly.
+  /// The `scale` provides the scalar to multiply both `x` and `y` axes and scales the child uniformly.
   ///
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
