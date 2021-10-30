@@ -658,7 +658,7 @@ void main() {
       "gender": {}
     }
   },
-  
+
   "selectWithPlaceholder": "Indeed, {gender, select, male {he likes {preference}} female {she likes {preference}} other {they like {preference}}}!",
   "@selectWithPlaceholder": {
     "description": "A select message with prefix, suffix strings, and a placeholder.",
