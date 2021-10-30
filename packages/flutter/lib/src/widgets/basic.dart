@@ -1295,15 +1295,16 @@ class Transform extends SingleChildRenderObjectWidget {
   Transform.scale({
     Key? key,
     double? scale,
-    double scaleX = 1.0,
-    double scaleY = 1.0,
+    double? scaleX,
+    double? scaleY,
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
     this.filterQuality,
     Widget? child,
-  })  : transform =
-            Matrix4.diagonal3Values(scale ?? scaleX, scale ?? scaleY, 1.0),
+  })  : assert(!(scale == null && scaleX == null && scaleY == null), "In Transform.Scale, You have to at least provide 'scale' or both of 'scaleX' and 'scaleY'"),
+        assert(scale == null || (scaleX == null && scaleY == null), "In Transform.Scale, you should either provide 'scale' or both of 'scaleX' and 'scaleY' but not all three"),
+        transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0),
         super(key: key, child: child);
 
   /// The matrix to transform the child by during painting.
