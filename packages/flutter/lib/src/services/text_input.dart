@@ -483,7 +483,7 @@ class TextInputConfiguration {
     this.enableIMEPersonalizedLearning = true,
   }) : assert(inputType != null),
 
-        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
+        assert(obscureText != null || obscureTextBehavior != null),
        smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
@@ -647,6 +647,7 @@ class TextInputConfiguration {
     TextInputType? inputType,
     bool? readOnly,
     bool? obscureText,
+    ObscureTextBehavior? obscureTextBehavior,
     bool? autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -662,6 +663,7 @@ class TextInputConfiguration {
       inputType: inputType ?? this.inputType,
       readOnly: readOnly ?? this.readOnly,
       obscureText: obscureText ?? this.obscureText,
+      obscureTextBehavior: obscureTextBehavior ?? this.obscureTextBehavior,
       autocorrect: autocorrect ?? this.autocorrect,
       smartDashesType: smartDashesType ?? this.smartDashesType,
       smartQuotesType: smartQuotesType ?? this.smartQuotesType,
@@ -680,7 +682,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
-      'obscureTextBehavior': obscureTextBehavior,
+      'obscureTextBehavior': obscureTextBehavior.index.toString(),
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),
