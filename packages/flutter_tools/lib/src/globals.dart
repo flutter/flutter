@@ -6,9 +6,7 @@
 
 import 'base/context.dart';
 import 'doctor.dart';
-import 'ios/simulators.dart';
 
 export 'globals_null_migrated.dart';
 
 Doctor get doctor => context.get<Doctor>();
-IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
