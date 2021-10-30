@@ -558,7 +558,7 @@ void main() {
             ),
           ),
         )));
-        
+
     Size _target = Size(_width * _scale, _height * _scale);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
