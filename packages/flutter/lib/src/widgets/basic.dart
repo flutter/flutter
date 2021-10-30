@@ -1302,8 +1302,8 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     Widget? child,
-  })  : assert(!(scale == null && scaleX == null && scaleY == null), "In Transform.Scale, You have to at least provide 'scale' or both of 'scaleX' and 'scaleY'"),
-        assert(scale == null || (scaleX == null && scaleY == null), "In Transform.Scale, you should either provide 'scale' or both of 'scaleX' and 'scaleY' but not all three"),
+  })  : assert(!(scale == null && scaleX == null && scaleY == null), "In Transform.scale(), You have to at least provide 'scale' or both of 'scaleX' and 'scaleY'"),
+        assert(scale == null || (scaleX == null && scaleY == null), "In Transform.scale(), you should either provide 'scale' or both of 'scaleX' and 'scaleY' but not all three"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0),
         super(key: key, child: child);
 
