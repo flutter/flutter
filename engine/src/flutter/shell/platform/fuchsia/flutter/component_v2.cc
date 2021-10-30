@@ -484,20 +484,28 @@ const std::string& ComponentV2::GetDebugLabel() const {
 }
 
 void ComponentV2::Kill() {
-  FML_VLOG(-1) << "ComponentController: received Kill";
+  FML_VLOG(-1) << "received Kill event";
 
   // From the documentation for ComponentController, ZX_OK should be sent when
-  // the ComponentController receives a termination request.
+  // the ComponentController receives a termination request. However, if the
+  // component exited with a non-zero return code, we indicate this by sending
+  // an INTERNAL epitaph instead.
   //
-  // TODO(fxb/50694): How should we communicate the return code of the process
-  // with the epitaph? Should we avoid sending ZX_OK if the return code is not
-  // 0?
-  //
-  // CF v1 logic for reference (the OnTerminated event no longer exists):
-  //   component_controller_.events().OnTerminated(
-  //       last_return_code_.second, fuchsia::sys::TerminationReason::EXITED);
+  // TODO(fxb/86666): Communicate return code from the ComponentController once
+  // v2 has support.
+  auto [got_return_code, return_code] = last_return_code_;
+  if (got_return_code && return_code == 0) {
+    KillWithEpitaph(ZX_OK);
+  } else {
+    if (got_return_code) {
+      FML_LOG(ERROR) << "Component exited with non-zero return code: "
+                     << return_code;
+    } else {
+      FML_LOG(ERROR) << "Failed to get return code for component";
+    }
 
-  KillWithEpitaph(ZX_OK);
+    KillWithEpitaph(zx_status_t(fuchsia::component::Error::INTERNAL));
+  }
 
   // WARNING: Don't do anything past this point as this instance may have been
   // collected.
@@ -513,7 +521,7 @@ void ComponentV2::KillWithEpitaph(zx_status_t epitaph_status) {
 }
 
 void ComponentV2::Stop() {
-  FML_VLOG(-1) << "ComponentController v2: received Stop";
+  FML_VLOG(-1) << "received Stop event";
 
   // TODO(fxb/50694): Any other cleanup logic we should do that's appropriate
   // for Stop but not for Kill?
@@ -530,7 +538,7 @@ void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
     return;
   }
 
-  // We may launch multiple shell in this component. However, we will
+  // We may launch multiple shells in this component. However, we will
   // terminate when the last shell goes away. The error code returned to the
   // component controller will be the last isolate that had an error.
   auto return_code = shell_holder->GetEngineReturnCode();
