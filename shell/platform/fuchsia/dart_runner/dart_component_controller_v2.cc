@@ -354,14 +354,20 @@ void DartComponentControllerV2::Run() {
   loop_->Run();
 
   if (binding_.is_bound()) {
-    // TODO(fxb/79871): This is likely a bug. We're taking the return_code
-    // of the process (a uint32_t) and implicitly converting it into a
-    // zx_status_t that is used as the epitaph. The uint32_t return code is
-    // unlikely to correspond to the epitaph status that is expected to close
-    // the connection (with the exception of 0 == ZX_OK). For the documentation
-    // of what epitaph status we should choose, see
-    // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.component.runner/component_runner.fidl;l=118;drc=e3b39f2b57e720770773b857feca4f770ee0619e
-    binding_.Close(return_code_);
+    // From the documentation for ComponentController, ZX_OK should be sent when
+    // the ComponentController receives a termination request. However, if the
+    // component exited with a non-zero return code, we indicate this by sending
+    // an INTERNAL epitaph instead.
+    //
+    // TODO(fxb/86666): Communicate return code from the ComponentController
+    // once v2 has support.
+    if (return_code_ == 0) {
+      binding_.Close(ZX_OK);
+    } else {
+      FML_LOG(ERROR) << "Component exited with non-zero return code: "
+                     << return_code_;
+      binding_.Close(zx_status_t(fuchsia::component::Error::INTERNAL));
+    }
   }
 }
 
