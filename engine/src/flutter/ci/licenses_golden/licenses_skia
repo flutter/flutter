@@ -1,4 +1,4 @@
-Signature: c427bbe06c4d9d912c9aefdd5eb79f59
+Signature: db61ba880a81dc94caa0fe56284b029d
 
 UNUSED LICENSES:
 
@@ -2432,6 +2432,7 @@ FILE: ../../../third_party/skia/gm/crbug_1177833.cpp
 FILE: ../../../third_party/skia/gm/crbug_1257515.cpp
 FILE: ../../../third_party/skia/gm/crop_imagefilter.cpp
 FILE: ../../../third_party/skia/gm/fillrect_gradient.cpp
+FILE: ../../../third_party/skia/gm/graphitestart.cpp
 FILE: ../../../third_party/skia/gm/hardstop_gradients_many.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
