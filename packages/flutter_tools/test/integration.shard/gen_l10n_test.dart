@@ -150,12 +150,12 @@ void main() {
       '#l10n 95 (ES - [Hola] -Mundo- #123#)\n'
       '#l10n 96 (ES - \$!)\n'
       '#l10n 97 (ES - One \$)\n'
-      '#l10n 98 (ES - Flutter\'s amazing!)\n'
-      '#l10n 99 (ES - Flutter\'s amazing, times 2!)\n'
+      "#l10n 98 (ES - Flutter's amazing!)\n"
+      "#l10n 99 (ES - Flutter's amazing, times 2!)\n"
       '#l10n 100 (ES - Flutter is "amazing"!)\n'
       '#l10n 101 (ES - Flutter is "amazing", times 2!)\n'
       '#l10n 102 (ES - 16 wheel truck)\n'
-      '#l10n 103 (ES - Sedan\'s elegance)\n'
+      "#l10n 103 (ES - Sedan's elegance)\n"
       '#l10n 104 (ES - Cabriolet has "acceleration")\n'
       '#l10n 105 (ES - Oh, she found ES - 1 itemES - !)\n'
       '#l10n 106 (ES - Indeed, ES - they like ES - Flutter!)\n'
