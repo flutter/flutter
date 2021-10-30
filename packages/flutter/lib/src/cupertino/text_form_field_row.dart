@@ -161,7 +161,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(autofocus != null),
         assert(readOnly != null),
         assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-        assert((obscureText != null && obscureTextBehavior == null) || (obscureText == null && obscureTextBehavior != null)),
+        assert(obscureText != null || obscureTextBehavior != null),
         assert(autocorrect != null),
         assert(enableSuggestions != null),
         assert(scrollPadding != null),
