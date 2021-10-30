@@ -110,7 +110,7 @@ void addAarTask(Project project, variant) {
 // This method mimics the logic in AGP when `android.defaultPublishConfig` is set in `build.gradle`:
 // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/variant/VariantHelper.java
 //
-// Unfortunately, `android.defaultPublishConfig` cannot be overriden at this point since
+// Unfortunately, `android.defaultPublishConfig` cannot be overridden at this point since
 // AGP already run this code.
 void overrideDefaultPublishConfig(Project project, variant) {
     String variantName = variant.name.capitalize()

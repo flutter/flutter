@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 List<String> items = <String>[
   'one',
@@ -20,7 +20,7 @@ Widget buildCard(BuildContext context, int index) {
     return const SizedBox(height: 100);
   }
 
-  return Container(
+  return SizedBox(
     key: ValueKey<String>(items[index]),
     height: 100.0,
     child: DefaultTextStyle(

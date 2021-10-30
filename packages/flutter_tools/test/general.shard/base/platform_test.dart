@@ -24,8 +24,8 @@ void _expectPlatformsEqual(Platform actual, Platform expected) {
 
 void main() {
   group('FakePlatform.fromPlatform', () {
-    FakePlatform fake;
-    LocalPlatform local;
+    late FakePlatform fake;
+    late LocalPlatform local;
 
     setUp(() {
       local = const LocalPlatform();

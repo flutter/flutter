@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
@@ -379,11 +378,9 @@ void main() {
           actions: <Type, Action<Intent>>{
             TestIntent: testAction,
           },
-          child: Container(
-            child: Actions(
-              actions: const <Type, Action<Intent>>{},
-              child: Container(key: containerKey),
-            ),
+          child: Actions(
+            actions: const <Type, Action<Intent>>{},
+            child: Container(key: containerKey),
           ),
         ),
       );
@@ -417,15 +414,15 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
                 onShowHoverHighlight: (bool value) => hovering = value,
                 onShowFocusHighlight: (bool value) => focusing = value,
-                child: Container(width: 100, height: 100, key: containerKey),
+                child: SizedBox(width: 100, height: 100, key: containerKey),
               ),
             ),
           ),
@@ -792,15 +789,15 @@ void main() {
               child: FocusableActionDetector(
                 enabled: enabled,
                 focusNode: focusNode,
-                shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                shortcuts: const <ShortcutActivator, Intent>{
+                  SingleActivator(LogicalKeyboardKey.enter): intent,
                 },
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
                 onShowHoverHighlight: supplyCallbacks ? (bool value) => hovering = value : null,
                 onShowFocusHighlight: supplyCallbacks ? (bool value) => focusing = value : null,
-                child: Container(width: 100, height: 100, key: key),
+                child: SizedBox(width: 100, height: 100, key: key),
               ),
             ),
           ),
@@ -921,6 +918,51 @@ void main() {
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
+
+    testWidgets(
+      'FocusableActionDetector can prevent its descendants from being focusable',
+      (WidgetTester tester) async {
+        final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              descendantsAreFocusable: true,
+              child: MaterialButton(
+                focusNode: buttonNode,
+                child: const Text('Test'),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        );
+
+        // Button is focusable
+        expect(buttonNode.hasFocus, isFalse);
+        buttonNode.requestFocus();
+        await tester.pump();
+        expect(buttonNode.hasFocus, isTrue);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FocusableActionDetector(
+              descendantsAreFocusable: false,
+              child: MaterialButton(
+                focusNode: buttonNode,
+                child: const Text('Test'),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        );
+
+        // Button is NOT focusable
+        expect(buttonNode.hasFocus, isFalse);
+        buttonNode.requestFocus();
+        await tester.pump();
+        expect(buttonNode.hasFocus, isFalse);
+      },
+    );
   });
 
   group('Diagnostics', () {

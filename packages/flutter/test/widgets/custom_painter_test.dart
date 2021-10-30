@@ -4,9 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -125,10 +125,6 @@ void _defineTests() {
           ),
         ),
       ),
-      child: Semantics(
-        container: true,
-        child: const Text('Hello', textDirection: TextDirection.ltr),
-      ),
       foregroundPainter: _PainterWithSemantics(
         semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
@@ -137,6 +133,10 @@ void _defineTests() {
             textDirection: TextDirection.rtl,
           ),
         ),
+      ),
+      child: Semantics(
+        container: true,
+        child: const Text('Hello', textDirection: TextDirection.ltr),
       ),
     ));
 
@@ -343,6 +343,7 @@ void _defineTests() {
             onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
             onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
             onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+            onSetText: (String text) => performedActions.add(SemanticsAction.setText),
             onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
             onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
           ),
@@ -387,6 +388,9 @@ void _defineTests() {
             'extent': 5,
           });
           break;
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
+          break;
         default:
           semanticsOwner.performAction(expectedId, action);
       }
@@ -413,6 +417,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             slider: true,
+            keyboardKey: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -464,6 +469,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             slider: true,
+            keyboardKey: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -516,35 +522,35 @@ void _defineTests() {
       semanticsTester.dispose();
     });
 
-    testDiff('adds one item to an empty list', (_DiffTester tester) async {
+    _testDiff('adds one item to an empty list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>[],
         to: <String>['a'],
       );
     });
 
-    testDiff('removes the last item from the list', (_DiffTester tester) async {
+    _testDiff('removes the last item from the list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>[],
       );
     });
 
-    testDiff('appends one item at the end of a non-empty list', (_DiffTester tester) async {
+    _testDiff('appends one item at the end of a non-empty list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>['a', 'b'],
       );
     });
 
-    testDiff('prepends one item at the beginning of a non-empty list', (_DiffTester tester) async {
+    _testDiff('prepends one item at the beginning of a non-empty list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>['b'],
         to: <String>['a', 'b'],
       );
     });
 
-    testDiff('inserts one item in the middle of a list', (_DiffTester tester) async {
+    _testDiff('inserts one item in the middle of a list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -558,7 +564,7 @@ void _defineTests() {
       );
     });
 
-    testDiff('removes one item from the middle of a list', (_DiffTester tester) async {
+    _testDiff('removes one item from the middle of a list', (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -572,7 +578,7 @@ void _defineTests() {
       );
     });
 
-    testDiff('swaps two items', (_DiffTester tester) async {
+    _testDiff('swaps two items', (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -585,7 +591,7 @@ void _defineTests() {
       );
     });
 
-    testDiff('finds and moved one keyed item', (_DiffTester tester) async {
+    _testDiff('finds and moved one keyed item', (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -690,7 +696,7 @@ void _defineTests() {
   });
 }
 
-void testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
+void _testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
   testWidgets(description, (WidgetTester tester) async {
     await testFunction(_DiffTester(tester));
   });

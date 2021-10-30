@@ -49,7 +49,7 @@ class Md5Hash {
   int _remainingLength = 0;
   int _contentLength = 0;
 
-  void addChunk(Uint8List data, [int stop]) {
+  void addChunk(Uint8List data, [int? stop]) {
     assert(_remainingLength == 0);
     stop ??= data.length;
     int i = 0;

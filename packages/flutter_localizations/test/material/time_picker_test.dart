@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -346,14 +345,18 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
@@ -364,14 +367,18 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );
 
+    // ignore: avoid_dynamic_calls
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
+      // ignore: avoid_dynamic_calls
       secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );

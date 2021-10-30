@@ -13,8 +13,10 @@ import 'package:flutter_gallery/demo/shrine/login.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
+  const ShrineApp({Key? key}) : super(key: key);
+
   @override
-  _ShrineAppState createState() => _ShrineAppState();
+  State<ShrineApp> createState() => _ShrineAppState();
 }
 
 class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMixin {
@@ -62,7 +64,7 @@ Route<dynamic>? _getRoute(RouteSettings settings) {
 
   return MaterialPageRoute<void>(
     settings: settings,
-    builder: (BuildContext context) => LoginPage(),
+    builder: (BuildContext context) => const LoginPage(),
     fullscreenDialog: true,
   );
 }
@@ -77,21 +79,14 @@ ThemeData _buildShrineTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     colorScheme: kShrineColorScheme,
-    accentColor: kShrineBrown900,
     primaryColor: kShrinePink100,
-    buttonColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
     errorColor: kShrineErrorRed,
-    buttonTheme: const ButtonThemeData(
-      colorScheme: kShrineColorScheme,
-      textTheme: ButtonTextTheme.normal,
-    ),
     primaryIconTheme: _customIconTheme(base.iconTheme),
     inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),
   );
 }

@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Tháng trước",
   "nextPageTooltip": "Trang tiếp theo",
   "previousPageTooltip": "Trang trước",
+  "firstPageTooltip": "Trang đầu",
+  "lastPageTooltip": "Trang cuối",
   "showMenuTooltip": "Hiển thị menu",
   "aboutListTileTitle": "Giới thiệu về $applicationName",
   "licensesPageTitle": "Giấy phép",

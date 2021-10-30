@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SliderDemo extends StatefulWidget {
+  const SliderDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/slider';
 
   @override
-  _SliderDemoState createState() => _SliderDemoState();
+  State<SliderDemo> createState() => _SliderDemoState();
 }
 
 Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
@@ -280,7 +282,7 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               Slider.adaptive(
-                label: _continuousValue.toStringAsFixed(6).toString(),
+                label: _continuousValue.toStringAsFixed(6),
                 value: _continuousValue,
                 min: 0.0,
                 max: 100.0,
@@ -332,7 +334,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

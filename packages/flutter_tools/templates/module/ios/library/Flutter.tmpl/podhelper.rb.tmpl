@@ -38,7 +38,7 @@ def install_flutter_engine_pod
     release_framework_dir = File.join(flutter_root, 'bin', 'cache', 'artifacts', 'engine', 'ios-release')
     unless Dir.exist?(release_framework_dir)
       # iOS artifacts have not been downloaded.
-      raise "#{release_framework_dir} must exist. Make sure \"flutter build ios\" has been run at least once"
+      raise "#{release_framework_dir} must exist. Make sure \"flutter precache --ios\" has been run at least once"
     end
     FileUtils.cp_r(File.join(release_framework_dir, framework_name), engine_dir)
   end

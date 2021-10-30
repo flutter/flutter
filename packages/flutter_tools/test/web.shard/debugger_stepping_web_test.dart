@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
 import 'package:file/file.dart';
 
@@ -27,7 +27,7 @@ void main() {
 
     await flutter.run(
       withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose']);
+      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
     await flutter.resume();
     await flutter.waitForPause(); // Now we should be on the breakpoint.
@@ -48,7 +48,7 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/70486
+  });
 
   tearDown(() async {
     await flutter.stop();

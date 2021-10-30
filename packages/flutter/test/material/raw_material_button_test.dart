@@ -46,9 +46,9 @@ void main() {
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
       Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -227,7 +227,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    // paints above above material
+    // paints above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
   });
@@ -239,24 +239,25 @@ void main() {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            child: Container(
-              width: 400.0,
-              height: 400.0,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: const <Widget>[
-                  SizedBox(
-                    height: 50.0,
-                    width: 400.0,
-                    child: Text('Material'),
-                  ),
-                ],
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () { },
+              child: SizedBox(
+                width: 400.0,
+                height: 400.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const <Widget>[
+                    SizedBox(
+                      height: 50.0,
+                      width: 400.0,
+                      child: Text('Material'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
     expect(find.text('Material').hitTestable(), findsOneWidget);
@@ -280,7 +281,8 @@ void main() {
                 ),
               ),
             ),
-        ]),
+          ],
+        ),
       ),
     );
     expect(find.byKey(key).hitTestable(), findsOneWidget);
@@ -445,9 +447,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -516,7 +518,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -533,7 +535,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -552,7 +554,7 @@ void main() {
     expect(box.size, equals(const Size(100, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));

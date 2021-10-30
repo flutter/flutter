@@ -13,8 +13,8 @@ import '../../src/common.dart';
 
 void main() {
   group('OperatingSystemUtils', () {
-    Directory tempDir;
-    FileSystem fileSystem;
+    late Directory tempDir;
+    late FileSystem fileSystem;
 
     setUp(() {
       fileSystem = LocalFileSystem.test(signals: Signals.test());

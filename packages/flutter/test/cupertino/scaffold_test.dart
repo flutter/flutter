@@ -25,7 +25,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Center)), Offset.zero);
   });
 
   testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
@@ -282,7 +282,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
 
     // Overscroll to the bottom.
-    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0));
+    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0), warnIfMissed: false); // can't be hit (it's empty) but we're aiming for the list really so it doesn't matter
     // Let it bounce back.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -420,8 +420,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
-          child: Center(),
           backgroundColor: Color(0xFF010203),
+          child: Center(),
         ),
       ),
     );

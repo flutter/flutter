@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpTest(
@@ -18,8 +17,13 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController? controller,
+  bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(MaterialApp(
+    scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: enableMouseDrag
+      ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+      : null,
+    ),
     theme: ThemeData(
       platform: platform,
     ),
@@ -35,6 +39,13 @@ Future<void> pumpTest(
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
+}
+
 // Pump a nested scrollable. The outer scrollable contains a sliver of a
 // 300-pixel-long scrollable followed by a 2000-pixel-long content.
 Future<void> pumpDoubleScrollableTest(
@@ -45,19 +56,19 @@ Future<void> pumpDoubleScrollableTest(
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
+    home: const CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
+          child: SizedBox(
             height: 300,
-            child: const CustomScrollView(
+            child: CustomScrollView(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
               ],
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
   ));
@@ -93,7 +104,7 @@ void resetScrollOffset(WidgetTester tester) {
 void main() {
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
@@ -103,7 +114,7 @@ void main() {
     resetScrollOffset(tester);
 
     await pumpTest(tester, TargetPlatform.iOS);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     // Scroll starts ease into the scroll on iOS.
     expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
     await tester.pump(); // trigger fling
@@ -114,7 +125,7 @@ void main() {
     resetScrollOffset(tester);
 
     await pumpTest(tester, TargetPlatform.macOS);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     // Scroll starts ease into the scroll on iOS.
     expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
     await tester.pump(); // trigger fling
@@ -128,7 +139,7 @@ void main() {
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    await tester.drag(find.byType(Viewport), const Offset(0.0, 200.0), touchSlopY: 0.0);
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 200.0), touchSlopY: 0.0);
     expect(getScrollOffset(tester), -200.0);
     await tester.pump(); // trigger ballistic
     await tester.pump(const Duration(milliseconds: 10));
@@ -136,7 +147,7 @@ void main() {
     expect(getScrollOffset(tester), lessThan(0.0));
     final double heldPosition = getScrollOffset(tester);
     // Hold and let go while in overscroll.
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     expect(await tester.pumpAndSettle(), 1);
     expect(getScrollOffset(tester), heldPosition);
     await gesture.up();
@@ -147,11 +158,11 @@ void main() {
 
   testWidgets('Repeated flings builds momentum', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
     // Repeat the exact same motion.
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump();
     // On iOS, the velocity will be larger than the velocity of the last fling by a
     // non-trivial amount.
@@ -160,24 +171,41 @@ void main() {
 
   testWidgets('Repeated flings do not build momentum on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
     // Repeat the exact same motion.
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump();
     // On Android, there is no momentum build. The final velocity is the same as the
     // velocity of the last fling.
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
 
+  testWidgets('A slower final fling does not apply carried momentum', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Repeat the exact same motion to build momentum.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.pump(); // trigger the second fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // Make a final fling that is much slower.
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 200.0);
+    await tester.pump(); // trigger the third fling
+    await tester.pump(const Duration(milliseconds: 10));
+    // expect that there is no carried velocity
+    expect(getScrollVelocity(tester), lessThan(200.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
     // Repeat the exact same motion in the opposite direction.
-    await tester.fling(find.byType(Viewport), const Offset(0.0, dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, dragOffset), 1000.0);
     await tester.pump();
     // The only applied velocity to the scrollable is the second fling that was in the
     // opposite direction.
@@ -186,11 +214,11 @@ void main() {
 
   testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
     expect(getScrollVelocity(tester), greaterThan(0.0));
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await tester.pump(const Duration(milliseconds: 40));
     await gesture.up();
     // After a hold longer than 2 frames, previous velocity is lost.
@@ -199,7 +227,7 @@ void main() {
 
   testWidgets('Drags creeping unaffected on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -0.5));
     expect(getScrollOffset(tester), 0.5);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
@@ -210,7 +238,7 @@ void main() {
 
   testWidgets('Drags creeping must break threshold on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -0.5));
     expect(getScrollOffset(tester), 0.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
@@ -230,7 +258,7 @@ void main() {
 
   testWidgets('Big drag over threshold magnitude preserved on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0));
     // No offset lost from threshold.
     expect(getScrollOffset(tester), 30.0);
@@ -238,7 +266,7 @@ void main() {
 
   testWidgets('Slow threshold breaks are attenuated on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     // This is a typical 'hesitant' iOS scroll start.
     await gesture.moveBy(const Offset(0.0, -10.0));
     expect(getScrollOffset(tester), moreOrLessEquals(1.1666666666666667));
@@ -249,7 +277,7 @@ void main() {
 
   testWidgets('Small continuing motion preserved on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
     expect(getScrollOffset(tester), 30.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
@@ -262,7 +290,7 @@ void main() {
 
   testWidgets('Motion stop resets threshold on iOS/macOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
     expect(getScrollOffset(tester), 30.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
@@ -334,7 +362,7 @@ void main() {
         lastUserScrollingDirection = controller.position.userScrollDirection;
     });
 
-    await tester.drag(find.byType(Viewport), const Offset(0.0, -20.0), touchSlopY: 0.0);
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -20.0), touchSlopY: 0.0);
 
     expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
@@ -346,7 +374,7 @@ void main() {
 
     expect(lastUserScrollingDirection, ScrollDirection.reverse);
 
-    await tester.drag(find.byType(Viewport), const Offset(0.0, 20.0), touchSlopY: 0.0);
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 20.0), touchSlopY: 0.0);
 
     expect(lastUserScrollingDirection, ScrollDirection.forward);
 
@@ -377,7 +405,7 @@ void main() {
             slivers: <Widget>[SliverToBoxAdapter(
               child: SizedBox(
                 height: 2000,
-                child: GestureDetector(onTap: () {},),
+                child: GestureDetector(onTap: () {}),
               ),
             )],
           ),
@@ -434,7 +462,7 @@ void main() {
       expect(renderIgnorePointer.ignoring, false);
 
       // Starts ignoring when the drag is recognized.
-      await tester.fling(find.byType(Viewport), const Offset(0, -100), 1000);
+      await tester.fling(find.byType(Scrollable), const Offset(0, -100), 1000);
       expect(renderIgnorePointer.ignoring, true);
       await tester.pump();
 
@@ -492,7 +520,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -543,7 +571,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -589,7 +617,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -638,7 +666,7 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -692,7 +720,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -740,7 +768,7 @@ void main() {
     if (!kIsWeb)
       await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -800,7 +828,7 @@ void main() {
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
-  });
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
     final List<String> widgetTracker = <String>[];
@@ -1015,13 +1043,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1102,13 +1130,13 @@ void main() {
                           width: 200,
                           height: 10,
                         ),
-                      ]
+                      ],
                     );
-                  }
+                  },
                 ),
               );
-            }
-          )
+            },
+          ),
         ),
       ),
     );
@@ -1157,33 +1185,31 @@ void main() {
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,
-          child: Container(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    for (int i = 0; i < 100; i++)
-                      Text('SingleChildScrollView $i'),
-                  ]
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  for (int i = 0; i < 100; i++)
+                    Text('SingleChildScrollView $i'),
+                ],
+              ),
+              SizedBox(
+                height: 3000,
+                width: 400,
+                child: ListView.builder(
+                  controller: innerController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Nested NeverScrollable ListView $index');
+                  },
                 ),
-                Container(
-                  height: 3000,
-                  width: 400,
-                  child: ListView.builder(
-                    controller: innerController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Nested NeverScrollable ListView $index');
-                    },
-                  )
-                ),
-              ]
-            )
-          )
-        )
+              ),
+            ],
+          ),
+        ),
       ),
     ));
     expect(outerController.position.pixels, 0.0);
@@ -1213,17 +1239,17 @@ void main() {
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
-            body: SizedBox(
-              width: double.infinity,
-              height: height,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 300.0,
-                ),
+          body: SizedBox(
+            width: double.infinity,
+            height: height,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: double.infinity,
+                height: 300.0,
               ),
-            )
+            ),
+          ),
         ),
       );
     }
@@ -1243,10 +1269,50 @@ void main() {
     final Offset scrollable = tester.getCenter(find.byType(SingleChildScrollView));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     testPointer.hover(scrollable);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 0.0)));
+    await tester.sendEventToBinding(testPointer.scroll(Offset.zero));
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
+  testWidgets('Does scroll with mouse pointer drag when behavior is not configured to ignore them', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: true);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200.0);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
 }
 
 // ignore: must_be_immutable

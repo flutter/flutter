@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoSwitchDemo extends StatefulWidget {
+  const CupertinoSwitchDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/switch';
 
   @override
-  _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
+  State<CupertinoSwitchDemo> createState() => _CupertinoSwitchDemoState();
 }
 
 class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {

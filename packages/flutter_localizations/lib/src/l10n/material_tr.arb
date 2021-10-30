@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Önceki ay",
   "nextPageTooltip": "Sonraki sayfa",
   "previousPageTooltip": "Önceki sayfa",
+  "firstPageTooltip": "İlk sayfa",
+  "lastPageTooltip": "Son sayfa",
   "showMenuTooltip": "Menüyü göster",
   "aboutListTileTitle": "$applicationName Hakkında",
   "licensesPageTitle": "Lisanslar",

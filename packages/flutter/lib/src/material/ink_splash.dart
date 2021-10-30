@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
@@ -167,8 +166,8 @@ class InkSplash extends InteractiveInkFeature {
   late Animation<int> _alpha;
   AnimationController? _alphaController;
 
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
-  /// or material [Theme].
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
+  /// material [Theme], or [ButtonStyle].
   static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
 
   @override

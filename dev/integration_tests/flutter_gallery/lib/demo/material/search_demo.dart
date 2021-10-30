@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SearchDemo extends StatefulWidget {
+  const SearchDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/search';
 
   @override
-  _SearchDemoState createState() => _SearchDemoState();
+  State<SearchDemo> createState() => _SearchDemoState();
 }
 
 class _SearchDemoState extends State<SearchDemo> {
@@ -209,7 +211,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
           tooltip: 'Voice Search',
           icon: const Icon(Icons.mic),
           onPressed: () {
-            query = 'TODO: implement voice input';
+            query = 'Implement voice input';
           },
         )
       else

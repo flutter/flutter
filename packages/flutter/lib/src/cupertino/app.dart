@@ -10,6 +10,7 @@ import 'icons.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'route.dart';
+import 'scrollbar.dart';
 import 'theme.dart';
 
 /// An application that uses Cupertino design.
@@ -37,6 +38,11 @@ import 'theme.dart';
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
 ///
+/// The [CupertinoApp] widget isn't a required ancestor for other Cupertino
+/// widgets, but many Cupertino widgets could depend on the [CupertinoTheme]
+/// widget, which the [CupertinoApp] composes. If you use Material widgets, a
+/// [MaterialApp] also creates the needed dependencies for Cupertino widgets.
+///
 /// Use this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:
 ///
@@ -52,10 +58,10 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold](https://flutter.github.io/assets-for-api-docs/assets/cupertino/basic_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('Home'),
+///       middle: Text('Home'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -72,17 +78,17 @@ import 'theme.dart';
 /// CupertinoApp(
 ///   routes: <String, WidgetBuilder>{
 ///     '/': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('Home Route'),
+///           middle: Text('Home Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
 ///     },
 ///     '/about': (BuildContext context) {
-///       return CupertinoPageScaffold(
+///       return const CupertinoPageScaffold(
 ///         navigationBar: CupertinoNavigationBar(
-///           middle: const Text('About Route'),
+///           middle: Text('About Route'),
 ///         ),
 ///         child: Center(child: Icon(CupertinoIcons.share)),
 ///       );
@@ -99,14 +105,14 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   theme: CupertinoThemeData(
 ///     brightness: Brightness.dark,
 ///     primaryColor: CupertinoColors.systemOrange,
 ///   ),
 ///   home: CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
-///       middle: const Text('CupertinoApp Theme'),
+///       middle: Text('CupertinoApp Theme'),
 ///     ),
 ///     child: Center(child: Icon(CupertinoIcons.share)),
 ///   ),
@@ -163,6 +169,8 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -202,6 +210,8 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -234,8 +244,9 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that performs
-  /// an appropriate transition, including [Hero] animations, to the new route.
+  /// [widgets.WidgetBuilder] is used to construct a [CupertinoPageRoute] that
+  /// performs an appropriate transition, including [Hero] animations, to the
+  /// new route.
   ///
   /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder>? routes;
@@ -337,9 +348,9 @@ class CupertinoApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -350,7 +361,7 @@ class CupertinoApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}
@@ -367,7 +378,7 @@ class CupertinoApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction: CallbackAction(
+  ///       ActivateAction: CallbackAction<Intent>(
   ///         onInvoke: (Intent intent) {
   ///           // Do something here...
   ///           return null;
@@ -388,8 +399,21 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
+  /// {@macro flutter.material.materialApp.scrollBehavior}
+  ///
+  /// When null, defaults to [CupertinoScrollBehavior].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
+  final ScrollBehavior? scrollBehavior;
+
+  /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  final bool useInheritedMediaQuery;
+
   @override
-  _CupertinoAppState createState() => _CupertinoAppState();
+  State<CupertinoApp> createState() => _CupertinoAppState();
 
   /// The [HeroController] used for Cupertino page transitions.
   ///
@@ -398,10 +422,47 @@ class CupertinoApp extends StatefulWidget {
       HeroController(); // Linear tweening.
 }
 
-class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
+///
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// Setting a [CupertinoScrollBehavior] will result in descendant [Scrollable] widgets
+/// using [BouncingScrollPhysics] by default. No [GlowingOverscrollIndicator] is
+/// applied when using a [CupertinoScrollBehavior] either, regardless of platform.
+/// When executing on desktop platforms, a [CupertinoScrollbar] is applied to the child.
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
+class CupertinoScrollBehavior extends ScrollBehavior {
+  /// Creates a CupertinoScrollBehavior that uses [BouncingScrollPhysics] and
+  /// adds [CupertinoScrollbar]s on desktop platforms.
+  const CupertinoScrollBehavior();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
-    // Never build any overscroll glow indicators.
+  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return CupertinoScrollbar(
+          controller: details.controller,
+          child: child,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        return child;
+    }
+  }
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    // No overscroll indicator.
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
     return child;
   }
 
@@ -434,13 +495,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return CupertinoButton.filled(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
       child: const Icon(
         CupertinoIcons.search,
         size: 28.0,
         color: CupertinoColors.white,
       ),
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
     );
   }
 
@@ -474,6 +535,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
+        useInheritedMediaQuery: widget.useInheritedMediaQuery,
       );
     }
     return WidgetsApp(
@@ -508,6 +570,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
+      useInheritedMediaQuery: widget.useInheritedMediaQuery,
     );
   }
 
@@ -516,7 +579,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: _AlwaysCupertinoScrollBehavior(),
+      behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
@@ -42,7 +42,8 @@ BuildContext _getParent(BuildContext context) {
 ///    [BuildContext].
 @immutable
 abstract class Intent with Diagnosticable {
-  /// A const constructor for an [Intent].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Intent();
 
   /// An intent that is mapped to a [DoNothingAction], which, as the name
@@ -197,6 +198,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// See the discussion at [removeActionListener].
   @protected
   @visibleForTesting
+  @pragma('vm:notify-debugger-on-exception')
   void notifyActionListeners() {
     if (_listeners.isEmpty) {
       return;
@@ -252,8 +254,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// ```dart preamble
 /// class ActionListenerExample extends StatefulWidget {
+///   const ActionListenerExample({Key? key}) : super(key: key);
+///
 ///   @override
-///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
+///   State<ActionListenerExample> createState() => _ActionListenerExampleState();
 /// }
 ///
 /// class _ActionListenerExampleState extends State<ActionListenerExample> {
@@ -285,26 +289,26 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///             child: Text(_on ? 'Disable' : 'Enable'),
 ///           ),
 ///         ),
-///         _on
-///             ? Padding(
-///                 padding: const EdgeInsets.all(8.0),
-///                 child: ActionListener(
-///                   listener: (Action<Intent> action) {
-///                     if (action.intentType == MyIntent) {
-///                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-///                           content: const Text('Action Listener Called'),
-///                       ));
-///                     }
-///                   },
-///                   action: _myAction,
-///                   child: ElevatedButton(
-///                     onPressed: () =>
-///                         ActionDispatcher().invokeAction(_myAction, MyIntent()),
-///                     child: const Text('Call Action Listener'),
-///                   ),
-///                 ),
-///               )
-///             : Container(),
+///         if (_on)
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: ActionListener(
+///               listener: (Action<Intent> action) {
+///                 if (action.intentType == MyIntent) {
+///                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+///                     content: Text('Action Listener Called'),
+///                   ));
+///                 }
+///               },
+///               action: _myAction,
+///               child: ElevatedButton(
+///                 onPressed: () => const ActionDispatcher()
+///                     .invokeAction(_myAction, const MyIntent()),
+///                 child: const Text('Call Action Listener'),
+///               ),
+///             ),
+///           ),
+///         if (!_on) Container(),
 ///       ],
 ///     );
 ///   }
@@ -312,13 +316,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// class MyAction extends Action<MyIntent> {
 ///   @override
-///   void addActionListener(listener) {
+///   void addActionListener(ActionListenerCallback listener) {
 ///     super.addActionListener(listener);
 ///     print('Action Listener was added');
 ///   }
 ///
 ///   @override
-///   void removeActionListener(listener) {
+///   void removeActionListener(ActionListenerCallback listener) {
 ///     super.removeActionListener(listener);
 ///     print('Action Listener was removed');
 ///   }
@@ -335,8 +339,9 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
-///   return ActionListenerExample();
+///   return const ActionListenerExample();
 /// }
 /// ```
 /// {@end-tool}
@@ -370,7 +375,7 @@ class ActionListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _ActionListenerState createState() => _ActionListenerState();
+  State<ActionListener> createState() => _ActionListenerState();
 }
 
 class _ActionListenerState extends State<ActionListener> {
@@ -485,7 +490,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
 ///  - [Actions] widget, which defines a mapping between a in [Intent] type and
 ///    an [Action].
 class ActionDispatcher with Diagnosticable {
-  /// Const constructor so that subclasses can be immutable.
+  /// Creates an action dispatcher that invokes actions directly.
   const ActionDispatcher();
 
   /// Invokes the given `action`, passing it the given `intent`.
@@ -595,12 +600,12 @@ class ActionDispatcher with Diagnosticable {
 /// }
 ///
 /// class SaveButton extends StatefulWidget {
-///   const SaveButton(this.valueNotifier);
+///   const SaveButton(this.valueNotifier, {Key? key}) : super(key: key);
 ///
 ///   final ValueNotifier<bool> valueNotifier;
 ///
 ///   @override
-///   _SaveButtonState createState() => _SaveButtonState();
+///   State<SaveButton> createState() => _SaveButtonState();
 /// }
 ///
 /// class _SaveButtonState extends State<SaveButton> {
@@ -621,7 +626,7 @@ class ActionDispatcher with Diagnosticable {
 ///           ),
 ///           onPressed: () {
 ///             setState(() {
-///               savedValue = Actions.invoke(context, const SaveIntent()) as int;
+///               savedValue = Actions.invoke(context, const SaveIntent())! as int;
 ///             });
 ///           },
 ///         );
@@ -654,7 +659,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_plus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count++));
+///                     Actions.invoke(context, ModifyIntent(++count));
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
@@ -669,7 +674,7 @@ class ActionDispatcher with Diagnosticable {
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
-///                     Actions.invoke(context, ModifyIntent(count--));
+///                     Actions.invoke(context, ModifyIntent(--count));
 ///                   },
 ///                 ),
 ///               ],
@@ -732,7 +737,7 @@ class Actions extends StatefulWidget {
   // Visits the Actions widget ancestors of the given element using
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool visitor(InheritedElement element)) {
+  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
@@ -810,14 +815,16 @@ class Actions extends StatefulWidget {
     assert(() {
       if (action == null) {
         final Type type = intent?.runtimeType ?? T;
-        throw FlutterError('Unable to find an action for a $type in an $Actions widget '
-            'in the given context.\n'
-            "$Actions.find() was called on a context that doesn't contain an "
-            '$Actions widget with a mapping for the given intent type.\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  $type');
+        throw FlutterError(
+          'Unable to find an action for a $type in an $Actions widget '
+          'in the given context.\n'
+          "$Actions.find() was called on a context that doesn't contain an "
+          '$Actions widget with a mapping for the given intent type.\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  $type',
+        );
       }
       return true;
     }());
@@ -848,11 +855,13 @@ class Actions extends StatefulWidget {
     // This allows this function to be called by code that doesn't know the
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
-    assert(type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent'
-      'generic type argument or an example intent derived from Intent must be'
-      'specified. Intent may be used as the generic type as long as the optional'
-      '"intent" argument is passed.');
+    assert(
+      type != Intent,
+      'The type passed to "find" resolved to "Intent": either a non-Intent '
+      'generic type argument or an example intent derived from Intent must be '
+      'specified. Intent may be used as the generic type as long as the optional '
+      '"intent" argument is passed.',
+    );
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
@@ -919,16 +928,18 @@ class Actions extends StatefulWidget {
 
     assert(() {
       if (actionElement == null) {
-        throw FlutterError('Unable to find an action for an Intent with type '
-            '${intent.runtimeType} in an $Actions widget in the given context.\n'
-            '$Actions.invoke() was unable to find an $Actions widget that '
-            "contained a mapping for the given intent, or the intent type isn't the "
-            'same as the type argument to invoke (which is $T - try supplying a '
-            'type argument to invoke if one was not given)\n'
-            'The context used was:\n'
-            '  $context\n'
-            'The intent type requested was:\n'
-            '  ${intent.runtimeType}');
+        throw FlutterError(
+          'Unable to find an action for an Intent with type '
+          '${intent.runtimeType} in an $Actions widget in the given context.\n'
+          '$Actions.invoke() was unable to find an $Actions widget that '
+          "contained a mapping for the given intent, or the intent type isn't the "
+          'same as the type argument to invoke (which is $T - try supplying a '
+          'type argument to invoke if one was not given)\n'
+          'The context used was:\n'
+          '  $context\n'
+          'The intent type requested was:\n'
+          '  ${intent.runtimeType}',
+        );
       }
       return true;
     }());
@@ -1118,26 +1129,25 @@ class _ActionsMarker extends InheritedWidget {
 ///   final Widget child;
 ///
 ///   @override
-///   _FadButtonState createState() => _FadButtonState();
+///   State<FadButton> createState() => _FadButtonState();
 /// }
 ///
 /// class _FadButtonState extends State<FadButton> {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   late Map<Type, Action<Intent>> _actionMap;
-///   late Map<LogicalKeySet, Intent> _shortcutMap;
+///   late final Map<Type, Action<Intent>> _actionMap;
+///   final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+///     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
+///   };
 ///
 ///   @override
 ///   void initState() {
 ///     super.initState();
 ///     _actionMap = <Type, Action<Intent>>{
-///       ActivateIntent: CallbackAction(
+///       ActivateIntent: CallbackAction<Intent>(
 ///         onInvoke: (Intent intent) => _toggleState(),
 ///       ),
-///     };
-///     _shortcutMap = <LogicalKeySet, Intent>{
-///       LogicalKeySet(LogicalKeyboardKey.keyX): const ActivateIntent(),
 ///     };
 ///   }
 ///
@@ -1182,14 +1192,14 @@ class _ActionsMarker extends InheritedWidget {
 ///         child: Row(
 ///           children: <Widget>[
 ///             Container(
-///               padding: EdgeInsets.all(10.0),
+///               padding: const EdgeInsets.all(10.0),
 ///               color: color,
 ///               child: widget.child,
 ///             ),
 ///             Container(
 ///               width: 30,
 ///               height: 30,
-///               margin: EdgeInsets.all(10.0),
+///               margin: const EdgeInsets.all(10.0),
 ///               color: _on ? Colors.red : Colors.transparent,
 ///             ),
 ///           ],
@@ -1201,10 +1211,11 @@ class _ActionsMarker extends InheritedWidget {
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('FocusableActionDetector Example'),
+///       title: const Text('FocusableActionDetector Example'),
 ///     ),
 ///     body: Center(
 ///       child: Row(
@@ -1212,11 +1223,11 @@ class _ActionsMarker extends InheritedWidget {
 ///         children: <Widget>[
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: TextButton(onPressed: () {}, child: Text('Press Me')),
+///             child: TextButton(onPressed: () {}, child: const Text('Press Me')),
 ///           ),
 ///           Padding(
 ///             padding: const EdgeInsets.all(8.0),
-///             child: FadButton(onPressed: () {}, child: Text('And Me')),
+///             child: FadButton(onPressed: () {}, child: const Text('And Me')),
 ///           ),
 ///         ],
 ///       ),
@@ -1239,6 +1250,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
+    this.descendantsAreFocusable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1267,11 +1279,14 @@ class FocusableActionDetector extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
+
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
 
   /// {@macro flutter.widgets.shortcuts.shortcuts}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// A function that will be called when the focus highlight should be shown or
   /// hidden.
@@ -1302,7 +1317,7 @@ class FocusableActionDetector extends StatefulWidget {
   final Widget child;
 
   @override
-  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+  State<FocusableActionDetector> createState() => _FocusableActionDetectorState();
 }
 
 class _FocusableActionDetectorState extends State<FocusableActionDetector> {
@@ -1452,6 +1467,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
+        descendantsAreFocusable: widget.descendantsAreFocusable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,
@@ -1561,7 +1577,7 @@ class DoNothingAction extends Action<Intent> {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
-  /// Creates a const [ActivateIntent] so subclasses can be const.
+  /// Creates an intent that activates the currently focused control.
   const ActivateIntent();
 }
 
@@ -1578,7 +1594,7 @@ class ActivateIntent extends Intent {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ButtonActivateIntent extends Intent {
-  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  /// Creates an intent that the currently focused control, if it's a button.
   const ButtonActivateIntent();
 }
 
@@ -1588,16 +1604,16 @@ class ButtonActivateIntent extends Intent {
 /// activate a control. By default, is bound to [LogicalKeyboardKey.enter],
 /// [LogicalKeyboardKey.gameButtonA], and [LogicalKeyboardKey.space] in the
 /// default keyboard map in [WidgetsApp].
-abstract class ActivateAction extends Action<ActivateIntent> {}
+abstract class ActivateAction extends Action<ActivateIntent> { }
 
 /// An intent that selects the currently focused control.
-class SelectIntent extends Intent {}
+class SelectIntent extends Intent { }
 
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
 /// select something. It is not bound to any key by default.
-abstract class SelectAction extends Action<SelectIntent> {}
+abstract class SelectAction extends Action<SelectIntent> { }
 
 /// An [Intent] that dismisses the currently focused widget.
 ///
@@ -1608,19 +1624,22 @@ abstract class SelectAction extends Action<SelectIntent> {}
 ///  - [ModalRoute] which listens for this intent to dismiss modal routes
 ///    (dialogs, pop-up menus, drawers, etc).
 class DismissIntent extends Intent {
-  /// Creates a const [DismissIntent].
+  /// Creates an intent that dismisses the currently focused widget.
   const DismissIntent();
 }
 
 /// An action that dismisses the focused widget.
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
-abstract class DismissAction extends Action<DismissIntent> {}
+abstract class DismissAction extends Action<DismissIntent> { }
 
 /// An [Intent] that evaluates a series of specified [orderedIntents] for
 /// execution.
+///
+/// The first intent that matches an enabled action is used.
 class PrioritizedIntents extends Intent {
-  /// Creates a set of const [PrioritizedIntents].
+  /// Creates an intent that is used with [PrioritizedAction] to specify a list
+  /// of intents, the first available of which will be used.
   const PrioritizedIntents({
     required this.orderedIntents,
   })  : assert(orderedIntents != null);

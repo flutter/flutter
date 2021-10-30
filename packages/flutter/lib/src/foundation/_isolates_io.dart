@@ -35,13 +35,15 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   final Completer<R> result = Completer<R>();
   errorPort.listen((dynamic errorData) {
     assert(errorData is List<dynamic>);
-    assert(errorData.length == 2);
-    final Exception exception = Exception(errorData[0]);
-    final StackTrace stack = StackTrace.fromString(errorData[1] as String);
-    if (result.isCompleted) {
-      Zone.current.handleUncaughtError(exception, stack);
-    } else {
-      result.completeError(exception, stack);
+    if (errorData is List<dynamic>) {
+      assert(errorData.length == 2);
+      final Exception exception = Exception(errorData[0]);
+      final StackTrace stack = StackTrace.fromString(errorData[1] as String);
+      if (result.isCompleted) {
+        Zone.current.handleUncaughtError(exception, stack);
+      } else {
+        result.completeError(exception, stack);
+      }
     }
   });
   exitPort.listen((dynamic exitData) {
@@ -57,6 +59,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
+  exitPort.close();
   errorPort.close();
   isolate.kill();
   Timeline.finishSync();

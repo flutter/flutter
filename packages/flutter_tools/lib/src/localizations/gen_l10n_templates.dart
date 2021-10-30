@@ -12,8 +12,7 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
+@(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
@@ -74,11 +73,10 @@ import 'package:intl/intl.dart' as intl;
 abstract class @(class) {
   @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  // ignore: unused_field
   final String localeName;
 
-  static @(class)? of(BuildContext context) {
-    return Localizations.of<@(class)>(context, @(class));
+  static @(class)@(canBeNullable) of(BuildContext context) {
+    return Localizations.of<@(class)>(context, @(class))@(needsNullCheck);
   }
 
   static const LocalizationsDelegate<@(class)> delegate = _@(class)Delegate();
@@ -110,7 +108,12 @@ abstract class @(class) {
 @(delegateClass)
 ''';
 
-const String numberFormatTemplate = '''
+const String numberFormatPositionalTemplate = '''
+    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+''';
+
+const String numberFormatNamedTemplate = '''
     final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
       @(parameters)
@@ -153,13 +156,51 @@ const String pluralMethodTemplate = '''
     );
   }''';
 
+const String pluralMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+@(dateFormatting)
+@(numberFormatting)
+    final String @(variable) = intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
+@(pluralLogicArgs),
+    );
+
+    return @(string);
+  }''';
+
+const String selectMethodTemplate = '''
+  @override
+  String @(name)(@(parameters)) {
+    return intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+  }''';
+
+const String selectMethodTemplateInString = '''
+  @override
+  String @(name)(@(parameters)) {
+    final String @(variable) = intl.Intl.select(
+      @(choice),
+      {
+        @(cases)
+      },
+      desc: '@(description)'
+    );
+
+    return @(string);
+  }''';
+
 const String classFileTemplate = '''
 @(header)
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
-import '@(fileName)';
 
-// ignore_for_file: unnecessary_brace_in_string_interps
+@(requiresIntlImport)
+import '@(fileName)';
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
@@ -262,15 +303,15 @@ case '@(languageCode)': {
 }''';
 
 const String languageCodeSwitchTemplate = '''
-@(comment)
-switch (locale.languageCode) {
-  @(switchClauses)
-}
+  @(comment)
+  switch (locale.languageCode) {
+    @(switchClauses)
+  }
 ''';
 
 const String allCodesLookupTemplate = '''
-// Lookup logic when language+script+country codes are specified.
-switch (locale.toString()) {
-  @(allCodesSwitchClauses)
-}
+  // Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    @(allCodesSwitchClauses)
+  }
 ''';

@@ -12,6 +12,8 @@
   "previousMonthTooltip": "Претходни месец",
   "nextPageTooltip": "Следећа страница",
   "previousPageTooltip": "Претходна страница",
+  "firstPageTooltip": "Прва страница",
+  "lastPageTooltip": "Последња страница",
   "showMenuTooltip": "Прикажи мени",
   "aboutListTileTitle": "О апликацији $applicationName",
   "licensesPageTitle": "Лиценце",

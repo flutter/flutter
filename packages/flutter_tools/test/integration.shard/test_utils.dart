@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -35,6 +37,13 @@ void writeFile(String path, String content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content)
+    ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
+}
+
+void writeBytesFile(String path, List<int> content) {
+  fileSystem.file(path)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(content)
     ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
 }
 
@@ -94,7 +103,7 @@ Future<void> pollForServiceExtensionValue<T>({
     }
   }
   fail(
-    'Did not find expected value for service extension \'$extension\'. All call'
-    ' attempts responded with \'$continuePollingValue\'.',
+    "Did not find expected value for service extension '$extension'. All call"
+    " attempts responded with '$continuePollingValue'.",
   );
 }

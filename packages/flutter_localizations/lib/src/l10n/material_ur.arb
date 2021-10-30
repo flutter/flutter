@@ -10,6 +10,8 @@
   "previousMonthTooltip": "پچھلا مہینہ",
   "nextPageTooltip": "اگلا صفحہ",
   "previousPageTooltip": "گزشتہ صفحہ",
+  "firstPageTooltip": "پہلا صفحہ",
+  "lastPageTooltip": "آخری صفحہ",
   "showMenuTooltip": "مینو دکھائیں",
   "aboutListTileTitle": "$applicationName کے بارے میں",
   "licensesPageTitle": "لائسنسز",

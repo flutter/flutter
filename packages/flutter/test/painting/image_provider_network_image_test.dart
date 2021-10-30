@@ -12,16 +12,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding();
 
-  final DecoderCallback _basicDecoder = (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  Future<Codec>  _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
     return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
-  };
+  }
 
   late _FakeHttpClient httpClient;
 
@@ -36,7 +35,7 @@ void main() {
     PaintingBinding.instance!.imageCache!.clearLiveImages();
   });
 
-  test('Expect thrown exception with statusCode - evicts from cache', () async {
+  test('Expect thrown exception with statusCode - evicts from cache and drains', () async {
     final int errorStatusCode = HttpStatus.notFound;
     const String requestUrl = 'foo-url';
 
@@ -69,7 +68,8 @@ void main() {
         .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
         .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
-  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
+    expect(httpClient.request.response.drained, true);
+  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
 
   test('Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set', () async {
     httpClient.thrownError = 'client1';
@@ -94,7 +94,7 @@ void main() {
     debugNetworkImageHttpClientProvider = () => client2;
     await loadNetworkImage();
     expect(capturedErrors, <dynamic>['client1', 'client2']);
-  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
 
   test('Propagates http client errors during resolve()', () async {
     httpClient.thrownError = Error();
@@ -155,7 +155,7 @@ void main() {
       expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
       expect(events[i].expectedTotalBytes, kTransparentImage.length);
     }
-  }, skip: isBrowser); // Browser loads images through <img> not Http.
+  }, skip: isBrowser); // [intended] Browser loads images through <img> not Http.
 
   test('NetworkImage is evicted from cache on SocketException', () async {
     final _FakeHttpClient mockHttpClient = _FakeHttpClient();
@@ -187,7 +187,7 @@ void main() {
     expect(imageCache!.containsKey(result), isFalse);
 
     debugNetworkImageHttpClientProvider = null;
-  }, skip: isBrowser); // Browser does not resolve images this way.
+  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
   Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
@@ -235,6 +235,8 @@ class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
 }
 
 class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
+  bool drained = false;
+
   @override
   int statusCode = HttpStatus.ok;
 
@@ -254,6 +256,12 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
       onError: onError,
       cancelOnError: cancelOnError,
     );
+  }
+
+  @override
+  Future<E> drain<E>([E? futureValue]) async {
+    drained = true;
+    return futureValue ?? <int>[] as E;
   }
 }
 

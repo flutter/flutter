@@ -4,9 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import '../common.dart';
 
@@ -45,7 +43,7 @@ void main() {
   final List<Offset> _offsets = <Offset>[
     const Offset(1.1, 1.2),
     const Offset(1.5, 1.8),
-    const Offset(0.0, 0.0),
+    Offset.zero,
     const Offset(-1.1, -1.2),
     const Offset(-1.5, -1.8),
   ];

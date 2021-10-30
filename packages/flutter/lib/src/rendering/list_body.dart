@@ -105,12 +105,12 @@ class RenderListBody extends RenderBox
         ErrorDescription(
           'RenderListBody does not clip or resize its children, so it must be '
           'placed in a parent that does not constrain the main '
-          'axis.'
+          'axis.',
         ),
         ErrorHint(
           'You probably want to put the RenderListBody inside a '
-          'RenderViewport with a matching main axis.'
-        )
+          'RenderViewport with a matching main axis.',
+        ),
       ]);
     }());
     assert(() {
@@ -132,7 +132,7 @@ class RenderListBody extends RenderBox
         ErrorDescription(
           "RenderListBody forces its children to expand to fit the RenderListBody's container, "
           'so it must be placed in a parent that constrains the cross '
-          'axis to a finite dimension.'
+          'axis to a finite dimension.',
         ),
         // TODO(jacobr): this hint is a great candidate to promote to being an
         // automated quick fix in the future.
@@ -141,8 +141,8 @@ class RenderListBody extends RenderBox
           'one direction inside one of another direction, you will want to '
           'wrap the inner one inside a box that fixes the dimension in that direction, '
           'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '
-          'This is relatively expensive, however.' // (that's why we don't do it automatically)
-        )
+          'This is relatively expensive, however.', // (that's why we don't do it automatically)
+        ),
       ]);
     }());
     return true;

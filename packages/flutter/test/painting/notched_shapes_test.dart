@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CircularNotchedRectangle', () {

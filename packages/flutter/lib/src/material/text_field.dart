@@ -4,13 +4,11 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:characters/characters.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -116,8 +114,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
     _state._requestKeyboard();
-    if (_state.widget.onTap != null)
-      _state.widget.onTap!();
+    _state.widget.onTap?.call();
   }
 
   @override
@@ -183,7 +180,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/text_field.png)
 ///
 /// ```dart
-/// TextField(
+/// const TextField(
 ///   obscureText: true,
 ///   decoration: InputDecoration(
 ///     border: OutlineInputBorder(),
@@ -207,16 +204,19 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```dart
 /// late TextEditingController _controller;
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller = TextEditingController();
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
 /// }
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
@@ -258,13 +258,15 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
 ///
-  /// ## Handling emojis and other complex characters
+/// ## Handling emojis and other complex characters
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// In the live Dartpad example above, try typing the emoji 👨‍👩‍👦
 /// into the field and submitting. Because the example code measures the length
 /// with `value.characters.length`, the emoji is correctly counted as a single
 /// character.
+///
+/// {@macro flutter.widgets.editableText.showCaretOnScreen}
 ///
 /// See also:
 ///
@@ -311,7 +313,7 @@ class TextField extends StatefulWidget {
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
   /// characters may be entered, and the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  /// switch to the [decoration].errorStyle when the limit is exceeded.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -323,8 +325,8 @@ class TextField extends StatefulWidget {
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
-  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
-  /// arguments must not be null.
+  /// [selectionHeightStyle], [selectionWidthStyle], [enableSuggestions], and
+  /// [enableIMEPersonalizedLearning] arguments must not be null.
   ///
   /// See also:
   ///
@@ -360,7 +362,7 @@ class TextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.25.0-5.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.',
     )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
@@ -388,6 +390,7 @@ class TextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
+    this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -421,10 +424,13 @@ class TextField extends StatefulWidget {
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(!identical(textInputAction, TextInputAction.newline) ||
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
          maxLines == 1 ||
          !identical(keyboardType, TextInputType.text),
-         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+       ),
+       assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -546,9 +552,13 @@ class TextField extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
+  ///  * [expands], which determines whether the field should fill the height of
+  ///    its parent.
   final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -612,7 +622,7 @@ class TextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.25.0-5.0.pre.'
+    'This feature was deprecated after v1.25.0-5.0.pre.',
   )
   final bool maxLengthEnforced;
 
@@ -813,8 +823,11 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   @override
-  _TextFieldState createState() => _TextFieldState();
+  State<TextField> createState() => _TextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -853,6 +866,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
@@ -1141,6 +1155,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Color selectionColor;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
+    VoidCallback? handleDidGainAccessibilityFocus;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1166,6 +1181,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        handleDidGainAccessibilityFocus = () {
+          // macOS automatically activated the TextField when it receives
+          // accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
         break;
 
       case TargetPlatform.android:
@@ -1247,6 +1269,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           autofillHints: widget.autofillHints,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           restorationId: 'editable',
+          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         ),
       ),
     );
@@ -1290,6 +1313,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
+<<<<<<< HEAD
     child = MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -1307,6 +1331,33 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
                 _requestKeyboard();
               },
+=======
+    return FocusTrapArea(
+      focusNode: focusNode,
+      child: MouseRegion(
+        cursor: effectiveMouseCursor,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
+          child: AnimatedBuilder(
+            animation: controller, // changes the _currentLength
+            builder: (BuildContext context, Widget? child) {
+              return Semantics(
+                maxValueLength: semanticsMaxValueLength,
+                currentValueLength: _currentLength,
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid)
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  _requestKeyboard();
+                },
+                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                child: child,
+              );
+            },
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+>>>>>>> 18116933e77adc82f80866c928266a5b4f1ed645
               child: child,
             );
           },

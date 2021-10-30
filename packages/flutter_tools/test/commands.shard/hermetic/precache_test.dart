@@ -2,31 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  MockCache cache;
-  Set<DevelopmentArtifact> artifacts;
+  FakeCache cache;
 
   setUp(() {
-    cache = MockCache();
-    // Release lock between test cases.
-    cache.releaseLock();
-
-    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
-    when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
-      artifacts = invocation.positionalArguments.first as Set<DevelopmentArtifact>;
-      return Future<void>.value(null);
-    });
+    cache = FakeCache();
+    cache.isUpToDateValue = false;
   });
 
   testUsingContext('precache should acquire lock', () async {
@@ -39,8 +33,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    // Do not throw StateError, lock is acquired.
-    expect(() => cache.checkLockAcquired(), returnsNormally);
+    expect(cache.locked, true);
   });
 
   testUsingContext('precache should not re-entrantly acquire lock', () async {
@@ -59,9 +52,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    expect(Cache.isLocked(), isFalse);
-    // Do not throw StateError, acquired reentrantly with FLUTTER_ALREADY_LOCKED.
-    expect(() => cache.checkLockAcquired(), returnsNormally);
+    expect(cache.locked, false);
   });
 
   testUsingContext('precache downloads web artifacts on dev branch when feature is enabled.', () async {
@@ -73,7 +64,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.web,
     }));
@@ -88,7 +79,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     }));
   });
@@ -102,7 +93,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.macOS,
     }));
@@ -117,7 +108,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     }));
   });
@@ -131,7 +122,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.windows,
     }));
@@ -146,7 +137,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     }));
   });
@@ -160,7 +151,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.linux,
     }));
@@ -175,7 +166,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     }));
   });
@@ -220,7 +211,7 @@ void main() {
         '--flutter_runner',
       ],
     );
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.iOS,
       DevelopmentArtifact.androidGenSnapshot,
@@ -249,7 +240,7 @@ void main() {
         '--android',
       ],
     );
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.androidGenSnapshot,
       DevelopmentArtifact.androidMaven,
@@ -274,7 +265,7 @@ void main() {
         '--android_internal_build',
       ],
     );
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.androidGenSnapshot,
       DevelopmentArtifact.androidMaven,
@@ -296,7 +287,7 @@ void main() {
       ],
     );
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.iOS,
       DevelopmentArtifact.androidGenSnapshot,
@@ -326,7 +317,7 @@ void main() {
       ],
     );
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.iOS,
       DevelopmentArtifact.androidGenSnapshot,
@@ -355,7 +346,7 @@ void main() {
       ],
     );
 
-    verify(cache.platformOverrideArtifacts = <String>{});
+    expect(cache.platformOverrideArtifacts, <String>{});
   });
 
   testUsingContext('precache with explicit artifact options overrides platform filtering', () async {
@@ -383,15 +374,15 @@ void main() {
       ],
     );
 
-    expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+    expect(cache.artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.macOS,
     }));
-    verify(cache.platformOverrideArtifacts = <String>{'macos'});
+    expect(cache.platformOverrideArtifacts, <String>{'macos'});
   });
 
   testUsingContext('precache deletes artifact stampfiles when --force is provided', () async {
-    when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(true));
+    cache.isUpToDateValue = true;
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
@@ -402,7 +393,7 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
-    verify(cache.clearStampFiles()).called(1);
+    expect(cache.clearedStampFiles, true);
   });
 
   testUsingContext('precache downloads all enabled platforms if no flags are provided.', () async {
@@ -422,7 +413,7 @@ void main() {
     await createTestCommandRunner(command).run(const <String>['precache']);
 
     expect(
-      artifacts,
+      cache.artifacts,
       unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.web,
         DevelopmentArtifact.macOS,
@@ -434,4 +425,38 @@ void main() {
   });
 }
 
-class MockCache extends Mock implements Cache {}
+class FakeCache extends Fake implements Cache {
+  bool isUpToDateValue = false;
+  bool clearedStampFiles = false;
+  bool locked = false;
+  Set<DevelopmentArtifact> artifacts;
+
+  @override
+  Future<void> lock() async {
+    locked = true;
+  }
+
+  @override
+  void releaseLock() {
+    locked = false;
+  }
+
+  @override
+  Future<bool> isUpToDate() async => isUpToDateValue;
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+    artifacts = requiredArtifacts;
+  }
+
+  @override
+  void clearStampFiles() {
+    clearedStampFiles = true;
+  }
+
+  @override
+  Set<String> platformOverrideArtifacts;
+
+  @override
+  bool includeAllPlatforms = false;
+}

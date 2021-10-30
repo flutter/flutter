@@ -24,6 +24,7 @@ Future<TaskResult> analyzerBenchmarkTask() async {
   await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
+    await flutter('update-packages');
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
@@ -56,7 +57,7 @@ class _BenchmarkResult {
 }
 
 abstract class _Benchmark {
-  _Benchmark({ this.watch = false });
+  _Benchmark({this.watch = false});
 
   final bool watch;
 
@@ -65,9 +66,9 @@ abstract class _Benchmark {
   Directory get directory;
 
   List<String> get options => <String>[
-    '--benchmark',
-    if (watch) '--watch',
-  ];
+        '--benchmark',
+        if (watch) '--watch',
+      ];
 
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
@@ -83,7 +84,7 @@ abstract class _Benchmark {
 
 /// Times how long it takes to analyze the Flutter repository.
 class _FlutterRepoBenchmark extends _Benchmark {
-  _FlutterRepoBenchmark({ bool watch = false }) : super(watch: watch);
+  _FlutterRepoBenchmark({bool watch = false}) : super(watch: watch);
 
   @override
   String get title => 'Flutter repo';
@@ -93,14 +94,13 @@ class _FlutterRepoBenchmark extends _Benchmark {
 
   @override
   List<String> get options {
-    return super.options
-      ..add('--flutter-repo');
+    return super.options..add('--flutter-repo');
   }
 }
 
 /// Times how long it takes to analyze the generated "mega_gallery" app.
 class _MegaGalleryBenchmark extends _Benchmark {
-  _MegaGalleryBenchmark({ bool watch = false }) : super(watch: watch);
+  _MegaGalleryBenchmark({bool watch = false}) : super(watch: watch);
 
   @override
   String get title => 'mega gallery';

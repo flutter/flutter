@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:io';
 
 /// Produces a per-library coverage summary when fed an lcov file, sorted by
@@ -17,7 +15,7 @@ void main(List<String> args) {
   }
   final List<String> lines = File(args.single).readAsLinesSync();
   final List<Coverage> coverages = <Coverage>[];
-  Coverage currentCoverage;
+  Coverage? currentCoverage;
 
   for (final String line in lines) {
     if (line.startsWith('SF:')) {
@@ -26,9 +24,9 @@ void main(List<String> args) {
       coverages.add(currentCoverage);
     }
     if (line.startsWith('DA')) {
-      currentCoverage.totalLines += 1;
+      currentCoverage?.totalLines += 1;
       if (!line.endsWith(',0')) {
-        currentCoverage.testedLines += 1;
+        currentCoverage?.testedLines += 1;
       }
     }
     if (line == 'end_of_record') {
@@ -53,7 +51,7 @@ void main(List<String> args) {
 }
 
 class Coverage {
-  String library;
+  String? library;
   int totalLines = 0;
   int testedLines = 0;
 }

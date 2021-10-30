@@ -6,32 +6,39 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   task(() async {
-    int vmServicePort;
+    int? vmServicePort;
 
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     section('TEST WHETHER `flutter drive --route` WORKS');
     await inDirectory(appDir, () async {
-      return await flutter(
+      return flutter(
         'drive',
-        options: <String>['--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        options: <String>[
+          '--verbose',
+          '-d',
+          device.deviceId,
+          '--route',
+          '/smuggle-it',
+          'lib/route.dart',
+        ],
         canFail: false,
       );
     });
     section('TEST WHETHER `flutter run --route` WORKS');
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
-      bool ok;
+      late bool ok;
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -49,7 +56,7 @@ void main() {
               print('service protocol connection available at port $vmServicePort');
               print('run: ready!');
               ready.complete();
-              ok ??= true;
+              ok = true;
             }
           }
         });
@@ -59,7 +66,7 @@ void main() {
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
         });
-      run.exitCode.then<void>((int exitCode) { ok = false; });
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';

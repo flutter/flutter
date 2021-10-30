@@ -2,12 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
+
+import '../image_data.dart';
+import 'fake_codec.dart';
 
 class FakeFrameInfo implements FrameInfo {
   const FakeFrameInfo(this._duration, this._image);
@@ -105,7 +115,7 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 1);
@@ -120,7 +130,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
@@ -143,7 +153,7 @@ void main() {
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     final ImageStreamListener streamListener = ImageStreamListener(listener);
     imageStream.addListener(streamListener);
     await tester.idle();
@@ -291,7 +301,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
@@ -467,7 +477,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
     final ImageStreamCompleterHandle handle = imageStream.keepAlive();
 
@@ -508,13 +518,13 @@ void main() {
     );
 
     final List<ImageInfo> emittedImages1 = <ImageInfo>[];
-    final ImageListener listener1 = (ImageInfo image, bool synchronousCall) {
+    void listener1(ImageInfo image, bool synchronousCall) {
       emittedImages1.add(image);
-    };
+    }
     final List<ImageInfo> emittedImages2 = <ImageInfo>[];
-    final ImageListener listener2 = (ImageInfo image, bool synchronousCall) {
+    void listener2(ImageInfo image, bool synchronousCall) {
       emittedImages2.add(image);
-    };
+    }
     imageStream.addListener(ImageStreamListener(listener1));
     imageStream.addListener(ImageStreamListener(listener2));
 
@@ -554,7 +564,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -587,7 +597,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -623,9 +633,9 @@ void main() {
     );
 
     dynamic capturedException;
-    final ImageErrorListener errorListener = (dynamic exception, StackTrace? stackTrace) {
+    void errorListener(dynamic exception, StackTrace? stackTrace) {
       capturedException = exception;
-    };
+    }
 
     streamUnderTest.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) { },
@@ -658,7 +668,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    void listener(ImageInfo image, bool synchronousCall) { }
     imageStream.addListener(ImageStreamListener(listener));
 
     codecCompleter.complete(mockCodec);
@@ -723,9 +733,9 @@ void main() {
     );
 
     int onImageCount = 0;
-    final ImageListener activeListener = (ImageInfo image, bool synchronousCall) {
+    void activeListener(ImageInfo image, bool synchronousCall) {
       onImageCount += 1;
-    };
+    }
     bool lastListenerDropped = false;
     imageStream.addOnLastListenerRemovedCallback(() {
       lastListenerDropped = true;
@@ -780,6 +790,32 @@ void main() {
     handle.dispose();
   });
 
+  test('MultiFrameImageStreamCompleter - one frame image should only be decoded once', () async {
+    final FakeCodec oneFrameCodec = await FakeCodec.fromData(Uint8List.fromList(kTransparentImage));
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+    final Completer<void> decodeCompleter = Completer<void>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+    final ImageStreamListener imageListener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      decodeCompleter.complete();
+    });
+
+    imageStream.keepAlive();  // do not dispose
+    imageStream.addListener(imageListener);
+    codecCompleter.complete(oneFrameCodec);
+    await decodeCompleter.future;
+
+    imageStream.removeListener(imageListener);
+    expect(oneFrameCodec.numFramesAsked, 1);
+
+    // Adding a new listener for decoded imageSteam, the one frame image should
+    // not be decoded again.
+    imageStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+    expect(oneFrameCodec.numFramesAsked, 1);
+  });  // https://github.com/flutter/flutter/issues/82532
+
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
   // https://github.com/flutter/flutter/issues/30344
   // testWidgets('remove and add listener before a delayed frame is scheduled', (WidgetTester tester) async {
@@ -801,7 +837,7 @@ void main() {
   //
   //   final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
   //   final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
-  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, const Duration(milliseconds: 0));
+  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, Duration.zero);
   //
   //   mockCodec.completeNextFrame(frame1);
   //   await tester.idle(); // let nextFrameFuture complete

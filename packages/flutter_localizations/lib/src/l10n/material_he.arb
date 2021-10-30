@@ -16,6 +16,8 @@
   "previousMonthTooltip": "החודש הקודם",
   "nextPageTooltip": "הדף הבא",
   "previousPageTooltip": "הדף הקודם",
+  "firstPageTooltip": "לדף הראשון",
+  "lastPageTooltip": "לדף האחרון",
   "showMenuTooltip": "הצגת התפריט",
   "aboutListTileTitle": "מידע על $applicationName",
   "licensesPageTitle": "רישיונות",

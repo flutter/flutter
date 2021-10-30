@@ -2,20 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  FileSystem fileSystem;
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+  });
+
   testUsingContext('default l10n settings', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
@@ -38,10 +50,12 @@ void main() {
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('not using synthetic packages', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
@@ -72,10 +86,12 @@ void main() {
     expect(l10nDirectory.existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('throws error when arguments are invalid', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
@@ -98,12 +114,14 @@ void main() {
         '--header="some header',
         '--header-file="header.txt"',
       ]),
-      throwsA(isA<ToolExit>()),
+      throwsToolExit(),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('l10n yaml file takes precedence over command line arguments', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
@@ -130,5 +148,8 @@ void main() {
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

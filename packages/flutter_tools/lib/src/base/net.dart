@@ -19,13 +19,14 @@ typedef HttpClientFactory = HttpClient Function();
 
 typedef UrlTunneller = Future<String> Function(String url);
 
+/// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
   Net({
-    HttpClientFactory httpClientFactory,
-    @required Logger logger,
-    @required Platform platform,
+    HttpClientFactory? httpClientFactory,
+    required Logger logger,
+    required Platform platform,
   }) :
-    _httpClientFactory = httpClientFactory,
+    _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
     _logger = logger,
     _platform = platform;
 
@@ -43,15 +44,16 @@ class Net {
   /// returns an empty list.
   ///
   /// If [maxAttempts] is exceeded, returns null.
-  Future<List<int>> fetchUrl(Uri url, {
-    int maxAttempts,
-    File destFile,
+  Future<List<int>?> fetchUrl(Uri url, {
+    int? maxAttempts,
+    File? destFile,
+    @visibleForTesting Duration? durationOverride,
   }) async {
     int attempts = 0;
     int durationSeconds = 1;
     while (true) {
       attempts += 1;
-      _MemoryIOSink memorySink;
+      _MemoryIOSink? memorySink;
       IOSink sink;
       if (destFile == null) {
         memorySink = _MemoryIOSink();
@@ -65,7 +67,7 @@ class Net {
         destSink: sink,
       );
       if (result) {
-        return memorySink?.writes?.takeBytes() ?? <int>[];
+        return memorySink?.writes.takeBytes() ?? <int>[];
       }
 
       if (maxAttempts != null && attempts >= maxAttempts) {
@@ -76,7 +78,7 @@ class Net {
         'Download failed -- attempting retry $attempts in '
         '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...',
       );
-      await Future<void>.delayed(Duration(seconds: durationSeconds));
+      await Future<void>.delayed(durationOverride ?? Duration(seconds: durationSeconds));
       if (durationSeconds < 64) {
         durationSeconds *= 2;
       }
@@ -88,19 +90,14 @@ class Net {
 
   // Returns true on success and false on failure.
   Future<bool> _attempt(Uri url, {
-    IOSink destSink,
+    IOSink? destSink,
     bool onlyHeaders = false,
   }) async {
     assert(onlyHeaders || destSink != null);
     _logger.printTrace('Downloading: $url');
-    HttpClient httpClient;
-    if (_httpClientFactory != null) {
-      httpClient = _httpClientFactory();
-    } else {
-      httpClient = HttpClient();
-    }
+    final HttpClient httpClient = _httpClientFactory();
     HttpClientRequest request;
-    HttpClientResponse response;
+    HttpClientResponse? response;
     try {
       if (onlyHeaders) {
         request = await httpClient.headUrl(url);
@@ -109,7 +106,7 @@ class Net {
       }
       response = await request.close();
     } on ArgumentError catch (error) {
-      final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+      final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
       if (overrideUrl != null && url.toString().contains(overrideUrl)) {
         _logger.printError(error.toString());
         throwToolExit(
@@ -159,7 +156,7 @@ class Net {
     _logger.printTrace('Received response from server, collecting bytes...');
     try {
       assert(destSink != null);
-      await response.forEach(destSink.add);
+      await response.forEach(destSink!.add);
       return true;
     } on IOException catch (error) {
       _logger.printTrace('Download error: $error');
@@ -170,8 +167,6 @@ class Net {
     }
   }
 }
-
-
 
 /// An IOSink that collects whatever is written to it.
 class _MemoryIOSink implements IOSink {
@@ -198,12 +193,12 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void write(Object obj) {
+  void write(Object? obj) {
     add(encoding.encode('$obj'));
   }
 
   @override
-  void writeln([ Object obj = '' ]) {
+  void writeln([ Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
@@ -220,7 +215,7 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [ StackTrace stackTrace ]) {
+  void addError(dynamic error, [ StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 

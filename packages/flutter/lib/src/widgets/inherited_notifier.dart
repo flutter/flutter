@@ -43,13 +43,13 @@ import 'framework.dart';
 /// just need to know that there is one in their ancestry. This can help with
 /// decoupling widgets from their models.
 ///
-/// ```dart imports
+/// ```dart dartImports
 /// import 'dart:math' as math;
 /// ```
 ///
 /// ```dart preamble
 /// class SpinModel extends InheritedNotifier<AnimationController> {
-///   SpinModel({
+///   const SpinModel({
 ///     Key? key,
 ///     AnimationController? notifier,
 ///     required Widget child,
@@ -61,7 +61,7 @@ import 'framework.dart';
 /// }
 ///
 /// class Spinner extends StatelessWidget {
-///   const Spinner();
+///   const Spinner({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -157,7 +157,7 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   }
 
   @override
-  _InheritedNotifierElement<T> createElement() => _InheritedNotifierElement<T>(this);
+  InheritedElement createElement() => _InheritedNotifierElement<T>(this);
 }
 
 class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {

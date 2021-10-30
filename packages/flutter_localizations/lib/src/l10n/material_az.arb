@@ -8,6 +8,8 @@
   "nextMonthTooltip": "Növbəti ay",
   "previousMonthTooltip": "Keçən ay",
   "nextPageTooltip": "Növbəti səhifə",
+  "firstPageTooltip": "Birinci səhifə",
+  "lastPageTooltip": "Son səhifə",
   "previousPageTooltip": "Əvvəlki səhifə",
   "showMenuTooltip": "Menyunu göstərin",
   "aboutListTileTitle": "$applicationName haqqında",

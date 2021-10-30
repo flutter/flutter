@@ -78,7 +78,7 @@ import 'theme.dart';
 ///         onTap: () {
 ///           print('Card tapped.');
 ///         },
-///         child: Container(
+///         child: const SizedBox(
 ///           width: 300,
 ///           height: 100,
 ///           child: Text('A card that can be tapped'),

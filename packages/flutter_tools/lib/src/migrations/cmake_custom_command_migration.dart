@@ -5,7 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
-import '../project.dart';
+import '../cmake_project.dart';
 
 // CMake's add_custom_command() should use VERBATIM to handle escaping of spaces
 // and special characters correctly.
@@ -49,15 +49,26 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
     final Iterable<RegExpMatch> matches = addCustomCommand.allMatches(originalProjectContents);
 
     for (final RegExpMatch match in matches) {
-      final String addCustomCommandOriginal = match.group(1);
-      if (addCustomCommandOriginal?.contains('VERBATIM') == false) {
+      final String? addCustomCommandOriginal = match.group(1);
+      if (addCustomCommandOriginal != null && addCustomCommandOriginal.contains('VERBATIM') == false) {
         final String addCustomCommandReplacement = '$addCustomCommandOriginal\n  VERBATIM';
         newProjectContents = newProjectContents.replaceAll(addCustomCommandOriginal, addCustomCommandReplacement);
       }
+
+      // CMake's add_custom_command() should add FLUTTER_TARGET_PLATFORM to support multi-architecture.
+      // However, developers would get the following warning every time if we do nothing.
+      // ------------------------------
+      // CMake Warning:
+      //   Manually-specified variables were not used by the project:
+      //    FLUTTER_TARGET_PLATFORM
+      // ------------------------------
+      if (addCustomCommandOriginal?.contains('linux-x64') == true) {
+        newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
+      }
     }
     if (originalProjectContents != newProjectContents) {
-      logger.printStatus('add_custom_command() missing VERBATIM, updating.');
-      _cmakeFile.writeAsStringSync(newProjectContents.toString());
+      logger.printStatus('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.');
+      _cmakeFile.writeAsStringSync(newProjectContents);
     }
     return true;
   }

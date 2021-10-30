@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
@@ -28,7 +27,7 @@ import 'theme.dart';
 ///     color: Colors.white,
 ///     child: bottomAppBarContents,
 ///   ),
-///   floatingActionButton: FloatingActionButton(onPressed: null),
+///   floatingActionButton: const FloatingActionButton(onPressed: null),
 /// )
 /// ```
 /// {@end-tool}
@@ -43,20 +42,20 @@ import 'theme.dart';
 ///
 /// ```dart
 /// void main() {
-///   runApp(BottomAppBarDemo());
+///   runApp(const BottomAppBarDemo());
 /// }
 ///
 /// class BottomAppBarDemo extends StatefulWidget {
-///   const BottomAppBarDemo();
+///   const BottomAppBarDemo({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   State createState() => _BottomAppBarDemoState();
 /// }
 ///
 /// class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
-///   var _showFab = true;
-///   var _showNotch = true;
-///   var _fabLocation = FloatingActionButtonLocation.endDocked;
+///   bool _showFab = true;
+///   bool _showNotch = true;
+///   FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
 ///
 ///   void _onShowNotchChanged(bool value) {
 ///     setState(() {
@@ -70,9 +69,9 @@ import 'theme.dart';
 ///     });
 ///   }
 ///
-///   void _onFabLocationChanged(dynamic value) {
+///   void _onFabLocationChanged(FloatingActionButtonLocation? value) {
 ///     setState(() {
-///       _fabLocation = value;
+///       _fabLocation = value ?? FloatingActionButtonLocation.endDocked;
 ///     });
 ///   }
 ///
@@ -82,55 +81,47 @@ import 'theme.dart';
 ///       home: Scaffold(
 ///         appBar: AppBar(
 ///           automaticallyImplyLeading: false,
-///           title: Text("Bottom App Bar Demo"),
+///           title: const Text('Bottom App Bar Demo'),
 ///         ),
 ///         body: ListView(
 ///           padding: const EdgeInsets.only(bottom: 88),
-///           children: [
+///           children: <Widget>[
 ///             SwitchListTile(
-///               title: Text(
-///                 "Floating Action Button",
+///               title: const Text(
+///                 'Floating Action Button',
 ///               ),
 ///               value: _showFab,
 ///               onChanged: _onShowFabChanged,
 ///             ),
 ///             SwitchListTile(
-///               title: Text("Notch"),
+///               title: const Text('Notch'),
 ///               value: _showNotch,
 ///               onChanged: _onShowNotchChanged,
 ///             ),
-///             Padding(
-///               padding: const EdgeInsets.all(16),
-///               child: Text("Floating action button position"),
+///             const Padding(
+///               padding: EdgeInsets.all(16),
+///               child: Text('Floating action button position'),
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Docked - End",
-///               ),
+///               title: const Text('Docked - End'),
 ///               value: FloatingActionButtonLocation.endDocked,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Docked - Center",
-///               ),
+///               title: const Text('Docked - Center'),
 ///               value: FloatingActionButtonLocation.centerDocked,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Floating - End",
-///               ),
+///               title: const Text('Floating - End'),
 ///               value: FloatingActionButtonLocation.endFloat,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
 ///             ),
 ///             RadioListTile<FloatingActionButtonLocation>(
-///               title: Text(
-///                 "Floating - Center",
-///               ),
+///               title: const Text('Floating - Center'),
 ///               value: FloatingActionButtonLocation.centerFloat,
 ///               groupValue: _fabLocation,
 ///               onChanged: _onFabLocationChanged,
@@ -141,7 +132,7 @@ import 'theme.dart';
 ///             ? FloatingActionButton(
 ///                 onPressed: () {},
 ///                 child: const Icon(Icons.add),
-///                 tooltip: "Create",
+///                 tooltip: 'Create',
 ///               )
 ///             : null,
 ///         floatingActionButtonLocation: _fabLocation,
@@ -161,9 +152,9 @@ import 'theme.dart';
 ///   });
 ///
 ///   final FloatingActionButtonLocation fabLocation;
-///   final dynamic shape;
+///   final NotchedShape? shape;
 ///
-///   static final centerLocations = <FloatingActionButtonLocation>[
+///   static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
 ///     FloatingActionButtonLocation.centerDocked,
 ///     FloatingActionButtonLocation.centerFloat,
 ///   ];
@@ -176,7 +167,7 @@ import 'theme.dart';
 ///       child: IconTheme(
 ///         data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
 ///         child: Row(
-///           children: [
+///           children: <Widget>[
 ///             IconButton(
 ///               tooltip: 'Open navigation menu',
 ///               icon: const Icon(Icons.menu),
@@ -184,12 +175,12 @@ import 'theme.dart';
 ///             ),
 ///             if (centerLocations.contains(fabLocation)) const Spacer(),
 ///             IconButton(
-///               tooltip: "Search",
+///               tooltip: 'Search',
 ///               icon: const Icon(Icons.search),
 ///               onPressed: () {},
 ///             ),
 ///             IconButton(
-///               tooltip: "Favorite",
+///               tooltip: 'Favorite',
 ///               icon: const Icon(Icons.favorite),
 ///               onPressed: () {},
 ///             ),
@@ -280,6 +271,7 @@ class BottomAppBar extends StatefulWidget {
 
 class _BottomAppBarState extends State<BottomAppBar> {
   late ValueListenable<ScaffoldGeometry> geometryListenable;
+  final GlobalKey materialKey = GlobalKey();
   static const double _defaultElevation = 8.0;
 
   @override
@@ -294,10 +286,11 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
     final CustomClipper<Path> clipper = notchedShape != null
       ? _BottomAppBarClipper(
-        geometry: geometryListenable,
-        shape: notchedShape,
-        notchMargin: widget.notchMargin,
-      )
+          geometry: geometryListenable,
+          shape: notchedShape,
+          materialKey: materialKey,
+          notchMargin: widget.notchMargin,
+        )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
     final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
@@ -308,6 +301,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
+        key: materialKey,
         type: MaterialType.transparency,
         child: widget.child == null
           ? null
@@ -321,6 +315,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   const _BottomAppBarClipper({
     required this.geometry,
     required this.shape,
+    required this.materialKey,
     required this.notchMargin,
   }) : assert(geometry != null),
        assert(shape != null),
@@ -329,17 +324,21 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
+  final GlobalKey materialKey;
   final double notchMargin;
+
+  // Returns the top of the BottomAppBar in global coordinates.
+  double get bottomNavigationBarTop {
+    final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
+    return box?.localToGlobal(Offset.zero).dy ?? 0;
+  }
 
   @override
   Path getClip(Size size) {
     // button is the floating action button's bounding rectangle in the
     // coordinate system whose origin is at the appBar's top left corner,
     // or null if there is no floating action button.
-    final Rect? button = geometry.value.floatingActionButtonArea?.translate(
-      0.0,
-      geometry.value.bottomNavigationBarTop! * -1.0,
-    );
+    final Rect? button = geometry.value.floatingActionButtonArea?.translate(0.0, bottomNavigationBarTop * -1.0);
     return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
   }
 

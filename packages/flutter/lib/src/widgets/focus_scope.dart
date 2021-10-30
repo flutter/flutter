@@ -16,7 +16,7 @@ import 'inherited_notifier.dart';
 ///
 /// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
 /// this widget's [focusNode], unless a focused descendant's [onKey] callback
-/// returns true when called.
+/// returns [KeyEventResult.handled] when called.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. Any desired visual changes should be made when [onFocusChange] is
@@ -163,7 +163,7 @@ import 'inherited_notifier.dart';
 ///         // would start looking for a Focus widget ancestor of the FocusableText
 ///         // instead of finding the one inside of its build function.
 ///         return Container(
-///           padding: EdgeInsets.all(8.0),
+///           padding: const EdgeInsets.all(8.0),
 ///           // Change the color based on whether or not this Container has focus.
 ///           color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
 ///           child: Text(data),
@@ -178,7 +178,7 @@ import 'inherited_notifier.dart';
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: ListView.builder(
-///       itemBuilder: (context, index) => FocusableText(
+///       itemBuilder: (BuildContext context, int index) => FocusableText(
 ///         'Item $index',
 ///         autofocus: index == 0,
 ///       ),
@@ -212,7 +212,9 @@ import 'inherited_notifier.dart';
 /// @override
 /// void dispose() {
 ///   super.dispose();
-///   childFocusNodes.forEach((FocusNode node) => node.dispose());
+///   for (final FocusNode node in childFocusNodes) {
+///     node.dispose();
+///   }
 /// }
 ///
 /// void _addChild() {
@@ -246,7 +248,7 @@ import 'inherited_notifier.dart';
 ///           _addChild();
 ///         });
 ///       },
-///       child: Icon(Icons.add),
+///       child: const Icon(Icons.add),
 ///     ),
 ///   );
 /// }
@@ -281,6 +283,7 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     this.onKey,
+    this.onKeyEvent,
     this.debugLabel,
     this.canRequestFocus,
     this.descendantsAreFocusable = true,
@@ -311,6 +314,24 @@ class Focus extends StatefulWidget {
 
   /// Handler for keys pressed when this object or one of its children has
   /// focus.
+  ///
+  /// Key events are first given to the [FocusNode] that has primary focus, and
+  /// if its [onKeyEvent] method returns [KeyEventResult.ignored], then they are
+  /// given to each ancestor node up the focus hierarchy in turn. If an event
+  /// reaches the root of the hierarchy, it is discarded.
+  ///
+  /// This is not the way to get text input in the manner of a text field: it
+  /// leaves out support for input method editors, and doesn't support soft
+  /// keyboards in general. For text input, consider [TextField],
+  /// [EditableText], or [CupertinoTextField] instead, which do support these
+  /// things.
+  final FocusOnKeyEventCallback? onKeyEvent;
+
+  /// Handler for keys pressed when this object or one of its children has
+  /// focus.
+  ///
+  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
+  /// future. Prefer [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -460,7 +481,7 @@ class Focus extends StatefulWidget {
           'Focus.of(). This can happen because you are using a widget that looks for a Focus '
           'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
           'The context used was:\n'
-          '  $context'
+          '  $context',
         );
       }
       return true;
@@ -475,7 +496,7 @@ class Focus extends StatefulWidget {
           'because you are using a widget that looks for a Focus ancestor, and do not have a '
           'Focus widget ancestor in the current FocusScope.\n'
           'The context used was:\n'
-          '  $context'
+          '  $context',
         );
       }
       return true;
@@ -538,7 +559,7 @@ class Focus extends StatefulWidget {
   }
 
   @override
-  _FocusState createState() => _FocusState();
+  State<Focus> createState() => _FocusState();
 }
 
 class _FocusState extends State<Focus> {
@@ -573,7 +594,7 @@ class _FocusState extends State<Focus> {
     _canRequestFocus = focusNode.canRequestFocus;
     _descendantsAreFocusable = focusNode.descendantsAreFocusable;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
+    _focusAttachment = focusNode.attach(context, onKeyEvent: widget.onKeyEvent, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -643,6 +664,9 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
+      if (widget.onKey != focusNode.onKey) {
+        focusNode.onKey = widget.onKey;
+      }
       if (widget.skipTraversal != null) {
         focusNode.skipTraversal = widget.skipTraversal!;
       }
@@ -652,7 +676,8 @@ class _FocusState extends State<Focus> {
       focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
     } else {
       _focusAttachment!.detach();
-      focusNode.removeListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      _internalNode?.removeListener(_handleAutofocus);
       _initNode();
     }
 
@@ -665,9 +690,7 @@ class _FocusState extends State<Focus> {
     final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
     final bool canRequestFocus = focusNode.canRequestFocus;
     final bool descendantsAreFocusable = focusNode.descendantsAreFocusable;
-    if (widget.onFocusChange != null) {
-      widget.onFocusChange!(focusNode.hasFocus);
-    }
+    widget.onFocusChange?.call(focusNode.hasFocus);
     if (_hasPrimaryFocus != hasPrimaryFocus) {
       setState(() {
         _hasPrimaryFocus = hasPrimaryFocus;
@@ -720,8 +743,9 @@ class _FocusState extends State<Focus> {
 /// The [onKey] argument allows specification of a key event handler that is
 /// invoked when this node or one of its children has focus. Keys are handed to
 /// the primary focused widget first, and then they propagate through the
-/// ancestors of that node, stopping if one of them returns true from [onKey],
-/// indicating that it has handled the event.
+/// ancestors of that node, stopping if one of them returns
+/// [KeyEventResult.handled] from [onKey], indicating that it has handled the
+/// event.
 ///
 /// Managing a [FocusScopeNode] means managing its lifecycle, listening for
 /// changes in focus, and re-parenting it when needed to keep the focus
@@ -805,7 +829,7 @@ class _FocusState extends State<Focus> {
 ///   }
 ///
 ///   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-///     Size stackSize = constraints.biggest;
+///     final Size stackSize = constraints.biggest;
 ///     return Stack(
 ///       fit: StackFit.expand,
 ///       // The backdrop is behind the front widget in the Stack, but the widgets
@@ -824,7 +848,7 @@ class _FocusState extends State<Focus> {
 ///           // foreground pane semi-transparent to see it clearly.
 ///           canRequestFocus: backdropIsVisible,
 ///           child: Pane(
-///             icon: Icon(Icons.close),
+///             icon: const Icon(Icons.close),
 ///             focusNode: backdropNode,
 ///             backgroundColor: Colors.lightBlue,
 ///             onPressed: () => setState(() => backdropIsVisible = false),
@@ -835,11 +859,11 @@ class _FocusState extends State<Focus> {
 ///                 // the foreground pane without the FocusScope.
 ///                 ElevatedButton(
 ///                   onPressed: () => print('You pressed the other button!'),
-///                   child: Text('ANOTHER BUTTON TO FOCUS'),
+///                   child: const Text('ANOTHER BUTTON TO FOCUS'),
 ///                 ),
 ///                 DefaultTextStyle(
 ///                     style: Theme.of(context).textTheme.headline2!,
-///                     child: Text('BACKDROP')),
+///                     child: const Text('BACKDROP')),
 ///               ],
 ///             ),
 ///           ),
@@ -858,7 +882,7 @@ class _FocusState extends State<Focus> {
 ///             }
 ///           },
 ///           child: Pane(
-///             icon: Icon(Icons.menu),
+///             icon: const Icon(Icons.menu),
 ///             focusNode: foregroundNode,
 ///             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
 ///             // yourself that the hidden components do/don't get focus.
@@ -868,7 +892,7 @@ class _FocusState extends State<Focus> {
 ///                 : () => setState(() => backdropIsVisible = true),
 ///             child: DefaultTextStyle(
 ///                 style: Theme.of(context).textTheme.headline2!,
-///                 child: Text('FOREGROUND')),
+///                 child: const Text('FOREGROUND')),
 ///           ),
 ///         ),
 ///       ],
@@ -911,6 +935,7 @@ class FocusScope extends Focus {
     ValueChanged<bool>? onFocusChange,
     bool? canRequestFocus,
     bool? skipTraversal,
+    FocusOnKeyEventCallback? onKeyEvent,
     FocusOnKeyCallback? onKey,
     String? debugLabel,
   })  : assert(child != null),
@@ -923,6 +948,7 @@ class FocusScope extends Focus {
           onFocusChange: onFocusChange,
           canRequestFocus: canRequestFocus,
           skipTraversal: skipTraversal,
+          onKeyEvent: onKeyEvent,
           onKey: onKey,
           debugLabel: debugLabel,
         );
@@ -941,7 +967,7 @@ class FocusScope extends Focus {
   }
 
   @override
-  _FocusScopeState createState() => _FocusScopeState();
+  State<Focus> createState() => _FocusScopeState();
 }
 
 class _FocusScopeState extends _FocusState {

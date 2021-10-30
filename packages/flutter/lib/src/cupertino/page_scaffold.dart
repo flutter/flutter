@@ -26,15 +26,16 @@ import 'theme.dart';
 /// ```dart
 /// int _count = 0;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoPageScaffold(
 ///     // Uncomment to change the background color
 ///     // backgroundColor: CupertinoColors.systemPink,
-///     navigationBar: CupertinoNavigationBar(
+///     navigationBar: const CupertinoNavigationBar(
 ///       middle: const Text('Sample Code'),
 ///     ),
 ///     child: ListView(
-///       children: [
+///       children: <Widget>[
 ///         CupertinoButton(
 ///           onPressed: () => setState(() => _count++),
 ///           child: const Icon(CupertinoIcons.add),
@@ -108,7 +109,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   final bool resizeToAvoidBottomInset;
 
   @override
-  _CupertinoPageScaffoldState createState() => _CupertinoPageScaffoldState();
+  State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {

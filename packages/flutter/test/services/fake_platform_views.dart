@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Used in internal testing.
 class FakePlatformViewController extends PlatformViewController {
@@ -123,7 +123,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
@@ -140,6 +140,8 @@ class FakeAndroidPlatformViewsController {
   Completer<void>? createCompleter;
 
   int? lastClearedFocusViewId;
+
+  bool synchronizeToNativeViewHierarchy = true;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -166,6 +168,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'synchronizeToNativeViewHierarchy':
+        return _synchronizeToNativeViewHierarchy(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -208,9 +212,10 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
+    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
-    final int id = call.arguments['id'] as int;
-    final bool hybrid = call.arguments['hybrid'] as bool;
+    final int id = arguments['id']! as int;
+    final bool hybrid = arguments['hybrid']! as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
       throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
@@ -298,11 +303,16 @@ class FakeAndroidPlatformViewsController {
     lastClearedFocusViewId = id;
     return Future<dynamic>.sync(() => null);
   }
+
+  Future<dynamic> _synchronizeToNativeViewHierarchy(MethodCall call) {
+    synchronizeToNativeViewHierarchy = call.arguments as bool;
+    return Future<dynamic>.sync(() => null);
+  }
 }
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -397,7 +407,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;

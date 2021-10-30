@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
-      alignment: const Alignment(1.0, 1.0),
+      alignment: Alignment.bottomRight,
       child: SizedBox(
         width: 10.0,
         height: 20.0,
@@ -20,7 +20,7 @@ void main() {
           minHeight: 0.0,
           maxHeight: 50.0,
           child: Container(
-            key: inner
+            key: inner,
           ),
         ),
       ),
@@ -58,7 +58,7 @@ void main() {
         child: SizedOverflowBox(
           size: const Size(100.0, 100.0),
           alignment: Alignment.topRight,
-          child: Container(height: 50.0, width: 50.0, key: inner),
+          child: SizedBox(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));
@@ -81,7 +81,7 @@ void main() {
         child: SizedOverflowBox(
           size: const Size(100.0, 100.0),
           alignment: AlignmentDirectional.bottomStart,
-          child: Container(height: 50.0, width: 50.0, key: inner),
+          child: SizedBox(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));

@@ -4,14 +4,14 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -109,7 +109,7 @@ class ListTileTheme extends InheritedTheme {
   final bool dense;
 
   /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// If specified, [shape] defines the [ListTile]'s shape.
   /// {@endtemplate}
   final ShapeBorder? shape;
 
@@ -221,6 +221,8 @@ class ListTileTheme extends InheritedTheme {
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
 ///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
+///  * [ExpansionTile], which combines a [ListTile] with a button that expands
+///    or collapses the tile to reveal or hide the children.
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
@@ -267,7 +269,28 @@ enum ListTileControlAffinity {
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// One ancestor must be a [Material] widget and typically this is
+/// provided by the app's [Scaffold]. The [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] are not
+/// painted by the list tile itself but by the material widget
+/// ancestor. This generally has no effect. However, if an opaque
+/// widget, like `Container(color: Colors.white)`, is included in
+/// between the [ListTile] and its [Material] ancestor, then the
+/// opaque widget will obscure the material widget and its background
+/// [tileColor], etc. If this a problem, one can wrap a material
+/// widget around the list tile, e.g.:
+///
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: ListTile(
+///       title: const Text('ListTile with red background'),
+///       tileColor: Colors.red,
+///     ),
+///   ),
+/// )
+/// ```
 ///
 /// {@tool snippet}
 ///
@@ -399,14 +422,14 @@ enum ListTileControlAffinity {
 ///     child: Container(
 ///       width: 48,
 ///       height: 48,
-///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       padding: const EdgeInsets.symmetric(vertical: 4.0),
 ///       alignment: Alignment.center,
-///       child: CircleAvatar(),
+///       child: const CircleAvatar(),
 ///     ),
 ///   ),
-///   title: Text('title'),
+///   title: const Text('title'),
 ///   dense: false,
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -426,11 +449,12 @@ enum ListTileControlAffinity {
 /// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
+///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
 ///     required this.user,
 ///     required this.viewCount,
-///   });
+///   }) : super(key: key);
 ///
 ///   final Widget thumbnail;
 ///   final String title;
@@ -547,7 +571,7 @@ enum ListTileControlAffinity {
 ///
 /// ```dart preamble
 /// class _ArticleDescription extends StatelessWidget {
-///   _ArticleDescription({
+///   const _ArticleDescription({
 ///     Key? key,
 ///     required this.title,
 ///     required this.subtitle,
@@ -573,7 +597,7 @@ enum ListTileControlAffinity {
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
 ///               Text(
-///                 '$title',
+///                 title,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -582,7 +606,7 @@ enum ListTileControlAffinity {
 ///               ),
 ///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
 ///               Text(
-///                 '$subtitle',
+///                 subtitle,
 ///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
@@ -600,7 +624,7 @@ enum ListTileControlAffinity {
 ///             mainAxisAlignment: MainAxisAlignment.end,
 ///             children: <Widget>[
 ///               Text(
-///                 '$author',
+///                 author,
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black87,
@@ -622,7 +646,7 @@ enum ListTileControlAffinity {
 /// }
 ///
 /// class CustomListItemTwo extends StatelessWidget {
-///   CustomListItemTwo({
+///   const CustomListItemTwo({
 ///     Key? key,
 ///     required this.thumbnail,
 ///     required this.title,
@@ -683,7 +707,7 @@ enum ListTileControlAffinity {
 ///         ),
 ///         title: 'Flutter 1.0 Launch',
 ///         subtitle:
-///           'Flutter continues to improve and expand its horizons.'
+///           'Flutter continues to improve and expand its horizons. '
 ///           'This text should max out at two lines and clip',
 ///         author: 'Dash',
 ///         publishDate: 'Dec 28',
@@ -788,11 +812,6 @@ class ListTile extends StatelessWidget {
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
-  /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
-  /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
-  /// is set to [ThemeData.primaryColor] when [ThemeData.brightness] is
-  /// [Brightness.light] and to [ThemeData.accentColor] when it is [Brightness.dark].
-  ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
   /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
   /// is null.
@@ -838,13 +857,12 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// The shape of the tile's [InkWell].
+  /// The tile's shape.
   ///
-  /// Defines the tile's [InkWell.customBorder].
+  /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
   ///
-  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
-  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 4.0.
+  /// If this property is null then [ListTileTheme.shape] is used.
+  /// If that's null then a rectangular [Border] will be used.
   final ShapeBorder? shape;
 
   /// The tile's internal padding.
@@ -984,7 +1002,10 @@ class ListTile extends StatelessWidget {
     assert(color != null || context != null);
 
     final Iterator<Widget> iterator = tiles.iterator;
-    final bool isNotEmpty = iterator.moveNext();
+    final bool hasNext = iterator.moveNext();
+
+    if (!hasNext)
+      return;
 
     final Decoration decoration = BoxDecoration(
       border: Border(
@@ -1001,7 +1022,7 @@ class ListTile extends StatelessWidget {
       );
       tile = iterator.current;
     }
-    if (isNotEmpty)
+    if (hasNext)
       yield tile;
   }
 
@@ -1017,9 +1038,11 @@ class ListTile extends StatelessWidget {
 
     switch (theme.brightness) {
       case Brightness.light:
-        return selected ? theme.primaryColor : Colors.black45;
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+        return selected ? theme.colorScheme.primary : Colors.black45;
       case Brightness.dark:
-        return selected ? theme.accentColor : null; // null - use current icon theme color
+        return selected ? theme.colorScheme.primary : null; // null - use current icon theme color
     }
   }
 
@@ -1033,14 +1056,9 @@ class ListTile extends StatelessWidget {
     if (!selected && tileTheme?.textColor != null)
       return tileTheme!.textColor;
 
-    if (selected) {
-      switch (theme.brightness) {
-        case Brightness.light:
-          return theme.primaryColor;
-        case Brightness.dark:
-          return theme.accentColor;
-      }
-    }
+    if (selected)
+      return theme.colorScheme.primary;
+
     return defaultColor;
   }
 
@@ -1183,8 +1201,11 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: ColoredBox(
-          color: _tileBackgroundColor(tileTheme),
+        child: Ink(
+          decoration: ShapeDecoration(
+            shape: shape ?? tileTheme.shape ?? const Border(),
+            color: _tileBackgroundColor(tileTheme),
+          ),
           child: SafeArea(
             top: false,
             bottom: false,
@@ -1329,7 +1350,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.leading, _ListTileSlot.leading);
     _mountChild(widget.title, _ListTileSlot.title);
@@ -1391,7 +1412,7 @@ class _ListTileElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -1689,7 +1710,7 @@ class _RenderListTile extends RenderBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
     return Size.zero;
   }
@@ -1724,13 +1745,13 @@ class _RenderListTile extends RenderBox {
       tileWidth != leadingSize.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
     assert(
       tileWidth != trailingSize.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)'
+      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
     final double titleStart = hasLeading

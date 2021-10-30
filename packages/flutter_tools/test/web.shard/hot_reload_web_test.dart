@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -29,7 +31,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
   });
 
@@ -41,7 +43,7 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -68,5 +70,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85575.
 }

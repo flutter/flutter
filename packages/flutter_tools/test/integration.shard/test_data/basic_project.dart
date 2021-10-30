@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'project.dart';
 
 class BasicProject extends Project {
@@ -51,6 +53,50 @@ class BasicProject extends Project {
 
   Uri get topLevelFunctionBreakpointUri => mainDart;
   int get topLevelFunctionBreakpointLine => lineContaining(main, '// TOP LEVEL BREAKPOINT');
+}
+
+class BasicProjectWithTimelineTraces extends Project {
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.12.0-0 <3.0.0"
+
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
+  import 'dart:developer';
+
+  import 'package:flutter/material.dart';
+
+  Future<void> main() async {
+    while (true) {
+      runApp(new MyApp());
+      await Future.delayed(const Duration(milliseconds: 50));
+      Timeline.instantSync('main');
+    }
+  }
+
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      topLevelFunction();
+      return new MaterialApp( // BUILD BREAKPOINT
+        title: 'Flutter Demo',
+        home: new Container(),
+      );
+    }
+  }
+
+  topLevelFunction() {
+    print("topLevelFunction"); // TOP LEVEL BREAKPOINT
+  }
+  ''';
 }
 
 class BasicProjectWithFlutterGen extends Project {

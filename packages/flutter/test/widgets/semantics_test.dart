@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,12 +30,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Container(
-        child: Semantics(
-          label: 'test1',
-          textDirection: TextDirection.ltr,
-          child: Container(),
-        ),
+      Semantics(
+        label: 'test1',
+        textDirection: TextDirection.ltr,
+        child: Container(),
       ),
     );
 
@@ -70,15 +67,13 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
-          child: Semantics(
-            key: key,
-            container: true,
-            label: 'test2a',
-            child: Container(),
-          ),
+          key: key,
+          container: true,
+          label: 'test2a',
+          child: Container(),
         ),
       ),
     ));
@@ -103,18 +98,16 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
+          container: true,
+          label: 'middle',
           child: Semantics(
+            key: key,
             container: true,
-            label: 'middle',
-            child: Semantics(
-              key: key,
-              container: true,
-              label: 'test2b',
-              child: Container(),
-            ),
+            label: 'test2b',
+            child: Container(),
           ),
         ),
       ),
@@ -426,7 +419,7 @@ void main() {
               tags: <SemanticsTag>[const SemanticsTag('custom tag')],
               textDirection: TextDirection.ltr,
             ),
-          ]
+          ],
         ),
       ],
     );
@@ -458,6 +451,7 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onSetText: (String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       ),
@@ -496,6 +490,9 @@ void main() {
             'extent': 5,
           });
           break;
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
+          break;
         default:
           semanticsOwner.performAction(expectedId, action);
       }
@@ -522,6 +519,7 @@ void main() {
           selected: true,
           button: true,
           slider: true,
+          keyboardKey: true,
           link: true,
           textField: true,
           readOnly: true,
@@ -597,7 +595,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
 
     final List<String> performedActions = <String>[];
@@ -771,7 +769,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -839,8 +837,10 @@ void main() {
             ],
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -852,7 +852,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -895,7 +895,10 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true));
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -907,7 +910,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -952,8 +955,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -965,7 +971,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -1013,8 +1019,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -1113,7 +1122,8 @@ void main() {
         ),
         ignoreTransform: true,
         ignoreRect: true,
-        ignoreId: true),
+        ignoreId: true,
+      ),
     );
 
     handle.dispose();
@@ -1140,8 +1150,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreId: true, ignoreRect: true, ignoreTransform: true),
-    );
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
     semantics.dispose();
   });
 

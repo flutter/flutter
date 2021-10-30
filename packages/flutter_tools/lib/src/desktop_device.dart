@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -17,6 +19,7 @@ import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'device_port_forwarder.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -247,6 +250,9 @@ abstract class DesktopDevice extends Device {
     }
     if (debuggingOptions.traceAllowlist != null) {
       addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
+    }
+    if (debuggingOptions.traceSkiaAllowlist != null) {
+      addFlag('trace-skia-allowlist=${debuggingOptions.traceSkiaAllowlist}');
     }
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');

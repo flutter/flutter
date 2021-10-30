@@ -11,6 +11,8 @@
   "previousMonthTooltip": "Өткен ай",
   "nextPageTooltip": "Келесі бет",
   "previousPageTooltip": "Алдыңғы бет",
+  "firstPageTooltip": "Бірінші бет",
+  "lastPageTooltip": "Соңғы бет",
   "showMenuTooltip": "Мәзірді көрсету",
   "aboutListTileTitle": "$applicationName туралы",
   "licensesPageTitle": "Лицензиялар",

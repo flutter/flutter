@@ -307,9 +307,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -622,8 +622,8 @@ void main() {
       child: Material(
         child: Center(
           child: MaterialButton(
-            child: Text('Button'),
             onPressed: null, // button is disabled
+            child: Text('Button'),
           ),
         ),
       ),
@@ -787,7 +787,7 @@ void main() {
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
-      return await tester.pumpWidget(
+      return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
@@ -804,7 +804,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -823,7 +823,7 @@ void main() {
     expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));
@@ -846,8 +846,8 @@ void main() {
     const double disabledElevation = 16;
 
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(
@@ -867,8 +867,8 @@ void main() {
 
   testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
     final Finder rawMaterialButtonFinder = find.descendant(
-        of: find.byType(MaterialButton),
-        matching: find.byType(RawMaterialButton)
+      of: find.byType(MaterialButton),
+      matching: find.byType(RawMaterialButton),
     );
 
     await tester.pumpWidget(

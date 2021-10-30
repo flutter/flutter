@@ -34,7 +34,12 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef _RegisterServiceExtensionCallback = void Function({
+/// Signature for a  method that registers the service extension `callback` with
+/// the given `name`.
+///
+/// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
+/// [BindingBase.registerServiceExtension] implements this signature.
+typedef RegisterServiceExtensionCallback = void Function({
   required String name,
   required ServiceExtensionCallback callback,
 });
@@ -743,7 +748,7 @@ mixin WidgetInspectorService {
 
   FlutterExceptionHandler? _structuredExceptionHandler;
 
-  late _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  late RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -767,7 +772,7 @@ mixin WidgetInspectorService {
   /// name "ext.flutter.inspector.name"), which takes no arguments.
   void _registerSignalServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(),
+    required FutureOr<Object?> Function() callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -785,7 +790,7 @@ mixin WidgetInspectorService {
   /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
     required String name,
-    required FutureOr<Object?> callback(String objectGroup),
+    required FutureOr<Object?> Function(String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -854,7 +859,7 @@ mixin WidgetInspectorService {
   /// lifetimes of object references in the returned JSON (see [disposeGroup]).
   void _registerServiceExtensionWithArg({
     required String name,
-    required FutureOr<Object?> callback(String? objectId, String objectGroup),
+    required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -872,7 +877,7 @@ mixin WidgetInspectorService {
   /// "arg0", "arg1", "arg2", ..., "argn".
   void _registerServiceExtensionVarArgs({
     required String name,
-    required FutureOr<Object?> callback(List<String> args),
+    required FutureOr<Object?> Function(List<String> args) callback,
   }) {
     registerServiceExtension(
       name: name,
@@ -905,7 +910,7 @@ mixin WidgetInspectorService {
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance!;
     if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!);
+      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
     }
     return Future<void>.value();
@@ -975,7 +980,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -1205,12 +1210,26 @@ mixin WidgetInspectorService {
   ///
   /// Use this method only for testing to ensure that object references from one
   /// test case do not impact other test cases.
+  @visibleForTesting
   @protected
   void disposeAllGroups() {
     _groups.clear();
     _idToReferenceData.clear();
     _objectToId.clear();
     _nextId = 0;
+  }
+
+  /// Reset all InspectorService state.
+  ///
+  /// Use this method only for testing to write hermetic tests for
+  /// WidgetInspectorService.
+  @visibleForTesting
+  @protected
+  @mustCallSuper
+  void resetAllState() {
+    disposeAllGroups();
+    selection.clear();
+    setPubRootDirectories(<String>[]);
   }
 
   /// Free all references to objects in a group.
@@ -1508,7 +1527,7 @@ mixin WidgetInspectorService {
   }
 
   bool _isLocalCreationLocation(_Location? location) {
-    if (location == null || location.file == null) {
+    if (location == null) {
       return false;
     }
     final String file = Uri.parse(location.file).path;
@@ -1544,8 +1563,9 @@ mixin WidgetInspectorService {
 
   List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, int maxDescendentsTruncatableNode) {
     if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
-      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
-          _isValueCreatedByLocalProject(node.value)).toList();
+      final List<DiagnosticsNode> localNodes = nodes
+        .where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value))
+        .toList();
       if (localNodes.isNotEmpty) {
         return localNodes;
       }
@@ -2102,6 +2122,7 @@ class _ElementLocationStatsTracker {
       'events': events,
     };
 
+    // Encode the new locations using the older encoding.
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
@@ -2115,6 +2136,29 @@ class _ElementLocationStatsTracker {
       }
       json['newLocations'] = locationsJson;
     }
+
+    // Encode the new locations using the newer encoding (as of v2.4.0).
+    if (newLocations.isNotEmpty) {
+      final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
+      for (final _LocationCount entry in newLocations) {
+        final _Location location = entry.location;
+        final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+          location.file, () => <String, List<Object?>>{
+            'ids': <int>[],
+            'lines': <int>[],
+            'columns': <int>[],
+            'names': <String?>[],
+          },
+        );
+
+        locations['ids']!.add(entry.id);
+        locations['lines']!.add(location.line);
+        locations['columns']!.add(location.column);
+        locations['names']!.add(location.name);
+      }
+      json['locations'] = fileLocationsMap;
+    }
+
     resetCounts();
     newLocations.clear();
     return json;
@@ -2169,7 +2213,7 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder? selectButtonBuilder;
 
   @override
-  _WidgetInspectorState createState() => _WidgetInspectorState();
+  State<WidgetInspector> createState() => _WidgetInspectorState();
 }
 
 class _WidgetInspectorState extends State<WidgetInspector>
@@ -2412,7 +2456,8 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  RenderObject? get current => _current;
+  RenderObject? get current => active ? _current : null;
+
   RenderObject? _current;
   set current(RenderObject? value) {
     if (_current != value) {
@@ -2426,9 +2471,17 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  Element? get currentElement => _currentElement;
+  Element? get currentElement {
+    return _currentElement?.debugIsDefunct ?? true ? null : _currentElement;
+  }
+
   Element? _currentElement;
   set currentElement(Element? element) {
+    if (element?.debugIsDefunct == true) {
+      _currentElement = null;
+      _current = null;
+      return;
+    }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();
@@ -2590,7 +2643,7 @@ class _InspectorOverlayLayer extends Layer {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
-          'negative performance impact.'
+          'negative performance impact.',
         ),
       ]);
     }
@@ -2688,7 +2741,8 @@ class _InspectorOverlayLayer extends Layer {
     }
 
     final Rect targetRect = MatrixUtils.transformRect(
-        state.selected.transform, state.selected.rect);
+      state.selected.transform, state.selected.rect,
+    );
     final Offset target = Offset(targetRect.left, targetRect.center.dy);
     const double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
@@ -2755,7 +2809,7 @@ class _InspectorOverlayLayer extends Layer {
       Offset(wedgeX + wedgeSize, wedgeY),
       Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
     ];
-    canvas.drawPath(Path()..addPolygon(wedge, true,), tooltipBackground);
+    canvas.drawPath(Path()..addPolygon(wedge, true), tooltipBackground);
     _textPainter!.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
     canvas.restore();
   }
@@ -2819,8 +2873,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    required this.name,
-    required this.parameterLocations,
+    this.name,
   });
 
   /// File path of the location.
@@ -2828,14 +2881,12 @@ class _Location {
 
   /// 1-based line number.
   final int line;
+
   /// 1-based column number.
   final int column;
 
   /// Optional name of the parameter or function at this location.
   final String? name;
-
-  /// Optional locations of the parameters of the member at this location.
-  final List<_Location>? parameterLocations;
 
   Map<String, Object?> toJsonMap() {
     final Map<String, Object?> json = <String, Object?>{
@@ -2845,10 +2896,6 @@ class _Location {
     };
     if (name != null) {
       json['name'] = name;
-    }
-    if (parameterLocations != null) {
-      json['parameterLocations'] = parameterLocations!.map<Map<String, Object?>>(
-          (_Location location) => location.toJsonMap()).toList();
     }
     return json;
   }
@@ -2871,7 +2918,12 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 ///
 /// This function will be registered to [FlutterErrorDetails.propertiesTransformers]
 /// in [WidgetsBinding.initInstances].
-Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+///
+/// This is meant to be called only in debug mode. In other modes, it yields an empty list.
+Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+  if (!kDebugMode) {
+    return;
+  }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   ErrorSummary? errorSummary;
   for (final DiagnosticsNode node in properties) {
@@ -2941,8 +2993,11 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 18116933e77adc82f80866c928266a5b4f1ed645
       DiagnosticsNode? devToolsDiagnostic;
 
       // TODO(kenz): once the inspector is better at dealing with broken trees,
@@ -2950,7 +3005,11 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
       // errors. See https://github.com/flutter/flutter/issues/74918.
       if (isOverflowError()) {
         final String? devToolsInspectorUri =
+<<<<<<< HEAD
         WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+=======
+          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+>>>>>>> 18116933e77adc82f80866c928266a5b4f1ed645
         if (devToolsInspectorUri != null) {
           devToolsDiagnostic = DevToolsDeepLinkProperty(
             'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
@@ -3036,7 +3095,7 @@ String? _describeCreationLocation(Object object) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Object? candidate =  object is Element ? object.widget : object;
+  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
   return candidate is _HasCreationLocation ? candidate._location : null;
 }
 

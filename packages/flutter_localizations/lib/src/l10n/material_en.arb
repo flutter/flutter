@@ -56,6 +56,16 @@
     "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
   },
 
+  "firstPageTooltip": "First page",
+  "@firstPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the first page of a paginated data table."
+  },
+
+  "lastPageTooltip": "Last page",
+  "@lastPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the last page of a paginated data table."
+  },
+
   "showMenuTooltip": "Show menu",
   "@showMenuTooltip": {
     "description": "The tooltip for the button that shows a popup menu."
@@ -238,17 +248,17 @@
 
   "dateInputLabel": "Enter Date",
   "@dateInputLabel": {
-    "description": "The label used to describe the input text field used in in the date picker."
+    "description": "The label used to describe the input text field used in the date picker."
   },
 
   "dateRangeStartLabel": "Start Date",
   "@dateRangeStartLabel": {
-    "description": "The label used to describe the starting date input text field used in in the date range picker."
+    "description": "The label used to describe the starting date input text field used in the date range picker."
   },
 
   "dateRangeEndLabel": "End Date",
   "@dateRangeEndLabel": {
-    "description": "The label used to describe the ending date input text field used in in the date range picker."
+    "description": "The label used to describe the ending date input text field used in the date range picker."
   },
 
   "dateRangeStartDateSemanticLabel": "Start date $fullDate",

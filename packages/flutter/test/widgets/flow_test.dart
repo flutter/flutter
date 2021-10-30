@@ -133,7 +133,7 @@ void main() {
       '   Cannot call paintChild twice for the same child.\n'
       '   The flow delegate of type DuplicatePainterOpacityFlowDelegate\n'
       '   attempted to paint child 0 multiple times, which is not\n'
-      '   permitted.\n'
+      '   permitted.\n',
     ));
   });
 
@@ -175,10 +175,10 @@ void main() {
       await tester.pumpWidget(
         Flow(
           delegate: OpacityFlowDelegate(opacity),
+          clipBehavior: clip,
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0),
           ],
-          clipBehavior: clip,
         ),
       );
       expect(renderObject.clipBehavior, clip);
@@ -204,10 +204,10 @@ void main() {
       await tester.pumpWidget(
         Flow.unwrapped(
           delegate: OpacityFlowDelegate(opacity),
+          clipBehavior: clip,
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0),
           ],
-          clipBehavior: clip,
         ),
       );
       expect(renderObject.clipBehavior, clip);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -51,5 +53,5 @@ void main() {
     }
 
     await _flutter.stop();
-  });
+  }, skip: Platform.isWindows); // Skipping for https://github.com/flutter/flutter/issues/87481
 }

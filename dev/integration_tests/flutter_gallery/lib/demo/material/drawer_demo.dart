@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
@@ -13,10 +13,12 @@ const String _kAsset2 = 'people/square/sandra.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {
+  const DrawerDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/drawer';
 
   @override
-  _DrawerDemoState createState() => _DrawerDemoState();
+  State<DrawerDemo> createState() => _DrawerDemoState();
 }
 
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {

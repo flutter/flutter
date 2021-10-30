@@ -48,8 +48,105 @@ void main() {
     ));
   });
 
+  testWidgets('TextSpan Locale works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(
+            text: 'root',
+            locale: const Locale('es', 'MX'),
+            children: <InlineSpan>[
+              TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+              const WidgetSpan(
+                child: SizedBox(),
+              ),
+              TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+            ]
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'root',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 4), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'one',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 3), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'three',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+      ],
+    ));
+  });
+
+  testWidgets('TextSpan spellOut works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(
+              text: 'root',
+              spellOut: true,
+              children: <InlineSpan>[
+                TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+                const WidgetSpan(
+                  child: SizedBox(),
+                ),
+                TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+              ]
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'root',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
+              ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'one',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 3)),
+              ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'three',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+              ]
+          ),
+        ),
+      ],
+    ));
+  });
+
   testWidgets('WidgetSpan calculate correct intrinsic heights', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -64,7 +161,7 @@ void main() {
                     WidgetSpan(
                       child: Row(
                         children: const <Widget>[
-                          SizedBox(height: 16, width: 16,),
+                          SizedBox(height: 16, width: 16),
                         ],
                       ),
                     ),
@@ -104,18 +201,22 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, <String>[
-      'textAlign: center',
-      'textDirection: rtl',
-      'softWrap: no wrapping except at line break characters',
-      'overflow: ellipsis',
-      'textScaleFactor: 1.3',
-      'maxLines: 1',
-      'textWidthBasis: longestLine',
-      'text: "rich text"',
-      'locale: zh_HK',
-      'strutStyle: StrutStyle(size: 16.0)',
-      'textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: true)'
-    ]);
+    expect(description, unorderedMatches(<dynamic>[
+      contains('textAlign: center'),
+      contains('textDirection: rtl'),
+      contains('softWrap: no wrapping except at line break characters'),
+      contains('overflow: ellipsis'),
+      contains('textScaleFactor: 1.3'),
+      contains('maxLines: 1'),
+      contains('textWidthBasis: longestLine'),
+      contains('text: "rich text"'),
+      contains('locale: zh_HK'),
+      allOf(startsWith('strutStyle: StrutStyle('), contains('size: 16.0')),
+      allOf(
+        startsWith('textHeightBehavior: TextHeightBehavior('),
+        contains('applyHeightToFirstAscent: false'),
+        contains('applyHeightToLastDescent: true'),
+      ),
+    ]));
   });
 }

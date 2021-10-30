@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -63,7 +63,7 @@ void main() {
     expect(app.themeMode, ThemeMode.system);
 
     // Verify density settings
-    expect(app.theme!.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Popup the density menu: third menu button, choose 'Compact'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
@@ -81,7 +81,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme!.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Verify platform settings
     expect(app.theme!.platform, equals(TargetPlatform.android));

@@ -28,10 +28,12 @@ const String _switchText =
 const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
+  const SelectionControlsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/selection-controls';
 
   @override
-  _SelectionControlsDemoState createState() => _SelectionControlsDemoState();
+  State<SelectionControlsDemo> createState() => _SelectionControlsDemoState();
 }
 
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {

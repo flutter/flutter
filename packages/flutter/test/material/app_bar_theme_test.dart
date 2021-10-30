@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,14 +15,17 @@ void main() {
   });
 
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-        ],
-      )),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ),
+      ),
+    );
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
@@ -30,29 +33,35 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.dark.statusBarBrightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
+    expect(widget.shape, null);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
     expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
+    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
-        title: const Text('App Bar Title'),
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-        ],
-      )),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: appBarTheme),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('App Bar Title'),
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ),
+      ),
+    );
 
     final Material widget = _getAppBarMaterial(tester);
     final IconTheme iconTheme = _getAppBarIconTheme(tester);
@@ -64,10 +73,58 @@ void main() {
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
+    expect(widget.shape, const StadiumBorder());
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
     expect(text.style, appBarTheme.toolbarTextStyle);
+    expect(tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).width, 800);
+  });
+
+  testWidgets('SliverAppBar allows AppBar to determine backwardsCompatibility', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/77016
+    const AppBarTheme appBarTheme = AppBarTheme(
+      backwardsCompatibility: false,
+      backgroundColor: Colors.lightBlue,
+      foregroundColor: Colors.black,
+    );
+
+    Widget _buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
+      theme: ThemeData(appBarTheme: appBarTheme),
+      home: Scaffold(body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: const Text('App Bar Title'),
+            backwardsCompatibility: enabled,
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+            ],
+          ),
+        ],
+      )),
+    );
+
+    // Backwards compatibility enabled, AppBar should be built with true.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility(true));
+    AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, true);
+
+    // Backwards compatibility disabled, AppBar should be built with false.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility(false));
+    appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, false);
+
+    // Backwards compatibility unspecified, AppBar should be built with null.
+    await tester.pumpWidget(_buildWithBackwardsCompatibility());
+    appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backwardsCompatibility, null);
+
+    // AppBar should use the backwardsCompatibility of AppBarTheme.
+    // Since backwardsCompatibility is false, the text color should match the
+    // foreground color of the AppBarTheme.
+    final DefaultTextStyle text = _getAppBarText(tester);
+    expect(text.style.color, appBarTheme.foregroundColor);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -76,6 +133,7 @@ void main() {
     const Color color = Colors.orange;
     const double elevation = 3.0;
     const Color shadowColor = Colors.red;
+    const ShapeBorder shape = RoundedRectangleBorder();
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextStyle toolbarTextStyle = TextStyle(color: Colors.pink);
@@ -83,15 +141,17 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
+          appBarTheme: _appBarTheme(),
+        ),
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             backgroundColor: color,
             brightness: brightness,
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
+            shape: shape,
             iconTheme: iconThemeData,
             actionsIconTheme: actionsIconThemeData,
             toolbarTextStyle: toolbarTextStyle,
@@ -114,6 +174,7 @@ void main() {
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(widget.shadowColor, shadowColor);
+    expect(widget.shape, shape);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style!.color, actionsIconThemeData.color);
@@ -128,7 +189,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.from(colorScheme: const ColorScheme.light()),
       home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
@@ -150,7 +210,6 @@ void main() {
           .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
@@ -187,7 +246,6 @@ void main() {
             theme = Theme.of(context);
             return Scaffold(
               appBar: AppBar(
-                backwardsCompatibility: false,
                 actions: <Widget>[
                   IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                 ],
@@ -204,7 +262,7 @@ void main() {
     // - background color: ColorScheme.primary
     // - foreground color: ColorScheme.onPrimary
     // - actions text: style bodyText2, foreground color
-    // - status bar brightness: dark (based on color scheme brightness)
+    // - status bar brightness: light (based on color scheme brightness)
     {
       await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.light())));
 
@@ -214,7 +272,7 @@ void main() {
       final RichText actionIconText = _getAppBarIconRichText(tester);
       final DefaultTextStyle text = _getAppBarText(tester);
 
-      expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.dark.statusBarBrightness);
+      expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
       expect(widget.color, theme.colorScheme.primary);
       expect(widget.elevation, 4.0);
       expect(widget.shadowColor, Colors.black);
@@ -264,10 +322,9 @@ void main() {
             builder: (BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
-                  backwardsCompatibility: false,
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
-                    IconButton(icon: const Icon(Icons.share), onPressed: () { })
+                    IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                   ],
                 ),
               );
@@ -298,7 +355,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(appBar: AppBar(
         title: const Text('Title'),
-        backwardsCompatibility: false,
       )),
     ));
 
@@ -311,7 +367,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           centerTitle: false,
         ),
@@ -327,8 +382,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
-        title: const Text('Title')
+        title: const Text('Title'),
       )),
     ));
 
@@ -343,7 +397,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           shadowColor: Colors.yellow,
         ),
@@ -361,7 +414,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
         ),
       ),
@@ -377,7 +429,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           titleSpacing: 40,
         ),
@@ -395,7 +446,6 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backwardsCompatibility: false,
             title: Text('Title'),
           ),
         ],
@@ -413,7 +463,6 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backwardsCompatibility: false,
             title: Text('Title'),
             titleSpacing: 40,
           ),
@@ -440,7 +489,6 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
-      backwardsCompatibility: false,
       brightness: Brightness.dark,
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
@@ -461,7 +509,6 @@ void main() {
       'shadowColor: Color(0xff000002)',
       'centerTitle: true',
       'titleSpacing: 40.0',
-      'backwardsCompatibility: false',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because
@@ -469,7 +516,7 @@ void main() {
     // to "4", which results in the web evaluating to the value "4" regardless of which
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 }
 
 AppBarTheme _appBarTheme() {
@@ -485,7 +532,9 @@ AppBarTheme _appBarTheme() {
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
+    shape: StadiumBorder(),
     iconTheme: iconThemeData,
+    toolbarHeight: 96,
     toolbarTextStyle: TextStyle(color: Colors.yellow),
     titleTextStyle: TextStyle(color: Colors.pink),
   );

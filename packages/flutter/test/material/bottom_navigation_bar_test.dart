@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -75,8 +76,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          primaryColor: primaryColor,
+        theme: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light().copyWith(primary: primaryColor),
           unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
@@ -720,9 +721,35 @@ void main() {
       ),
     );
 
-    const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
-    const double additionalPadding = 40.0 - labelBottomMargin;
-    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('BottomNavigationBar adds bottom padding to height with a custom font size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              selectedFontSize: 8,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
@@ -1114,23 +1141,23 @@ void main() {
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return Scaffold(
-                        bottomNavigationBar: BottomNavigationBar(
-                          items: const <BottomNavigationBarItem>[
-                            BottomNavigationBarItem(
-                              label: label,
-                              icon: Icon(Icons.ac_unit),
-                              tooltip: label,
-                            ),
-                            BottomNavigationBarItem(
-                              label: 'B',
-                              icon: Icon(Icons.battery_alert),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: BottomNavigationBar(
+                        items: const <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                            tooltip: label,
+                          ),
+                          BottomNavigationBarItem(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -1657,7 +1684,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets(
     'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
@@ -1694,7 +1722,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1828,8 +1857,95 @@ void main() {
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('BottomNavigationBar excludes semantics',
-      (WidgetTester tester) async {
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    Widget feedbackBoilerplate({bool? enableFeedback, bool? enableFeedbackTheme}) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBarTheme(
+            data: BottomNavigationBarThemeData(
+              enableFeedback: enableFeedbackTheme,
+            ),
+            child: BottomNavigationBar(
+              enableFeedback: enableFeedback,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('BottomNavigationBar with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(feedbackBoilerplate());
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedbackTheme: enableFeedbackTheme));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(feedbackBoilerplate(
+        enableFeedbackTheme: enableFeedbackTheme,
+        enableFeedback: enableFeedback,
+      ));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+  });
+
+  testWidgets('BottomNavigationBar excludes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1869,7 +1985,7 @@ void main() {
                             TestSemantics(
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isSelected,
-                                SemanticsFlag.isFocusable
+                                SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'A\nTab 1 of 2',
@@ -1898,6 +2014,143 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('BottomNavigationBar default layout', (WidgetTester tester) async {
+    final Key icon0 = UniqueKey();
+    final Key title0 = UniqueKey();
+    final Key icon1 = UniqueKey();
+    final Key title1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: 0,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon0, width: 200, height: 10),
+                    title: SizedBox(key: title0, width: 200, height: 10),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon1, width: 200, height: 10),
+                    title: SizedBox(key: title1, width: 200, height: 10),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
+    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+
+    // The height of the navigation bar is kBottomNavigationBarHeight = 56
+    // The top of the navigation bar is 600 - 56 = 544
+    // The top and bottom of the selected item is defined by its centered icon/label column:
+    //   top = 544 - (56 - (10 + 10)) / 2 = 562
+    //   bottom = top + 10 + 10 = 582
+    expect(tester.getRect(find.byKey(icon0)).top, 562);
+    expect(tester.getRect(find.byKey(title0)).bottom, 582);
+
+    // The items are horizontal padded according to
+    // MainAxisAlignment.spaceBetween Left/right padding is 800 - (200
+    // * 4) / 4 = 100. The layout of the unselected item's title is
+    // slightly different; not checking that here.
+    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(100, 572, 300, 582));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(100, 562, 300, 572));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(500, 562, 700, 572));
+  });
+
+  testWidgets('BottomNavigationBar centered landscape layout', (WidgetTester tester) async {
+    final Key icon0 = UniqueKey();
+    final Key title0 = UniqueKey();
+    final Key icon1 = UniqueKey();
+    final Key title1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: 0,
+                landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon0, width: 200, height: 10),
+                    title: SizedBox(key: title0, width: 200, height: 10),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon1, width: 200, height: 10),
+                    title: SizedBox(key: title1, width: 200, height: 10),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
+    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+
+    // The items are laid out as in the default case, within width=600
+    // (the "portrait" width) and the result is centered with the
+    // landscape width=800.  So item 0's left edges are (800 - 600) / 2 +
+    // (600 - 400) / 4 = 150.  Item 1's right edge is 800 - 150 =
+    // 650. The layout of the unselected item's title is slightly
+    // different; not checking that here.
+    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(150.0, 572.0, 350.0, 582.0));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(150, 562, 350, 572));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(450, 562, 650, 572));
+  });
+
+  testWidgets('BottomNavigationBar linear landscape layout', (WidgetTester tester) async {
+    final Key icon0 = UniqueKey();
+    final Key title0 = UniqueKey();
+    final Key icon1 = UniqueKey();
+    final Key title1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: 0,
+                landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon0, width: 100, height: 20),
+                    title: SizedBox(key: title0, width: 100, height: 20),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: SizedBox(key: icon1, width: 100, height: 20),
+                    title: SizedBox(key: title1, width: 100, height: 20),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(BottomNavigationBar)), const Size(800, kBottomNavigationBarHeight));
+    expect(tester.getRect(find.byType(BottomNavigationBar)), const Rect.fromLTRB(0, 600 - kBottomNavigationBarHeight, 800, 600));
+
+    // The items are laid out as in the default case except each
+    // item's icon/title is arranged in a row, with 8 pixels in
+    // between the icon and title.  The layout of the unselected
+    // item's title is slightly different; not checking that here.
+    expect(tester.getRect(find.byKey(title0)), const Rect.fromLTRB(204, 562, 304, 582));
+    expect(tester.getRect(find.byKey(icon0)), const Rect.fromLTRB(96, 562, 196, 582));
+    expect(tester.getRect(find.byKey(icon1)), const Rect.fromLTRB(496, 562, 596, 582));
   });
 }
 

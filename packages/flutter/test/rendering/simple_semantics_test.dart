@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -12,7 +11,7 @@ import 'rendering_tester.dart';
 void main() {
   test('only send semantics update if semantics have changed', () {
     final TestRender testRender = TestRender()
-      ..label = 'hello'
+      ..attributedLabel = AttributedString('hello')
       ..textDirection = TextDirection.ltr;
 
     final RenderConstrainedBox tree = RenderConstrainedBox(
@@ -21,9 +20,9 @@ void main() {
     );
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        }
+      listener: () {
+        ++semanticsUpdateCount;
+      },
     );
 
     layout(tree, phase: EnginePhase.flushSemantics);
@@ -47,7 +46,7 @@ void main() {
     semanticsUpdateCount = 0;
 
     // Change semantics and request update.
-    testRender.label = 'bye';
+    testRender.attributedLabel = AttributedString('bye');
     testRender.markNeedsSemanticsUpdate();
     pumpFrame(phase: EnginePhase.flushSemantics);
 

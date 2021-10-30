@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'back_button.dart';
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -51,9 +50,10 @@ import 'theme.dart';
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
+///    final ThemeData theme = Theme.of(context);
+///    final TextStyle textStyle = theme.textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
-///      SizedBox(height: 24),
+///      const SizedBox(height: 24),
 ///      RichText(
 ///        text: TextSpan(
 ///          children: <TextSpan>[
@@ -64,7 +64,7 @@ import 'theme.dart';
 ///              'from a single codebase. Learn more about Flutter at '
 ///            ),
 ///            TextSpan(
-///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              style: textStyle.copyWith(color: theme.colorScheme.primary),
 ///              text: 'https://flutter.dev'
 ///            ),
 ///            TextSpan(
@@ -78,14 +78,14 @@ import 'theme.dart';
 ///
 ///    return Scaffold(
 ///      appBar: AppBar(
-///        title: Text('Show About Example'),
+///        title: const Text('Show About Example'),
 ///      ),
 ///      drawer: Drawer(
 ///        child: SingleChildScrollView(
 ///          child: SafeArea(
 ///            child: AboutListTile(
-///              icon: Icon(Icons.info),
-///              applicationIcon: FlutterLogo(),
+///              icon: const Icon(Icons.info),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
@@ -96,11 +96,11 @@ import 'theme.dart';
 ///      ),
 ///      body: Center(
 ///        child: ElevatedButton(
-///          child: Text('Show About Example'),
+///          child: const Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
-///              applicationIcon: FlutterLogo(),
+///              applicationIcon: const FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
@@ -482,7 +482,7 @@ class LicensePage extends StatefulWidget {
   final String? applicationLegalese;
 
   @override
-  _LicensePageState createState() => _LicensePageState();
+  State<LicensePage> createState() => _LicensePageState();
 }
 
 class _LicensePageState extends State<LicensePage> {
@@ -675,23 +675,23 @@ class _PackagesViewState extends State<_PackagesView> {
             .asMap()
             .entries
             .map<Widget>((MapEntry<int, String> entry) {
-          final String packageName = entry.value;
-          final int index = entry.key;
-          final List<int> bindings = data.packageLicenseBindings[packageName]!;
-          return _PackageListTile(
-            packageName: packageName,
-            index: index,
-            isSelected: drawSelection && entry.key == (selectedId ?? 0),
-            numberLicenses: bindings.length,
-            onTap: () {
-              widget.selectedId.value = index;
-              _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
-                packageName,
-                bindings.map((int i) => data.licenses[i]).toList(growable: false),
-              ));
-            },
-          );
-        }),
+              final String packageName = entry.value;
+              final int index = entry.key;
+              final List<int> bindings = data.packageLicenseBindings[packageName]!;
+              return _PackageListTile(
+                packageName: packageName,
+                index: index,
+                isSelected: drawSelection && entry.key == (selectedId ?? 0),
+                numberLicenses: bindings.length,
+                onTap: () {
+                  widget.selectedId.value = index;
+                  _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+                    packageName,
+                    bindings.map((int i) => data.licenses[i]).toList(growable: false),
+                  ));
+                },
+              );
+            }),
       ],
     );
   }
@@ -798,7 +798,7 @@ class _DetailArguments {
   }
 
   @override
-  int get hashCode => packageName.hashCode; // Good enough.
+  int get hashCode => hashValues(packageName, hashList(licenseEntries));
 }
 
 class _PackageLicensePage extends StatefulWidget {
@@ -925,8 +925,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
-                child: Scrollbar(
-                  child: ListView(padding: padding, children: listWidgets),
+                child: ScrollConfiguration(
+                  // A Scrollbar is built-in below.
+                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  child: Scrollbar(
+                    child: ListView(padding: padding, children: listWidgets),
+                  ),
                 ),
               ),
             ),
@@ -1207,7 +1211,7 @@ class _MasterDetailFlow extends StatefulWidget {
         throw FlutterError(
           'Master Detail operation requested with a context that does not include a Master Detail '
           'Flow.\nThe context used to open a detail page from the Master Detail Flow must be '
-          'that of a widget that is a descendant of a Master Detail Flow widget.'
+          'that of a widget that is a descendant of a Master Detail Flow widget.',
         );
       }
       return true;
@@ -1279,15 +1283,14 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       case _LayoutMode.lateral:
         return _lateralUI(context);
       case _LayoutMode.auto:
-        return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final double availableWidth = constraints.maxWidth;
-              if (availableWidth >= (widget.breakpoint ?? _materialWideDisplayThreshold)) {
-                return _lateralUI(context);
-              } else {
-                return _nestedUI(context);
-              }
-            });
+        return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          final double availableWidth = constraints.maxWidth;
+          if (availableWidth >= (widget.breakpoint ?? _materialWideDisplayThreshold)) {
+            return _lateralUI(context);
+          } else {
+            return _nestedUI(context);
+          }
+        });
     }
   }
 
@@ -1308,7 +1311,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             case _Focus.detail:
               return <Route<void>>[
                 masterPageRoute,
-                _detailPageRoute(_cachedDetailArguments)
+                _detailPageRoute(_cachedDetailArguments),
               ];
           }
         },
@@ -1416,7 +1419,7 @@ class _MasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: title,
           leading: leading,
@@ -1534,16 +1537,20 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints:
-                    BoxConstraints.tightFor(width: masterViewWidth),
+                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: ButtonBar(
-                        children:
-                        widget.actionBuilder!(context, _ActionLevel.view),
+                      child: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        padding: const EdgeInsets.all(8),
+                        child: OverflowBar(
+                          spacing: 8,
+                          overflowAlignment: OverflowBarAlignment.end,
+                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -1564,11 +1571,14 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               valueListenable: _detailArguments,
               builder: (BuildContext context, Object? value, Widget? child) {
                 return AnimatedSwitcher(
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) =>
-                      const FadeUpwardsPageTransitionsBuilder()
-                          .buildTransitions<void>(
-                          null, null, animation, null, child),
+                  transitionBuilder: (Widget child, Animation<double> animation) =>
+                    const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
+                      null,
+                      null,
+                      animation,
+                      null,
+                      child,
+                    ),
                   duration: const Duration(milliseconds: 500),
                   child: Container(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
@@ -1639,11 +1649,9 @@ class _DetailView extends StatelessWidget {
             color: Theme.of(context).cardColor,
             elevation: _kCardElevation,
             clipBehavior: Clip.antiAlias,
-            margin: const EdgeInsets.fromLTRB(
-                _kCardElevation, 0.0, _kCardElevation, 0.0),
+            margin: const EdgeInsets.fromLTRB(_kCardElevation, 0.0, _kCardElevation, 0.0),
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(3.0), bottom: Radius.zero),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(3.0), bottom: Radius.zero),
             ),
             child: _builder(
               context,

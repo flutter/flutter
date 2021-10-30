@@ -19,7 +19,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return buttons | kPrimaryButton;
+      return buttons == 0 ? kPrimaryButton : buttons;
     case PointerDeviceKind.unknown:
       // We have no information about the device but we know we never want
       // buttons to be 0 when the pointer is down.
@@ -35,7 +35,6 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 class PointerEventConverter {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   PointerEventConverter._();
 
   /// Expand the given packet of pointer data into a sequence of framework

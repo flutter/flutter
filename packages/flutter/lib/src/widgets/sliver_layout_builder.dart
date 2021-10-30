@@ -39,7 +39,7 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   SliverLayoutWidgetBuilder get builder => super.builder;
 
   @override
-  _RenderSliverLayoutBuilder createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {

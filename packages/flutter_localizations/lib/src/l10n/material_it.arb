@@ -10,6 +10,8 @@
   "previousMonthTooltip": "Mese precedente",
   "nextPageTooltip": "Pagina successiva",
   "previousPageTooltip": "Pagina precedente",
+  "firstPageTooltip": "Prima pagina",
+  "lastPageTooltip": "Ultima pagina",
   "showMenuTooltip": "Mostra il menu",
   "aboutListTileTitle": "Informazioni su $applicationName",
   "licensesPageTitle": "Licenze",

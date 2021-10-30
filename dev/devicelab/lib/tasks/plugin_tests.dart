@@ -4,10 +4,10 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
@@ -29,8 +29,8 @@ class PluginTest {
 
   final String buildTarget;
   final List<String> options;
-  final Map<String, String> pluginCreateEnvironment;
-  final Map<String, String> appCreateEnvironment;
+  final Map<String, String>? pluginCreateEnvironment;
+  final Map<String, String>? appCreateEnvironment;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -75,7 +75,7 @@ class _FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
 
-  Future<void> addPlugin(String plugin, {String pluginPath}) async {
+  Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     final String dependency =
@@ -98,9 +98,9 @@ class _FlutterProject {
       List<String> options,
       String target,
       {
-        String name,
-        String template,
-        Map<String, String> environment,
+        required String name,
+        required String template,
+        Map<String, String>? environment,
       }) async {
     await inDirectory(directory, () async {
       await flutter(
@@ -167,19 +167,26 @@ class _FlutterProject {
         }
 
         final String podsProjectContent = podsProject.readAsStringSync();
-        // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
-        // Pods Xcode project file 6 times. If this number changes, make sure
-        // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
-        // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
-        // See _reduceDarwinPluginMinimumVersion for details.
-        if (target == 'ios' && 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 6) {
-          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET');
+        if (target == 'ios') {
+          // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
+          // Pods Xcode project file 6 times. If this number changes, make sure
+          // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
+          // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
+          // See _reduceDarwinPluginMinimumVersion for details.
+          final int iosDeploymentTargetCount = 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
+          if (iosDeploymentTargetCount != 9) {
+            throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET, $iosDeploymentTargetCount found');
+          }
+          if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+            throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+          }
         }
 
         // Same for macOS, but 12.
         // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-        if (target == 'macos' && 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 12) {
-          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET');
+        final int macosDeploymentTargetCount = 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length;
+        if (target == 'macos' && macosDeploymentTargetCount != 12) {
+          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET, $macosDeploymentTargetCount found');
         }
       }
     });

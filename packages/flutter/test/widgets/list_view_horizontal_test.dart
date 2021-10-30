@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,7 +11,7 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: Container(
+      child: SizedBox(
         height: 50.0,
         child: ListView(
           itemExtent: 290.0,
@@ -20,9 +19,7 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
           reverse: reverse,
           physics: const BouncingScrollPhysics(),
           children: items.map<Widget>((int item) {
-            return Container(
-              child: Text('$item'),
-            );
+            return Text('$item');
           }).toList(),
         ),
       ),

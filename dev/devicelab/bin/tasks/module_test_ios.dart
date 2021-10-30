@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -14,7 +18,7 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    String simulatorDeviceId;
+    late String simulatorDeviceId;
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -53,6 +57,8 @@ Future<void> main() async {
         );
       });
 
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
+
       final Directory ephemeralIOSHostApp = Directory(path.join(
         projectDir.path,
         'build',
@@ -85,6 +91,8 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '--profile'],
         );
       });
+
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       if (!exists(ephemeralIOSHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
@@ -122,6 +130,7 @@ Future<void> main() async {
       if (!exists(ephemeralSimulatorHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
       }
+      checkFileExists(path.join(ephemeralSimulatorHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       if (!exists(File(path.join(
         ephemeralSimulatorHostApp.path,
@@ -166,6 +175,7 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '-v'],
         );
       });
+      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralIOSHostApp);
 
@@ -180,10 +190,12 @@ Future<void> main() async {
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')) {
+        print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'device_info.framework', 'device_info'));
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
       // Static, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));
@@ -212,6 +224,8 @@ Future<void> main() async {
 
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
+
+      section('Build iOS Objective-C host app');
       await inDirectory(objectiveCHostApp, () async {
         await exec(
           'pod',
@@ -228,6 +242,7 @@ Future<void> main() async {
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
             || hostPodfileLockOutput.contains('android_alarm_manager')) {
+          print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
         }
 
@@ -279,6 +294,28 @@ Future<void> main() async {
         'isolate_snapshot_data',
       ));
 
+      section('Check the NOTICE file is correct');
+
+      final String licenseFilePath = path.join(
+        objectiveCBuildDirectory.path,
+        'Host.app',
+        'Frameworks',
+        'App.framework',
+        'flutter_assets',
+        'NOTICES.Z',
+      );
+      checkFileExists(licenseFilePath);
+
+      await inDirectory(objectiveCBuildDirectory, () async {
+        final Uint8List licenseData = File(licenseFilePath).readAsBytesSync();
+        final String licenseString = utf8.decode(gzip.decode(licenseData));
+        if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
+          return TaskResult.failure('License content missing');
+        }
+      });
+
+      section('Check that the host build sends the correct analytics');
+
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')
           || !objectiveCAnalyticsOutput.contains('cd25: true')
@@ -290,30 +327,59 @@ Future<void> main() async {
       }
 
       section('Run platform unit tests');
-      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
+
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
+      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
-        return inDirectory(objectiveCHostApp, () =>
-          exec(
-            'xcodebuild',
-            <String>[
-              '-workspace',
-              'Host.xcworkspace',
-              '-scheme',
-              'Host',
-              '-configuration',
-              'Debug',
-              '-destination',
-              'id=$deviceId',
-              'test',
-              'CODE_SIGNING_ALLOWED=NO',
-              'CODE_SIGNING_REQUIRED=NO',
-              'CODE_SIGN_IDENTITY=-',
-              'EXPANDED_CODE_SIGN_IDENTITY=-',
-              'COMPILER_INDEX_STORE_ENABLE=NO',
-            ],
-          ));
+        final String resultBundlePath = path.join(resultBundleTemp, 'result');
+
+        final int testResultExit = await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            '-destination',
+            'id=$deviceId',
+            '-resultBundlePath',
+            resultBundlePath,
+            'test',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          workingDirectory: objectiveCHostApp.path,
+          canFail: true,
+        );
+
+        if (testResultExit != 0) {
+          final Directory? dumpDirectory = hostAgent.dumpDirectory;
+          if (dumpDirectory != null) {
+            // Zip the test results to the artifacts directory for upload.
+            await inDirectory(resultBundleTemp, () {
+              final String zipPath = path.join(dumpDirectory.path,
+                  'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+              return exec(
+                'zip',
+                <String>[
+                  '-r',
+                  '-9',
+                  zipPath,
+                  'result.xcresult',
+                ],
+                canFail: true, // Best effort to get the logs.
+              );
+            });
+          }
+
+          throw TaskResult.failure('Platform unit tests failed');
         }
-      );
+      });
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
       final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>
@@ -409,7 +475,7 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      removeIOSimulator(simulatorDeviceId);
+      unawaited(removeIOSimulator(simulatorDeviceId));
       rmTree(tempDir);
     }
   });

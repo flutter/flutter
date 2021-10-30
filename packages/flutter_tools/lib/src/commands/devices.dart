@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../convert.dart';
@@ -10,17 +12,17 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-
-  DevicesCommand() {
+  DevicesCommand({ bool verboseHelp = false }) {
     argParser.addFlag('machine',
       negatable: false,
-      help: 'Output device information in machine readable structured JSON format',
+      help: 'Output device information in machine readable structured JSON format.',
     );
     argParser.addOption(
       'timeout',
       abbr: 't',
       defaultsTo: null,
-      help: '(deprecated) Use --device-timeout instead',
+      help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
+      hide: !verboseHelp,
     );
     usesDeviceTimeoutOption();
   }
@@ -36,7 +38,7 @@ class DevicesCommand extends FlutterCommand {
     if (argResults['timeout'] != null) {
       final int timeoutSeconds = int.tryParse(stringArg('timeout'));
       if (timeoutSeconds == null) {
-        throwToolExit( 'Could not parse -t/--timeout argument. It must be an integer.');
+        throwToolExit('Could not parse -t/--timeout argument. It must be an integer.');
       }
       return Duration(seconds: timeoutSeconds);
     }
@@ -46,7 +48,7 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults['timeout'] != null) {
-      globals.printError('--timeout has been deprecated, use --${FlutterOptions.kDeviceTimeout} instead');
+      globals.printError('${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
     }
     return super.validateCommand();
   }

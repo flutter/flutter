@@ -1,9 +1,7 @@
 ## Directory contents
 
 The Dart files and golden master `.expect` files in this directory are used to
-test the `dart fix` framework refactorings used by the Flutter framework.
-
-<!-- TODO(devoncarew): Add link to public user guide when available. -->
+test the [`dart fix` framework](https://dart.dev/tools/dart-fix) refactorings used by the Flutter framework.
 
 See the flutter/packages/flutter/lib/fix_data.yaml file for the current package:flutter
 data driven fixes.

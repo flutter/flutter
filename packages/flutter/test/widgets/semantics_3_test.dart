@@ -16,15 +16,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
           child: Semantics(
-            label: 'test',
-            textDirection: TextDirection.ltr,
-            child: Container(
-              child: Semantics(
-                checked: true
-              ),
-            ),
+            checked: true,
           ),
         ),
       ),
@@ -47,10 +43,8 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-             checked: true,
-          ),
+        child: Semantics(
+           checked: true,
         ),
       ),
     );
@@ -71,11 +65,9 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-            label: 'test',
-            textDirection: TextDirection.ltr,
-          ),
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
         ),
       ),
     );
@@ -97,13 +89,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          checked: true,
           child: Semantics(
-            checked: true,
-            child: Semantics(
-              label: 'test',
-              textDirection: TextDirection.ltr,
-            ),
+            label: 'test',
+            textDirection: TextDirection.ltr,
           ),
         ),
       ),
@@ -131,13 +121,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
+        child: Semantics(
+          checked: true,
           child: Semantics(
-            checked: true,
-            child: Semantics(
-              label: 'test',
-              textDirection: TextDirection.ltr,
-            ),
+            label: 'test',
+            textDirection: TextDirection.ltr,
           ),
         ),
       ),

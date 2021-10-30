@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -489,9 +487,7 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
-      return Container(
-        child: const Text('BottomSheet'),
-      );
+      return const Text('BottomSheet');
     });
 
     await tester.pump(); // bottom sheet show animation starts
@@ -550,9 +546,7 @@ void main() {
       shape: shape,
       clipBehavior: clipBehavior,
       builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -589,9 +583,7 @@ void main() {
           builder: (_, ScrollController controller) {
             return SingleChildScrollView(
               controller: controller,
-              child: Container(
-                child: const Text('BottomSheet'),
-              ),
+              child: const Text('BottomSheet'),
             );
           },
         );
@@ -695,11 +687,9 @@ void main() {
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
 
-  testWidgets('Verify that route settings can be set in the showModalBottomSheet',
-      (WidgetTester tester) async {
+  testWidgets('Verify that route settings can be set in the showModalBottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    const RouteSettings routeSettings =
-        RouteSettings(name: 'route_name', arguments: 'route_argument');
+    const RouteSettings routeSettings = RouteSettings(name: 'route_name', arguments: 'route_argument');
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -715,9 +705,7 @@ void main() {
       routeSettings: routeSettings,
       builder: (BuildContext context) {
         retrievedRouteSettings = ModalRoute.of(context)!.settings;
-        return Container(
-          child: const Text('BottomSheet'),
-        );
+        return const Text('BottomSheet');
       },
     );
 
@@ -734,6 +722,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showModalBottomSheet<void>(
                   context: context,
@@ -744,17 +733,14 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: const Text('BottomSheet'),
-                    );
+                    return const Text('BottomSheet');
                   },
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -793,6 +779,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showBottomSheet<void>(
                   context: context,
@@ -803,21 +790,18 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return Container(
-                      child: MaterialButton(
-                        child: const Text('BottomSheet'),
-                        onPressed: () => Navigator.pop(context),
-                        key: tapTargetToClose,
-                      ),
+                    return MaterialButton(
+                      onPressed: () => Navigator.pop(context),
+                      key: tapTargetToClose,
+                      child: const Text('BottomSheet'),
                     );
                   },
                 );
               },
               behavior: HitTestBehavior.opaque,
-              child: Container(
+              child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -848,39 +832,240 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('showModalBottomSheet should move along on-screen keyboard',
-          (WidgetTester tester) async {
-    late BuildContext savedContext;
+  group('constraints', () {
 
-    // Show a keyboard (simulate by space at the bottom of the screen).
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200)),
-          child: Builder(
-            builder: (BuildContext context) {
-              savedContext = context;
-              return Container();
-            },
+    testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: Center(child: Text('body')),
+          bottomSheet: Text('BottomSheet'),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 154, 600),
+      );
+    });
+
+    testWidgets('No constraints by default for showBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  Scaffold.of(context).showBottomSheet<void>(
+                    (BuildContext context) => const Text('BottomSheet'),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 154, 600),
+      );
+    });
+
+    testWidgets('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) => const Text('BottomSheet'),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(0, 586, 800, 600),
+      );
+    });
+
+    testWidgets('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: 80),
           ),
         ),
-      ),
-    );
+        home: Scaffold(
+          body: const Center(child: Text('body')),
+          bottomSheet: const Text('BottomSheet'),
+          floatingActionButton: FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsOneWidget);
+      // Should be centered and only 80dp wide
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
+      // Ensure the FAB is overlapping the top of the sheet
+      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(
+        tester.getRect(find.byIcon(Icons.add)),
+        const Rect.fromLTRB(744, 544, 768, 568),
+      );
+    });
 
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
+    testWidgets('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: 80),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  Scaffold.of(context).showBottomSheet<void>(
+                    (BuildContext context) => const Text('BottomSheet'),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      // Should be centered and only 80dp wide
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
+    });
 
-    showModalBottomSheet<void>(
-      context: savedContext,
-      builder: (BuildContext context) {
-        return const Text('BottomSheet');
-      },
-    );
+    testWidgets('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: 80),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) => const Text('BottomSheet'),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      // Should be centered and only 80dp wide
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(360, 558, 440, 600),
+      );
+    });
 
-    await tester.pumpAndSettle();
+    testWidgets('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: 80),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  Scaffold.of(context).showBottomSheet<void>(
+                    (BuildContext context) => const Text('BottomSheet'),
+                    constraints: const BoxConstraints(maxWidth: 100),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      // Should be centered and only 100dp wide instead of 80dp wide
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(350, 572, 450, 600),
+      );
+    });
 
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(tester.getBottomLeft(find.text('BottomSheet')).dy, 600);
+    testWidgets('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: 80),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('Press me'),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) => const Text('BottomSheet'),
+                    constraints: const BoxConstraints(maxWidth: 100),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsNothing);
+      await tester.tap(find.text('Press me'));
+      await tester.pumpAndSettle();
+      expect(find.text('BottomSheet'), findsOneWidget);
+      // Should be centered and only 100dp instead of 80dp wide
+      expect(
+        tester.getRect(find.text('BottomSheet')),
+        const Rect.fromLTRB(350, 572, 450, 600),
+      );
+    });
+
   });
 }
 

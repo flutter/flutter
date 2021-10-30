@@ -11,8 +11,6 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
 import 'object.dart';
 
 
@@ -211,15 +209,27 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
     if ((size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(true, offset, offset & size, _paintTexture, clipBehavior: clipBehavior,
-          oldLayer: _clipRectLayer);
+      _clipRectLayer.layer = context.pushClipRect(
+        true,
+        offset,
+        offset & size,
+        _paintTexture,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer.layer,
+      );
       return;
     }
-    _clipRectLayer = null;
+    _clipRectLayer.layer = null;
     _paintTexture(context, offset);
   }
 
-  ClipRectLayer? _clipRectLayer;
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
 
   void _paintTexture(PaintingContext context, Offset offset) {
     // As resizing the Android view happens asynchronously we don't know exactly when is a
@@ -313,9 +323,10 @@ class RenderUiKitView extends RenderBox {
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
     assert(
-    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
-    'There were multiple gesture recognizer factories for the same type, there must only be a single '
-        'gesture recognizer factory for each gesture recognizer type.',);
+      _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+      'There were multiple gesture recognizer factories for the same type, there must only be a single '
+      'gesture recognizer factory for each gesture recognizer type.',
+    );
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
@@ -409,7 +420,7 @@ class RenderUiKitView extends RenderBox {
 }
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
-// it was give, adds all of them to a gesture arena team with the _UiKitViewGesturrRecognizer
+// it was give, adds all of them to a gesture arena team with the _UiKitViewGestureRecognizer
 // as the team captain.
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
@@ -417,8 +428,8 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(
     this.controller,
     this.gestureRecognizerFactories, {
-    PointerDeviceKind? kind,
-  }) : super(kind: kind) {
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(supportedDevices: supportedDevices) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -451,7 +462,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+    super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
@@ -495,8 +506,8 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
     this.gestureRecognizerFactories, {
-    PointerDeviceKind? kind,
-  }) : super(kind: kind) {
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(supportedDevices: supportedDevices) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -539,7 +550,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
+    super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
@@ -703,9 +714,10 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
     assert(gestureRecognizers != null);
     assert(
-    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
-    'There were multiple gesture recognizer factories for the same type, there must only be a single '
-        'gesture recognizer factory for each gesture recognizer type.',);
+      _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+      'There were multiple gesture recognizer factories for the same type, there must only be a single '
+      'gesture recognizer factory for each gesture recognizer type.',
+    );
     if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }

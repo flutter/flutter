@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
+  const ProgressIndicatorDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/progress-indicator';
 
   @override
-  _ProgressIndicatorDemoState createState() => _ProgressIndicatorDemoState();
+  State<ProgressIndicatorDemo> createState() => _ProgressIndicatorDemoState();
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
@@ -94,7 +96,10 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map<Widget>((Widget c) => Container(
+          margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+          child: c,
+        ))
         .toList(),
     );
   }

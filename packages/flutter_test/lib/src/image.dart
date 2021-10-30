@@ -50,7 +50,7 @@ Future<ui.Image> createTestImage({
 
 Future<ui.Image> _createImage(int width, int height) async {
   if (kIsWeb) {
-    return await _webCreateTestImage(
+    return _webCreateTestImage(
       width: width,
       height: height,
     );
@@ -66,7 +66,7 @@ Future<ui.Image> _createImage(int width, int height) async {
       completer.complete(image);
     },
   );
-  return await completer.future;
+  return completer.future;
 }
 
 /// Web doesn't support [decodeImageFromPixels]. Instead, generate a 1bpp BMP

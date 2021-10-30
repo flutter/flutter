@@ -60,7 +60,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// to the notification, listeners must stop using the old bucket and restore
 /// their state from the information in the new [rootBucket].
 ///
-/// Same platforms restrict the size of the restoration data. Therefore, the
+/// Some platforms restrict the size of the restoration data. Therefore, the
 /// data stored in the buckets should be as small as possible while still
 /// allowing the app to restore its current state from it. Data that can be
 /// retrieved from other services (e.g. a database or a web server) should not
@@ -166,7 +166,6 @@ class RestorationManager extends ChangeNotifier {
   /// that communications channel, or to set it up differently, as necessary.
   @protected
   void initChannels() {
-    assert(!SystemChannels.restoration.checkMethodCallHandler(_methodHandler));
     SystemChannels.restoration.setMethodCallHandler(_methodHandler);
   }
 
@@ -226,7 +225,7 @@ class RestorationManager extends ChangeNotifier {
   bool _isReplacing = false;
 
   Future<void> _getRootBucketFromEngine() async {
-    final Map<dynamic, dynamic>? config = await SystemChannels.restoration.invokeMethod<Map<dynamic, dynamic>>('get');
+    final Map<Object?, Object?>? config = await SystemChannels.restoration.invokeMethod<Map<Object?, Object?>>('get');
     if (_pendingRootBucket == null) {
       // The restoration data was obtained via other means (e.g. by calling
       // [handleRestorationDataUpdate] while the request to the engine was
@@ -237,9 +236,9 @@ class RestorationManager extends ChangeNotifier {
     _parseAndHandleRestorationUpdateFromEngine(config);
   }
 
-  void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic>? update) {
+  void _parseAndHandleRestorationUpdateFromEngine(Map<Object?, Object?>? update) {
     handleRestorationUpdateFromEngine(
-      enabled: update != null && update['enabled'] as bool,
+      enabled: update != null && update['enabled']! as bool,
       data: update == null ? null : update['data'] as Uint8List?,
     );
   }
@@ -305,25 +304,25 @@ class RestorationManager extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> _methodHandler(MethodCall call) async {
+  Future<Object?> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
-        _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<dynamic, dynamic>);
+        _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
         break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
   }
 
-  Map<dynamic, dynamic>? _decodeRestorationData(Uint8List? data) {
+  Map<Object?, Object?>? _decodeRestorationData(Uint8List? data) {
     if (data == null) {
       return null;
     }
     final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
-    return const StandardMessageCodec().decodeMessage(encoded) as Map<dynamic, dynamic>;
+    return const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
   }
 
-  Uint8List _encodeRestorationData(Map<dynamic, dynamic> data) {
+  Uint8List _encodeRestorationData(Map<Object?, Object?> data) {
     final ByteData encoded = const StandardMessageCodec().encodeMessage(data)!;
     return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
@@ -505,7 +504,7 @@ class RestorationBucket {
     required Object? debugOwner,
   }) : assert(restorationId != null),
        _restorationId = restorationId,
-       _rawData = <String, dynamic>{} {
+       _rawData = <String, Object?>{} {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -537,10 +536,10 @@ class RestorationBucket {
   /// The `manager` argument must not be null.
   RestorationBucket.root({
     required RestorationManager manager,
-    required Map<dynamic, dynamic>? rawData,
+    required Map<Object?, Object?>? rawData,
   }) : assert(manager != null),
        _manager = manager,
-       _rawData = rawData ?? <dynamic, dynamic>{},
+       _rawData = rawData ?? <Object?, Object?>{},
        _restorationId = 'root' {
     assert(() {
       _debugOwner = manager;
@@ -567,7 +566,7 @@ class RestorationBucket {
        assert(parent._rawChildren[restorationId] != null),
        _manager = parent._manager,
        _parent = parent,
-       _rawData = parent._rawChildren[restorationId] as Map<dynamic, dynamic>,
+       _rawData = parent._rawChildren[restorationId]! as Map<Object?, Object?>,
        _restorationId = restorationId {
     assert(() {
       _debugOwner = debugOwner;
@@ -578,7 +577,7 @@ class RestorationBucket {
   static const String _childrenMapKey = 'c';
   static const String _valuesMapKey = 'v';
 
-  final Map<dynamic, dynamic> _rawData;
+  final Map<Object?, Object?> _rawData;
 
   /// The owner of the bucket that was provided when the bucket was claimed via
   /// [claimChild].
@@ -616,9 +615,9 @@ class RestorationBucket {
   String _restorationId;
 
   // Maps a restoration ID to the raw map representation of a child bucket.
-  Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  Map<Object?, Object?> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
   // Maps a restoration ID to a value that is stored in this bucket.
-  Map<dynamic, dynamic> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  Map<Object?, Object?> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
 
   // Get and store values.
 
@@ -858,7 +857,7 @@ class RestorationBucket {
       }
       final List<DiagnosticsNode> error = <DiagnosticsNode>[
         ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
-        ErrorDescription('The following IDs were claimed multiple times from the parent $this:')
+        ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
       for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
         final String id = child.key;
@@ -986,7 +985,7 @@ class RestorationBucket {
       if (_debugDisposed) {
         throw FlutterError(
             'A $runtimeType was used after being disposed.\n'
-            'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+            'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;

@@ -68,7 +68,7 @@ class Animation {
 
 /// Represents the animation of a single path.
 class PathAnimation {
-  const PathAnimation(this.commands, {@required this.opacities});
+  const PathAnimation(this.commands, {required this.opacities});
 
   factory PathAnimation.fromFrameData(List<FrameData> frames, int pathIdx) {
     if (frames.isEmpty)
@@ -77,9 +77,7 @@ class PathAnimation {
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
     for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx += 1) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
-      final List<List<Point<double>>> points = List<List<Point<double>>>.filled(numPointsInCommand, null);
-      for (int j = 0; j < numPointsInCommand; j += 1)
-        points[j] = <Point<double>>[];
+      final List<List<Point<double>>> points = List<List<Point<double>>>.filled(numPointsInCommand, <Point<double>>[]);
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
       for (int i = 0; i < frames.length; i += 1) {
         final FrameData frame = frames[i];
@@ -206,7 +204,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
     final XmlElement element = node as XmlElement;
 
     if (element.name.local == 'path') {
-      paths.add(SvgPath.fromElement(element).applyTransform(transform));
+      paths.add(SvgPath.fromElement(element)._applyTransform(transform));
     }
 
     if (element.name.local == 'g') {
@@ -248,12 +246,12 @@ List<Point<double>> parsePoints(String points) {
   String unParsed = points;
   final List<Point<double>> result = <Point<double>>[];
   while (unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
-    final Match m = _pointMatcher.firstMatch(unParsed);
+    final Match m = _pointMatcher.firstMatch(unParsed)!;
     result.add(Point<double>(
-        double.parse(m.group(1)),
-        double.parse(m.group(2)),
+        double.parse(m.group(1)!),
+        double.parse(m.group(2)!),
     ));
-    unParsed = m.group(3);
+    unParsed = m.group(3)!;
   }
   return result;
 }
@@ -276,7 +274,7 @@ class FrameData {
   }
 
   @override
-  int get hashCode => size.hashCode ^ paths.hashCode;
+  int get hashCode => Object.hash(size, Object.hashAll(paths));
 
   @override
   String toString() {
@@ -306,16 +304,16 @@ class SvgPath {
     if (!_pathCommandValidator.hasMatch(dAttr))
       throw Exception('illegal or unsupported path d expression: $dAttr');
     for (final Match match in _pathCommandMatcher.allMatches(dAttr)) {
-      final String commandType = match.group(1);
-      final String pointStr = match.group(2);
+      final String commandType = match.group(1)!;
+      final String pointStr = match.group(2)!;
       commands.add(commandsBuilder.build(commandType, parsePoints(pointStr)));
     }
     return SvgPath(id, commands);
   }
 
-  SvgPath applyTransform(_Transform transform) {
+  SvgPath _applyTransform(_Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map<SvgPathCommand>((SvgPathCommand c) => c.applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
@@ -330,7 +328,7 @@ class SvgPath {
   }
 
   @override
-  int get hashCode => id.hashCode ^ commands.hashCode ^ opacity.hashCode;
+  int get hashCode => Object.hash(id, Object.hashAll(commands), opacity);
 
   @override
   String toString() {
@@ -359,7 +357,7 @@ class SvgPathCommand {
   /// List of points used by this command.
   final List<Point<double>> points;
 
-  SvgPathCommand applyTransform(_Transform transform) {
+  SvgPathCommand _applyTransform(_Transform transform) {
     final List<Point<double>> transformedPoints =
     _vector3ArrayToPoints(
         transform.transformMatrix.applyToVector3Array(
@@ -379,7 +377,7 @@ class SvgPathCommand {
   }
 
   @override
-  int get hashCode => type.hashCode ^ points.hashCode;
+  int get hashCode => Object.hash(type, Object.hashAll(points));
 
   @override
   String toString() {
@@ -422,7 +420,7 @@ class SvgPathCommandBuilder {
 }
 
 List<double> _pointsToVector3Array(List<Point<double>> points) {
-  final List<double> result = List<double>.filled(points.length * 3, null);
+  final List<double> result = List<double>.filled(points.length * 3, 0.0);
   for (int i = 0; i < points.length; i += 1) {
     result[i * 3] = points[i].x;
     result[i * 3 + 1] = points[i].y;
@@ -433,10 +431,10 @@ List<double> _pointsToVector3Array(List<Point<double>> points) {
 
 List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
   final int numPoints = (vector.length / 3).floor();
-  final List<Point<double>> points = List<Point<double>>.filled(numPoints, null);
-  for (int i = 0; i < numPoints; i += 1) {
-    points[i] = Point<double>(vector[i*3], vector[i*3 + 1]);
-  }
+  final List<Point<double>> points = <Point<double>>[
+    for (int i = 0; i < numPoints; i += 1)
+      Point<double>(vector[i*3], vector[i*3 + 1]),
+  ];
   return points;
 }
 
@@ -447,7 +445,7 @@ List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
 class _Transform {
 
   /// Constructs a new _Transform, default arguments create a no-op transform.
-  _Transform({Matrix3 transformMatrix, this.opacity = 1.0}) :
+  _Transform({Matrix3? transformMatrix, this.opacity = 1.0}) :
       transformMatrix = transformMatrix ?? Matrix3.identity();
 
   final Matrix3 transformMatrix;
@@ -472,8 +470,8 @@ Matrix3 _parseSvgTransform(String transform) {
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
   Matrix3 result = Matrix3.identity();
   for (final Match m in matches) {
-    final String command = m.group(1);
-    final String params = m.group(2);
+    final String command = m.group(1)!;
+    final String params = m.group(2)!;
     if (command == 'translate') {
       result = _parseSvgTranslate(params).multiplied(result);
       continue;
@@ -533,7 +531,7 @@ int parsePixels(String pixels) {
     throw ArgumentError(
       "illegal pixels expression: '$pixels'"
       ' (the tool currently only support pixel units).');
-  return int.parse(_pixelsExp.firstMatch(pixels).group(1));
+  return int.parse(_pixelsExp.firstMatch(pixels)!.group(1)!);
 }
 
 String _extractAttr(XmlElement element, String name) {

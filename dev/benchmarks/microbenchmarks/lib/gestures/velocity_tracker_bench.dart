@@ -10,7 +10,7 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 class TrackerBenchmark {
-  TrackerBenchmark({ this.name, this.tracker });
+  TrackerBenchmark({required this.name, required this.tracker });
 
   final VelocityTracker tracker;
   final String name;

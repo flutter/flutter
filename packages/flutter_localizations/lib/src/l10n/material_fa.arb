@@ -10,6 +10,8 @@
   "previousMonthTooltip": "ماه قبل",
   "nextPageTooltip": "صفحه بعد",
   "previousPageTooltip": "صفحه قبل",
+  "firstPageTooltip": "صفحه اول",
+  "lastPageTooltip": "صفحه آخر",
   "showMenuTooltip": "نمایش منو",
   "aboutListTileTitle": "درباره $applicationName",
   "licensesPageTitle": "مجوزها",

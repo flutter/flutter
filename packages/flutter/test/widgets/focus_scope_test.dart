@@ -4,9 +4,10 @@
 
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -229,36 +230,40 @@ void main() {
       expect(parentFocusScope, hasAGoodToStringDeep);
       expect(
         parentFocusScope.toStringDeep(),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-            ' │ context: FocusScope\n'
-            ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            ' │\n'
-            ' └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '     context: Focus\n'
-            '     PRIMARY FOCUS\n'),
+        equalsIgnoringHashCodes(
+          'FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          ' │ context: FocusScope\n'
+          ' │ IN FOCUS PATH\n'
+          ' │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          ' │\n'
+          ' └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '     context: Focus\n'
+          '     PRIMARY FOCUS\n',
+        ),
       );
 
       expect(FocusManager.instance.rootScope, hasAGoodToStringDeep);
       expect(
         FocusManager.instance.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
-            ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
-            ' │   PATH])\n'
-            ' │\n'
-            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-            '   │ context: FocusScope\n'
-            '   │ IN FOCUS PATH\n'
-            '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '   │\n'
-            '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '       context: Focus\n'
-            '       PRIMARY FOCUS\n'),
+        equalsIgnoringHashCodes(
+          'FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
+          ' │ IN FOCUS PATH\n'
+          ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
+          ' │   PATH])\n'
+          ' │\n'
+          ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          '   │ context: FocusScope\n'
+          '   │ IN FOCUS PATH\n'
+          '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '   │\n'
+          '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '       context: Focus\n'
+          '       PRIMARY FOCUS\n',
+        ),
       );
 
       // Add the child focus scope to the focus tree.
-      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext!);
+      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext);
       parentFocusScope.setFirstFocus(childFocusScope);
       await tester.pumpAndSettle();
       expect(childFocusScope.isFirstFocus, isTrue);
@@ -1140,20 +1145,16 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(
-                  child: Focus(
-                    key: key3,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key3,
+                  child: Container(),
                 ),
               ),
               Focus(
                 key: key4,
-                child: Container(
-                  child: Focus(
-                    key: key5,
-                    child: Container(),
-                  ),
+                child: Focus(
+                  key: key5,
+                  child: Container(),
                 ),
               ),
               Focus(
@@ -1592,6 +1593,37 @@ void main() {
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+    });
+    testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode focusNode = FocusNode();
+      bool? keyEventHandled;
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => KeyEventResult.ignored, // This one does nothing.
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      Focus.of(key1.currentContext!).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, isNull);
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: (FocusNode node, RawKeyEvent event) { // The updated handler handles the key.
+            keyEventHandled = true;
+            return KeyEventResult.handled;
+          },
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, isTrue);
     });
   });
   group('ExcludeFocus', () {

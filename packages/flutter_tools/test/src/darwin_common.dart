@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:process/process.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:process/process.dart';
 
 bool containsBitcode(String pathToBinary, ProcessManager processManager) {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
@@ -37,12 +37,11 @@ bool containsBitcode(String pathToBinary, ProcessManager processManager) {
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
     if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      final String emptyBitcodeMarker =
-      lines.skip(index - 1).take(3).firstWhere(
-            (String line) => line.contains(' size 0x0000000000000001'),
-        orElse: () => null,
-      );
-      if (emptyBitcodeMarker != null) {
+      final bool bitcodeMarkerFound = lines
+          .skip(index - 1)
+          .take(4)
+          .any((String line) => line.contains(' size 0x0000000000000001'));
+      if (bitcodeMarkerFound) {
         emptyBitcodeMarkerFound = true;
         return;
       }

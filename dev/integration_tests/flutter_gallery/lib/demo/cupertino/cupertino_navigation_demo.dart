@@ -32,13 +32,14 @@ const List<String> coolColorNames = <String>[
 const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
-  CupertinoNavigationDemo({ this.randomSeed })
+  CupertinoNavigationDemo({ Key? key, this.randomSeed })
       : colorItems = List<Color>.generate(_kChildCount, (int index) {
           return coolColors[math.Random(randomSeed).nextInt(coolColors.length)];
         }) ,
         colorNameItems = List<String>.generate(_kChildCount, (int index) {
           return coolColorNames[math.Random(randomSeed).nextInt(coolColorNames.length)];
-        });
+        }),
+        super(key: key);
 
   static const String routeName = '/cupertino/navigation';
 
@@ -85,12 +86,12 @@ class CupertinoNavigationDemo extends StatelessWidget {
                 );
               case 1:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => CupertinoDemoTab2(),
+                  builder: (BuildContext context) => const CupertinoDemoTab2(),
                   defaultTitle: 'Support Chat',
                 );
               case 2:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => CupertinoDemoTab3(),
+                  builder: (BuildContext context) => const CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
             }
@@ -104,7 +105,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
 }
 
 class ExitButton extends StatelessWidget {
-  const ExitButton();
+  const ExitButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +113,8 @@ class ExitButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: const Tooltip(
         message: 'Back',
-        child: Text('Exit'),
         excludeFromSemantics: true,
+        child: Text('Exit'),
       ),
       onPressed: () {
         // The demo is on the root navigator.
@@ -134,10 +135,11 @@ final Widget trailingButtons = Row(
 
 class CupertinoDemoTab1 extends StatelessWidget {
   const CupertinoDemoTab1({
+    Key? key,
     this.colorItems,
     this.colorNameItems,
     this.randomSeed,
-  });
+  }) : super(key: key);
 
   final List<Color>? colorItems;
   final List<String>? colorNameItems;
@@ -184,12 +186,13 @@ class CupertinoDemoTab1 extends StatelessWidget {
 
 class Tab1RowItem extends StatelessWidget {
   const Tab1RowItem({
+    Key? key,
     this.index,
     this.lastItem,
     this.color,
     this.colorName,
     this.randomSeed,
-  });
+  }) : super(key: key);
 
   final int? index;
   final bool? lastItem;
@@ -287,7 +290,7 @@ class Tab1RowItem extends StatelessWidget {
 }
 
 class Tab1ItemPage extends StatefulWidget {
-  const Tab1ItemPage({this.color, this.colorName, this.index, this.randomSeed});
+  const Tab1ItemPage({Key? key, this.color, this.colorName, this.index, this.randomSeed}) : super(key: key);
 
   final Color? color;
   final String? colorName;
@@ -299,21 +302,15 @@ class Tab1ItemPage extends StatefulWidget {
 }
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
-  @override
-  void initState() {
-    super.initState();
-    relatedColors = List<Color>.generate(10, (int index) {
-      final math.Random random = math.Random(widget.randomSeed);
-      return Color.fromARGB(
-        255,
-        (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
-      );
-    });
-  }
-
-  late List<Color> relatedColors;
+  late final List<Color> relatedColors = List<Color>.generate(10, (int index) {
+    final math.Random random = math.Random(widget.randomSeed);
+    return Color.fromARGB(
+      255,
+      (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.green + random.nextInt(100) - 50).clamp(0, 255),
+      (widget.color!.blue + random.nextInt(100) - 50).clamp(0, 255),
+    );
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -441,6 +438,8 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
 }
 
 class CupertinoDemoTab2 extends StatelessWidget {
+  const CupertinoDemoTab2({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -450,7 +449,7 @@ class CupertinoDemoTab2 extends StatelessWidget {
       child: CupertinoScrollbar(
         child: ListView(
           children: <Widget>[
-            CupertinoUserInterfaceLevel(
+            const CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Tab2Header(),
             ),
@@ -463,6 +462,8 @@ class CupertinoDemoTab2 extends StatelessWidget {
 }
 
 class Tab2Header extends StatelessWidget {
+  const Tab2Header({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -589,7 +590,7 @@ enum Tab2ConversationBubbleColor {
 }
 
 class Tab2ConversationBubble extends StatelessWidget {
-  const Tab2ConversationBubble({this.text, this.color});
+  const Tab2ConversationBubble({Key? key, this.text, this.color}) : super(key: key);
 
   final String? text;
   final Tab2ConversationBubbleColor? color;
@@ -633,7 +634,7 @@ class Tab2ConversationBubble extends StatelessWidget {
 }
 
 class Tab2ConversationAvatar extends StatelessWidget {
-  const Tab2ConversationAvatar({this.text, this.color});
+  const Tab2ConversationAvatar({Key? key, this.text, this.color}) : super(key: key);
 
   final String? text;
   final Color? color;
@@ -672,7 +673,7 @@ class Tab2ConversationAvatar extends StatelessWidget {
 }
 
 class Tab2ConversationRow extends StatelessWidget {
-  const Tab2ConversationRow({this.avatar, this.text});
+  const Tab2ConversationRow({Key? key, this.avatar, this.text}) : super(key: key);
 
   final Tab2ConversationAvatar? avatar;
   final String? text;
@@ -742,6 +743,8 @@ List<Widget> buildTab2Conversation() {
 }
 
 class CupertinoDemoTab3 extends StatelessWidget {
+  const CupertinoDemoTab3({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -755,7 +758,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
               Navigator.of(context, rootNavigator: true).push(
                 CupertinoPageRoute<bool>(
                   fullscreenDialog: true,
-                  builder: (BuildContext context) => Tab3Dialog(),
+                  builder: (BuildContext context) => const Tab3Dialog(),
                 ),
               );
             },
@@ -792,13 +795,15 @@ class CupertinoDemoTab3 extends StatelessWidget {
 }
 
 class Tab3Dialog extends StatelessWidget {
+  const Tab3Dialog({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(
-          child: const Text('Cancel'),
           padding: EdgeInsets.zero,
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },

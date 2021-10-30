@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
@@ -12,14 +14,15 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../cache.dart';
+import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart' as globals;
+import '../../globals_null_migrated.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'common.dart';
 import 'localizations.dart';
 
 /// Whether the application has web plugins.
@@ -32,6 +35,12 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// Placeholder for base href
+const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
@@ -101,6 +110,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
+      Cache.flutterRoot,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -174,9 +184,9 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.flutterWebSdk),
-    Source.artifact(Artifact.dart2jsSnapshot),
-    Source.artifact(Artifact.engineDartBinary),
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
+    Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
@@ -189,18 +199,28 @@ class Dart2JSTarget extends Target {
     'dart2js.d',
   ];
 
+  String _collectOutput(ProcessResult result) {
+    final String stdout = result.stdout is List<int>
+        ? utf8.decode(result.stdout as List<int>)
+        : result.stdout as String;
+    final String stderr = result.stderr is List<int>
+        ? utf8.decode(result.stderr as List<int>)
+        : result.stderr as String;
+    return stdout + stderr;
+  }
+
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
-
+    final String librariesSpec = (globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
-      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
-      '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
-      ...?decodeDartDefines(environment.defines, kExtraFrontEndOptions),
+      globals.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      '--libraries-spec=$librariesSpec',
+      ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)
@@ -224,7 +244,7 @@ class Dart2JSTarget extends Target {
       environment.buildDir.childFile('main.dart').path, // dartfile
     ]);
     if (kernelResult.exitCode != 0) {
-      throw Exception(kernelResult.stdout + kernelResult.stderr);
+      throw Exception(_collectOutput(kernelResult));
     }
 
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
@@ -241,7 +261,7 @@ class Dart2JSTarget extends Target {
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
     if (javaScriptResult.exitCode != 0) {
-      throw Exception(javaScriptResult.stdout + javaScriptResult.stderr);
+      throw Exception(_collectOutput(javaScriptResult));
     }
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');
@@ -353,11 +373,24 @@ class WebReleaseBundle extends Target {
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final String randomHash = Random().nextInt(4294967296).toString();
-        final String resultString = inputFile.readAsStringSync()
+        String resultString = inputFile.readAsStringSync()
+          .replaceFirst(
+            'var serviceWorkerVersion = null',
+            "var serviceWorkerVersion = '$randomHash'",
+          )
+          // This is for legacy index.html that still use the old service
+          // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
+        if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] == null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
+        } else if (resultString.contains(kBaseHrefPlaceholder) &&
+            environment.defines[kBaseHref] != null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, environment.defines[kBaseHref]);
+        }
         outputFile.writeAsStringSync(resultString);
         continue;
       }
@@ -490,7 +523,7 @@ self.addEventListener("install", (event) => {
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
-        CORE.map((value) => new Request(value + '?revision=' + RESOURCES[value], {'cache': 'reload'})));
+        CORE.map((value) => new Request(value, {'cache': 'reload'})));
     })
   );
 });

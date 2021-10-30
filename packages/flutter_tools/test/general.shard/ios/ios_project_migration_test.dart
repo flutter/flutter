@@ -6,24 +6,23 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
-import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/ios/migrations/deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
 void main () {
   group('iOS migration', () {
-    MockUsage mockUsage;
+    late TestUsage testUsage;
+
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
     });
 
     testWithoutContext('migrators succeed', () {
@@ -39,30 +38,27 @@ void main () {
     });
 
     group('remove framework linking and embedding migration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectInfoFile;
-      MockXcode mockXcode;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
-        mockXcode = MockXcode();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
+        project = FakeIosProject();
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage
+          testUsage
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -76,13 +72,12 @@ void main () {
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -97,10 +92,9 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -125,13 +119,12 @@ keep this 2
 ''');
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -145,123 +138,69 @@ keep this 2
         xcodeProjectInfoFile.writeAsStringSync('''
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
 
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails with leftover Flutter.framework reference', () {
         xcodeProjectInfoFile.writeAsStringSync('''
       9705A1C71CF904A300538480 /* Flutter.framework in Embed Frameworks */,
 ''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails without Xcode installed', () {
         xcodeProjectInfoFile.writeAsStringSync('''
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
-        when(mockXcode.isInstalled).thenReturn(false);
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
+          project,
           testLogger,
-          mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
-      });
-
-      testWithoutContext('migration fails on Xcode < 11.4', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 3, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
-          mockUsage,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
-        expect(testLogger.errorText, isEmpty);
-      });
-
-      testWithoutContext('migration fails on Xcode 11.4', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
-          mockUsage,
-        );
-        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
-      });
-
-      testWithoutContext('migration fails on Xcode 12,0', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
-        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
-''');
-        when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.currentVersion).thenReturn(Version(12, 0, 0));
-
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
-          mockIosProject,
-          testLogger,
-          mockXcode,
-          mockUsage,
-        );
-        expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
     });
 
     group('new Xcode build system', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeWorkspaceSharedSettings;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeWorkspaceSharedSettings;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
         xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeWorkspaceSharedSettings).thenReturn(xcodeWorkspaceSharedSettings);
+        project = FakeIosProject();
+        project.xcodeWorkspaceSharedSettings = xcodeWorkspaceSharedSettings;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -284,7 +223,7 @@ keep this 2
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -307,7 +246,7 @@ keep this 2
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
 
         final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -318,22 +257,22 @@ keep this 2
     });
 
     group('Xcode default build location', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectWorkspaceData;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectWorkspaceData;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectWorkspaceData = memoryFileSystem.file('contents.xcworkspacedata');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectWorkspaceData).thenReturn(xcodeProjectWorkspaceData);
+        project = FakeIosProject();
+        project.xcodeProjectWorkspaceData = xcodeProjectWorkspaceData;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -355,7 +294,7 @@ keep this 2
         xcodeProjectWorkspaceData.writeAsStringSync(contents);
 
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -379,7 +318,7 @@ keep this 2
         xcodeProjectWorkspaceData.writeAsStringSync(contents);
 
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -397,22 +336,22 @@ keep this 2
     });
 
     group('remove Runner project base configuration', () {
-      MemoryFileSystem memoryFileSystem;
-      BufferLogger testLogger;
-      MockIosProject mockIosProject;
-      File xcodeProjectInfoFile;
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
         testLogger = BufferLogger.test();
-        mockIosProject = MockIosProject();
-        when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
+        project = FakeIosProject();
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -428,7 +367,7 @@ keep this 2
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -456,7 +395,7 @@ keep this 3
 ''');
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -511,7 +450,7 @@ keep this 3
 ''');
 
         final ProjectBaseConfigurationMigration iosProjectMigration = ProjectBaseConfigurationMigration(
-          mockIosProject,
+          project,
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
@@ -549,16 +488,138 @@ keep this 3
         expect(testLogger.statusText, contains('Project base configurations detected, removing.'));
       });
     });
+
+    group('update deployment target version', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File xcodeProjectInfoFile;
+      late File appFrameworkInfoPlist;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        testLogger = BufferLogger.test();
+        project = FakeIosProject();
+        xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+        project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+
+        appFrameworkInfoPlist = memoryFileSystem.file('AppFrameworkInfo.plist');
+        project.appFrameworkInfoPlist = appFrameworkInfoPlist;
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeProjectInfoFile.existsSync(), isFalse);
+        expect(appFrameworkInfoPlist.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode project not found, skipping iOS deployment target version migration'));
+        expect(testLogger.traceText, contains('AppFrameworkInfo.plist not found, skipping minimum OS version migration'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';
+        xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
+
+        const String appFrameworkInfoPlistContents = '''
+  <key>MinimumOSVersion</key>
+  <string>9.0</string>
+''';
+        appFrameworkInfoPlist.writeAsStringSync(appFrameworkInfoPlistContents);
+
+        final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+        expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
+        expect(appFrameworkInfoPlist.readAsStringSync(), appFrameworkInfoPlistContents);
+
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated to minimum version 8.0', () {
+        xcodeProjectInfoFile.writeAsStringSync('''
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+''');
+
+        appFrameworkInfoPlist.writeAsStringSync('''
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>MinimumOSVersion</key>
+  <string>8.0</string>
+</dict>
+</plist>
+''');
+
+        final DeploymentTargetMigration iosProjectMigration = DeploymentTargetMigration(
+          project,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+
+        expect(xcodeProjectInfoFile.readAsStringSync(), '''
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+''');
+
+        expect(appFrameworkInfoPlist.readAsStringSync(), '''
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>MinimumOSVersion</key>
+  <string>9.0</string>
+</dict>
+</plist>
+''');
+        // Only print once even though 2 lines were changed.
+        expect('Updating minimum iOS deployment target from 8.0 to 9.0'.allMatches(testLogger.statusText).length, 1);
+      });
+    });
   });
 }
 
-class MockIosProject extends Mock implements IosProject {}
-class MockXcode extends Mock implements Xcode {}
-class MockUsage extends Mock implements Usage {}
+class FakeIosProject extends Fake implements IosProject {
+  @override
+  File xcodeProjectWorkspaceData = MemoryFileSystem.test().file('xcodeProjectWorkspaceData');
+
+  @override
+  File xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
+
+  @override
+  File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
+
+  @override
+  File appFrameworkInfoPlist = MemoryFileSystem.test().file('appFrameworkInfoPlist');
+}
 
 class FakeIOSMigrator extends ProjectMigrator {
-  FakeIOSMigrator({@required this.succeeds})
-    : super(null);
+  FakeIOSMigrator({required this.succeeds})
+    : super(BufferLogger.test());
 
   final bool succeeds;
 

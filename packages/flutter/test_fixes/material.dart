@@ -7,6 +7,12 @@ import 'package:flutter/material.dart';
 void main() {
   // Generic reference variables.
   BuildContext context;
+<<<<<<< HEAD
+=======
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
+>>>>>>> 18116933e77adc82f80866c928266a5b4f1ed645
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
@@ -166,4 +172,232 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68905
   MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: true);
   MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: false);
+<<<<<<< HEAD
+=======
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  TextField(maxLengthEnforced: true);
+  TextField(maxLengthEnforced: false);
+  final TextField textField;
+  textField.maxLengthEnforced;
+  TextFormField(maxLengthEnforced: true);
+  TextFormField(maxLengthEnforced: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  bottomNavigationBarItem.title;
+
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape(disabledThumbGapWidth: 2.0);
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
+  InputDecoration(hasFloatingPlaceholder: false);
+  InputDecoration();
+  InputDecoration.collapsed(hasFloatingPlaceholder: true);
+  InputDecoration.collapsed(hasFloatingPlaceholder: false);
+  InputDecoration.collapsed();
+  inputDecoration.hasFloatingPlaceholder;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(hasFloatingPlaceholder: true);
+  InputDecorationTheme(hasFloatingPlaceholder: false);
+  InputDecorationTheme();
+  inputDecorationTheme.hasFloatingPlaceholder;
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: false);
+  inputDecorationTheme.copyWith(hasFloatingPlaceholder: true);
+  inputDecorationTheme.copyWith();
+
+  // Changes made in https://github.com/flutter/flutter/pull/66482
+  ThemeData(textSelectionColor: Colors.red);
+  ThemeData(cursorColor: Colors.blue);
+  ThemeData(textSelectionHandleColor: Colors.yellow);
+  ThemeData(useTextSelectionTheme: false);
+  ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(textSelectionColor: Colors.red);
+  ThemeData.raw(cursorColor: Colors.blue);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow);
+  ThemeData.raw(useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionColor: Colors.red, useTextSelectionTheme: false);
+  ThemeData.raw(cursorColor: Colors.blue, useTextSelectionTheme: false);
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionHandleColor: Colors.yellow,
+    cursorColor: Colors.blue,
+    useTextSelectionTheme: true,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+  );
+  ThemeData.raw(
+    textSelectionColor: Colors.red,
+    cursorColor: Colors.blue,
+    textSelectionHandleColor: Colors.yellow,
+    useTextSelectionTheme: false,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchor: DragAnchor.child);
+  draggable = Draggable(dragAnchor: DragAnchor.pointer);
+  draggable.dragAnchor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.child);
+  longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.pointer);
+  longPressDraggable.dragAnchor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertChildRenderObject(renderObject, object);
+  leafElement.moveChildRenderObject(renderObject, object);
+  leafElement.removeChildRenderObject(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertChildRenderObject(renderObject, object);
+  listWheelElement.moveChildRenderObject(renderObject, object);
+  listWheelElement.removeChildRenderObject(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  multiChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.moveChildRenderObject(renderObject, object);
+  singleChildRenderObjectElement.removeChildRenderObject(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveChildRenderObject(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeChildRenderObject(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
+  renderObjectToWidgetElement.removeChildRenderObject(renderObject);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColor: Colors.red);
+  themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red);
+  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red);
+  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData.accentColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentColorBrightness: Brightness.dark);
+  themeData = ThemeData.raw(accentColorBrightness: Brightness.dark);
+  themeData = themeData.copyWith(accentColorBrightness: Brightness.dark);
+  themeData.accentColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentTextTheme: TextTheme());
+  themeData = ThemeData.raw(accentTextTheme: TextTheme());
+  themeData = themeData.copyWith(accentTextTheme: TextTheme());
+  themeData.accentTextTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(accentIconTheme: IconThemeData());
+  themeData = ThemeData.raw(accentIconTheme: IconThemeData());
+  themeData = themeData.copyWith(accentIconTheme: IconThemeData());
+  themeData.accentIconTheme; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/81336
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(buttonColor: Colors.red);
+  themeData = ThemeData.raw(buttonColor: Colors.red);
+  themeData = themeData.copyWith(buttonColor: Colors.red);
+  themeData.buttonColor; // Removing field reference not supported.
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
+  listWheelScrollView.clipToSize;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipToSize: true);
+  listWheelViewport = ListWheelViewport(clipToSize: false);
+  listWheelViewport.clipToSize;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87281
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(fixTextFieldOutlineLabel: true);
+  themeData = ThemeData.raw(fixTextFieldOutlineLabel: true);
+  themeData = themeData.copyWith(fixTextFieldOutlineLabel: true);
+  themeData.fixTextFieldOutlineLabel; // Removing field reference not supported.
+>>>>>>> 18116933e77adc82f80866c928266a5b4f1ed645
 }

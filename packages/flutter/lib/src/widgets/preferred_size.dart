@@ -16,6 +16,10 @@ import 'framework.dart';
 /// [Scaffold] sets its app bar height to the app bar's preferred height
 /// plus the height of the system status bar.
 ///
+/// Widgets that need to know the preferred size of their child can require
+/// that their child implement this interface by using this class rather
+/// than [Widget] as the type of their `child` property.
+///
 /// Use [PreferredSize] to give a preferred size to an arbitrary widget.
 abstract class PreferredSizeWidget implements Widget {
   /// The size this widget would prefer if it were otherwise unconstrained.
@@ -33,7 +37,13 @@ abstract class PreferredSizeWidget implements Widget {
 /// affect the child's layout in any way. It just advertises a preferred size
 /// which can be used by the parent.
 ///
-/// Widgets like [AppBar] implement a [PreferredSizeWidget].
+/// Parents like [Scaffold] use [PreferredSizeWidget] to require that their
+/// children implement that interface. To give a preferred size to an arbitrary
+/// widget so that it can be used in a `child` property of that type, this
+/// widget, [PreferredSize], can be used.
+///
+/// Widgets like [AppBar] implement a [PreferredSizeWidget], so that this
+/// [PreferredSize] widget is not necessary for them.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
@@ -44,22 +54,24 @@ abstract class PreferredSizeWidget implements Widget {
 ///
 /// ```dart preamble
 /// class AppBarContent extends StatelessWidget {
+///   const AppBarContent({Key? key}) : super(key: key);
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.end,
-///       children: [
+///       children: <Widget>[
 ///         Padding(
 ///           padding: const EdgeInsets.symmetric(horizontal: 10),
 ///           child: Row(
-///             children: [
-///               Text(
-///                 "PreferredSize Sample",
+///             children: <Widget>[
+///               const Text(
+///                 'PreferredSize Sample',
 ///                 style: TextStyle(color: Colors.white),
 ///               ),
-///               Spacer(),
+///               const Spacer(),
 ///               IconButton(
-///                 icon: Icon(
+///                 icon: const Icon(
 ///                   Icons.search,
 ///                   size: 20,
 ///                 ),
@@ -67,7 +79,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///                 onPressed: () {},
 ///               ),
 ///               IconButton(
-///                 icon: Icon(
+///                 icon: const Icon(
 ///                   Icons.more_vert,
 ///                   size: 20,
 ///                 ),
@@ -88,16 +100,16 @@ abstract class PreferredSizeWidget implements Widget {
 ///     appBar: PreferredSize(
 ///       preferredSize: const Size.fromHeight(80.0),
 ///       child: Container(
-///         decoration: BoxDecoration(
+///         decoration: const BoxDecoration(
 ///           gradient: LinearGradient(
-///             colors: [Colors.blue, Colors.pink],
+///             colors: <Color>[Colors.blue, Colors.pink],
 ///           ),
 ///         ),
-///         child: AppBarContent(),
+///         child: const AppBarContent(),
 ///       ),
 ///     ),
-///     body: Center(
-///       child: Text("Content"),
+///     body: const Center(
+///       child: Text('Content'),
 ///     ),
 ///   );
 /// }
@@ -111,7 +123,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///    its preferred size.
 ///  * [AppBar] and [TabBar], which implement PreferredSizeWidget.
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a widget that has a preferred size.
+  /// Creates a widget that has a preferred size that the parent can query.
   const PreferredSize({
     Key? key,
     required this.child,

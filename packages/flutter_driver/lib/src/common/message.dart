@@ -64,6 +64,19 @@ abstract class Result {
   /// A const constructor to allow subclasses to be const.
   const Result();
 
+  /// An empty responds that does not include any result data.
+  ///
+  /// Consider using this object as a result for [Command]s that do not return
+  /// any data.
+  static const Result empty = _EmptyResult();
+
   /// Serializes this message to a JSON map.
   Map<String, dynamic> toJson();
+}
+
+class _EmptyResult extends Result {
+  const _EmptyResult();
+
+  @override
+  Map<String, dynamic> toJson() => <String, dynamic>{};
 }

@@ -12,7 +12,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // class Intl { static String message(String s, { String? name, String? locale }) => ''; }
-// Future<void> initializeMessages(String locale) => Future.value();
+// Future<void> initializeMessages(String locale) => Future<void>.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -418,12 +418,12 @@ class Localizations extends StatefulWidget {
         throw FlutterError(
           'Requested the Locale of a context that does not include a Localizations ancestor.\n'
           'To request the Locale, the context used to retrieve the Localizations widget must '
-          'be that of a widget that is a descendant of a Localizations widget.'
+          'be that of a widget that is a descendant of a Localizations widget.',
         );
       }
       if (scope.localizationsState.locale == null) {
         throw FlutterError(
-          'Localizations.localeOf found a Localizations widget that had a unexpected null locale.\n'
+          'Localizations.localeOf found a Localizations widget that had a unexpected null locale.\n',
         );
       }
       return true;
@@ -474,7 +474,7 @@ class Localizations extends StatefulWidget {
   }
 
   @override
-  _LocalizationsState createState() => _LocalizationsState();
+  State<Localizations> createState() => _LocalizationsState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

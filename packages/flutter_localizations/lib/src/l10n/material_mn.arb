@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Өмнөх сар",
   "nextPageTooltip": "Дараах хуудас",
   "previousPageTooltip": "Өмнөх хуудас",
+  "firstPageTooltip": "Эхний хуудас",
+  "lastPageTooltip": "Сүүлийн хуудас",
   "showMenuTooltip": "Цэсийг харуулах",
   "aboutListTileTitle": "$applicationName-н тухай",
   "licensesPageTitle": "Лиценз",

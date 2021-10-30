@@ -8,7 +8,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
   const TestImageInfo(this.value, { required this.image, this.scale = 1.0, this.debugLabel });
 
@@ -76,7 +75,7 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone()))
+      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone())),
     );
   }
 

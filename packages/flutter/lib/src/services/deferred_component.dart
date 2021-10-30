@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'system_channels.dart';
 
-/// Manages the installation and loading of deferred component modules.
+/// Manages the installation and loading of deferred components.
 ///
 /// Deferred components allow Flutter applications to download precompiled AOT
 /// dart code and assets at runtime, reducing the install size of apps and
-/// avoiding installing unnessecary code/assets on end user devices. Common
+/// avoiding installing unnecessary code/assets on end user devices. Common
 /// use cases include deferring installation of advanced or infrequently
 /// used features and limiting locale specific features to users of matching
 /// locales. Deferred components can only deliver split off parts of the same
@@ -25,12 +25,12 @@ class DeferredComponent {
   // prevents instantiation and extension.
   DeferredComponent._();
 
-  // TODO(garyq): We should eventually expand this to install modules by loadingUnitId
-  // as well as moduleName, but currently, loadingUnitId is opaque to the dart code
+  // TODO(garyq): We should eventually expand this to install components by loadingUnitId
+  // as well as componentName, but currently, loadingUnitId is opaque to the dart code
   // so this is not possible. The API has been left flexible to allow adding
   // loadingUnitId as a parameter.
 
-  /// Requests that an assets-only deferred component identified by the [moduleName]
+  /// Requests that an assets-only deferred component identified by the [componentName]
   /// be downloaded and installed.
   ///
   /// This method returns a Future<void> that will complete when the feature is
@@ -45,14 +45,14 @@ class DeferredComponent {
   /// library loading process. For example:
   ///
   /// ```dart
-  /// import 'split_module.dart' deferred as SplitModule;
+  /// import 'split_component.dart' deferred as SplitComponent;
   /// ...
-  /// SplitModule.loadLibrary();
+  /// SplitComponent.loadLibrary();
   /// ```
   ///
-  /// This method will not load associated dart libraries contained in the dynamic
-  /// feature module, though it will download the files necessary and subsequent
-  /// calls to `loadLibrary()` to load will complete faster.
+  /// This method will not load associated dart libraries contained in the component,
+  /// though it will download the files necessary and subsequent calls to `loadLibrary()`
+  /// to load will complete faster.
   ///
   /// Assets installed by this method may be accessed in the same way as any other
   /// local asset by providing a string path to the asset.
@@ -63,14 +63,14 @@ class DeferredComponent {
   ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
   ///    the dart method to trigger the installation of the corresponding deferred component that
   ///    contains the dart library.
-  static Future<void> installDeferredComponent({required String moduleName}) async {
+  static Future<void> installDeferredComponent({required String componentName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'installDeferredComponent',
-      <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
+      <String, dynamic>{ 'loadingUnitId': -1, 'componentName': componentName },
     );
   }
 
-  /// Requests that a deferred component identified by the [moduleName] be
+  /// Requests that a deferred component identified by the [componentName] be
   /// uninstalled.
   ///
   /// Since uninstallation typically requires significant disk i/o, this method only
@@ -91,10 +91,10 @@ class DeferredComponent {
   ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
   ///    the dart method to trigger the installation of the corresponding deferred component that
   ///    contains the dart library.
-  static Future<void> uninstallDeferredComponent({required String moduleName}) async {
+  static Future<void> uninstallDeferredComponent({required String componentName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'uninstallDeferredComponent',
-      <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
+      <String, dynamic>{ 'loadingUnitId': -1, 'componentName': componentName },
     );
   }
 }

@@ -46,7 +46,7 @@ def flutter_additional_ios_build_settings(target)
 
   unless Dir.exist?(debug_framework_dir)
     # iOS artifacts have not been downloaded.
-    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure flutter build ios is executed first"
+    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure \"flutter precache --ios\" is executed first"
   end
 
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release', 'Flutter.xcframework'), __FILE__)
@@ -55,7 +55,7 @@ def flutter_additional_ios_build_settings(target)
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      if xcframework_file.end_with?("-simulator") # ios-x86_64-simulator
+      if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       elsif xcframework_file.start_with?("ios-") # ios-armv7_arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
@@ -71,6 +71,10 @@ def flutter_additional_ios_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
+
+    # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
+    build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
   end
 end
 
@@ -96,6 +100,11 @@ def flutter_additional_macos_build_settings(target)
   debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
 
+  unless Dir.exist?(debug_framework_dir)
+    # macOS artifacts have not been downloaded.
+    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure \"flutter precache --macos\" is executed first"
+  end
+
   target.build_configurations.each do |build_configuration|
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
@@ -107,6 +116,12 @@ def flutter_additional_macos_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target
+
+    # Avoid error about Pods-Runner not supporting provisioning profiles.
+    # Framework signing is handled at the app layer, not per framework, so disallow individual signing.
+    build_configuration.build_settings.delete 'EXPANDED_CODE_SIGN_IDENTITY'
+    build_configuration.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+    build_configuration.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
   end
 end
 
@@ -146,7 +161,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
 
   # Generate a fake podspec to represent the Flutter framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
-  # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CoocaPods trunk.
+  # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CocoaPods trunk.
   File.open(copied_podspec_path, 'w') { |podspec|
     podspec.write <<~EOF
       #
@@ -162,7 +177,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.license          = { :type => 'MIT' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '8.0'
+        s.ios.deployment_target = '9.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -184,7 +199,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
 
   # Generate a fake podspec to represent the FlutterMacOS framework.
   # This is only necessary because plugin podspecs contain `s.dependency 'FlutterMacOS'`, and if this Podfile
-  # does not add a `pod 'FlutterMacOS'` CocoaPods will try to download it from the CoocaPods trunk.
+  # does not add a `pod 'FlutterMacOS'` CocoaPods will try to download it from the CocoaPods trunk.
   File.open(copied_podspec_path, 'w') { |podspec|
     podspec.write <<~EOF
       #

@@ -10,6 +10,8 @@
   "previousMonthTooltip": "Forrige måned",
   "nextPageTooltip": "Neste side",
   "previousPageTooltip": "Forrige side",
+  "firstPageTooltip": "Første side",
+  "lastPageTooltip": "Siste side",
   "showMenuTooltip": "Vis meny",
   "aboutListTileTitle": "Om $applicationName",
   "licensesPageTitle": "Lisenser",

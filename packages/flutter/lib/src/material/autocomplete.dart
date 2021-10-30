@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
 import 'material.dart';
 import 'text_form_field.dart';
+import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
@@ -14,15 +16,33 @@ import 'text_form_field.dart';
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
-///   final List<String> _kOptions = <String>[
+///   static const List<String> _kOptions = <String>[
 ///     'aardvark',
 ///     'bobcat',
 ///     'chameleon',
@@ -52,11 +72,30 @@ import 'text_form_field.dart';
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///
-/// ```dart imports
+/// ```dart main
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart
+/// void main() => runApp(const AutocompleteExampleApp());
+///
+/// class AutocompleteExampleApp extends StatelessWidget {
+///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Autocomplete Basic User'),
+///         ),
+///         body: const Center(
+///           child: AutocompleteBasicUserExample(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// @immutable
 /// class User {
 ///   const User({
 ///     required this.email,
@@ -73,8 +112,9 @@ import 'text_form_field.dart';
 ///
 ///   @override
 ///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType)
+///     if (other.runtimeType != runtimeType) {
 ///       return false;
+///     }
 ///     return other is User
 ///         && other.name == name
 ///         && other.email == email;
@@ -85,9 +125,9 @@ import 'text_form_field.dart';
 /// }
 ///
 /// class AutocompleteBasicUserExample extends StatelessWidget {
-///   AutocompleteBasicUserExample({Key? key}) : super(key: key);
+///   const AutocompleteBasicUserExample({Key? key}) : super(key: key);
 ///
-///   static final List<User> _userOptions = <User>[
+///   static const List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
 ///     User(name: 'Bob', email: 'bob@example.com'),
 ///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -128,7 +168,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
+    this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
+    this.initialValue,
   }) : assert(displayStringForOption != null),
        assert(optionsBuilder != null),
        super(key: key);
@@ -154,6 +196,17 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
+  /// The maximum height used for the default Material options list widget.
+  ///
+  /// When [optionsViewBuilder] is `null`, this property sets the maximum height
+  /// that the options widget can occupy.
+  ///
+  /// The default value is set to 200.
+  final double optionsMaxHeight;
+
+  /// {@macro flutter.widgets.RawAutocomplete.initialValue}
+  final TextEditingValue? initialValue;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -167,12 +220,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
+          maxOptionsHeight: optionsMaxHeight,
         );
       },
       onSelected: onSelected,
@@ -214,6 +269,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
+    required this.maxOptionsHeight,
   }) : super(key: key);
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -221,6 +277,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
+  final double maxOptionsHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -228,10 +285,11 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: Container(
-          height: 200.0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxOptionsHeight),
           child: ListView.builder(
             padding: EdgeInsets.zero,
+            shrinkWrap: true,
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);
@@ -239,9 +297,20 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                 onTap: () {
                   onSelected(option);
                 },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(displayStringForOption(option)),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final bool highlight = AutocompleteHighlightedOption.of(context) == index;
+                    if (highlight) {
+                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                        Scrollable.ensureVisible(context, alignment: 0.5);
+                      });
+                    }
+                    return Container(
+                      color: highlight ? Theme.of(context).focusColor : null,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(displayStringForOption(option)),
+                    );
+                  }
                 ),
               );
             },

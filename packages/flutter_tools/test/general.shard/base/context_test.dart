@@ -11,7 +11,7 @@ import '../../src/common.dart';
 void main() {
   group('AppContext', () {
     group('global getter', () {
-      bool called;
+      late bool called;
 
       setUp(() {
         called = false;
@@ -76,7 +76,7 @@ void main() {
       test('still finds values if async code runs after body has finished', () async {
         final Completer<void> outer = Completer<void>();
         final Completer<void> inner = Completer<void>();
-        String value;
+        String? value;
         await context.run<void>(
           body: () {
             outer.future.then<void>((_) {
@@ -96,10 +96,10 @@ void main() {
 
       test('caches generated override values', () async {
         int consultationCount = 0;
-        String value;
+        String? value;
         await context.run<void>(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>());
+            final StringBuffer buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
             await context.run<void>(body: () {
               buf.write(context.get<String>());
@@ -119,10 +119,10 @@ void main() {
 
       test('caches generated fallback values', () async {
         int consultationCount = 0;
-        String value;
+        String? value;
         await context.run(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>());
+            final StringBuffer buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
             await context.run<void>(body: () {
               buf.write(context.get<String>());
@@ -141,7 +141,7 @@ void main() {
       });
 
       test('returns null if generated value is null', () async {
-        final String value = await context.run<String>(
+        final String? value = await context.run<String?>(
           body: () => context.get<String>(),
           overrides: <Type, Generator>{
             String: () => null,
@@ -151,23 +151,28 @@ void main() {
       });
 
       test('throws if generator has dependency cycle', () async {
-        final Future<String> value = context.run<String>(
+        final Future<String?> value = context.run<String?>(
           body: () async {
             return context.get<String>();
           },
           fallbacks: <Type, Generator>{
-            int: () => int.parse(context.get<String>()),
+            int: () => int.parse(context.get<String>() ?? ''),
             String: () => '${context.get<double>()}',
-            double: () => context.get<int>() * 1.0,
+            double: () => context.get<int>()! * 1.0,
           },
         );
-        try {
-          await value;
-          fail('ContextDependencyCycleException expected but not thrown.');
-        } on ContextDependencyCycleException catch (e) {
-          expect(e.cycle, <Type>[String, double, int]);
-          expect(e.toString(), 'Dependency cycle detected: String -> double -> int');
-        }
+        expect(
+          () => value,
+          throwsA(
+            isA<ContextDependencyCycleException>()
+              .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
+              .having(
+                (ContextDependencyCycleException error) => error.toString(),
+                'toString()',
+                'Dependency cycle detected: String -> double -> int',
+              ),
+          ),
+        );
       });
     });
 
@@ -185,16 +190,16 @@ void main() {
       });
 
       group('fallbacks', () {
-        bool called;
+        late bool called;
 
         setUp(() {
           called = false;
         });
 
         test('are applied after parent context is consulted', () async {
-          final String value = await context.run<String>(
+          final String? value = await context.run<String?>(
             body: () {
-              return context.run<String>(
+              return context.run<String?>(
                 body: () {
                   called = true;
                   return context.get<String>();
@@ -211,9 +216,9 @@ void main() {
 
         test('are not applied if parent context supplies value', () async {
           bool childConsulted = false;
-          final String value = await context.run<String>(
+          final String? value = await context.run<String?>(
             body: () {
-              return context.run<String>(
+              return context.run<String?>(
                 body: () {
                   called = true;
                   return context.get<String>();
@@ -236,7 +241,7 @@ void main() {
         });
 
         test('may depend on one another', () async {
-          final String value = await context.run<String>(
+          final String? value = await context.run<String?>(
             body: () {
               return context.get<String>();
             },
@@ -252,9 +257,9 @@ void main() {
       group('overrides', () {
         test('intercept consultation of parent context', () async {
           bool parentConsulted = false;
-          final String value = await context.run<String>(
+          final String? value = await context.run<String?>(
             body: () {
-              return context.run<String>(
+              return context.run<String?>(
                 body: () => context.get<String>(),
                 overrides: <Type, Generator>{
                   String: () => 'child',

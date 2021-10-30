@@ -117,7 +117,8 @@ class GestureTransformable extends StatefulWidget {
   final double? initialScale;
   final double? initialRotation;
 
-  @override _GestureTransformableState createState() => _GestureTransformableState();
+  @override
+  State<GestureTransformable> createState() => _GestureTransformableState();
 }
 
 // A single user event can only represent one of these gestures. The user can't
@@ -174,8 +175,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Get the offset of the current widget from the global screen coordinates.
-  // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
+    assert(context.findRenderObject() != null, 'The given context must have a renderObject, such as after the first build has completed.');
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
   }
@@ -286,10 +287,10 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
         // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
           transform: _transform,
-          child: Container(
-            child: widget.child,
+          child: SizedBox(
             height: widget.size.height,
             width: widget.size.width,
+            child: widget.child,
           ),
         ),
       ),
@@ -333,8 +334,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       Offset(nextTranslation.dx, nextTranslation.dy),
     );
     if (!inBoundaries) {
-      // TODO(justinmc): Instead of canceling translation when it goes out of
-      // bounds, stop translation at boundary.
       return matrix;
     }
 
@@ -350,7 +349,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     assert(scale != 0);
 
     // Don't allow a scale that moves the viewport outside of _boundaryRect.
-    final Offset tl = fromViewport(const Offset(0, 0), _transform);
+    final Offset tl = fromViewport(Offset.zero, _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
     final Offset br = fromViewport(
@@ -392,9 +391,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Handle the start of a gesture of _GestureType.
   void _onScaleStart(ScaleStartDetails details) {
-    if (widget.onScaleStart != null) {
-      widget.onScaleStart!(details);
-    }
+    widget.onScaleStart?.call(details);
 
     if (_controller.isAnimating) {
       _controller.stop();
@@ -417,13 +414,11 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     double scale = _transform.getMaxScaleOnAxis();
-    if (widget.onScaleUpdate != null) {
-      widget.onScaleUpdate!(ScaleUpdateDetails(
-        focalPoint: fromViewport(details.focalPoint, _transform),
-        scale: details.scale,
-        rotation: details.rotation,
-      ));
-    }
+    widget.onScaleUpdate?.call(ScaleUpdateDetails(
+      focalPoint: fromViewport(details.focalPoint, _transform),
+      scale: details.scale,
+      rotation: details.rotation,
+    ));
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
       _transform,
@@ -476,9 +471,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Handle the end of a gesture of _GestureType.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onScaleEnd != null) {
-      widget.onScaleEnd!(details);
-    }
+    widget.onScaleEnd?.call(details);
     setState(() {
       _scaleStart = null;
       _rotationStart = null;

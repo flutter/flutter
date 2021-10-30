@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=456"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -179,8 +185,7 @@ void main() {
     expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(
-        tester, flying(tester, find.text('Page 1')).first, 0.9004602432250977);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9004602432250977);
 
     // The top back label is styled exactly the same way. But the opacity tweens
     // are flipped.
@@ -207,8 +212,7 @@ void main() {
     expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
-    checkOpacity(
-        tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
+    checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.7630139589309692);
   });
 
   testWidgets('Font transitions respect themes', (WidgetTester tester) async {
@@ -589,8 +593,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    final Finder backChevron = flying(tester,
-        find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
+    final Finder backChevron = flying(tester, find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
       backChevron,
@@ -599,13 +602,11 @@ void main() {
     );
     // Come in from the right and fade in.
     checkOpacity(tester, backChevron, 0.0);
-    expect(
-        tester.getTopLeft(backChevron), const Offset(86.734375, 7.0));
+    expect(tester.getTopLeft(backChevron), const Offset(86.734375, 7.0));
 
     await tester.pump(const Duration(milliseconds: 150));
     checkOpacity(tester, backChevron, 0.09497911669313908);
-    expect(
-        tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
+    expect(tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
   });
 
   testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
@@ -631,8 +632,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    final Finder backChevron = flying(tester,
-        find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
+    final Finder backChevron = flying(tester, find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
       backChevron,
@@ -660,8 +660,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    final Finder backChevrons = flying(tester,
-        find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
+    final Finder backChevrons = flying(tester, find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
       backChevrons,
@@ -887,13 +886,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(
-        flying(tester, find.text('A title too long to fit')), findsOneWidget);
+    expect(flying(tester, find.text('A title too long to fit')), findsOneWidget);
     // Automatically changed to the word 'Back' in the back label.
     expect(flying(tester, find.text('Back')), findsOneWidget);
 
-    checkOpacity(tester, flying(tester, find.text('A title too long to fit')),
-        0.8833301812410355);
+    checkOpacity(tester, flying(tester, find.text('A title too long to fit')), 0.8833301812410355);
     checkOpacity(tester, flying(tester, find.text('Back')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),

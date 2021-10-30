@@ -21,6 +21,15 @@ void main() {
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
   });
 
+test('generateBootstrapScript includes loading indicator', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+    );
+    expect(result, contains('"flutter-loader"'));
+    expect(result, contains('"indeterminate"'));
+  });
+
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',

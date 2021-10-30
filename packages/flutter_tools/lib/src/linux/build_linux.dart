@@ -12,11 +12,11 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
+import '../cmake_project.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import '../plugins.dart';
-import '../project.dart';
 
 // Matches the following error and warning patterns:
 // - <file path>:<line>:<column>: (fatal) error: <error...>
@@ -30,11 +30,14 @@ Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
-    SizeAnalyzer sizeAnalyzer,
+    SizeAnalyzer? sizeAnalyzer,
+    bool needCrossBuild = false,
+    TargetPlatform targetPlatform = TargetPlatform.linux_x64,
+    String targetSysroot = '/',
   }) async {
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Linux support to a project.');
   }
 
@@ -51,13 +54,14 @@ Future<void> buildLinux(
   // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   environmentConfig['FLUTTER_TARGET'] = target;
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+  final Artifacts? artifacts = globals.artifacts;
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, environmentConfig);
 
   createPluginSymlinks(linuxProject.parent);
 
@@ -65,24 +69,26 @@ Future<void> buildLinux(
     'Building Linux application...',
   );
   try {
-    final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
-    final Directory buildDirectory = globals.fs.directory(getLinuxBuildDirectory()).childDirectory(buildModeName);
-    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory);
+    final String buildModeName = getNameForBuildMode(buildInfo.mode);
+    final Directory buildDirectory =
+        globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
+    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
+                    needCrossBuild, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForTargetPlatform(TargetPlatform.linux_x64);
+    final String arch = getNameForTargetPlatform(targetPlatform);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('trace.$arch.json');
-    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getLinuxBuildDirectory(), 'release', 'bundle'),
+        globals.fs.path.join(getLinuxBuildDirectory(targetPlatform), 'release', 'bundle'),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',
@@ -107,12 +113,15 @@ Future<void> buildLinux(
   }
 }
 
-Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir) async {
+Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
+    bool needCrossBuild, TargetPlatform targetPlatform, String targetSysroot) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
 
   final String buildFlag = toTitleCase(buildModeName);
+  final bool needCrossBuildOptionsForArm64 = needCrossBuild
+      && targetPlatform == TargetPlatform.linux_arm64;
   int result;
   try {
     result = await globals.processUtils.stream(
@@ -121,6 +130,15 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
+        '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+        // Support cross-building for arm64 targets on x64 hosts.
+        // (Cross-building for x64 on arm64 hosts isn't supported now.)
+        if (needCrossBuild)
+          '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
+        if (needCrossBuildOptionsForArm64)
+          '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
+        if (needCrossBuildOptionsForArm64)
+          '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
         sourceDir.path,
       ],
       workingDirectory: buildDir.path,

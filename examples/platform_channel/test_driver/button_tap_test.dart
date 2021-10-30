@@ -7,15 +7,14 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('button tap test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      driver.close();
     });
 
     test('tap on the button, verify result', () async {
@@ -27,7 +26,7 @@ void main() {
       await driver.waitFor(button);
       await driver.tap(button);
 
-      String batteryLevel;
+      String? batteryLevel;
       while (batteryLevel == null || batteryLevel.contains('unknown')) {
         batteryLevel = await driver.getText(batteryLevelLabel);
       }

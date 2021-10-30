@@ -14,10 +14,10 @@ class DriverError extends Error {
   final String message;
 
   /// The error object that was caught and wrapped by this error object, if any.
-  final dynamic originalError;
+  final Object? originalError;
 
   /// The stack trace that was caught and wrapped by this error object, if any.
-  final dynamic originalStackTrace;
+  final Object? originalStackTrace;
 
   @override
   String toString() {
@@ -50,10 +50,12 @@ typedef DriverLogCallback = void Function(String source, String message);
 /// messages from the driver subsystem.
 ///
 /// The default implementation prints `"$source: $message"` to stderr.
-DriverLogCallback driverLog = (String source, String message) {
+DriverLogCallback driverLog = _defaultDriverLogger;
+
+void _defaultDriverLogger(String source, String message) {
   try {
     stderr.writeln('$source: $message');
   } on FileSystemException {
     // May encounter IO error: https://github.com/flutter/flutter/issues/69314
   }
-};
+}

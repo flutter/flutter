@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -11,7 +13,8 @@ import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals_null_migrated.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -20,8 +23,7 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    //addSubcommand(PackagesGetCommand('upgrade', true));
-    addSubcommand(PackagesInteractiveGetCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.'));
+    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
     addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
     addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
@@ -79,14 +81,16 @@ class PackagesGetCommand extends FlutterCommand {
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
   @override
-  Future<Map<CustomDimensions, String>> get usageValues async {
-    final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async {
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
-      return usageValues;
+      return const CustomDimensions();
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+
+    int numberPlugins;
+
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
       && rootProject.packagesFile.existsSync()
@@ -95,14 +99,16 @@ class PackagesGetCommand extends FlutterCommand {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
       final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
+      numberPlugins = plugins.length;
     } else {
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
+      numberPlugins = 0;
     }
-    usageValues[CustomDimensions.commandPackagesProjectModule] = '${rootProject.isModule}';
-    usageValues[CustomDimensions.commandPackagesAndroidEmbeddingVersion] =
-        rootProject.android.getEmbeddingVersion().toString().split('.').last;
-    return usageValues;
+
+    return CustomDimensions(
+      commandPackagesNumberPlugins: numberPlugins,
+      commandPackagesProjectModule: rootProject.isModule,
+      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+    );
   }
 
   Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
@@ -116,7 +122,9 @@ class PackagesGetCommand extends FlutterCommand {
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
+        platform: globals.platform,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -131,6 +139,7 @@ class PackagesGetCommand extends FlutterCommand {
         context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade,
+        shouldSkipThirdPartyGenerator: false,
         offline: boolArg('offline'),
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
@@ -151,14 +160,14 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(workingDirectory);
+    final String target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
       throwToolExit(
-       'Expected to find project root in '
-       '${ workingDirectory ?? "current working directory" }.'
+        'Expected to find project root in '
+        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     await _runPubGet(target, rootProject);
     await rootProject.regeneratePlatformSpecificTooling();
@@ -241,9 +250,8 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand() {
-    requiresPubspecYaml();
-  }
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';
@@ -267,9 +275,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 }
 
 class PackagesInteractiveGetCommand extends FlutterCommand {
-  PackagesInteractiveGetCommand(this._commandName, this._description) {
-    requiresPubspecYaml();
-  }
+  PackagesInteractiveGetCommand(this._commandName, this._description);
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -294,53 +300,56 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     List<String> rest = argResults.rest;
+    final bool isHelp = rest.contains('-h') || rest.contains('--help');
     String target;
-    if (rest.length == 1 &&
-        (rest[0].contains('/') ||
-            rest[0].contains(r'\'))) {
+    if (rest.length == 1 && (rest[0].contains('/') || rest[0].contains(r'\'))) {
       // HACK: Supporting flutter specific behavior where you can pass a
       //       folder to the command.
-      target = findProjectRoot(rest[0]);
+      target = findProjectRoot(globals.fs, rest[0]);
       rest = <String>[];
     } else {
-      target = findProjectRoot();
-    }
-    if (target == null) {
-      throwToolExit('Expected to find project root in '
-          'current working directory.');
-    }
-    final FlutterProject flutterProject = FlutterProject.fromPath(target);
-
-    if (flutterProject.manifest.generateSyntheticPackage) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        projectDir: flutterProject.directory,
-      );
-
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-      );
+      target = findProjectRoot(globals.fs);
     }
 
-    final List<String> subArgs = rest.toList()
-      ..removeWhere((String arg) => arg == '--');
+    FlutterProject flutterProject;
+    if (!isHelp) {
+      if (target == null) {
+        throwToolExit('Expected to find project root in current working directory.');
+      }
+      flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+
+      if (flutterProject.manifest.generateSyntheticPackage) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          platform: globals.platform,
+          projectDir: flutterProject.directory,
+          generateDartPluginRegistry: true,
+        );
+
+        await generateLocalizationsSyntheticPackage(
+          environment: environment,
+          buildSystem: globals.buildSystem,
+        );
+      }
+    }
+
+    final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     await pub.interactively(
       <String>[name, ...subArgs],
       directory: target,
       stdio: globals.stdio,
-      touchesPackageConfig: true,
-      generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+      touchesPackageConfig: !isHelp,
+      generateSyntheticPackage: flutterProject?.manifest?.generateSyntheticPackage ?? false,
     );
 
-    await flutterProject.regeneratePlatformSpecificTooling();
+    await flutterProject?.regeneratePlatformSpecificTooling();
     return FlutterCommandResult.success();
   }
 }

@@ -11,6 +11,8 @@
   "nextMonthTooltip": "Sljedeći mjesec",
   "previousMonthTooltip": "Prethodni mjesec",
   "nextPageTooltip": "Sljedeća stranica",
+  "firstPageTooltip": "Prva stranica",
+  "lastPageTooltip": "Posljednja stranica",
   "previousPageTooltip": "Prethodna stranica",
   "showMenuTooltip": "Prikaži meni",
   "aboutListTileTitle": "O aplikaciji $applicationName",

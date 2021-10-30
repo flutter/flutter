@@ -10,7 +10,7 @@ void main() {
   testWidgets('Drawer header does not scroll', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: DrawerDemo(),
+      home: const DrawerDemo(),
     ));
 
     await tester.tap(find.text('Tap here to open the drawer'));

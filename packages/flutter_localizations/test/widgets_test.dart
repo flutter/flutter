@@ -4,10 +4,10 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestLocalizations {
   TestLocalizations(this.locale, this.prefix);
@@ -169,7 +169,7 @@ Widget buildFrame({
 }
 
 class SyncLoadTest extends StatefulWidget {
-  const SyncLoadTest();
+  const SyncLoadTest({Key? key}) : super(key: key);
 
   @override
   SyncLoadTestState createState() => SyncLoadTestState();

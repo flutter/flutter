@@ -221,7 +221,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// If `T` is not nullable, then [begin] and [end] must both be set to
 /// non-null values before using [lerp] or [transform], otherwise they
 /// will throw.
-class Tween<T extends dynamic> extends Animatable<T> {
+class Tween<T extends Object?> extends Animatable<T> {
   /// Creates a tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
@@ -246,7 +246,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 
   /// Returns the value this variable has at the given animation clock value.
   ///
-  /// The default implementation of this method uses the [+], [-], and [*]
+  /// The default implementation of this method uses the `+`, `-`, and `*`
   /// operators on `T`. The [begin] and [end] properties must therefore be
   /// non-null by the time this method is called.
   ///
@@ -256,7 +256,54 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    return begin + (end - begin) * t as T;
+    assert(() {
+      // Assertions that attempt to catch common cases of tweening types
+      // that do not conform to the Tween requirements.
+      dynamic result;
+      try {
+        // ignore: avoid_dynamic_calls
+        result = (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t;
+        result as T;
+        return true;
+      } on NoSuchMethodError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is Color || end is Color)
+            ErrorHint('To lerp colors, consider ColorTween instead.')
+          else if (begin is Rect || end is Rect)
+            ErrorHint('To lerp rects, consider RectTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      } on TypeError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
+            'multiplication with a double value. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
+          ),
+          if (begin is int || end is int)
+            ErrorHint('To lerp int values, consider IntTween or StepTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.',
+            ),
+        ]);
+      }
+    }());
+    // ignore: avoid_dynamic_calls
+    return (begin as dynamic) + ((end as dynamic) - (begin as dynamic)) * t as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -285,7 +332,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
-class ReverseTween<T> extends Tween<T> {
+class ReverseTween<T extends Object?> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
     : assert(parent != null),

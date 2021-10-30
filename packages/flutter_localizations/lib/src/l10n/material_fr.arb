@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Mois précédent",
   "nextPageTooltip": "Page suivante",
   "previousPageTooltip": "Page précédente",
+  "firstPageTooltip": "Première page",
+  "lastPageTooltip": "Dernière page",
   "showMenuTooltip": "Afficher le menu",
   "aboutListTileTitle": "À propos de $applicationName",
   "licensesPageTitle": "Licences",

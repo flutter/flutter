@@ -26,9 +26,9 @@ import 'framework.dart';
 /// Widget build(BuildContext context) {
 ///   return SingleChildScrollView(
 ///     child: Column(
-///       children: [
+///       children: <Widget>[
 ///         ColorFiltered(
-///           colorFilter: ColorFilter.mode(
+///           colorFilter: const ColorFilter.mode(
 ///             Colors.red,
 ///             BlendMode.modulate,
 ///           ),
@@ -36,7 +36,7 @@ import 'framework.dart';
 ///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
 ///         ),
 ///         ColorFiltered(
-///           colorFilter: ColorFilter.mode(
+///           colorFilter: const ColorFilter.mode(
 ///             Colors.grey,
 ///             BlendMode.saturation,
 ///           ),
@@ -71,8 +71,8 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => _ColorFilterRenderObject(colorFilter);
 
   @override
-  void updateRenderObject(BuildContext context, _ColorFilterRenderObject renderObject) {
-    renderObject.colorFilter = colorFilter;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _ColorFilterRenderObject).colorFilter = colorFilter;
   }
 
   @override

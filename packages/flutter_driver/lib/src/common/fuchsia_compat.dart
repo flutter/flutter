@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// Convenience methods for Flutter application driving on Fuchsia. Can
 /// be run on either a host machine (making a remote connection to a Fuchsia
 /// device), or on the target Fuchsia machine.
@@ -40,13 +38,13 @@ class _DummySshCommandRunner implements SshCommandRunner {
   }
 
   @override
-  String get sshConfigPath => null;
+  String get sshConfigPath => '';
 
   @override
   String get address => InternetAddress.loopbackIPv4.address;
 
   @override
-  String get interface => null;
+  String get interface => '';
 
   @override
   Future<List<String>> run(String command) async {
@@ -72,8 +70,8 @@ class _DummySshCommandRunner implements SshCommandRunner {
 Future<PortForwarder> _dummyPortForwardingFunction(
   String address,
   int remotePort, [
-  String interface = '',
-  String configFile,
+  String? interface,
+  String? configFile,
 ]) async {
   return _DummyPortForwarder(remotePort, remotePort);
 }
@@ -85,6 +83,10 @@ Future<PortForwarder> _dummyPortForwardingFunction(
 /// `FUCHSIA_SSH_CONFIG` variables must be set. If run on a Fuchsia device, will
 /// connect locally without need for environment variables.
 class FuchsiaCompat {
+  // This class is not meant to be instantiated or extended; this constructor
+  // prevents instantiation and extension.
+  FuchsiaCompat._();
+
   static void _init() {
     fuchsiaPortForwardingFunction = _dummyPortForwardingFunction;
   }

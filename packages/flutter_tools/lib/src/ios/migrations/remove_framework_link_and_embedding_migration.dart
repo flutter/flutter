@@ -6,10 +6,8 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
-import '../../base/version.dart';
-import '../../macos/xcode.dart';
-import '../../project.dart';
 import '../../reporting/reporting.dart';
+import '../../xcode_project.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
 // This caused issues switching between a real device and simulator due to architecture mismatch.
@@ -18,15 +16,12 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
     Logger logger,
-    Xcode xcode,
     Usage usage,
   ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _xcode = xcode,
         _usage = usage,
         super(logger);
 
   final File _xcodeProjectInfoFile;
-  final Xcode _xcode;
   final Usage _usage;
 
   @override
@@ -42,7 +37,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     // App.framework Frameworks reference.
     // isa = PBXFrameworksBuildPhase;
     // files = (
@@ -98,12 +93,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     }
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
-      // Print scary message if the user is on Xcode 11.4 or greater, or if Xcode isn't installed.
-      final bool xcodeIsInstalled = _xcode.isInstalled;
-      if(!xcodeIsInstalled || _xcode.currentVersion >= Version(11, 4, 0)) {
-        UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
-        throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
-      }
+      // Print scary message.
+      UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
+      throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     }
 
     return line;

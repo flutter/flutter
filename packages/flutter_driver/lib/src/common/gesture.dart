@@ -4,7 +4,6 @@
 
 import 'deserialization_factory.dart';
 import 'find.dart';
-import 'message.dart';
 
 /// A Flutter Driver command that taps on a target widget located by [finder].
 class Tap extends CommandWithTarget {
@@ -17,21 +16,6 @@ class Tap extends CommandWithTarget {
   @override
   String get kind => 'tap';
 }
-
-/// The result of a [Tap] command.
-class TapResult extends Result {
-  /// Creates a [TapResult].
-  const TapResult();
-
-  /// Deserializes this result from JSON.
-  static TapResult fromJson(Map<String, dynamic> json) {
-    return const TapResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
-}
-
 
 /// A Flutter Driver command that commands the driver to perform a scrolling action.
 class Scroll extends CommandWithTarget {
@@ -76,20 +60,6 @@ class Scroll extends CommandWithTarget {
     'duration': '${duration.inMicroseconds}',
     'frequency': '$frequency',
   });
-}
-
-/// The result of a [Scroll] command.
-class ScrollResult extends Result {
-  /// Creates a [ScrollResult].
-  const ScrollResult();
-
-  /// Deserializes this result from JSON.
-  static ScrollResult fromJson(Map<String, dynamic> json) {
-    return const ScrollResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
 }
 
 /// A Flutter Driver command that commands the driver to ensure that the element

@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -68,13 +67,13 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builds the text selection handles, but desktop has none.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
     return const SizedBox.shrink();
   }
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
     return Offset.zero;
   }
 }
@@ -231,7 +230,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
-/// Tries to position itself as closesly as possible to [anchor] while remaining
+/// Tries to position itself as closely as possible to [anchor] while remaining
 /// fully on-screen.
 ///
 /// See also:

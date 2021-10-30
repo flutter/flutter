@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -90,9 +87,7 @@ void main() {
       return MaterialApp(
         locale: const Locale('en', 'us'),
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: Theme(
@@ -113,7 +108,7 @@ void main() {
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -140,9 +135,7 @@ void main() {
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: Theme(
@@ -166,7 +159,7 @@ void main() {
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -465,6 +458,45 @@ void main() {
 
     // Teardown.
     await gesture.removePointer();
+  });
+
+  testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+    const Color selectedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+
+    BorderSide getBorderSide(Set<MaterialState> states) {
+      Color color = defaultColor;
+
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
+
+      return BorderSide(color: color, width: 1);
+    }
+
+    Widget chipWidget({ bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+          ),
+        ),
+        home: Scaffold(
+          body: ChoiceChip(
+            label: const Text('Chip'),
+            selected: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+    }
+
+    // Default.
+    await tester.pumpWidget(chipWidget());
+    expect(find.byType(RawChip), paints..rrect(color: defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(find.byType(RawChip), paints..rrect(color: selectedColor));
   });
 
   testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {

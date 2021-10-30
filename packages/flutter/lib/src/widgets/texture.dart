@@ -38,12 +38,16 @@ class Texture extends LeafRenderObjectWidget {
   const Texture({
     Key? key,
     required this.textureId,
+    this.freeze = false,
     this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
 
   /// The identity of the backend texture.
   final int textureId;
+
+  /// When true the texture will not be updated with new frames.
+  final bool freeze;
 
   /// {@template flutter.widgets.Texture.filterQuality}
   /// The quality of sampling the texture and rendering it on screen.
@@ -56,11 +60,12 @@ class Texture extends LeafRenderObjectWidget {
   final FilterQuality filterQuality;
 
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, filterQuality: filterQuality);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {
     renderObject.textureId = textureId;
+    renderObject.freeze = freeze;
     renderObject.filterQuality = filterQuality;
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import 'package:flutter_tools/runner.dart' as runner;
@@ -17,7 +19,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
@@ -28,6 +30,7 @@ final ArgParser parser = ArgParser()
   ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
   ..addOption('dev-finder', help: 'The location of the device-finder binary')
+  ..addOption('ffx', help: 'The location of the ffx binary')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -46,6 +49,7 @@ Future<void> main(List<String> args) async {
   final File frontendServer = globals.fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = globals.fs.file('$buildDirectory/ssh-keys/ssh_config');
   final File devFinder = globals.fs.file(argResults['dev-finder']);
+  final File ffx = globals.fs.file(argResults['ffx']);
   final File platformKernelDill = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
@@ -58,6 +62,10 @@ Future<void> main(List<String> args) async {
 
   if (!devFinder.existsSync()) {
     print('Error: device-finder not found at ${devFinder.path}.');
+    return 1;
+  }
+  if (!ffx.existsSync()) {
+    print('Error: ffx not found at ${ffx.path}.');
     return 1;
   }
   if (!frontendServer.existsSync()) {
@@ -105,12 +113,14 @@ Future<void> main(List<String> args) async {
     overrides: <Type, Generator>{
       FeatureFlags: () => const _FuchsiaFeatureFlags(),
       DeviceManager: () => _FuchsiaDeviceManager(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+        sshConfig: sshConfig, devFinder: devFinder, ffx: ffx),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(
           fileSystem: globals.fs,
           cache: globals.cache,
           platform: globals.platform,
+          operatingSystemUtils: globals.os,
         ),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,

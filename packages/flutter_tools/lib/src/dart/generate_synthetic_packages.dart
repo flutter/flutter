@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 
 Future<void> generateLocalizationsSyntheticPackage({
-  @required Environment environment,
-  @required BuildSystem buildSystem,
+  required Environment environment,
+  required BuildSystem buildSystem,
 }) async {
   assert(environment != null);
   assert(buildSystem != null);
@@ -35,17 +35,11 @@ Future<void> generateLocalizationsSyntheticPackage({
     );
   }
 
-  BuildResult result;
-  // If an l10n.yaml file exists but is empty, attempt to build synthetic
-  // package with default settings.
-  if (yamlNode.value == null) {
-    result = await buildSystem.build(
-      const GenerateLocalizationsTarget(),
-      environment,
-    );
-  } else {
+  // If an l10n.yaml file exists and is not empty, attempt to parse settings in
+  // it.
+  if (yamlNode.value != null) {
     final YamlMap yamlMap = yamlNode as YamlMap;
-    final Object value = yamlMap['synthetic-package'];
+    final Object? value = yamlMap['synthetic-package'];
     if (value is! bool && value != null) {
       throwToolExit(
         'Expected "synthetic-package" to have a bool value, '
@@ -55,18 +49,25 @@ Future<void> generateLocalizationsSyntheticPackage({
 
     // Generate gen_l10n synthetic package only if synthetic-package: true or
     // synthetic-package is null.
-    final bool isSyntheticL10nPackage = value as bool ?? true;
-    if (!isSyntheticL10nPackage) {
+    final bool? isSyntheticL10nPackage = value as bool?;
+    if (isSyntheticL10nPackage == false) {
       return;
     }
   }
 
-  result = await buildSystem.build(
+  final BuildResult result = await buildSystem.build(
     const GenerateLocalizationsTarget(),
     environment,
   );
 
-  if (result == null || result.hasException) {
-    throwToolExit('Generating synthetic localizations package has failed.');
+  if (result == null) {
+    throwToolExit('Generating synthetic localizations package failed: result is null.');
+  }
+  if (result.hasException) {
+    throwToolExit(
+      'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+      '\n\n'
+      '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+    );
   }
 }
