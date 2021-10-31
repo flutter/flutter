@@ -745,6 +745,22 @@ void main() {
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
+
+  
+  testWidgets('IconButton has long-press gesture', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+          child: IconButton(
+            onPressed: () { /* enable the button */ },
+            onLongPress: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
+      ),
+    );
+
+    await tester.longPress(find.byType(IconButton));
+    expect(mockOnPressedFunction.called, 1);
+  });
 }
 
 Widget wrap({ required Widget child }) {

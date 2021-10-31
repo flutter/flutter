@@ -128,6 +128,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
+    this.onLongPress,
     this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
@@ -253,6 +254,9 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
+  /// The callback that is called when the button is long-pressed.
+  final VoidCallback? onLongPress;
+
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
   /// If set to null, will default to
@@ -356,6 +360,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
+        onLongPress: onLongPress,
         mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
         enableFeedback: enableFeedback,
         focusColor: focusColor ?? theme.focusColor,
