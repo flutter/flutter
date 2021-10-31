@@ -1532,8 +1532,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
-      final Offset start = Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
-      final Offset end = Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
+      final Offset start = Offset(boxes.first.start.clamp(0, _textPainter.size.width), boxes.first.bottom) + paintOffset;
+      final Offset end = Offset(boxes.last.end.clamp(0, _textPainter.size.width), boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         TextSelectionPoint(start, boxes.first.direction),
         TextSelectionPoint(end, boxes.last.direction),
