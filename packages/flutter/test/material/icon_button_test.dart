@@ -746,7 +746,7 @@ void main() {
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 
-  
+
   testWidgets('IconButton has long-press gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
