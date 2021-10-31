@@ -554,13 +554,13 @@ void main() {
               child: Container(
                 height: _height,
                 width: _width,
-                color: Colors.blue,
+                decoration: const BoxDecoration(),
               ),
             ),
           ),
         )));
 
-    Size _target = const Size(_width * _scale, _height * _scale);
+    final Size _target = const Size(_width * _scale, _height * _scale);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
@@ -582,13 +582,13 @@ void main() {
               child: Container(
                 height: _height,
                 width: _width,
-                color: Colors.blue,
+                decoration: const BoxDecoration(),
               ),
             ),
           ),
         )));
 
-    Size _target = const Size(_width * _scaleX, _height * _scaleY);
+    final Size _target = const Size(_width * _scaleX, _height * _scaleY);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
