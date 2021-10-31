@@ -506,7 +506,7 @@ void main() {
     );
   });
 
-  testWidgets('Transform.scale() does not accept all three scale, scaleX and scaleY parameters', (tester) async {
+  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -515,7 +515,7 @@ void main() {
               scale: 1.0,
               scaleX: 1.0,
               scaleY: 1.0,
-              child: Container(
+              child: const SizedBox(
                 height: 100,
                 width: 100,
               ),
@@ -524,13 +524,13 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() needs at least 'scale' or both of 'scaleX' and 'scaleY' otherwise throws AssertionError", (tester) async {
+  testWidgets("Transform.scale() needs at least 'scale' or both of 'scaleX' and 'scaleY' otherwise throws AssertionError", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: Transform.scale(
-              child: Container(
+              child: const SizedBox(
                 height: 100,
                 width: 100,
               ),
@@ -539,10 +539,10 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() scales widget uniformly with scale parameter", (tester) async {
-    double _scale = 1.5;
-    double _height = 100;
-    double _width = 150;
+  testWidgets("Transform.scale() scales widget uniformly with 'scale' parameter", (WidgetTester tester) async {
+    const double _scale = 1.5;
+    const double _height = 100;
+    const double _width = 150;
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SizedBox(
@@ -554,21 +554,22 @@ void main() {
               child: Container(
                 height: _height,
                 width: _width,
+                color: Colors.blue,
               ),
             ),
           ),
         )));
 
-    Size _target = Size(_width * _scale, _height * _scale);
+    Size _target = const Size(_width * _scale, _height * _scale);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
-  testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (tester) async {
-    double _scaleX = 1.5;
-    double _scaleY = 1.2;
-    double _height = 100;
-    double _width = 150;
+  testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
+    const double _scaleX = 1.5;
+    const double _scaleY = 1.2;
+    const double _height = 100;
+    const double _width = 150;
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SizedBox(
@@ -581,12 +582,13 @@ void main() {
               child: Container(
                 height: _height,
                 width: _width,
+                color: Colors.blue,
               ),
             ),
           ),
         )));
 
-    Size _target = Size(_width * _scaleX, _height * _scaleY);
+    Size _target = const Size(_width * _scaleX, _height * _scaleY);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
