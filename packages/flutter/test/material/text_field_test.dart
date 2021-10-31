@@ -1110,7 +1110,7 @@ void main() {
     );
 
     const String testValueOneLine = 'enough text to be exactly at the end of the line.';
-    const String testValueSpaces = '$testValueOneLine          ';
+    const String testValueSpaces = '$testValueOneLine              ';
 
     // Positioning the cursor at the end of a line overflowing with spaces puts
     // it inside the input still.
