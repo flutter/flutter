@@ -149,22 +149,20 @@ class PackageDependency {
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
-    targets.sort((String a, String b) => values[b]?.length ?? 0 .compareTo(values[a]?.length ?? 0));
+    targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
     for (final String target in targets) {
-      final List<String>? targetList = values[target];
-      if (targetList != null) {
-        final int count = targetList.length;
-        result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
-        bool canonical = false;
-        for (final String source in targetList) {
-          result.writeln('    $source');
-          if (source == canonicalSource) {
-            canonical = true;
-          }
+      final List<String> targetList = values[target]!;
+      final int count = targetList.length;
+      result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
+      bool canonical = false;
+      for (final String source in targetList) {
+        result.writeln('    $source');
+        if (source == canonicalSource) {
+          canonical = true;
         }
-        if (canonical) {
-          result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
-        }
+      }
+      if (canonical) {
+        result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
       }
     }
   }
