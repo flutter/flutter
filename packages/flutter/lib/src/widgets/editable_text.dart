@@ -1674,6 +1674,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
   }
 
+  // Whether `TickerMode.of(context)` is true and animations (like blinking the
+  // cursor) are supposed to run.
   bool _tickersEnabled = true;
 
   @override
