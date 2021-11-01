@@ -75,7 +75,7 @@ impeller_component("renderer") {
               "render_pass_descriptor.h",
               "render_pass_descriptor.cc",
               "renderer.h",
-              "renderer.mm",
+              "renderer.cc",
               "sampler.h",
               "sampler.cc",
               "sampler_descriptor.h",
