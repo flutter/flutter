@@ -20,7 +20,7 @@
 namespace impeller {
 
 class ShaderFunction;
-class PipelineVertexDescriptor;
+class VertexDescriptor;
 
 class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
  public:
@@ -45,9 +45,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   }
 
   PipelineDescriptor& SetVertexDescriptor(
-      std::shared_ptr<PipelineVertexDescriptor> vertex_descriptor);
+      std::shared_ptr<VertexDescriptor> vertex_descriptor);
 
-  const std::shared_ptr<PipelineVertexDescriptor>& GetVertexDescriptor() const {
+  const std::shared_ptr<VertexDescriptor>& GetVertexDescriptor() const {
     return vertex_descriptor_;
   }
 
@@ -108,7 +108,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
   std::map<size_t /* index */, PipelineColorAttachment>
       color_attachment_descriptors_;
-  std::shared_ptr<PipelineVertexDescriptor> vertex_descriptor_;
+  std::shared_ptr<VertexDescriptor> vertex_descriptor_;
   PixelFormat depth_pixel_format_ = PixelFormat::kUnknown;
   PixelFormat stencil_pixel_format_ = PixelFormat::kUnknown;
   std::optional<PipelineDepthAttachment> depth_attachment_descriptor_;

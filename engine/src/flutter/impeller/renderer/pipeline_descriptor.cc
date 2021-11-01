@@ -82,7 +82,7 @@ PipelineDescriptor& PipelineDescriptor::AddStageEntrypoint(
 }
 
 PipelineDescriptor& PipelineDescriptor::SetVertexDescriptor(
-    std::shared_ptr<PipelineVertexDescriptor> vertex_descriptor) {
+    std::shared_ptr<VertexDescriptor> vertex_descriptor) {
   vertex_descriptor_ = std::move(vertex_descriptor);
   return *this;
 }
