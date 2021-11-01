@@ -13,7 +13,8 @@ import 'inherited_model.dart';
 /// an [AppModel] keyword.
 typedef AppModelInitCallback<T> = T Function();
 
-/// Enables sharing key/value data with the all of the widgets below `child`.
+/// Enables sharing key/value data with its `child` and all of the
+/// child's descendants.
 ///
 /// - `AppModel.getValue(context, key, initCallback)` creates a dependency
 /// on the key and returns the value for the key from the shared data table.
