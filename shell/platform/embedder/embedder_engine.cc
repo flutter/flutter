@@ -229,8 +229,8 @@ bool EmbedderEngine::OnVsyncEvent(intptr_t baton,
     return false;
   }
 
-  return VsyncWaiterEmbedder::OnEmbedderVsync(baton, frame_start_time,
-                                              frame_target_time);
+  return VsyncWaiterEmbedder::OnEmbedderVsync(
+      task_runners_, baton, frame_start_time, frame_target_time);
 }
 
 bool EmbedderEngine::ReloadSystemFonts() {
