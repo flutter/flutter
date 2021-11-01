@@ -89,6 +89,15 @@ class EmbedderTestContext {
 
   virtual EmbedderTestContextType GetContextType() const = 0;
 
+  // Sets up the callback for vsync. This callback will be invoked
+  // for every vsync. This should be used in conjunction with SetupVsyncCallback
+  // on the EmbedderConfigBuilder. Any callback setup here must call
+  // `FlutterEngineOnVsync` from the platform task runner.
+  void SetVsyncCallback(std::function<void(intptr_t)> callback);
+
+  // Runs the vsync callback.
+  void RunVsyncCallback(intptr_t baton);
+
   // TODO(gw280): encapsulate these properly for subclasses to use
  protected:
   // This allows the builder to access the hooks.
@@ -112,6 +121,7 @@ class EmbedderTestContext {
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
   SkMatrix root_surface_transformation_;
+  std::function<void(intptr_t)> vsync_callback_ = nullptr;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
