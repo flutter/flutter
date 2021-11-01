@@ -237,31 +237,34 @@ template("fuchsia_sdk") {
     part_meta_rebased = "$_fuchsia_sdk_path/$part_meta"
 
     part_meta_json = read_file(part_meta_rebased, "json")
-    subtarget_name = part_meta_json.name
 
-    foreach(enabled_part, invoker.enabled_parts) {
-      if (part.type == "cc_source_library") {
-        if (part.type == enabled_part) {
-          _fuchsia_cc_source_library(subtarget_name) {
-            meta = part_meta_rebased
+    if (defined(part_meta_json.name)) {
+      subtarget_name = part_meta_json.name
+
+      foreach(enabled_part, invoker.enabled_parts) {
+        if (part.type == "cc_source_library") {
+          if (part.type == enabled_part) {
+            _fuchsia_cc_source_library(subtarget_name) {
+              meta = part_meta_rebased
+            }
           }
-        }
-      } else if (part.type == "sysroot") {
-        if (part.type == enabled_part) {
-          _fuchsia_sysroot(subtarget_name) {
-            meta = part_meta_rebased
+        } else if (part.type == "sysroot") {
+          if (part.type == enabled_part) {
+            _fuchsia_sysroot(subtarget_name) {
+              meta = part_meta_rebased
+            }
           }
-        }
-      } else if (part.type == "fidl_library") {
-        if (part.type == enabled_part) {
-          _fuchsia_fidl_library(subtarget_name) {
-            meta = part_meta_rebased
+        } else if (part.type == "fidl_library") {
+          if (part.type == enabled_part) {
+            _fuchsia_fidl_library(subtarget_name) {
+              meta = part_meta_rebased
+            }
           }
-        }
-      } else if (part.type == "cc_prebuilt_library") {
-        if (part.type == enabled_part) {
-          _fuchsia_cc_prebuilt_library(subtarget_name) {
-            meta = part_meta_rebased
+        } else if (part.type == "cc_prebuilt_library") {
+          if (part.type == enabled_part) {
+            _fuchsia_cc_prebuilt_library(subtarget_name) {
+              meta = part_meta_rebased
+            }
           }
         }
       }
