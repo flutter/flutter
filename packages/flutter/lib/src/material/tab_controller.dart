@@ -101,13 +101,12 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex = 0, Duration animationDuration = kTabScrollDuration, required this.length, required TickerProvider vsync})
+  TabController({ int initialIndex = 0, Duration? animationDuration, required this.length, required TickerProvider vsync})
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
-      assert(animationDuration > Duration.zero),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationDuration = animationDuration,
+      _animationDuration = animationDuration ?? kTabScrollDuration,
       _animationController = AnimationController.unbounded(
         value: initialIndex.toDouble(),
         vsync: vsync,
@@ -123,8 +122,8 @@ class TabController extends ChangeNotifier {
     required this.length,
   }) : _index = index,
        _previousIndex = previousIndex,
-       _animationDuration = animationDuration,
-       _animationController = animationController;
+       _animationController = animationController,
+       _animationDuration = animationDuration;
 
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
@@ -138,7 +137,7 @@ class TabController extends ChangeNotifier {
     required int? index,
     required int? length,
     required int? previousIndex,
-    required Duration? duration,
+    required Duration? animationDuration,
   }) {
     if (index != null) {
       _animationController!.value = index.toDouble();
@@ -148,7 +147,7 @@ class TabController extends ChangeNotifier {
       length: length ?? this.length,
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
-      animationDuration: duration ?? _animationDuration,
+      animationDuration: animationDuration ?? _animationDuration,
     );
   }
 
@@ -169,11 +168,7 @@ class TabController extends ChangeNotifier {
   ///
   /// Defaults to kTabScrollDuration, must be greater than [Duration.zero].
   Duration get animationDuration => _animationDuration;
-  Duration _animationDuration;
-  set animationDuration(Duration value){
-    assert(value > Duration.zero);
-    _animationDuration = value;
-  }
+  final Duration _animationDuration;
 
   /// The total number of tabs.
   ///
@@ -190,7 +185,7 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
-    if (duration != null) {
+    if (duration != null && duration > Duration.zero) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
@@ -245,7 +240,7 @@ class TabController extends ChangeNotifier {
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
   void animateTo(int value, { Duration? duration, Curve curve = Curves.ease }) {
-    _changeIndex(value, duration: duration ?? animationDuration, curve: curve);
+    _changeIndex(value, duration: duration ?? _animationDuration, curve: curve);
   }
 
   /// The difference between the [animation]'s value and [index].
@@ -348,7 +343,8 @@ class DefaultTabController extends StatefulWidget {
     Key? key,
     required this.length,
     this.initialIndex = 0,
-    required this.child, this.animationDuration,
+    required this.child,
+    this.animationDuration,
   }) : assert(initialIndex != null),
        assert(length >= 0),
        assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
@@ -405,6 +401,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       vsync: this,
       length: widget.length,
       initialIndex: widget.initialIndex,
+      animationDuration: widget.animationDuration,
     );
   }
 
@@ -437,9 +434,18 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       }
       _controller = _controller._copyWith(
         length: widget.length,
-        duration: widget.animationDuration,
+        animationDuration: widget.animationDuration,
         index: newIndex,
         previousIndex: previousIndex,
+      );
+    }
+
+    if (oldWidget.animationDuration != widget.animationDuration) {
+      _controller = _controller._copyWith(
+        length: widget.length,
+        animationDuration: widget.animationDuration,
+        index: _controller.index,
+        previousIndex: _controller.previousIndex,
       );
     }
   }
