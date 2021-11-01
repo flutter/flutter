@@ -7,6 +7,12 @@ import 'dart:ui' as ui;
 
 import '../navigation_common/url_strategy.dart';
 
+/// Returns the present [UrlStrategy] for handling the browser URL.
+///
+/// In case null is returned, the browser integration has been manually
+/// disabled by [setUrlStrategy].
+UrlStrategy? get urlStrategy => null;
+
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
