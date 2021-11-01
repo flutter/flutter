@@ -883,7 +883,7 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-    
+
     // TODO(yjbanov): ahem.ttf doesn't have Chinese glyphs, making this test
     //                sensitive to browser/OS when running in web mode:
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/83129
