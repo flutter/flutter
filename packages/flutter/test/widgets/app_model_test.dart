@@ -29,13 +29,13 @@ void main() {
                     Builder(
                       builder: (BuildContext context) {
                         child1BuildCount += 1;
-                        return Text(AppModel.getValue<String, String>(context, 'child1Text') ?? 'null');
+                        return Text(AppModel.getValue<String, String>(context, 'child1Text', () => 'null'));
                       },
                     ),
                     Builder(
                       builder: (BuildContext context) {
                         child2BuildCount += 1;
-                        return Text(AppModel.getValue<String, String>(context, 'child2Text') ?? 'null');
+                        return Text(AppModel.getValue<String, String>(context, 'child2Text', () => 'null'));
                       }
                     ),
                   ],
@@ -95,7 +95,7 @@ void main() {
     // More of the same, resetting the values to null..
 
     setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child1Text', null);
+      AppModel.setValue<String, String>(context, 'child1Text', 'null');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -106,7 +106,7 @@ void main() {
     expect(find.text('child2'), findsOneWidget);
 
     setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child2Text', null);
+      AppModel.setValue<String, String>(context, 'child2Text', 'null');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -134,7 +134,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   childBuildCount += 1;
-                  return Text(AppModel.getValue<String, String>(context, 'childText') ?? 'null');
+                  return Text(AppModel.getValue<String, String>(context, 'childText', () => 'null'));
                 },
               ),
             ),
@@ -177,7 +177,7 @@ void main() {
                         innerTapCount += 1;
                         AppModel.setValue<String, String>(context, 'childText', 'child');
                       },
-                      child: Text(AppModel.getValue<String, String>(context, 'childText') ?? 'null'),
+                      child: Text(AppModel.getValue<String, String>(context, 'childText', () => 'null')),
                     );
                   },
                 ),
