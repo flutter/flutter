@@ -16,7 +16,7 @@ class ShowAppModelValue extends StatelessWidget {
     // The AppModel.getValue() call here causes this widget to depend
     // on the value of the AppModel's 'foo' key. If it's changed, with
     // AppModel.setValue(), then this widget will be rebuilt.
-    final String? value = AppModel.getValue<String, String>(context, appModelKey);
+    final String value = AppModel.getValue<String, String>(context, appModelKey, () => 'initial');
     return Text('$appModelKey: $value');
   }
 }

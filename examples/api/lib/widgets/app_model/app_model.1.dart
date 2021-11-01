@@ -20,19 +20,14 @@ class SharedObject {
   String toString() => describeIdentity(this);
 
   static void reset(BuildContext context) {
-    // Calling AppModel.setValue() causes dependent widgets to be rebuilt.
+    // Calling AppModel.set() causes dependent widgets to be rebuilt.
     AppModel.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
   static SharedObject of(BuildContext context) {
-    SharedObject? value = AppModel.getValue<Object, SharedObject>(context, _sharedObjectKey);
-    if (value == null) {
-      value = SharedObject._();
-      // Calling AppModel.init() does not cause dependent widgets to
-      // be rebuilt, so it's safe to call it from within a build method.
-      AppModel.initValue<Object, SharedObject>(context, _sharedObjectKey, value);
-    }
-    return value;
+    // If a value for _sharedObjectKey has never been set then the third
+    // callback parameter is used to generate an initial value.
+    return AppModel.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
   }
 }
 
