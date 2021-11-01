@@ -190,7 +190,7 @@ MTLVertexDescriptor* VertexDescriptorMTL::GetMTLVertexDescriptor() const {
   auto descriptor = [MTLVertexDescriptor vertexDescriptor];
 
   const size_t vertex_buffer_index =
-      PipelineVertexDescriptor::kReservedVertexBufferIndex;
+      VertexDescriptor::kReservedVertexBufferIndex;
 
   size_t stride = 0u;
   for (const auto& input : stage_inputs_) {

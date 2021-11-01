@@ -32,7 +32,7 @@ struct PipelineBuilder {
   using FragmentShader = FragmentShader_;
 
   static constexpr size_t kVertexBufferIndex =
-      PipelineVertexDescriptor::kReservedVertexBufferIndex;
+      VertexDescriptor::kReservedVertexBufferIndex;
 
   //----------------------------------------------------------------------------
   /// @brief      Create a default pipeline descriptor using the combination
@@ -70,7 +70,7 @@ struct PipelineBuilder {
 
     // Setup the vertex descriptor from reflected information.
     {
-      auto vertex_descriptor = std::make_shared<PipelineVertexDescriptor>();
+      auto vertex_descriptor = std::make_shared<VertexDescriptor>();
       if (!vertex_descriptor->SetStageInputs(
               VertexShader::kAllShaderStageInputs)) {
         FML_LOG(ERROR) << "Could not configure vertex descriptor.";

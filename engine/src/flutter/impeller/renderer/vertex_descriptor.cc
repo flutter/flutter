@@ -6,11 +6,11 @@
 
 namespace impeller {
 
-PipelineVertexDescriptor::PipelineVertexDescriptor() = default;
+VertexDescriptor::VertexDescriptor() = default;
 
-PipelineVertexDescriptor::~PipelineVertexDescriptor() = default;
+VertexDescriptor::~VertexDescriptor() = default;
 
-bool PipelineVertexDescriptor::SetStageInputs(
+bool VertexDescriptor::SetStageInputs(
     const ShaderStageIOSlot* const stage_inputs[],
     size_t count) {
   inputs_.reserve(inputs_.size() + count);
@@ -21,7 +21,7 @@ bool PipelineVertexDescriptor::SetStageInputs(
 }
 
 // |Comparable<VertexDescriptor>|
-size_t PipelineVertexDescriptor::GetHash() const {
+size_t VertexDescriptor::GetHash() const {
   auto seed = fml::HashCombine();
   for (const auto& input : inputs_) {
     fml::HashCombineSeed(seed, input.GetHash());
@@ -30,13 +30,11 @@ size_t PipelineVertexDescriptor::GetHash() const {
 }
 
 // |Comparable<VertexDescriptor>|
-bool PipelineVertexDescriptor::IsEqual(
-    const PipelineVertexDescriptor& other) const {
+bool VertexDescriptor::IsEqual(const VertexDescriptor& other) const {
   return inputs_ == other.inputs_;
 }
 
-const std::vector<ShaderStageIOSlot>& PipelineVertexDescriptor::GetStageInputs()
-    const {
+const std::vector<ShaderStageIOSlot>& VertexDescriptor::GetStageInputs() const {
   return inputs_;
 }
 
