@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <string_view>
 
+#include "flutter/fml/hash_combine.h"
 #include "impeller/geometry/matrix.h"
 
 namespace impeller {
@@ -48,6 +49,7 @@ struct ShaderUniformSlot {
 };
 
 struct ShaderStageIOSlot {
+  // Statically allocated const string containing advisory debug description.
   const char* name;
   size_t location;
   size_t set;
@@ -56,6 +58,22 @@ struct ShaderStageIOSlot {
   size_t bit_width;
   size_t vec_size;
   size_t columns;
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(name, location, set, binding, type, bit_width,
+                            vec_size, columns);
+  }
+
+  constexpr bool operator==(const ShaderStageIOSlot& other) const {
+    return name == other.name &&            //
+           location == other.location &&    //
+           set == other.set &&              //
+           binding == other.binding &&      //
+           type == other.type &&            //
+           bit_width == other.bit_width &&  //
+           vec_size == other.vec_size &&    //
+           columns == other.columns;
+  }
 };
 
 struct SampledImageSlot {

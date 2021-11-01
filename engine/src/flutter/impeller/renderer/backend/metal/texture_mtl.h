@@ -15,16 +15,21 @@ namespace impeller {
 class TextureMTL final : public Texture,
                          public BackendCast<TextureMTL, Texture> {
  public:
+  TextureMTL(TextureDescriptor desc, id<MTLTexture> texture);
+
   // |Texture|
   ~TextureMTL() override;
 
+  // |Texture|
   void SetLabel(const std::string_view& label) override;
 
-  [[nodiscard]] bool SetContents(const uint8_t* contents,
-                                 size_t length) override;
+  // |Texture|
+  bool SetContents(const uint8_t* contents, size_t length) override;
 
+  // |Texture|
   bool IsValid() const override;
 
+  // |Texture|
   ISize GetSize() const override;
 
   id<MTLTexture> GetMTLTexture() const;
@@ -32,8 +37,6 @@ class TextureMTL final : public Texture,
  private:
   id<MTLTexture> texture_ = nullptr;
   bool is_valid_ = false;
-
-  TextureMTL(TextureDescriptor desc, id<MTLTexture> texture);
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureMTL);
 };

@@ -7,6 +7,7 @@
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/shader_function_mtl.h"
+#include "impeller/renderer/backend/metal/vertex_descriptor_mtl.h"
 
 namespace impeller {
 
@@ -34,7 +35,12 @@ static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
   }
 
   if (const auto& vertex_descriptor = desc.GetVertexDescriptor()) {
-    descriptor.vertexDescriptor = vertex_descriptor->GetMTLVertexDescriptor();
+    VertexDescriptorMTL vertex_descriptor_mtl;
+    if (vertex_descriptor_mtl.SetStageInputs(
+            vertex_descriptor->GetStageInputs())) {
+      descriptor.vertexDescriptor =
+          vertex_descriptor_mtl.GetMTLVertexDescriptor();
+    }
   }
 
   for (const auto& item : desc.GetColorAttachmentDescriptors()) {

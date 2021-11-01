@@ -10,8 +10,9 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/formats_metal.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/surface.h"
@@ -141,7 +142,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
     RenderPassColorAttachment color0;
     color0.texture =
-        std::make_shared<Texture>(color0_desc, current_drawable.texture);
+        std::make_shared<TextureMTL>(color0_desc, current_drawable.texture);
     color0.clear_color = Color::SkyBlue();
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;

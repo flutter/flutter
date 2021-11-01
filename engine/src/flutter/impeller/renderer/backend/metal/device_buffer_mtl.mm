@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
+#include "impeller/renderer/backend/metal/texture_mtl.h"
 
 namespace impeller {
 
@@ -39,7 +40,7 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
     return nullptr;
   }
 
-  return std::make_shared<Texture>(desc, texture);
+  return std::make_shared<TextureMTL>(desc, texture);
 }
 
 [[nodiscard]] bool DeviceBufferMTL::CopyHostBuffer(const uint8_t* source,
