@@ -104,6 +104,10 @@ class EmbedderConfigBuilder {
 
   UniqueEngine InitializeEngine() const;
 
+  // Sets up the callback for vsync, the callbacks needs to be specified on the
+  // text context vis `SetVsyncCallback`.
+  void SetupVsyncCallback();
+
  private:
   EmbedderTestContext& context_;
   FlutterProjectArgs project_args_ = {};

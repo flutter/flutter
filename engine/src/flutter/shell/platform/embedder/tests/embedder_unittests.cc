@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fml/task_runner.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
@@ -18,7 +17,10 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/fml/thread.h"
+#include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -28,6 +30,16 @@
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
+
+namespace {
+
+static uint64_t NanosFromEpoch(int millis_from_now) {
+  const auto now = fml::TimePoint::Now();
+  const auto delta = fml::TimeDelta::FromMilliseconds(millis_from_now);
+  return (now + delta).ToEpochDelta().ToNanoseconds();
+}
+
+}  // namespace
 
 namespace flutter {
 namespace testing {
@@ -1566,6 +1578,61 @@ TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
 
   EXPECT_TRUE(user_data2.returned);
   EXPECT_TRUE(user_data3.returned);
+
+  fml::AutoResetWaitableEvent shutdown_latch;
+  platform_task_runner->PostTask([&]() {
+    engine.reset();
+    shutdown_latch.Signal();
+  });
+  shutdown_latch.Wait();
+}
+
+// This test schedules a frame for the future and asserts that vsync waiter
+// posts the event at the right frame start time (which is in the future).
+TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
+  UniqueEngine engine;
+  fml::AutoResetWaitableEvent present_latch;
+
+  // One of the threads that the callback (FlutterEngineOnVsync) will be posted
+  // to is the platform thread. So we cannot wait for assertions to complete on
+  // the platform thread. Create a new thread to manage the engine instance and
+  // wait for assertions on the test thread.
+  auto platform_task_runner = CreateNewThread("platform_thread");
+
+  platform_task_runner->PostTask([&]() {
+    auto& context =
+        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+    context.SetVsyncCallback([&](intptr_t baton) {
+      platform_task_runner->PostTask([baton = baton, engine = engine.get()]() {
+        FlutterEngineOnVsync(engine, baton, NanosFromEpoch(16),
+                             NanosFromEpoch(32));
+      });
+    });
+    context.AddNativeCallback(
+        "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+          present_latch.Signal();
+        }));
+
+    EmbedderConfigBuilder builder(context);
+    builder.SetSoftwareRendererConfig();
+    builder.SetupVsyncCallback();
+    builder.SetDartEntrypoint("empty_scene");
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    // Send a window metrics events so frames may be scheduled.
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+    event.pixel_ratio = 1.0;
+
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+  });
+
+  present_latch.Wait();
 
   fml::AutoResetWaitableEvent shutdown_latch;
   platform_task_runner->PostTask([&]() {

@@ -17,26 +17,35 @@ VsyncWaiterEmbedder::~VsyncWaiterEmbedder() = default;
 // |VsyncWaiter|
 void VsyncWaiterEmbedder::AwaitVSync() {
   auto* weak_waiter = new std::weak_ptr<VsyncWaiter>(shared_from_this());
-  vsync_callback_(reinterpret_cast<intptr_t>(weak_waiter));
+  intptr_t baton = reinterpret_cast<intptr_t>(weak_waiter);
+  vsync_callback_(baton);
 }
 
 // static
-bool VsyncWaiterEmbedder::OnEmbedderVsync(intptr_t baton,
-                                          fml::TimePoint frame_start_time,
-                                          fml::TimePoint frame_target_time) {
+bool VsyncWaiterEmbedder::OnEmbedderVsync(
+    const flutter::TaskRunners& task_runners,
+    intptr_t baton,
+    fml::TimePoint frame_start_time,
+    fml::TimePoint frame_target_time) {
   if (baton == 0) {
     return false;
   }
 
-  auto* weak_waiter = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(baton);
-  auto strong_waiter = weak_waiter->lock();
-  delete weak_waiter;
+  // If the time here is in the future, the contract for `FlutterEngineOnVsync`
+  // says that the engine will only process the frame when the time becomes
+  // current.
+  task_runners.GetUITaskRunner()->PostTaskForTime(
+      [frame_start_time, frame_target_time, baton]() {
+        std::weak_ptr<VsyncWaiter>* weak_waiter =
+            reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(baton);
+        auto vsync_waiter = weak_waiter->lock();
+        delete weak_waiter;
+        if (vsync_waiter) {
+          vsync_waiter->FireCallback(frame_start_time, frame_target_time);
+        }
+      },
+      frame_start_time);
 
-  if (!strong_waiter) {
-    return false;
-  }
-
-  strong_waiter->FireCallback(frame_start_time, frame_target_time);
   return true;
 }
 

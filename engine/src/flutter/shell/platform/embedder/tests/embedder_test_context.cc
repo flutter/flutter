@@ -224,5 +224,14 @@ void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
   callback(image_callback());
 }
 
+void EmbedderTestContext::SetVsyncCallback(
+    std::function<void(intptr_t)> callback) {
+  vsync_callback_ = callback;
+}
+
+void EmbedderTestContext::RunVsyncCallback(intptr_t baton) {
+  vsync_callback_(baton);
+}
+
 }  // namespace testing
 }  // namespace flutter
