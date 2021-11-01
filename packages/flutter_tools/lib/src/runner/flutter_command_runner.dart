@@ -18,7 +18,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
 
@@ -311,7 +311,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
     }
-
 
     final List<String> projectPaths = globals.fs.directory(rootPath)
       .listSync(followLinks: false)

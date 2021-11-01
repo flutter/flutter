@@ -121,7 +121,6 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            overAndUnderCenterOpacity: 1,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -1236,7 +1235,7 @@ void main() {
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -50.0),
-        100.0,
+        800.0,
       );
 
       // At this moment, the ballistics is started but 50px is still inside the

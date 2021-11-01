@@ -1182,7 +1182,7 @@ Future<void> main() async {
       bool isVisible = true;
       node.visitAncestorElements((Element ancestor) {
         final RenderObject r = ancestor.renderObject!;
-        if (r is RenderOpacity && r.opacity == 0) {
+        if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
           isVisible = false;
           return false;
         }
@@ -1308,7 +1308,6 @@ Future<void> main() async {
       ),
       '/two': (BuildContext context) => Material(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               height: 200.0,
@@ -1423,7 +1422,6 @@ Future<void> main() async {
       ),
       '/two': (BuildContext context) => Material(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               height: 200.0,
@@ -1836,10 +1834,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // [intended] there are no default transitions on the web.
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
     transitionFromUserGestures = true;
@@ -1882,10 +1877,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
-  },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // [intended] there are no default transitions on the web.
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
     transitionFromUserGestures = true;
@@ -1921,10 +1913,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // [intended] there are no default transitions on the web.
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -2728,7 +2717,6 @@ Future<void> main() async {
         child: Column(
           children: <Widget>[
             HeroMode(
-              enabled: true,
               child: Card(
                 child: Hero(
                   tag: 'a',
@@ -2929,12 +2917,12 @@ Future<void> main() async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     final ScrollController controller = ScrollController();
 
-    RenderOpacity? findRenderOpacity() {
+    RenderAnimatedOpacity? findRenderAnimatedOpacity() {
       AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
-      while (parent is RenderObject && parent is! RenderOpacity) {
+      while (parent is RenderObject && parent is! RenderAnimatedOpacity) {
         parent = parent.parent;
       }
-      return parent is RenderOpacity ? parent : null;
+      return parent is RenderAnimatedOpacity ? parent : null;
     }
 
     await tester.pumpWidget(
@@ -2986,14 +2974,14 @@ Future<void> main() async {
     // Starts Hero animation and scroll animation almost simultaneously.
     // Scroll to make the Hero invisible.
     await tester.pump();
-    expect(findRenderOpacity()?.opacity, anyOf(isNull, 1.0));
+    expect(findRenderAnimatedOpacity()?.opacity.value, anyOf(isNull, 1.0));
 
     // In this frame the Hero animation finds out the toHero is not paintable,
     // and starts fading.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(findRenderOpacity()?.opacity, lessThan(1.0));
+    expect(findRenderAnimatedOpacity()?.opacity.value, lessThan(1.0));
 
     await tester.pumpAndSettle();
     // The Hero on the new route should be invisible.

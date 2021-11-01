@@ -233,6 +233,36 @@ void main() {
     debugDisableShadows = true;
   });
 
+  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              elevation: 0,
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(MergeableMaterial),
+      isNot(paints..shadow(elevation: 0.0)),
+    );
+    debugDisableShadows = true;
+  });
+
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

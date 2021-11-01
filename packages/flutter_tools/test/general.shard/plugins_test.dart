@@ -84,7 +84,8 @@ void main() {
       androidProject
         ..pluginRegistrantHost = androidDirectory.childDirectory('app')
         ..hostAppGradleRoot = androidDirectory
-        ..exists = false;
+        ..exists = false
+        ..embeddingVersion = AndroidEmbeddingVersion.v2;
 
       webProject = FakeWebProject();
       flutterProject.web = webProject;
@@ -119,7 +120,7 @@ void main() {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       systemClock = FakeSystemClock()
-        ..currentTime = DateTime(1970, 1, 1);
+        ..currentTime = DateTime(1970);
       flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
@@ -169,7 +170,7 @@ void main() {
             mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
-            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', toTitleCase(camelCase(name))));
+            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', sentenceCase(camelCase(name))));
         directories.add(pluginDirectory);
       }
       return directories;
@@ -424,7 +425,7 @@ dependencies:
         final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         iosProject.testExists = true;
 
-        final DateTime dateCreated = DateTime(1970, 1, 1);
+        final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
         await refreshPluginsList(flutterProject);
@@ -922,7 +923,6 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         final File manifest = fs.file('AndroidManifest.xml');
         androidProject.appManifestFile = manifest;
-
         await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -961,6 +961,53 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins', () async {
+        // Create a plugin without a pluginClass.
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      android:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, androidPlatform: true);
+
+        final File registrantFile = androidProject.pluginRegistrantHost
+          .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Injecting creates generated iOS registrant, but does not include Dart-only plugins', () async {
+        flutterProject.isModule = true;
+        // Create a plugin without a pluginClass.
+        final Directory pluginDirectory = createFakePlugin(fs);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      ios:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, iosPlatform: true);
+
+        final File registrantFile = iosProject.pluginRegistrantImplementation;
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1547,6 +1594,12 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   Directory pluginRegistrantHost;
+
+  @override
+  File get pluginRegistrantHeader => pluginRegistrantHost.childFile('GeneratedPluginRegistrant.h');
+
+  @override
+  File get pluginRegistrantImplementation => pluginRegistrantHost.childFile('GeneratedPluginRegistrant.m');
 
   @override
   File podfile;

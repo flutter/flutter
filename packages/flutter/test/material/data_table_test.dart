@@ -44,6 +44,9 @@ void main() {
             onSelectChanged: (bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
+            onLongPress: () {
+              log.add('onLongPress: ${dessert.name}');
+            },
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -85,6 +88,11 @@ void main() {
     await tester.tap(find.text('Cupcake'));
 
     expect(log, <String>['row-selected: Cupcake']);
+    log.clear();
+
+    await tester.longPress(find.text('Cupcake'));
+
+    expect(log, <String>['onLongPress: Cupcake']);
     log.clear();
 
     await tester.tap(find.text('Calories'));
@@ -456,7 +464,7 @@ void main() {
 
     // Check for ascending list
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortAscending: true)),
+      home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
@@ -1173,9 +1181,7 @@ void main() {
 
     // Turn on sorting
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(
-        sortEnabled: true,
-      )),
+      home: Material(child: buildTable()),
     ));
 
     {
@@ -1282,7 +1288,7 @@ void main() {
       return tableRow.decoration! as BoxDecoration;
     }
 
-    await tester.pumpWidget(buildTable(selected: false));
+    await tester.pumpWidget(buildTable());
     expect(lastTableRowBoxDecoration().color, null);
 
     await tester.pumpWidget(buildTable(selected: true));

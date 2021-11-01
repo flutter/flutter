@@ -26,6 +26,7 @@ import 'src/commands/config.dart';
 import 'src/commands/create.dart';
 import 'src/commands/custom_devices.dart';
 import 'src/commands/daemon.dart';
+import 'src/commands/debug_adapter.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
@@ -108,11 +109,8 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        fileSystem: globals.fs,
         dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
-        platform: globals.platform,
-        persistentToolState: globals.persistentToolState,
       ),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
@@ -163,6 +161,7 @@ List<FlutterCommand> generateCommands({
   ),
   CreateCommand(verboseHelp: verboseHelp),
   DaemonCommand(hidden: !verboseHelp),
+  DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(verbose: verbose),
   DowngradeCommand(verboseHelp: verboseHelp),

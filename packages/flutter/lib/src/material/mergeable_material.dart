@@ -592,7 +592,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             decoration: BoxDecoration(
               color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
-              shape: BoxShape.rectangle,
             ),
             child: Material(
               type: MaterialType.transparency,
@@ -695,12 +694,14 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
 
   void _paintShadows(Canvas canvas, Rect rect) {
     // TODO(ianh): We should interpolate the border radii of the shadows the same way we do those of the visible Material slices.
-    canvas.drawShadow(
-      Path()..addRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect)),
-      Colors.black,
-      elevation,
-      true, // occluding object is not (necessarily) opaque
-    );
+    if (elevation != 0) {
+      canvas.drawShadow(
+        Path()..addRRect(kMaterialEdges[MaterialType.card]!.toRRect(rect)),
+        Colors.black,
+        elevation,
+        true, // occluding object is not (necessarily) opaque
+      );
+    }
   }
 
   @override

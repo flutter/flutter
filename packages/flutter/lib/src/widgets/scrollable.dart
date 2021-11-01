@@ -539,10 +539,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   @protected
-  void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
+  void setCanDrag(bool value) {
+    if (value == _lastCanDrag && (!value || widget.axis == _lastAxisDirection))
       return;
-    if (!canDrag) {
+    if (!value) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
       // Cancel the active hold/drag (if any) because the gesture recognizers
       // will soon be disposed by our RawGestureDetector, and we won't be
@@ -592,7 +592,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           break;
       }
     }
-    _lastCanDrag = canDrag;
+    _lastCanDrag = value;
     _lastAxisDirection = widget.axis;
     if (_gestureDetectorKey.currentState != null)
       _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);

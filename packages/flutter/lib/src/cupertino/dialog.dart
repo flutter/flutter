@@ -351,7 +351,6 @@ class CupertinoAlertDialog extends StatelessWidget {
     if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
-        isActionSheet: false,
         children: actions,
       );
     }
@@ -458,7 +457,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(_kCornerRadius),
+      borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
@@ -686,7 +685,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
     final List<Widget> children = <Widget>[
       Flexible(child: ClipRRect(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _CupertinoDialogRenderWidget(
@@ -858,7 +857,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: BorderRadius.circular(_kCornerRadius),
+          borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
         ),
         child: widget.child,
       ),
@@ -1517,7 +1516,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
-          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: titleContentGroup,
         ),
@@ -2012,6 +2010,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsLayout();
   }
 
+  Color get dialogColor => _buttonBackgroundPaint.color;
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
     if (value == _buttonBackgroundPaint.color)
@@ -2021,6 +2020,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dialogPressedColor => _pressedButtonBackgroundPaint.color;
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
     if (value == _pressedButtonBackgroundPaint.color)
@@ -2030,6 +2030,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
+  Color get dividerColor => _dividerPaint.color;
   final Paint _dividerPaint;
   set dividerColor(Color value) {
     if (value == _dividerPaint.color)
@@ -2039,8 +2040,8 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  bool _isActionSheet;
   bool get isActionSheet => _isActionSheet;
+  bool _isActionSheet;
   set isActionSheet(bool value) {
     if (value == _isActionSheet)
       return;
@@ -2231,7 +2232,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void performLayout() {
-    size = _performLayout(constraints: constraints, dry: false);
+    size = _performLayout(constraints: constraints);
   }
 
   Size _performLayout({required BoxConstraints constraints, bool dry = false}) {
@@ -2256,8 +2257,6 @@ class _RenderCupertinoDialogActions extends RenderBox
         final BoxConstraints perButtonConstraints = BoxConstraints(
           minWidth: (constraints.minWidth - dividerThickness) / 2.0,
           maxWidth: (constraints.maxWidth - dividerThickness) / 2.0,
-          minHeight: 0.0,
-          maxHeight: double.infinity,
         );
 
         // Layout the 2 buttons.

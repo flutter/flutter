@@ -38,12 +38,11 @@ class Config {
       name,
       fileSystem: fileSystem,
       logger: logger,
-      platform: platform,
-      managed: false
+      platform: platform
     );
   }
 
-  /// Similiar to the default config constructor, but with some different
+  /// Similar to the default config constructor, but with some different
   /// behaviours:
   /// - will not delete the config if it's not valid JSON
   /// - will log but also rethrow any exceptions while loading the JSON, so

@@ -22,7 +22,7 @@ import '../migrations/cmake_custom_command_migration.dart';
 import 'install_manifest.dart';
 import 'visual_studio.dart';
 
-// From https://cmake.org/cmake/help/v3.15/manual/cmake-generators.7.html#visual-studio-generators
+// From https://cmake.org/cmake/help/v3.14/manual/cmake-generators.7.html#visual-studio-generators
 // This may need to become a getter on VisualStudio in the future to support
 // future major versions of Visual Studio.
 const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
@@ -279,7 +279,7 @@ Future<void> _runBuild(
         '--build',
         buildDir.path,
         '--config',
-        toTitleCase(buildModeName),
+        sentenceCase(buildModeName),
         if (install)
           ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)

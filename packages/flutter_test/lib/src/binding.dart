@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+import 'package:test_api/expect.dart' show fail;
+import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -27,6 +27,7 @@ import 'test_async_utils.dart';
 import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
+import 'window.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -238,45 +239,28 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
-  /// Increase the timeout for the current test by the given duration.
+  /// This method has no effect.
   ///
-  /// This only matters if the test has an `initialTimeout` set on
-  /// [testWidgets], and the test is running via `flutter test`. By default,
-  /// tests do not have such a timeout. Tests run using `flutter run` never time
-  /// out even if one is specified.
+  /// This method was previously used to change the timeout of the test. However,
+  /// in practice having short timeouts was found to be nothing but trouble,
+  /// primarily being a cause flakes rather than helping debug tests.
   ///
-  /// This method has no effect on the timeout specified via `timeout` on
-  /// [testWidgets]. That timeout is implemented by the `test` package.
-  ///
-  /// By default, each [pump] and [WidgetTester.pumpWidget] call increases the
-  /// timeout by a hundred milliseconds, and each [matchesGoldenFile]
-  /// expectation increases it by a minute. If there is no timeout in the first
-  /// place, this has no effect.
-  ///
-  /// The granularity of timeouts is coarse: the time is checked once per
-  /// second, and only when the test is not executing. It is therefore possible
-  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
-  /// to still succeed. If precise timing is required, it should be implemented
-  /// as a part of the test rather than relying on this mechanism.
-  ///
-  /// See also:
-  ///
-  ///  * [testWidgets], on which a timeout can be set using the `timeout`
-  ///    argument.
-  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
-  ///    (That timeout is implemented by the `test` package.)
-  // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
-  void addTime(Duration duration);
+  /// For this reason, this method has been deprecated.
+  @Deprecated(
+    'This method has no effect. '
+    'This feature was deprecated after v2.6.0-1.0.pre.'
+  )
+  void addTime(Duration duration) { }
 
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
   /// typically used in `flutter test`), this advances the fake [clock] for the
-  /// period and also increases timeout (see [addTime]).
+  /// period.
   ///
   /// In the live test environment ([LiveTestWidgetsFlutterBinding], typically
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
-  /// equivalent as [Future.delayed].
+  /// equivalent to [Future.delayed].
   Future<void> delayed(Duration duration);
 
   /// Creates and initializes the binding. This function is
@@ -324,15 +308,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The number of outstanding microtasks in the queue.
   int get microtaskCount;
 
-  /// The default maximum test timeout for tests when using this binding.
+  /// The default test timeout for tests when using this binding.
   ///
-  /// This controls the default for the `timeout` argument on `testWidgets`. It
+  /// This controls the default for the `timeout` argument on [testWidgets]. It
   /// is 10 minutes for [AutomatedTestWidgetsFlutterBinding] (tests running
   /// using `flutter test`), and unlimited for tests using
   /// [LiveTestWidgetsFlutterBinding] (tests running using `flutter run`).
-  ///
-  /// This is the maximum that the timeout controlled by `initialTimeout` on
-  /// [testWidgets] can reach when augmented using [addTime].
   test_package.Timeout get defaultTestTimeout;
 
   /// The current time.
@@ -379,12 +360,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
   ///
-  /// The `additionalTime` argument is used by the
-  /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
-  /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
-  /// for details.
+  /// The `additionalTime` argument was previously used with
+  /// [AutomatedTestWidgetsFlutterBinding.addTime] but now has no effect.
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
+    @Deprecated(
+      'This parameter has no effect. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -499,7 +482,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If `source` is [TestBindingEventSource.test], then the `event` is based
   /// in the local coordinate space and the event is likely triggered by
-  /// programatically simulated pointer events, such as:
+  /// programmatically simulated pointer events, such as:
   ///
   ///  * [WidgetController.tap] and alike methods, as well as directly using
   ///    [TestGesture]. They are usually used in
@@ -621,10 +604,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  ///
-  /// The `timeout` argument sets the initial timeout, if any. It can
-  /// be increased with [addTime]. By default there is no timeout.
-  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout });
+  Future<void> runTest(
+    Future<void> Function() testBody,
+    VoidCallback invariantTester, {
+    String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
+    Duration? timeout,
+  });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -667,9 +656,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
-    String description, {
-    Future<void>? timeout,
-  }) {
+    String description,
+  ) {
     assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
@@ -755,8 +743,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       DiagnosticsNode treeDump;
       try {
         treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
-        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
-        // Potentially everything is good enough without this case.
+        // We try to stringify the tree dump here (though we immediately discard the result) because
+        // we want to make sure that if it can't be serialised, we replace it with a message that
+        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
         treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
@@ -794,7 +784,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary<Future<void>, Future<void> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
-    timeout?.catchError(handleUncaughtError);
     return testCompleter.future;
   }
 
@@ -976,9 +965,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get disableShadows => true;
 
-  /// The value of [defaultTestTimeout] can be set to `None` to enable debugging flutter tests where
-  /// we would not want to timeout the test. This is expected to be used by test tooling which
-  /// can detect debug mode.
+  /// The value of [defaultTestTimeout] can be set to `None` to enable debugging
+  /// flutter tests where we would not want to timeout the test. This is
+  /// expected to be used by test tooling which can detect debug mode.
   @override
   test_package.Timeout defaultTestTimeout = const test_package.Timeout(Duration(minutes: 10));
 
@@ -1019,11 +1008,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
@@ -1162,37 +1151,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  Duration? _timeout;
-  Stopwatch? _timeoutStopwatch;
-  Timer? _timeoutTimer;
-  Completer<void>? _timeoutCompleter;
-
-  void _checkTimeout(Timer timer) {
-    assert(_timeoutTimer == timer);
-    assert(_timeout != null);
-    assert(_timeoutCompleter != null);
-    assert(_timeoutStopwatch != null);
-    if (_timeoutStopwatch!.elapsed > _timeout!) {
-      _timeoutCompleter!.completeError(
-        TimeoutException(
-          'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
-          _timeout,
-        ),
-      );
-    }
-  }
-
-  @override
-  void addTime(Duration duration) {
-    if (_timeout != null)
-      _timeout = _timeout! + duration;
-  }
-
   @override
   Future<void> delayed(Duration duration) {
     assert(_currentFakeAsync != null);
-    addTime(duration);
     _currentFakeAsync!.elapse(duration);
     return Future<void>.value();
   }
@@ -1202,6 +1163,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration? timeout,
   }) {
     assert(description != null);
@@ -1209,21 +1174,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_currentFakeAsync == null);
     assert(_clock == null);
 
-    _timeout = timeout;
-    if (_timeout != null) {
-      _timeoutStopwatch = Stopwatch()..start();
-      _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
-      _timeoutCompleter = Completer<void>();
-    }
-
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
-    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
+    _clock = fakeAsync.getClock(DateTime.utc(2015));
     late Future<void> testBodyResult;
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
       assert(fakeAsync == localFakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter?.future);
+      testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
 
@@ -1286,11 +1244,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_clock != null);
     _clock = null;
     _currentFakeAsync = null;
-    _timeoutCompleter = null;
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
-    _timeoutStopwatch = null;
-    _timeout = null;
   }
 }
 
@@ -1453,12 +1406,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
-
-  @override
-  void addTime(Duration duration) {
-    // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
-    // See runTest().
-  }
 
   @override
   Future<void> delayed(Duration duration) {
@@ -1629,15 +1576,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
-
-    addTime(additionalTime); // doesn't do anything since we don't actually track the timeout, but just for correctness...
 
     _runningAsyncTasks = true;
     try {
@@ -1656,15 +1601,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
+  Future<void> runTest(
+    Future<void> Function() testBody,
+    VoidCallback invariantTester, {
+    String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
+    Duration? timeout,
+  }) {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
     _liveTestRenderView._setDescription(description);
-    // We drop the timeout on the floor in `flutter run` mode.
-    // We could support it, but we'd have to automatically add the entire duration of pumps
-    // and timers and so on, since those operate in real time when using this binding, but
-    // the timeouts expect them to happen near-instantaneously.
     return _runTest(testBody, invariantTester, description);
   }
 

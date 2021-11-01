@@ -76,7 +76,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.0,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
@@ -110,7 +109,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.1,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
@@ -195,4 +193,35 @@ void main() {
     final OffsetLayer offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+
+  testWidgets('Child shows up in the right spot when opacity is disabled', (WidgetTester tester) async {
+    debugDisableOpacityLayers = true;
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                top: 40,
+                left: 140,
+                child: Opacity(
+                  opacity: .5,
+                  child: Container(height: 100, width: 100, color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('opacity_disabled_with_child.png'),
+    );
+    debugDisableOpacityLayers = false;
+  });
 }

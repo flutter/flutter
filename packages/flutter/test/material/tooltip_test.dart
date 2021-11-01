@@ -919,8 +919,7 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
+      gesture?.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -968,6 +967,70 @@ void main() {
     await gesture.removePointer();
     gesture = null;
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip should not show more than one tooltip when hovered', (WidgetTester tester) async {
+    const Duration waitDuration = Duration(milliseconds: 500);
+    final UniqueKey innerKey = UniqueKey();
+    final UniqueKey outerKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: 'Outer',
+            child: Container(
+              key: outerKey,
+              width: 100,
+              height: 100,
+              alignment: Alignment.centerRight,
+              child: Tooltip(
+                message: 'Inner',
+                child: SizedBox(
+                  key: innerKey,
+                  width: 25,
+                  height: 100,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async { gesture?.removePointer(); });
+
+    // Both the inner and outer containers have tooltips associated with them, but only
+    // the currently hovered one should appear, even though the pointer is inside both.
+    final Finder outer = find.byKey(outerKey);
+    final Finder inner = find.byKey(innerKey);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(outer));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(inner));
+    await tester.pump();
+
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+
+    expect(find.text('Outer'), findsNothing);
+    expect(find.text('Inner'), findsOneWidget);
+    await gesture.moveTo(tester.getCenter(outer));
+    await tester.pump();
+    // Wait for it to switch.
+    await tester.pump(waitDuration);
+    expect(find.text('Outer'), findsOneWidget);
+    expect(find.text('Inner'), findsNothing);
+
+    await gesture.moveTo(Offset.zero);
+
+    // Wait for all tooltips to disappear.
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    gesture = null;
+    expect(find.text('Outer'), findsNothing);
+    expect(find.text('Inner'), findsNothing);
   });
 
   testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
@@ -1256,6 +1319,63 @@ void main() {
     expect(tip.size.height, equals(56.0));
   });
 
+  testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const String textSpan1Text = 'I am a rich tooltip message. ';
+    const String textSpan2Text = 'I am another span of a rich tooltip message';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: key,
+          richMessage: const TextSpan(
+            text: textSpan1Text,
+            children: <InlineSpan>[
+              TextSpan(
+                text: textSpan2Text,
+              ),
+            ],
+          ),
+          child: Container(
+            width: 100.0,
+            height: 100.0,
+            color: Colors.green[500],
+          ),
+        ),
+      ),
+    );
+    _ensureTooltipVisible(key);
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RichText richText = tester.widget<RichText>(find.byType(RichText));
+    expect(richText.text.toPlainText(), equals('$textSpan1Text$textSpan2Text'));
+  });
+
+  testWidgets('Tooltip throws assertion error when both message and richMessage are specified', (WidgetTester tester) async {
+    expect(
+      () {
+        MaterialApp(
+          home: Tooltip(
+            message: 'I am a tooltip message.',
+            richMessage: const TextSpan(
+              text: 'I am a rich tooltip.',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'I am another span of a rich tooltip.',
+                ),
+              ],
+            ),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        );
+      },
+      throwsA(const TypeMatcher<AssertionError>()),
+    );
+  });
+
   testWidgets('Haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     await tester.pumpWidget(
@@ -1413,6 +1533,28 @@ void main() {
       '"message"',
     ]);
   });
+  testWidgets('default Tooltip debugFillProperties with richMessage', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Tooltip(
+      richMessage: TextSpan(
+        text: 'This is a ',
+        children: <InlineSpan>[
+          TextSpan(
+            text: 'richMessage',
+          ),
+        ],
+      ),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"This is a richMessage"',
+    ]);
+  });
   testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -1496,6 +1638,32 @@ void main() {
 
     await testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          child: Text(tooltipText),
+        ),
+      ),
+    );
+    expect(find.text(tooltipText), findsOneWidget);
+  });
+
+  testWidgets('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+        ),
+      ),
+    );
+    expect(find.text(tooltipText), findsNothing);
+    if (tooltipText.isEmpty) {
+      expect(find.byType(SizedBox), findsOneWidget);
+    }
   });
 }
 
