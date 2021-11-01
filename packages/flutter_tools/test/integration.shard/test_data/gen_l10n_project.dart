@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
 import 'project.dart';
@@ -750,8 +747,8 @@ void main() {
 ''';
 
   String l10nYaml({
-    @required bool useDeferredLoading,
-    @required bool useSyntheticPackage,
+    required bool useDeferredLoading,
+    required bool useSyntheticPackage,
   }) {
     String l10nYamlString = '';
 

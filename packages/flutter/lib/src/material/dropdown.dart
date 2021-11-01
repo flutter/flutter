@@ -577,7 +577,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollOffset = math.min(scrollOffset, preferredMenuHeight - menuHeight);
     }
 
-    assert(menuHeight == menuBottom - menuTop);
+    assert((menuBottom - menuTop - menuHeight).abs() < precisionErrorTolerance);
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
 }
