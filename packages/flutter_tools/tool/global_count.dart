@@ -17,7 +17,7 @@ void main() {
   print('test/ contains $testGlobals libraries with global usage');
 }
 
-final RegExp globalImport = RegExp('import.*globals.dart\' as globals;');
+final RegExp globalImport = RegExp("import.*globals.dart' as globals;");
 
 int countGlobalImports(Directory directory) {
   int count = 0;
