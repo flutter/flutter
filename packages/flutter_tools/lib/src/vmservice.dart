@@ -402,7 +402,7 @@ class FlutterView {
     required this.uiIsolate,
   });
 
-  factory FlutterView.parse(Map<String, Object> json) {
+  factory FlutterView.parse(Map<String, Object?> json) {
     final Map<String, Object?>? rawIsolate = json['isolate'] as Map<String, Object?>?;
     vm_service.IsolateRef? isolate;
     if (rawIsolate != null) {
@@ -826,7 +826,7 @@ class FlutterVmService {
       final List<FlutterView> views = <FlutterView>[
         if (rawViews != null)
           for (final Object rawView in rawViews)
-            FlutterView.parse(rawView as Map<String, Object>)
+            FlutterView.parse(rawView as Map<String, Object?>)
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;
