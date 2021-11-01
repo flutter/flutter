@@ -560,7 +560,7 @@ void main() {
           ),
         )));
 
-    final Size _target = const Size(_width * _scale, _height * _scale);
+    const Size _target = Size(_width * _scale, _height * _scale);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
@@ -588,7 +588,7 @@ void main() {
           ),
         )));
 
-    final Size _target = const Size(_width * _scaleX, _height * _scaleY);
+    const Size _target = Size(_width * _scaleX, _height * _scaleY);
 
     expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
