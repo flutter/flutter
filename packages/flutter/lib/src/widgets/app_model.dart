@@ -30,9 +30,16 @@ import 'inherited_model.dart';
 /// class is based on [InheritedModel], which is an [InheritedWidget].
 /// It's intended to be used by packages that need to share a modest
 /// number of values among their own components. It obviates the
-/// need for app developers to instantiate a package-specific
-/// data sharing "umbrella" widgets to enable the use of such
-/// packages.
+/// need for app developers to instantiate package-specific
+/// data sharing "umbrella" widgets.
+///
+/// AppModel is not intended to be a substitute for Provider or any of
+/// the other general purpose application state systems. AppModel is
+/// for situations where a package's custom widgets need to share one
+/// or a handful of immutable data objects that can be lazily
+/// initialized. It exists so that packages like that can deliver
+/// custom widgets without requiring the developer to add an umbrella
+/// widget to their application.
 ///
 /// A good way to create an AppModel key that avoids potential
 /// collisions with other packages is to use a static `Object()` value.
