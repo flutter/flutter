@@ -13,7 +13,8 @@ namespace impeller {
 constexpr size_t kMaxFramesInFlight = 3u;
 
 Renderer::Renderer(std::shared_ptr<Context> context)
-    : frames_in_flight_sema_(::dispatch_semaphore_create(kMaxFramesInFlight)),
+    : frames_in_flight_sema_(
+          std::make_shared<fml::Semaphore>(kMaxFramesInFlight)),
       context_(std::move(context)) {
   if (!context_->IsValid()) {
     return;
@@ -58,11 +59,13 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  ::dispatch_semaphore_wait(frames_in_flight_sema_, DISPATCH_TIME_FOREVER);
+  if (!frames_in_flight_sema_->Wait()) {
+    return false;
+  }
 
   command_buffer->Commit(
       [sema = frames_in_flight_sema_](CommandBuffer::CommitResult result) {
-        ::dispatch_semaphore_signal(sema);
+        sema->Signal();
         if (result != CommandBuffer::CommitResult::kCompleted) {
           FML_LOG(ERROR) << "Could not commit command buffer.";
         }

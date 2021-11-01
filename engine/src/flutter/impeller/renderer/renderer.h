@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "fml/synchronization/semaphore.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/context.h"
 
@@ -34,7 +35,7 @@ class Renderer {
   std::shared_ptr<Context> GetContext() const;
 
  private:
-  dispatch_semaphore_t frames_in_flight_sema_ = nullptr;
+  std::shared_ptr<fml::Semaphore> frames_in_flight_sema_;
   std::shared_ptr<Context> context_;
   bool is_valid_ = false;
 
