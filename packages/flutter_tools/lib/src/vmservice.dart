@@ -822,11 +822,11 @@ class FlutterVmService {
         // with cleaning up.
         return <FlutterView>[];
       }
-      final List<Object>? rawViews = response.json?['views'] as List<Object>?;
+      final List<Object?>? rawViews = response.json?['views'] as List<Object?>?;
       final List<FlutterView> views = <FlutterView>[
         if (rawViews != null)
-          for (final Object rawView in rawViews)
-            FlutterView.parse(rawView as Map<String, Object?>)
+          for (final Map<String, Object?> rawView in rawViews.whereType<Map<String, Object?>>())
+            FlutterView.parse(rawView)
       ];
       if (views.isNotEmpty || returnEarly) {
         return views;
