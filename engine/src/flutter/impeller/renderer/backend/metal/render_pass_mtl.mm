@@ -59,11 +59,14 @@ static bool ConfigureStencilAttachment(
   return true;
 }
 
-MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
-    const {
+// TODO(csg): Move this to formats_mtl.h
+static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
+    const RenderPassDescriptor& desc) {
   auto result = [MTLRenderPassDescriptor renderPassDescriptor];
 
-  for (const auto& color : colors_) {
+  const auto& colors = desc.GetColorAttachments();
+
+  for (const auto& color : colors) {
     if (!ConfigureColorAttachment(color.second,
                                   result.colorAttachments[color.first])) {
       FML_LOG(ERROR) << "Could not configure color attachment at index "
@@ -72,13 +75,17 @@ MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
     }
   }
 
-  if (depth_.has_value() &&
-      !ConfigureDepthAttachment(depth_.value(), result.depthAttachment)) {
+  const auto& depth = desc.GetDepthAttachment();
+
+  if (depth.has_value() &&
+      !ConfigureDepthAttachment(depth.value(), result.depthAttachment)) {
     return nil;
   }
 
-  if (stencil_.has_value() &&
-      !ConfigureStencilAttachment(stencil_.value(), result.stencilAttachment)) {
+  const auto& stencil = desc.GetStencilAttachment();
+
+  if (stencil.has_value() &&
+      !ConfigureStencilAttachment(stencil.value(), result.stencilAttachment)) {
     return nil;
   }
 
@@ -88,7 +95,7 @@ MTLRenderPassDescriptor* RenderPassDescriptor::ToMTLRenderPassDescriptor()
 RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer,
                              const RenderPassDescriptor& desc)
     : buffer_(buffer),
-      desc_(desc.ToMTLRenderPassDescriptor()),
+      desc_(ToMTLRenderPassDescriptor(desc)),
       transients_buffer_(HostBuffer::Create()) {
   if (!buffer_ || !desc_) {
     return;

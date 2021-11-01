@@ -55,4 +55,19 @@ RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
   return *this;
 }
 
+const std::map<size_t, RenderPassColorAttachment>&
+RenderPassDescriptor::GetColorAttachments() const {
+  return colors_;
+}
+
+const std::optional<RenderPassDepthAttachment>&
+RenderPassDescriptor::GetDepthAttachment() const {
+  return depth_;
+}
+
+const std::optional<RenderPassStencilAttachment>&
+RenderPassDescriptor::GetStencilAttachment() const {
+  return stencil_;
+}
+
 }  // namespace impeller

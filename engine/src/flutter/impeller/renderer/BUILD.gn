@@ -33,6 +33,8 @@ impeller_component("renderer") {
     "backend/metal/shader_library_mtl.mm",
     "backend/metal/texture_mtl.h",
     "backend/metal/texture_mtl.mm",
+    "backend/metal/vertex_descriptor_mtl.h",
+    "backend/metal/vertex_descriptor_mtl.mm",
   ]
 
   sources = [

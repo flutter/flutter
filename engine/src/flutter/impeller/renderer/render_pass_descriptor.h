@@ -32,6 +32,14 @@ class RenderPassDescriptor {
   RenderPassDescriptor& SetStencilAttachment(
       RenderPassStencilAttachment attachment);
 
+  const std::map<size_t, RenderPassColorAttachment>& GetColorAttachments()
+      const;
+
+  const std::optional<RenderPassDepthAttachment>& GetDepthAttachment() const;
+
+  const std::optional<RenderPassStencilAttachment>& GetStencilAttachment()
+      const;
+
  private:
   std::map<size_t, RenderPassColorAttachment> colors_;
   std::optional<RenderPassDepthAttachment> depth_;

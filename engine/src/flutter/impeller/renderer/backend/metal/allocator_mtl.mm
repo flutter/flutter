@@ -8,6 +8,7 @@
 #include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
+#include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/buffer.h"
 
 namespace impeller {
@@ -115,7 +116,7 @@ std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
   if (!texture) {
     return nullptr;
   }
-  return std::make_shared<Texture>(desc, texture);
+  return std::make_shared<TextureMTL>(desc, texture);
 }
 
 }  // namespace impeller
