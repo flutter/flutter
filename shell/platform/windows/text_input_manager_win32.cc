@@ -157,7 +157,7 @@ std::optional<std::u16string> TextInputManagerWin32::GetString(int type) const {
     const long compose_bytes =
         ::ImmGetCompositionString(imm_context.get(), type, nullptr, 0);
     const long compose_length = compose_bytes / sizeof(wchar_t);
-    if (compose_length <= 0) {
+    if (compose_length < 0) {
       return std::nullopt;
     }
 
