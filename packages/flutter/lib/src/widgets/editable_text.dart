@@ -2808,7 +2808,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled && cutEnabled && _hasFocus && controls?.canCut(this) == true
-      ? () => controls!.handleCut(this)
+      ? () => controls!.handleCut(this, _clipboardStatus)
       : null;
   }
 
