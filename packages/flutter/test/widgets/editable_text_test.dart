@@ -8724,7 +8724,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  void handleCut(TextSelectionDelegate delegate) {
+  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     cutCount += 1;
   }
 
