@@ -1674,6 +1674,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor;
   }
 
+  // Whether `TickerMode.of(context)` is true and animations (like blinking the
+  // cursor) are supposed to run.
+  bool _tickersEnabled = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -1692,6 +1696,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           FocusScope.of(context).autofocus(widget.focusNode);
         }
       });
+    }
+
+    // Restart or stop the blinking cursor when TickerMode changes.
+    final bool newTickerEnabled = TickerMode.of(context);
+    if (_tickersEnabled != newTickerEnabled) {
+      _tickersEnabled = newTickerEnabled;
+      if (_tickersEnabled && _cursorActive) {
+        _startCursorTimer();
+      } else if (!_tickersEnabled && _cursorTimer != null) {
+        // Cannot use _stopCursorTimer because it would reset _cursorActive.
+        _cursorTimer!.cancel();
+        _cursorTimer = null;
+      }
     }
   }
 
@@ -2535,8 +2552,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
+  // Indicates whether the cursor should be blinking right now (but it may
+  // actually not blink because it's disabled via TickerMode.of(context)).
+  bool _cursorActive = false;
+
   void _startCursorTimer() {
     assert(_cursorTimer == null);
+    _cursorActive = true;
+    if (!_tickersEnabled) {
+      return;
+    }
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController.value = 1.0;
     if (EditableText.debugDeterministicCursor)
@@ -2549,6 +2574,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorTimer({ bool resetCharTicks = true }) {
+    _cursorActive = false;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _targetCursorVisibility = false;
@@ -2566,7 +2592,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _startOrStopCursorTimerIfNeeded() {
     if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
       _startCursorTimer();
-    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
+    else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed))
       _stopCursorTimer();
   }
 
@@ -2782,7 +2808,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled && cutEnabled && _hasFocus && controls?.canCut(this) == true
-      ? () => controls!.handleCut(this)
+      ? () => controls!.handleCut(this, _clipboardStatus)
       : null;
   }
 
