@@ -40,7 +40,7 @@ import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider? get instance => context.get<DoctorValidatorsProvider>();
+  static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 
@@ -181,7 +181,7 @@ class Doctor {
   final Logger _logger;
 
   List<DoctorValidator> get validators {
-    return DoctorValidatorsProvider.instance!.validators;
+    return DoctorValidatorsProvider._instance.validators;
   }
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
@@ -204,7 +204,7 @@ class Doctor {
   ];
 
   List<Workflow> get workflows {
-    return DoctorValidatorsProvider.instance!.workflows;
+    return DoctorValidatorsProvider._instance.workflows;
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
