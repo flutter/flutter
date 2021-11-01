@@ -49,10 +49,10 @@ def main():
         interleave_args(analyzer_option_flags, prefix)
   returncode, stderr = wrapper_utils.CaptureCommandStderr(
       wrapper_utils.CommandToRun(cmd))
-  sys.stderr.write(stderr)
+  sys.stderr.write(stderr.decode())
   returncode, stderr = wrapper_utils.CaptureCommandStderr(
     wrapper_utils.CommandToRun(parsed_args.args))
-  sys.stderr.write(stderr)
+  sys.stderr.write(stderr.decode())
   return returncode
 if __name__ == '__main__':
   sys.exit(main())
