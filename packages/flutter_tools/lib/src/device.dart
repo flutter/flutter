@@ -444,10 +444,10 @@ abstract class Device {
   final String id;
 
   /// The [Category] for this device type.
-  final Category category;
+  final Category? category;
 
   /// The [PlatformType] for this device.
-  final PlatformType platformType;
+  final PlatformType? platformType;
 
   /// Whether this is an ephemeral device.
   final bool ephemeral;

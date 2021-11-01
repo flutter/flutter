@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
