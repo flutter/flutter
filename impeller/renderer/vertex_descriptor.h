@@ -28,6 +28,7 @@ class PipelineVertexDescriptor final
 
   PipelineVertexDescriptor();
 
+  // |Comparable<PipelineVertexDescriptor>|
   virtual ~PipelineVertexDescriptor();
 
   template <size_t Size>
@@ -39,29 +40,16 @@ class PipelineVertexDescriptor final
   bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
-  //| Comparable<VertexDescriptor>|
+  const std::vector<ShaderStageIOSlot>& GetStageInputs() const;
+
+  // |Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
 
   // |Comparable<VertexDescriptor>|
   bool IsEqual(const PipelineVertexDescriptor& other) const override;
 
-  MTLVertexDescriptor* GetMTLVertexDescriptor() const;
-
  private:
-  struct StageInput {
-    size_t location;
-    MTLVertexFormat format;
-    size_t length;
-
-    StageInput(size_t p_location, MTLVertexFormat p_format, size_t p_length)
-        : location(p_location), format(p_format), length(p_length) {}
-
-    constexpr bool operator==(const StageInput& other) const {
-      return location == other.location && format == other.format &&
-             length == other.length;
-    }
-  };
-  std::vector<StageInput> stage_inputs_;
+  std::vector<ShaderStageIOSlot> inputs_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineVertexDescriptor);
 };
