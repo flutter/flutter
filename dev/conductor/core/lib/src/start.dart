@@ -361,26 +361,9 @@ class StartContext {
         framework.upstreamRemote.name, candidateBranch,
         exact: false,
     ))..ensureValid(candidateBranch, incrementLetter);
-    Version nextVersion;
-    if (incrementLetter == 'm') {
-      nextVersion = Version.fromCandidateBranch(candidateBranch);
-    } else {
-      if (incrementLetter == 'z') {
-        if (lastVersion.type == VersionType.stable) {
-          nextVersion = Version.increment(lastVersion, incrementLetter);
-        } else {
-          // This is the first stable release, so hardcode the z as 0
-          nextVersion = Version(
-            x: lastVersion.x,
-            y: lastVersion.y,
-            z: 0,
-            type: VersionType.stable,
-          );
-        }
-      } else {
-        nextVersion = Version.increment(lastVersion, incrementLetter);
-      }
-    }
+    Version nextVersion = calculateNextVersion(lastVersion);
+    nextVersion = await ensureBranchPointTagged(nextVersion);
+
     state.releaseVersion = nextVersion.toString();
 
     final String frameworkHead = await framework.reverseParse('HEAD');
@@ -404,6 +387,35 @@ class StartContext {
     writeStateToFile(stateFile, state, stdio.logs);
 
     stdio.printStatus(presentState(state));
+  }
+
+  /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
+  Version calculateNextVersion(Version lastVersion) {
+    if (incrementLetter == 'm') {
+      return Version.fromCandidateBranch(candidateBranch);
+    }
+    if (incrementLetter == 'z') {
+      if (lastVersion.type == VersionType.stable) {
+        return Version.increment(lastVersion, incrementLetter);
+      }
+      // This is the first stable release, so hardcode the z as 0
+      return Version(
+          x: lastVersion.x,
+          y: lastVersion.y,
+          z: 0,
+          type: VersionType.stable,
+      );
+    }
+    return Version.increment(lastVersion, incrementLetter);
+  }
+
+  Future<Version> ensureBranchPointTagged(Version requestedVersion) async {
+    if (incrementLetter != 'm' || requestedVersion.n != 0) {
+      return requestedVersion;
+    }
+    // TODO Find branch point
+    // TODO tag and push branch point
+    return Version.increment(requestedVersion, 'n');
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.
