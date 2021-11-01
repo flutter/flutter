@@ -20,16 +20,15 @@ namespace impeller {
 ///               `impellerc`. The usage of this class is indirectly via
 ///               `PipelineBuilder<VS, FS>`.
 ///
-class PipelineVertexDescriptor final
-    : public Comparable<PipelineVertexDescriptor> {
+class VertexDescriptor final : public Comparable<VertexDescriptor> {
  public:
   static constexpr size_t kReservedVertexBufferIndex =
       30u;  // The final slot available. Regular buffer indices go up from 0.
 
-  PipelineVertexDescriptor();
+  VertexDescriptor();
 
   // |Comparable<PipelineVertexDescriptor>|
-  virtual ~PipelineVertexDescriptor();
+  virtual ~VertexDescriptor();
 
   template <size_t Size>
   bool SetStageInputs(
@@ -46,12 +45,12 @@ class PipelineVertexDescriptor final
   std::size_t GetHash() const override;
 
   // |Comparable<VertexDescriptor>|
-  bool IsEqual(const PipelineVertexDescriptor& other) const override;
+  bool IsEqual(const VertexDescriptor& other) const override;
 
  private:
   std::vector<ShaderStageIOSlot> inputs_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineVertexDescriptor);
+  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);
 };
 
 }  // namespace impeller
