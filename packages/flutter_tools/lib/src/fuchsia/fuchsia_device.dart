@@ -22,7 +22,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 
