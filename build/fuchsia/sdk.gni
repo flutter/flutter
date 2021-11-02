@@ -238,7 +238,8 @@ template("fuchsia_sdk") {
 
     part_meta_json = read_file(part_meta_rebased, "json")
 
-    if (defined(part_meta_json.name)) {
+    # version_history.json does not have a name and thus fails when we try to read it.
+    if (part_meta != "version_history.json") {
       subtarget_name = part_meta_json.name
 
       foreach(enabled_part, invoker.enabled_parts) {
