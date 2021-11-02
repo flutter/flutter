@@ -78,6 +78,9 @@ class PrecacheCommand extends FlutterCommand {
     'for all currently enabled platforms';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   bool get shouldUpdateCache => false;
 
   /// Some flags are umbrella names that expand to include multiple artifacts.

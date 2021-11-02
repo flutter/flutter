@@ -824,7 +824,7 @@ void main() {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
-      await pumpTest(tester, enabled: true, key: containerKey);
+      await pumpTest(tester, key: containerKey);
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -843,14 +843,14 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
       expect(invoked, isFalse);
-      await pumpTest(tester, enabled: true, key: containerKey);
+      await pumpTest(tester, key: containerKey);
       expect(focusing, isFalse);
       expect(hovering, isTrue);
       await pumpTest(tester, enabled: false, key: containerKey);
       expect(focusing, isFalse);
       expect(hovering, isFalse);
       await gesture.moveTo(Offset.zero);
-      await pumpTest(tester, enabled: true, key: containerKey);
+      await pumpTest(tester, key: containerKey);
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
@@ -858,11 +858,11 @@ void main() {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
-      await pumpTest(tester, enabled: true, key: containerKey);
+      await pumpTest(tester, key: containerKey);
       await tester.pump();
       expect(focusing, isFalse);
 
-      await pumpTest(tester, enabled: true, key: containerKey);
+      await pumpTest(tester, key: containerKey);
       focusNode.requestFocus();
       await tester.pump();
       expect(focusing, isTrue);
@@ -888,7 +888,7 @@ void main() {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
-      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      await pumpTest(tester, key: containerKey, supplyCallbacks: false);
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -907,14 +907,14 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
       expect(invoked, isFalse);
-      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      await pumpTest(tester, key: containerKey, supplyCallbacks: false);
       expect(focusing, isFalse);
       expect(hovering, isFalse);
       await pumpTest(tester, enabled: false, key: containerKey, supplyCallbacks: false);
       expect(focusing, isFalse);
       expect(hovering, isFalse);
       await gesture.moveTo(Offset.zero);
-      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      await pumpTest(tester, key: containerKey, supplyCallbacks: false);
       expect(hovering, isFalse);
       expect(focusing, isFalse);
     });
@@ -927,7 +927,6 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
-              descendantsAreFocusable: true,
               child: MaterialButton(
                 focusNode: buttonNode,
                 child: const Text('Test'),
@@ -1345,7 +1344,7 @@ void main() {
           builder: (BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
-                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1', enabled: true), context: context1),
+                LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
                 builder: (BuildContext context2) {

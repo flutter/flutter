@@ -643,7 +643,6 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: ' ',
   prefixOtherLinesRootNode: '  ',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: ' ',
@@ -678,7 +677,6 @@ final TextTreeConfiguration flatTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: '',
   prefixOtherLinesRootNode: '',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: '',
@@ -733,7 +731,6 @@ final TextTreeConfiguration errorPropertyTextConfiguration = TextTreeConfigurati
   prefixLineOne: '',
   prefixOtherLines: '',
   prefixLastChildLineOne: '',
-  lineBreak: '\n',
   lineBreakProperties: false,
   addBlankLineIfNoChildren: false,
   showChildren: false,
@@ -741,7 +738,6 @@ final TextTreeConfiguration errorPropertyTextConfiguration = TextTreeConfigurati
   propertyPrefixNoChildren: '  ',
   linkCharacter: '',
   prefixOtherLinesRootNode: '',
-  afterName: ':',
   isNameOnOwnLine: true,
 );
 
@@ -761,7 +757,6 @@ final TextTreeConfiguration shallowTextConfiguration = TextTreeConfiguration(
   prefixLastChildLineOne: '',
   prefixOtherLines: ' ',
   prefixOtherLinesRootNode: '  ',
-  bodyIndent: '',
   propertyPrefixIfChildren: '',
   propertyPrefixNoChildren: '',
   linkCharacter: ' ',
@@ -1310,7 +1305,7 @@ class TextTreeRenderer {
         if (propertyLines.length == 1 && !config.lineBreakProperties) {
           builder.write(propertyLines.first);
         } else {
-          builder.write(propertyRender, allowWrap: false);
+          builder.write(propertyRender);
           if (!propertyRender.endsWith('\n'))
             builder.write('\n');
         }
@@ -1740,7 +1735,6 @@ abstract class DiagnosticsNode {
       result = TextTreeRenderer(
         minLevel: minLevel,
         wrapWidth: 65,
-        wrapWidthProperties: 65,
       ).render(
         this,
         prefixLineOne: prefixLineOne,
@@ -2838,18 +2832,29 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     try {
       _value = _computeValue!();
     } catch (exception) {
+      // The error is reported to inspector; rethrowing would destroy the
+      // debugging experience.
       _exception = exception;
       _value = null;
     }
   }
 
-  /// If the [value] of the property equals [defaultValue] the priority [level]
-  /// of the property is downgraded to [DiagnosticLevel.fine] as the property
-  /// value is uninteresting.
+  /// The default value of this property, when it has not been set to a specific
+  /// value.
+  ///
+  /// For most [DiagnosticsProperty] classes, if the [value] of the property
+  /// equals [defaultValue], then the priority [level] of the property is
+  /// downgraded to [DiagnosticLevel.fine] on the basis that the property value
+  /// is uninteresting. This is implemented by [isInteresting].
   ///
   /// The [defaultValue] is [kNoDefaultValue] by default. Otherwise it must be of
   /// type `T?`.
   final Object? defaultValue;
+
+  /// Whether to consider the property's value interesting. When a property is
+  /// uninteresting, its [level] is downgraded to [DiagnosticLevel.fine]
+  /// regardless of the value provided as the constructor's `level` argument.
+  bool get isInteresting => defaultValue == kNoDefaultValue || value != defaultValue;
 
   final DiagnosticLevel _defaultLevel;
 
@@ -2874,8 +2879,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (value == null && missingIfNull)
       return DiagnosticLevel.warning;
 
-    // Use a low level when the value matches the default value.
-    if (defaultValue != kNoDefaultValue && value == defaultValue)
+    if (!isInteresting)
       return DiagnosticLevel.fine;
 
     return _defaultLevel;
@@ -3553,7 +3557,9 @@ class DiagnosticsBlock extends DiagnosticsNode {
 
   @override
   final DiagnosticLevel level;
+
   final String? _description;
+
   @override
   final Object? value;
 

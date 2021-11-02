@@ -7,7 +7,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../localizations/gen_l10n.dart';
 import '../localizations/gen_l10n_types.dart';
 import '../localizations/localizations_utils.dart';
@@ -193,6 +193,9 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   String get name => 'gen-l10n';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

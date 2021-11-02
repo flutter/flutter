@@ -9,9 +9,8 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
-import 'fuchsia_dev_finder.dart';
 import 'fuchsia_ffx.dart';
 import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
@@ -32,13 +31,6 @@ class FuchsiaSdk {
   /// Interface to the 'pm' tool.
   late final FuchsiaPM fuchsiaPM = FuchsiaPM();
 
-  /// Interface to the 'device-finder' tool.
-  late final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
-        fuchsiaArtifacts: globals.fuchsiaArtifacts,
-        logger: globals.logger,
-        processManager: globals.processManager
-      );
-
   /// Interface to the 'kernel_compiler' tool.
   late final FuchsiaKernelCompiler fuchsiaKernelCompiler = FuchsiaKernelCompiler();
 
@@ -52,21 +44,12 @@ class FuchsiaSdk {
   /// Returns any attached devices is a newline-denominated String.
   ///
   /// Example output: abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
-  Future<String?> listDevices({Duration? timeout, bool useDeviceFinder = false}) async {
-    List<String>? devices;
-    if (useDeviceFinder) {
-      final File? devFinder = globals.fuchsiaArtifacts?.devFinder;
-      if (devFinder == null || !devFinder.existsSync()) {
-        return null;
-      }
-      devices = await fuchsiaDevFinder.list(timeout: timeout);
-    } else {
-      final File? ffx = globals.fuchsiaArtifacts?.ffx;
-      if (ffx == null || !ffx.existsSync()) {
-        return null;
-      }
-      devices = await fuchsiaFfx.list(timeout: timeout);
+  Future<String?> listDevices({Duration? timeout}) async {
+    final File? ffx = globals.fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
+      return null;
     }
+    final List<String>? devices = await fuchsiaFfx.list(timeout: timeout);
     if (devices == null) {
       return null;
     }
@@ -118,7 +101,6 @@ class FuchsiaArtifacts {
   /// Creates a new [FuchsiaArtifacts].
   FuchsiaArtifacts({
     this.sshConfig,
-    this.devFinder,
     this.ffx,
     this.pm,
   });
@@ -147,13 +129,11 @@ class FuchsiaArtifacts {
 
     final String fuchsia = globals.cache.getArtifactDirectory('fuchsia').path;
     final String tools = globals.fs.path.join(fuchsia, 'tools');
-    final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'device-finder'));
     final File ffx = globals.fs.file(globals.fs.path.join(tools, 'x64/ffx'));
     final File pm = globals.fs.file(globals.fs.path.join(tools, 'pm'));
 
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
-      devFinder: devFinder.existsSync() ? devFinder : null,
       ffx: ffx.existsSync() ? ffx : null,
       pm: pm.existsSync() ? pm : null,
     );
@@ -165,10 +145,6 @@ class FuchsiaArtifacts {
   /// The location of the SSH configuration file used to interact with a
   /// Fuchsia device.
   final File? sshConfig;
-
-  /// The location of the dev finder tool used to locate connected
-  /// Fuchsia devices.
-  final File? devFinder;
 
   /// The location of the ffx tool used to locate connected
   /// Fuchsia devices.

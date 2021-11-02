@@ -43,9 +43,7 @@ const String testConfigForwardPortSuccessOutput = 'testforwardportsuccess\n';
 final CustomDeviceConfig disabledTestConfig = testConfig.copyWith(enabled: false);
 final CustomDeviceConfig testConfigNonForwarding = testConfig.copyWith(
   explicitForwardPortCommand: true,
-  forwardPortCommand: null,
   explicitForwardPortSuccessRegex: true,
-  forwardPortSuccessRegex: null,
 );
 
 const Map<String, dynamic> testConfigJson = <String, dynamic>{

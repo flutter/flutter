@@ -9,7 +9,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
@@ -27,6 +27,9 @@ class LogsCommand extends FlutterCommand {
 
   @override
   final String description = 'Show log output for running Flutter apps.';
+
+  @override
+  final String category = FlutterCommandCategory.tools;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};

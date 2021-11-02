@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
@@ -28,6 +28,9 @@ class FormatCommand extends FlutterCommand {
 
   @override
   final String description = 'Format one or more Dart files.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   String get invocation => '${runner.executableName} $name <one or more paths>';

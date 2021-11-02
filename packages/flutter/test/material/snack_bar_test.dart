@@ -667,6 +667,45 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
+  testWidgets('Dark theme SnackBar has primary text buttons', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final TextStyle buttonTextStyle = tester.widget<RichText>(
+        find.descendant(of: find.text('ACTION'), matching: find.byType(RichText))
+    ).text.style!;
+    expect(buttonTextStyle.color, equals(darkTheme.colorScheme.primary));
+  });
+
   testWidgets('SnackBar should inherit theme data from its ancestor.', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
@@ -741,8 +780,7 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
-      typography: Typography.material2018(platform: TargetPlatform.android),
-      cupertinoOverrideTheme: null,
+      typography: Typography.material2018(),
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
@@ -1919,7 +1957,6 @@ void main() {
           await tester.pumpWidget(
             MediaQuery(
               data: const MediaQueryData(
-                padding: EdgeInsets.zero,
                 viewPadding: EdgeInsets.all(20),
                 viewInsets: EdgeInsets.all(100),
               ),
@@ -2595,7 +2632,8 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
           Offset(-scaffoldWidth, 0.0), // drag to left gesture
         ];
         break;
-      default:
+      case DismissDirection.none:
+        break;
     }
   }
 

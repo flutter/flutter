@@ -8,7 +8,7 @@ import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
@@ -30,6 +30,9 @@ class ShellCompletionCommand extends FlutterCommand {
       'use it, specify an output file and follow the instructions in the generated output file to '
       'install it in your shell environment. Once it is sourced, your shell will be able to '
       'complete flutter commands and options.';
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   final List<String> aliases = <String>['zsh-completion'];

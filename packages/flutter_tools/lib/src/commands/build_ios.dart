@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
@@ -186,7 +186,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: true);
+    addBuildModeFlags(verboseHelp: verboseHelp);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -236,7 +236,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       throwToolExit('Building for iOS is only supported on macOS.');
     }
     if (environmentType == EnvironmentType.simulator && !buildInfo.supportsSimulator) {
-      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
+      throwToolExit('${sentenceCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
     }
     if (configOnly && buildInfo.codeSizeDirectory != null) {
       throwToolExit('Cannot analyze code size without performing a full build.');

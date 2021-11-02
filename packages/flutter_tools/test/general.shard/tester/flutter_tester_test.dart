@@ -82,7 +82,7 @@ void main() {
     TestBuildSystem buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),

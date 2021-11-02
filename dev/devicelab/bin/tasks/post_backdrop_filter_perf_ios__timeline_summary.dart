@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createPostBackdropFilterPerfTest(measureCpuGpu: true));
+  await task(createPostBackdropFilterPerfTest());
 }

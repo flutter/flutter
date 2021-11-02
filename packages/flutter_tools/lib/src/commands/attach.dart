@@ -21,7 +21,7 @@ import '../compile.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -143,6 +143,9 @@ is started.
 If the app or module is already running and the specific observatory port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`''';
+
+  @override
+  final String category = FlutterCommandCategory.tools;
 
   int get debugPort {
     if (argResults['debug-port'] == null) {

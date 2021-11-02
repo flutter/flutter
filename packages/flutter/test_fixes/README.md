@@ -12,7 +12,7 @@ Note that the tests in this directory are also invoked from external repositorie
 Specifically, the CI system for the dart-lang/sdk repo runs these tests in order to
 ensure that changes to the dart fix file format do not break Flutter.
 
-See [tools/bots/flutter/analyze_flutter_flutter.sh](https://github.com/dart-lang/sdk/blob/master/tools/bots/flutter/analyze_flutter_flutter.sh)
+See [tools/bots/flutter/analyze_flutter_flutter.sh](https://github.com/dart-lang/sdk/blob/main/tools/bots/flutter/analyze_flutter_flutter.sh)
 for where the tests are invoked.
 
 When possible, please coordinate changes to this directory that might affect the

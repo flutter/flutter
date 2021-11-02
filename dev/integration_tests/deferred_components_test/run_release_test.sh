@@ -27,19 +27,20 @@ rm -f build/app/outputs/bundle/release/run_logcat.log
 
 flutter build appbundle
 
-java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing
+java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
 java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
-sleep 12
+sleep 30
 exit
 "
-$adb_path logcat -d -t "$script_start_time" -s "flutter" > build/app/outputs/bundle/release/run_logcat.log
+$adb_path logcat -d -t "$script_start_time" > build/app/outputs/bundle/release/run_logcat.log
 echo ""
 if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferred code"; then
   echo "All tests passed."
   exit 0
 fi
+cat build/app/outputs/bundle/release/run_logcat.log
 echo "Failure: Deferred component did not load."
 exit 1

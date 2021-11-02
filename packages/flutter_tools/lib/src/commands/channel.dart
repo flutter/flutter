@@ -6,7 +6,7 @@
 
 import '../base/common.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -26,6 +26,9 @@ class ChannelCommand extends FlutterCommand {
 
   @override
   final String description = 'List or switch Flutter channels.';
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   String get invocation => '${runner.executableName} $name [<channel-name>]';

@@ -93,7 +93,7 @@ enum BottomNavigationBarLandscapeLayout {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets, which means it defaults to [BottomNavigationBarType.fixed], and
@@ -104,7 +104,7 @@ enum BottomNavigationBarLandscapeLayout {
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has four [BottomNavigationBarItem]
 /// widgets, which means it defaults to [BottomNavigationBarType.shifting], and
@@ -357,7 +357,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///    bottom navigation bar defaults for an entire application.
   ///  * [BottomNavigationBarTheme] - which can be used to specify
   ///    bottom navigation bar defaults for a widget subtree.
-  ///  * [MediaQuery.of] - which can be used to determing the current
+  ///  * [MediaQuery.of] - which can be used to determine the current
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
@@ -555,7 +555,7 @@ class _BottomNavigationTile extends StatelessWidget {
 }
 
 
-// If the orientaion is landscape and layout is
+// If the orientation is landscape and layout is
 // BottomNavigationBarLandscapeLayout.linear then return a
 // icon-space-label row, where space is 8 pixels. Otherwise return a
 // icon-label column.
@@ -578,14 +578,12 @@ class _Tile extends StatelessWidget {
       return Align(
         heightFactor: 1,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[icon, const SizedBox(width: 8), label],
         ),
       );
     }
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, label],

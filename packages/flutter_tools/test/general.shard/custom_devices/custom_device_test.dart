@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
@@ -179,7 +179,7 @@ void main() {
     _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
 
     expect(await CustomDevices(
-      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: false),
+      featureFlags: TestFeatureFlags(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       config: CustomDevicesConfig.test(
@@ -285,8 +285,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: testConfig.pingCommand,
-          exitCode: 0,
-          stdout: '',
         ),
       ]),
       config: CustomDevicesConfig.test(
@@ -354,7 +352,7 @@ void main() {
     );
 
     // this should start the command
-    expect(await forwarder.forward(12345, hostPort: null), 12345);
+    expect(await forwarder.forward(12345), 12345);
     expect(forwardPortCommandCompleter.isCompleted, false);
 
     // this should terminate it

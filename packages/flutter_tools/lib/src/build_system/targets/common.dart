@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -12,7 +10,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
-import '../../globals_null_migrated.dart' as globals show xcode;
+import '../../globals.dart' as globals show xcode;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -51,10 +49,11 @@ class CopyFlutterBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -155,15 +154,16 @@ class KernelSnapshot extends Target {
       processManager: environment.processManager,
       artifacts: environment.artifacts,
       fileSystemRoots: <String>[],
-      fileSystemScheme: null,
     );
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
     }
-    if (environment.defines[kTargetPlatform] == null) {
+    final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
+    if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir
       .childDirectory('.dart_tool')
@@ -171,12 +171,12 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
     // This configuration is all optional.
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
-    final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
-    final String fileSystemScheme = environment.defines[kFileSystemScheme];
+    final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
+    final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
@@ -193,8 +193,20 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
+        break;
     }
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -202,7 +214,7 @@ class KernelSnapshot extends Target {
       logger: environment.logger,
     );
 
-    final CompilerOutput output = await compiler.compile(
+    final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
         platform: targetPlatform,
@@ -241,26 +253,27 @@ abstract class AotElfBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode,
+      xcode: globals.xcode!,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );
     final String outputPath = environment.buildDir.path;
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
-    if (environment.defines[kTargetPlatform] == null) {
+    final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
+    if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
+    final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem

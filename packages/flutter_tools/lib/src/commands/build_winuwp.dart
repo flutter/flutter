@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';

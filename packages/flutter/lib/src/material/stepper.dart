@@ -56,7 +56,7 @@ enum StepperType {
 }
 
 /// Container for all the information necessary to build a Stepper widget's
-/// foward and backward controls for any given step.
+/// forward and backward controls for any given step.
 ///
 /// Used by [Stepper.controlsBuilder].
 @immutable
@@ -173,8 +173,9 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
+/// An example the shows how to use the [Stepper], and the [Stepper] UI
+/// appearance.
 ///
 /// ** See code in examples/api/lib/material/stepper/stepper.0.dart **
 /// {@end-tool}
@@ -256,7 +257,7 @@ class Stepper extends StatefulWidget {
   /// [ControlsDetails.currentStep] value within the callback can change the text
   /// of the continue or cancel button depending on which step users are at.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -728,6 +729,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       ],
     ];
 
+    final List<Widget> stepPanels = <Widget>[];
+    for (int i = 0; i < widget.steps.length; i += 1) {
+      stepPanels.add(
+        Visibility(
+          maintainState: true,
+          visible: i == widget.currentStep,
+          child: widget.steps[i].content,
+        ),
+      );
+    }
+
     return Column(
       children: <Widget>[
         Material(
@@ -747,7 +759,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
-                child: widget.steps[widget.currentStep].content,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: stepPanels),
               ),
               _buildVerticalControls(widget.currentStep),
             ],

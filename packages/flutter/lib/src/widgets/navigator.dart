@@ -175,6 +175,7 @@ abstract class Route<T> {
     }
   }
 
+  // ignore: use_setters_to_change_properties, (setters can't be private)
   void _updateRestorationId(String? restorationId) {
     _restorationScopeId.value = restorationId;
   }
@@ -214,7 +215,9 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      navigator?.focusScopeNode.requestFocus();
+      if (navigator?.widget.requestFocus == true) {
+        navigator!.focusScopeNode.requestFocus();
+      }
     });
   }
 
@@ -228,30 +231,32 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didAdd() {
-    // This TickerFuture serves two purposes. First, we want to make sure
-    // animations triggered by other operations finish before focusing the
-    // navigator. Second, navigator.focusScopeNode might acquire more focused
-    // children in Route.install asynchronously. This TickerFuture will wait for
-    // it to finish first.
-    //
-    // The later case can be found when subclasses manage their own focus scopes.
-    // For example, ModalRoute create a focus scope in its overlay entries. The
-    // focused child can only be attached to navigator after initState which
-    // will be guarded by the asynchronous gap.
-    TickerFuture.complete().then<void>((void _) {
-      // The route can be disposed before the ticker future completes. This can
-      // happen when the navigator is under a TabView that warps from one tab to
-      // another, non-adjacent tab, with an animation. The TabView reorders its
-      // children before and after the warping completes, and that causes its
-      // children to be built and disposed within the same frame. If one of its
-      // children contains a navigator, the routes in that navigator are also
-      // added and disposed within that frame.
+    if (navigator?.widget.requestFocus == true) {
+      // This TickerFuture serves two purposes. First, we want to make sure
+      // that animations triggered by other operations will finish before focusing the
+      // navigator. Second, navigator.focusScopeNode might acquire more focused
+      // children in Route.install asynchronously. This TickerFuture will wait for
+      // it to finish first.
       //
-      // Since the reference to the navigator will be set to null after it is
-      // disposed, we have to do a null-safe operation in case that happens
-      // within the same frame when it is added.
-      navigator?.focusScopeNode.requestFocus();
-    });
+      // The later case can be found when subclasses manage their own focus scopes.
+      // For example, ModalRoute creates a focus scope in its overlay entries. The
+      // focused child can only be attached to navigator after initState which
+      // will be guarded by the asynchronous gap.
+      TickerFuture.complete().then<void>((void _) {
+        // The route can be disposed before the ticker future completes. This can
+        // happen when the navigator is under a TabView that warps from one tab to
+        // another, non-adjacent tab, with an animation. The TabView reorders its
+        // children before and after the warping completes, and that causes its
+        // children to be built and disposed within the same frame. If one of its
+        // children contains a navigator, the routes in that navigator are also
+        // added and disposed within that frame.
+        //
+        // Since the reference to the navigator will be set to null after it is
+        // disposed, we have to do a null-safe operation in case that happens
+        // within the same frame when it is added.
+        navigator?.focusScopeNode.requestFocus();
+      });
+    }
   }
 
   /// Called after [install] when the route replaced another in the navigator.
@@ -754,12 +759,46 @@ abstract class RouteTransitionRecord {
 ///
 /// To make route transition decisions, subclass must implement [resolve].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool snippet}
 /// The following example demonstrates how to implement a subclass that always
 /// removes or adds routes without animated transitions and puts the removed
 /// routes at the top of the list.
 ///
-/// ** See code in examples/api/lib/widgets/navigator/transition_delegate.0.dart **
+/// ```dart
+/// class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
+///   @override
+///   Iterable<RouteTransitionRecord> resolve({
+///     required List<RouteTransitionRecord> newPageRouteHistory,
+///     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+///     required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
+///   }) {
+///     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
+///
+///     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
+///       if (pageRoute.isWaitingForEnteringDecision) {
+///         pageRoute.markForAdd();
+///       }
+///       results.add(pageRoute);
+///
+///     }
+///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
+///       if (exitingPageRoute.isWaitingForExitingDecision) {
+///        exitingPageRoute.markForRemove();
+///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+///        if (pagelessRoutes != null) {
+///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+///             pagelessRoute.markForRemove();
+///           }
+///        }
+///       }
+///       results.add(exitingPageRoute);
+///
+///     }
+///     return results;
+///   }
+/// }
+///
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -1249,7 +1288,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// [WidgetsApp] and [CupertinoTabView] widgets and do not need to be explicitly
 /// created or managed.
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample}
 /// The following example demonstrates how a nested [Navigator] can be used to
 /// present a standalone user registration journey.
 ///
@@ -1309,6 +1348,7 @@ class Navigator extends StatefulWidget {
     this.transitionDelegate = const DefaultTransitionDelegate<dynamic>(),
     this.reportsRouteUpdateToEngine = false,
     this.observers = const <NavigatorObserver>[],
+    this.requestFocus = true,
     this.restorationScopeId,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
@@ -1472,6 +1512,12 @@ class Navigator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool reportsRouteUpdateToEngine;
+
+  /// Whether or not the navigator and it's new topmost route should request focus
+  /// when the new route is pushed onto the navigator.
+  ///
+  /// Defaults to true.
+  final bool requestFocus;
 
   /// Push a named route onto the navigator that most tightly encloses the given
   /// context.
@@ -1994,7 +2040,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push.0.dart **
@@ -2073,7 +2119,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push_replacement.0.dart **
@@ -2158,7 +2204,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator.restorable_push_and_remove_until.0.dart **
@@ -4317,7 +4363,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push.0.dart **
@@ -4439,7 +4485,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push_replacement.0.dart **
@@ -4524,7 +4570,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// Typical usage is as follows:
   ///
   /// ** See code in examples/api/lib/widgets/navigator/navigator_state.restorable_push_and_remove_until.0.dart **
@@ -5353,7 +5399,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
     final Map<dynamic, dynamic> casted = data! as Map<dynamic, dynamic>;
     return casted.map<String?, List<Object>>((dynamic key, dynamic value) => MapEntry<String?, List<Object>>(
       key as String?,
-      List<Object>.from(value as List<dynamic>, growable: true),
+      List<Object>.from(value as List<dynamic>),
     ));
   }
 
@@ -5421,7 +5467,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// When [present] has been called to add a route, it may only be called again
 /// after the previously added route has completed.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example uses a [RestorableRouteFuture] in the `_MyHomeState` to push a
 /// new `MyCounter` route and to retrieve its return value.
 ///

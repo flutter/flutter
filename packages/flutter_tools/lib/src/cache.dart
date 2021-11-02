@@ -127,7 +127,6 @@ class Cache {
   /// Defaults to a memory file system, fake platform,
   /// buffer logger, and no accessible artifacts.
   /// By default, the root cache directory path is "cache".
-  @visibleForTesting
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
@@ -247,6 +246,7 @@ class Cache {
       }
     } on Exception catch (error) {
       // There is currently no logger attached since this is computed at startup.
+      // ignore: avoid_print
       print(userMessages.runnerNoRoot('$error'));
     }
     return normalize('.');
@@ -370,6 +370,22 @@ class Cache {
     return _dartSdkVersion!;
   }
   String? _dartSdkVersion;
+
+  /// The current version of Dart used to build Flutter and run the tool.
+  String get dartSdkBuild {
+    if (_dartSdkBuild == null) {
+      // Make the version string more customer-friendly.
+      // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
+      final String justVersion = _platform.version.split(' ')[0];
+      _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+        final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
+        return '${match[1]}$noFlutter';
+      });
+    }
+    return _dartSdkBuild!;
+  }
+  String? _dartSdkBuild;
+
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {

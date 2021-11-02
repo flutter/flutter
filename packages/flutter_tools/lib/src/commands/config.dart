@@ -7,7 +7,7 @@
 import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
@@ -53,6 +53,9 @@ class ConfigCommand extends FlutterCommand {
     'To remove a setting, configure it to an empty string.\n\n'
     'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
     "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   final List<String> aliases = <String>['configure'];

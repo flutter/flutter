@@ -240,7 +240,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -277,7 +277,7 @@ void main() {
   testWidgets('Rich selectable text has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(devicePixelRatio: 1.0),
+        data: MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SelectableText.rich(
@@ -319,10 +319,10 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text only support TextSpan', (WidgetTester tester) async {
+  testWidgets('Rich selectable text supports WidgetSpan', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(devicePixelRatio: 1.0),
+        data: MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: SelectableText.rich(
@@ -357,7 +357,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isAssertionError);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {
@@ -710,7 +710,6 @@ void main() {
         child: const SelectableText(
           'a selectable text',
           toolbarOptions: ToolbarOptions(
-            copy: false,
             selectAll: true,
           ),
         ),
@@ -1579,7 +1578,6 @@ void main() {
           home: Material(
             child: RawKeyboardListener(
               focusNode: focusNode,
-              onKey: null,
               child: SelectableText(
                 text,
                 maxLines: 3,
@@ -1713,7 +1711,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: const SelectableText(
               testValue,
               maxLines: 3,
@@ -1762,7 +1759,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: const SelectableText(
               testValue,
               maxLines: 3,
@@ -1798,7 +1794,6 @@ void main() {
         home: Material(
           child: RawKeyboardListener(
             focusNode: focusNode,
-            onKey: null,
             child: SelectableText(
               testValue,
               maxLines: 3,
@@ -1923,9 +1918,8 @@ void main() {
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   }, variant: KeySimulatorTransitModeVariant.all());
-
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -2001,7 +1995,6 @@ void main() {
         overlay(
           child: const SelectableText(
             'x',
-            maxLines: null,
           ),
         ),
     );
@@ -2234,6 +2227,32 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: SelectableText(
+          'Guten Tag',
+          semanticsLabel: 'German greeting for good day',
+          key: key,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+          label: 'German greeting for good day',
+          textDirection: TextDirection.ltr,
+        )
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
   });
 
   testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
@@ -3253,7 +3272,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 7,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Cursor move doesn't trigger a toolbar initially.
@@ -3268,7 +3286,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 12,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Still no toolbar.
@@ -3283,7 +3300,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 23,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Still no toolbar.
@@ -3298,7 +3314,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 23,
-          affinity: TextAffinity.downstream,
         ),
       );
       // The toolbar now shows up.
@@ -3335,7 +3350,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 7,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Cursor move doesn't trigger a toolbar initially.
@@ -3350,7 +3364,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 8,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Still no toolbar.
@@ -3365,7 +3378,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 12,
-          affinity: TextAffinity.downstream,
         ),
       );
       // Still no toolbar.
@@ -3380,7 +3392,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 12,
-          affinity: TextAffinity.downstream,
         ),
       );
       // The toolbar now shows up.
@@ -3437,7 +3448,6 @@ void main() {
       const TextSelection(
         baseOffset: 13,
         extentOffset: 66,
-        affinity: TextAffinity.downstream,
       ),
     );
     // Keep moving out.
@@ -3448,7 +3458,6 @@ void main() {
       const TextSelection(
         baseOffset: 13,
         extentOffset: 66,
-        affinity: TextAffinity.downstream,
       ),
     );
     await gesture.moveBy(const Offset(1, 0));
@@ -3458,7 +3467,6 @@ void main() {
       const TextSelection(
         baseOffset: 13,
         extentOffset: 66,
-        affinity: TextAffinity.downstream,
       ),
     );
     expect(find.byType(CupertinoButton), findsNothing);
@@ -3472,7 +3480,6 @@ void main() {
       const TextSelection(
         baseOffset: 13,
         extentOffset: 66,
-        affinity: TextAffinity.downstream,
       ),
     );
     // The toolbar now shows up.
@@ -3667,7 +3674,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 0, affinity: TextAffinity.downstream),
+        const TextSelection.collapsed(offset: 0),
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3718,7 +3725,7 @@ void main() {
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
@@ -3756,7 +3763,7 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
     final TextEditingController controller = editableTextWidget.controller;
@@ -3798,7 +3805,7 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: selectableTextStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0));
     await gesture.up();
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3851,6 +3858,7 @@ void main() {
       cursorRadius: Radius.zero,
       cursorColor: Color(0xff00ff00),
       scrollPhysics: ClampingScrollPhysics(),
+      semanticsLabel: 'something else',
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -3860,6 +3868,7 @@ void main() {
 
     expect(description, <String>[
       'data: something',
+      'semanticsLabel: something else',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'showCursor: true',
@@ -4916,7 +4925,6 @@ void main() {
                   ),
                   key: Key('field0'),
                   selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
-                  selectionWidthStyle: ui.BoxWidthStyle.tight,
                 ),
               ],
             ),

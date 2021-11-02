@@ -15,7 +15,7 @@ import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 
 // Matches the following error and warning patterns:
@@ -119,7 +119,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
 
   await buildDir.create(recursive: true);
 
-  final String buildFlag = toTitleCase(buildModeName);
+  final String buildFlag = sentenceCase(buildModeName);
   final bool needCrossBuildOptionsForArm64 = needCrossBuild
       && targetPlatform == TargetPlatform.linux_arm64;
   int result;
