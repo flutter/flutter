@@ -18,7 +18,7 @@ import 'base/process.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {

@@ -50,7 +50,7 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
-import 'src/globals_null_migrated.dart' as globals;
+import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';

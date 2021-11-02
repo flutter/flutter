@@ -16,7 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';

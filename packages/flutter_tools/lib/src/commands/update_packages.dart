@@ -16,7 +16,7 @@ import '../base/net.dart';
 import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub

@@ -22,7 +22,7 @@ import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';

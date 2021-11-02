@@ -8,7 +8,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';

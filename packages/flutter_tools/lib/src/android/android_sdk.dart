@@ -9,7 +9,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import 'android_studio.dart';
 
 // ANDROID_HOME is deprecated.

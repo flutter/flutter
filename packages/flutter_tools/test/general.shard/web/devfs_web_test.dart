@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:package_config/package_config.dart';

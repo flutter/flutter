@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/pkgctl.dart';
 import 'package:flutter_tools/src/fuchsia/session_control.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';

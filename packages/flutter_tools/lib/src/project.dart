@@ -18,7 +18,7 @@ import 'cmake_project.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'template.dart';
 import 'xcode_project.dart';

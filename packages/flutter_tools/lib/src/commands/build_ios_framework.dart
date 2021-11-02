@@ -18,7 +18,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;

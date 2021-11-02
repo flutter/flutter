@@ -11,7 +11,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;

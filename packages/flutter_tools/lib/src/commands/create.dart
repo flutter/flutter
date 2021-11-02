@@ -16,7 +16,7 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';

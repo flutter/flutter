@@ -8,7 +8,7 @@ import '../base/io.dart';
 import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
 

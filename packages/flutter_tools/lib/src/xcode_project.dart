@@ -9,7 +9,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;

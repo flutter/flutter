@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';

@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
