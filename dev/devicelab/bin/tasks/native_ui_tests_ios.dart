@@ -36,7 +36,11 @@ Future<void> main() async {
     section('Run platform unit tests');
 
     final Device device = await devices.workingDevice;
-    if (!await runXcodeTests(path.join(projectDirectory, 'ios'), 'id=${device.deviceId}', 'native_ui_tests_ios')) {
+    if (!await runXcodeTests(
+      platformDirectory: path.join(projectDirectory, 'ios'),
+      destination: 'id=${device.deviceId}',
+      testName: 'native_ui_tests_ios',
+    )) {
       return TaskResult.failure('Platform unit tests failed');
     }
 
