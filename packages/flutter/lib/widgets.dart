@@ -37,6 +37,7 @@ export 'src/widgets/default_text_editing_actions.dart';
 export 'src/widgets/default_text_editing_shortcuts.dart';
 export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/dismissible.dart';
+export 'src/widgets/display_feature_sub_screen.dart';
 export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
