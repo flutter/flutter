@@ -806,8 +806,9 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   RunLoopUntilIdle();
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
+
   EXPECT_TRUE(6 <= semantics_manager_.UpdateCount() &&
-              semantics_manager_.UpdateCount() <= 10);
+              semantics_manager_.UpdateCount() <= 12);
   EXPECT_EQ(1, semantics_manager_.CommitCount());
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
