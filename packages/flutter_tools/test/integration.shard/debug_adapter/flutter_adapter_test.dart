@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:dds/src/dap/protocol_generated.dart';
@@ -18,8 +16,8 @@ import 'test_client.dart';
 import 'test_support.dart';
 
 void main() {
-  Directory tempDir;
-  /*late*/ DapTestSession dap;
+  late Directory tempDir;
+  late DapTestSession dap;
   final String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
@@ -119,7 +117,7 @@ void main() {
     await _project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
@@ -156,7 +154,7 @@ void main() {
     await _project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
@@ -192,7 +190,7 @@ void main() {
 /// Extracts the output from a set of [OutputEventBody], removing any
 /// adjacent duplicates and combining into a single string.
 String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
-  String/*?*/ lastItem;
+  String? lastItem;
   return outputEvents
       .map((OutputEventBody e) => e.output)
       .where((String output) {
