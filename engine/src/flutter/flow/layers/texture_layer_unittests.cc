@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/texture_layer.h"
 
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/flow/testing/mock_texture.h"
@@ -92,6 +93,27 @@ TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
                 mock_canvas(), layer->paint_bounds(), false, nullptr,
                 SkSamplingOptions(SkFilterMode::kLinear)}}));
   EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
+}
+
+using TextureLayerDiffTest = DiffContextTest;
+
+TEST_F(TextureLayerDiffTest, TextureInRetainedLayer) {
+  MockLayerTree tree1;
+  auto container = std::make_shared<ContainerLayer>();
+  tree1.root()->Add(container);
+  auto layer = std::make_shared<TextureLayer>(
+      SkPoint::Make(0, 0), SkSize::Make(100, 100), 0, false,
+      SkSamplingOptions(SkFilterMode::kLinear));
+  container->Add(layer);
+
+  MockLayerTree tree2;
+  tree2.root()->Add(container);  // retained layer
+
+  auto damage = DiffLayerTree(tree1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
+
+  damage = DiffLayerTree(tree2, tree1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
 }
 
 }  // namespace testing
