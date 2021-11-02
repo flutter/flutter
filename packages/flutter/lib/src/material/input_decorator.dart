@@ -483,7 +483,7 @@ enum FloatingLabelBehavior {
 /// See also:
 ///
 ///  * [InputDecoration.floatingLabelAlignment] which defines the alignment for
-///    [InputDecoration.label] or [InputDecoration.labelText]
+///    [InputDecoration.label] or [InputDecoration.labelText].
 ///  * [FloatingLabelBehavior] which defines the behaviour of the floating label.
 @immutable
 class FloatingLabelAlignment {
@@ -497,11 +497,10 @@ class FloatingLabelAlignment {
   /// position, and 0.0 represents the center position.
   final double x;
 
-  /// Aligns a floating label to the leftmost possible position on top of
-  /// an input decorator.
+  /// Aligns a floating label to the leftmost possible position in an
+  /// [InputDecorator].
   static const FloatingLabelAlignment left = FloatingLabelAlignment._(x: -1.0);
-  /// Aligns a floating label to the center position on top of an input
-  /// decorator.
+  /// Aligns a floating label to the center position on top of an [InputDecorator].
   static const FloatingLabelAlignment center = FloatingLabelAlignment._(x: 0.0);
 
   @override
@@ -1521,22 +1520,25 @@ class _RenderDecoration extends RenderBox {
 
     if (label != null) {
       final double labelX = _boxParentData(label!).offset.dx;
-      final bool centerFloatLabel = decoration.floatingLabelAlignment == FloatingLabelAlignment.center;
-      // When floating label is centered, it's x is relative to
+      // the +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0)
+      final double floatAlign = decoration.floatingLabelAlignment.x + 1;
+      final double floatWidth = _boxSize(label).width * _kFinalLabelScale;
+      // When floating label is centered, its x is relative to
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap!.start = centerFloatLabel
-              ? _boxSize(container).width / 2 + _boxSize(label).width * _kFinalLabelScale / 2
-              : (labelX + label!.size.width);
+          decoration.borderGap!.start = lerpDouble(labelX + _boxSize(label).width,
+              _boxSize(container).width / 2.0 + floatWidth / 2.0,
+              floatAlign);
+
           break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
-          // floating label is centered, its already relative to _BorderContainer.
-          decoration.borderGap!.start = centerFloatLabel
-              ? _boxSize(container).width / 2 - _boxSize(label).width * _kFinalLabelScale / 2
-              : (labelX - _boxSize(icon).width);
+          // floating label is centered, it's already relative to _BorderContainer.
+          decoration.borderGap!.start = lerpDouble(labelX - _boxSize(icon).width,
+              _boxSize(container).width / 2.0 - floatWidth / 2.0,
+              floatAlign);
           break;
       }
       decoration.borderGap!.extent = label!.size.width * _kFinalLabelScale;
@@ -1566,6 +1568,9 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label!).offset;
       final double labelHeight = _boxSize(label).height;
       final double labelWidth = _boxSize(label).width;
+      // the +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0)
+      final double floatAlign = decoration.floatingLabelAlignment.x + 1;
+      final double floatWidth = labelWidth * _kFinalLabelScale;
       final double borderWeight = decoration.border!.borderSide.width;
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
@@ -1575,21 +1580,19 @@ class _RenderDecoration extends RenderBox {
       // Center the scaled label relative to the border.
       final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
-      final double dx;
-      if (decoration.floatingLabelAlignment == FloatingLabelAlignment.center) {
-        final double centeredFloatingX = _boxParentData(container!).offset.dx +
-            _boxSize(container).width / 2.0 - (labelWidth * _kFinalLabelScale) / 2.0;
-        dx = lerpDouble(labelOffset.dx, centeredFloatingX, t)!;
-      } else {
-        switch (textDirection) {
-          case TextDirection.rtl: // origin is on the right
-            dx = labelOffset.dx + labelWidth * (1.0 - scale);
-            break;
-          case TextDirection.ltr: // origin on the left
-            dx = labelOffset.dx;
-            break;
-        }
+      final double centeredFloatX = _boxParentData(container!).offset.dx +
+          _boxSize(container).width / 2.0 - floatWidth / 2.0;
+      final double floatStartX;
+      switch (textDirection) {
+        case TextDirection.rtl: // origin is on the right
+          floatStartX = labelOffset.dx + labelWidth * (1.0 - scale);
+          break;
+        case TextDirection.ltr: // origin on the left
+          floatStartX = labelOffset.dx;
+          break;
       }
+      final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
+      final double dx = lerpDouble(floatStartX, floatEndX, t)!;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
