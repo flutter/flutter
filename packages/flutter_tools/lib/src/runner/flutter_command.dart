@@ -1282,7 +1282,10 @@ abstract class FlutterCommand extends Command<void> {
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
         checkUpToDate: cachePubGet,
       );
-      final bool deprecationCheck = argResults.arguments.contains('ignore-deprecation') ? !boolArg('ignore-deprecation') : false;
+      bool deprecationCheck = false;
+      if (argResults.arguments.contains('ignore-deprecation')) {
+        deprecationCheck = !boolArg('ignore-deprecation');
+      }
       await project.regeneratePlatformSpecificTooling(exitOnDeprecation: deprecationCheck);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
