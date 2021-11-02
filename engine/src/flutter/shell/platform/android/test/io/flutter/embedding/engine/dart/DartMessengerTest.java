@@ -14,6 +14,11 @@ import io.flutter.embedding.engine.dart.DartMessenger.DartMessengerTaskQueue;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -185,5 +190,47 @@ public class DartMessengerTest {
     long messageData = 1234;
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
     verify(fakeFlutterJni).cleanupMessageData(eq(messageData));
+  }
+
+  @Test
+  public void testSerialTaskQueue() throws InterruptedException {
+    final FlutterJNI fakeFlutterJni = mock(FlutterJNI.class);
+    final DartMessenger messenger = new DartMessenger(fakeFlutterJni);
+    final ExecutorService taskQueuePool = Executors.newFixedThreadPool(4);
+    final DartMessengerTaskQueue taskQueue = new DartMessenger.DefaultTaskQueue(taskQueuePool);
+    final int count = 5000;
+    final LinkedList<Integer> ints = new LinkedList<>();
+    Random rand = new Random();
+    for (int i = 0; i < count; ++i) {
+      final int value = i;
+      taskQueue.dispatch(
+          () -> {
+            try {
+              Thread.sleep(rand.nextInt(10));
+            } catch (InterruptedException ex) {
+              System.out.println(ex.toString());
+            }
+            ints.add(value);
+          });
+      taskQueuePool.execute(
+          () -> {
+            // Add some extra noise to make sure we aren't always handling on the same thread.
+            try {
+              Thread.sleep(rand.nextInt(10));
+            } catch (InterruptedException ex) {
+              System.out.println(ex.toString());
+            }
+          });
+    }
+    CountDownLatch latch = new CountDownLatch(1);
+    taskQueue.dispatch(
+        () -> {
+          latch.countDown();
+        });
+    latch.await();
+    assertEquals(count, ints.size());
+    for (int i = 0; i < count - 1; ++i) {
+      assertEquals((int) ints.get(i), (int) (ints.get(i + 1)) - 1);
+    }
   }
 }
