@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <chrono>
-
-#include "flutter/fml/time/time_point.h"
-
 #include "flutter/shell/platform/windows/task_runner.h"
 
 #include "gtest/gtest.h"
@@ -32,8 +28,7 @@ class MockTaskRunner : public TaskRunner {
 };
 
 uint64_t MockGetCurrentTime() {
-  return static_cast<uint64_t>(
-      fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+  return 10000;
 }
 }  // namespace
 
@@ -67,15 +62,13 @@ TEST(TaskRunnerTest, MaybeExecuteTaskOnlyExpired) {
         executed_task.insert(expired_task->task);
       });
 
-  uint64_t time_now = MockGetCurrentTime();
-
   uint64_t task_expired_before_now = 1;
-  uint64_t time_before_now = time_now - 10000;
+  uint64_t time_before_now = 0;
   runner.PostFlutterTask(FlutterTask{nullptr, task_expired_before_now},
                          time_before_now);
 
   uint64_t task_expired_after_now = 2;
-  uint64_t time_after_now = time_now + 10000;
+  uint64_t time_after_now = MockGetCurrentTime() * 2;
   runner.PostFlutterTask(FlutterTask{nullptr, task_expired_after_now},
                          time_after_now);
 
