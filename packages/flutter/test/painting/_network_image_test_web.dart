@@ -31,7 +31,10 @@ void runTests() {
       return testHttpRequest;
     };
 
-    const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
+    const Map<String, String> headers = <String, String>{
+      'flutter': 'flutter',
+      'second': 'second'
+    };
 
     final Image image = Image.network(
       'https://www.example.com/images/frame.png',
@@ -42,8 +45,63 @@ void runTests() {
 
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
+
+  testWidgets('loads an image from the network with unsuccessful HTTP code',
+      (WidgetTester tester) async {
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 404
+      ..onError = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
+        html.ProgressEvent('test error'),
+      ]);
+
+    httpRequestFactory = () {
+      return testHttpRequest;
+    };
+
+    const Map<String, String> headers = <String, String>{
+      'flutter': 'flutter',
+      'second': 'second'
+    };
+
+    final Image image = Image.network(
+      'https://www.example.com/images/frame.png',
+      headers: headers,
+    );
+
+    await tester.pumpWidget(image);
+    expect((tester.takeException() as html.ProgressEvent).type, 'test error');
+  });
+
+  testWidgets('loads an image from the network with empty response',
+      (WidgetTester tester) async {
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
+        html.ProgressEvent('test error'),
+      ])
+      ..response = (Uint8List.fromList(<int>[])).buffer;
+
+    httpRequestFactory = () {
+      return testHttpRequest;
+    };
+
+    const Map<String, String> headers = <String, String>{
+      'flutter': 'flutter',
+      'second': 'second'
+    };
+
+    final Image image = Image.network(
+      'https://www.example.com/images/frame.png',
+      headers: headers,
+    );
+
+    await tester.pumpWidget(image);
+    expect(tester.takeException().toString(),
+        'HTTP request failed, statusCode: 200, https://www.example.com/images/frame.png');
+  });
 }
 
+// ignore: avoid_implementing_value_types
 class TestHttpRequest implements html.HttpRequest {
   @override
   String responseType = 'invalid';
