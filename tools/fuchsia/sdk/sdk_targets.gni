@@ -107,16 +107,19 @@ template("sdk_targets") {
     part_meta_rebased = "$fuchsia_sdk_path/$part_meta"
 
     part_meta_json = read_file(part_meta_rebased, "json")
-    subtarget_name = part_meta_json.name
 
-    if (part.type == target_type) {
-      if (target_type == "dart_library") {
-        _fuchsia_dart_library(subtarget_name) {
-          meta = part_meta_json
-        }
-      } else if (target_type == "fidl_library") {
-        _fuchsia_fidl_library(subtarget_name) {
-          meta = part_meta_json
+    if (part_meta != "version_history.json") {
+      subtarget_name = part_meta_json.name
+
+      if (part.type == target_type) {
+        if (target_type == "dart_library") {
+          _fuchsia_dart_library(subtarget_name) {
+            meta = part_meta_json
+          }
+        } else if (target_type == "fidl_library") {
+          _fuchsia_fidl_library(subtarget_name) {
+            meta = part_meta_json
+          }
         }
       }
     }
