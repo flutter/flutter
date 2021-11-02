@@ -39,7 +39,8 @@ public interface BinaryMessenger {
    * Creates a TaskQueue that executes the tasks serially on a background thread.
    *
    * <p>There is no guarantee that the tasks will execute on the same thread, just that execution is
-   * serial.
+   * serial. This is could be problematic if your code relies on ThreadLocal storage or
+   * introspection about what thread is actually executing.
    */
   @UiThread
   default TaskQueue makeBackgroundTaskQueue() {
