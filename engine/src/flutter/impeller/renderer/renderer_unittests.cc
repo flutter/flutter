@@ -25,9 +25,9 @@
 namespace impeller {
 namespace testing {
 
-using CompositorTest = Playground;
+using RendererTest = Playground;
 
-TEST_F(CompositorTest, CanCreateBoxPrimitive) {
+TEST_F(RendererTest, CanCreateBoxPrimitive) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -91,7 +91,7 @@ TEST_F(CompositorTest, CanCreateBoxPrimitive) {
   // OpenPlaygroundHere(callback);
 }
 
-TEST_F(CompositorTest, CanRenderMultiplePrimitives) {
+TEST_F(RendererTest, CanRenderMultiplePrimitives) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -144,8 +144,8 @@ TEST_F(CompositorTest, CanRenderMultiplePrimitives) {
 
     cmd.primitive_type = PrimitiveType::kTriangle;
 
-    for (size_t i = 0; i < 50; i++) {
-      for (size_t j = 0; j < 50; j++) {
+    for (size_t i = 0; i < 1; i++) {
+      for (size_t j = 0; j < 1; j++) {
         VS::UniformBuffer uniforms;
         uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
@@ -162,7 +162,7 @@ TEST_F(CompositorTest, CanRenderMultiplePrimitives) {
   // OpenPlaygroundHere(callback);
 }
 
-TEST_F(CompositorTest, CanRenderToTexture) {
+TEST_F(RendererTest, CanRenderToTexture) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -253,7 +253,7 @@ TEST_F(CompositorTest, CanRenderToTexture) {
   ASSERT_TRUE(r2t_pass->Commit(*context->GetTransientsAllocator()));
 }
 
-TEST_F(CompositorTest, CanRenderPath) {
+TEST_F(RendererTest, CanRenderPath) {
   auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
   ASSERT_FALSE(path.GetBoundingBox().IsZero());
 

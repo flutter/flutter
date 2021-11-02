@@ -23,12 +23,19 @@ class RenderPass {
 
   virtual HostBuffer& GetTransientsBuffer() = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Record a command for subsequent commit to the underlying
+  ///             command buffer. No work is encoded into the command buffer at
+  ///             this time.
+  ///
+  /// @param[in]  command  The command
+  ///
+  /// @return     If the command was valid for subsequent commitment.
+  ///
   [[nodiscard]] virtual bool RecordCommand(Command command) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Commit the recorded commands to the underlying command buffer.
-  ///             Any completion handlers must on the underlying command buffer
-  ///             must have already been added by this point.
   ///
   /// @param      transients_allocator  The transients allocator.
   ///
