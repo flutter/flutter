@@ -1918,8 +1918,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
       child: DisplayFeatureSubScreen(
-        child: _pageBuilder(context, animation, secondaryAnimation),
         anchorPoint: _anchorPoint,
+        child: _pageBuilder(context, animation, secondaryAnimation),
       ),
     );
   }

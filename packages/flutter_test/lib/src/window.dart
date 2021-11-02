@@ -138,7 +138,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   List<ui.DisplayFeature> get displayFeatures => _displayFeaturesTestValue ?? _window.displayFeatures;
   List<ui.DisplayFeature>? _displayFeaturesTestValue;
   /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
-  set displayFeaturesTestValue(List<ui.DisplayFeature> displayFeaturesTestValue) {
+  set displayFeaturesTestValue(List<ui.DisplayFeature> displayFeaturesTestValue) { // ignore: avoid_setters_without_getters
     _displayFeaturesTestValue = displayFeaturesTestValue;
     onMetricsChanged?.call();
   }

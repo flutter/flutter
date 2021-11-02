@@ -1078,8 +1078,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
       child: DisplayFeatureSubScreen(
-        child: Builder(builder: builder),
         anchorPoint: anchorPoint,
+        child: Builder(builder: builder),
       ),
     );
   }

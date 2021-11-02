@@ -127,7 +127,7 @@ class TwoPane extends StatelessWidget {
     late Widget _pane1;
     late Widget _pane2;
     late Widget _delimiter;
-    TextDirection? _textDirection = _getTextDirection(context);
+    final TextDirection? _textDirection = _getTextDirection(context);
     const int fractionBase = 1000000000000;
 
     if (mediaQuery == null || displayFeature == null) {
@@ -219,6 +219,13 @@ class TwoPane extends StatelessWidget {
     }
 
     return Flex(
+      direction: _direction,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      textDirection: _textDirection,
+      verticalDirection: verticalDirection,
+      mainAxisAlignment: panePriority != TwoPanePriority.both
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
       children: <Widget>[
         if (panePriority != TwoPanePriority.pane2)
           Expanded(
@@ -233,13 +240,6 @@ class TwoPane extends StatelessWidget {
             child: _pane2,
           ),
       ],
-      direction: _direction,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      textDirection: _textDirection,
-      verticalDirection: verticalDirection,
-      mainAxisAlignment: panePriority != TwoPanePriority.both
-          ? MainAxisAlignment.center
-          : MainAxisAlignment.start,
     );
   }
 

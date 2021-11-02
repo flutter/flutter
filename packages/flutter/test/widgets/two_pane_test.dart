@@ -39,7 +39,6 @@ void main() {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
-      print(exception);
       exception ??= details.exception;
     };
 
@@ -196,7 +195,6 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         direction: Axis.vertical,
-        verticalDirection: VerticalDirection.down,
         paneProportion: 0.1,
         pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
         pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
@@ -379,14 +377,14 @@ void main() {
       ),
     ));
 
-    expect(unpaddedPane1.padding, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane1.viewPadding, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane1.viewInsets, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane2.padding, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane2.viewPadding, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane2.viewInsets, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
+    expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -657,14 +655,14 @@ void main() {
       ),
     ));
 
-    expect(unpaddedPane1.padding, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane1.viewPadding, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane1.viewInsets, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.only(left: 0, top:10, right: 10, bottom: 10));
-    expect(unpaddedPane2.padding, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane2.viewPadding, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane2.viewInsets, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.only(left: 10, top:10, right: 0, bottom: 10));
+    expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
+    expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
+    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -894,14 +892,14 @@ void main() {
       ),
     ));
 
-    expect(unpaddedPane1.padding, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane1.viewPadding, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane1.viewInsets, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane2.padding, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane2.viewPadding, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane2.viewInsets, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
+    expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -1134,14 +1132,14 @@ void main() {
       ),
     ));
 
-    expect(unpaddedPane1.padding, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane1.viewPadding, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane1.viewInsets, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.only(left: 10, top: 0, right: 10, bottom: 10));
-    expect(unpaddedPane2.padding, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane2.viewPadding, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane2.viewInsets, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0));
+    expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
+    expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });

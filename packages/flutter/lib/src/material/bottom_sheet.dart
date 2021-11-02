@@ -523,6 +523,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       context: context,
       removeTop: true,
       child: DisplayFeatureSubScreen(
+        anchorPoint: anchorPoint,
         child: Builder(
           builder: (BuildContext context) {
             final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
@@ -538,7 +539,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
             );
           },
         ),
-        anchorPoint: anchorPoint,
       ),
     );
     return capturedThemes.wrap(bottomSheet);
