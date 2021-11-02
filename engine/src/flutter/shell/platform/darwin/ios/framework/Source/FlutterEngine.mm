@@ -720,13 +720,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Text input delegate
 
-- (void)handlePressEvent:(FlutterUIPressProxy*)press
-              nextAction:(void (^)())next API_AVAILABLE(ios(13.4)) {
-  if (_viewController.get() != nullptr) {
-    [_viewController.get() handlePressEvent:press nextAction:next];
-  }
-}
-
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState"
                               arguments:@[ @(client), state ]];

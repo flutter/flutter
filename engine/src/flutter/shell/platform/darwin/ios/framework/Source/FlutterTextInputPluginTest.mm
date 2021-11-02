@@ -357,6 +357,21 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+- (void)testPropagatePressEventsToNextResponder {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+
+  FlutterTextInputView* currentView = textInputPlugin.activeView;
+  UIView* mockCurrentView = OCMPartialMock(currentView);
+
+  [mockCurrentView pressesBegan:[NSSet setWithObjects:OCMClassMock([UIPress class]), nil]
+                      withEvent:OCMClassMock([UIPressesEvent class])];
+
+  // The event should be propagated to the next responder instead
+  // of the engine.
+  OCMVerify([mockCurrentView nextResponder]);
+}
+
 #pragma mark - TextEditingDelta tests
 - (void)testTextEditingDeltasAreGeneratedOnTextInput {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];

@@ -6,7 +6,6 @@
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTDELEGATE_H_
 
 #import <Foundation/Foundation.h>
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
 
 typedef NS_ENUM(NSInteger, FlutterTextInputAction) {
   FlutterTextInputActionUnspecified,
@@ -29,8 +28,6 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 };
 
 @protocol FlutterTextInputDelegate <NSObject>
-- (void)handlePressEvent:(FlutterUIPressProxy*)press
-              nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state;
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state withTag:(NSString*)tag;
 - (void)updateEditingClient:(int)client withDelta:(NSDictionary*)state;
