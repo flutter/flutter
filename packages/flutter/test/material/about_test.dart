@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -591,6 +592,135 @@ void main() {
 
     expect(rootObserver.dialogCount, 0);
     expect(nestedObserver.dialogCount, 1);
+  });
+
+  group('showAboutDialog avoids overlapping display features', () {
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: child!,
+          );
+        },
+        home: Builder(
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  applicationName: 'A',
+                );
+              },
+              child: const Text('Show About Dialog'),
+            )
+        ),
+      ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(AboutDialog)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(390.0, 600.0));
+    });
+
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: child!,
+          );
+        },
+        home: Builder(
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  applicationName: 'A',
+                  anchorPoint: const Offset(1000, 0),
+                );
+              },
+              child: const Text('Show About Dialog'),
+            )
+        ),
+      ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // The anchorPoint hits the right side of the display
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Display has a vertical hinge down the middle
+            data: const MediaQueryData(
+              displayFeatures: <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTRB(390, 0, 410, 600),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.unknown,
+                ),
+              ],
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: child!,
+            ),
+          );
+        },
+        home: Builder(
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  applicationName: 'A',
+                );
+              },
+              child: const Text('Show About Dialog'),
+            )
+        ),
+      ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // Since this is rtl, the first screen is the on the right
+      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+    });
   });
 
   testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'dart:ui' show DisplayFeature;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'display_feature_sub_screen.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -1864,6 +1866,9 @@ abstract class RouteAware {
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// The [anchorPoint] argument is used to pick the closest area without
+/// [DisplayFeature]s, where the dialog will be rendered.
+///
 /// See also:
 ///
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
@@ -1879,6 +1884,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
+    Offset? anchorPoint,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
@@ -1886,6 +1892,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
        _transitionBuilder = transitionBuilder,
+       _anchorPoint = anchorPoint,
        super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
@@ -1908,12 +1915,17 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
+  final Offset? _anchorPoint;
+
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: _pageBuilder(context, animation, secondaryAnimation),
+      child: DisplayFeatureSubScreen(
+        anchorPoint: _anchorPoint,
+        child: _pageBuilder(context, animation, secondaryAnimation),
+      ),
     );
   }
 
@@ -2015,6 +2027,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -2027,6 +2040,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
     settings: routeSettings,
+    anchorPoint: anchorPoint,
   ));
 }
 

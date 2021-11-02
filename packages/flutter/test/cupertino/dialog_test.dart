@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1316,6 +1317,120 @@ void main() {
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
+  });
+
+  group('showCupertinoDialog avoids overlapping display features', () {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+    });
   });
 }
 
