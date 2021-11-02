@@ -25,8 +25,13 @@ class PaintRegion {
   PaintRegion(std::shared_ptr<std::vector<SkRect>> rects,
               size_t from,
               size_t to,
-              bool has_readback)
-      : rects_(rects), from_(from), to_(to), has_readback_(has_readback) {}
+              bool has_readback,
+              bool has_texture)
+      : rects_(rects),
+        from_(from),
+        to_(to),
+        has_readback_(has_readback),
+        has_texture_(has_texture) {}
 
   std::vector<SkRect>::const_iterator begin() const {
     FML_DCHECK(is_valid());
@@ -47,11 +52,16 @@ class PaintRegion {
   // that performs readback
   bool has_readback() const { return has_readback_; }
 
+  // Returns whether there is a TextureLayer in subtree represented by this
+  // region.
+  bool has_texture() const { return has_texture_; }
+
  private:
   std::shared_ptr<std::vector<SkRect>> rects_;
   size_t from_ = 0;
   size_t to_ = 0;
   bool has_readback_ = false;
+  bool has_texture_ = false;
 };
 
 }  // namespace flutter

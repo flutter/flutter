@@ -104,6 +104,10 @@ class DiffContext {
 
   bool IsSubtreeDirty() const { return state_.dirty; }
 
+  // Marks that current subtree contains a TextureLayer. This is needed to
+  // ensure that we'll Diff the TextureLayer even if inside retained layer.
+  void MarkSubtreeHasTextureLayer();
+
   // Add layer bounds to current paint region; rect is in "local" (layer)
   // coordinates.
   void AddLayerBounds(const SkRect& rect);
@@ -203,6 +207,9 @@ class DiffContext {
     // Whether this subtree has filter bounds adjustment function. If so,
     // it will need to be removed from stack when subtree is closed.
     bool has_filter_bounds_adjustment;
+
+    // Whether there is a texture layer in this subtree.
+    bool has_texture;
   };
 
   std::shared_ptr<std::vector<SkRect>> rects_;

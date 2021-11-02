@@ -28,6 +28,13 @@ void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
     // dirty
     context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(prev));
   }
+
+  // Make sure DiffContext knows there is a TextureLayer in this subtree.
+  // This prevents ContainerLayer from skipping TextureLayer diffing when
+  // TextureLayer is inside retained layer.
+  // See ContainerLayer::DiffChildren
+  // https://github.com/flutter/flutter/issues/92925
+  context->MarkSubtreeHasTextureLayer();
   context->AddLayerBounds(SkRect::MakeXYWH(offset_.x(), offset_.y(),
                                            size_.width(), size_.height()));
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
