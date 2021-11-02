@@ -125,10 +125,14 @@ void main() {
     test('creates state file if provided correct inputs', () async {
       const String revision2 = 'def789';
       const String revision3 = '123abc';
+      const String branchPointRevision='deadbeef';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
-      const String nextVersion = '1.2.0-3.0.pre';
+      // This is a git tag applied to the branch point, not an actual release
+      const String branchPointTag = '1.2.0-3.0.pre';
+      // This is what this release will be
+      const String nextVersion = '1.2.0-3.1.pre';
       const String incrementLevel = 'm';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
@@ -242,6 +246,16 @@ void main() {
             'refs/remotes/upstream/$candidateBranch',
           ],
           stdout: '$previousVersion-42-gabc123',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          stdout: branchPointRevision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', branchPointTag, branchPointRevision],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
