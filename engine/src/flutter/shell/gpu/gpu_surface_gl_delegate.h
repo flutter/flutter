@@ -45,9 +45,8 @@ class GPUSurfaceGLDelegate {
   // rendering subsequent frames.
   virtual bool GLContextFBOResetAfterPresent() const;
 
-  // Indicates whether or not the surface supports pixel readback as used in
-  // circumstances such as a BackdropFilter.
-  virtual bool SurfaceSupportsReadback() const;
+  // Returns framebuffer info for current backbuffer
+  virtual SurfaceFrame::FramebufferInfo GLContextFramebufferInfo() const;
 
   // A transformation applied to the onscreen surface before the canvas is
   // flushed.

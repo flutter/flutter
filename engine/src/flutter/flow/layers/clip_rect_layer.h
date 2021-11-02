@@ -13,11 +13,7 @@ class ClipRectLayer : public ContainerLayer {
  public:
   ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior);
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   void Diff(DiffContext* context, const Layer* old_layer) override;
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;

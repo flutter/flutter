@@ -7,8 +7,6 @@
 
 namespace flutter {
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 DiffContext::DiffContext(SkISize frame_size,
                          double frame_device_pixel_ratio,
                          PaintRegionMap& this_frame_paint_region_map,
@@ -118,6 +116,12 @@ void DiffContext::MarkSubtreeDirty(const PaintRegion& previous_paint_region) {
   state_.dirty = true;
 }
 
+void DiffContext::MarkSubtreeDirty(const SkRect& previous_paint_region) {
+  FML_DCHECK(!IsSubtreeDirty());
+  AddDamage(previous_paint_region);
+  state_.dirty = true;
+}
+
 void DiffContext::AddLayerBounds(const SkRect& rect) {
   // During painting we cull based on non-overriden transform and then
   // override the transform right before paint. Do the same thing here to get
@@ -199,7 +203,5 @@ void DiffContext::Statistics::LogStatistics() {
                     different_instance_but_equal_pictures_);
 #endif  // !FLUTTER_RELEASE
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 }  // namespace flutter

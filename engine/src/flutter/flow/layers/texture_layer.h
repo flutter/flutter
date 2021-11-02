@@ -19,8 +19,6 @@ class TextureLayer : public Layer {
                bool freeze,
                const SkSamplingOptions& sampling);
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   bool IsReplacing(DiffContext* context, const Layer* layer) const override {
     return layer->as_texture_layer() != nullptr;
   }
@@ -28,8 +26,6 @@ class TextureLayer : public Layer {
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
   const TextureLayer* as_texture_layer() const override { return this; }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;

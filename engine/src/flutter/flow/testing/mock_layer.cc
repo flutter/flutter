@@ -16,8 +16,6 @@ MockLayer::MockLayer(SkPath path,
       fake_has_platform_view_(fake_has_platform_view),
       fake_reads_surface_(fake_reads_surface) {}
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 bool MockLayer::IsReplacing(DiffContext* context, const Layer* layer) const {
   // Similar to PictureLayer, only return true for identical mock layers;
   // That way ContainerLayer::DiffChildren can properly detect mock layer
@@ -32,8 +30,6 @@ void MockLayer::Diff(DiffContext* context, const Layer* old_layer) {
   context->AddLayerBounds(fake_paint_path_.getBounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif
 
 void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   parent_mutators_ = context->mutators_stack;

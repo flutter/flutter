@@ -8,21 +8,21 @@
 namespace flutter {
 
 SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
-                           bool supports_readback,
+                           FramebufferInfo framebuffer_info,
                            const SubmitCallback& submit_callback)
     : surface_(surface),
-      supports_readback_(supports_readback),
+      framebuffer_info_(std::move(framebuffer_info)),
       submit_callback_(submit_callback) {
   FML_DCHECK(submit_callback_);
 }
 
 SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
-                           bool supports_readback,
+                           FramebufferInfo framebuffer_info,
                            const SubmitCallback& submit_callback,
                            std::unique_ptr<GLContextResult> context_result)
     : submitted_(false),
       surface_(surface),
-      supports_readback_(supports_readback),
+      framebuffer_info_(std::move(framebuffer_info)),
       submit_callback_(submit_callback),
       context_result_(std::move(context_result)) {
   FML_DCHECK(submit_callback_);
