@@ -64,9 +64,9 @@ bool Renderer::Render(const Surface& surface,
   }
 
   command_buffer->Commit(
-      [sema = frames_in_flight_sema_](CommandBuffer::CommitResult result) {
+      [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
         sema->Signal();
-        if (result != CommandBuffer::CommitResult::kCompleted) {
+        if (result != CommandBuffer::Status::kCompleted) {
           FML_LOG(ERROR) << "Could not commit command buffer.";
         }
       });

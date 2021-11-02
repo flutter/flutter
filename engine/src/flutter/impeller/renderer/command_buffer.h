@@ -20,22 +20,44 @@ class RenderPassDescriptor;
 ///             execution. A command buffer is obtained from a graphics
 ///             `Context`.
 ///
+///             To submit commands to the GPU, acquire a `RenderPass` from the
+///             command buffer and record `Command`s into that pass. A
+///             `RenderPass` describes the configuration of the various
+///             attachments when the command is submitted.
+///
+///             A command buffer is only meant to be used on a single thread.
+///
 class CommandBuffer {
  public:
-  enum class CommitResult {
+  enum class Status {
     kPending,
     kError,
     kCompleted,
   };
 
-  using CommitCallback = std::function<void(CommitResult)>;
+  using CompletionCallback = std::function<void(Status)>;
 
   virtual ~CommandBuffer();
 
   virtual bool IsValid() const = 0;
 
-  virtual void Commit(CommitCallback callback) = 0;
+  //----------------------------------------------------------------------------
+  /// @brief      Schedule the command encoded by render passes within this
+  ///             command buffer on the GPU.
+  ///
+  ///             A command buffer may only be committed once.
+  ///
+  /// @param[in]  callback  The completion callback.
+  ///
+  virtual void Commit(CompletionCallback callback) = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Create a render pass to record render commands into.
+  ///
+  /// @param[in]  desc  The description of the render pass.
+  ///
+  /// @return     A valid render pass or null.
+  ///
   virtual std::shared_ptr<RenderPass> CreateRenderPass(
       const RenderPassDescriptor& desc) const = 0;
 
