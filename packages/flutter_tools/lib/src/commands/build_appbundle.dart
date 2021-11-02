@@ -40,6 +40,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser.addMultiOption('target-platform',
       splitCommas: true,
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],

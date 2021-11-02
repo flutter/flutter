@@ -822,6 +822,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addIgnoreDeprecationOption({ bool hide = false }) {
+    argParser.addFlag('ignore-deprecation',
+      negatable: false,
+      defaultsTo: false,
+      help: 'Indicates that the app should ignore deprecation warnings and continue to build '
+            'using deprecated APIs. Use of this flag may cause your app to fail to build when '
+            'deprecated APIs are removed.',
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -1272,7 +1282,8 @@ abstract class FlutterCommand extends Command<void> {
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
         checkUpToDate: cachePubGet,
       );
-      await project.regeneratePlatformSpecificTooling();
+      final bool deprecationCheck = argResults.arguments.contains('ignore-deprecation') ? !boolArg('ignore-deprecation') : false;
+      await project.regeneratePlatformSpecificTooling(exitOnDeprecation: deprecationCheck);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }

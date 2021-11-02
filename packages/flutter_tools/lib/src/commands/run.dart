@@ -250,6 +250,7 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
     addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,

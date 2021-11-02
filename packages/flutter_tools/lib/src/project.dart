@@ -282,7 +282,7 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling() async {
+  Future<void> regeneratePlatformSpecificTooling({bool exitOnDeprecation = true}) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -293,6 +293,7 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
+      exitOnDeprecation: exitOnDeprecation,
     );
   }
 
@@ -306,13 +307,14 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     bool winUwpPlatform = false,
+    bool exitOnDeprecation = true,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling();
+      await android.ensureReadyForPlatformSpecificTooling(exitOnDeprecation: exitOnDeprecation);
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -478,7 +480,7 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.directory.childDirectory('build');
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({bool exitOnDeprecation = true}) async {
     if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
       globals.printStatus(
 """
@@ -486,15 +488,23 @@ class AndroidProject extends FlutterProjectPlatform {
 Warning
 ──────────────────────────────────────────────────────────────────────────────
 Your Flutter application is created using an older version of the Android
-embedding. It's being deprecated in favor of Android embedding v2. Follow the
+embedding. It is being deprecated in favor of Android embedding v2. Follow the
 steps at
 
 https://flutter.dev/go/android-project-migration
 
-to migrate your project.
+to migrate your project. You may also pass the --ignore-deprecation flag to
+ignore this check and continue with the deprecated v1 embedding. However,
+the v1 Android embedding will be removed in future versions of Flutter.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
       );
+      if (exitOnDeprecation) {
+        throwToolExit(
+          'Build failed due to use of deprecated v1 emebdding.',
+          exitCode: 1,
+        );
+      }
     }
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
@@ -571,6 +581,12 @@ to migrate your project.
     } on FileSystemException {
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
+    }
+    for (final XmlElement application in document.findAllElements('application')) {
+      final String? applicationName = application.getAttribute('android:name');
+      if (applicationName == 'io.flutter.app.FlutterApplication') {
+        return AndroidEmbeddingVersion.v1;
+      }
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
