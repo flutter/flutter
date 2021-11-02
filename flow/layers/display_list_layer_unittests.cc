@@ -106,8 +106,6 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using DisplayListLayerDiffTest = DiffContextTest;
 
 TEST_F(DisplayListLayerDiffTest, SimpleDisplayList) {
@@ -178,8 +176,6 @@ TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {
   damage = DiffLayerTree(tree4, tree3);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(20, 20, 70, 70));
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter

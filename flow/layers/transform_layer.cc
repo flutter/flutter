@@ -26,8 +26,6 @@ TransformLayer::TransformLayer(const SkMatrix& transform)
   }
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
   auto* prev = static_cast<const TransformLayer*>(old_layer);
@@ -41,8 +39,6 @@ void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffChildren(context, prev);
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "TransformLayer::Preroll");

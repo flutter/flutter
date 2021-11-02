@@ -9,6 +9,7 @@
 #include <string>
 
 #include "flutter/common/graphics/texture.h"
+#include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
@@ -54,6 +55,43 @@ enum class RasterStatus {
   kYielded,
 };
 
+class FrameDamage {
+ public:
+  // Sets previous layer tree for calculating frame damage. If not set, entire
+  // frame will be repainted.
+  void SetPreviousLayerTree(const LayerTree* prev_layer_tree) {
+    prev_layer_tree_ = prev_layer_tree;
+  }
+
+  // Adds additional damage (accumulated for double / triple buffering).
+  // This is area that will be repainted alongside any changed part.
+  void AddAdditonalDamage(const SkIRect& damage) {
+    additional_damage_.join(damage);
+  }
+
+  // Calculates clip rect for current rasterization. This is diff of layer tree
+  // and previous layer tree + any additional provideddamage.
+  // If previous layer tree is not specified, clip rect will be nulloptional,
+  // but the paint region of layer_tree will be calculated so that it can be
+  // used for diffing of subsequent frames.
+  std::optional<SkRect> ComputeClipRect(flutter::LayerTree& layer_tree);
+
+  // See Damage::frame_damage.
+  std::optional<SkIRect> GetFrameDamage() const {
+    return damage_ ? std::make_optional(damage_->frame_damage) : std::nullopt;
+  }
+
+  // See Damage::buffer_damage.
+  std::optional<SkIRect> GetBufferDamage() {
+    return damage_ ? std::make_optional(damage_->buffer_damage) : std::nullopt;
+  }
+
+ private:
+  SkIRect additional_damage_ = SkIRect::MakeEmpty();
+  std::optional<Damage> damage_;
+  const LayerTree* prev_layer_tree_ = nullptr;
+};
+
 class CompositorContext {
  public:
   class ScopedFrame {
@@ -84,7 +122,8 @@ class CompositorContext {
     GrDirectContext* gr_context() const { return gr_context_; }
 
     virtual RasterStatus Raster(LayerTree& layer_tree,
-                                bool ignore_raster_cache);
+                                bool ignore_raster_cache,
+                                FrameDamage* frame_damage);
 
    private:
     CompositorContext& context_;

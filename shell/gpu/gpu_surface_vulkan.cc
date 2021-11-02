@@ -37,11 +37,15 @@ bool GPUSurfaceVulkan::IsValid() {
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     const SkISize& size) {
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
+
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface.
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
-        nullptr, true, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+        nullptr, std::move(framebuffer_info),
+        [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
           return true;
         });
   }
@@ -63,8 +67,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     }
     return weak_this->window_.SwapBuffers();
   };
-  return std::make_unique<SurfaceFrame>(std::move(surface), true,
-                                        std::move(callback));
+  return std::make_unique<SurfaceFrame>(
+      std::move(surface), std::move(framebuffer_info), std::move(callback));
 }
 
 SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {

@@ -7,8 +7,6 @@
 namespace flutter {
 namespace testing {
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 DiffContextTest::DiffContextTest()
     : unref_queue_(fml::MakeRefCounted<SkiaUnrefQueue>(
           GetCurrentTaskRunner(),
@@ -76,8 +74,6 @@ std::shared_ptr<OpacityLayer> DiffContextTest::CreateOpacityLater(
   }
   return res;
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 }  // namespace testing
 }  // namespace flutter

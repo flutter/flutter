@@ -251,8 +251,6 @@ TEST_F(ContainerLayerTest, MergedMultipleChildren) {
                                                child_path2, child_paint2}}}));
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using ContainerLayerDiffTest = DiffContextTest;
 
 // Insert PictureLayer amongst container layers
@@ -455,8 +453,6 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   damage = DiffLayerTree(t5, t1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 150));
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter

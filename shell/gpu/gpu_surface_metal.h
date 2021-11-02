@@ -28,7 +28,6 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
  private:
   const GPUSurfaceMetalDelegate* delegate_;
   const MTLRenderTargetType render_target_type_;
-  GrMTLHandle next_drawable_ = nullptr;
   sk_sp<GrDirectContext> context_;
   GrDirectContext* precompiled_sksl_context_ = nullptr;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
@@ -36,6 +35,10 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
   // hack to make avoid allocating resources for the root surface when an
   // external view embedder is present.
   bool render_to_surface_;
+
+  // Accumulated damage for each framebuffer; Key is address of underlying
+  // MTLTexture for each drawable
+  std::map<uintptr_t, SkIRect> damage_;
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
@@ -57,8 +60,6 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetal : public Surface {
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromMTLTexture(
       const SkISize& frame_info);
-
-  void ReleaseUnusedDrawableIfNecessary();
 
   void PrecompileKnownSkSLsIfNecessary();
 

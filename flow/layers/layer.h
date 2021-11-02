@@ -79,8 +79,6 @@ class Layer {
     original_layer_id_ = old_layer->original_layer_id_;
   }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   // Used to establish link between old layer and new layer that replaces it.
   // If this method returns true, it is assumed that this layer replaces the old
   // layer in tree and is able to diff with it.
@@ -99,8 +97,6 @@ class Layer {
     // current and old region
     context->SetLayerPaintRegion(this, context->GetOldLayerPaintRegion(this));
   }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
 
@@ -271,8 +267,6 @@ class Layer {
 
   uint64_t unique_id() const { return unique_id_; }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   virtual const PictureLayer* as_picture_layer() const { return nullptr; }
   virtual const DisplayListLayer* as_display_list_layer() const {
     return nullptr;
@@ -282,8 +276,6 @@ class Layer {
     return nullptr;
   }
   virtual const testing::MockLayer* as_mock_layer() const { return nullptr; }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
  private:
   SkRect paint_bounds_;

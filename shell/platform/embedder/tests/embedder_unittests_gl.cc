@@ -2449,8 +2449,8 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
-  event.width = 1024;
-  event.height = 800;
+  event.width = 800;
+  event.height = 1024;
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);

@@ -6,8 +6,6 @@
 
 namespace flutter {
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 SkRect PaintRegion::ComputeBounds() const {
   SkRect res = SkRect::MakeEmpty();
   for (const auto& r : *this) {
@@ -15,7 +13,5 @@ SkRect PaintRegion::ComputeBounds() const {
   }
   return res;
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 }  // namespace flutter

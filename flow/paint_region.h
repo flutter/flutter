@@ -8,8 +8,6 @@
 
 namespace flutter {
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 // Corresponds to area on the screen where the layer subtree has painted to.
 //
 // The area is used when adding damage of removed or dirty layer to overall
@@ -55,7 +53,5 @@ class PaintRegion {
   size_t to_ = 0;
   bool has_readback_ = false;
 };
-
-#endif
 
 }  // namespace flutter

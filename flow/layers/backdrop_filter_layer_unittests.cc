@@ -269,8 +269,6 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using BackdropLayerDiffTest = DiffContextTest;
 
 TEST_F(BackdropLayerDiffTest, BackdropLayer) {
@@ -328,8 +326,6 @@ TEST_F(BackdropLayerDiffTest, BackdropLayer) {
   damage = DiffLayerTree(l5, l4);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 190, 190));
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter

@@ -428,8 +428,6 @@ TEST_F(OpacityLayerTest, CullRectIsTransformed) {
   EXPECT_EQ(mockLayer->parent_cull_rect().fTop, -20);
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using OpacityLayerDiffTest = DiffContextTest;
 
 TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
@@ -447,8 +445,6 @@ TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
 #endif
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter

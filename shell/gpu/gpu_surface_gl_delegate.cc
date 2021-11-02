@@ -16,8 +16,11 @@ bool GPUSurfaceGLDelegate::GLContextFBOResetAfterPresent() const {
   return false;
 }
 
-bool GPUSurfaceGLDelegate::SurfaceSupportsReadback() const {
-  return true;
+SurfaceFrame::FramebufferInfo GPUSurfaceGLDelegate::GLContextFramebufferInfo()
+    const {
+  SurfaceFrame::FramebufferInfo res;
+  res.supports_readback = true;
+  return res;
 }
 
 SkMatrix GPUSurfaceGLDelegate::GLContextSurfaceTransformation() const {

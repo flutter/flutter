@@ -225,8 +225,6 @@ TEST_F(TransformLayerTest, NestedSeparated) {
                  MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using TransformLayerLayerDiffTest = DiffContextTest;
 
 TEST_F(TransformLayerLayerDiffTest, Transform) {
@@ -332,8 +330,6 @@ TEST_F(TransformLayerLayerDiffTest, TransformNested) {
 
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 200, 300, 302));
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter
