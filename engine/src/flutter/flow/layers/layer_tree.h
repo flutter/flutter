@@ -29,7 +29,8 @@ class LayerTree {
   //   layer tree performs any operations that require readback
   //   from the root surface.
   bool Preroll(CompositorContext::ScopedFrame& frame,
-               bool ignore_raster_cache = false);
+               bool ignore_raster_cache = false,
+               SkRect cull_rect = kGiantRect);
 
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;
@@ -45,12 +46,8 @@ class LayerTree {
   const SkISize& frame_size() const { return frame_size_; }
   float device_pixel_ratio() const { return device_pixel_ratio_; }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
   PaintRegionMap& paint_region_map() { return paint_region_map_; }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   // The number of frame intervals missed after which the compositor must
   // trace the rasterized picture to a trace file. Specify 0 to disable all
@@ -79,9 +76,7 @@ class LayerTree {
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
   PaintRegionMap paint_region_map_;
-#endif  //  FLUTTER_ENABLE_DIFF_CONTEXT
 
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

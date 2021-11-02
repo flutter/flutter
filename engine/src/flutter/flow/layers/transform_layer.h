@@ -15,11 +15,7 @@ class TransformLayer : public ContainerLayer {
  public:
   TransformLayer(const SkMatrix& transform);
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   void Diff(DiffContext* context, const Layer* old_layer) override;
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 

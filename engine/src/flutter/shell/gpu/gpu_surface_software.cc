@@ -25,11 +25,15 @@ bool GPUSurfaceSoftware::IsValid() {
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     const SkISize& logical_size) {
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
+
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface.
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
-        nullptr, true, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+        nullptr, std::move(framebuffer_info),
+        [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
           return true;
         });
   }
@@ -69,7 +73,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     return self->delegate_->PresentBackingStore(surface_frame.SkiaSurface());
   };
 
-  return std::make_unique<SurfaceFrame>(backing_store, true, on_submit);
+  return std::make_unique<SurfaceFrame>(backing_store,
+                                        std::move(framebuffer_info), on_submit);
 }
 
 // |Surface|

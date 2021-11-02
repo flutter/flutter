@@ -21,12 +21,6 @@ config("config") {
       cflags = [ "/WX" ]  # Treat warnings as errors.
     }
   }
-
-  defines = []
-
-  if (is_debug) {
-    defines += [ "FLUTTER_ENABLE_DIFF_CONTEXT" ]
-  }
 }
 
 config("export_dynamic_symbols") {

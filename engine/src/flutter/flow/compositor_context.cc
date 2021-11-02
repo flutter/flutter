@@ -4,10 +4,44 @@
 
 #include "flutter/flow/compositor_context.h"
 
+#include <optional>
 #include "flutter/flow/layers/layer_tree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flutter {
+
+std::optional<SkRect> FrameDamage::ComputeClipRect(
+    flutter::LayerTree& layer_tree) {
+  if (layer_tree.root_layer()) {
+    PaintRegionMap empty_paint_region_map;
+    DiffContext context(layer_tree.frame_size(),
+                        layer_tree.device_pixel_ratio(),
+                        layer_tree.paint_region_map(),
+                        prev_layer_tree_ ? prev_layer_tree_->paint_region_map()
+                                         : empty_paint_region_map);
+    context.PushCullRect(SkRect::MakeIWH(layer_tree.frame_size().width(),
+                                         layer_tree.frame_size().height()));
+    {
+      DiffContext::AutoSubtreeRestore subtree(&context);
+      const Layer* prev_root_layer = nullptr;
+      if (!prev_layer_tree_ ||
+          prev_layer_tree_->frame_size() != layer_tree.frame_size()) {
+        // If there is no previous layer tree assume the entire frame must be
+        // repainted.
+        context.MarkSubtreeDirty(SkRect::MakeIWH(
+            layer_tree.frame_size().width(), layer_tree.frame_size().height()));
+      } else {
+        prev_root_layer = prev_layer_tree_->root_layer();
+      }
+      layer_tree.root_layer()->Diff(&context, prev_root_layer);
+    }
+
+    damage_ = context.ComputeDamage(additional_damage_);
+    return SkRect::Make(damage_->buffer_damage);
+  } else {
+    return std::nullopt;
+  }
+}
 
 CompositorContext::CompositorContext(fml::Milliseconds frame_budget)
     : raster_time_(frame_budget), ui_time_(frame_budget) {}
@@ -68,9 +102,15 @@ CompositorContext::ScopedFrame::~ScopedFrame() {
 
 RasterStatus CompositorContext::ScopedFrame::Raster(
     flutter::LayerTree& layer_tree,
-    bool ignore_raster_cache) {
+    bool ignore_raster_cache,
+    FrameDamage* frame_damage) {
   TRACE_EVENT0("flutter", "CompositorContext::ScopedFrame::Raster");
-  bool root_needs_readback = layer_tree.Preroll(*this, ignore_raster_cache);
+
+  std::optional<SkRect> clip_rect =
+      frame_damage ? frame_damage->ComputeClipRect(layer_tree) : std::nullopt;
+
+  bool root_needs_readback = layer_tree.Preroll(
+      *this, ignore_raster_cache, clip_rect ? *clip_rect : kGiantRect);
   bool needs_save_layer = root_needs_readback && !surface_supports_readback();
   PostPrerollResult post_preroll_result = PostPrerollResult::kSuccess;
   if (view_embedder_ && raster_thread_merger_) {
@@ -84,9 +124,16 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
   if (post_preroll_result == PostPrerollResult::kSkipAndRetryFrame) {
     return RasterStatus::kSkipAndRetry;
   }
+
+  SkAutoCanvasRestore restore(canvas(), clip_rect.has_value());
+
   // Clearing canvas after preroll reduces one render target switch when preroll
   // paints some raster cache.
   if (canvas()) {
+    if (clip_rect) {
+      canvas()->clipRect(*clip_rect);
+    }
+
     if (needs_save_layer) {
       FML_LOG(INFO) << "Using SaveLayer to protect non-readback surface";
       SkRect bounds = SkRect::Make(layer_tree.frame_size());

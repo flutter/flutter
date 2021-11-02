@@ -12,8 +12,6 @@ ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
   FML_DCHECK(clip_behavior != Clip::none);
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void ClipRectLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
   auto* prev = static_cast<const ClipRectLayer*>(old_layer);
@@ -29,8 +27,6 @@ void ClipRectLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "ClipRectLayer::Preroll");

@@ -192,6 +192,14 @@ class RasterCache {
                const SkMatrix& untranslated_matrix,
                const SkPoint& offset = SkPoint());
 
+  // If there is cache entry for this picture, display list or layer, mark it as
+  // used for this frame in order to not get evicted. This is needed during
+  // partial repaint for layers that are outside of current clip and are culled
+  // away.
+  void Touch(SkPicture* picture, const SkMatrix& transformation_matrix);
+  void Touch(DisplayList* display_list, const SkMatrix& transformation_matrix);
+  void Touch(Layer* layer, const SkMatrix& ctm);
+
   void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
   // Find the raster cache for the picture and draw it to the canvas.

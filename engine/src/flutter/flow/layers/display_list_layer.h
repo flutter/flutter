@@ -24,8 +24,6 @@ class DisplayListLayer : public Layer {
     return display_list_.skia_object().get();
   }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   bool IsReplacing(DiffContext* context, const Layer* layer) const override;
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
@@ -33,8 +31,6 @@ class DisplayListLayer : public Layer {
   const DisplayListLayer* as_display_list_layer() const override {
     return this;
   }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   void Preroll(PrerollContext* frame, const SkMatrix& matrix) override;
 
@@ -46,13 +42,9 @@ class DisplayListLayer : public Layer {
   bool is_complex_ = false;
   bool will_change_ = false;
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   static bool Compare(DiffContext::Statistics& statistics,
                       const DisplayListLayer* l1,
                       const DisplayListLayer* l2);
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   FML_DISALLOW_COPY_AND_ASSIGN(DisplayListLayer);
 };

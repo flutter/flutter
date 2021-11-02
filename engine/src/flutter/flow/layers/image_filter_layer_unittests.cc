@@ -334,8 +334,6 @@ TEST_F(ImageFilterLayerTest, ChildrenNotCached) {
   EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), cache_canvas));
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 using ImageFilterLayerDiffTest = DiffContextTest;
 
 TEST_F(ImageFilterLayerDiffTest, ImageFilterLayer) {
@@ -424,8 +422,6 @@ TEST_F(ImageFilterLayerDiffTest, ImageFilterLayerInflatestChildSize) {
   // ensure that filter properly inflated child size
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(40, 40, 170, 170));
 }
-
-#endif
 
 }  // namespace testing
 }  // namespace flutter

@@ -319,6 +319,33 @@ bool RasterCache::Prepare(PrerollContext* context,
   return true;
 }
 
+void RasterCache::Touch(Layer* layer, const SkMatrix& ctm) {
+  LayerRasterCacheKey cache_key(layer->unique_id(), ctm);
+  auto it = layer_cache_.find(cache_key);
+  if (it != layer_cache_.end()) {
+    it->second.used_this_frame = true;
+  }
+}
+
+void RasterCache::Touch(SkPicture* picture,
+                        const SkMatrix& transformation_matrix) {
+  PictureRasterCacheKey cache_key(picture->uniqueID(), transformation_matrix);
+  auto it = picture_cache_.find(cache_key);
+  if (it != picture_cache_.end()) {
+    it->second.used_this_frame = true;
+  }
+}
+
+void RasterCache::Touch(DisplayList* display_list,
+                        const SkMatrix& transformation_matrix) {
+  DisplayListRasterCacheKey cache_key(display_list->unique_id(),
+                                      transformation_matrix);
+  auto it = display_list_cache_.find(cache_key);
+  if (it != display_list_cache_.end()) {
+    it->second.used_this_frame = true;
+  }
+}
+
 bool RasterCache::Draw(const SkPicture& picture, SkCanvas& canvas) const {
   PictureRasterCacheKey cache_key(picture.uniqueID(), canvas.getTotalMatrix());
   auto it = picture_cache_.find(cache_key);

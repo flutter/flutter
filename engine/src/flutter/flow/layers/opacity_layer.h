@@ -27,11 +27,7 @@ class OpacityLayer : public MergedContainerLayer {
   // the propagation as repainting the OpacityLayer is expensive.
   OpacityLayer(SkAlpha alpha, const SkPoint& offset);
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   void Diff(DiffContext* context, const Layer* old_layer) override;
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 

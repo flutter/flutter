@@ -9,8 +9,6 @@ namespace flutter {
 ColorFilterLayer::ColorFilterLayer(sk_sp<SkColorFilter> filter)
     : filter_(std::move(filter)) {}
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
   auto* prev = static_cast<const ColorFilterLayer*>(old_layer);
@@ -25,8 +23,6 @@ void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void ColorFilterLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {

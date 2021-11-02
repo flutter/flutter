@@ -23,8 +23,6 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
       path_(path),
       clip_behavior_(clip_behavior) {}
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
   auto* prev = static_cast<const PhysicalShapeLayer*>(old_layer);
@@ -53,8 +51,6 @@ void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {

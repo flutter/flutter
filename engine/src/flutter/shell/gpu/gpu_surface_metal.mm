@@ -5,10 +5,12 @@
 #include "flutter/shell/gpu/gpu_surface_metal.h"
 
 #import <Metal/Metal.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -19,6 +21,22 @@ static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
 namespace flutter {
 
+namespace {
+sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
+                                               id<MTLTexture> texture,
+                                               GrSurfaceOrigin origin,
+                                               int sample_cnt,
+                                               SkColorType color_type,
+                                               sk_sp<SkColorSpace> color_space,
+                                               const SkSurfaceProps* props) {
+  GrMtlTextureInfo info;
+  info.fTexture.reset([texture retain]);
+  GrBackendTexture backend_texture(texture.width, texture.height, GrMipmapped::kNo, info);
+  return SkSurface::MakeFromBackendTexture(context, backend_texture, origin, sample_cnt, color_type,
+                                           color_space, props);
+}
+}  // namespace
+
 GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
                                  sk_sp<GrDirectContext> context,
                                  bool render_to_surface)
@@ -27,9 +45,7 @@ GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceMetalDelegate* delegate,
       context_(std::move(context)),
       render_to_surface_(render_to_surface) {}
 
-GPUSurfaceMetal::~GPUSurfaceMetal() {
-  ReleaseUnusedDrawableIfNecessary();
-}
+GPUSurfaceMetal::~GPUSurfaceMetal() = default;
 
 // |Surface|
 bool GPUSurfaceMetal::IsValid() {
@@ -60,7 +76,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& frame
 
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
-        nullptr, true, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; });
+        nullptr, SurfaceFrame::FramebufferInfo(),
+        [](const SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; });
   }
 
   PrecompileKnownSkSLsIfNecessary();
@@ -85,24 +102,31 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromCAMetalLayer(
     return nullptr;
   }
 
-  ReleaseUnusedDrawableIfNecessary();
-  sk_sp<SkSurface> surface =
-      SkSurface::MakeFromCAMetalLayer(context_.get(),            // context
-                                      layer,                     // layer
-                                      kTopLeft_GrSurfaceOrigin,  // origin
-                                      1,                         // sample count
-                                      kBGRA_8888_SkColorType,    // color type
-                                      nullptr,                   // colorspace
-                                      nullptr,                   // surface properties
-                                      &next_drawable_            // drawable (transfer out)
-      );
+  auto* mtl_layer = (CAMetalLayer*)layer;
+  // Get the drawable eagerly, we will need texture object to identify target framebuffer
+  fml::scoped_nsprotocol<id<CAMetalDrawable>> drawable(
+      reinterpret_cast<id<CAMetalDrawable>>([[mtl_layer nextDrawable] retain]));
+
+  if (!drawable.get()) {
+    FML_LOG(ERROR) << "Could not obtain drawable from the metal layer.";
+    return nullptr;
+  }
+
+  auto surface = CreateSurfaceFromMetalTexture(context_.get(), drawable.get().texture,
+                                               kTopLeft_GrSurfaceOrigin,  // origin
+                                               1,                         // sample count
+                                               kBGRA_8888_SkColorType,    // color type
+                                               nullptr,                   // colorspace
+                                               nullptr                    // surface properties
+  );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create the SkSurface from the CAMetalLayer.";
     return nullptr;
   }
 
-  auto submit_callback = [this](const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
+  auto submit_callback = [this, drawable](const SurfaceFrame& surface_frame,
+                                          SkCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
@@ -111,16 +135,33 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromCAMetalLayer(
 
     canvas->flush();
 
-    GrMTLHandle drawable = next_drawable_;
-    if (!drawable) {
-      FML_DLOG(ERROR) << "Unable to obtain a metal drawable.";
-      return false;
+    uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.get().texture);
+    for (auto& entry : damage_) {
+      if (entry.first != texture) {
+        // Accumulate damage for other framebuffers
+        if (surface_frame.submit_info().frame_damage) {
+          entry.second.join(*surface_frame.submit_info().frame_damage);
+        }
+      }
     }
+    // Reset accumulated damage for current framebuffer
+    damage_[texture] = SkIRect::MakeEmpty();
 
     return delegate_->PresentDrawable(drawable);
   };
 
-  return std::make_unique<SurfaceFrame>(std::move(surface), true, submit_callback);
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
+
+  // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
+  // front buffer)
+  uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.get().texture);
+  auto i = damage_.find(texture);
+  if (i != damage_.end()) {
+    framebuffer_info.existing_damage = i->second;
+  }
+
+  return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info, submit_callback);
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
@@ -133,13 +174,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
     return nullptr;
   }
 
-  GrMtlTextureInfo info;
-  info.fTexture.reset([mtl_texture retain]);
-  GrBackendTexture backend_texture(frame_info.width(), frame_info.height(), GrMipmapped::kNo, info);
-
   sk_sp<SkSurface> surface =
-      SkSurface::MakeFromBackendTexture(context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin,
-                                        1, kBGRA_8888_SkColorType, nullptr, nullptr);
+      CreateSurfaceFromMetalTexture(context_.get(), mtl_texture, kTopLeft_GrSurfaceOrigin, 1,
+                                    kBGRA_8888_SkColorType, nullptr, nullptr);
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create the SkSurface from the metal texture.";
@@ -159,7 +196,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
     return delegate->PresentTexture(texture);
   };
 
-  return std::make_unique<SurfaceFrame>(std::move(surface), true, submit_callback);
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
+
+  return std::make_unique<SurfaceFrame>(std::move(surface), std::move(framebuffer_info),
+                                        submit_callback);
 }
 
 // |Surface|
@@ -186,18 +227,6 @@ std::unique_ptr<GLContextResult> GPUSurfaceMetal::MakeRenderContextCurrent() {
 
 bool GPUSurfaceMetal::AllowsDrawingWhenGpuDisabled() const {
   return delegate_->AllowsDrawingWhenGpuDisabled();
-}
-
-void GPUSurfaceMetal::ReleaseUnusedDrawableIfNecessary() {
-  // If the previous surface frame was not submitted before  a new one is acquired, the old drawable
-  // needs to be released. An RAII wrapper may not be used because this needs to interoperate with
-  // Skia APIs.
-  if (next_drawable_ == nullptr) {
-    return;
-  }
-
-  CFRelease(next_drawable_);
-  next_drawable_ = nullptr;
 }
 
 }  // namespace flutter

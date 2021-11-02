@@ -74,8 +74,6 @@ PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options,
   }
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void PerformanceOverlayLayer::Diff(DiffContext* context,
                                    const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -87,8 +85,6 @@ void PerformanceOverlayLayer::Diff(DiffContext* context,
   context->AddLayerBounds(paint_bounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   const int padding = 8;

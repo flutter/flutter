@@ -259,9 +259,11 @@ void DrawSimpleFrame(FlatlandExternalViewEmbedder& external_view_embedder,
     draw_callback(root_canvas);
   }
   external_view_embedder.EndFrame(false, nullptr);
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFrame(
       nullptr, std::make_unique<flutter::SurfaceFrame>(
-                   nullptr, true,
+                   nullptr, std::move(framebuffer_info),
                    [](const flutter::SurfaceFrame& surface_frame,
                       SkCanvas* canvas) { return true; }));
 }
@@ -285,9 +287,11 @@ void DrawFrameWithView(FlatlandExternalViewEmbedder& external_view_embedder,
     overlay_draw_callback(overlay_canvas);
   }
   external_view_embedder.EndFrame(false, nullptr);
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFrame(
       nullptr, std::make_unique<flutter::SurfaceFrame>(
-                   nullptr, true,
+                   nullptr, std::move(framebuffer_info),
                    [](const flutter::SurfaceFrame& surface_frame,
                       SkCanvas* canvas) { return true; }));
 }

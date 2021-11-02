@@ -15,12 +15,8 @@ class ContainerLayer : public Layer {
  public:
   ContainerLayer();
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   void Diff(DiffContext* context, const Layer* old_layer) override;
   void PreservePaintRegion(DiffContext* context) override;
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   virtual void Add(std::shared_ptr<Layer> layer);
 
@@ -29,12 +25,8 @@ class ContainerLayer : public Layer {
 
   const std::vector<std::shared_ptr<Layer>>& layers() const { return layers_; }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
   virtual void DiffChildren(DiffContext* context,
                             const ContainerLayer* old_layer);
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
  protected:
   void PrerollChildren(PrerollContext* context,
@@ -109,10 +101,8 @@ class MergedContainerLayer : public ContainerLayer {
 
   void Add(std::shared_ptr<Layer> layer) override;
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
   void DiffChildren(DiffContext* context,
                     const ContainerLayer* old_layer) override;
-#endif
 
  protected:
   /**

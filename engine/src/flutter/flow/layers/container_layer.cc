@@ -10,8 +10,6 @@ namespace flutter {
 
 ContainerLayer::ContainerLayer() {}
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void ContainerLayer::Diff(DiffContext* context, const Layer* old_layer) {
   auto old_container = static_cast<const ContainerLayer*>(old_layer);
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -104,8 +102,6 @@ void ContainerLayer::DiffChildren(DiffContext* context,
   }
 }
 
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
-
 void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
   layers_.emplace_back(std::move(layer));
 }
@@ -175,6 +171,9 @@ void ContainerLayer::TryToPrepareRasterCache(PrerollContext* context,
       context->raster_cache &&
       SkRect::Intersects(context->cull_rect, layer->paint_bounds())) {
     context->raster_cache->Prepare(context, layer, matrix);
+  } else if (context->raster_cache) {
+    // Don't evict raster cache entry during partial repaint
+    context->raster_cache->Touch(layer, matrix);
   }
 }
 
@@ -191,7 +190,6 @@ MergedContainerLayer::MergedContainerLayer() {
   ContainerLayer::Add(std::make_shared<ContainerLayer>());
 }
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
 void MergedContainerLayer::DiffChildren(DiffContext* context,
                                         const ContainerLayer* old_layer) {
   if (context->IsSubtreeDirty()) {
@@ -207,7 +205,6 @@ void MergedContainerLayer::DiffChildren(DiffContext* context,
   auto layer = static_cast<const MergedContainerLayer*>(old_layer);
   GetChildContainer()->DiffChildren(context, layer->GetChildContainer());
 }
-#endif
 
 void MergedContainerLayer::Add(std::shared_ptr<Layer> layer) {
   GetChildContainer()->Add(std::move(layer));

@@ -56,13 +56,15 @@ intptr_t IOSSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
 }
 
 // |GPUSurfaceGLDelegate|
-bool IOSSurfaceGL::SurfaceSupportsReadback() const {
+SurfaceFrame::FramebufferInfo IOSSurfaceGL::GLContextFramebufferInfo() const {
+  SurfaceFrame::FramebufferInfo res;
   // The onscreen surface wraps a GL renderbuffer, which is extremely slow to read on iOS.
   // Certain filter effects, in particular BackdropFilter, require making a copy of
   // the current destination. For performance, the iOS surface will specify that it
   // does not support readback so that the engine compositor can implement a workaround
   // such as rendering the scene to an offscreen surface or Skia saveLayer.
-  return false;
+  res.supports_readback = false;
+  return res;
 }
 
 // |GPUSurfaceGLDelegate|

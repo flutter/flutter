@@ -19,8 +19,6 @@ TextureLayer::TextureLayer(const SkPoint& offset,
       freeze_(freeze),
       sampling_(sampling) {}
 
-#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
-
 void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
   if (!context->IsSubtreeDirty()) {
@@ -34,8 +32,6 @@ void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
                                            size_.width(), size_.height()));
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
-
-#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
 void TextureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "TextureLayer::Preroll");
