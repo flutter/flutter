@@ -25,6 +25,6 @@ dev_dependencies:
     path: ../../web_sdk/web_engine_tester
   simulators:
     git:
-      url: git://github.com/flutter/web_installers.git
+      url: https://github.com/flutter/web_installers.git
       path: packages/simulators/
       ref: 4a7b0a2c84b8993bf4d19030218de38c18838c26
