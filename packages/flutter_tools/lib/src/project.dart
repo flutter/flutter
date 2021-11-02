@@ -20,6 +20,7 @@ import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
@@ -499,7 +500,9 @@ the v1 Android embedding will be removed in future versions of Flutter.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
       );
+      BuildEvent('deprecated-v1-android-embedding-detected', type: 'deprecation', flutterUsage: globals.flutterUsage).send();
       if (exitOnDeprecation) {
+        BuildEvent('deprecated-v1-android-embedding-ignored', type: 'deprecation', flutterUsage: globals.flutterUsage).send();
         throwToolExit(
           'Build failed due to use of deprecated v1 emebdding.',
           exitCode: 1,
