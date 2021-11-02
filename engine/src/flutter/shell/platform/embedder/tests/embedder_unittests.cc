@@ -1592,6 +1592,7 @@ TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
 TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
   UniqueEngine engine;
   fml::AutoResetWaitableEvent present_latch;
+  fml::AutoResetWaitableEvent vsync_latch;
 
   // One of the threads that the callback (FlutterEngineOnVsync) will be posted
   // to is the platform thread. So we cannot wait for assertions to complete on
@@ -1604,9 +1605,10 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
         GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
     context.SetVsyncCallback([&](intptr_t baton) {
-      platform_task_runner->PostTask([baton = baton, engine = engine.get()]() {
-        FlutterEngineOnVsync(engine, baton, NanosFromEpoch(16),
+      platform_task_runner->PostTask([baton = baton, &engine, &vsync_latch]() {
+        FlutterEngineOnVsync(engine.get(), baton, NanosFromEpoch(16),
                              NanosFromEpoch(32));
+        vsync_latch.Signal();
       });
     });
     context.AddNativeCallback(
@@ -1632,6 +1634,7 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
               kSuccess);
   });
 
+  vsync_latch.Wait();
   present_latch.Wait();
 
   fml::AutoResetWaitableEvent shutdown_latch;
