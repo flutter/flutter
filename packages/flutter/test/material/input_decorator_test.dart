@@ -2974,7 +2974,7 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        textDirection: TextDirection.ltr,
+        // textDirection: TextDirection.ltr (default),
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           floatingLabelAlignment: FloatingLabelAlignment.center,
@@ -2993,7 +2993,7 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        textDirection: TextDirection.ltr,
+        // textDirection: TextDirection.ltr (default),
         decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           floatingLabelAlignment: FloatingLabelAlignment.center,
