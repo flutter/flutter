@@ -167,6 +167,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)dealloc {
   [_scrollView removeFromSuperview];
+  _scrollView.semanticsObject = nil;
   [_scrollView release];
   [super dealloc];
 }

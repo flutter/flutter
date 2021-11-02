@@ -1573,4 +1573,42 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   OCMVerify([messenger cleanUpConnection:connection]);
   [engine stopMocking];
 }
+
+- (void)testFlutterSemanticsScrollViewManagedObjectLifecycleCorrectly {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  FlutterSemanticsScrollView* flutterSemanticsScrollView;
+  @autoreleasepool {
+    FlutterScrollableSemanticsObject* semanticsObject =
+        [[[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge->GetWeakPtr()
+                                                              uid:1234] autorelease];
+
+    flutterSemanticsScrollView = semanticsObject.nativeAccessibility;
+  }
+  XCTAssertTrue(flutterSemanticsScrollView);
+  // If the _semanticsObject is not a weak pointer this (or any other method on
+  // flutterSemanticsScrollView) will cause an EXC_BAD_ACCESS.
+  XCTAssertFalse([flutterSemanticsScrollView isAccessibilityElement]);
+}
 @end
