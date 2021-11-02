@@ -362,7 +362,7 @@ class StartContext {
         exact: false,
     ))..ensureValid(candidateBranch, incrementLetter);
     Version nextVersion = calculateNextVersion(lastVersion);
-    nextVersion = await ensureBranchPointTagged(nextVersion);
+    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
 
     state.releaseVersion = nextVersion.toString();
 
@@ -409,12 +409,25 @@ class StartContext {
     return Version.increment(lastVersion, incrementLetter);
   }
 
-  Future<Version> ensureBranchPointTagged(Version requestedVersion) async {
-    if (incrementLetter != 'm' || requestedVersion.n != 0) {
+  /// Ensures the branch point [candidateBranch] and `master` has a version tag.
+  ///
+  /// This is necessary for version reporting for users on the `master` channel
+  /// to be correct.
+  Future<Version> ensureBranchPointTagged(
+    Version requestedVersion,
+    FrameworkRepository framework,
+  ) async {
+    if (incrementLetter != 'm') {
+      // in this case, there must have been a previous tagged release, so skip
+      // tagging the branch point
       return requestedVersion;
     }
-    // TODO Find branch point
-    // TODO tag and push branch point
+    final String branchPoint = await framework.branchPoint(candidateBranch, 'master');
+    await framework.tag(
+      branchPoint,
+      requestedVersion.toString(),
+      frameworkUpstream,
+    );
     return Version.increment(requestedVersion, 'n');
   }
 
