@@ -22,27 +22,26 @@ bool CommandBufferMTL::IsValid() const {
   return is_valid_;
 }
 
-static CommandBuffer::CommitResult ToCommitResult(
-    MTLCommandBufferStatus status) {
+static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   switch (status) {
     case MTLCommandBufferStatusCompleted:
-      return CommandBufferMTL::CommitResult::kCompleted;
+      return CommandBufferMTL::Status::kCompleted;
     case MTLCommandBufferStatusEnqueued:
-      return CommandBufferMTL::CommitResult::kPending;
+      return CommandBufferMTL::Status::kPending;
     default:
       break;
   }
-  return CommandBufferMTL::CommitResult::kError;
+  return CommandBufferMTL::Status::kError;
 }
 
-void CommandBufferMTL::Commit(CommitCallback callback) {
+void CommandBufferMTL::Commit(CompletionCallback callback) {
   if (!callback) {
     callback = [](auto) {};
   }
 
   if (!buffer_) {
     // Already committed. This is caller error.
-    callback(CommitResult::kError);
+    callback(Status::kError);
     return;
   }
 
