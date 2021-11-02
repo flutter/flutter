@@ -51,7 +51,7 @@ abstract class Logger {
 
   /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
   /// [hadWarningOutput] is true.
-  bool warningsAreFatal = false;
+  bool fatalWarnings = false;
 
   /// Returns the terminal attached to this logger.
   Terminal get terminal;
@@ -196,15 +196,15 @@ abstract class Logger {
   /// Clears all output.
   void clear();
 
-  /// If [warningsAreFatal] is set, causes the logger to check if
+  /// If [fatalWarnings] is set, causes the logger to check if
   /// [hadWarningOutput] is true, and then to call [throwToolExit] if so.
   ///
-  /// The [warningsAreFatal] flag can be set from the command line with the
-  /// "--fatal-log-warnings" option on commands that support it.
+  /// The [fatalWarnings] flag can be set from the command line with the
+  /// "--fatal-warnings" option on commands that support it.
   void checkForFatalLogs() {
-    if (warningsAreFatal && (hadWarningOutput || hadErrorOutput)) {
+    if (fatalWarnings && (hadWarningOutput || hadErrorOutput)) {
       throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
-          'during the run, and "--fatal-log-warnings" is enabled.');
+          'during the run, and "--fatal-warnings" is enabled.');
     }
   }
 }
@@ -250,10 +250,10 @@ class DelegatingLogger implements Logger {
   set hadWarningOutput(bool value) => _delegate.hadWarningOutput = value;
 
   @override
-  bool get warningsAreFatal => _delegate.warningsAreFatal;
+  bool get fatalWarnings => _delegate.fatalWarnings;
 
   @override
-  set warningsAreFatal(bool value) => _delegate.warningsAreFatal = value;
+  set fatalWarnings(bool value) => _delegate.fatalWarnings = value;
 
   @override
   void printError(String message, {

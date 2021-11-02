@@ -793,7 +793,8 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalLogWarnings: false);
+    // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
@@ -1628,7 +1629,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String>? environment,
   List<String> tests = const <String>[],
   bool shuffleTests = true,
-  bool fatalLogWarnings = true,
+  bool fatalWarnings = true,
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
@@ -1642,7 +1643,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
-    if (fatalLogWarnings) '--fatal-log-warnings',
+    if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,
     ...flutterTestArgs,

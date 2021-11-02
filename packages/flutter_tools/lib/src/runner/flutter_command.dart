@@ -115,7 +115,7 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
-  static const String kFatalLogWarnings = 'fatal-log-warnings';
+  static const String kFatalWarnings = 'fatal-warnings';
 }
 
 /// flutter command categories for usage.
@@ -179,7 +179,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool _usesFatalLogs = false;
+  bool _usesFatalWarnings = false;
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
@@ -274,14 +274,13 @@ abstract class FlutterCommand extends Command<void> {
     _usesTargetOption = true;
   }
 
-  void usesFatalLogOutputOption({ @required bool verboseHelp }) {
-    argParser.addFlag(FlutterOptions.kFatalLogWarnings,
-        defaultsTo: false,
+  void usesFatalWarningsOption({ required bool verboseHelp }) {
+    argParser.addFlag(FlutterOptions.kFatalWarnings,
         hide: !verboseHelp,
-        help: 'Causes the command to fail if warnings are sent to the log '
-            'during its execution.'
+        help: 'Causes the command to fail if warnings are sent to the console '
+              'during its execution.'
     );
-    _usesFatalLogs = true;
+    _usesFatalWarnings = true;
   }
 
   String get targetFile {
@@ -1136,8 +1135,8 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (_usesFatalLogs) {
-          globals.logger.warningsAreFatal = boolArg(FlutterOptions.kFatalLogWarnings);
+        if (_usesFatalWarnings) {
+          globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
@@ -1155,7 +1154,7 @@ abstract class FlutterCommand extends Command<void> {
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
-          if (_usesFatalLogs) {
+          if (_usesFatalWarnings) {
             globals.logger.checkForFatalLogs();
           }
         }

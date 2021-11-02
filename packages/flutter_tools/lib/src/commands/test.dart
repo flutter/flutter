@@ -217,7 +217,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: '30s',
       );
     addDdsOptions(verboseHelp: verboseHelp);
-    usesFatalLogOutputOption(verboseHelp: verboseHelp);
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.

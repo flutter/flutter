@@ -38,7 +38,7 @@ void main() {
         terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
         outputPreferences: OutputPreferences(),
       );
-      logger.warningsAreFatal = true;
+      logger.fatalWarnings = true;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
         final Cache cache = Cache.test(
@@ -90,7 +90,7 @@ exit(0);
         terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
         outputPreferences: OutputPreferences(),
       );
-      logger.warningsAreFatal = true;
+      logger.fatalWarnings = true;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
         final Cache cache = Cache.test(
