@@ -15,6 +15,11 @@ class Context;
 class RenderPass;
 class RenderPassDescriptor;
 
+//------------------------------------------------------------------------------
+/// @brief      A collection of encoded commands to be submitted to the GPU for
+///             execution. A command buffer is obtained from a graphics
+///             `Context`.
+///
 class CommandBuffer {
  public:
   enum class CommitResult {
