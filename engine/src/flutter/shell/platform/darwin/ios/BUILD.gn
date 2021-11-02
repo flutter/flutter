@@ -256,6 +256,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/connection_collection_test.mm",
   ]
   deps = [
+    ":flutter_framework",
     ":flutter_framework_source",
     ":ios_gpu_configuration",
     ":ios_test_flutter_mrc",

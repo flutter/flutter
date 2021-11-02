@@ -6,10 +6,6 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
-@interface FlutterSemanticsScrollView ()
-@property(nonatomic, assign) SemanticsObject* semanticsObject;
-@end
-
 @implementation FlutterSemanticsScrollView
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject {
@@ -40,7 +36,7 @@
       self.contentSize.height > self.frame.size.height) {
     // In SwitchControl or VoiceControl, the isAccessibilityElement must return YES
     // in order to use scroll actions.
-    return !_semanticsObject.bridge->isVoiceOverRunning();
+    return ![_semanticsObject bridge]->isVoiceOverRunning();
   } else {
     return NO;
   }
