@@ -105,7 +105,8 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop)
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
+    this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -121,7 +122,8 @@ class MediaQueryData {
        assert(disableAnimations != null),
        assert(boldText != null),
        assert(navigationMode != null),
-       assert(gestureSettings != null);
+       assert(gestureSettings != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -146,7 +148,8 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window);
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -351,6 +354,37 @@ class MediaQueryData {
   /// gesture behavior over the framework constants.
   final DeviceGestureSettings gestureSettings;
 
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.DisplayFeatureType], where you can see types of display features.
+  ///  * [dart:ui.DisplayFeatureState], where you can see possible states for
+  ///  folding features ([dart:ui.DisplayFeatureType.fold] and
+  ///  [dart:ui.DisplayFeatureType.hinge])
+  final List<ui.DisplayFeature> displayFeatures;
+
+
+  /// Area of the display that is obstructed specifically by the [DisplayFeatureType.hinge].
+  ///
+  /// A hinge is the space between 2 physical displays. The size of the Flutter view
+  /// in this case contains both screens and the area between them. The hinge
+  /// area can be used to separate the layout into 2 logical areas or panels in
+  /// the application.
+  ///
+  /// See also:
+  ///
+  ///  * [TwoPane], a widget that helps with building layouts for dual-screen devices.
+  ///  * [AvoidDisplayFeatures], which helps with making popups and dialogs
+  ///  avoid areas obstructed by display features.
+  ui.DisplayFeature? get hinge {
+    for (final ui.DisplayFeature e in displayFeatures) {
+      if (e.type == ui.DisplayFeatureType.hinge)
+        return e;
+    }
+    return null;
+  }
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -376,6 +410,7 @@ class MediaQueryData {
     bool? boldText,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
+    List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -394,6 +429,7 @@ class MediaQueryData {
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
+      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -445,6 +481,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -494,6 +531,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -543,6 +581,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -565,7 +604,8 @@ class MediaQueryData {
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
         && other.navigationMode == navigationMode
-        && other.gestureSettings == gestureSettings;
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
@@ -586,6 +626,7 @@ class MediaQueryData {
       boldText,
       navigationMode,
       gestureSettings,
+      hashList(displayFeatures),
     );
   }
 
@@ -607,6 +648,7 @@ class MediaQueryData {
       'boldText: $boldText',
       'navigationMode: ${navigationMode.name}',
       'gestureSettings: $gestureSettings',
+      'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
