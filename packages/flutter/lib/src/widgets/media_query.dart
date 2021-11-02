@@ -371,12 +371,6 @@ class MediaQueryData {
   /// in this case contains both screens and the area between them. The hinge
   /// area can be used to separate the layout into 2 logical areas or panels in
   /// the application.
-  ///
-  /// See also:
-  ///
-  ///  * [TwoPane], a widget that helps with building layouts for dual-screen devices.
-  ///  * [AvoidDisplayFeatures], which helps with making popups and dialogs
-  ///  avoid areas obstructed by display features.
   ui.DisplayFeature? get hinge {
     for (final ui.DisplayFeature e in displayFeatures) {
       if (e.type == ui.DisplayFeatureType.hinge)
