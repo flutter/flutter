@@ -6264,14 +6264,18 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    // TextInput.show should be before TextInput.setEditingState
+    // TextInput.show should be after TextInput.setEditingState.
+    // On Android setEditingState triggers an IME restart which may prevent
+    // the keyboard from showing if the show keyboard request comes before the
+    // restart.
+    // See: https://github.com/flutter/flutter/issues/68571.
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6280,6 +6284,67 @@ void main() {
       tester.testTextInput.log.map((MethodCall m) => m.method),
       logOrder,
     );
+  });
+
+  testWidgets(
+    'keyboard is requested after setEditingState after switching to a new text field',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68571.
+      final EditableText editableText1 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      final EditableText editableText2 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Center(
+          child: Column(
+            children: <Widget>[editableText1, editableText2],
+          ),
+        ),
+      ));
+
+      await tester.tap(find.byWidget(editableText1));
+      await tester.pumpAndSettle();
+
+      tester.testTextInput.log.clear();
+      await tester.tap(find.byWidget(editableText2));
+      await tester.pumpAndSettle();
+
+      // Send TextInput.show after TextInput.setEditingState. Otherwise
+      // some Android keyboards ignore the "show keyboard" request, as the
+      // Android text input plugin restarts the input method when setEditingState
+      // is sent by the framework.
+      final List<String> logOrder = <String>[
+        'TextInput.clearClient',
+        'TextInput.setClient',
+        'TextInput.setEditableSizeAndTransform',
+        'TextInput.setMarkedTextRect',
+        'TextInput.setStyle',
+        'TextInput.setEditingState',
+        'TextInput.show',
+        'TextInput.setCaretRect',
+      ];
+      expect(
+        tester.testTextInput.log.map((MethodCall m) => m.method),
+        logOrder,
+      );
   });
 
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
@@ -6311,11 +6376,11 @@ void main() {
 
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6361,11 +6426,11 @@ void main() {
 
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',

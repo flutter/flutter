@@ -2175,16 +2175,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-      _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
       _updateCaretRectIfNeeded();
-      if (_needsAutofill) {
-        // Request autofill AFTER the size and the transform have been sent to
-        // the platform text input plugin.
-        _textInputConnection!.requestAutofill();
-      }
-
       final TextStyle style = widget.style;
       _textInputConnection!
         ..setStyle(
@@ -2194,8 +2187,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         )
-        ..setEditingState(localValue);
-        _lastKnownRemoteTextEditingValue = localValue;
+        ..setEditingState(localValue)
+        ..show();
+      if (_needsAutofill) {
+        // Request autofill AFTER the size and the transform have been sent to
+        // the platform text input plugin.
+        _textInputConnection!.requestAutofill();
+      }
+      _lastKnownRemoteTextEditingValue = localValue;
     } else {
       _textInputConnection!.show();
     }
