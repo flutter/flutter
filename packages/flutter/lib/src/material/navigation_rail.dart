@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -94,6 +95,7 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.minWidth,
     this.minExtendedWidth,
+    this.useIndicator,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
@@ -279,6 +281,17 @@ class NavigationRail extends StatefulWidget {
   /// The default value is 256.
   final double? minExtendedWidth;
 
+  /// If `true`, adds a rounded [NavigationIndicator] behind the selected
+  /// destination's icon.
+  ///
+  /// The indicator's shape will be circular if [labelType] is
+  /// [NavigationRailLabelType.none], or a [StadiumBorder] if [labelType] is
+  /// [NavigationRailLabelType.all] or [NavigationRailLabelType.selected].
+  ///
+  /// If `null`, defaults to [NavigationRailThemeData.useIndicator]. If that is
+  /// `null`, defaults to false.
+  final bool? useIndicator;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
@@ -413,6 +426,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
+                          useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? false,
                           onTap: () {
                             if (widget.onDestinationSelected != null)
                               widget.onDestinationSelected!(i);
@@ -498,6 +512,7 @@ class _RailDestination extends StatelessWidget {
     required this.onTap,
     required this.indexLabel,
     this.padding,
+    required this.useIndicator,
   }) : assert(minWidth != null),
        assert(minExtendedWidth != null),
        assert(icon != null),
@@ -529,6 +544,7 @@ class _RailDestination extends StatelessWidget {
   final VoidCallback onTap;
   final String indexLabel;
   final EdgeInsetsGeometry? padding;
+  final bool useIndicator;
 
   final Animation<double> _positionAnimation;
 
@@ -545,11 +561,25 @@ class _RailDestination extends StatelessWidget {
     final Widget content;
     switch (labelType) {
       case NavigationRailLabelType.none:
+        final Widget iconWithIndicator =  Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            if (useIndicator)
+              NavigationIndicator(
+                animation: destinationAnimation,
+                height: 56,
+                width: 56,
+                borderRadius: 100,
+              ),
+            themedIcon,
+          ],
+        );
+
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
           child: Align(
-            child: themedIcon,
+            child: iconWithIndicator,
           ),
         );
         if (extendedTransitionAnimation.value == 0) {
@@ -606,6 +636,19 @@ class _RailDestination extends StatelessWidget {
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
         final Interval interval = selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: interval));
+
+        final Widget iconWithIndicator =  Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            if (useIndicator)
+              NavigationIndicator(
+                animation: destinationAnimation,
+                width: 56,
+                borderRadius: 100,
+              ),
+            themedIcon,
+          ],
+        );
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -618,7 +661,7 @@ class _RailDestination extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(height: verticalPadding),
-                themedIcon,
+                iconWithIndicator,
                 Align(
                   alignment: Alignment.topCenter,
                   heightFactor: appearingAnimationValue,
@@ -636,6 +679,18 @@ class _RailDestination extends StatelessWidget {
         );
         break;
       case NavigationRailLabelType.all:
+        final Widget iconWithIndicator =  Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            if (useIndicator)
+              NavigationIndicator(
+                animation: destinationAnimation,
+                width: 56,
+                borderRadius: 100,
+              ),
+            themedIcon,
+          ],
+        );
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -645,7 +700,7 @@ class _RailDestination extends StatelessWidget {
           child: Column(
             children: <Widget>[
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
-              themedIcon,
+              iconWithIndicator,
               styledLabel,
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
             ],

@@ -36,6 +36,7 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
     expect(_labelType(tester), NavigationRailLabelType.none);
+    expect(find.byType(NavigationIndicator), findsNothing);
   });
 
   testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
@@ -51,6 +52,7 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -73,6 +75,7 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -95,6 +98,7 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -110,6 +114,7 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -132,6 +137,7 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
               groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
+              useIndicator: false,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -152,6 +158,7 @@ void main() {
               unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
             ),
           ),
         ),
@@ -170,6 +177,7 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
@@ -195,6 +203,7 @@ void main() {
       unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
       groupAlignment: 1.0,
       labelType: NavigationRailLabelType.selected,
+      useIndicator: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -215,7 +224,7 @@ void main() {
 
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
-
+    expect(description[8], 'useIndicator: true');
   });
 }
 
