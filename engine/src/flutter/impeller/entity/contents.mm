@@ -51,13 +51,12 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
 
   auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
   {
-    auto result =
-        Tessellator{}.Tessellate(entity.GetPath().SubdivideAdaptively(),
-                                 [&vertices_builder](Point point) {
-                                   VS::PerVertexData vtx;
-                                   vtx.vertices = point;
-                                   vertices_builder.AppendVertex(vtx);
-                                 });
+    auto result = Tessellator{}.Tessellate(entity.GetPath().CreatePolyline(),
+                                           [&vertices_builder](Point point) {
+                                             VS::PerVertexData vtx;
+                                             vtx.vertices = point;
+                                             vertices_builder.AppendVertex(vtx);
+                                           });
     if (!result) {
       return false;
     }
