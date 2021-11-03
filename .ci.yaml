@@ -1312,7 +1312,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
