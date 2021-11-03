@@ -36,34 +36,35 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   final List<int> _items = List<int>.generate(50, (int index) => index);
 
-  Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        final double animValue = Curves.easeInOut.transform(animation.value);
-        final double elevation = lerpDouble(0, 6, animValue)!;
-        return Material(
-          elevation: elevation,
-          color: Colors.blue,
-          shadowColor: Colors.blue[300],
-          child: child,
-        );
-      },
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color evenItemColor = colorScheme.primaryVariant.withOpacity(0.15);
+    final Color draggableItemColor = colorScheme.secondary;
+  
+    Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          final double animValue = Curves.easeInOut.transform(animation.value);
+          final double elevation = lerpDouble(0, 6, animValue)!;
+          return Material(
+            elevation: elevation,
+            color: draggableItemColor,
+            shadowColor: draggableItemColor,
+            child: child,
+          );
+        },
+        child: child,
+      );
+    }
 
     return ReorderableListView(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       proxyDecorator: _proxyDecorator,
       children: <Widget>[
-        for (int index = 0; index < _items.length; index++)
+        for (int index = 1; index < _items.length; index++)
           ListTile(
             key: Key('$index'),
             tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,

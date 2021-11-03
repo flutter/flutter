@@ -34,19 +34,16 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.0.dart **
 /// {@end-tool}
 ///
-/// Default [proxyDecorator] can overriden to customize an item when it is being dragged.
+/// This example demonstrates using the [proxyDecorator] callback to customize the appearance of
+/// a list item while it's being dragged.
 /// {@tool snippet}
 ///
-/// Here item's background color and shadow color customized compared to default behavior
-/// when item is being dragged.
+/// While a drag is underway, the widget returned by the [proxyDecorator] serves as a "proxy" (a substitute)
+/// for the item in the list. The proxy is created with the original list item as its child. The [proxyDecorator]
+/// in this example is similar to the default one except that it changes the proxy item's background color.
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.1.dart **
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [proxyDecorator], A callback that allows an item to be customized when it is being dragged.
-///
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
   ///
