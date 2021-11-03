@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -88,7 +86,7 @@ List<Target> _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({ bool verboseHelp = false, @required BuildSystem buildSystem })
+  AssembleCommand({ bool verboseHelp = false, required BuildSystem buildSystem })
     : _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
@@ -161,13 +159,13 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final String platform = environment.defines[kTargetPlatform];
+    final String? platform = environment.defines[kTargetPlatform];
     if (platform == null) {
       return super.requiredArtifacts;
     }
 
     final TargetPlatform targetPlatform = getTargetPlatformForName(platform);
-    final DevelopmentArtifact artifact = artifactFromTargetPlatform(targetPlatform);
+    final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform);
     if (artifact != null) {
       return <DevelopmentArtifact>{artifact};
     }
@@ -176,18 +174,19 @@ class AssembleCommand extends FlutterCommand {
 
   /// The target(s) we are building.
   List<Target> createTargets() {
-    if (argResults.rest.isEmpty) {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
-    final String name = argResults.rest.first;
+    final String name = rest.first;
     final Map<String, Target> targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets)
         target.name: target
     };
     final List<Target> results = <Target>[
-      for (final String targetName in argResults.rest)
+      for (final String targetName in rest)
         if (targetMap.containsKey(targetName))
-          targetMap[targetName]
+          targetMap[targetName]!
     ];
     if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
@@ -196,7 +195,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   bool isDeferredComponentsTargets() {
-    for (final String targetName in argResults.rest) {
+    for (final String targetName in argResults?.rest ?? <String>[]) {
       if (deferredComponentsTargets.contains(targetName)) {
         return true;
       }
@@ -205,7 +204,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   bool isDebug() {
-    for (final String targetName in argResults.rest) {
+    for (final String targetName in argResults?.rest ?? <String>[]) {
       if (targetName.contains('debug')) {
         return true;
       }
@@ -213,13 +212,12 @@ class AssembleCommand extends FlutterCommand {
     return false;
   }
 
-  Environment get environment => _environment ??= createEnvironment();
-  Environment _environment;
+  late final Environment environment = createEnvironment();
 
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
-    String output = stringArg('output');
+    String? output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -237,12 +235,12 @@ class AssembleCommand extends FlutterCommand {
       inputs: _parseDefines(stringsArg('input')),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      artifacts: globals.artifacts,
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
-      engineVersion: globals.artifacts.isLocalEngine
+      engineVersion: globals.artifacts!.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
@@ -261,18 +259,18 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    if (argResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] = (argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
+    if (argResults?.wasParsed(FlutterOptions.kExtraGenSnapshotOptions) == true) {
+      results[kExtraGenSnapshotOptions] = (argResults![FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+    if (argResults?.wasParsed(FlutterOptions.kDartDefinesOption) == true) {
+      results[kDartDefines] = (argResults![FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
-    if (argResults.wasParsed(FlutterOptions.kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] = (argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
+    if (argResults?.wasParsed(FlutterOptions.kExtraFrontEndOptions) == true) {
+      results[kExtraFrontEndOptions] = (argResults![FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
     return results;
   }
@@ -289,7 +287,7 @@ class AssembleCommand extends FlutterCommand {
         nonDeferredTargets.add(target);
       }
     }
-    Target target;
+    Target? target;
     List<String> decodedDefines;
     try {
       decodedDefines = decodeDartDefines(environment.defines, kDartDefines);
@@ -315,11 +313,11 @@ class AssembleCommand extends FlutterCommand {
       target = targets.single;
     }
     final BuildResult result = await _buildSystem.build(
-      target,
+      target!,
       environment,
       buildSystemConfig: BuildSystemConfig(
-        resourcePoolSize: argResults.wasParsed('resource-pool-size')
-          ? int.tryParse(stringArg('resource-pool-size'))
+        resourcePoolSize: argResults?.wasParsed('resource-pool-size') == true
+          ? int.tryParse(stringArg('resource-pool-size')!)
           : null,
         ),
       );
@@ -335,17 +333,17 @@ class AssembleCommand extends FlutterCommand {
     }
     globals.printTrace('build succeeded.');
 
-    if (argResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
+    if (argResults?.wasParsed('build-inputs') == true) {
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs')!);
     }
-    if (argResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
+    if (argResults?.wasParsed('build-outputs') == true) {
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs')!);
     }
-    if (argResults.wasParsed('performance-measurement-file')) {
-      final File outFile = globals.fs.file(argResults['performance-measurement-file']);
+    if (argResults?.wasParsed('performance-measurement-file') == true) {
+      final File outFile = globals.fs.file(argResults!['performance-measurement-file']);
       writePerformanceData(result.performance.values, outFile);
     }
-    if (argResults.wasParsed('depfile')) {
+    if (argResults?.wasParsed('depfile') == true) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
