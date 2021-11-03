@@ -32,25 +32,26 @@ Path& Path::AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2) {
   return *this;
 }
 
-void Path::EnumerateComponents(Applier<LinearPathComponent> linearApplier,
-                               Applier<QuadraticPathComponent> quadApplier,
-                               Applier<CubicPathComponent> cubicApplier) const {
+void Path::EnumerateComponents(
+    Applier<LinearPathComponent> linear_applier,
+    Applier<QuadraticPathComponent> quad_applier,
+    Applier<CubicPathComponent> cubic_applier) const {
   size_t currentIndex = 0;
   for (const auto& component : components_) {
     switch (component.type) {
       case ComponentType::kLinear:
-        if (linearApplier) {
-          linearApplier(currentIndex, linears_[component.index]);
+        if (linear_applier) {
+          linear_applier(currentIndex, linears_[component.index]);
         }
         break;
       case ComponentType::kQuadratic:
-        if (quadApplier) {
-          quadApplier(currentIndex, quads_[component.index]);
+        if (quad_applier) {
+          quad_applier(currentIndex, quads_[component.index]);
         }
         break;
       case ComponentType::kCubic:
-        if (cubicApplier) {
-          cubicApplier(currentIndex, cubics_[component.index]);
+        if (cubic_applier) {
+          cubic_applier(currentIndex, cubics_[component.index]);
         }
         break;
     }
@@ -155,15 +156,15 @@ std::vector<Point> Path::CreatePolyline(
   for (const auto& component : components_) {
     switch (component.type) {
       case ComponentType::kLinear:
-        AddPoints(points, linears_[component.index].SubdivideAdaptively());
+        AddPoints(points, linears_[component.index].CreatePolyline());
         break;
       case ComponentType::kQuadratic:
         AddPoints(points,
-                  quads_[component.index].SubdivideAdaptively(approximation));
+                  quads_[component.index].CreatePolyline(approximation));
         break;
       case ComponentType::kCubic:
         AddPoints(points,
-                  cubics_[component.index].SubdivideAdaptively(approximation));
+                  cubics_[component.index].CreatePolyline(approximation));
         break;
     }
   }
