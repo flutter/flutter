@@ -166,7 +166,7 @@ class TabController extends ChangeNotifier {
 
   /// Controls the duration of TabController and TabBarView animations.
   ///
-  /// Defaults to kTabScrollDuration, must be greater than [Duration.zero].
+  /// Defaults to kTabScrollDuration.
   Duration get animationDuration => _animationDuration;
   final Duration _animationDuration;
 
@@ -363,7 +363,7 @@ class DefaultTabController extends StatefulWidget {
 
   /// Controls the duration of DefaultTabController and TabBarView animations.
   ///
-  /// Defaults to kTabScrollDuration, must be greater than [Duration.zero].
+  /// Defaults to kTabScrollDuration.
   final Duration? animationDuration;
 
   /// The widget below this widget in the tree.

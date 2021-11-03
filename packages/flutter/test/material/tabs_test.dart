@@ -939,44 +939,44 @@ void main() {
     expect(find.text('Second'), findsNothing);
   });
 
-  testWidgets('TabBar animationDuration sets indicatior animation duration', (WidgetTester tester) async {
-    const Duration animDuration = Duration(milliseconds: 100);
+  testWidgets('TabBar animationDuration sets indicator animation duration', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 100);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animDuration));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
     final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
 
     await tester.tap(find.text('A'));
     await tester.pump();
     expect(controller.indexIsChanging, true);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.pump(animDuration);
+    await tester.pump(animationDuration);
     expect(controller.index, 0);
     expect(controller.previousIndex, 1);
     expect(controller.indexIsChanging, false);
 
     //Test when index diff is greater than 1
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animDuration));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
     await tester.tap(find.text('C'));
     await tester.pump();
     expect(controller.indexIsChanging, true);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.pump(animDuration);
+    await tester.pump(animationDuration);
     expect(controller.index, 2);
     expect(controller.previousIndex, 0);
     expect(controller.indexIsChanging, false);
   });
 
   testWidgets('TabBarView controller sets animation duration', (WidgetTester tester) async {
-    const Duration animDuration = Duration(milliseconds: 100);
+    const Duration animationDuration = Duration(milliseconds: 100);
+    final List<String> tabs = <String>['A', 'B', 'C'];
 
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
-      length: 3,
-      animationDuration: animDuration,
+      length: tabs.length,
+      animationDuration: animationDuration,
     );
-    final List<String> tabs = <String>['A', 'B', 'C'];
     await tester.pumpWidget(boilerplate(
       child: Column(
         children: <Widget>[
@@ -1013,7 +1013,7 @@ void main() {
     await tester.pump();
     expect(position.pixels, 400);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.pump(animDuration);
+    await tester.pump(animationDuration);
     expect(position.pixels, 800);
   });
 
@@ -1064,13 +1064,13 @@ void main() {
   });
 
   testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
-      length: 3,
+      length: tabs.length,
       animationDuration: Duration.zero,
     );
-    final List<String> tabs = <String>['A', 'B', 'C'];
     await tester.pumpWidget(boilerplate(
       child: Column(
         children: <Widget>[
@@ -1109,12 +1109,12 @@ void main() {
   });
 
   testWidgets('TabBarView skips animation when disabled in controller - skip tabs', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
     final TabController tabController = TabController(
       vsync: const TestVSync(),
-      length: 3,
+      length: tabs.length,
       animationDuration: Duration.zero,
     );
-    final List<String> tabs = <String>['A', 'B', 'C'];
     await tester.pumpWidget(boilerplate(
       child: Column(
         children: <Widget>[
@@ -1153,12 +1153,12 @@ void main() {
   });
 
   testWidgets('TabBarView skips animation when disabled in controller - two tabs', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
     final TabController tabController = TabController(
       vsync: const TestVSync(),
-      length: 2,
+      length: tabs.length,
       animationDuration: Duration.zero,
     );
-    final List<String> tabs = <String>['A', 'B'];
     await tester.pumpWidget(boilerplate(
       child: Column(
         children: <Widget>[
