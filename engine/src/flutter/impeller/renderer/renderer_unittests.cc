@@ -83,7 +83,7 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
     FS::BindContents2(cmd, bridge, sampler);
 
     cmd.primitive_type = PrimitiveType::kTriangle;
-    if (!pass.RecordCommand(std::move(cmd))) {
+    if (!pass.AddCommand(std::move(cmd))) {
       return false;
     }
     return true;
@@ -151,7 +151,7 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
         VS::BindUniformBuffer(
             cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-        if (!pass.RecordCommand(cmd)) {
+        if (!pass.AddCommand(cmd)) {
           return false;
         }
       }
@@ -249,8 +249,8 @@ TEST_F(RendererTest, CanRenderToTexture) {
                  Matrix::MakeTranslation({50.0f, 50.0f, 0.0f});
   VS::BindUniformBuffer(
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
-  ASSERT_TRUE(r2t_pass->RecordCommand(std::move(cmd)));
-  ASSERT_TRUE(r2t_pass->Commit(*context->GetTransientsAllocator()));
+  ASSERT_TRUE(r2t_pass->AddCommand(std::move(cmd)));
+  ASSERT_TRUE(r2t_pass->EncodeCommands(*context->GetTransientsAllocator()));
 }
 
 TEST_F(RendererTest, CanRenderPath) {
@@ -314,7 +314,7 @@ TEST_F(RendererTest, CanRenderPath) {
     uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-    if (!pass.RecordCommand(cmd)) {
+    if (!pass.AddCommand(cmd)) {
       return false;
     }
 

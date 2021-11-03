@@ -30,7 +30,7 @@ class CommandBufferMTL final : public CommandBuffer {
   bool IsValid() const override;
 
   // |CommandBuffer|
-  void Commit(CompletionCallback callback) override;
+  void SubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
   std::shared_ptr<RenderPass> CreateRenderPass(

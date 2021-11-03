@@ -24,7 +24,7 @@ class RenderPass {
   virtual HostBuffer& GetTransientsBuffer() = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      Record a command for subsequent commit to the underlying
+  /// @brief      Record a command for subsequent encoding to the underlying
   ///             command buffer. No work is encoded into the command buffer at
   ///             this time.
   ///
@@ -32,17 +32,17 @@ class RenderPass {
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
-  [[nodiscard]] virtual bool RecordCommand(Command command) = 0;
+  virtual bool AddCommand(Command command) = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      Commit the recorded commands to the underlying command buffer.
+  /// @brief      Encode the recorded commands to the underlying command buffer.
   ///
   /// @param      transients_allocator  The transients allocator.
   ///
-  /// @return     If the commands were committed to the underlying command
+  /// @return     If the commands were encoded to the underlying command
   ///             buffer.
   ///
-  [[nodiscard]] virtual bool Commit(Allocator& transients_allocator) const = 0;
+  virtual bool EncodeCommands(Allocator& transients_allocator) const = 0;
 
  protected:
   RenderPass();

@@ -49,7 +49,7 @@ class CommandBuffer {
   ///
   /// @param[in]  callback  The completion callback.
   ///
-  virtual void Commit(CompletionCallback callback) = 0;
+  virtual void SubmitCommands(CompletionCallback callback) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.

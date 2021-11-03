@@ -118,7 +118,7 @@ void RenderPassMTL::SetLabel(std::string label) {
   transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
 
-bool RenderPassMTL::Commit(Allocator& transients_allocator) const {
+bool RenderPassMTL::EncodeCommands(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
@@ -406,7 +406,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
   return true;
 }
 
-bool RenderPassMTL::RecordCommand(Command command) {
+bool RenderPassMTL::AddCommand(Command command) {
   if (!command) {
     return false;
   }

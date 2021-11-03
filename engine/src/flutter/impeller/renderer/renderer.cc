@@ -55,7 +55,7 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  if (!render_pass->Commit(*GetContext()->GetTransientsAllocator())) {
+  if (!render_pass->EncodeCommands(*GetContext()->GetTransientsAllocator())) {
     return false;
   }
 
@@ -63,7 +63,7 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  command_buffer->Commit(
+  command_buffer->SubmitCommands(
       [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
         sema->Signal();
         if (result != CommandBuffer::Status::kCompleted) {
