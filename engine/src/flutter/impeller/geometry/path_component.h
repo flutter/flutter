@@ -41,7 +41,7 @@ struct LinearPathComponent {
 
   Point Solve(Scalar time) const;
 
-  std::vector<Point> SubdivideAdaptively() const;
+  std::vector<Point> CreatePolyline() const;
 
   std::vector<Point> Extrema() const;
 
@@ -64,7 +64,7 @@ struct QuadraticPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
-  std::vector<Point> SubdivideAdaptively(
+  std::vector<Point> CreatePolyline(
       const SmoothingApproximation& approximation) const;
 
   std::vector<Point> Extrema() const;
@@ -95,7 +95,7 @@ struct CubicPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
-  std::vector<Point> SubdivideAdaptively(
+  std::vector<Point> CreatePolyline(
       const SmoothingApproximation& approximation) const;
 
   std::vector<Point> Extrema() const;
