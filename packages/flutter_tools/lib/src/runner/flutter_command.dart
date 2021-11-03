@@ -14,6 +14,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -1234,6 +1235,24 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+    final FileSystem fileSystem = globals.fs;
+    final String flutterRoot = Cache.flutterRoot;
+
+    // If a user downloads the Flutter SDK via a pre-built archive and there is
+    // an error during extraction, the user could have a valid Dart snapshot of
+    // the tool but not the source directory. We still need the source, so
+    // validate the source directory exists and toolExit if not.
+    final Directory toolsDir = fileSystem.directory(
+      fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools'),
+    );
+    if (!toolsDir.existsSync()) {
+      throwToolExit(
+        'Flutter SDK installation appears corrupted: expected to find the '
+        'directory ${toolsDir.path} but it does not exist! Please go to '
+        'https://flutter.dev/setup for instructions on how to re-install '
+        'Flutter.',
+      );
+    }
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1253,9 +1272,9 @@ abstract class FlutterCommand extends Command<void> {
         logger: globals.logger,
         cacheDir: globals.cache.getRoot(),
         engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
+        fileSystem: fileSystem,
+        flutterRootDir: fileSystem.directory(flutterRoot),
+        outputDir: fileSystem.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: project.directory,
