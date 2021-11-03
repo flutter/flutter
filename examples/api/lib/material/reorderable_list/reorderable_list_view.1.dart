@@ -64,7 +64,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 40),
       proxyDecorator: _proxyDecorator,
       children: <Widget>[
-        for (int index = 1; index < _items.length; index++)
+        for (int index = 0; index < _items.length; index += 1)
           ListTile(
             key: Key('$index'),
             tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
