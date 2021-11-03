@@ -21,8 +21,12 @@ void main() {
   const Color _kDestructiveActionColor = CupertinoColors.destructiveRed;
   const FontWeight _kDefaultActionWeight = FontWeight.w600;
 
-  Widget _getApp({VoidCallback? onPressed, bool isDestructiveAction = false,
-                  bool isDefaultAction = false, bool isDark = false}) {
+  Widget _getApp({
+    VoidCallback? onPressed,
+    bool isDestructiveAction = false,
+    bool isDefaultAction = false,
+    bool isDark = false,
+  }) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,

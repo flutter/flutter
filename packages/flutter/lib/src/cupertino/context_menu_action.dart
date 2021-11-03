@@ -100,7 +100,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
       );
     }
     return _kActionSheetActionStyle.copyWith(
-        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
     );
   }
 
