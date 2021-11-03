@@ -358,14 +358,16 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [dart:ui.DisplayFeatureType], where you can see types of display features.
-  ///  * [dart:ui.DisplayFeatureState], where you can see possible states for
+  ///  * [dart:ui.DisplayFeatureType], which lists the different types of
+  ///  display features and explains the differences between them.
+  ///  * [dart:ui.DisplayFeatureState], which lists the possible states for
   ///  folding features ([dart:ui.DisplayFeatureType.fold] and
   ///  [dart:ui.DisplayFeatureType.hinge])
   final List<ui.DisplayFeature> displayFeatures;
 
 
-  /// Area of the display that is obstructed specifically by the [DisplayFeatureType.hinge].
+  /// Area of the display that is obstructed specifically by the
+  /// [DisplayFeatureType.hinge].
   ///
   /// A hinge is the space between 2 physical displays. The size of the Flutter view
   /// in this case contains both screens and the area between them. The hinge
