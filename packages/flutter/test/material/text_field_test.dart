@@ -31,10 +31,10 @@ import 'feedback_tester.dart';
 typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
 
 // On web, the context menu (aka toolbar) is provided by the browser.
-final bool isContextMenuProvidedByPlatform = isBrowser;
+const bool isContextMenuProvidedByPlatform = isBrowser;
 
 // On web, key events in text fields are handled by the browser.
-final bool areKeyEventsHandledByPlatform = isBrowser;
+const bool areKeyEventsHandledByPlatform = isBrowser;
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
