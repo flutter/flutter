@@ -75,7 +75,7 @@ EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
 
     cmd.primitive_type = PrimitiveType::kTriangle;
 
-    if (!pass.RecordCommand(std::move(cmd))) {
+    if (!pass.AddCommand(std::move(cmd))) {
       return RenderResult::kFailure;
     }
   } else if (entity.GetContents()) {
