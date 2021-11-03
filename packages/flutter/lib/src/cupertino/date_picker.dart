@@ -1039,16 +1039,21 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       ));
     }
 
+    final double totalWidth = columnWidths.reduce((double a, double b) => a + b);
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 85),
+          child: CustomMultiChildLayout(
+            delegate: _DatePickerLayoutDelegate(
+              columnWidths: columnWidths,
+              textDirectionFactor: textDirectionFactor,
+            ),
+            children: pickers,
           ),
-          children: pickers,
         ),
       ),
     );
@@ -1420,16 +1425,21 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       ));
     }
 
+    final double totalWidth = columnWidths.reduce((double a, double b) => a + b);
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 85),
+          child: CustomMultiChildLayout(
+            delegate: _DatePickerLayoutDelegate(
+              columnWidths: columnWidths,
+              textDirectionFactor: textDirectionFactor,
+            ),
+            children: pickers,
           ),
-          children: pickers,
         ),
       ),
     );
