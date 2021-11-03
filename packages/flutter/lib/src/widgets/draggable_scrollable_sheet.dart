@@ -45,9 +45,6 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// The controller's methods cannot be used until after the controller has been
 /// passed into a [DraggableScrollableSheet] and the sheet has run initState.
 class DraggableScrollableController {
-  /// Creates a draggable scrollable controller.
-  DraggableScrollableController();
-
   _DraggableScrollableSheetScrollController? _attachedController;
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
@@ -57,24 +54,33 @@ class DraggableScrollableController {
   }
 
   /// Get the current pixel height of the attached sheet.
-  double get pixels => _attachedController!.extent.currentPixels;
+  double get pixels {
+    _assertAttached();
+    return _attachedController!.extent.currentPixels;
+  }
 
   /// Convert a sheet's size (fractional value of parent container height) to pixels.
-  double sizeToPixels(double size) => _attachedController!.extent.sizeToPixels(size);
+  double sizeToPixels(double size) {
+    _assertAttached();
+    return _attachedController!.extent.sizeToPixels(size);
+  }
 
   /// Convert a sheet's pixel height to size (fractional value of parent container height).
-  double pixelsToSize(double pixels) => _attachedController!.extent.pixelsToSize(pixels);
+  double pixelsToSize(double pixels) {
+    _assertAttached();
+    return _attachedController!.extent.pixelsToSize(pixels);
+  }
 
-  /// Animates the attached sheet from its current size to [size], a fractional
-  /// value of the parent container's height.
+  /// Animates the attached sheet from its current size to [size] to the
+  /// provided new `size`, a fractional value of the parent container's height.
   ///
   /// Any active sheet animation is canceled. If the sheet's internal scrollable
-  /// is currently animating (eg responding to a user fling), that animation is
+  /// is currently animating (e.g. responding to a user fling), that animation is
   /// canceled as well.
   ///
   /// An animation will be interrupted whenever the user attempts to scroll
   /// manually, whenever another activity is started, or when the sheet hits its
-  /// max or min size (eg if you animate to 1 but the max size is .8, the
+  /// max or min size (e.g. if you animate to 1 but the max size is .8, the
   /// animation will stop playing when it reaches .8).
   ///
   /// The duration must not be zero. To jump to a particular value without an
@@ -116,7 +122,6 @@ class DraggableScrollableController {
       }
     });
     await animationController.animateTo(size, duration: duration);
-    animationController.dispose();
   }
 
   /// Jumps the attached sheet from its current size to the given [size], a
@@ -126,7 +131,7 @@ class DraggableScrollableController {
   /// [jumpTo] will jump the sheet to the nearest valid size instead.
   ///
   /// Any active sheet animation is canceled. If the sheet's inner scrollable
-  /// is currently animating (eg responding to a user fling), that animation is
+  /// is currently animating (e.g. responding to a user fling), that animation is
   /// canceled as well.
   void jumpTo(double size) {
     _assertAttached();
@@ -495,7 +500,7 @@ class _DraggableSheetExtent {
   /// Set the size to the new value. [newSize] should be a number between
   /// [minSize] and [maxSize].
   ///
-  /// This can be triggered by a programmatic (eg controller triggered) change
+  /// This can be triggered by a programmatic (e.g. controller triggered) change
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
     assert(newSize != null);
@@ -903,7 +908,7 @@ class _DraggableScrollableSheetScrollPosition
 ///
 /// This is just a wrapper on top of [DraggableScrollableController]. It is
 /// primarily useful for controlling a sheet in a part of the widget tree that
-/// the current code does not control (eg library code trying to affect a sheet
+/// the current code does not control (e.g. library code trying to affect a sheet
 /// in library users' code). Generally, it's easier to control the sheet
 /// directly by creating a controller and passing the controller to the sheet in
 /// its constructor (see [DraggableScrollableSheet.controller]).
