@@ -56,7 +56,7 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  bool get ignoreDeprecation => boolArg('ignore-deprecation');
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
