@@ -3,8 +3,10 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< HEAD
     package="dev.flutter.microbenchmarks">
    <application
+        android:name="${applicationName}"
         android:label="microbenchmarks"
         android:icon="@mipmap/ic_launcher">
         <activity

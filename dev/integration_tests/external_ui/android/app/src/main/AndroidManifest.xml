@@ -8,7 +8,7 @@ found in the LICENSE file. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="external_ui">
         <activity
             android:name=".MainActivity"

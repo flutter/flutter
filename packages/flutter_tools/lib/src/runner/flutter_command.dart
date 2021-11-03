@@ -827,7 +827,6 @@ abstract class FlutterCommand extends Command<void> {
   void addIgnoreDeprecationOption({ bool hide = false }) {
     argParser.addFlag('ignore-deprecation',
       negatable: false,
-      defaultsTo: false,
       help: 'Indicates that the app should ignore deprecation warnings and continue to build '
             'using deprecated APIs. Use of this flag may cause your app to fail to build when '
             'deprecated APIs are removed.',

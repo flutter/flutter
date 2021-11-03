@@ -5,6 +5,7 @@ found in the LICENSE file. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.flutter.platform_views_layout_hybrid_composition">
    <application
+        android:name="${applicationName}"
         android:label="platform_views_layout_hybrid_composition"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -22,7 +23,7 @@ found in the LICENSE file. -->
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
-              />
+            />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
