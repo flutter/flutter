@@ -149,7 +149,7 @@ static void AddPoints(std::vector<Point>& dest, const std::vector<Point>& src) {
   dest.insert(dest.end(), src.begin(), src.end());
 }
 
-std::vector<Point> Path::SubdivideAdaptively(
+std::vector<Point> Path::CreatePolyline(
     const SmoothingApproximation& approximation) const {
   std::vector<Point> points;
   for (const auto& component : components_) {

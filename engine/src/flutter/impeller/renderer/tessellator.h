@@ -13,6 +13,12 @@
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      A utility that generates triangles of the specified fill type
+///             given a polyline. This happens on the CPU.
+///
+/// @bug        This should just be called a triangulator.
+///
 class Tessellator {
  public:
   enum class FillType {
@@ -34,8 +40,17 @@ class Tessellator {
   WindingOrder GetFrontFaceWinding() const;
 
   using VertexCallback = std::function<void(Point)>;
-  [[nodiscard]] bool Tessellate(const std::vector<Point>& vertices,
-                                VertexCallback callback) const;
+  //----------------------------------------------------------------------------
+  /// @brief      Generates triangles from the polyline. A callback is invoked
+  ///             for each vertex of the triangle.
+  ///
+  /// @param[in]  polyline  The polyline
+  /// @param[in]  callback  The callback
+  ///
+  /// @return If tessellation was successful.
+  ///
+  bool Tessellate(const std::vector<Point>& polyline,
+                  VertexCallback callback) const;
 
  private:
   FillType fill_type_ = FillType::kNonZero;

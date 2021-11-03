@@ -269,7 +269,7 @@ TEST_F(RendererTest, CanRenderPath) {
 
   Tessellator tessellator;
   ASSERT_TRUE(tessellator.Tessellate(
-      path.SubdivideAdaptively({}), [&vertex_builder](Point point) {
+      path.CreatePolyline({}), [&vertex_builder](Point point) {
         VS::PerVertexData vtx;
         vtx.vertex_position = {point.x, point.y, 0.0};
         vtx.texture_coordinates = {0.5, 0.5};
