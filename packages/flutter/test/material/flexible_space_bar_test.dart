@@ -470,6 +470,78 @@ void main() {
     );
   });
 
+  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+    const double titleFontSize = 20.0;
+    const double height = 300.0;
+    const double expandedTitleScale = 3.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                stretch: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  expandedTitleScale: expandedTitleScale,
+                  titlePadding: EdgeInsets.zero,
+                  title: Text(
+                    'X' * 41,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: titleFontSize,),
+                  ),
+                  centerTitle: false,
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  <Widget>[
+                    for (int i = 0; i < 3; i++)
+                      SizedBox(
+                        height: 200.0,
+                        child: Center(child: Text('Item $i')),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
+    await tester.pumpAndSettle();
+
+    final Finder title = find.byType(Text).first;
+    final double collapsedWidth = tester.getRect(title).width;
+
+    // We drag down to fully expand the space bar.
+    await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
+    await tester.pumpAndSettle();
+
+    // The title is shifted by this margin to maintain the position of the
+    // bottom edge.
+    const double bottomMargin = titleFontSize * (expandedTitleScale - 1);
+
+    // The title is scaled and transformed to be 3 times bigger, when the
+    // FlexibleSpaceBar is fully expanded, thus we expect the width to be
+    // 3 times smaller than the full width. The height of the text is the same
+    // as the font size, with 40 dps bottom margin to maintain its bottom position.
+    expect(
+      tester.getRect(title),
+      Rect.fromLTRB(
+        0,
+        height - titleFontSize - bottomMargin,
+        (collapsedWidth / 3).floorToDouble(),
+        height - bottomMargin,
+      ),
+    );
+  });
+
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(

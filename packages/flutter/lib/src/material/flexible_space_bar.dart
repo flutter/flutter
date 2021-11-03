@@ -82,7 +82,9 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
+    this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
+       assert(expandedTitleScale >= 1),
        super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
@@ -122,6 +124,14 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
   /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
   final EdgeInsetsGeometry? titlePadding;
+
+  /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
+  /// due to the user scrolling downwards. The title is scaled uniformly on the
+  /// x and y axes while maintaining its bottom-left position (bottom-center if
+  /// [centerTitle] is true).
+  ///
+  /// Defaults to 1.5 and must be greater than 1.
+  final double expandedTitleScale;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -317,7 +327,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 start: effectiveCenterTitle ? 0.0 : 72.0,
                 bottom: 16.0,
               );
-            final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+            final double scaleValue = Tween<double>(begin: widget.expandedTitleScale, end: 1.0).transform(t);
             final Matrix4 scaleTransform = Matrix4.identity()
               ..scale(scaleValue, scaleValue, 1.0);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
