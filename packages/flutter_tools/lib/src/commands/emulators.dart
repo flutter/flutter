@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../doctor_validator.dart';
 import '../emulator.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
