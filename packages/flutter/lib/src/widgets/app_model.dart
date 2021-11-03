@@ -192,7 +192,7 @@ class _AppModelData extends InheritedModel<Object> {
   }
 
   @override
-  bool updateShouldNotifyDependent(_AppModelData old, Set<Object> keys) => true;
+  bool updateShouldNotifyDependent(_AppModelData old, Set<Object> keys) {
     for (final Object key in keys) {
       if (data[key] != old.data[key]) {
         return true;
