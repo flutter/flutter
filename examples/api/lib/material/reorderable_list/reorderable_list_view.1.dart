@@ -42,7 +42,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primaryVariant.withOpacity(0.15);
     final Color draggableItemColor = colorScheme.secondary;
-  
+
     Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
       return AnimatedBuilder(
         animation: animation,
