@@ -8,10 +8,10 @@ impeller_shaders("entity_shaders") {
   name = "entity"
 
   shaders = [
-    "gradient_fill.frag",
-    "gradient_fill.vert",
-    "solid_fill.frag",
-    "solid_fill.vert",
+    "shaders/gradient_fill.frag",
+    "shaders/gradient_fill.vert",
+    "shaders/solid_fill.frag",
+    "shaders/solid_fill.vert",
   ]
 }
 

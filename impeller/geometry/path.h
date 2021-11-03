@@ -7,10 +7,20 @@
 #include <functional>
 #include <vector>
 
-#include "path_component.h"
+#include "impeller/geometry/path_component.h"
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      Paths are lightweight objects that describe a collection of
+///             linear, quadratic, or cubic segments.
+///
+///             All shapes supported by Impeller are paths either directly or
+///             via approximation (in the case of circles).
+///
+///             Creating paths that describe complex shapes is usually done by a
+///             path builder.
+///
 class Path {
  public:
   enum class ComponentType {
