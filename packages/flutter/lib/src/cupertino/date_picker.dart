@@ -1046,7 +1046,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 85),
+          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
           child: CustomMultiChildLayout(
             delegate: _DatePickerLayoutDelegate(
               columnWidths: columnWidths,
@@ -1432,7 +1432,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 85),
+          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
           child: CustomMultiChildLayout(
             delegate: _DatePickerLayoutDelegate(
               columnWidths: columnWidths,
