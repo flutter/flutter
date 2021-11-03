@@ -363,9 +363,7 @@ void main() {
     }
     // This test is expected to be skipped when Platform.isWindows:
     // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-    //
-    // Alway skip due to flake: https://github.com/flutter/flutter/issues/92042
-  }, skip: true);
+  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
