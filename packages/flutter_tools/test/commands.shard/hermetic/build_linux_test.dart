@@ -51,6 +51,11 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    fileSystem
+        .directory(_kTestFlutterRoot)
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .createSync(recursive: true);
     Cache.flutterRoot = _kTestFlutterRoot;
     usage = TestUsage();
   });

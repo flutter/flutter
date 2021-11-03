@@ -52,11 +52,19 @@ void main() {
   FakeFlutterVersion flutterVersion;
   BufferLogger logger;
   FakeProcessManager fakeProcessManager;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
     flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
+    Cache.flutterRoot = '/path/to/flutter';
+    fileSystem = MemoryFileSystem.test();
+    fileSystem
+        .directory(Cache.flutterRoot)
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .createSync(recursive: true);
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
@@ -621,8 +629,8 @@ void main() {
       contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
+    FileSystem: () => fileSystem,
   });
 
   testUsingContext('Fetches tags to get the right version', () async {
@@ -636,8 +644,8 @@ void main() {
     expect(flutterVersion.didFetchTagsAndUpdate, true);
     Cache.enableLocking();
   }, overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.any(),
-    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => fakeProcessManager,
+    FileSystem: () => fileSystem,
     FlutterVersion: () => flutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);

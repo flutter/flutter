@@ -69,6 +69,7 @@ void main() {
 
     setUp(() {
       Cache.disableLocking();
+      Cache.flutterRoot = '/path/to/flutter';
       logger = StreamLogger();
       testFileSystem = MemoryFileSystem(
       style: globals.platform.isWindows
@@ -77,6 +78,11 @@ void main() {
       );
       testFileSystem.directory('lib').createSync();
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
+      testFileSystem
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .createSync(recursive: true);
     });
 
     group('with one device and no specified target file', () {
