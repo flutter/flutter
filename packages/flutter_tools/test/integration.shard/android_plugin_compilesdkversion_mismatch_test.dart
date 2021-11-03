@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 
 
 import '../src/common.dart';
-import '../../src/context.dart';
+import '../src/context.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -45,7 +45,9 @@ void main() {
 
     final Directory pluginAppDir = tempDir.childDirectory('test_plugin').childDirectory('example');
     final File pluginGradleFile = pluginAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    expect(pluginGradleFile, exists);
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
+
 
     // Bump up plugin compileSdkVersion to 31
     String pluginNewGradleFile = pluginBuildGradle.replaceAll(
@@ -62,8 +64,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     final Directory projectAppDir = tempDir.childDirectory('test_project'); //todo check
-    final File pubspecFile = projectAppDir.childFile('pubspec.yaml');
-    final File projectGradleFile = pluginAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    final File pubspecFile = projectAppDir.childFile('pubspec.yaml'); //check exists
+    final File projectGradleFile = pluginAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle'); //check exists
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
     final String pubspecFileString = pubspecFile.readAsStringSync();
     final RegExp pubspecDependenciesRegExp = RegExp(r'dependencies:');
@@ -89,9 +91,10 @@ void main() {
 
     // Check error message is thrown
     expect(testLogger.statusText,
-      contains("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}."); //todo fix
+      contains("Warning: The plugin test_plugin requires Android SDK version 31.")
       );
     expect(testLogger.errorText,
-      contains("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}/build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n    ...\n}\n") //todo fix
+      contains("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to /flutter_plugin_test/test_project/android/app/build.gradle:\nandroid {\n  compileSdkVersion 31\n    ...\n}\n")
       );
+  });
 }
