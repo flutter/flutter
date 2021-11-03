@@ -1478,6 +1478,24 @@ void main() {
     );
   });
 
+  testWidgets('CupertinoDataPicker width is properly sized', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: CupertinoDatePicker(
+              initialDateTime: DateTime(2019, 1, 1, 4),
+              onDateTimeChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(CupertinoDatePicker)).width, 464);
+  });
+
   testWidgets('picker exports semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     debugResetSemanticsIdCounter();
