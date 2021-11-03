@@ -128,7 +128,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
   /// due to the user scrolling downwards. The title is scaled uniformly on the
   /// x and y axes while maintaining its bottom-left position (bottom-center if
-  /// [centerTitle] is true.
+  /// [centerTitle] is true).
   ///
   /// Defaults to 1.5 and must be greater than 1.
   final double expandedTitleScale;
