@@ -1478,7 +1478,7 @@ void main() {
     );
   });
 
-  testWidgets('CupertinoDataPicker width is properly sized', (WidgetTester tester) async {
+  testWidgets('CupertinoDatePicker CustomMultiChildLayout has constrained width', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Directionality(
@@ -1493,7 +1493,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(CupertinoDatePicker)).width, 464);
+    expect(tester.getSize(find.byType(CustomMultiChildLayout)).width, 464);
   });
 
   testWidgets('picker exports semantics', (WidgetTester tester) async {

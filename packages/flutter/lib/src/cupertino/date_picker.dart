@@ -1045,14 +1045,16 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
-          child: CustomMultiChildLayout(
-            delegate: _DatePickerLayoutDelegate(
-              columnWidths: columnWidths,
-              textDirectionFactor: textDirectionFactor,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
+            child: CustomMultiChildLayout(
+              delegate: _DatePickerLayoutDelegate(
+                columnWidths: columnWidths,
+                textDirectionFactor: textDirectionFactor,
+              ),
+              children: pickers,
             ),
-            children: pickers,
           ),
         ),
       ),
@@ -1431,14 +1433,16 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
-          child: CustomMultiChildLayout(
-            delegate: _DatePickerLayoutDelegate(
-              columnWidths: columnWidths,
-              textDirectionFactor: textDirectionFactor,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: totalWidth + (_kDatePickerPadSize * columnWidths.length) + 80),
+            child: CustomMultiChildLayout(
+              delegate: _DatePickerLayoutDelegate(
+                columnWidths: columnWidths,
+                textDirectionFactor: textDirectionFactor,
+              ),
+              children: pickers,
             ),
-            children: pickers,
           ),
         ),
       ),
