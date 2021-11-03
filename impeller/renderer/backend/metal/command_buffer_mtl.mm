@@ -34,7 +34,7 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   return CommandBufferMTL::Status::kError;
 }
 
-void CommandBufferMTL::Commit(CompletionCallback callback) {
+void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
   if (!callback) {
     callback = [](auto) {};
   }

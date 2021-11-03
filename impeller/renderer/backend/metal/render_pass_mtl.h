@@ -39,10 +39,10 @@ class RenderPassMTL final : public RenderPass {
   HostBuffer& GetTransientsBuffer() override;
 
   // |RenderPass|
-  bool RecordCommand(Command command) override;
+  bool AddCommand(Command command) override;
 
   // |RenderPass|
-  bool Commit(Allocator& transients_allocator) const override;
+  bool EncodeCommands(Allocator& transients_allocator) const override;
 
   bool EncodeCommands(Allocator& transients_allocator,
                       id<MTLRenderCommandEncoder> pass) const;

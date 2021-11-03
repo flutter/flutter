@@ -82,7 +82,7 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-  return pass.RecordCommand(std::move(cmd));
+  return pass.AddCommand(std::move(cmd));
 }
 
 }  // namespace impeller
