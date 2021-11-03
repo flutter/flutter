@@ -283,7 +283,7 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling({bool ignoreDeprecation = true}) async {
+  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -294,7 +294,7 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
-      ignoreDeprecation: ignoreDeprecation,
+      deprecationBehavior: deprecationBehavior,
     );
   }
 
@@ -308,14 +308,14 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     bool winUwpPlatform = false,
-    bool ignoreDeprecation = true,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
     if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(ignoreDeprecation: ignoreDeprecation);
+      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -481,7 +481,7 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.directory.childDirectory('build');
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling({bool ignoreDeprecation = true}) async {
+  Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
       globals.printStatus(
 '''
@@ -500,14 +500,19 @@ the v1 Android embedding will be removed in future versions of Flutter.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 '''
       );
-      if (ignoreDeprecation) {
-        BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      } else {
-        BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-        throwToolExit(
-          'Build failed due to use of deprecated Android v1 emebdding.',
-          exitCode: 1,
-        );
+      switch (deprecationBehavior) {
+        case DeprecationBehavior.none:
+          break;
+        case DeprecationBehavior.ignore:
+          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+          break;
+        case DeprecationBehavior.exit:
+          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+          throwToolExit(
+            'Build failed due to use of deprecated Android v1 emebdding.',
+            exitCode: 1,
+          );
+          break;
       }
     }
     if (isModule && _shouldRegenerateFromTemplate()) {
@@ -614,6 +619,16 @@ enum AndroidEmbeddingVersion {
   v1,
   /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
   v2,
+}
+
+// What the tool should do when encountering deprecated API in applications.
+enum DeprecationBehavior {
+  // The command being run does not care about deprecation status.
+  none,
+  // The command should continue and ignore the deprecation warning.
+  ignore,
+  // The command should exit the tool.
+  exit,
 }
 
 /// Represents the web sub-project of a Flutter project.

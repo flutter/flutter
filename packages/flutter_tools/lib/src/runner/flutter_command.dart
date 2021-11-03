@@ -178,7 +178,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get ignoreDeprecation => true;
+  DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
@@ -1284,7 +1284,7 @@ abstract class FlutterCommand extends Command<void> {
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
         checkUpToDate: cachePubGet,
       );
-      await project.regeneratePlatformSpecificTooling(ignoreDeprecation: ignoreDeprecation);
+      await project.regeneratePlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }

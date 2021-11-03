@@ -72,7 +72,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   final String name = 'appbundle';
 
   @override
-  bool get ignoreDeprecation => boolArg('ignore-deprecation');
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
