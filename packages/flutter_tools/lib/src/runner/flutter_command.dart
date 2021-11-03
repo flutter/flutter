@@ -14,7 +14,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
-import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
