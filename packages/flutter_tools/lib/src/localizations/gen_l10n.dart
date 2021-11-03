@@ -1277,7 +1277,9 @@ class LocalizationsGenerator {
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
     if (useSyntheticPackage) {
-      final Directory syntheticPackageDirectory = _fs.directory(_defaultSyntheticPackagePath(_fs));
+      final Directory syntheticPackageDirectory = projectDirectory != null
+          ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
+          : _fs.directory(_defaultSyntheticPackagePath(_fs));
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
