@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/entity_renderer_impl.h"
+#include "flutter/impeller/entity/entity_renderer.h"
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/renderer/tessellator.h"
@@ -10,7 +10,7 @@
 
 namespace impeller {
 
-EntityRendererImpl::EntityRendererImpl(std::shared_ptr<Context> context)
+EntityRenderer::EntityRenderer(std::shared_ptr<Context> context)
     : context_(std::move(context)) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -26,13 +26,30 @@ EntityRendererImpl::EntityRendererImpl(std::shared_ptr<Context> context)
   is_valid_ = true;
 }
 
-EntityRendererImpl::~EntityRendererImpl() = default;
+EntityRenderer::~EntityRenderer() = default;
 
-bool EntityRendererImpl::IsValid() const {
+bool EntityRenderer::IsValid() const {
   return is_valid_;
 }
 
-EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
+bool EntityRenderer::RenderEntities(const Surface& surface,
+                                    RenderPass& onscreen_pass,
+                                    const std::vector<Entity>& entities) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  for (const auto& entity : entities) {
+    if (RenderEntity(surface, onscreen_pass, entity) ==
+        EntityRenderer::RenderResult::kFailure) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+EntityRenderer::RenderResult EntityRenderer::RenderEntity(
     const Surface& surface,
     RenderPass& pass,
     const Entity& entity) {

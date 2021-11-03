@@ -7,8 +7,8 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/gradient_fill.frag.h"
-#include "impeller/entity/gradient_fill.vert.h"
+#include "flutter/impeller/entity/gradient_fill.frag.h"
+#include "flutter/impeller/entity/gradient_fill.vert.h"
 #include "impeller/renderer/pipeline.h"
 
 namespace impeller {

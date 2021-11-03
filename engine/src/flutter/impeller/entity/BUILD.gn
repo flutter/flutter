@@ -17,16 +17,14 @@ impeller_shaders("entity_shaders") {
 
 impeller_component("entity") {
   sources = [
+    "content_renderer.cc",
     "content_renderer.h",
-    "content_renderer.mm",
+    "contents.cc",
     "contents.h",
-    "contents.mm",
     "entity.cc",
     "entity.h",
+    "entity_renderer.cc",
     "entity_renderer.h",
-    "entity_renderer.mm",
-    "entity_renderer_impl.h",
-    "entity_renderer_impl.mm",
   ]
 
   deps = [ ":entity_shaders" ]
@@ -40,7 +38,7 @@ impeller_component("entity") {
 impeller_component("entity_unittests") {
   testonly = true
 
-  sources = [ "entity_unittests.mm" ]
+  sources = [ "entity_unittests.cc" ]
 
   deps = [
     ":entity",
