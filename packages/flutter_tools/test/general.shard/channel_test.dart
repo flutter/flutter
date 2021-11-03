@@ -25,13 +25,22 @@ import '../src/test_flutter_command_runner.dart';
 void main() {
   group('channel', () {
     FakeProcessManager fakeProcessManager;
+    MemoryFileSystem fileSystem;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
+      fileSystem = MemoryFileSystem.test();
+      final Directory flutterRootDirectory = fileSystem.directory(Cache.flutterRoot);
+      // The tool ensures that its own source directory exists before running
+      flutterRootDirectory
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .createSync(recursive: true);
     });
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = '/path/to/flutter';
     });
 
     Future<void> simpleChannelTest(List<String> args) async {
@@ -49,11 +58,23 @@ void main() {
     }
 
     testUsingContext('list', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <String>['git', 'branch', '-r']),
+      );
       await simpleChannelTest(<String>['channel']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('verbose list', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <String>['git', 'branch', '-r']),
+      );
       await simpleChannelTest(<String>['channel', '-v']);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('sorted by stability', () async {
@@ -135,7 +156,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('removes duplicates', () async {
@@ -168,7 +189,7 @@ void main() {
       expect(rows, <String>['dev', 'beta', 'stable', 'Currently not on an official channel.']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('can switch channels', () async {
@@ -211,7 +232,7 @@ void main() {
 
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
     });
 
@@ -245,7 +266,7 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
     });
 
@@ -287,7 +308,7 @@ void main() {
       expect(versionCheckFile.existsSync(), isFalse);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
     });
   });
