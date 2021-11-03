@@ -206,6 +206,7 @@ class TextPainter {
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
     _paragraph = null;
+    _lineMetricsCache = null;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
   }
@@ -975,6 +976,7 @@ class TextPainter {
     return _paragraph!.getLineBoundary(position);
   }
 
+  List<ui.LineMetrics>? _lineMetricsCache;
   /// Returns the full list of [LineMetrics] that describe in detail the various
   /// metrics of each laid out line.
   ///
@@ -992,6 +994,6 @@ class TextPainter {
   /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_debugNeedsLayout);
-    return _paragraph!.computeLineMetrics();
+    return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
   }
 }
