@@ -26,10 +26,41 @@ struct Bindings {
   std::map<size_t, std::shared_ptr<const Sampler>> samplers;
 };
 
+//------------------------------------------------------------------------------
+/// @brief      An object used to specify work to the GPU along with references
+///             to resources the GPU will used when doing said work.
+///
+///             To construct a valid command, follow these steps:
+///             * Specify a valid pipeline.
+///             * Specify vertex information via a call `BindVertices`
+///             * Specify any stage bindings.
+///             * (Optional) Specify a debug label.
+///
+///             Command are very lightweight objects and can be created
+///             frequently and on demand. The resources referenced in commands
+///             views into buffers managed by other allocators and resource
+///             managers.
+///
 struct Command {
+  //----------------------------------------------------------------------------
+  /// The pipeline to use for this command.
+  ///
   std::shared_ptr<Pipeline> pipeline;
+  //----------------------------------------------------------------------------
+  /// The buffer, texture, and sampler bindings used by the vertex pipeline
+  /// stage.
+  ///
   Bindings vertex_bindings;
+  //----------------------------------------------------------------------------
+  /// The buffer, texture, and sampler bindings used by the fragment pipeline
+  /// stage.
+  ///
   Bindings fragment_bindings;
+  //----------------------------------------------------------------------------
+  /// The index buffer binding used by the vertex shader stage. Instead of
+  /// setting this directly, it usually easier to specify the vertex and index
+  /// buffer bindings directly via a single call to `BindVertices`.
+  ///
   BufferView index_buffer;
   size_t index_count = 0u;
   std::string label;

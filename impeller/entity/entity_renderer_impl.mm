@@ -53,7 +53,7 @@ EntityRendererImpl::RenderResult EntityRendererImpl::RenderEntity(
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     {
       auto tesselation_result = Tessellator{}.Tessellate(
-          entity.GetPath().SubdivideAdaptively(), [&vtx_builder](auto point) {
+          entity.GetPath().CreatePolyline(), [&vtx_builder](auto point) {
             VS::PerVertexData vtx;
             vtx.vertices = point;
             vtx_builder.AppendVertex(vtx);
