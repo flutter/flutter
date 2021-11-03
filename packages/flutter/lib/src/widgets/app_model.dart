@@ -25,9 +25,12 @@ typedef AppModelInitCallback<T> = T Function();
 /// in the shared data table and forces widgets that depend on that entry
 /// to be rebuilt.
 ///
-/// A widget whose build method uses AppModel.getValue(context, keyword, init)
-/// creates a dependency on the AppModel: when the value of keyword
-/// changes with AppModel.setValue(), the widget will be rebuilt.
+/// A widget whose build method uses AppModel.getValue(context,
+/// keyword, initCallback) creates a dependency on the AppModel. When
+/// the value of keyword changes with AppModel.setValue(), the widget
+/// will be rebuilt. The values managed by the AppModel are expected
+/// to be immutable: intrinsic changes to values will not cause
+/// dependent widgets to be rebuilt.
 ///
 /// An instance of this widget is created automatically by [WidgetsApp].
 ///
@@ -88,8 +91,10 @@ class AppModel extends StatefulWidget {
   /// time the value of `key` is changed with [AppModel.setValue], the
   /// specified context will be rebuilt.
   ///
-  /// If no value for `key` then the `init` callback is used to generate
-  /// an initial value.
+  /// If no value for `key` exists then the `init` callback is used to
+  /// generate an initial value. The callback is expected to return
+  /// an immutable value because intrinsic changes to the value will
+  /// not cause dependent widgets to be rebuilt.
   ///
   /// A Widget that depends on the app model's value for `key` should use
   /// this method in their `build` methods to ensure that they are rebuilt
@@ -108,6 +113,10 @@ class AppModel extends StatefulWidget {
   ///
   /// If `value` is `==` to the current value of `key` then nothing
   /// is rebuilt.
+  ///
+  /// The `value` is expected to be immutable because intrinsic
+  /// changes to the value will not cause dependent widgets to be
+  /// rebuilt.
   ///
   /// Unlike [AppModel.getValue], this method does _not_ create a dependency
   /// between `context` and `key`.
@@ -183,7 +192,7 @@ class _AppModelData extends InheritedModel<Object> {
   }
 
   @override
-  bool updateShouldNotifyDependent(_AppModelData old, Set<Object> keys) {
+  bool updateShouldNotifyDependent(_AppModelData old, Set<Object> keys) => true;
     for (final Object key in keys) {
       if (data[key] != old.data[key]) {
         return true;
