@@ -24,7 +24,10 @@
   XCTAssertGreaterThanOrEqual([mainMenu itemWithTitle:@"View"].submenu.numberOfItems, 1);
   XCTAssertGreaterThanOrEqual([mainMenu itemWithTitle:@"Window"].submenu.numberOfItems, 1);
 
-  XCTAssertNil(NSApplication.sharedApplication.helpMenu);
+  NSMenu *helpMenu = NSApplication.sharedApplication.helpMenu;
+  XCTAssertNotNil(helpMenu);
+  // Only the help menu search text box.
+  XCTAssertEqual(helpMenu.numberOfItems, 0);
 }
 
 @end
