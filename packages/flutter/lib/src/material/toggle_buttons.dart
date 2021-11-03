@@ -172,6 +172,7 @@ class ToggleButtons extends StatelessWidget {
     required this.isSelected,
     this.onPressed,
     this.mouseCursor,
+    this.tapTargetSize,
     this.textStyle,
     this.constraints,
     this.color,
@@ -230,6 +231,15 @@ class ToggleButtons extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
+
+  /// Configures the minimum size of the area within which the button may
+  /// be pressed.
+  ///
+  /// If the [tapTargetSize] is larger than [constraints], the button will
+  /// include a transparent margin that responds to taps.
+  ///
+  /// Always defaults to [ThemeData.materialTapTargetSize].
+  final MaterialTapTargetSize? tapTargetSize;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
@@ -686,7 +696,7 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    return direction == Axis.horizontal
+    final Widget result = direction == Axis.horizontal
       ? IntrinsicHeight(
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -702,6 +712,22 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+
+    final MaterialTapTargetSize resolvedTapTargetSize = tapTargetSize ?? theme.materialTapTargetSize;
+    switch (resolvedTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        return ConstrainedBox(
+          // TODO: This makes it work but constrains the max height which we don't actually want.
+          constraints: const BoxConstraints(maxHeight: kMinInteractiveDimension),
+          child: _InputPadding(
+            minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+            child: result,
+          ),
+        );
+      case MaterialTapTargetSize.shrinkWrap:
+        return result;
+    }
+    return result;
   }
 
   @override
@@ -1548,5 +1574,120 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           break;
       }
     }
+  }
+}
+
+/// A widget to pad the area around a [ToggleButtons]'s children.
+///
+/// Redirect taps that occur in the padded area around the child to the center
+/// of the child. This increases the size of the widget and it's "tap target",
+/// but not its material or its ink splashes.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
+    Key? key,
+    Widget? child,
+    required this.minSize,
+  }) : super(key: key, child: child);
+
+  final Size minSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderInputPadding(minSize);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
+  }
+}
+
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
+
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
+      return;
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
+    print('------------ performLayout: $size');
+    if (child != null) {
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    if (super.hitTest(result, position: position)) {
+      return true;
+    }
+    print('------------ hitTest position: $position, child: ${child!.size}');
+
+    final Offset center = Offset(position.dx, child!.size.height / 2);
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(center),
+      position: center,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == center);
+        return child!.hitTest(result, position: center);
+      },
+    );
   }
 }
