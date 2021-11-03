@@ -13,8 +13,9 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #pragma once
 
-// Note: The nogncheck decorations are only to make GN not mad at the template.
-// There are no GN rule violations in the generated file itself.
+// Note: The nogncheck decorations are only to make GN not mad at the template
+// this file is generated from. There are no GN rule violations in the generated
+// file itself.
 #include "impeller/renderer/buffer_view.h"   // nogncheck
 #include "impeller/renderer/command.h"       // nogncheck
 #include "impeller/renderer/sampler.h"       // nogncheck
