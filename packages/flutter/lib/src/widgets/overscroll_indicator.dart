@@ -66,6 +66,14 @@ import 'transitions.dart';
 /// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates how to override the default drag behavior to render
+/// `GlowingOverscrollIndicator` affect on devices with `PointerDeviceKind.touch`
+/// and `PointerDeviceKind.mouse`.
+///
+/// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OverscrollIndicatorNotification], which can be used to manipulate the
