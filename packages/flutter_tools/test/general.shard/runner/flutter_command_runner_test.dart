@@ -30,12 +30,17 @@ void main() {
     Platform platform;
 
     setUpAll(() {
+      Cache.flutterRoot = _kFlutterRoot;
       Cache.disableLocking();
     });
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
+      fileSystem
+          .directory(_kFlutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .createSync(recursive: true);
       fileSystem.directory(_kProjectRoot).createSync(recursive: true);
       fileSystem.currentDirectory = _kProjectRoot;
 

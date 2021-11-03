@@ -27,8 +27,14 @@ const String kCustomBugInstructions = 'These are instructions to report with a c
 
 void main() {
   int firstExitCode;
+  MemoryFileSystem fileSystem;
+  FakeProcessManager processManager;
 
   group('runner', () {
+    setUpAll(() {
+      Cache.flutterRoot = '/path/to/flutter';
+    });
+
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
@@ -46,6 +52,13 @@ void main() {
       });
 
       Cache.disableLocking();
+      fileSystem = MemoryFileSystem.test();
+      fileSystem
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .createSync(recursive: true);
+      processManager = FakeProcessManager.empty();
     });
 
     tearDown(() {
@@ -92,8 +105,8 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
     });
@@ -192,8 +205,8 @@ void main() {
           'FLUTTER_ROOT': '/',
         }
       ),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
       CrashReporter: () => WaitingCrashReporter(Future<void>.value())
