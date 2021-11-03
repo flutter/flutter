@@ -365,22 +365,6 @@ class MediaQueryData {
   ///  [dart:ui.DisplayFeatureType.hinge])
   final List<ui.DisplayFeature> displayFeatures;
 
-
-  /// Area of the display that is obstructed specifically by the
-  /// [DisplayFeatureType.hinge].
-  ///
-  /// A hinge is the space between 2 physical displays. The size of the Flutter view
-  /// in this case contains both screens and the area between them. The hinge
-  /// area can be used to separate the layout into 2 logical areas or panels in
-  /// the application.
-  ui.DisplayFeature? get hinge {
-    for (final ui.DisplayFeature e in displayFeatures) {
-      if (e.type == ui.DisplayFeatureType.hinge)
-        return e;
-    }
-    return null;
-  }
-
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {

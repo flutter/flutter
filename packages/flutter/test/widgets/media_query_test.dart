@@ -113,7 +113,6 @@ void main() {
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
-    expect(data.hinge, isNull);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -760,46 +759,5 @@ void main() {
 
     expect(settingsA, equals(settingsC));
     expect(settingsA, isNot(settingsB));
-  });
-
-  testWidgets('MediaQueryData.hinge returns hinge display feature', (WidgetTester tester) async {
-    const MediaQueryData data = MediaQueryData(
-      displayFeatures: <DisplayFeature>[
-        DisplayFeature(
-          bounds: Rect.zero,
-          type: DisplayFeatureType.cutout,
-          state: DisplayFeatureState.unknown,
-        ),
-        DisplayFeature(
-          bounds: Rect.zero,
-          type: DisplayFeatureType.fold,
-          state: DisplayFeatureState.unknown,
-        ),
-        DisplayFeature(
-          bounds: Rect.zero,
-          type: DisplayFeatureType.hinge,
-          state: DisplayFeatureState.unknown,
-        ),
-      ],
-    );
-    expect(data.hinge?.type, DisplayFeatureType.hinge);
-  });
-
-  testWidgets('MediaQueryData.hinge returns null', (WidgetTester tester) async {
-    const MediaQueryData data = MediaQueryData(
-      displayFeatures: <DisplayFeature>[
-        DisplayFeature(
-          bounds: Rect.zero,
-          type: DisplayFeatureType.cutout,
-          state: DisplayFeatureState.unknown,
-        ),
-        DisplayFeature(
-          bounds: Rect.zero,
-          type: DisplayFeatureType.fold,
-          state: DisplayFeatureState.unknown,
-        ),
-      ],
-    );
-    expect(data.hinge, isNull);
   });
 }
