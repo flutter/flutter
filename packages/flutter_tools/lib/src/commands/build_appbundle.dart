@@ -72,6 +72,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
   final String name = 'appbundle';
 
   @override
+  bool get ignoreDeprecation => boolArg('ignore-deprecation');
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
   };

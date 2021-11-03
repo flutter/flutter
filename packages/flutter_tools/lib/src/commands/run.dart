@@ -343,6 +343,9 @@ class RunCommand extends RunCommandBase {
   final String name = 'run';
 
   @override
+  bool get ignoreDeprecation => boolArg('ignore-deprecation');
+
+  @override
   final String description = 'Run your Flutter app on an attached device.';
 
   @override
