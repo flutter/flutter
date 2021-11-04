@@ -122,20 +122,10 @@ bool AngleSurfaceManager::Initialize() {
       EGL_NONE,
   };
 
-  // These are used to request ANGLE's D3D9 renderer as a fallback if D3D11
-  // is not available.
-  const EGLint d3d9_display_attributes[] = {
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE,
-      EGL_TRUE,
-      EGL_NONE,
-  };
-
   std::vector<const EGLint*> display_attributes_configs = {
       d3d11_display_attributes,
       d3d11_fl_9_3_display_attributes,
       d3d11_warp_display_attributes,
-      d3d9_display_attributes,
   };
 
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
@@ -147,7 +137,7 @@ bool AngleSurfaceManager::Initialize() {
   }
 
   // Attempt to initialize ANGLE's renderer in order of: D3D11, D3D11 Feature
-  // Level 9_3, D3D11 WARP and finally D3D9.
+  // Level 9_3 and finally D3D11 WARP.
   for (auto config : display_attributes_configs) {
     bool should_log = (config == display_attributes_configs.back());
     if (InitializeEGL(egl_get_platform_display_EXT, config, should_log)) {
