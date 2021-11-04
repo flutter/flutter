@@ -193,8 +193,9 @@ void main() {
 
         try {
           await project.regeneratePlatformSpecificTooling(deprecationBehavior: DeprecationBehavior.exit);
-        } catch (e) {}
-        throwsA(isException);
+        } on Exception {
+          throwsA(isException);
+        }
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android project not on v2 embedding ignore continues', () async {
