@@ -324,6 +324,7 @@ void RasterCache::Touch(Layer* layer, const SkMatrix& ctm) {
   auto it = layer_cache_.find(cache_key);
   if (it != layer_cache_.end()) {
     it->second.used_this_frame = true;
+    it->second.access_count++;
   }
 }
 
@@ -333,6 +334,7 @@ void RasterCache::Touch(SkPicture* picture,
   auto it = picture_cache_.find(cache_key);
   if (it != picture_cache_.end()) {
     it->second.used_this_frame = true;
+    it->second.access_count++;
   }
 }
 
@@ -343,6 +345,7 @@ void RasterCache::Touch(DisplayList* display_list,
   auto it = display_list_cache_.find(cache_key);
   if (it != display_list_cache_.end()) {
     it->second.used_this_frame = true;
+    it->second.access_count++;
   }
 }
 
