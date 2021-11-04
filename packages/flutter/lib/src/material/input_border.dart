@@ -416,8 +416,12 @@ class OutlineInputBorder extends InputBorder {
       scaledRRect.blRadiusX * 2.0,
     );
 
+    // This assumes that the radius is circular (x and y radius are equal).
+    // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = math.acos((1 - start / scaledRRect.tlRadiusX).clamp(0.0, 1.0));
+    final double tlCornerArcSweep = math.acos(
+      (1 - start / scaledRRect.tlRadiusX).clamp(0.0, 1.0),
+    );
 
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep);
