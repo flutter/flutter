@@ -542,6 +542,126 @@ void main() {
     );
   });
 
+  testWidgets('FlexibleSpaceBar scaled title', (WidgetTester tester) async {
+    const double titleFontSize = 20.0;
+    const double height = 300.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                stretch: true,
+                flexibleSpace: RepaintBoundary(
+                  child: FlexibleSpaceBar(
+                    title: Text(
+                      'X',
+                      style: TextStyle(fontSize: titleFontSize,),
+                    ),
+                    centerTitle: false,
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  <Widget>[
+                    for (int i = 0; i < 3; i++)
+                      SizedBox(
+                        height: 200.0,
+                        child: Center(child: Text('Item $i')),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
+    await tester.pumpAndSettle();
+
+    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    await expectLater(
+        flexibleSpaceBar,
+        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
+    );
+
+    // We drag down to fully expand the space bar.
+    await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+        flexibleSpaceBar,
+        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png')
+    );
+  });
+
+  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
+    const double titleFontSize = 20.0;
+    const double height = 300.0;
+    const double expandedTitleScale = 3.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                stretch: true,
+                flexibleSpace: RepaintBoundary(
+                  child: FlexibleSpaceBar(
+                    title: Text(
+                      'X',
+                      style: TextStyle(fontSize: titleFontSize,),
+                    ),
+                    centerTitle: false,
+                    expandedTitleScale: expandedTitleScale,
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  <Widget>[
+                    for (int i = 0; i < 3; i++)
+                      SizedBox(
+                        height: 200.0,
+                        child: Center(child: Text('Item $i')),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
+    await tester.pumpAndSettle();
+
+    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    await expectLater(
+        flexibleSpaceBar,
+        matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.collapsed.png')
+    );
+
+    // We drag down to fully expand the space bar.
+    await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+        flexibleSpaceBar,
+        matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png')
+    );
+  });
+
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
