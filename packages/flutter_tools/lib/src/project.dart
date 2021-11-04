@@ -347,6 +347,12 @@ class FlutterProject {
     );
   }
 
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (android.existsSync()) {
+      android.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+    }
+  }
+
   /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
   String getVersionInfo()  {
     final String? buildName = manifest.buildName;
@@ -482,38 +488,6 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
-    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
-'''
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. Follow the
-steps at
-
-https://flutter.dev/go/android-project-migration
-
-to migrate your project. You may also pass the --ignore-deprecation flag to
-ignore this check and continue with the deprecated v1 embedding. However,
-the v1 Android embedding will be removed in future versions of Flutter.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'''
-      );
-      switch (deprecationBehavior) {
-        case DeprecationBehavior.none:
-          break;
-        case DeprecationBehavior.ignore:
-          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          break;
-        case DeprecationBehavior.exit:
-          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          throwToolExit(
-            'Build failed due to use of deprecated Android v1 emebdding.',
-            exitCode: 1,
-          );
-      }
-    }
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -569,6 +543,41 @@ the v1 Android embedding will be removed in future versions of Flutter.
       },
       printStatusWhenWriting: false,
     );
+  }
+
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
+      globals.printStatus(
+'''
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It is being deprecated in favor of Android embedding v2. Follow the
+steps at
+
+https://flutter.dev/go/android-project-migration
+
+to migrate your project. You may also pass the --ignore-deprecation flag to
+ignore this check and continue with the deprecated v1 embedding. However,
+the v1 Android embedding will be removed in future versions of Flutter.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+'''
+      );
+      switch (deprecationBehavior) {
+        case DeprecationBehavior.none:
+          break;
+        case DeprecationBehavior.ignore:
+          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+          break;
+        case DeprecationBehavior.exit:
+          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+          throwToolExit(
+            'Build failed due to use of deprecated Android v1 emebdding.',
+            exitCode: 1,
+          );
+      }
+    }
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {

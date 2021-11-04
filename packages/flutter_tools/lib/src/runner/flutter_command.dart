@@ -1257,8 +1257,10 @@ abstract class FlutterCommand extends Command<void> {
 
     await validateCommand();
 
+    final FlutterProject project = FlutterProject.current();
+    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+
     if (shouldRunPub) {
-      final FlutterProject project = FlutterProject.current();
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
@@ -1278,12 +1280,12 @@ abstract class FlutterCommand extends Command<void> {
         buildSystem: globals.buildSystem!,
       );
 
-      await project.regeneratePlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
         checkUpToDate: cachePubGet,
       );
+      await project.regeneratePlatformSpecificTooling();
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
