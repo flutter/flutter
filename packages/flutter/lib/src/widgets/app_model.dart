@@ -37,9 +37,7 @@ typedef AppModelInitCallback<T> = T Function();
 /// There are many ways to share data with a widget subtree. This
 /// class is based on [InheritedModel], which is an [InheritedWidget].
 /// It's intended to be used by packages that need to share a modest
-/// number of values among their own components. It obviates the
-/// need for package users to instantiate package-specific
-/// data sharing "umbrella" widgets.
+/// number of values among their own components.
 ///
 /// AppModel is not intended to be a substitute for Provider or any of
 /// the other general purpose application state systems. AppModel is
@@ -96,7 +94,7 @@ class AppModel extends StatefulWidget {
   /// an immutable value because intrinsic changes to the value will
   /// not cause dependent widgets to be rebuilt.
   ///
-  /// A Widget that depends on the app model's value for `key` should use
+  /// A widget that depends on the app model's value for `key` should use
   /// this method in their `build` methods to ensure that they are rebuilt
   /// if the value changes.
   ///
