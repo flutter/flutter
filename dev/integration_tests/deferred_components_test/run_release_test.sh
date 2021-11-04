@@ -39,17 +39,18 @@ exit
 x=20
 while [ $x -le 120 ]
 do
+  $adb_path logcat -d -t "$script_start_time" > build/app/outputs/bundle/release/run_logcat.log
+  if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferred code"; then
+    echo "All tests passed."
+    exit 0
+  fi
+  echo "Waiting for $x seconds"
   # We use an increasing delay here as the emulator can lag and take a long time to finish running the app.
   # Delay of 20s produces ~5-10% flakes, 30s produces ~2% flakes roughly.
   $adb_path shell "
   sleep 10
   exit
   "
-  echo ""
-  if $adb_path logcat -d -t "$script_start_time" | grep -q "Running deferred code"; then
-    echo "All tests passed."
-    exit 0
-  fi
   x=$(( $x + 10 ))
 done
 echo "Failure: Deferred component did not load."
