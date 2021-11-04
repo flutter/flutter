@@ -49,7 +49,7 @@ List<Target> _kDefaultTargets = <Target>[
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
-  WebServiceWorker(globals.fs),
+  WebServiceWorker(globals.fs, globals.cache),
   const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   const CopyFlutterBundle(),
