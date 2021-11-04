@@ -225,6 +225,17 @@ abstract class FlutterView {
   ///   applications.
   WindowPadding get padding => viewConfiguration.padding;
 
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  ///
+  /// When this changes, [onMetricsChanged] is called.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  ///  * [MediaQuery.of], a simpler mechanism to access this data.
+  List<DisplayFeature> get displayFeatures => viewConfiguration.displayFeatures;
+
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
   /// This function must be called within the scope of the
