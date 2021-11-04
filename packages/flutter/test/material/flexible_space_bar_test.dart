@@ -647,9 +647,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    // This should match the default behavior
     await expectLater(
         flexibleSpaceBar,
-        matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.collapsed.png')
+        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
     );
 
     // We drag down to fully expand the space bar.
