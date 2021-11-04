@@ -1104,7 +1104,6 @@ class RenderParagraph extends RenderBox
   }
 
   /// Assert that the last layout still matches the constraints.
-  @override
   void debugAssertLayoutUpToDate() {}
 
   // End TextLayoutMetrics.
