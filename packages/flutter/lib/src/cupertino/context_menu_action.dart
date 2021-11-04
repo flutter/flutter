@@ -104,7 +104,6 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
