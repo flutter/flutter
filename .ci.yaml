@@ -1188,7 +1188,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_canvaskit_tests_0
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1251,7 +1250,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_3
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1335,7 +1333,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_7_last
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1642,7 +1639,6 @@ targets:
 
   - name: Linux_android flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91270
     presubmit: false
     timeout: 60
     properties:
