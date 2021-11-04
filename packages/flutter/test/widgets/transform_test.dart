@@ -506,7 +506,7 @@ void main() {
     );
   });
 
-  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters", (WidgetTester tester) async {
+  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -524,7 +524,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() needs at least 'scale' or both of 'scaleX' and 'scaleY' otherwise throws AssertionError", (WidgetTester tester) async {
+  testWidgets("Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,

@@ -1264,11 +1264,11 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scaleX` and `scaleY` provide the scalars to multiply the `x` and `y` axes.
+  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case that axis defaults to 1.0.
   ///
-  /// The `scale` provides the scalar to multiply both `x` and `y` axes and scales the child uniformly.
+  /// For convenience, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used, which will scale the child uniformly.
   ///
-  /// Please note that, you can provide either only `scale` or both `scaleX` and `scaleY`, but all three parameters cannot be left null.
+  /// At least one of `scale`, `scaleX`, and `scaleY` must be non-null. If `scale` is provided, the other two must be null; similarly, if it is not provided, one of the other two must be.
   ///
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
@@ -1304,8 +1304,8 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     Widget? child,
-  })  : assert(!(scale == null && scaleX == null && scaleY == null), "In Transform.scale(), You have to at least provide 'scale' or both of 'scaleX' and 'scaleY'"),
-        assert(scale == null || (scaleX == null && scaleY == null), "In Transform.scale(), you should either provide 'scale' or both of 'scaleX' and 'scaleY' but not all three"),
+  })  : assert(!(scale == null && scaleX == null && scaleY == null), "At least one of 'scale', 'scaleX' and 'scaleY' is required to be non-null"),
+        assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0),
         super(key: key, child: child);
 
