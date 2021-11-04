@@ -422,13 +422,19 @@ class StartContext {
       // tagging the branch point
       return requestedVersion;
     }
-    final String branchPoint = await framework.branchPoint(candidateBranch, 'master');
+    final String branchPoint = await framework.branchPoint(
+      candidateBranch,
+      kFrameworkDefaultBranch,
+    );
+    stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
     await framework.tag(
       branchPoint,
       requestedVersion.toString(),
       frameworkUpstream,
     );
-    return Version.increment(requestedVersion, 'n');
+    final Version nextVersion = Version.increment(requestedVersion, 'n');
+    stdio.printStatus('The actual release will be version $nextVersion.');
+    return nextVersion;
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.
