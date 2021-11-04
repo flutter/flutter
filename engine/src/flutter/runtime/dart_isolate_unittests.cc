@@ -123,7 +123,7 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
       /*isolate_shutdown_callback=*/settings.isolate_shutdown_callback,
       /*dart_entrypoint=*/"main",
       /*dart_entrypoint_library=*/std::nullopt,
-      /*isolate_configration=*/std::move(spawn_configuration));
+      /*isolate_configuration=*/std::move(spawn_configuration));
   auto spawn = weak_spawn.lock();
   ASSERT_TRUE(spawn);
   ASSERT_EQ(spawn->GetPhase(), DartIsolate::Phase::Running);
