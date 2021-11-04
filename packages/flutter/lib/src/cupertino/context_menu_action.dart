@@ -122,7 +122,9 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           button: true,
           child: Container(
             decoration: BoxDecoration(
-              color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
+              color: _isPressed
+                ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
             ),
             padding: const EdgeInsets.symmetric(
               vertical: 16.0,
