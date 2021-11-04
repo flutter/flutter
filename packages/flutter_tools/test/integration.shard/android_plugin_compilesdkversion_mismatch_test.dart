@@ -56,9 +56,9 @@ void main() {
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
 
-    // Bump up plugin compileSdkVersion to 30
+    // Bump up plugin compileSdkVersion to 31
     String newPluginGradleFile = pluginBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
+      androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
   
     // Create dummy project
@@ -79,16 +79,15 @@ void main() {
     final String pubspecFileString = pubspecFile.readAsStringSync();
     final RegExp pubspecDependenciesRegExp = RegExp('^dependencies:\n');
 
-    // Bump down project compileSdkVersion to 28
+    // Bump down project compileSdkVersion to 30
     String newProjectGradleFile = projectBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdkVersion 28');
+      androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
     // Add dummy plugin as dependency to dummy project
     String newPubspecFile= pubspecFileString.replaceFirst(
       'dependencies:', 'dependencies:\n  test_plugin:\n    path: ../test_plugin');
-    print(newPubspecFile);
-    projectGradleFile.writeAsStringSync(newPubspecFile);
+    pubspecFile.writeAsStringSync(newPubspecFile);
 
     // Run flutter pub get to update the dependencies
     final BufferLogger logger = BufferLogger.test();
@@ -105,11 +104,6 @@ void main() {
       context: PubContext.flutterTests,
       directory: projectAppDir.path);
 
-    await for (var entity in
-      projectAppDir.list(recursive: true, followLinks: false)) {
-    print(entity.path);
-  }
-
     // Run flutter build apk to build dummy project
     final ProcessResult result = await processManager.runSync(<String>[
       flutterBin,
@@ -120,11 +114,11 @@ void main() {
     ], workingDirectory: projectAppDir.path);
 
     // Check error message is thrown
-    expect(result.stderr,
-      contains("Warning: The plugin test_plugin requires Android SDK version 29.")
-      );
     expect(result.stdout,
-      contains("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to /flutter_plugin_test/test_project/android/app/build.gradle:\nandroid {\n  compileSdkVersion 31\n    ...\n}\n")
+      contains("Warning: The plugin test_plugin requires Android SDK version 31.\n")
+      );
+    expect(result.stderr,
+      contains("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${projectGradleFile.path}:\nandroid {\n  compileSdkVersion 31\n    ...\n}\n")
       );
    });
 }
