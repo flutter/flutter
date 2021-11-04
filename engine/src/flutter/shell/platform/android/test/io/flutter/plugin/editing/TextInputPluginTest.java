@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Insets;
@@ -67,6 +68,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -1439,7 +1441,7 @@ public class TextInputPluginTest {
       return;
     }
 
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
@@ -1526,7 +1528,7 @@ public class TextInputPluginTest {
       return;
     }
 
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
@@ -1578,7 +1580,7 @@ public class TextInputPluginTest {
 
     TestAfm testAfm =
         Shadow.extract(RuntimeEnvironment.application.getSystemService(AutofillManager.class));
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
@@ -1709,7 +1711,7 @@ public class TextInputPluginTest {
 
     TestAfm testAfm =
         Shadow.extract(RuntimeEnvironment.application.getSystemService(AutofillManager.class));
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
@@ -1803,7 +1805,7 @@ public class TextInputPluginTest {
 
     TestAfm testAfm =
         Shadow.extract(RuntimeEnvironment.application.getSystemService(AutofillManager.class));
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
@@ -1967,7 +1969,7 @@ public class TextInputPluginTest {
   @TargetApi(30)
   @Config(sdk = 30)
   public void ime_windowInsetsSync() {
-    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    FlutterView testView = new FlutterView(Robolectric.setupActivity(Activity.class));
     TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
