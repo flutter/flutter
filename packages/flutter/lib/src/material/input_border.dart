@@ -437,7 +437,9 @@ class OutlineInputBorder extends InputBorder {
       path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.asin((1 - dx / scaledRRect.trRadiusX).clamp(0.0, 1.0));
+      final double sweep = math.asin(
+        (1 - dx / scaledRRect.trRadiusX).clamp(0.0, 1.0),
+      );
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
