@@ -234,11 +234,7 @@ bool RasterCache::Prepare(PrerollContext* context,
   SkMatrix transformation_matrix = untranslated_matrix;
   transformation_matrix.preTranslate(offset.x(), offset.y());
 
-  // Decompose the matrix (once) for all subsequent operations. We want to make
-  // sure to avoid volumetric distortions while accounting for scaling.
-  const MatrixDecomposition matrix(transformation_matrix);
-
-  if (!matrix.IsValid()) {
+  if (!transformation_matrix.invert(nullptr)) {
     // The matrix was singular. No point in going further.
     return false;
   }
@@ -285,11 +281,7 @@ bool RasterCache::Prepare(PrerollContext* context,
   SkMatrix transformation_matrix = untranslated_matrix;
   transformation_matrix.preTranslate(offset.x(), offset.y());
 
-  // Decompose the matrix (once) for all subsequent operations. We want to make
-  // sure to avoid volumetric distortions while accounting for scaling.
-  const MatrixDecomposition matrix(transformation_matrix);
-
-  if (!matrix.IsValid()) {
+  if (!transformation_matrix.invert(nullptr)) {
     // The matrix was singular. No point in going further.
     return false;
   }

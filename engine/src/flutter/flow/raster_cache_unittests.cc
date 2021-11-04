@@ -473,6 +473,74 @@ TEST(RasterCache, NestedOpCountMetricUsedForDisplayList) {
   ASSERT_TRUE(cache.Draw(*display_list, dummy_canvas));
 }
 
+TEST(RasterCache, SkPictureWithSingularMatrixIsNotCached) {
+  size_t threshold = 2;
+  flutter::RasterCache cache(threshold);
+
+  SkMatrix matrices[] = {
+      SkMatrix::Scale(0, 1),
+      SkMatrix::Scale(1, 0),
+      SkMatrix::Skew(1, 1),
+  };
+  int matrixCount = sizeof(matrices) / sizeof(matrices[0]);
+
+  auto picture = GetSamplePicture();
+
+  SkCanvas dummy_canvas;
+
+  PrerollContextHolder preroll_context_holder = GetSamplePrerollContextHolder();
+
+  for (int i = 0; i < 10; i++) {
+    cache.PrepareNewFrame();
+
+    for (int j = 0; j < matrixCount; j++) {
+      ASSERT_FALSE(cache.Prepare(&preroll_context_holder.preroll_context,
+                                 picture.get(), true, false, matrices[j]));
+    }
+
+    for (int j = 0; j < matrixCount; j++) {
+      dummy_canvas.setMatrix(matrices[j]);
+      ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
+    }
+
+    cache.CleanupAfterFrame();
+  }
+}
+
+TEST(RasterCache, DisplayListWithSingularMatrixIsNotCached) {
+  size_t threshold = 2;
+  flutter::RasterCache cache(threshold);
+
+  SkMatrix matrices[] = {
+      SkMatrix::Scale(0, 1),
+      SkMatrix::Scale(1, 0),
+      SkMatrix::Skew(1, 1),
+  };
+  int matrixCount = sizeof(matrices) / sizeof(matrices[0]);
+
+  auto display_list = GetSampleDisplayList();
+
+  SkCanvas dummy_canvas;
+
+  PrerollContextHolder preroll_context_holder = GetSamplePrerollContextHolder();
+
+  for (int i = 0; i < 10; i++) {
+    cache.PrepareNewFrame();
+
+    for (int j = 0; j < matrixCount; j++) {
+      ASSERT_FALSE(cache.Prepare(&preroll_context_holder.preroll_context,
+                                 display_list.get(), true, false, matrices[j]));
+    }
+
+    for (int j = 0; j < matrixCount; j++) {
+      dummy_canvas.setMatrix(matrices[j]);
+      ASSERT_FALSE(cache.Draw(*display_list, dummy_canvas));
+    }
+
+    cache.CleanupAfterFrame();
+  }
+}
+
 }  // namespace testing
 
 }  // namespace flutter
