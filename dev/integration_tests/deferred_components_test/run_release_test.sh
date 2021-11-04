@@ -30,7 +30,6 @@ flutter build appbundle
 java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
 java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
-
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
 sleep 20
