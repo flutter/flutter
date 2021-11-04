@@ -1278,12 +1278,12 @@ abstract class FlutterCommand extends Command<void> {
         buildSystem: globals.buildSystem!,
       );
 
+      await project.regeneratePlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
       await pub.get(
         context: PubContext.getVerifyContext(name),
         generateSyntheticPackage: project.manifest.generateSyntheticPackage,
         checkUpToDate: cachePubGet,
       );
-      await project.regeneratePlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
