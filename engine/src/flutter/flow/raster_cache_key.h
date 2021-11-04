@@ -7,8 +7,8 @@
 
 #include <unordered_map>
 
-#include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/core/SkMatrix.h"
 
 namespace flutter {
 
