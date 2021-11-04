@@ -30,9 +30,12 @@ flutter build appbundle
 java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
 java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
+# TODO(garyq): Periodically check for the completed result rather than use a hard delay
+# We use a long delay here as the emulator can lag and take a long time to finish running the app.
+# Delay of 20s produces ~5-10% flakes, 30s produces ~2% flakes roughly.
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
-sleep 30
+sleep 60
 exit
 "
 $adb_path logcat -d -t "$script_start_time" > build/app/outputs/bundle/release/run_logcat.log
