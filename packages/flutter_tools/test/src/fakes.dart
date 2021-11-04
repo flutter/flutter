@@ -320,6 +320,7 @@ class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
     this.channel = 'unknown',
     this.dartSdkVersion = '12',
+    this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
     this.engineRevisionShort = 'abcde',
     this.repositoryUrl = 'https://github.com/flutter/flutter.git',
@@ -339,6 +340,9 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String channel;
+
+  @override
+  final String devToolsVersion;
 
   @override
   final String dartSdkVersion;

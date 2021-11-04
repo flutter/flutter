@@ -126,7 +126,7 @@ void main() {
           'Flutter • channel $channel • unknown source\n'
           'Framework • revision 1234abcd (1 second ago) • ${getChannelUpToDateVersion()}\n'
           'Engine • revision abcdefg\n'
-          'Tools • Dart 2.12.0',
+          'Tools • Dart 2.12.0 • DevTools 2.8.0',
         );
         expect(flutterVersion.frameworkAge, '1 second ago');
         expect(flutterVersion.getVersionString(), '$channel/1234abcd');
@@ -604,6 +604,9 @@ class FakeCache extends Fake implements Cache {
 
   @override
   String get engineRevision => 'abcdefg';
+
+  @override
+  String get devToolsVersion => '2.8.0';
 
   @override
   String get dartSdkVersion => '2.12.0';

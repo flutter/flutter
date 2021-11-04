@@ -894,6 +894,12 @@ void main() {
     expect(pub.calledGet, 1);
   });
 
+  testUsingContext('Check current DevTools version', () async {
+    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+    final RegExp devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+    expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1,);
+  });
+
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
   testUsingContext('Check current Dart SDK build number', () async {

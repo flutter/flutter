@@ -144,6 +144,8 @@ class FlutterVersion {
   late String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
+  String get devToolsVersion => globals.cache.devToolsVersion;
+
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -159,7 +161,7 @@ class FlutterVersion {
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
-    final String toolsText = 'Tools • Dart $dartSdkVersion';
+    final String toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
 
     // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
@@ -177,6 +179,7 @@ class FlutterVersion {
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
+    'devToolsVersion': devToolsVersion,
   };
 
   String get frameworkDate => frameworkCommitDate;

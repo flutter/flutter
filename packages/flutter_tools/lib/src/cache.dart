@@ -356,6 +356,30 @@ class Cache {
     }
   }
 
+  String get devToolsVersion {
+    if (_devToolsVersion == null) {
+      final Directory devToolsDir = getCacheDir('dart-sdk/bin/resources/devtools');
+      if (!devToolsDir.existsSync()) {
+        throwToolExit('Could not determine DevTools version.');
+      }
+      final File versionFile = _fileSystem.file('${devToolsDir.path}/version.json');
+      if (!versionFile.existsSync()) {
+        throwToolExit('Could not determine DevTools version.');
+      }
+      final dynamic data = jsonDecode(versionFile.readAsStringSync());
+      if (data is! Map<String, Object>) {
+        throwToolExit('Could not determine DevTools version.');
+      }
+      final dynamic version = data['version'];
+      if (version == null || version is! String) {
+        throwToolExit('Could not determine DevTools version.');
+      }
+      return _devToolsVersion = version;
+    }
+    return _devToolsVersion!;
+  }
+  String ? _devToolsVersion;
+
   /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {
     if (_dartSdkVersion == null) {
