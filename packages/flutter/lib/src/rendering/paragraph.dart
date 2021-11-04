@@ -1103,9 +1103,6 @@ class RenderParagraph extends RenderBox
     return _getTextPositionVertical(position, verticalOffset);
   }
 
-  /// Assert that the last layout still matches the constraints.
-  void debugAssertLayoutUpToDate() {}
-
   // End TextLayoutMetrics.
 
   /// Returns the TextPosition above or below the given offset.
