@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
 import '../src/fakes.dart';
-import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -104,7 +103,7 @@ void main() {
       directory: projectAppDir.path);
 
     // Run flutter build apk to build dummy project
-    final ProcessResult result = await processManager.runSync(<String>[
+    final ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
@@ -117,7 +116,7 @@ void main() {
       contains('Warning: The plugin test_plugin requires Android SDK version 31.\n')
       );
     expect(result.stderr,
-      contains('One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${projectGradleFile.path}:\nandroid {\n  compileSdkVersion 31\n    ...\n}\n')
+      contains('One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${projectGradleFile.path}:\nandroid {\n  compileSdkVersion 31\n    ...\n}')
       );
    });
 }
