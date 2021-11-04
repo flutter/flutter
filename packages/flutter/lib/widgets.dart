@@ -120,6 +120,7 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
+export 'src/widgets/text_editing_action_target.dart';
 export 'src/widgets/text_editing_intents.dart';
 export 'src/widgets/text_selection.dart';
 export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
