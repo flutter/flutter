@@ -83,11 +83,6 @@ void main() {
             .join(exampleAppDir.path, 'android', 'gradle', 'wrapper'))
         .deleteSync(recursive: true);
 
-    // Use AGP 3.3.0
-    newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:3.3.0');
-    buildGradleFile.writeAsStringSync(newBuildGradle);
-
     // Enable R8 in gradle.properties
     final File gradleProperties =
         exampleAppDir.childDirectory('android').childFile('gradle.properties');
