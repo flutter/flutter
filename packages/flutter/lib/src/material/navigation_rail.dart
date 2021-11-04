@@ -561,7 +561,7 @@ class _RailDestination extends StatelessWidget {
     final Widget content;
     switch (labelType) {
       case NavigationRailLabelType.none:
-        final Widget iconWithIndicator =  Stack(
+        final Widget iconWithIndicator = Stack(
           alignment: Alignment.center,
           children: <Widget>[
             if (useIndicator)
