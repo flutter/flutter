@@ -362,7 +362,7 @@ class MediaQueryData {
   ///  display features and explains the differences between them.
   ///  * [dart:ui.DisplayFeatureState], which lists the possible states for
   ///  folding features ([dart:ui.DisplayFeatureType.fold] and
-  ///  [dart:ui.DisplayFeatureType.hinge])
+  ///  [dart:ui.DisplayFeatureType.hinge]).
   final List<ui.DisplayFeature> displayFeatures;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
