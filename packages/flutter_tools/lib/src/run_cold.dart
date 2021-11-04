@@ -13,7 +13,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';

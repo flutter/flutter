@@ -9,10 +9,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
+import 'app_model.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'default_text_editing_actions.dart';
 import 'default_text_editing_shortcuts.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -1053,9 +1053,6 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
-  ///
-  /// Passing this will not replace [DefaultTextEditingActions]. These can be
-  /// overridden by placing an [Actions] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1668,15 +1665,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-        // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-        // fall through to the defaultShortcuts.
-        child: DefaultTextEditingShortcuts(
-          child: Actions(
-            actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: DefaultTextEditingActions(
+      child: AppModel(
+        child: Shortcuts(
+          debugLabel: '<Default WidgetsApp Shortcuts>',
+          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+          // fall through to the defaultShortcuts.
+          child: DefaultTextEditingShortcuts(
+            child: Actions(
+              actions: widget.actions ?? WidgetsApp.defaultActions,
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
                 child: child,

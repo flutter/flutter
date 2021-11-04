@@ -17,7 +17,7 @@ import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import 'install_manifest.dart';
 import 'visual_studio.dart';

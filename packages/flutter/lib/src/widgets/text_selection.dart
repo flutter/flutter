@@ -204,8 +204,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
+  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
+    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.copySelection] to copy current selection.

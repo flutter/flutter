@@ -23,7 +23,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';

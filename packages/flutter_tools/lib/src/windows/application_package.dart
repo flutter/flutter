@@ -8,7 +8,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 abstract class WindowsApp extends ApplicationPackage {
   WindowsApp({required String projectBundleId}) : super(id: projectBundleId);
