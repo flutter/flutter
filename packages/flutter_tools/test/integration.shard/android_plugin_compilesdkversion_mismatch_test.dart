@@ -60,7 +60,7 @@ void main() {
     String newPluginGradleFile = pluginBuildGradle.replaceAll(
       androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
-  
+
     // Create dummy project
     processManager.runSync(<String>[
       flutterBin,
