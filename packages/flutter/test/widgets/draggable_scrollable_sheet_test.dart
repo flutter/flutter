@@ -985,13 +985,13 @@ void main() {
     expect(() => controller.size, throwsAssertionError);
     expect(() => controller.pixelsToSize(0), throwsAssertionError);
     expect(() => controller.sizeToPixels(0), throwsAssertionError);
-    
+
     await tester.pumpWidget(_boilerplate(
       null,
       controller: controller,
     ));
 
-    
+
     // Can't jump or animate to invalid sizes.
     expect(() => controller.jumpTo(-1), throwsAssertionError);
     expect(() => controller.jumpTo(1.1), throwsAssertionError);
