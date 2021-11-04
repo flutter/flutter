@@ -12,13 +12,13 @@ import io.flutter.plugin.common.MethodChannel;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    new MethodChannel(getFlutterView(), "flavor").setMethodCallHandler(new MethodChannel.MethodCallHandler() {
-      @Override
-      public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        result.success(BuildConfig.FLAVOR);
-      }
-    });
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+    new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "flavor")
+        .setMethodCallHandler(
+            (call, result) -> {
+                result.success(BuildConfig.FLAVOR);
+        }
+    );
   }
 }
