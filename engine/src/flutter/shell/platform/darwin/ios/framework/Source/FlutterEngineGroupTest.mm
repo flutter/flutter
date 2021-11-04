@@ -24,10 +24,12 @@ FLUTTER_ASSERT_ARC
 - (void)testSpawn {
   FlutterEngineGroup* group = [[FlutterEngineGroup alloc] initWithName:@"foo" project:nil];
   FlutterEngine* spawner = [group makeEngineWithEntrypoint:nil libraryURI:nil];
+  spawner.isGpuDisabled = YES;
   FlutterEngine* spawnee = [group makeEngineWithEntrypoint:nil libraryURI:nil];
   XCTAssertNotNil(spawner);
   XCTAssertNotNil(spawnee);
   XCTAssertEqual(&spawner.threadHost, &spawnee.threadHost);
+  XCTAssertEqual(spawner.isGpuDisabled, spawnee.isGpuDisabled);
 }
 
 - (void)testDeleteLastEngine {
