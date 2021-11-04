@@ -47,7 +47,7 @@ void main() {
         RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
     // Use AGP 4.1.0
-    String newBuildGradle = buildGradle.replaceAll(
+    final String newBuildGradle = buildGradle.replaceAll(
         androidPluginRegExp, 'com.android.tools.build:gradle:4.1.0');
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
