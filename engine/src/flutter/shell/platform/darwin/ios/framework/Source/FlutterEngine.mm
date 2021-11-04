@@ -1034,6 +1034,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   result->_threadHost = _threadHost;
   result->_profiler = _profiler;
   result->_profiler_metrics = _profiler_metrics;
+  result->_isGpuDisabled = _isGpuDisabled;
   [result setupShell:std::move(shell) withObservatoryPublication:NO];
   return result;
 }
