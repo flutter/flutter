@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import '../base/common.dart';
 import '../base/io.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
@@ -34,10 +32,10 @@ class LogsCommand extends FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
-  Device device;
+  Device? device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     device = await findTargetDevice(includeUnsupportedDevices: true);
     if (device == null) {
       throwToolExit(null);
@@ -47,11 +45,12 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Device cachedDevice = device!;
     if (boolArg('clear')) {
-      device.clearLogs();
+      cachedDevice.clearLogs();
     }
 
-    final DeviceLogReader logReader = await device.getLogReader();
+    final DeviceLogReader logReader = await cachedDevice.getLogReader();
 
     globals.printStatus('Showing $logReader logs:');
 

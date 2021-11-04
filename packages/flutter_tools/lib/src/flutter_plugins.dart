@@ -20,7 +20,7 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';

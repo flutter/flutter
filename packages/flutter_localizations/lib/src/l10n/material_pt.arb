@@ -51,7 +51,7 @@
   "reorderItemLeft": "Mover para a esquerda",
   "reorderItemRight": "Mover para a direita",
   "expandedIconTapHint": "Recolher",
-  "collapsedIconTapHint": "Expandir",
+  "collapsedIconTapHint": "Abrir",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 caractere restante",
   "remainingTextFieldCharacterCountOther": "$remainingCount caracteres restantes",

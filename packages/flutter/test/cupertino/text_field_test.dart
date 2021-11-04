@@ -27,7 +27,7 @@ import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingContr
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
-final bool isContextMenuProvidedByPlatform = isBrowser;
+const bool isContextMenuProvidedByPlatform = isBrowser;
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
@@ -263,7 +263,7 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);

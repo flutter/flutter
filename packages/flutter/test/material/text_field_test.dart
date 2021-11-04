@@ -31,10 +31,10 @@ import 'feedback_tester.dart';
 typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
 
 // On web, the context menu (aka toolbar) is provided by the browser.
-final bool isContextMenuProvidedByPlatform = isBrowser;
+const bool isContextMenuProvidedByPlatform = isBrowser;
 
 // On web, key events in text fields are handled by the browser.
-final bool areKeyEventsHandledByPlatform = isBrowser;
+const bool areKeyEventsHandledByPlatform = isBrowser;
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -79,16 +79,14 @@ Widget overlayWithEntry(OverlayEntry entry) {
       MaterialLocalizationsDelegate(),
     ],
     child: DefaultTextEditingShortcuts(
-      child: DefaultTextEditingActions(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800.0, 600.0)),
-            child: Overlay(
-              initialEntries: <OverlayEntry>[
-                entry,
-              ],
-            ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry,
+            ],
           ),
         ),
       ),
@@ -260,14 +258,14 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -1526,7 +1524,7 @@ void main() {
     expect(container.size, Size.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
+  testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -10036,4 +10034,84 @@ void main() {
 
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+
+  testWidgets('cursor blinking respects TickerMode', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    Widget builder({required bool tickerMode}) {
+      return MaterialApp(
+        home:  Material(
+          child: Center(
+            child: TickerMode(enabled: tickerMode, child: TextField(focusNode: focusNode)),
+          ),
+        ),
+      );
+    }
+
+    // TickerMode is on, cursor is blinking.
+    await tester.pumpWidget(builder(tickerMode: true));
+    await tester.showKeyboard(find.byType(TextField));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable editable = state.renderEditable;
+    expect(editable.showCursor.value, isTrue);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isTrue);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+
+    // TickerMode is off, cursor does not blink.
+    await tester.pumpWidget(builder(tickerMode: false));
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+
+    // TickerMode is on, cursor blinks again.
+    await tester.pumpWidget(builder(tickerMode: true));
+    expect(editable.showCursor.value, isTrue);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isTrue);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+
+    // Dismissing focus while tickerMode is off does not start cursor blinking
+    // when tickerMode is turned on again.
+    await tester.pumpWidget(builder(tickerMode: false));
+    focusNode.unfocus();
+    await tester.pump();
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pumpWidget(builder(tickerMode: true));
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+
+    // Focusing while tickerMode is off does not start cursor blinking...
+    await tester.pumpWidget(builder(tickerMode: false));
+    await tester.showKeyboard(find.byType(TextField));
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+
+    // ... but it does start when tickerMode is switched on again.
+    await tester.pumpWidget(builder(tickerMode: true));
+    expect(editable.showCursor.value, isTrue);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isFalse);
+    await tester.pump(state.cursorBlinkInterval);
+    expect(editable.showCursor.value, isTrue);
+  });
 }
