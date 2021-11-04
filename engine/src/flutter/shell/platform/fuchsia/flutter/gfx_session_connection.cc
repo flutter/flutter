@@ -4,12 +4,11 @@
 
 #include "gfx_session_connection.h"
 
+#include <lib/async/cpp/task.h>
 #include <lib/async/cpp/time.h>
 #include <lib/async/default.h>
-
-#include <lib/async/cpp/task.h>
-#include <lib/async/default.h>
 #include <lib/fit/function.h>
+#include <zircon/status.h>
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/time/time_point.h"
@@ -222,8 +221,11 @@ GfxSessionConnection::GfxSessionConnection(
 
   next_presentation_info_.set_presentation_time(0);
 
-  session_wrapper_.set_error_handler(
-      [callback = session_error_callback](zx_status_t status) { callback(); });
+  session_wrapper_.set_error_handler([callback = session_error_callback](
+                                         zx_status_t status) {
+    FML_LOG(ERROR) << "scenic::Session error: " << zx_status_get_string(status);
+    callback();
+  });
 
   // Set the |fuchsia::ui::scenic::OnFramePresented()| event handler that will
   // fire every time a set of one or more frames is presented.

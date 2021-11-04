@@ -485,6 +485,11 @@ void ComponentV1::OnEngineTerminate(const Engine* shell_holder) {
                             });
 
   if (found == shell_holders_.end()) {
+    // This indicates a deeper issue with memory management and should never
+    // happen.
+    FML_LOG(ERROR) << "Tried to terminate an unregistered shell holder.";
+    FML_DCHECK(false);
+
     return;
   }
 
@@ -494,11 +499,15 @@ void ComponentV1::OnEngineTerminate(const Engine* shell_holder) {
   auto return_code = shell_holder->GetEngineReturnCode();
   if (return_code.has_value()) {
     last_return_code_ = {true, return_code.value()};
+  } else {
+    FML_LOG(ERROR) << "Failed to get return code from terminated shell holder.";
   }
 
   shell_holders_.erase(found);
 
   if (shell_holders_.size() == 0) {
+    FML_VLOG(-1) << "Killing component because all shell holders have been "
+                    "terminated.";
     Kill();
     // WARNING: Don't do anything past this point because the delegate may have
     // collected this instance via the termination callback.
