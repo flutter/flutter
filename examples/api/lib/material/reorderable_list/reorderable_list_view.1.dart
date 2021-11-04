@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Flutter code sample for ReorderableListView
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -39,10 +40,29 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color evenItemColor = colorScheme.primaryVariant.withOpacity(0.15);
+    final Color draggableItemColor = colorScheme.secondary;
+
+    Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          final double animValue = Curves.easeInOut.transform(animation.value);
+          final double elevation = lerpDouble(0, 6, animValue)!;
+          return Material(
+            elevation: elevation,
+            color: draggableItemColor,
+            shadowColor: draggableItemColor,
+            child: child,
+          );
+        },
+        child: child,
+      );
+    }
 
     return ReorderableListView(
       padding: const EdgeInsets.symmetric(horizontal: 40),
+      proxyDecorator: _proxyDecorator,
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)
           ListTile(
