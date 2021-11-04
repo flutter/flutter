@@ -372,7 +372,7 @@ typedef uint32_t (*UIntFrameInfoCallback)(
 ///
 /// See: \ref FlutterOpenGLRendererConfig.present_with_info.
 typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterFrameInfo).
+  /// The size of this struct. Must be sizeof(FlutterPresentInfo).
   size_t struct_size;
   /// Id of the fbo backing the surface that was presented.
   uint32_t fbo_id;
