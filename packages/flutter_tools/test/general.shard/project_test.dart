@@ -182,7 +182,7 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        await project.checkDeprecation();
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android project not on v2 embedding exits', () async {
@@ -192,7 +192,7 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         try {
-          await project.checkDeprecation(deprecationBehavior: DeprecationBehavior.exit);
+          project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
         } on Exception {
           throwsA(isException);
         }
@@ -204,7 +204,7 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        await project.checkDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
