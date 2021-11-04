@@ -180,7 +180,7 @@ class MultidexProject extends Project {
           // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "com.example.multidextest2"
           minSdkVersion 16
-          targetSdkVersion 30
+          targetSdkVersion 31
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }
