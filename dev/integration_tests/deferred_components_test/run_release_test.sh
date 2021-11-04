@@ -46,10 +46,7 @@ do
   echo "Waiting for $x seconds"
   # We use an increasing delay here as the emulator can lag and take a long time to finish running the app.
   # Delay of 20s produces ~5-10% flakes, 30s produces ~2% flakes roughly.
-  $adb_path shell "
   sleep 10
-  exit
-  "
   x=$(( $x + 10 ))
 done
 echo "Failure: Deferred component did not load."
