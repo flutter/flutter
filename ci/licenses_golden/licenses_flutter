@@ -110,9 +110,6 @@ FILE: ../../../flutter/flow/layers/texture_layer_unittests.cc
 FILE: ../../../flutter/flow/layers/transform_layer.cc
 FILE: ../../../flutter/flow/layers/transform_layer.h
 FILE: ../../../flutter/flow/layers/transform_layer_unittests.cc
-FILE: ../../../flutter/flow/matrix_decomposition.cc
-FILE: ../../../flutter/flow/matrix_decomposition.h
-FILE: ../../../flutter/flow/matrix_decomposition_unittests.cc
 FILE: ../../../flutter/flow/mutators_stack_unittests.cc
 FILE: ../../../flutter/flow/paint_region.cc
 FILE: ../../../flutter/flow/paint_region.h
