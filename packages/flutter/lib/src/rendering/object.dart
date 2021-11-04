@@ -175,8 +175,6 @@ class PaintingContext extends ClipContext {
   /// into the layer subtree associated with this painting context. Otherwise,
   /// the child will be painted into the current PictureLayer for this context.
   void paintChild(RenderObject child, Offset offset) {
-    if (!kReleaseMode && debugProfilePaintsEnabled)
-      Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
     assert(() {
       debugOnProfilePaint?.call(child);
       return true;
@@ -188,9 +186,6 @@ class PaintingContext extends ClipContext {
     } else {
       child._paintWithContext(this, offset);
     }
-
-    if (!kReleaseMode && debugProfilePaintsEnabled)
-      Timeline.finishSync();
   }
 
   void _compositeChild(RenderObject child, Offset offset) {
@@ -863,14 +858,27 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileLayoutsEnabled) {
+          debugTimelineArguments = <String, String>{
+            ...debugTimelineArguments,
+            'dirty count': '${_nodesNeedingLayout.length}',
+            'dirty list': '$_nodesNeedingLayout',
+          };
+        }
+        return true;
+      }());
+      Timeline.startSync(
+        'LAYOUT',
+        arguments: debugTimelineArguments,
+      );
     }
     assert(() {
       _debugDoingLayout = true;
       return true;
     }());
     try {
-      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themselves
       while (_nodesNeedingLayout.isNotEmpty) {
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
@@ -923,7 +931,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      Timeline.startSync('Compositing bits');
+      Timeline.startSync('UPDATING COMPOSITING BITS', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -956,7 +964,21 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfilePaintsEnabled) {
+          debugTimelineArguments = <String, String>{
+            ...debugTimelineArguments,
+            'dirty count': '${_nodesNeedingPaint.length}',
+            'dirty list': '$_nodesNeedingPaint',
+          };
+        }
+        return true;
+      }());
+      Timeline.startSync(
+        'PAINT',
+        arguments: debugTimelineArguments,
+      );
     }
     assert(() {
       _debugDoingPaint = true;
@@ -1058,7 +1080,7 @@ class PipelineOwner {
     if (_semanticsOwner == null)
       return;
     if (!kReleaseMode) {
-      Timeline.startSync('Semantics');
+      Timeline.startSync('SEMANTICS', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1745,9 +1767,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(!_debugDisposed);
-    if (!kReleaseMode && debugProfileLayoutsEnabled)
-      Timeline.startSync('$runtimeType',  arguments: timelineArgumentsIndicatingLandmarkEvent);
-
+    if (!kReleaseMode && debugProfileLayoutsEnabled) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        return true;
+      }());
+      Timeline.startSync(
+        '$runtimeType',
+        arguments: debugTimelineArguments,
+      );
+    }
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
@@ -2336,6 +2366,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // a different layer, because there's a repaint boundary between us.
     if (_needsLayout)
       return;
+    if (!kReleaseMode && debugProfilePaintsEnabled) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        return true;
+      }());
+      Timeline.startSync(
+        '$runtimeType',
+        arguments: debugTimelineArguments,
+      );
+    }
     assert(() {
       if (_needsCompositingBitsUpdate) {
         if (parent is RenderObject) {
@@ -2412,6 +2453,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugDoingThisPaint = false;
       return true;
     }());
+    if (!kReleaseMode && debugProfilePaintsEnabled)
+      Timeline.finishSync();
   }
 
   /// An estimate of the bounds within which this render object will paint.
@@ -2885,27 +2928,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   String toStringShort() {
     String header = describeIdentity(this);
-    if (_debugDisposed) {
-      header += ' DISPOSED';
-      return header;
-    }
-    if (_relayoutBoundary != null && _relayoutBoundary != this) {
-      int count = 1;
-      RenderObject? target = parent as RenderObject?;
-      while (target != null && target != _relayoutBoundary) {
-        target = target.parent as RenderObject?;
-        count += 1;
+    if (!kReleaseMode) {
+      if (_debugDisposed) {
+        header += ' DISPOSED';
+        return header;
       }
-      header += ' relayoutBoundary=up$count';
+      if (_relayoutBoundary != null && _relayoutBoundary != this) {
+        int count = 1;
+        RenderObject? target = parent as RenderObject?;
+        while (target != null && target != _relayoutBoundary) {
+          target = target.parent as RenderObject?;
+          count += 1;
+        }
+        header += ' relayoutBoundary=up$count';
+      }
+      if (_needsLayout)
+        header += ' NEEDS-LAYOUT';
+      if (_needsPaint)
+        header += ' NEEDS-PAINT';
+      if (_needsCompositingBitsUpdate)
+        header += ' NEEDS-COMPOSITING-BITS-UPDATE';
+      if (!attached)
+        header += ' DETACHED';
     }
-    if (_needsLayout)
-      header += ' NEEDS-LAYOUT';
-    if (_needsPaint)
-      header += ' NEEDS-PAINT';
-    if (_needsCompositingBitsUpdate)
-      header += ' NEEDS-COMPOSITING-BITS-UPDATE';
-    if (!attached)
-      header += ' DETACHED';
     return header;
   }
 

@@ -750,6 +750,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 /// An extendable base class for building scrollbars that fade in and out.

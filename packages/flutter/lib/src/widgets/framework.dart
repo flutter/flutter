@@ -2306,10 +2306,18 @@ abstract class BuildContext {
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
 
-  /// Returns a description of an [Element] from the current build context.
+  /// Returns a description of the [Element] associated with the current build context.
+  ///
+  /// The `name` is typically something like "The element being rebuilt was".
+  ///
+  /// See also:
+  ///
+  ///  * [Element.describeElements], which can be used to describe a list of elements.
   DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
 
   /// Returns a description of the [Widget] associated with the current build context.
+  ///
+  /// The `name` is typically something like "The widget being rebuilt was".
   DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
 
   /// Adds a description of a specific type of widget missing from the current
@@ -2525,7 +2533,25 @@ class BuildOwner {
       _debugBuilding = true;
       return true;
     }());
-    Timeline.startSync('Build', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    if (!kReleaseMode) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileBuildsEnabled) {
+          debugTimelineArguments = <String, String>{
+            ...debugTimelineArguments,
+            'dirty count': '${_dirtyElements.length}',
+            'dirty list': '$_dirtyElements',
+            'lock level': '$_debugStateLockLevel',
+            'scope context': '$context',
+          };
+        }
+        return true;
+      }());
+      Timeline.startSync(
+        'BUILD',
+        arguments: debugTimelineArguments
+      );
+    }
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
@@ -2555,10 +2581,11 @@ class BuildOwner {
       int dirtyCount = _dirtyElements.length;
       int index = 0;
       while (index < dirtyCount) {
-        assert(_dirtyElements[index] != null);
-        assert(_dirtyElements[index]._inDirtyList);
+        final Element element = _dirtyElements[index];
+        assert(element != null);
+        assert(element._inDirtyList);
         assert(() {
-          if (_dirtyElements[index]._lifecycleState == _ElementLifecycle.active && !_dirtyElements[index]._debugIsInScope(context)) {
+          if (element._lifecycleState == _ElementLifecycle.active && !element._debugIsInScope(context)) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
               ErrorDescription(
@@ -2578,15 +2605,26 @@ class BuildOwner {
               ),
               DiagnosticsProperty<Element>(
                 'The offending element (which does not appear to be a descendant of the root of the build scope) was',
-                _dirtyElements[index],
+                element,
                 style: DiagnosticsTreeStyle.errorProperty,
               ),
             ]);
           }
           return true;
         }());
+        if (!kReleaseMode && debugProfileBuildsEnabled) {
+          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          assert(() {
+            debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+            return true;
+          }());
+          Timeline.startSync(
+            '${element.widget.runtimeType}',
+            arguments: debugTimelineArguments,
+          );
+        }
         try {
-          _dirtyElements[index].rebuild();
+          element.rebuild();
         } catch (e, stack) {
           _debugReportException(
             ErrorDescription('while rebuilding dirty elements'),
@@ -2594,14 +2632,16 @@ class BuildOwner {
             stack,
             informationCollector: () sync* {
               if (index < _dirtyElements.length) {
-                yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
-                yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
+                yield DiagnosticsDebugCreator(DebugCreator(element));
+                yield element.describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
               } else {
                 yield ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.');
               }
             },
           );
         }
+        if (!kReleaseMode && debugProfileBuildsEnabled)
+          Timeline.finishSync();
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
           _dirtyElements.sort(Element._sort);
@@ -2637,7 +2677,9 @@ class BuildOwner {
       _dirtyElements.clear();
       _scheduledFlushDirtyElements = false;
       _dirtyElementsNeedsResorting = null;
-      Timeline.finishSync();
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
       assert(_debugBuilding);
       assert(() {
         _debugBuilding = false;
@@ -2842,7 +2884,9 @@ class BuildOwner {
   /// about changes to global keys will run.
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
-    Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    if (!kReleaseMode) {
+      Timeline.startSync('FINALIZE TREE', arguments: timelineArgumentsIndicatingLandmarkEvent);
+    }
     try {
       lockState(() {
         _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
@@ -2937,7 +2981,9 @@ class BuildOwner {
       // cause more exceptions.
       _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
-      Timeline.finishSync();
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 
@@ -2948,14 +2994,18 @@ class BuildOwner {
   ///
   /// This is expensive and should not be called except during development.
   void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
-    Timeline.startSync('Dirty Element Tree');
+    if (!kReleaseMode) {
+      Timeline.startSync('Preparing Hot Reload (widgets)');
+    }
     try {
       assert(root._parent == null);
       assert(root.owner == this);
       root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
-      Timeline.finishSync();
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 }
@@ -3021,8 +3071,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
 
-  // Custom implementation of `operator ==` optimized for the ".of" pattern
-  // used with `InheritedWidgets`.
+  /// Compare two widgets for equality.
+  ///
+  /// When a widget is rebuilt with another that compares equal according
+  /// to `operator ==`, it is assumed that the update is redundant and the
+  /// work to update that branch of the tree is skipped.
+  ///
+  /// It is generally discouraged to override `operator ==` on any widget that
+  /// has children, since a correct implementation would have to defer to the
+  /// children's equality operator also, and that is an O(N²) operation: each
+  /// child would need to itself walk all its children, each step of the tree.
+  ///
+  /// It is sometimes reasonable for a leaf widget (one with no children) to
+  /// implement this method, if rebuilding the widget is known to be much more
+  /// expensive than checking the widgets' parameters for equality and if the
+  /// widget is expected to often be rebuilt with identical parameters.
+  ///
+  /// In general, however, it is more efficient to cache the widgets used
+  /// in a build method if it is known that they will not change.
   @nonVirtual
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -3347,6 +3413,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         deactivateChild(child);
       return null;
     }
+
     final Element newChild;
     if (child != null) {
       bool hasSameSuperclass = true;
@@ -3372,13 +3439,29 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         return true;
       }());
       if (hasSameSuperclass && child.widget == newWidget) {
+        // We don't insert a timeline event here, because otherwise it's
+        // confusing that widgets that "don't update" (because they didn't
+        // change) get "charged" on the timeline.
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         newChild = child;
       } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
+        if (!kReleaseMode && debugProfileBuildsEnabled) {
+          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          assert(() {
+            debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            return true;
+          }());
+          Timeline.startSync(
+            '${newWidget.runtimeType}',
+            arguments: debugTimelineArguments,
+          );
+        }
         child.update(newWidget);
+        if (!kReleaseMode && debugProfileBuildsEnabled)
+          Timeline.finishSync();
         assert(child.widget == newWidget);
         assert(() {
           child.owner!._debugElementWasRebuilt(child);
@@ -3388,10 +3471,36 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       } else {
         deactivateChild(child);
         assert(child._parent == null);
+        if (!kReleaseMode && debugProfileBuildsEnabled) {
+          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          assert(() {
+            debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            return true;
+          }());
+          Timeline.startSync(
+            '${newWidget.runtimeType}',
+            arguments: debugTimelineArguments,
+          );
+        }
         newChild = inflateWidget(newWidget, newSlot);
+        if (!kReleaseMode && debugProfileBuildsEnabled)
+          Timeline.finishSync();
       }
     } else {
+      if (!kReleaseMode && debugProfileBuildsEnabled) {
+        Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+        assert(() {
+          debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+          return true;
+        }());
+        Timeline.startSync(
+          '${newWidget.runtimeType}',
+          arguments: debugTimelineArguments,
+        );
+      }
       newChild = inflateWidget(newWidget, newSlot);
+      if (!kReleaseMode && debugProfileBuildsEnabled)
+        Timeline.finishSync();
     }
 
     assert(() {
@@ -4291,6 +4400,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     owner!.scheduleBuildFor(this);
   }
 
+  /// Cause the widget to update itself. In debug builds, also verify various
+  /// invariants.
+  ///
   /// Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
@@ -4328,7 +4440,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(!_dirty);
   }
 
-  /// Called by rebuild() after the appropriate checks have been made.
+  /// Cause the widget to update itself.
+  ///
+  /// Called by [rebuild] after the appropriate checks have been made.
   @protected
   void performRebuild();
 }
@@ -4574,7 +4688,8 @@ abstract class ComponentElement extends Element {
   }
 
   void _firstBuild() {
-    rebuild();
+    // StatefulElement overrides this to also call state.didChangeDependencies.
+    rebuild(); // This eventually calls performRebuild.
   }
 
   /// Calls the [StatelessWidget.build] method of the [StatelessWidget] object
@@ -4586,9 +4701,6 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
-    if (!kReleaseMode && debugProfileBuildsEnabled)
-      Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);
-
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget? built;
     try {
@@ -4636,9 +4748,6 @@ abstract class ComponentElement extends Element {
       );
       _child = updateChild(null, built, slot);
     }
-
-    if (!kReleaseMode && debugProfileBuildsEnabled)
-      Timeline.finishSync();
   }
 
   /// Subclasses should override this function to actually call the appropriate
@@ -5490,16 +5599,7 @@ abstract class RenderObjectElement extends Element {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
-    assert(() {
-      _debugDoingBuild = true;
-      return true;
-    }());
-    widget.updateRenderObject(this, renderObject);
-    assert(() {
-      _debugDoingBuild = false;
-      return true;
-    }());
-    _dirty = false;
+    _performRebuild(); // calls widget.updateRenderObject()
   }
 
   void _debugUpdateRenderObjectOwner() {
@@ -5511,6 +5611,11 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void performRebuild() {
+    _performRebuild(); // calls widget.updateRenderObject()
+  }
+
+  @pragma('vm:prefer-inline')
+  void _performRebuild() {
     assert(() {
       _debugDoingBuild = true;
       return true;
@@ -6367,8 +6472,10 @@ class IndexedSlot<T extends Element?> {
   int get hashCode => hashValues(index, value);
 }
 
+/// Used as a placeholder in [List<Element>] objects when the actual
+/// elements are not yet determined.
 class _NullElement extends Element {
-  _NullElement() : super(_NullWidget());
+  _NullElement() : super(const _NullWidget());
 
   static _NullElement instance = _NullElement();
 
@@ -6376,10 +6483,12 @@ class _NullElement extends Element {
   bool get debugDoingBuild => throw UnimplementedError();
 
   @override
-  void performRebuild() { }
+  void performRebuild() => throw UnimplementedError();
 }
 
 class _NullWidget extends Widget {
+  const _NullWidget();
+
   @override
   Element createElement() => throw UnimplementedError();
 }

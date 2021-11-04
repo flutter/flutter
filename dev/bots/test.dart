@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -744,6 +746,89 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
   }
 
+  Future<void> runTracingTests() async {
+    final String tracingDirectory = path.join(flutterRoot, 'dev', 'tracing_tests');
+
+    // run the tests for debug mode
+    await _runFlutterTest(tracingDirectory, options: <String>['--enable-vmservice']);
+
+    Future<List<String>> verifyTracingAppBuild({
+      required String modeArgument,
+      required String sourceFile,
+      required Set<String> allowed,
+      required Set<String> disallowed,
+    }) async {
+      await runCommand(
+        flutter,
+        <String>[
+          'build', 'appbundle', '--$modeArgument', path.join('lib', sourceFile),
+        ],
+        workingDirectory: tracingDirectory,
+      );
+      final Archive archive = ZipDecoder().decodeBytes(File(path.join(tracingDirectory, 'build', 'app', 'outputs', 'bundle', modeArgument, 'app-$modeArgument.aab')).readAsBytesSync());
+      final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so')!;
+      final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
+      final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
+      await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
+      final List<String> results = <String>[];
+      for (final String pattern in allowed) {
+        if (!libappStrings.contains(pattern)) {
+          results.add('When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.');
+        }
+      }
+      for (final String pattern in disallowed) {
+        if (libappStrings.contains(pattern)) {
+          results.add('When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.');
+        }
+      }
+      return results;
+    }
+
+    final List<String> results = <String>[];
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'profile',
+      sourceFile: 'control.dart', // this is the control, the other two below are the actual test
+      allowed: <String>{
+        'TIMELINE ARGUMENTS TEST CONTROL FILE',
+        'toTimelineArguments used in non-debug build', // we call toTimelineArguments directly to check the message does exist
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN RELEASE MODE',
+      },
+    ));
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'profile',
+      sourceFile: 'test.dart',
+      allowed: <String>{
+        'BUILT IN PROFILE MODE', 'RenderTest.performResize called', // controls
+        'BUILD', 'LAYOUT', 'PAINT', // we output these to the timeline in profile builds
+        // (LAYOUT and PAINT also exist because of NEEDS-LAYOUT and NEEDS-PAINT in RenderObject.toStringShort)
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN RELEASE MODE',
+        'TestWidget.debugFillProperties called', 'RenderTest.debugFillProperties called', // debug only
+        'toTimelineArguments used in non-debug build', // entire function should get dropped by tree shaker
+      },
+    ));
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'release',
+      sourceFile: 'test.dart',
+      allowed: <String>{
+        'BUILT IN RELEASE MODE', 'RenderTest.performResize called', // controls
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN PROFILE MODE',
+        'BUILD', 'LAYOUT', 'PAINT', // these are only used in Timeline.startSync calls that should not appear in release builds
+        'TestWidget.debugFillProperties called', 'RenderTest.debugFillProperties called', // debug only
+        'toTimelineArguments used in non-debug build', // not included in release builds
+      },
+    ));
+    if (results.isNotEmpty) {
+      print(results.join('\n'));
+      exit(1);
+    }
+  }
+
   Future<void> runFixTests() async {
     final List<String> args = <String>[
       'fix',
@@ -808,10 +893,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
-    await _runFlutterTest(
-      path.join(flutterRoot, 'dev', 'tracing_tests'),
-      options: <String>['--enable-vmservice'],
-    );
+    await runTracingTests();
     await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
