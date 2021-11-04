@@ -1066,7 +1066,7 @@ class FakeSecondaryCache extends Fake implements Cache {
   Directory getArtifactDirectory(String name) => artifactDirectory;
 
   @override
-  Directory getCacheDir(String name) {
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
     return artifactDirectory.childDirectory(name);
   }
 

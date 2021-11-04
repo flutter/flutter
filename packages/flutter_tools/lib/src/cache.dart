@@ -358,21 +358,26 @@ class Cache {
 
   String get devToolsVersion {
     if (_devToolsVersion == null) {
-      final Directory devToolsDir = getCacheDir('dart-sdk/bin/resources/devtools');
+      const String devToolsDirPath = 'dart-sdk/bin/resources/devtools';
+      final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
       if (!devToolsDir.existsSync()) {
-        throwToolExit('Could not determine DevTools version.');
+        throw Exception('Could not find directory at $devToolsDirPath');
       }
-      final File versionFile = _fileSystem.file('${devToolsDir.path}/version.json');
+      final String versionFilePath = '${devToolsDir.path}/version.json';
+      final File versionFile = _fileSystem.file(versionFilePath);
       if (!versionFile.existsSync()) {
-        throwToolExit('Could not determine DevTools version.');
+        throw Exception('Could not find file at $versionFilePath');
       }
       final dynamic data = jsonDecode(versionFile.readAsStringSync());
       if (data is! Map<String, Object>) {
-        throwToolExit('Could not determine DevTools version.');
+        throw Exception("Expected object of type 'Map<String, Object>' but got one of type '${data.runtimeType}'");
       }
       final dynamic version = data['version'];
-      if (version == null || version is! String) {
-        throwToolExit('Could not determine DevTools version.');
+      if (version == null) {
+        throw Exception('Could not parse DevTools version from $version');
+      }
+      if (version is! String) {
+        throw Exception("Could not parse DevTools version. Expected object of type 'String', but got one of type '${version.runtimeType}'");
       }
       return _devToolsVersion = version;
     }
@@ -463,9 +468,12 @@ class Cache {
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
-  Directory getCacheDir(String name) {
+  ///
+  /// When [shouldCreate] is true, the cache directory at [name] will be created
+  /// if it does not already exist.
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
     final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
-    if (!dir.existsSync()) {
+    if (!dir.existsSync() && shouldCreate) {
       dir.createSync(recursive: true);
       _osUtils.chmod(dir, '755');
     }
