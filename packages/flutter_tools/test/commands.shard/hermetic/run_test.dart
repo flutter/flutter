@@ -242,7 +242,6 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           fileSystem: fs,
           processManager: FakeProcessManager.any(),
-          androidConsoleSocketFactory: kAndroidConsoleSocketFactory,
         );
 
         mockDeviceManager
@@ -285,7 +284,6 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           fileSystem: fs,
           processManager: FakeProcessManager.any(),
-          androidConsoleSocketFactory: kAndroidConsoleSocketFactory,
         );
 
         mockDeviceManager
