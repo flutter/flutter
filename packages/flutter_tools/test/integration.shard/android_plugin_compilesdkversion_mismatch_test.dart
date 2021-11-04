@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
 import '../src/fakes.dart';
+import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
