@@ -7766,8 +7766,147 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('mouse click and drag can edge scroll', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(textOffsetToPosition(tester, 66).dx, 1056);
+
+    final TestGesture gesture =
+        await tester.startGesture(
+          textOffsetToPosition(tester, 19),
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(textOffsetToPosition(tester, 56));
+    // To the edge of the screen basically.
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 19, extentOffset: 56),
+    );
+
+    // Keep moving out.
+    await gesture.moveTo(textOffsetToPosition(tester, 62));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 19, extentOffset: 62),
+    );
+    await gesture.moveTo(textOffsetToPosition(tester, 66));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 19, extentOffset: 66),
+    ); // We're at the edge now.
+    expect(find.byType(CupertinoButton), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 19, extentOffset: 66),
+    );
+
+    // The last character is now on screen near the right edge.
+    //final double screenWidth = MediaQuery.of(context).size.width;
+    expect(
+      textOffsetToPosition(tester, 66).dx,
+      moreOrLessEquals(TestSemantics.fullScreen.width, epsilon: 2.0),
+    );
+
+    // The first character is now offscreen to the left.
+    expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('keyboard selection change scrolls the field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(textOffsetToPosition(tester, 66).dx, 1056);
+
+    await tester.tapAt(textOffsetToPosition(tester, 13));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 13),
+    );
+
+    // Move to position 56 with the right arrow (near the edge of the screen).
+    for (int i = 0; i < (56 - 13); i += 1) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    }
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 56),
+    );
+
+    // Keep moving out.
+    for (int i = 0; i < (62 - 56); i += 1) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    }
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 62),
+    );
+    for (int i = 0; i < (66 - 62); i += 1) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    }
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66),
+    ); // We're at the edge now.
+
+    await tester.pumpAndSettle();
+
+    // The last character is now on screen near the right edge.
+    //final double screenWidth = MediaQuery.of(context).size.width;
+    expect(
+      textOffsetToPosition(tester, 66).dx,
+      moreOrLessEquals(TestSemantics.fullScreen.width, epsilon: 2.0),
+    );
+
+    // The first character is now offscreen to the left.
+    expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'long tap after a double tap select is not affected',
