@@ -61,8 +61,9 @@ class MultidexProject extends Project {
   dependencies:
     flutter:
       sdk: flutter
-    cloud_firestore: ^2.5.3
-    firebase_core: ^1.6.0
+    # Pin to specific plugin versions to avoid out-of-band failures.
+    cloud_firestore: 2.5.3
+    firebase_core: 1.6.0
   ''';
 
   @override
