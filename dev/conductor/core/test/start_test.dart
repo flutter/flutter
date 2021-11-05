@@ -314,6 +314,9 @@ void main() {
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
+      expect(stdio.stdout, contains('Applying the tag $branchPointTag at the branch point $branchPointRevision'));
+      expect(stdio.stdout, contains('The actual release will be version $nextVersion'));
+      expect(branchPointTag != nextVersion, true);
     });
 
     test('can convert from dev style version to stable version', () async {
