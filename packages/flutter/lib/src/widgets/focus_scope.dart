@@ -488,8 +488,8 @@ class _FocusState extends State<Focus> {
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal;
     }
-    if (widget.canRequestFocus != null) {
-      focusNode.canRequestFocus = widget.canRequestFocus;
+    if (widget._canRequestFocus != null) {
+      focusNode.canRequestFocus = widget._canRequestFocus!;
     }
     _couldRequestFocus = focusNode.canRequestFocus;
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;
@@ -575,8 +575,8 @@ class _FocusState extends State<Focus> {
         if (widget.skipTraversal != null) {
           focusNode.skipTraversal = widget.skipTraversal;
         }
-        if (widget.canRequestFocus != null) {
-          focusNode.canRequestFocus = widget.canRequestFocus;
+        if (widget._canRequestFocus != null) {
+          focusNode.canRequestFocus = widget._canRequestFocus!;
         }
         focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
       }
