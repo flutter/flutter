@@ -93,7 +93,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('November 2016'), findsOneWidget);
       expect(displayedMonth, equals(DateTime(2016, DateTime.november)));
-  
+
       // Go forward a month
       await tester.drag(find.text('November'), const Offset(0.0, -50.0), warnIfMissed: false); // see top of file
       await tester.pump();

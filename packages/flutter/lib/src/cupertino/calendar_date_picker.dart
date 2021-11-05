@@ -95,7 +95,7 @@ class CupertinoCalendarPicker extends StatefulWidget {
   CupertinoCalendarPicker({
     Key? key,
     this.initialCalendarMode = CalendarPickerMode.day,
-    required this.onDateChanged, 
+    required this.onDateChanged,
     DateTime? initialDate,
     this.onDisplayedMonthChanged,
   }) : initialDate = initialDate ?? DateTime.now(),
@@ -565,7 +565,7 @@ class _YearPickerState extends State<_YearPicker> {
   late int selectedMonth;
   late int selectedYear;
 
-  // The controller of the month/year picker. 
+  // The controller of the month/year picker.
   late FixedExtentScrollController monthController;
   late FixedExtentScrollController yearController;
 
@@ -1473,13 +1473,13 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   );
 
   final bool tallTiles;
-  
+
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
-    final double tileHeight = 
-      tallTiles ? 
+    final double tileHeight =
+      tallTiles ?
       math.max(
       _dayPickerRowHeight,
       constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1),
