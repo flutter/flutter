@@ -7,9 +7,11 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
@@ -162,6 +164,9 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
+      createFlutterToolsDir();
+
       return body();
     },
     skip: skip,
@@ -173,6 +178,26 @@ void test(String description, FutureOr<void> Function() body, {
     // configures all tests to have a 15 minute timeout which should
     // definitely be enough.
   );
+}
+
+/// For tests with MemoryFileSystem, create the flutter_tools source directory.
+///
+/// This is necessary because each FlutterCommand verifies that the
+/// flutter_tools source directory exists to catch bad installations of the
+/// Flutter SDK. This only done if [globals.fs] wraps a [MemoryFileSystem].
+void createFlutterToolsDir() {
+  final FileSystem fs = globals.fs;
+  if (fs is ErrorHandlingFileSystem) {
+    final FileSystem delegate = fs.fileSystem;
+    if (delegate is MemoryFileSystem) {
+      assert(Cache.flutterRoot != null);
+      delegate
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .createSync(recursive: true);
+    }
+  }
 }
 
 /// Executes a test body in zone that does not allow context-based injection.
