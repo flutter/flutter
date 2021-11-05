@@ -180,7 +180,7 @@ void test(String description, FutureOr<void> Function() body, {
   );
 }
 
-/// For tests with MemoryFileSystem, create the flutter_tools source directory.
+/// For tests using a [MemoryFileSystem], create the tools source directory.
 ///
 /// This is necessary because each FlutterCommand verifies that the
 /// flutter_tools source directory exists to catch bad installations of the
