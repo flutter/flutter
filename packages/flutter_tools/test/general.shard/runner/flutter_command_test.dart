@@ -49,10 +49,6 @@ void main() {
       processInfo = FakeProcessInfo();
       processInfo.maxRss = 10;
       fileSystem = MemoryFileSystem.test();
-      final Directory flutterTools = fileSystem.directory(Cache.flutterRoot)
-          .childDirectory('packages')
-          .childDirectory('flutter_tools');
-      flutterTools.createSync(recursive: true);
       processManager = FakeProcessManager.empty();
     });
 
