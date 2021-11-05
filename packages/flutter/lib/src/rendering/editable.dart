@@ -161,16 +161,6 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
     return _isValid;
   }
 
-  // Computes the vertical distance from the `from` line's bottom to the `to`
-  // lines top.
-  double _lineDistance(int from, int to) {
-    double lineHeight = 0;
-    for (int index = from + 1; index < to; index += 1) {
-      lineHeight += _lineMetrics[index].height;
-    }
-    return lineHeight;
-  }
-
   final Map<int, MapEntry<Offset, TextPosition>> _positionCache = <int, MapEntry<Offset, TextPosition>>{};
 
   MapEntry<Offset, TextPosition> _getTextPositionForLine(int lineNumber) {
@@ -181,11 +171,8 @@ class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
       return cachedPosition;
     }
     assert(lineNumber != _currentLine);
-    final double distanceY = lineNumber > _currentLine
-      ? _lineMetrics[_currentLine].descent + _lineMetrics[lineNumber].ascent + _lineDistance(_currentLine, lineNumber)
-      : - _lineMetrics[_currentLine].ascent - _lineMetrics[lineNumber].descent - _lineDistance(lineNumber, _currentLine);
 
-    final Offset newOffset = _currentOffset.translate(0, distanceY);
+    final Offset newOffset = Offset(_currentOffset.dx, _lineMetrics[lineNumber].baseline);
     final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
     final MapEntry<Offset, TextPosition> position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
     _positionCache[lineNumber] = position;
