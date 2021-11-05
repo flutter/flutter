@@ -4,15 +4,21 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
+import 'colors.dart';
 import 'date.dart';
 import 'debug.dart';
+import 'icons.dart';
 import 'localizations.dart';
+import 'picker.dart';
+import 'text_theme.dart';
+import 'theme.dart';
 
 const double _kItemExtent = 32.0;
 const bool _kUseMagnifier = true;
