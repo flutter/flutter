@@ -1,4 +1,4 @@
-Signature: fe6af193418566f7a056a2902daa5cf3
+Signature: d9c7535dca1a1342e0565484b82dd6c7
 
 UNUSED LICENSES:
 
@@ -5426,6 +5426,8 @@ FILE: ../../../third_party/skia/modules/androidkit/src/SurfaceThread.h
 FILE: ../../../third_party/skia/modules/androidkit/src/Text.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Utils.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Utils.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/BuldgeEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/CCTonerEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/DirectionalBlur.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SkSLEffect.cpp
@@ -5762,7 +5764,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/Composition.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.h
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.h
-FILE: ../../../third_party/skia/modules/skottie/src/effects/CCToner.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/DropShadowEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.h
@@ -5947,6 +5948,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathTessellator.h
