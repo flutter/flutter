@@ -45,6 +45,7 @@ class ReorderableListView extends StatefulWidget {
     Key? key,
     required List<Widget> children,
     required this.onReorder,
+    this.useAdjustedOnReorderNewIndex = false,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -113,6 +114,7 @@ class ReorderableListView extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.useAdjustedOnReorderNewIndex = false,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -149,6 +151,9 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.useAdjustedOnReorderNewIndex}
+  final bool useAdjustedOnReorderNewIndex;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -242,8 +247,13 @@ class ReorderableListView extends StatefulWidget {
 class _ReorderableListViewState extends State<ReorderableListView> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex)
+      if (startIndex == endIndex)
+        return;
+      if (!widget.useAdjustedOnReorderNewIndex || endIndex < startIndex) {
         widget.onReorder(startIndex, endIndex);
+        return;
+      }
+      widget.onReorder(startIndex, endIndex - 1);
     }
 
     // First, determine which semantics actions apply.
@@ -461,6 +471,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            useAdjustedOnReorderNewIndex: widget.useAdjustedOnReorderNewIndex,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
           ),
         ),

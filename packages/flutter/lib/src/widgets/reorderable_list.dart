@@ -115,6 +115,7 @@ class ReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.useAdjustedOnReorderNewIndex = false,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -166,6 +167,15 @@ class ReorderableList extends StatefulWidget {
   /// of the items.
   /// {@endtemplate}
   final ReorderCallback onReorder;
+
+  /// {@template flutter.widgets.reorderable_list.useAdjustedOnReorderNewIndex}
+  /// An opt-in flag to use the adjusted value for new index in [onReorder].
+  /// When set to true you will no longer need to subtract one from the new index
+  /// if the item has been reordered to a position with a higher index.
+  /// 
+  /// See https://github.com/flutter/flutter/issues/24786 for more.
+  /// {@endtemplate}
+  final bool useAdjustedOnReorderNewIndex;
 
   /// {@template flutter.widgets.reorderable_list.proxyDecorator}
   /// A callback that allows the app to add an animated decoration around
@@ -401,6 +411,7 @@ class SliverReorderableList extends StatefulWidget {
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.useAdjustedOnReorderNewIndex = false,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -419,6 +430,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.useAdjustedOnReorderNewIndex}
+  final bool useAdjustedOnReorderNewIndex;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -693,7 +707,16 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     final int fromIndex = _dragIndex!;
     final int toIndex = _insertIndex!;
     if (fromIndex != toIndex) {
-      widget.onReorder.call(fromIndex, toIndex);
+      if (widget.useAdjustedOnReorderNewIndex) {
+        widget.onReorder.call(
+          fromIndex,
+          toIndex > fromIndex
+            ? toIndex - 1
+            : toIndex
+        );
+      } else {
+        widget.onReorder.call(fromIndex, toIndex);
+      }
     }
     _dragReset();
   }

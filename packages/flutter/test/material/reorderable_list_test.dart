@@ -68,6 +68,41 @@ void main() {
     });
 
     group('in vertical mode', () {
+      testWidgets('onReorder with adjusted end index flag provides expected index', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/24786
+        late int adjustedEndIndex;
+        await tester.pumpWidget(MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              height: itemHeight * 10,
+              width: itemHeight * 10,
+              child: ReorderableListView(
+                useAdjustedOnReorderNewIndex: true,
+                onReorder: (int oldIndex, int newIndex) {
+                  adjustedEndIndex = newIndex;
+                  final String element = listItems.removeAt(oldIndex);
+                  listItems.insert(newIndex, element);
+                },
+                children: listItems.map<Widget>(listItemToWidget).toList(),
+              ),
+            ),
+          ),
+        ));
+
+        expect(listItems, orderedEquals(originalListItems));
+
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 2')) + const Offset(0.0, itemHeight),
+        );
+        await tester.pumpAndSettle();
+
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 1', 'Item 3', 'Item 4']));
+        expect(adjustedEndIndex, 1);
+      });
+
       testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
         bool onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
