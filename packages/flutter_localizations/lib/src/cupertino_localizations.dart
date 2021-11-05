@@ -58,6 +58,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     required intl.DateFormat fullYearFormat,
     required intl.DateFormat dayFormat,
     required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
     required intl.DateFormat singleDigitHourFormat,
     required intl.DateFormat singleDigitMinuteFormat,
     required intl.DateFormat doubleDigitMinuteFormat,
@@ -71,7 +73,11 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
        _dayFormat = dayFormat,
        assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
+       assert(longDateFormat != null),
+       _longDateFormat = longDateFormat,
        assert(singleDigitHourFormat != null),
+       assert(yearMonthFormat != null),
+       _yearMonthFormat = yearMonthFormat,
        _singleDigitHourFormat = singleDigitHourFormat,
        assert(singleDigitMinuteFormat != null),
        _singleDigitMinuteFormat = singleDigitMinuteFormat,
@@ -86,6 +92,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   final intl.DateFormat _fullYearFormat;
   final intl.DateFormat _dayFormat;
   final intl.DateFormat _mediumDateFormat;
+  final intl.DateFormat _longDateFormat;
+  final intl.DateFormat _yearMonthFormat;
   final intl.DateFormat _singleDigitHourFormat;
   final intl.DateFormat _singleDigitMinuteFormat;
   final intl.DateFormat _doubleDigitMinuteFormat;
@@ -124,6 +132,26 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerMinute(int minute) {
     return _doubleDigitMinuteFormat.format(DateTime.utc(0, 0, 0, 0, minute));
+  }
+
+  @override
+  String formatDecimal(int number) {
+    return _decimalFormat.format(number);
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    return _longDateFormat.format(date);
+  }
+
+  @override
+  String formatMonthYear(DateTime date) {
+    return _yearMonthFormat.format(date);
+  }
+
+  @override
+  String formatYear(DateTime date) {
+    return _fullYearFormat.format(date);
   }
 
   /// Subclasses should provide the optional zero pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
