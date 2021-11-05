@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -132,7 +132,7 @@ void main() {
             contentPadding: EdgeInsets.fromLTRB(10, 18, 4, 2),
           ),
         ),
-      )
+      ),
     );
 
     final Rect paddingRect = tester.getRect(find.byType(SafeArea));
@@ -231,7 +231,7 @@ void main() {
 
   testWidgets('CheckboxListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
 
     await tester.pumpWidget(wrap(

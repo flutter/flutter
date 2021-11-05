@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -67,6 +68,8 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'package:flutter/services.dart' show
+  AssetBundle;
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { const TestWidget({Key? key}) : super(key: key); @override Widget build(BuildContext context) => const Placeholder(); }
@@ -166,6 +169,12 @@ class Directionality extends InheritedWidget {
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
+/// The presence of the intermediate buffer which has a transparent background
+/// by default may cause some child widgets to behave differently. For example
+/// a [BackdropFilter] child will only be able to apply its filter to the content
+/// between this widget and the backdrop child and may require adjusting the
+/// [BackdropFilter.blendMode] property to produce the desired results.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
 ///
 /// {@tool snippet}
@@ -188,7 +197,7 @@ class Directionality extends InheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] instead.
+/// an [AnimatedOpacity] or a [FadeTransition] instead.
 ///
 /// ## Transparent image
 ///
@@ -377,6 +386,18 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
+/// The results of the filter will be blended back into the background using
+/// the [blendMode] parameter.
+/// {@template flutter.widgets.BackdropFilter.blendMode}
+/// The only value for [blendMode] that is supported on all platforms is
+/// [BlendMode.srcOver] which works well for most scenes. But that value may
+/// produce surprising results when a parent of the [BackdropFilter] uses a
+/// temporary buffer, or save layer, as does an [Opacity] widget. In that
+/// situation, a value of [BlendMode.src] can produce more pleasing results,
+/// but at the cost of incompatibility with some platforms, most notably the
+/// html renderer for web applications.
+/// {@endtemplate}
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
@@ -427,10 +448,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
+  /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
+  /// null if provided.
   const BackdropFilter({
     Key? key,
     required this.filter,
     Widget? child,
+    this.blendMode = BlendMode.srcOver,
   }) : assert(filter != null),
        super(key: key, child: child);
 
@@ -440,14 +464,22 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// blur effect.
   final ui.ImageFilter filter;
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  final BlendMode blendMode;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
-    renderObject.filter = filter;
+    renderObject
+      ..filter = filter
+      ..blendMode = blendMode;
   }
 }
 
@@ -1017,6 +1049,47 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 /// [PhysicalModel] does the same but only supports shapes that can be expressed
 /// as rectangles with rounded corners.
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows how to use a [PhysicalShape] on a centered [SizedBox]
+/// to clip it to a rounded rectangle using a [ShapeBorderClipper] and give it
+/// an orange color along with a shadow.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('PhysicalShape Sample'),
+///     ),
+///     body: Center(
+///       child: PhysicalShape(
+///         elevation: 5.0,
+///         child: const SizedBox(
+///           child: Center(
+///             child: Text(
+///               'Hello, World!',
+///               style: TextStyle(
+///                 color: Colors.white,
+///                 fontSize: 20.0,
+///               ),
+///             ),
+///           ),
+///           height: 200.0,
+///           width: 200.0,
+///         ),
+///         clipper: ShapeBorderClipper(
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           )
+///         ),
+///         color: Colors.orange,
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ShapeBorderClipper], which converts a [ShapeBorder] to a [CustomClipper], as
@@ -1149,6 +1222,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : assert(transform != null),
        super(key: key, child: child);
@@ -1186,6 +1260,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.rotationZ(angle),
        super(key: key, child: child);
@@ -1213,6 +1288,7 @@ class Transform extends SingleChildRenderObjectWidget {
     Key? key,
     required Offset offset,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.translationValues(offset.dx, offset.dy, 0.0),
        origin = null,
@@ -1254,6 +1330,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
+    this.filterQuality,
     Widget? child,
   }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
@@ -1285,6 +1362,15 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@template flutter.widgets.Transform.optional.FilterQuality}
+  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
+  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
+  /// rendering of the child.
+  /// {@endtemplate}
+  final FilterQuality? filterQuality;
+
   @override
   RenderTransform createRenderObject(BuildContext context) {
     return RenderTransform(
@@ -1293,6 +1379,7 @@ class Transform extends SingleChildRenderObjectWidget {
       alignment: alignment,
       textDirection: Directionality.maybeOf(context),
       transformHitTests: transformHitTests,
+      filterQuality: filterQuality,
     );
   }
 
@@ -1303,7 +1390,8 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..textDirection = Directionality.maybeOf(context)
-      ..transformHitTests = transformHitTests;
+      ..transformHitTests = transformHitTests
+      ..filterQuality = filterQuality;
   }
 }
 
@@ -1630,6 +1718,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// Unlike [Transform], which applies a transform just prior to painting,
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=BFE6_UglLfQ}
 ///
 /// {@tool snippet}
 ///
@@ -2201,6 +2291,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = size?.height,
       super(key: key, child: child);
 
+  /// Creates a box whose [width] and [height] are equal.
+  const SizedBox.square({Key? key, Widget? child, double? dimension})
+    : width = dimension,
+      height = dimension,
+      super(key: key, child: child);
+
   /// If non-null, requires the child to have exactly this width.
   final double? width;
 
@@ -2624,11 +2720,11 @@ class UnconstrainedBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstraintsTransformBox(
-      child: child,
       textDirection: textDirection,
       alignment: alignment,
       clipBehavior: clipBehavior,
       constraintsTransform: _axisToTransform(constrainedAxis),
+      child: child,
     );
   }
 
@@ -2646,6 +2742,33 @@ class UnconstrainedBox extends StatelessWidget {
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=PEsY654EGZ0}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows a [FractionallySizedBox] whose one child is 50% of
+/// the box's size per the width and height factor parameters, and centered
+/// within that box by the alignment parameter.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SizedBox.expand(
+///     child: FractionallySizedBox(
+///       widthFactor: 0.5,
+///       heightFactor: 0.5,
+///       alignment: FractionalOffset.center,
+///       child: DecoratedBox(
+///         decoration: BoxDecoration(
+///           border: Border.all(
+///             color: Colors.blue,
+///             width: 4,
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -3089,7 +3212,7 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _OffstageElement createElement() => _OffstageElement(this);
+  SingleChildRenderObjectElement createElement() => _OffstageElement(this);
 }
 
 class _OffstageElement extends SingleChildRenderObjectElement {
@@ -3796,9 +3919,9 @@ class Stack extends MultiChildRenderObjectWidget {
     if (alignment is AlignmentDirectional && textDirection == null) {
       assert(debugCheckHasDirectionality(
         context,
-        why: 'to resolve the \'alignment\' argument',
-        hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+        why: "to resolve the 'alignment' argument",
+        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
+        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
       ));
     }
     return true;
@@ -5465,7 +5588,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   const FlowMenu({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlowMenuState createState() => _FlowMenuState();
+///   State<FlowMenu> createState() => _FlowMenuState();
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
@@ -5844,6 +5967,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale = 1.0,
     this.color,
+    this.opacity,
     this.colorBlendMode,
     this.fit,
     this.alignment = Alignment.center,
@@ -5889,6 +6013,13 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
+
+  /// If non-null, the value from the [Animation] is multiplied with the opacity
+  /// of each image pixel before painting onto the canvas.
+  ///
+  /// This is more efficient than using [FadeTransition] to change the opacity
+  /// of an image.
+  final Animation<double>? opacity;
 
   /// Used to set the filterQuality of the image
   /// Use the "low" quality setting to scale the image, which corresponds to
@@ -5999,6 +6130,7 @@ class RawImage extends LeafRenderObjectWidget {
       height: height,
       scale: scale,
       color: color,
+      opacity: opacity,
       colorBlendMode: colorBlendMode,
       fit: fit,
       alignment: alignment,
@@ -6051,6 +6183,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -6078,8 +6211,9 @@ class RawImage extends LeafRenderObjectWidget {
 /// class TestAssetBundle extends CachingAssetBundle {
 ///   @override
 ///   Future<ByteData> load(String key) async {
-///     if (key == 'resources/test')
+///     if (key == 'resources/test') {
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///     }
 ///     return ByteData(0);
 ///   }
 /// }
@@ -6109,7 +6243,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AssetBundle], the interface for asset bundles.
-///  * [rootBundle], the default default asset bundle.
+///  * [rootBundle], the default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///
@@ -6150,6 +6284,11 @@ class DefaultAssetBundle extends InheritedWidget {
 /// A given render object can be placed at most once in the widget tree. This
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
+///
+/// This widget will call [RenderObject.dispose] on the [renderBox] when it is
+/// unmounted. After that point, the [renderBox] will be unusable. If any
+/// children have been added to the [renderBox], they must be disposed in the
+/// [onUnmount] callback.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// Creates an adapter for placing a specific [RenderBox] in the widget tree.
   ///
@@ -6157,6 +6296,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter({
     required this.renderBox,
     this.onBuild,
+    this.onUnmount,
   }) : assert(renderBox != null),
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
@@ -6165,6 +6305,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
        super(key: GlobalObjectKey(renderBox));
 
   /// The render box to place in the widget tree.
+  ///
+  /// This widget takes ownership of the render object. When it is unmounted,
+  /// it also calls [RenderObject.dispose].
   final RenderBox renderBox;
 
   /// Called when it is safe to update the render box and its descendants. If
@@ -6173,12 +6316,37 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback? onBuild;
 
+  /// Called when it is safe to dispose of children that were manually added to
+  /// the [renderBox].
+  ///
+  /// Do not dispose the [renderBox] itself, as it will be disposed by the
+  /// framework automatically. However, during that process the framework will
+  /// check that all children of the [renderBox] have also been disposed.
+  /// Typically, child [RenderObject]s are disposed by corresponding [Element]s
+  /// when they are unmounted. However, child render objects that were manually
+  /// added do not have corresponding [Element]s to manage their lifecycle, and
+  /// need to be manually disposed here.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderObjectElement.unmount], which invokes this callback before
+  ///     disposing of its render object.
+  ///   * [RenderObject.dispose], which instructs a render object to release
+  ///     any resources it may be holding.
+  final VoidCallback? onUnmount;
+
   @override
   RenderBox createRenderObject(BuildContext context) => renderBox;
 
   @override
   void updateRenderObject(BuildContext context, RenderBox renderObject) {
     onBuild?.call();
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    assert(renderObject == renderBox);
+    onUnmount?.call();
   }
 }
 
@@ -6590,7 +6758,7 @@ class MouseRegion extends StatefulWidget {
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   _MyTimedButton createState() => _MyTimedButton();
+  ///   State<MyTimedButton> createState() => _MyTimedButton();
   /// }
   ///
   /// class _MyTimedButton extends State<MyTimedButton> {
@@ -6708,7 +6876,7 @@ class MouseRegion extends StatefulWidget {
   final Widget? child;
 
   @override
-  _MouseRegionState createState() => _MouseRegionState();
+  State<MouseRegion> createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -7178,10 +7346,15 @@ class Semantics extends SingleChildRenderObjectWidget {
     int? maxValueLength,
     int? currentValueLength,
     String? label,
+    AttributedString? attributedLabel,
     String? value,
+    AttributedString? attributedValue,
     String? increasedValue,
+    AttributedString? attributedIncreasedValue,
     String? decreasedValue,
+    AttributedString? attributedDecreasedValue,
     String? hint,
+    AttributedString? attributedHint,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -7237,10 +7410,15 @@ class Semantics extends SingleChildRenderObjectWidget {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       label: label,
+      attributedLabel: attributedLabel,
       value: value,
+      attributedValue: attributedValue,
       increasedValue: increasedValue,
+      attributedIncreasedValue: attributedIncreasedValue,
       decreasedValue: decreasedValue,
+      attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
+      attributedHint: attributedHint,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -7325,6 +7503,31 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  AttributedString? get _effectiveAttributedLabel {
+    return properties.attributedLabel ??
+          (properties.label == null ? null : AttributedString(properties.label!));
+  }
+
+  AttributedString? get _effectiveAttributedValue {
+    return properties.attributedValue ??
+        (properties.value == null ? null : AttributedString(properties.value!));
+  }
+
+  AttributedString? get _effectiveAttributedIncreasedValue {
+    return properties.attributedIncreasedValue ??
+        (properties.increasedValue == null ? null : AttributedString(properties.increasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedDecreasedValue {
+    return properties.attributedDecreasedValue ??
+        (properties.decreasedValue == null ? null : AttributedString(properties.decreasedValue!));
+  }
+
+  AttributedString? get _effectiveAttributedHint {
+    return properties.attributedHint ??
+        (properties.hint == null ? null : AttributedString(properties.hint!));
+  }
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
@@ -7354,11 +7557,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
       image: properties.image,
-      label: properties.label,
-      value: properties.value,
-      increasedValue: properties.increasedValue,
-      decreasedValue: properties.decreasedValue,
-      hint: properties.hint,
+      attributedLabel: _effectiveAttributedLabel,
+      attributedValue: _effectiveAttributedValue,
+      attributedIncreasedValue: _effectiveAttributedIncreasedValue,
+      attributedDecreasedValue: _effectiveAttributedDecreasedValue,
+      attributedHint: _effectiveAttributedHint,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -7391,7 +7594,10 @@ class Semantics extends SingleChildRenderObjectWidget {
     if (properties.textDirection != null)
       return properties.textDirection;
 
-    final bool containsText = properties.label != null || properties.value != null || properties.hint != null;
+    final bool containsText = properties.attributedLabel != null ||
+                              properties.label != null ||
+                              properties.value != null ||
+                              properties.hint != null;
 
     if (!containsText)
       return null;
@@ -7427,11 +7633,11 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..liveRegion = properties.liveRegion
       ..maxValueLength = properties.maxValueLength
       ..currentValueLength = properties.currentValueLength
-      ..label = properties.label
-      ..value = properties.value
-      ..increasedValue = properties.increasedValue
-      ..decreasedValue = properties.decreasedValue
-      ..hint = properties.hint
+      ..attributedLabel = _effectiveAttributedLabel
+      ..attributedValue = _effectiveAttributedValue
+      ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
+      ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
+      ..attributedHint = _effectiveAttributedHint
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
@@ -7867,7 +8073,7 @@ class StatefulBuilder extends StatefulWidget {
   final StatefulWidgetBuilder builder;
 
   @override
-  _StatefulBuilderState createState() => _StatefulBuilderState();
+  State<StatefulBuilder> createState() => _StatefulBuilderState();
 }
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
@@ -7889,13 +8095,13 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  _RenderColoredBox createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(BuildContext context) {
     return _RenderColoredBox(color: color);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
-    renderObject.color = color;
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderColoredBox).color = color;
   }
 
   @override

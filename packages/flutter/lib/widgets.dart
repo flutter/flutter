@@ -12,8 +12,8 @@
 ///    for a catalog of commonly-used Flutter widgets.
 library widgets;
 
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'package:characters/characters.dart';
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
@@ -63,6 +63,7 @@ export 'src/widgets/inherited_model.dart';
 export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/inherited_theme.dart';
 export 'src/widgets/interactive_viewer.dart';
+export 'src/widgets/keyboard_listener.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
@@ -98,6 +99,7 @@ export 'src/widgets/scroll_context.dart';
 export 'src/widgets/scroll_controller.dart';
 export 'src/widgets/scroll_metrics.dart';
 export 'src/widgets/scroll_notification.dart';
+export 'src/widgets/scroll_notification_observer.dart';
 export 'src/widgets/scroll_physics.dart';
 export 'src/widgets/scroll_position.dart';
 export 'src/widgets/scroll_position_with_single_context.dart';

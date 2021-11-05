@@ -6,6 +6,9 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
+import 'artifacts.dart';
+import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_io.dart';
@@ -21,10 +24,28 @@ import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'custom_devices/custom_devices_config.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
+import 'macos/xcode.dart';
+import 'persistent_tool_state.dart';
+import 'project.dart';
+import 'reporting/reporting.dart';
+import 'runner/local_engine.dart';
+import 'version.dart';
 
+/// The flutter GitHub repository.
+String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+
+Artifacts? get artifacts => context.get<Artifacts>();
+BuildSystem? get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>()!;
+CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>()!;
@@ -32,6 +53,26 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
+FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
+Usage get flutterUsage => context.get<Usage>()!;
+XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
+Xcode? get xcode => context.get<Xcode>();
+IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
+LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+
+PersistentToolState? get persistentToolState => PersistentToolState.instance;
+
+BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
+final BotDetector _defaultBotDetector = BotDetector(
+  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+  platform: platform,
+  persistentToolState: persistentToolState ?? PersistentToolState(
+    fileSystem: fs,
+    logger: logger,
+    platform: platform,
+  ),
+);
+Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// Currently active implementation of the file system.
 ///
@@ -137,6 +178,7 @@ AnsiTerminal get terminal {
 final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
   stdio: stdio,
   platform: platform,
+  now: DateTime.now(),
 );
 
 /// The global Stdio wrapper.
@@ -165,3 +207,17 @@ LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
   Signals.defaultExitSignals,
   shutdownHooks,
 );
+
+/// Gradle utils in the current [AppContext].
+GradleUtils? get gradleUtils => context.get<GradleUtils>();
+
+CocoaPods? get cocoaPods => context.get<CocoaPods>();
+
+FlutterProjectFactory get projectFactory {
+  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+    logger: logger,
+    fileSystem: fs,
+  );
+}
+
+CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 // This is the test for the private implementation of animated icons.
 // To make the private API accessible from the test we do not import the
 // material material_animated_icons library, but instead, this test file is an
@@ -13,7 +15,6 @@ import 'dart:math' as math show pi;
 import 'dart:ui' show lerpDouble, Offset;
 import 'dart:ui' as ui show Paint, Path, Canvas;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -95,7 +96,7 @@ void main() {
 
     test('progress 0', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -117,7 +118,7 @@ void main() {
 
     test('progress 1', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -139,7 +140,7 @@ void main() {
 
     test('clamped progress', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(1.5),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -161,7 +162,7 @@ void main() {
 
     test('scale', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 0.5,
@@ -177,7 +178,7 @@ void main() {
 
     test('mirror', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -195,7 +196,7 @@ void main() {
 
     test('interpolated frame', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: movingBar.paths,
+        paths: _movingBar.paths,
         progress: const AlwaysStoppedAnimation<double>(0.5),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -217,7 +218,7 @@ void main() {
 
     test('curved frame', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(1.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -237,7 +238,7 @@ void main() {
 
     test('interpolated curved frame', () {
       final _AnimatedIconPainter painter = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.25),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -257,7 +258,7 @@ void main() {
 
     test('should not repaint same values', () {
       final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -266,7 +267,7 @@ void main() {
       );
 
       final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -279,7 +280,7 @@ void main() {
 
     test('should repaint on progress change', () {
       final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -288,7 +289,7 @@ void main() {
       );
 
       final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.1),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -301,7 +302,7 @@ void main() {
 
     test('should repaint on color change', () {
       final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF00FF00),
         scale: 1.0,
@@ -310,7 +311,7 @@ void main() {
       );
 
       final _AnimatedIconPainter painter2 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFFFF0000),
         scale: 1.0,
@@ -323,7 +324,7 @@ void main() {
 
     test('should repaint on paths change', () {
       final _AnimatedIconPainter painter1 = _AnimatedIconPainter(
-        paths: bow.paths,
+        paths: _bow.paths,
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: const Color(0xFF0000FF),
         scale: 1.0,
@@ -413,7 +414,7 @@ class Mock {
   }
 }
 
-const _AnimatedIconData movingBar = _AnimatedIconData(
+const _AnimatedIconData _movingBar = _AnimatedIconData(
   Size(48.0, 48.0),
   <_PathFrames>[
     _PathFrames(
@@ -455,7 +456,7 @@ const _AnimatedIconData movingBar = _AnimatedIconData(
   ],
 );
 
-const _AnimatedIconData bow = _AnimatedIconData(
+const _AnimatedIconData _bow = _AnimatedIconData(
   Size(48.0, 48.0),
   <_PathFrames>[
     _PathFrames(

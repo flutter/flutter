@@ -14,4 +14,40 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/66043
   VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
   tracker = VelocityTracker.withKind(PointerDeviceKind.mouse);
+
+  // Changes made in https://github.com/flutter/flutter/pull/81858
+  DragGestureRecognizer();
+  DragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  VerticalDragGestureRecognizer();
+  VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  HorizontalDragGestureRecognizer();
+  HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  GestureRecognizer();
+  GestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  OneSequenceGestureRecognizer();
+  OneSequenceGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  PrimaryPointerGestureRecognizer();
+  PrimaryPointerGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  EagerGestureRecognizer();
+  EagerGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ForcePressGestureRecognizer();
+  ForcePressGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  LongPressGestureRecognizer();
+  LongPressGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  MultiDragGestureRecognizer();
+  MultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ImmediateMultiDragGestureRecognizer();
+  ImmediateMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  HorizontalMultiDragGestureRecognizer();
+  HorizontalMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  VerticalMultiDragGestureRecognizer();
+  VerticalMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  DelayedMultiDragGestureRecognizer();
+  DelayedMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  DoubleTapGestureRecognizer();
+  DoubleTapGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  MultiTapGestureRecognizer();
+  MultiTapGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ScaleGestureRecognizer();
+  ScaleGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
 }

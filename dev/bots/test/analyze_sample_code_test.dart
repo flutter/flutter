@@ -7,44 +7,63 @@ import 'dart:io';
 import 'common.dart';
 
 void main() {
-  test('analyze_sample_code', () {
+  // These tests don't run on Windows because the sample analyzer doesn't
+  // support Windows as a platform, since it is only run on Linux in the
+  // continuous integration tests.
+  if (Platform.isWindows) {
+    return;
+  }
+
+  test('analyze_sample_code smoke test', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
-      <String>['analyze_sample_code.dart', 'test/analyze-sample-code-test-input'],
+      <String>['analyze_sample_code.dart', '--no-include-dart-ui', 'test/analyze-sample-code-test-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n')
       ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
-      'In sample starting at known_broken_documentation.dart:117:bool? _visible = true;',
-      '>>> info: Use late for private members with non-nullable type (use_late_for_private_fields_and_variables)',
-      'In sample starting at known_broken_documentation.dart:117:      child: Text(title),',
-      '>>> error: The final variable \'title\' can\'t be read because it is potentially unassigned at this point (read_potentially_unassigned_final)',
-      'known_broken_documentation.dart:30:9: new Opacity(',
+      'In sample starting at dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:125:      child: Text(title),',
+      ">>> error: The final variable 'title' can't be read because it is potentially unassigned at this point (read_potentially_unassigned_final)",
+      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:30:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
-      'known_broken_documentation.dart:62:9: new Opacity(',
+      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:62:9: new Opacity(',
       '>>> info: Unnecessary new keyword (unnecessary_new)',
-      'known_broken_documentation.dart:95:9: const text0 = Text(\'Poor wandering ones!\');',
-      '>>> info: Specify type annotations (always_specify_types)',
-      'known_broken_documentation.dart:103:9: const text1 = _Text(\'Poor wandering ones!\');',
-      '>>> info: Specify type annotations (always_specify_types)',
-      'known_broken_documentation.dart:111:9: final String? bar = \'Hello\';',
+      "dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:111:9: final String? bar = 'Hello';",
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
-      'known_broken_documentation.dart:111:23: final String? bar = \'Hello\';',
-      '>>> info: Use a non-nullable type for a final variable initialized with a non-nullable value (unnecessary_nullable_for_final_variable_declarations)',
-      'known_broken_documentation.dart:112:9: final int foo = null;',
+      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:9: final int foo = null;',
       '>>> info: Prefer const over final for declarations (prefer_const_declarations)',
-      'known_broken_documentation.dart:112:25: final int foo = null;',
-      '>>> error: A value of type \'Null\' can\'t be assigned to a variable of type \'int\' (invalid_assignment)',
+      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:112:25: final int foo = null;',
+      ">>> error: A value of type 'Null' can't be assigned to a variable of type 'int' (invalid_assignment)",
+      'dev/bots/test/analyze-sample-code-test-input/known_broken_documentation.dart:120:24: const SizedBox(),',
+      '>>> error: Unexpected comma at end of sample code. (missing_identifier)',
       '',
       'Found 2 sample code errors.',
       ''
     ]);
     expect(stdoutLines, <String>[
-      'Found 8 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
+      'Found 9 snippet code blocks, 0 sample code sections, and 2 dartpad sections.',
       'Starting analysis of code samples.',
       '',
     ]);
-  }, skip: Platform.isWindows);
+  });
+  test('Analyzes dart:ui code', () {
+    final ProcessResult process = Process.runSync(
+      '../../bin/cache/dart-sdk/bin/dart',
+      <String>[
+        'analyze_sample_code.dart',
+        '--dart-ui-location',
+        'test/analyze-sample-code-test-dart-ui',
+        'test/analyze-sample-code-test-input',
+      ],
+    );
+    final List<String> stdoutLines = process.stdout.toString().split('\n');
+    expect(process.exitCode, isNot(equals(0)));
+    expect(stdoutLines, equals(<String>[
+      // There is one sample code section in the test's dummy dart:ui code.
+      'Found 9 snippet code blocks, 1 sample code sections, and 2 dartpad sections.',
+      '',
+    ]));
+  });
 }

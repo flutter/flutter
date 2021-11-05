@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'mock_canvas.dart';
 import 'rendering_tester.dart';
@@ -95,8 +95,16 @@ void main() {
     layout(root);
     expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..rect(color: const Color(0x90909090)));
     expect(b.debugPaint, isNot(paints..path()));
-    expect(s.debugPaint, paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                               ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
+    expect(
+      s.debugPaint,
+      paints
+        ..circle(hasMaskFilter: true)
+        ..line(hasMaskFilter: true)
+        ..path(hasMaskFilter: true)
+        ..path(hasMaskFilter: true)
+        ..path(color: const Color(0x900090FF))
+        ..path(color: const Color(0xFF0090FF)),
+    );
     expect(s.debugPaint, isNot(paints..rect()));
     debugPaintSizeEnabled = false;
   });
@@ -118,8 +126,18 @@ void main() {
     );
     layout(b);
     expect(s.debugPaint, paints..rect(color: const Color(0x90909090)));
-    expect(s.debugPaint, isNot(paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                                     ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF))));
+    expect(
+      s.debugPaint,
+      isNot(
+        paints
+          ..circle(hasMaskFilter: true)
+          ..line(hasMaskFilter: true)
+          ..path(hasMaskFilter: true)
+          ..path(hasMaskFilter: true)
+          ..path(color: const Color(0x900090FF))
+          ..path(color: const Color(0xFF0090FF)),
+      ),
+    );
     expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
@@ -145,10 +163,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -178,10 +196,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {

@@ -84,8 +84,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         platform: globals.platform,
         userMessages: userMessages,
         plistParser: globals.plistParser,
+        processManager: globals.processManager,
       ),
-      ...VsCodeValidator.installedValidators(globals.fs, globals.platform),
+      ...VsCodeValidator.installedValidators(globals.fs, globals.platform, globals.processManager),
     ];
     final ProxyValidator proxyValidator = ProxyValidator(platform: globals.platform);
     _validators = <DoctorValidator>[
@@ -436,6 +437,10 @@ class FlutterValidator extends DoctorValidator {
         frameworkVersion,
         _flutterRoot(),
       )));
+      messages.add(ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(version.repositoryUrl ?? 'unknown')));
+      if (_platform.environment.containsKey('FLUTTER_GIT_URL')) {
+        messages.add(ValidationMessage(_userMessages.flutterGitUrl(_platform.environment['FLUTTER_GIT_URL'])));
+      }
       messages.add(ValidationMessage(_userMessages.flutterRevision(
         version.frameworkRevisionShort,
         version.frameworkAge,

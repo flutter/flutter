@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -149,9 +149,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              child: const Text('TextButton'),
               onPressed: () { },
               focusNode: focusNode,
+              child: const Text('TextButton'),
             ),
           ),
         ),
@@ -216,9 +216,9 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return TextButton(
-                    child: const Text('TextButton'),
                     onPressed: () {},
                     focusNode: focusNode,
+                    child: const Text('TextButton'),
                   );
                 },
               ),
@@ -631,9 +631,9 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
-          child: const Text('button'),
           onPressed: onPressed,
           onLongPress: onLongPress,
+          child: const Text('button'),
         ),
       );
     }
@@ -739,7 +739,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(100, 100)));
+    expect(box.size, equals(const Size(116, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(VisualDensity.standard, useText: true);
@@ -757,7 +757,7 @@ void main() {
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(56, 36)));
+    expect(box.size, equals(const Size(72, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
@@ -996,7 +996,7 @@ void main() {
                   child: TextButton(
                     style: TextButton.styleFrom(padding: const EdgeInsets.all(22)),
                     onPressed: () {},
-                    child: const Text('TextButton')
+                    child: const Text('TextButton'),
                   ),
                 ),
               ),
@@ -1087,6 +1087,136 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  testWidgets('TextButton.icon does not overflow', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/77815
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: TextButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text( // Much wider than 200
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('TextButton.icon icon,label layout', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final Key iconKey = UniqueKey();
+    final Key labelKey = UniqueKey();
+    final ButtonStyle style = TextButton.styleFrom(
+      padding: EdgeInsets.zero,
+      visualDensity: VisualDensity.standard, // dx=0, dy=0
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: TextButton.icon(
+              key: buttonKey,
+              style: style,
+              onPressed: () {},
+              icon: SizedBox(key: iconKey, width: 50, height: 100),
+              label: SizedBox(key: labelKey, width: 50, height: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The button's label and icon are separated by a gap of 8:
+    // 46 [icon 50] 8 [label 50] 46
+    // The overall button width is 200. So:
+    // icon.x = 46
+    // label.x = 46 + 50 + 8 = 104
+
+    expect(tester.getRect(find.byKey(buttonKey)), const Rect.fromLTRB(0.0, 0.0, 200.0, 100.0));
+    expect(tester.getRect(find.byKey(iconKey)), const Rect.fromLTRB(46.0, 0.0, 96.0, 100.0));
+    expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
+  });
+
+  testWidgets('TextButton maximumSize', (WidgetTester tester) async {
+    final Key key0 = UniqueKey();
+    final Key key1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextButton(
+                  key: key0,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(64),
+                  ),
+                  onPressed: () { },
+                  child: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+                TextButton.icon(
+                  key: key1,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(24, 36),
+                    maximumSize: const Size.fromWidth(104),
+                  ),
+                  onPressed: () {},
+                  icon: Container(color: Colors.red, width: 32, height: 32),
+                  label: const Text('A B C D E F G H I J K L M N O P'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key0)), const Size(64.0, 128.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(104.0, 128.0));
+  });
+
+  testWidgets('Fixed size TextButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(fixedSize: const Size(200, 200)),
+                onPressed: () { },
+                child: const Text('200x200'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(200, 200),
+                  maximumSize: const Size(200, 200),
+                ),
+                onPressed: () { },
+                child: const Text('200,200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(TextButton, '200x200')), const Size(200, 200));
+    expect(tester.getSize(find.widgetWithText(TextButton, '200,200')), const Size(200, 200));
+  });
+
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

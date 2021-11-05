@@ -10,7 +10,7 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.white,
-        brightness: Brightness.light,
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
@@ -82,38 +81,37 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            Wrap(
+            const SizedBox(height: 12.0),
+            OverflowBar(
+              spacing: 8,
+              alignment: MainAxisAlignment.end,
               children: <Widget>[
-                ButtonBar(
-                  children: <Widget>[
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        shape: const BeveledRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                        ),
-                      ),
-                      onPressed: () {
-                        // The login screen is immediately displayed on top of
-                        // the Shrine home screen using onGenerateRoute and so
-                        // rootNavigator must be set to true in order to get out
-                        // of Shrine completely.
-                        Navigator.of(context, rootNavigator: true).pop();
-                      },
-                      child: const Text('CANCEL'),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    shape: const BeveledRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 8.0,
-                        shape: const BeveledRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('NEXT'),
+                  ),
+                  onPressed: () {
+                    // The login screen is immediately displayed on top of
+                    // the Shrine home screen using onGenerateRoute and so
+                    // rootNavigator must be set to true in order to get out
+                    // of Shrine completely.
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                  child: const Text('CANCEL'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 8.0,
+                    shape: const BeveledRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7.0)),
                     ),
-                  ],
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('NEXT'),
                 ),
               ],
             ),
@@ -133,8 +131,8 @@ class PrimaryColorOverride extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: child!,
       data: Theme.of(context).copyWith(primaryColor: color),
+      child: child!,
     );
   }
 }

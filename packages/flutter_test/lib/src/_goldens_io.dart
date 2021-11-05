@@ -146,7 +146,7 @@ mixin LocalComparisonOutput {
       final Map<String, Image> diffs = result.diffs!.cast<String, Image>();
       for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
-          key.isEmpty ? entry.key : entry.key + '_' + key,
+          key.isEmpty ? entry.key : '${entry.key}_$key',
           golden,
           basedir,
         );
@@ -161,10 +161,7 @@ mixin LocalComparisonOutput {
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments.last;
-    final String testName = fileName.split(path.extension(fileName))[0]
-      + '_'
-      + failure
-      + '.png';
+    final String testName = '${fileName.split(path.extension(fileName))[0]}_$failure.png';
     return File(path.join(
       path.fromUri(basedir),
       path.fromUri(Uri.parse('failures/$testName')),

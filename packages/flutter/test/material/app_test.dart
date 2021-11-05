@@ -2,12 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -105,7 +111,7 @@ void main() {
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
             );
-          }
+          },
         ),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -146,7 +152,7 @@ void main() {
           builder: (BuildContext context) {
             ++buildCounter;
             return const Text('A');
-          }
+          },
         ),
       ),
     );
@@ -158,7 +164,7 @@ void main() {
           builder: (BuildContext context) {
             ++buildCounter;
             return const Text('B');
-          }
+          },
         ),
       ),
     );
@@ -172,7 +178,7 @@ void main() {
       builder: (BuildContext context) {
         ++buildCounter;
         return const Placeholder();
-      }
+      },
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -255,16 +261,16 @@ void main() {
     await tester.pumpWidget(
         MaterialApp(
           home: Builder(
-              builder: (BuildContext context) {
-                return Material(
-                  child: ElevatedButton(
-                      child: const Text('X'),
-                      onPressed: () async {
-                        result = Navigator.of(context).pushNamed<Object?>('/a');
-                      },
-                  ),
-                );
-              }
+            builder: (BuildContext context) {
+              return Material(
+                child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () async {
+                      result = Navigator.of(context).pushNamed<Object?>('/a');
+                    },
+                ),
+              );
+            },
           ),
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
@@ -326,11 +332,13 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isA<String>());
-    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
-    expect(find.text('route "/"'), findsOneWidget);
-    expect(find.text('route "/a"'), findsNothing);
-    expect(find.text('route "/a/b"'), findsNothing);
-    expect(find.text('route "/b"'), findsNothing);
+    if (exception is String) {
+      expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+      expect(find.text('route "/"'), findsOneWidget);
+      expect(find.text('route "/a"'), findsNothing);
+      expect(find.text('route "/a/b"'), findsNothing);
+      expect(find.text('route "/b"'), findsNothing);
+    }
   });
 
   testWidgets('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
@@ -525,7 +533,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -546,7 +554,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -571,7 +579,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -592,7 +600,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -619,7 +627,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -645,7 +653,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-            brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -672,7 +680,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         home: Builder(
           builder: (BuildContext context) {
@@ -741,7 +749,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -857,7 +865,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          brightness: Brightness.light
+          brightness: Brightness.light,
         ),
         darkTheme: ThemeData(
           brightness: Brightness.dark,
@@ -927,17 +935,19 @@ void main() {
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page one');
-              }
+              },
             ),
             PageRouteBuilder<void>(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
-                Animation<double> secondaryAnimation) {
+                Animation<double> secondaryAnimation,
+              ) {
                 return const Text('non-regular page two');
-              }
+              },
             ),
           ];
         },
@@ -946,7 +956,7 @@ void main() {
           '/': (BuildContext context) => const Text('regular page one'),
           '/abc': (BuildContext context) => const Text('regular page two'),
         },
-      )
+      ),
     );
     expect(find.text('non-regular page two'), findsOneWidget);
     expect(find.text('non-regular page one'), findsNothing);
@@ -964,7 +974,7 @@ void main() {
     final HeroController controller = MaterialApp.createMaterialHeroController();
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
     );
     expect(tween, isA<MaterialRectArcTween>());
   });
@@ -1000,7 +1010,7 @@ void main() {
           location: 'popped',
         );
         return route.didPop(result);
-      }
+      },
     );
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
@@ -1058,6 +1068,26 @@ void main() {
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
     expect(scrollBehavior.runtimeType, MockScrollBehavior);
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
+  });
+
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    final UniqueKey uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        key: uniqueKey,
+        data: const MediaQueryData(),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          builder: (BuildContext context, Widget? child) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      ),
+    );
+    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 }
 
@@ -1148,7 +1178,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         MaterialPage<void>(
           key: ValueKey<String>(routeInformation.location!),
           child: builder(context, routeInformation),
-        )
+        ),
       ],
     );
   }

@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
@@ -18,14 +18,16 @@ void main() {
         WidgetsLocalizationsDelegate(),
         delegate,
       ],
-      child: const Text('loaded')
+      child: const Text('loaded'),
     ));
     final dynamic state = tester.state(find.byType(Localizations));
+    // ignore: avoid_dynamic_calls
     expect(state!.locale, isNull);
     expect(find.text('loaded'), findsNothing);
 
     late Locale locale;
     binding.onAllowFrame = () {
+      // ignore: avoid_dynamic_calls
       locale = state.locale as Locale;
     };
     delegate.completer.complete('foo');

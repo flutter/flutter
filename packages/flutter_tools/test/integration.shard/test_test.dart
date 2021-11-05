@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -194,7 +200,7 @@ void main() {
   });
 
   testWithoutContext('flutter test should run all tests inside of a directory with no trailing slash', () async {
-    final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
+    final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, '$flutterTestDirectory/child_directory',
       extraArguments: const <String>['--verbose']);
     final String stdout = result.stdout as String;
     if ((!stdout.contains('+2: All tests passed')) ||

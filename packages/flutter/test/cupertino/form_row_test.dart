@@ -57,10 +57,7 @@ void main() {
       ),
     );
 
-    expect(
-        tester.getTopLeft(find.byType(Text)).dx >
-            tester.getTopLeft(find.byType(CupertinoTextField)).dx,
-        true);
+    expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, true);
   });
 
   testWidgets('LTR puts child after prefix', (WidgetTester tester) async {
@@ -81,10 +78,7 @@ void main() {
       ),
     );
 
-    expect(
-        tester.getTopLeft(find.byType(Text)).dx >
-            tester.getTopLeft(find.byType(CupertinoTextField)).dx,
-        false);
+    expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, false);
   });
 
   testWidgets('Shows error widget', (WidgetTester tester) async {
@@ -121,8 +115,7 @@ void main() {
     expect(helper, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper text above error text',
-      (WidgetTester tester) async {
+  testWidgets('Shows helper text above error text', (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = CupertinoActivityIndicator();
 
@@ -139,13 +132,12 @@ void main() {
     );
 
     expect(
-        tester.getTopLeft(find.byType(CupertinoActivityIndicator)).dy >
-            tester.getTopLeft(find.byType(Text)).dy,
-        true);
+      tester.getTopLeft(find.byType(CupertinoActivityIndicator)).dy > tester.getTopLeft(find.byType(Text)).dy,
+      true,
+    );
   });
 
-  testWidgets('Shows helper in label color and error text in red color',
-      (WidgetTester tester) async {
+  testWidgets('Shows helper in label color and error text in red color', (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = Text('Error');
 

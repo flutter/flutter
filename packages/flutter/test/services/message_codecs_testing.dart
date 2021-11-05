@@ -46,8 +46,7 @@ bool deepEquals(dynamic valueA, dynamic valueB) {
 bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   if (valueA is ByteData) {
     return valueB is ByteData
-        && deepEqualsList(
-            valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
+        && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
   if (valueA is Uint8List)
     return valueB is Uint8List && deepEqualsList(valueA, valueB);
@@ -55,6 +54,8 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     return valueB is Int32List && deepEqualsList(valueA, valueB);
   if (valueA is Int64List)
     return valueB is Int64List && deepEqualsList(valueA, valueB);
+  if (valueA is Float32List)
+    return valueB is Float32List && deepEqualsList(valueA, valueB);
   if (valueA is Float64List)
     return valueB is Float64List && deepEqualsList(valueA, valueB);
   throw 'Unexpected typed data: $valueA';

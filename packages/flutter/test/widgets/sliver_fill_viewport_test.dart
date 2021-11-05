@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
@@ -154,7 +153,7 @@ void main() {
         '           ║ TextSpan:\n'
         '           ║   <all styles inherited>\n'
         '           ║   "1"\n'
-        '           ╚═══════════\n'
+        '           ╚═══════════\n',
       ),
     );
   });

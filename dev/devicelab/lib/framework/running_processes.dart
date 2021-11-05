@@ -26,20 +26,7 @@ class RunningProcessInfo {
   }
 
   @override
-  int get hashCode {
-    // TODO(dnfield): Replace this when Object.hashValues lands, https://github.com/dart-lang/sdk/issues/11617
-    int hash = 17;
-    if (pid != null) {
-      hash = hash * 23 + pid.hashCode;
-    }
-    if (commandLine != null) {
-      hash = hash * 23 + commandLine.hashCode;
-    }
-    if (creationDate != null) {
-      hash = hash * 23 + creationDate.hashCode;
-    }
-    return hash;
-  }
+  int get hashCode => Object.hash(pid, commandLine, creationDate);
 
   @override
   String toString() {
@@ -47,7 +34,7 @@ class RunningProcessInfo {
   }
 }
 
-Future<bool> killProcess(String pid, {ProcessManager processManager}) async {
+Future<bool> killProcess(String pid, {ProcessManager? processManager}) async {
   assert(pid != null, 'Must specify a pid to kill');
   processManager ??= const LocalProcessManager();
   ProcessResult result;
@@ -69,8 +56,8 @@ Future<bool> killProcess(String pid, {ProcessManager processManager}) async {
 }
 
 Stream<RunningProcessInfo> getRunningProcesses({
-  String processName,
-  ProcessManager processManager,
+  String? processName,
+  ProcessManager? processManager,
 }) {
   processManager ??= const LocalProcessManager();
   if (Platform.isWindows) {
@@ -80,7 +67,7 @@ Stream<RunningProcessInfo> getRunningProcesses({
 }
 
 @visibleForTesting
-Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
+Stream<RunningProcessInfo> windowsRunningProcesses(String? processName) async* {
   // PowerShell script to get the command line arguments and create time of
   // a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
@@ -118,8 +105,8 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
   const int processIdHeaderSize = 'ProcessId'.length;
   const int creationDateHeaderStart = processIdHeaderSize + 1;
-  int creationDateHeaderEnd;
-  int commandLineHeaderStart;
+  late int creationDateHeaderEnd;
+  late int commandLineHeaderStart;
   bool inTableBody = false;
   for (final String line in output.split('\n')) {
     if (line.startsWith('ProcessId')) {
@@ -148,7 +135,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       rawTime = '0$rawTime';
     }
     if (rawTime[4] == '/') {
-      rawTime = rawTime.substring(0, 3) + '0' + rawTime.substring(3);
+      rawTime = '${rawTime.substring(0, 3)}0${rawTime.substring(3)}';
     }
     final String year = rawTime.substring(6, 10);
     final String month = rawTime.substring(3, 5);
@@ -171,7 +158,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
 @visibleForTesting
 Stream<RunningProcessInfo> posixRunningProcesses(
-  String processName,
+  String? processName,
   ProcessManager processManager,
 ) async* {
   // Cirrus is missing this in Linux for some reason.
@@ -205,7 +192,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
 @visibleForTesting
 Iterable<RunningProcessInfo> processPsOutput(
   String output,
-  String processName,
+  String? processName,
 ) sync* {
   if (output == null) {
     return;
@@ -246,7 +233,7 @@ Iterable<RunningProcessInfo> processPsOutput(
     final String rawTime = line.substring(0, 24);
 
     final String year = rawTime.substring(20, 24);
-    final String month = months[rawTime.substring(4, 7)];
+    final String month = months[rawTime.substring(4, 7)]!;
     final String day = rawTime.substring(8, 10).replaceFirst(' ', '0');
     final String time = rawTime.substring(11, 19);
 

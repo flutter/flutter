@@ -20,12 +20,13 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
@@ -101,12 +102,25 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        def rootProject = project.rootProject
+        rootProject.tasks.register('generateLockfiles') {
+            rootProject.subprojects.each { subproject ->
+                def gradlew = (OperatingSystem.current().isWindows()) ?
+                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                rootProject.exec {
+                    workingDir rootProject.projectDir
+                    executable gradlew
+                    args ":${subproject.name}:dependencies", "--write-locks"
+                }
+            }
+        }
+
         // Configure the Maven repository.
         String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
             : "$hostedRepository/download.flutter.io"
-        project.rootProject.allprojects {
+        rootProject.allprojects {
             repositories {
                 maven {
                     url repository
@@ -275,51 +289,8 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
-        if (!buildPluginAsAar()) {
-            getPluginList().each this.&configurePluginProject
-            getPluginDependencies().each this.&configurePluginDependencies
-            return
-        }
-        project.repositories {
-            maven {
-                url "${getPluginBuildDir()}/outputs/repo"
-            }
-        }
-        getPluginList().each { pluginName, pluginPath ->
-            configurePluginAar(pluginName, pluginPath, project)
-        }
-    }
-
-    private static final Pattern GROUP_PATTERN = ~/group\s+\'(.+)\'/
-    private static final Pattern PROJECT_NAME_PATTERN = ~/rootProject\.name\s+=\s+\'(.+)\'/
-
-    // Adds the plugin AAR dependency to the app project.
-    private void configurePluginAar(String pluginName, String pluginPath, Project project) {
-        // Extract the group id from the plugin's build.gradle.
-        // This is `group '<group-id>'`
-        File pluginBuildFile = project.file(Paths.get(pluginPath, "android", "build.gradle"));
-        if (!pluginBuildFile.exists()) {
-            throw new GradleException("Plugin $pluginName doesn't have the required file $pluginBuildFile.")
-        }
-
-        Matcher groupParts = GROUP_PATTERN.matcher(pluginBuildFile.text)
-        assert groupParts.count == 1
-        assert groupParts.hasGroup()
-        String groupId = groupParts[0][1]
-
-        // Extract the artifact name from the plugin's settings.gradle.
-        // This is `rootProject.name = '<artifact-name>'`
-        File pluginSettings = project.file(Paths.get(pluginPath, "android", "settings.gradle"));
-        if (!pluginSettings.exists()) {
-            throw new GradleException("Plugin $pluginName doesn't have the required file $pluginSettings.")
-        }
-        Matcher projectNameParts = PROJECT_NAME_PATTERN.matcher(pluginSettings.text)
-        assert projectNameParts.count == 1
-        assert projectNameParts.hasGroup()
-        String artifactId = "${projectNameParts[0][1]}_release"
-
-        assert !groupId.empty
-        project.dependencies.add("api", "$groupId:$artifactId:+")
+        getPluginList().each this.&configurePluginProject
+        getPluginDependencies().each this.&configurePluginDependencies
     }
 
     // Adds the plugin project dependency to the app project .
@@ -339,6 +310,9 @@ class FlutterPlugin implements Plugin<Project> {
             // so java8 features are desugared against the runtime classpath.
             // For more, see https://github.com/flutter/flutter/issues/40126
             if (!supportsBuildMode(flutterBuildMode)) {
+                return
+            }
+            if (!pluginProject.hasProperty('android')) {
                 return
             }
             // Copy build types from the app to the plugin.
@@ -525,10 +499,6 @@ class FlutterPlugin implements Plugin<Project> {
         // Projects are built as applications when the they use the `com.android.application`
         // plugin.
         return project.plugins.hasPlugin("com.android.application");
-    }
-
-    private static Boolean buildPluginAsAar() {
-        return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
     // Returns true if the build mode is supported by the current call to Gradle.
@@ -1075,7 +1045,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--DartDefines=${dartDefines}"
             }
             if (bundleSkSLPath != null) {
-                args "-iBundleSkSLPath=${bundleSkSLPath}"
+                args "-dBundleSkSLPath=${bundleSkSLPath}"
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"

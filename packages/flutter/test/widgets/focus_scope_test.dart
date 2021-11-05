@@ -230,36 +230,40 @@ void main() {
       expect(parentFocusScope, hasAGoodToStringDeep);
       expect(
         parentFocusScope.toStringDeep(),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-            ' │ context: FocusScope\n'
-            ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            ' │\n'
-            ' └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '     context: Focus\n'
-            '     PRIMARY FOCUS\n'),
+        equalsIgnoringHashCodes(
+          'FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          ' │ context: FocusScope\n'
+          ' │ IN FOCUS PATH\n'
+          ' │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          ' │\n'
+          ' └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '     context: Focus\n'
+          '     PRIMARY FOCUS\n',
+        ),
       );
 
       expect(FocusManager.instance.rootScope, hasAGoodToStringDeep);
       expect(
         FocusManager.instance.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
-            ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
-            ' │   PATH])\n'
-            ' │\n'
-            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-            '   │ context: FocusScope\n'
-            '   │ IN FOCUS PATH\n'
-            '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '   │\n'
-            '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-            '       context: Focus\n'
-            '       PRIMARY FOCUS\n'),
+        equalsIgnoringHashCodes(
+          'FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
+          ' │ IN FOCUS PATH\n'
+          ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
+          ' │   PATH])\n'
+          ' │\n'
+          ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          '   │ context: FocusScope\n'
+          '   │ IN FOCUS PATH\n'
+          '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '   │\n'
+          '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '       context: Focus\n'
+          '       PRIMARY FOCUS\n',
+        ),
       );
 
       // Add the child focus scope to the focus tree.
-      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext!);
+      final FocusAttachment childAttachment = childFocusScope.attach(key.currentContext);
       parentFocusScope.setFirstFocus(childFocusScope);
       await tester.pumpAndSettle();
       expect(childFocusScope.isFirstFocus, isTrue);
@@ -1596,7 +1600,7 @@ void main() {
       bool? keyEventHandled;
       await tester.pumpWidget(
         Focus(
-          onKey: (_, __) => true, // This one does nothing.
+          onKey: (_, __) => KeyEventResult.ignored, // This one does nothing.
           focusNode: focusNode,
           child: Container(key: key1),
         ),
@@ -1611,7 +1615,7 @@ void main() {
         Focus(
           onKey: (FocusNode node, RawKeyEvent event) { // The updated handler handles the key.
             keyEventHandled = true;
-            return true;
+            return KeyEventResult.handled;
           },
           focusNode: focusNode,
           child: Container(key: key1),

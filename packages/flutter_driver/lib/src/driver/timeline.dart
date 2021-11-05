@@ -24,7 +24,7 @@ class Timeline {
   /// This is parsed from "traceEvents" data within [json] and sorted by
   /// timestamp. Anything without a valid timestamp is put in the beginning.
   ///
-  /// This will be null if there are are no "traceEvents" in the [json].
+  /// This will be null if there are no "traceEvents" in the [json].
   final List<TimelineEvent>? events;
 }
 

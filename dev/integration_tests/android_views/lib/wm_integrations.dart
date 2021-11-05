@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
-  const WindowManagerIntegrationsPage({Key key})
+  const WindowManagerIntegrationsPage({Key? key})
       : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'), key: key);
 
   @override
@@ -18,7 +18,7 @@ class WindowManagerIntegrationsPage extends PageWidget {
 }
 
 class WindowManagerBody extends StatefulWidget {
-  const WindowManagerBody({Key key}) : super(key: key);
+  const WindowManagerBody({Key? key}) : super(key: key);
 
   @override
   State<WindowManagerBody> createState() => WindowManagerBodyState();
@@ -32,10 +32,10 @@ enum _LastTestStatus {
 
 class WindowManagerBodyState extends State<WindowManagerBody> {
 
-  MethodChannel viewChannel;
-  _LastTestStatus lastTestStatus = _LastTestStatus.pending;
-  String lastError;
-  int id;
+  MethodChannel? viewChannel;
+  _LastTestStatus _lastTestStatus = _LastTestStatus.pending;
+  String? lastError;
+  int? id;
   int windowClickCount = 0;
 
   @override
@@ -53,24 +53,24 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
               onPlatformViewCreated: onPlatformViewCreated,
             ),
           ),
-          if (lastTestStatus != _LastTestStatus.pending) _statusWidget(),
+          if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
-              child: const Text('SHOW ALERT DIALOG'),
               onPressed: onShowAlertDialogPressed,
+              child: const Text('SHOW ALERT DIALOG'),
             ),
             Row(
               children: <Widget>[
                 ElevatedButton(
                   key: const ValueKey<String>('AddWindow'),
-                  child: const Text('ADD WINDOW'),
                   onPressed: onAddWindowPressed,
+                  child: const Text('ADD WINDOW'),
                 ),
                 ElevatedButton(
                   key: const ValueKey<String>('TapWindow'),
-                  child: const Text('TAP WINDOW'),
                   onPressed: onTapWindowPressed,
+                  child: const Text('TAP WINDOW'),
                 ),
                 if (windowClickCount > 0)
                   Text(
@@ -86,34 +86,34 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   }
 
   Widget _statusWidget() {
-    assert(lastTestStatus != _LastTestStatus.pending);
-    final String message = lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
+    assert(_lastTestStatus != _LastTestStatus.pending);
+    final String? message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError;
     return Container(
-      color: lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
+      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
-        message,
+        message!,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color: lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
   }
 
   Future<void> onShowAlertDialogPressed() async {
-    if (lastTestStatus != _LastTestStatus.pending) {
+    if (_lastTestStatus != _LastTestStatus.pending) {
       setState(() {
-        lastTestStatus = _LastTestStatus.pending;
+        _lastTestStatus = _LastTestStatus.pending;
       });
     }
     try {
-      await viewChannel.invokeMethod<void>('showAndHideAlertDialog');
+      await viewChannel?.invokeMethod<void>('showAndHideAlertDialog');
       setState(() {
-        lastTestStatus = _LastTestStatus.success;
+        _lastTestStatus = _LastTestStatus.success;
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }
@@ -121,13 +121,13 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
 
   Future<void> onAddWindowPressed() async {
     try {
-      await viewChannel.invokeMethod<void>('addWindowAndWaitForClick');
+      await viewChannel?.invokeMethod<void>('addWindowAndWaitForClick');
       setState(() {
         windowClickCount++;
       });
     } catch(e) {
       setState(() {
-        lastTestStatus = _LastTestStatus.error;
+        _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
       });
     }

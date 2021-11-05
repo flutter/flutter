@@ -33,7 +33,7 @@ class StockRow extends StatelessWidget {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0)
-      changeInPrice = '+' + changeInPrice;
+      changeInPrice = '+$changeInPrice';
     return InkWell(
       key: ValueKey<String>(stock.symbol),
       onTap: _getHandler(onPressed),
@@ -57,6 +57,8 @@ class StockRow extends StatelessWidget {
             ),
             Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
                 children: <Widget>[
                   Expanded(
                     flex: 2,
@@ -77,8 +79,6 @@ class StockRow extends StatelessWidget {
                     ),
                   ),
                 ],
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
               ),
             ),
           ],

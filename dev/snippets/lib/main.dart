@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:io' show exit, stderr, stdout, File, ProcessResult;
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'configuration.dart';
 import 'snippets.dart';
@@ -21,20 +24,64 @@ const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
-String getChannelName() {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
-      (gitResult.stdout as String).trim().split('\n').first);
-  return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.group(1).split('...').first;
+class GitStatusFailed implements Exception {
+  GitStatusFailed(this.gitResult);
+
+  final ProcessResult gitResult;
+
+  @override
+  String toString() => 'git status exited with a non-zero exit code: ${gitResult.exitCode}:\n${gitResult.stderr}\n${gitResult.stdout}';
+}
+
+/// Get the name of the channel these docs are from.
+///
+/// First check env variable LUCI_BRANCH, then refer to the currently
+/// checked out git branch.
+String getChannelName({
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final String? envReleaseChannel = platform.environment['LUCI_BRANCH']?.trim();
+  if (<String>['master', 'stable'].contains(envReleaseChannel)) {
+    return envReleaseChannel!;
+  }
+  final RegExp gitBranchRegexp = RegExp(r'^## (?<branch>.*)');
+  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain'],
+    environment: <String, String>{
+      'GIT_TRACE': '2',
+      'GIT_TRACE_SETUP': '2'
+    },
+    includeParentEnvironment: true
+  );
+  if (gitResult.exitCode != 0) {
+    throw GitStatusFailed(gitResult);
+  }
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch((gitResult.stdout as String).trim().split('\n').first);
+  return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.namedGroup('branch')!.split('...').first;
+}
+
+// This is a hack to workaround the fact that git status inexplicably fails
+// (random non-zero error code) about 2% of the time.
+String getChannelNameWithRetries() {
+  int retryCount = 0;
+  while(retryCount < 2) {
+    try {
+      return getChannelName();
+    } on GitStatusFailed catch (e) {
+      retryCount += 1;
+      stderr.write('git status failed, retrying ($retryCount)\nError report:\n$e');
+    }
+  }
+  return getChannelName();
 }
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
 void main(List<String> argList) {
-  final Map<String, String> environment = Platform.environment;
+  const Platform platform = LocalPlatform();
+  final Map<String, String> environment = platform.environment;
   final ArgParser parser = ArgParser();
   final List<String> snippetTypes =
       SnippetType.values.map<String>((SnippetType type) => getEnumName(type)).toList();
@@ -113,8 +160,7 @@ void main(List<String> argList) {
   }
 
   final SnippetType snippetType = SnippetType.values
-      .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);
-  assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
+      .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption]);
 
   if (args[_kShowDartPad] == true && snippetType != SnippetType.sample) {
     errorExit('${args[_kTypeOption]} was selected, but the --dartpad flag is only valid '
@@ -132,7 +178,7 @@ void main(List<String> argList) {
     errorExit('The input file ${input.path} does not exist.');
   }
 
-  String template;
+  String? template;
   if (snippetType == SnippetType.sample) {
     final String templateArg = args[_kTemplateOption] as String;
     if (templateArg == null || templateArg.isEmpty) {
@@ -143,25 +189,24 @@ void main(List<String> argList) {
     template = templateArg.replaceAll(RegExp(r'.tmpl$'), '');
   }
 
-  String emptyToNull(String value) => value?.isEmpty ?? true ? null : value;
-  final String packageName = emptyToNull(args[_kPackageOption] as String);
-  final String libraryName = emptyToNull(args[_kLibraryOption] as String);
-  final String elementName = emptyToNull(args[_kElementOption] as String);
-  final String serial = emptyToNull(args[_kSerialOption] as String);
+  final String packageName = args[_kPackageOption] as String? ?? '';
+  final String libraryName = args[_kLibraryOption] as String? ?? '';
+  final String elementName = args[_kElementOption] as String? ?? '';
+  final String serial = args[_kSerialOption] as String? ?? '';
   final List<String> id = <String>[];
   if (args[_kOutputOption] != null) {
     id.add(path.basename(path.basenameWithoutExtension(args[_kOutputOption] as String)));
   } else {
-    if (packageName != null && packageName != 'flutter') {
+    if (packageName.isNotEmpty && packageName != 'flutter') {
       id.add(packageName);
     }
-    if (libraryName != null) {
+    if (libraryName.isNotEmpty) {
       id.add(libraryName);
     }
-    if (elementName != null) {
+    if (elementName.isNotEmpty) {
       id.add(elementName);
     }
-    if (serial != null) {
+    if (serial.isNotEmpty) {
       id.add(serial);
     }
     if (id.isEmpty) {
@@ -178,13 +223,13 @@ void main(List<String> argList) {
     showDartPad: args[_kShowDartPad] as bool,
     template: template,
     output: args[_kOutputOption] != null ? File(args[_kOutputOption] as String) : null,
-    metadata: <String, Object>{
+    metadata: <String, Object?>{
       'sourcePath': environment['SOURCE_PATH'],
       'sourceLine': environment['SOURCE_LINE'] != null
-          ? int.tryParse(environment['SOURCE_LINE'])
+          ? int.tryParse(environment['SOURCE_LINE']!)
           : null,
       'id': id.join('.'),
-      'channel': getChannelName(),
+      'channel': getChannelNameWithRetries(),
       'serial': serial,
       'package': packageName,
       'library': libraryName,

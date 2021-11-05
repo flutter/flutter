@@ -26,10 +26,10 @@ void main() {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key key }) : super(key: key);
+  const Home({ Key? key }) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
               min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
-              label: '${seed.round()}',
+              label: '$seed',
               divisions: 1025,
               onChanged: (double value) {
                 setState(() {
@@ -119,24 +119,22 @@ class _HomeState extends State<Home> {
 }
 
 class Fuzzer extends StatefulWidget {
-  const Fuzzer({ Key key, this.seed }) : super(key: key);
+  const Fuzzer({ Key? key, required this.seed }) : super(key: key);
 
   final int seed;
 
   @override
-  _FuzzerState createState() => _FuzzerState();
+  State<Fuzzer> createState() => _FuzzerState();
 }
 
 class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   TextSpan _textSpan = const TextSpan(text: 'Welcome to the Flutter text fuzzer.');
-  Ticker _ticker;
-  math.Random _random;
+  late final Ticker _ticker = createTicker(_updateTextSpan)..start();
+  late final math.Random _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
 
@@ -146,7 +144,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _updateTextSpan(Duration duration) {
+  void _updateTextSpan(Duration? duration) {
     setState(() {
       _textSpan = _fiddleWith(_textSpan);
     });
@@ -156,17 +154,17 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan)).toList() ?? <TextSpan>[]),
     );
   }
 
-  String _fiddleWithText(String text) {
+  String? _fiddleWithText(String? text) {
     if (_random.nextInt(10) > 0)
       return text;
     return _createRandomText();
   }
 
-  TextStyle _fiddleWithStyle(TextStyle style) {
+  TextStyle? _fiddleWithStyle(TextStyle? style) {
     if (style == null) {
       switch (_random.nextInt(20)) {
         case 0:
@@ -196,7 +194,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     );
   }
 
-  Color _fiddleWithColor(Color value) {
+  Color? _fiddleWithColor(Color? value) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
@@ -218,7 +216,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  TextDecoration _fiddleWithDecoration(TextDecoration value) {
+  TextDecoration? _fiddleWithDecoration(TextDecoration? value) {
     if (_random.nextInt(10) > 0)
       return value;
     switch (_random.nextInt(100)) {
@@ -246,7 +244,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return null;
   }
 
-  TextDecorationStyle _fiddleWithDecorationStyle(TextDecorationStyle value) {
+  TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -256,7 +254,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontWeight _fiddleWithFontWeight(FontWeight value) {
+  FontWeight? _fiddleWithFontWeight(FontWeight? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -266,7 +264,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontStyle _fiddleWithFontStyle(FontStyle value) {
+  FontStyle? _fiddleWithFontStyle(FontStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -276,7 +274,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  String _fiddleWithFontFamily(String value) {
+  String? _fiddleWithFontFamily(String? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -300,7 +298,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  double _fiddleWithDouble(double value, double defaultValue, double max) {
+  double? _fiddleWithDouble(double? value, double defaultValue, double max) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
@@ -312,7 +310,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  List<TextSpan> _fiddleWithChildren(List<TextSpan> children) {
+  List<TextSpan>? _fiddleWithChildren(List<TextSpan> children) {
     switch (_random.nextInt(100)) {
       case 0:
       case 1:
@@ -340,10 +338,10 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children.isEmpty)
+    if (node.children == null || node.children?.isEmpty == true)
       return 0;
     int result = 0;
-    for (final TextSpan child in node.children.cast<TextSpan>())
+    for (final TextSpan child in node.children!.cast<TextSpan>())
       result = math.max(result, depthOf(child));
     return result;
   }
@@ -354,7 +352,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     );
   }
 
-  String _createRandomText() {
+  String? _createRandomText() {
     switch (_random.nextInt(90)) {
       case 0:
       case 1:
@@ -459,7 +457,8 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 65: // random emoji
         return String.fromCharCode(0x1F000 + _random.nextInt(0x9FF));
       case 66:
-        return 'Z{' + zalgo(_random, _random.nextInt(4) + 2) + '}Z';
+        final String value = zalgo(_random, _random.nextInt(4) + 2);
+        return 'Z{$value}Z';
       case 67:
         return 'Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν';
       case 68:
@@ -536,10 +535,10 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 }
 
 class Underlines extends StatefulWidget {
-  const Underlines({ Key key }) : super(key: key);
+  const Underlines({ Key? key }) : super(key: key);
 
   @override
-  _UnderlinesState createState() => _UnderlinesState();
+  State<Underlines> createState() => _UnderlinesState();
 }
 
 class _UnderlinesState extends State<Underlines> {
@@ -554,7 +553,7 @@ class _UnderlinesState extends State<Underlines> {
     decorationColor: Colors.yellow.shade500,
   );
 
-  Widget _wrap(TextDecorationStyle style) {
+  Widget _wrap(TextDecorationStyle? style) {
     return Align(
       alignment: Alignment.centerLeft,
       heightFactor: 1.0,
@@ -641,10 +640,10 @@ class _UnderlinesState extends State<Underlines> {
 }
 
 class Fallback extends StatefulWidget {
-  const Fallback({ Key key }) : super(key: key);
+  const Fallback({ Key? key }) : super(key: key);
 
   @override
-  _FallbackState createState() => _FallbackState();
+  State<Fallback> createState() => _FallbackState();
 }
 
 class _FallbackState extends State<Fallback> {
@@ -736,10 +735,10 @@ class _FallbackState extends State<Fallback> {
 }
 
 class Bidi extends StatefulWidget {
-  const Bidi({ Key key }) : super(key: key);
+  const Bidi({ Key? key }) : super(key: key);
 
   @override
-  _BidiState createState() => _BidiState();
+  State<Bidi> createState() => _BidiState();
 }
 
 class _BidiState extends State<Bidi> {
@@ -811,24 +810,23 @@ class _BidiState extends State<Bidi> {
 }
 
 class Zalgo extends StatefulWidget {
-  const Zalgo({ Key key, this.seed }) : super(key: key);
+  const Zalgo({ Key? key, required this.seed }) : super(key: key);
 
   final int seed;
 
   @override
-  _ZalgoState createState() => _ZalgoState();
+  State<Zalgo> createState() => _ZalgoState();
 }
 
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
-  String _text;
-  Ticker _ticker;
-  math.Random _random;
+  String? _text;
+  late final Ticker _ticker = createTicker(_update)..start();
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -841,7 +839,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   bool _allowSpacing = false;
   bool _varyBase = false;
 
-  void _update(Duration duration) {
+  void _update(Duration? duration) {
     setState(() {
       _text = zalgo(
         _random,
@@ -918,24 +916,23 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 }
 
 class Painting extends StatefulWidget {
-  const Painting({ Key key, this.seed }) : super(key: key);
+  const Painting({ Key? key, required this.seed }) : super(key: key);
 
   final int seed;
 
   @override
-  _PaintingState createState() => _PaintingState();
+  State<Painting> createState() => _PaintingState();
 }
 
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
-  String _text;
-  Ticker _ticker;
-  math.Random _random;
+  String? _text;
+  late final Ticker _ticker = createTicker(_update)..start();
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -950,7 +947,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
 
   bool _ellipsize = false;
 
-  void _update(Duration duration) {
+  void _update(Duration? duration) {
     setState(() {
       final StringBuffer buffer = StringBuffer();
       final int targetLength = _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
@@ -963,11 +960,14 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      if (mounted && intrinsicKey.currentContext.size.height != controlKey.currentContext.size.height) {
+    SchedulerBinding.instance?.addPostFrameCallback((Duration duration) {
+      if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text.runes.map<String>((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
+        debugPrint(_text?.runes.map<String>((int index) {
+          final String hexa = index.toRadixString(16).padLeft(4, '0');
+          return 'U+$hexa';
+        }).join(' '));
         setState(() {
           _ticker.stop();
         });
@@ -1080,7 +1080,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                       TextButton(
                         onPressed: _ticker.isActive ? null : () {
                           print('The currently visible text is: $_text');
-                          print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                          print(_text?.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
                         },
                         child: const Text('DUMP TEXT TO LOGS'),
                       ),
@@ -1096,7 +1096,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   }
 }
 
-String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String base }) {
+String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String? base }) {
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.

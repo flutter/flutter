@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -171,6 +170,7 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -211,6 +211,7 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    this.useInheritedMediaQuery = false,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -243,8 +244,9 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [CupertinoPageRoute] that performs
-  /// an appropriate transition, including [Hero] animations, to the new route.
+  /// [widgets.WidgetBuilder] is used to construct a [CupertinoPageRoute] that
+  /// performs an appropriate transition, including [Hero] animations, to the
+  /// new route.
   ///
   /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder>? routes;
@@ -346,9 +348,9 @@ class CupertinoApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///     shortcuts: <ShortcutActivator, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
+  ///       const SingleActivator(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget? child) {
@@ -359,7 +361,7 @@ class CupertinoApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
-  final Map<LogicalKeySet, Intent>? shortcuts;
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}
@@ -407,8 +409,11 @@ class CupertinoApp extends StatefulWidget {
   ///    in a subtree.
   final ScrollBehavior? scrollBehavior;
 
+  /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  final bool useInheritedMediaQuery;
+
   @override
-  _CupertinoAppState createState() => _CupertinoAppState();
+  State<CupertinoApp> createState() => _CupertinoAppState();
 
   /// The [HeroController] used for Cupertino page transitions.
   ///
@@ -443,8 +448,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return CupertinoScrollbar(
-          child: child,
           controller: details.controller,
+          child: child,
         );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -490,13 +495,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
     return CupertinoButton.filled(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
       child: const Icon(
         CupertinoIcons.search,
         size: 28.0,
         color: CupertinoColors.white,
       ),
-      padding: EdgeInsets.zero,
-      onPressed: onPressed,
     );
   }
 
@@ -530,6 +535,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
+        useInheritedMediaQuery: widget.useInheritedMediaQuery,
       );
     }
     return WidgetsApp(
@@ -564,6 +570,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
+      useInheritedMediaQuery: widget.useInheritedMediaQuery,
     );
   }
 

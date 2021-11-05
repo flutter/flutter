@@ -7,19 +7,20 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/framework/adb.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'host_agent.dart';
 import 'task_result.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
-String get localEngine {
+String? get localEngine {
   // Use two distinct `defaultValue`s to determine whether a 'localEngine'
   // declaration exists in the environment.
   const bool isDefined =
@@ -30,7 +31,7 @@ String get localEngine {
 
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
-String get localEngineSrcPath {
+String? get localEngineSrcPath {
   // Use two distinct `defaultValue`s to determine whether a
   // 'localEngineSrcPath' declaration exists in the environment.
   const bool isDefined =
@@ -66,18 +67,18 @@ class HealthCheckResult {
   HealthCheckResult.failure(this.details) : succeeded = false;
   HealthCheckResult.error(dynamic error, dynamic stackTrace)
       : succeeded = false,
-        details = 'ERROR: $error${'\n$stackTrace' ?? ''}';
+        details = 'ERROR: $error${stackTrace != null ? '\n$stackTrace' : ''}';
 
   final bool succeeded;
-  final String details;
+  final String? details;
 
   @override
   String toString() {
     final StringBuffer buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
-    if (details != null && details.trim().isNotEmpty) {
+    if (details != null && details!.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
-      for (final String line in details.trim().split('\n')) {
+      for (final String line in details!.trim().split('\n')) {
         buf.writeln('    $line');
       }
     }
@@ -123,7 +124,7 @@ Directory dir(String path) => Directory(path);
 
 File file(String path) => File(path);
 
-void copy(File sourceFile, Directory targetDirectory, {String name}) {
+void copy(File sourceFile, Directory targetDirectory, {String? name}) {
   final File target = file(
       path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
@@ -150,7 +151,7 @@ void recursiveCopy(Directory source, Directory target) {
 }
 
 FileSystemEntity move(FileSystemEntity whatToMove,
-    {Directory to, String name}) {
+    {required Directory to, String? name}) {
   return whatToMove
       .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
 }
@@ -221,9 +222,9 @@ Future<String> getDartVersion() async {
   return version.replaceAll('"', "'");
 }
 
-Future<String> getCurrentFlutterRepoCommit() {
+Future<String?> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return Future<String>.value(null);
+    return Future<String?>.value(null);
   }
 
   return inDirectory<String>(flutterDirectory, () {
@@ -271,30 +272,30 @@ Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
 /// returned in the form of a [Future] that completes to a [Process] object.
 Future<Process> startProcess(
   String executable,
-  List<String> arguments, {
-  Map<String, String> environment,
+  List<String>? arguments, {
+  Map<String, String>? environment,
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
-  String workingDirectory,
+  String? workingDirectory,
 }) async {
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  print('\nExecuting: $command in $finalWorkingDirectory'
-      + (environment != null ? ' with environment $environment' : ''));
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
+  newEnvironment['LANG'] = 'en_US.UTF-8';
+  print('\nExecuting: $command in $finalWorkingDirectory with environment $newEnvironment');
   final Process process = await _processManager.start(
-    <String>[executable, ...arguments],
+    <String>[executable, ...?arguments],
     environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then<void>((int exitCode) {
+  unawaited(process.exitCode.then<void>((int exitCode) {
     print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
-  });
+  }));
 
   return process;
 }
@@ -320,9 +321,9 @@ Future<void> forceQuitRunningProcesses() async {
 Future<int> exec(
   String executable,
   List<String> arguments, {
-  Map<String, String> environment,
+  Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  String workingDirectory,
+  String? workingDirectory,
 }) async {
   return _execute(
     executable,
@@ -336,11 +337,11 @@ Future<int> exec(
 Future<int> _execute(
   String executable,
   List<String> arguments, {
-  Map<String, String> environment,
+  Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  String workingDirectory,
-  StringBuffer output, // if not null, the stdout will be written here
-  StringBuffer stderr, // if not null, the stderr will be written here
+  String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
   bool printStdout = true,
   bool printStderr = true,
 }) async {
@@ -372,8 +373,8 @@ Future<int> _execute(
 /// Returns a future that completes when both out and error streams a closed.
 Future<void> forwardStandardStreams(
   Process process, {
-  StringBuffer output,
-  StringBuffer stderr,
+  StringBuffer? output,
+  StringBuffer? stderr,
   bool printStdout = true,
   bool printStderr = true,
   }) {
@@ -410,10 +411,10 @@ Future<void> forwardStandardStreams(
 Future<String> eval(
   String executable,
   List<String> arguments, {
-  Map<String, String> environment,
+  Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  String workingDirectory,
-  StringBuffer stderr, // if not null, the stderr will be written here
+  String? workingDirectory,
+  StringBuffer? stderr, // if not null, the stderr will be written here
   bool printStdout = true,
   bool printStderr = true,
 }) async {
@@ -450,8 +451,13 @@ List<String> flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
-    if (localEngine != null) ...<String>['--local-engine', localEngine],
-    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+
+    if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
+      '--screenshot',
+      hostAgent.dumpDirectory!.path,
+    ],
+    if (localEngine != null) ...<String>['--local-engine', localEngine!],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath!],
     ...options,
   ];
 }
@@ -461,19 +467,31 @@ List<String> flutterCommandArgs(String command, List<String> options) {
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment = const <String, String>{},
+  Map<String, String>? environment,
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment);
 }
 
+Future<Process> startFlutter(String command, {
+  List<String> options = const <String>[],
+  Map<String, String> environment = const <String, String>{},
+}) {
+  final List<String> args = flutterCommandArgs(command, options);
+  return startProcess(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    environment: environment,
+  );
+}
+
 /// Runs a `flutter` command and returns the standard output as a string.
 Future<String> evalFlutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
-  StringBuffer stderr, // if not null, the stderr will be written here.
+  Map<String, String>? environment,
+  StringBuffer? stderr, // if not null, the stderr will be written here.
 }) {
   final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
@@ -500,17 +518,23 @@ Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-de
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.
-Future<String> findJavaHome() async {
-  final Iterable<String> hits = grep(
-    'Java binary at: ',
-    from: await evalFlutter('doctor', options: <String>['-v']),
-  );
-  if (hits.isEmpty)
-    return null;
-  final String javaBinary = hits.first.split(': ').last;
-  // javaBinary == /some/path/to/java/home/bin/java
-  return path.dirname(path.dirname(javaBinary));
+Future<String?> findJavaHome() async {
+  if (_javaHome == null) {
+    final Iterable<String> hits = grep(
+      'Java binary at: ',
+      from: await evalFlutter('doctor', options: <String>['-v']),
+    );
+    if (hits.isEmpty)
+      return null;
+    final String javaBinary = hits.first
+        .split(': ')
+        .last;
+    // javaBinary == /some/path/to/java/home/bin/java
+    _javaHome = path.dirname(path.dirname(javaBinary));
+  }
+  return _javaHome;
 }
+String? _javaHome;
 
 Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
   final String previousCwd = cwd;
@@ -541,12 +565,12 @@ void cd(dynamic directory) {
 Directory get flutterDirectory => Directory.current.parent.parent;
 
 String requireEnvVar(String name) {
-  final String value = Platform.environment[name];
+  final String? value = Platform.environment[name];
 
   if (value == null)
     fail('$name environment variable is missing. Quitting.');
 
-  return value;
+  return value!;
 }
 
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
@@ -557,7 +581,8 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
+  final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
+  return '$jsonValue\n';
 }
 
 Future<void> getNewGallery(String revision, Directory galleryDir) async {
@@ -609,7 +634,7 @@ void checkNotNull(Object o1,
 }
 
 /// Splits [from] into lines and selects those that contain [pattern].
-Iterable<String> grep(Pattern pattern, {@required String from}) {
+Iterable<String> grep(Pattern pattern, {required String from}) {
   return from.split('\n').where((String line) {
     return line.contains(pattern);
   });
@@ -647,8 +672,8 @@ final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
-int parseServicePort(String line, {
-  Pattern prefix,
+int? parseServicePort(String line, {
+  Pattern? prefix,
 }) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
@@ -658,15 +683,15 @@ int parseServicePort(String line, {
   final Match prefixMatch = matchesIter.first;
   final List<Match> matches =
     _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
-  return matches.isEmpty ? null : int.parse(matches[0].group(2));
+  return matches.isEmpty ? null : int.parse(matches[0].group(2)!);
 }
 
 /// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
-Uri parseServiceUri(String line, {
-  Pattern prefix,
+Uri? parseServiceUri(String line, {
+  Pattern? prefix,
 }) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
@@ -676,7 +701,7 @@ Uri parseServiceUri(String line, {
   final Match prefixMatch = matchesIter.first;
   final List<Match> matches =
     _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
-  return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
+  return matches.isEmpty ? null : Uri.parse(matches[0].group(0)!);
 }
 
 /// Checks that the file exists, otherwise throws a [FileSystemException].
@@ -743,7 +768,7 @@ void checkFileContains(List<Pattern> patterns, String filePath) {
 ///
 /// Removes the directory [path], then clones the git repository
 /// specified by [repo] to the directory [path].
-Future<int> gitClone({String path, String repo}) async {
+Future<int> gitClone({required String path, required String repo}) async {
   rmTree(Directory(path));
 
   await Directory(path).create(recursive: true);
@@ -764,7 +789,7 @@ Future<int> gitClone({String path, String repo}) async {
 /// Waits a constant duration of [delayDuration] between every retry attempt.
 Future<T> retry<T>(
   FutureOr<T> Function() fn, {
-  FutureOr<bool> Function(Exception) retryIf,
+  FutureOr<bool> Function(Exception)? retryIf,
   int maxAttempts = 5,
   Duration delayDuration = const Duration(seconds: 3),
 }) async {

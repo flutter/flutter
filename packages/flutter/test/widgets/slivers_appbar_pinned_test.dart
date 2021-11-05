@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
@@ -116,7 +116,7 @@ void main() {
         '         parentData: <none> (can use size)\n'
         '         constraints: BoxConstraints(w=800.0, 100.0<=h<=200.0)\n'
         '         size: Size(800.0, 200.0)\n'
-        '         additionalConstraints: BoxConstraints(biggest)\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });

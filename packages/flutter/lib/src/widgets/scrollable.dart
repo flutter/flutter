@@ -214,8 +214,9 @@ class Scrollable extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], scrolling drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// begin at the position where the drag gesture won the arena. If set to
+  /// [DragStartBehavior.down] it will begin at the position where a down
+  /// event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -553,7 +554,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
+              () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -573,7 +574,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
+              () => HorizontalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -758,10 +759,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
         position: position,
         allowImplicitScrolling: _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
+        child: result,
       );
     }
 

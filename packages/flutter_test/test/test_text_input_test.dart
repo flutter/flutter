@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210721"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -43,11 +49,9 @@ void main() {
       throw FlutterError('A fake error occurred during action processing.');
     });
 
-    try {
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      fail('Expected a PlatformException, but it was not thrown.');
-    } catch (e) {
-      expect(e, isA<PlatformException>());
-    }
+    await expectLater(
+      () => tester.testTextInput.receiveAction(TextInputAction.done),
+      throwsA(isA<PlatformException>()),
+    );
   });
 }

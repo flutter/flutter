@@ -63,7 +63,13 @@ enum MaterialState {
   /// See: https://material.io/design/interaction/states.html#selected.
   selected,
 
-  /// The state when this widget disabled and can not be interacted with.
+  /// The state when this widget overlaps the content of a scrollable below.
+  ///
+  /// Used by [AppBar] to indicate that the primary scrollable's
+  /// content has scrolled up and behind the app bar.
+  scrolledUnder,
+
+  /// The state when this widget is disabled and cannot be interacted with.
   ///
   /// Disabled widgets should not respond to hover, focus, press, or drag
   /// interactions.
@@ -431,15 +437,17 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return FilterChip(
-///     label: const Text('Select chip'),
-///     selected: isSelected,
-///     onSelected: (bool value) {
-///       setState(() {
-///         isSelected = value;
-///       });
-///     },
-///     shape: SelectedBorder(),
+///   return Material(
+///     child: FilterChip(
+///       label: const Text('Select chip'),
+///       selected: isSelected,
+///       onSelected: (bool value) {
+///         setState(() {
+///           isSelected = value;
+///         });
+///       },
+///       shape: SelectedBorder(),
+///     ),
 ///   );
 /// }
 /// ```

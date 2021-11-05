@@ -4,12 +4,11 @@
 
 import 'dart:convert' show JsonEncoder;
 
-import 'package:flutter_driver/flutter_driver.dart';
 import 'package:file/file.dart';
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:macrobenchmarks/common.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 
@@ -17,7 +16,7 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 void main() {
   test('stack_size', () async {
-    int stackSizeInBytes;
+    late int stackSizeInBytes;
     await runDriverTestForRoute(kStackSizeRouteName, (FlutterDriver driver) async {
       final String stackSize = await driver.getText(find.byValueKey(kStackSizeKey));
       expect(stackSize.isNotEmpty, isTrue);
@@ -31,7 +30,7 @@ void main() {
     await file.writeAsString(_encodeJson(<String, dynamic>{
       'stack_size': stackSizeInBytes,
     }));
-  }, timeout: const Timeout(kTimeout));
+  }, timeout: Timeout.none);
 }
 
 String _encodeJson(Map<String, dynamic> jsonObject) {

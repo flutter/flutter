@@ -44,7 +44,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
        super(key: key);
 
   @override
-  _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
+  RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
   /// Called at layout time to construct the widget tree.
   ///
@@ -115,7 +115,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   void _layout(ConstraintType constraints) {
-    owner!.buildScope(this, () {
+    @pragma('vm:notify-debugger-on-exception')
+    void layoutCallback() {
       Widget built;
       try {
         built = widget.builder(this, constraints);
@@ -148,7 +149,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         );
         _child = updateChild(null, built, slot);
       }
-    });
+    }
+
+    owner!.buildScope(this, layoutCallback);
   }
 
   @override
@@ -317,7 +320,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   LayoutWidgetBuilder get builder => super.builder;
 
   @override
-  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {

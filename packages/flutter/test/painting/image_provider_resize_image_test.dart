@@ -136,8 +136,10 @@ void main() {
   });
 }
 
-Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
-    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
+Future<Size> _resolveAndGetSize(
+  ImageProvider imageProvider, {
+  ImageConfiguration configuration = ImageConfiguration.empty,
+}) async {
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
   final ImageStreamListener listener =

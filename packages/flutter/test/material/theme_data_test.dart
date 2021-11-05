@@ -25,8 +25,11 @@ void main() {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform);
       final Typography typography = Typography.material2018(platform: platform);
-      expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
-          reason: 'Not using default typography for $platform');
+      expect(
+        theme.textTheme,
+        typography.black.apply(decoration: TextDecoration.none),
+        reason: 'Not using default typography for $platform',
+      );
     }
   });
 
@@ -46,15 +49,6 @@ void main() {
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
-  test('Default accent text theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.accentTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.accentTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
   test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
@@ -85,15 +79,6 @@ void main() {
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
-  test('Default accent icon theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.accentTextTheme.headline6!.color, typography.black.headline6!.color);
-    expect(darkTheme.accentTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
     switch (defaultTargetPlatform) {
@@ -120,7 +105,6 @@ void main() {
 
     expect(themeData.textTheme.bodyText1!.fontFamily, equals('Ahem'));
     expect(themeData.primaryTextTheme.headline3!.fontFamily, equals('Ahem'));
-    expect(themeData.accentTextTheme.headline1!.fontFamily, equals('Ahem'));
 
     // Shouldn't override the specified style's family
     expect(themeData.textTheme.headline6!.fontFamily, equals('Roboto'));
@@ -217,6 +201,49 @@ void main() {
         expect(themeData.visualDensity, equals(VisualDensity.compact));
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Ensure Visual Density effective constraints are clamped', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
+    BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(35));
+    expect(expanded.minHeight, equals(35));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(19));
+    expect(contracted.minHeight, equals(19));
+    expect(expanded.maxWidth, equals(35));
+    expect(expanded.maxHeight, equals(35));
+
+    const BoxConstraints small = BoxConstraints.tightFor(width: 4, height: 4);
+    expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(small);
+    expect(expanded.minWidth, equals(4));
+    expect(expanded.minHeight, equals(4));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+
+    contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(small);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(4));
+    expect(expanded.maxHeight, equals(4));
+  });
+
+  testWidgets('Ensure Visual Density effective constraints expand and contract', (WidgetTester tester) async {
+    const BoxConstraints square = BoxConstraints();
+    final BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
+    expect(expanded.minWidth, equals(16));
+    expect(expanded.minHeight, equals(16));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+
+    final BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    expect(contracted.minWidth, equals(0));
+    expect(contracted.minHeight, equals(0));
+    expect(expanded.maxWidth, equals(double.infinity));
+    expect(expanded.maxHeight, equals(double.infinity));
+  });
 
   testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
 
@@ -316,6 +343,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -409,6 +437,7 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );
@@ -418,8 +447,6 @@ void main() {
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       primaryColorLight: otherTheme.primaryColorLight,
       primaryColorDark: otherTheme.primaryColorDark,
-      accentColor: otherTheme.accentColor,
-      accentColorBrightness: otherTheme.accentColorBrightness,
       canvasColor: otherTheme.canvasColor,
       shadowColor: otherTheme.shadowColor,
       scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
@@ -449,11 +476,9 @@ void main() {
       toggleableActiveColor: otherTheme.toggleableActiveColor,
       textTheme: otherTheme.textTheme,
       primaryTextTheme: otherTheme.primaryTextTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
       inputDecorationTheme: otherTheme.inputDecorationTheme,
       iconTheme: otherTheme.iconTheme,
       primaryIconTheme: otherTheme.primaryIconTheme,
-      accentIconTheme: otherTheme.accentIconTheme,
       sliderTheme: otherTheme.sliderTheme,
       tabBarTheme: otherTheme.tabBarTheme,
       tooltipTheme: otherTheme.tooltipTheme,
@@ -491,8 +516,6 @@ void main() {
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
     expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
-    expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
-    expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
@@ -522,10 +545,8 @@ void main() {
     expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
     expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
-    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.accentColor));
     expect(themeDataCopy.textTheme, equals(otherTheme.textTheme));
     expect(themeDataCopy.primaryTextTheme, equals(otherTheme.primaryTextTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.tabBarTheme, equals(otherTheme.tabBarTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));

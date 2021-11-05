@@ -28,7 +28,7 @@ import 'theme_data.dart';
 /// new widgets can be customized by specifying a [ButtonStyle]
 /// or by creating a one-off style using a `styleFrom` method like
 /// [TextButton.styleFrom]. The original button classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -176,8 +176,6 @@ class MaterialButton extends StatelessWidget {
 
   /// The button's fill color, displayed by its [Material], while it
   /// is in its default (unpressed, [enabled]) state.
-  ///
-  /// The default fill color is the theme's button color, [ThemeData.buttonColor].
   ///
   /// See also:
   ///
@@ -429,9 +427,9 @@ class MaterialButton extends StatelessWidget {
       focusNode: focusNode,
       autofocus: autofocus,
       animationDuration: buttonTheme.getAnimationDuration(this),
-      child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       disabledElevation: disabledElevation ?? 0.0,
+      child: child,
     );
   }
 

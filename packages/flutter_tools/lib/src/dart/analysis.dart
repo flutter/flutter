@@ -137,7 +137,7 @@ class AnalysisServer {
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = castStringKeyedMap(response['error']!)!;
+        final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
         _logger.printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
@@ -150,7 +150,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'] as bool;
+      final bool isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }
@@ -293,15 +293,16 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,
       message: json['message'] as String,
       code: json['code'] as String,
-      file: json['location']['file'] as String,
-      startLine: json['location']['startLine'] as int,
-      startColumn: json['location']['startColumn'] as int,
-      offset: json['location']['offset'] as int,
+      file: location['file'] as String,
+      startLine: location['startLine'] as int,
+      startColumn: location['startColumn'] as int,
+      offset: location['offset'] as int,
     );
   }
 

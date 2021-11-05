@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class User {
@@ -35,7 +36,7 @@ void main() {
     'koala',
     'lemur',
     'mouse',
-    'northern white rhinocerous',
+    'northern white rhinoceros',
   ];
 
   const List<User> kOptionsUsers = <User>[
@@ -102,7 +103,7 @@ void main() {
     expect(lastOptions.elementAt(0), 'chameleon');
     expect(lastOptions.elementAt(1), 'elephant');
 
-    // Select a option. The options hide and the field updates to show the
+    // Select an option. The options hide and the field updates to show the
     // selection.
     final String selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
@@ -125,7 +126,7 @@ void main() {
     expect(lastOptions.elementAt(2), 'goose');
     expect(lastOptions.elementAt(3), 'lemur');
     expect(lastOptions.elementAt(4), 'mouse');
-    expect(lastOptions.elementAt(5), 'northern white rhinocerous');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
   });
 
   testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
@@ -184,7 +185,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[0]);
     expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
-    // Select a option. The options hide and onSelected is called.
+    // Select an option. The options hide and onSelected is called.
     final User selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
     await tester.pump();
@@ -266,7 +267,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[0]);
     expect(lastOptions.elementAt(1), kOptionsUsers[1]);
 
-    // Select a option. The options hide and onSelected is called. The field
+    // Select an option. The options hide and onSelected is called. The field
     // has its text set to the selection's display string.
     final User selection = lastOptions.elementAt(1);
     lastOnSelected(selection);
@@ -553,4 +554,264 @@ void main() {
     expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, lastOptions.elementAt(0));
   });
+
+  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late AutocompleteOnSelected<String> lastOnSelected;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            // Should initialize text field with 'lem'.
+            initialValue: const TextEditingValue(text: 'lem'),
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              lastOnSelected = onSelected;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    // The text editing controller value starts off with initialized value.
+    expect(textEditingController.text, 'lem');
+
+    // Focus the empty field. All the options are displayed.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.elementAt(0), 'lemur');
+
+    // Select an option. The options hide and the field updates to show the
+    // selection.
+    final String selection = lastOptions.elementAt(0);
+    lastOnSelected(selection);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(textEditingController.text, selection);
+  });
+
+  testWidgets('initialValue cannot be defined if TextEditingController is defined', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController textEditingController = TextEditingController();
+
+    expect(
+      () {
+        RawAutocomplete<String>(
+          focusNode: focusNode,
+          // Both [initialValue] and [textEditingController] cannot be
+          // simultaneously defined.
+          initialValue: const TextEditingValue(text: 'lemur'),
+          textEditingController: textEditingController,
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            return Container();
+          },
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            return TextField(
+              focusNode: focusNode,
+              controller: textEditingController,
+            );
+          },
+        );
+      },
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextFormField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+                onFieldSubmitted: (String value) {
+                  onFieldSubmitted();
+                },
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Enter text. The options are filtered by the text.
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'ele');
+    await tester.pumpAndSettle();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 2);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+
+    // Move the highlighted option to the second item 'elephant' and select it
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    // Can't use the key event for enter to submit to the text field using
+    // the test framework, so this appears to be the equivalent.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(textEditingController.text, 'elephant');
+
+    // Modify the field text. The options appear again and are filtered.
+    focusNode.requestFocus();
+    textEditingController.clear();
+    await tester.enterText(find.byKey(fieldKey), 'e');
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 6);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+    expect(lastOptions.elementAt(2), 'goose');
+    expect(lastOptions.elementAt(3), 'lemur');
+    expect(lastOptions.elementAt(4), 'mouse');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+
+    // The selection should wrap at the top and bottom. Move up to 'mouse'
+    // and then back down to 'goose' and select it.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(textEditingController.text, 'goose');
+  });
+
+  testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late int lastHighlighted;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextFormField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+                onFieldSubmitted: (String value) {
+                  onFieldSubmitted();
+                },
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Enter text. The options are filtered by the text.
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'e');
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 6);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+    expect(lastOptions.elementAt(2), 'goose');
+    expect(lastOptions.elementAt(3), 'lemur');
+    expect(lastOptions.elementAt(4), 'mouse');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+
+    // Move the highlighted option down and check the highlighted index
+    expect(lastHighlighted, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 2);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 3);
+
+    // And move it back up
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 2);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+
+    // Going back up should wrap around
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+  });
+
 }

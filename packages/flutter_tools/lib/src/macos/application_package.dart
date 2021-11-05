@@ -13,7 +13,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../ios/plist_parser.dart';
-import '../project.dart';
+import '../xcode_project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory.
 bool _isBundleDirectory(FileSystemEntity entity) =>

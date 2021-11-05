@@ -203,8 +203,8 @@ class _Heading extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
         child: Semantics(
-          child: Text(text),
           header: true,
+          child: Text(text),
         ),
       ),
     );

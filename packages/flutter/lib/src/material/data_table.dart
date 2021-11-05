@@ -390,8 +390,9 @@ class DataCell {
 ///         (int index) => DataRow(
 ///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
-///             if (states.contains(MaterialState.selected))
+///             if (states.contains(MaterialState.selected)) {
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+///             }
 ///             // Even rows will have a grey color.
 ///             if (index.isEven) {
 ///               return Colors.grey.withOpacity(0.3);
@@ -790,8 +791,8 @@ class DataTable extends StatelessWidget {
     if (onRowTap != null) {
       contents = TableRowInkWell(
         onTap: onRowTap,
-        child: contents,
         overlayColor: overlayColor,
+        child: contents,
       );
     }
     return TableCell(
@@ -915,14 +916,14 @@ class DataTable extends StatelessWidget {
         onLongPress: onLongPress,
         onTapCancel: onTapCancel,
         onTapDown: onTapDown,
-        child: label,
         overlayColor: overlayColor,
+        child: label,
       );
     } else if (onSelectChanged != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
-        child: label,
         overlayColor: overlayColor,
+        child: label,
       );
     }
     return label;
@@ -1018,7 +1019,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children![0] = _buildCheckbox(
           context: context,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged?.call(!row.selected),
+          onRowTap: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
           tristate: false,
@@ -1084,7 +1085,7 @@ class DataTable extends StatelessWidget {
           onLongPress: cell.onLongPress,
           onTapCancel: cell.onTapCancel,
           onTapDown: cell.onTapDown,
-          onSelectChanged: () => row.onSelectChanged?.call(!row.selected),
+          onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
         );
         rowIndex += 1;

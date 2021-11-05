@@ -13,7 +13,7 @@ class MyWebApp extends StatefulWidget {
   const MyWebApp({Key? key}) : super(key: key);
 
   @override
-  _MyWebAppState createState() => _MyWebAppState();
+  State<MyWebApp> createState() => _MyWebAppState();
 }
 
 class _MyWebAppState extends State<MyWebApp> {

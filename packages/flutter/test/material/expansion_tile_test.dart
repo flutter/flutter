@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({Key? key}) : super(key: key);
@@ -154,7 +154,7 @@ void main() {
     expect(collapsedContainerDecoration.border!.bottom.color, _dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ListTileTheme', (WidgetTester tester) async {
+  testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
@@ -163,7 +163,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(secondary: _foregroundColor),
+          colorScheme: ColorScheme.fromSwatch().copyWith(primary: _foregroundColor),
           unselectedWidgetColor: _unselectedWidgetColor,
           textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
@@ -230,37 +230,38 @@ void main() {
   });
 
   testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
-     await tester.pumpWidget(
-       MaterialApp(
-         theme: ThemeData(
-           platform: TargetPlatform.iOS,
-           dividerColor: _dividerColor,
-         ),
-         home: Material(
-           child: SingleChildScrollView(
-             child: Column(
-               children: const <Widget>[
-                 ExpansionTile(
-                   title: Text('Tile 1'),
-                   initiallyExpanded: false,
-                   maintainState: true,
-                   children: <Widget>[
-                     Text('Maintaining State'),
-                   ],
-                 ),
-                 ExpansionTile(
-                   title: Text('Title 2'),
-                   initiallyExpanded: false,
-                   maintainState: false,
-                   children: <Widget>[
-                     Text('Discarding State'),
-                   ],
-                 ),
-               ],
-             ),
-           ),
-         ),
-     ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          dividerColor: _dividerColor,
+        ),
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: const <Widget>[
+                ExpansionTile(
+                  title: Text('Tile 1'),
+                  initiallyExpanded: false,
+                  maintainState: true,
+                  children: <Widget>[
+                    Text('Maintaining State'),
+                  ],
+                ),
+                ExpansionTile(
+                  title: Text('Title 2'),
+                  initiallyExpanded: false,
+                  maintainState: false,
+                  children: <Widget>[
+                    Text('Discarding State'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
 
      // This text should be offstage while ExpansionTile collapsed
      expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
@@ -370,22 +371,23 @@ void main() {
   });
 
   testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
-    try {
-      MaterialApp(
-        home: Material(
-          child: ExpansionTile(
-            initiallyExpanded: true,
-            title: const Text('title'),
-            expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+    expect(
+      () {
+        MaterialApp(
+          home: Material(
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              title: const Text('title'),
+              expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+            ),
           ),
-        ),
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('CrossAxisAlignment.baseline is not supported since the expanded'
-          ' children are aligned in a column, not a row. Try to use another constant.'));
-      return;
-    }
-    fail('AssertionError was not thrown when expandedCrossAxisAlignment is CrossAxisAlignment.baseline.');
+        );
+      },
+      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
+        'CrossAxisAlignment.baseline is not supported since the expanded'
+        ' children are aligned in a column, not a row. Try to use another constant.',
+      ))),
+    );
   });
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
@@ -557,5 +559,65 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile trailing controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.trailing,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading, isNull);
+    expect(listTile.trailing.runtimeType, RotationTransition);
+  });
+
+  testWidgets('ExpansionTile leading controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, RotationTransition);
+    expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          title: Text('Title'),
+          leading: Icon(Icons.info),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    expect(listTile.leading.runtimeType, Icon);
+    expect(listTile.trailing, isNull);
   });
 }

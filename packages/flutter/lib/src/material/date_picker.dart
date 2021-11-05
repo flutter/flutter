@@ -191,6 +191,7 @@ const double _inputFormLandscapeHeight = 108.0;
 ///    used to select a range of dates.
 ///  * [CalendarDatePicker], which provides the calendar grid used by the date picker dialog.
 ///  * [InputDatePickerFormField], which provides a text input field for entering dates.
+///  * [showTimePicker], which shows a dialog that contains a material design time picker.
 ///
 Future<DateTime?> showDatePicker({
   required BuildContext context,
@@ -411,7 +412,7 @@ class DatePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DatePickerDialogState createState() => _DatePickerDialogState();
+  State<DatePickerDialog> createState() => _DatePickerDialogState();
 }
 
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
@@ -495,9 +496,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     }
   }
 
-  static final Map<LogicalKeySet, Intent> _formShortcutMap = <LogicalKeySet, Intent>{
+  static const Map<ShortcutActivator, Intent> _formShortcutMap = <ShortcutActivator, Intent>{
     // Pressing enter on the field will move focus to the next field or control.
-    LogicalKeySet(LogicalKeyboardKey.enter): const NextFocusIntent(),
+    SingleActivator(LogicalKeyboardKey.enter): NextFocusIntent(),
   };
 
   @override
@@ -527,12 +528,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
-            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
             onPressed: _handleCancel,
+            child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
-            child: Text(widget.confirmText ?? localizations.okButtonLabel),
             onPressed: _handleOk,
+            child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),
         ],
       ),
@@ -629,6 +630,8 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: dialogSize.width,
         height: dialogSize.height,
@@ -672,8 +675,6 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           }),
         ),
       ),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      clipBehavior: Clip.antiAlias,
     );
   }
 }
@@ -1056,7 +1057,7 @@ Future<DateTimeRange?> showDateRangePicker({
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
-    'initialDateRange\'s start date must not be after it\'s end date.',
+    "initialDateRange's start date must not be after it's end date.",
   );
   initialDateRange = initialDateRange == null ? null : DateUtils.datesOnly(initialDateRange);
   assert(firstDate != null);
@@ -1069,19 +1070,19 @@ Future<DateTimeRange?> showDateRangePicker({
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
-    'initialDateRange\'s start date must be on or after firstDate $firstDate.',
+    "initialDateRange's start date must be on or after firstDate $firstDate.",
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
-    'initialDateRange\'s end date must be on or after firstDate $firstDate.',
+    "initialDateRange's end date must be on or after firstDate $firstDate.",
   );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
-    'initialDateRange\'s start date must be on or before lastDate $lastDate.',
+    "initialDateRange's start date must be on or before lastDate $lastDate.",
   );
   assert(
     initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
-    'initialDateRange\'s end date must be on or before lastDate $lastDate.',
+    "initialDateRange's end date must be on or before lastDate $lastDate.",
   );
   currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
   assert(initialEntryMode != null);
@@ -1311,7 +1312,7 @@ class DateRangePickerDialog extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _DateRangePickerDialogState createState() => _DateRangePickerDialogState();
+  State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
 }
 
 class _DateRangePickerDialogState extends State<DateRangePickerDialog> with RestorationMixin {
@@ -1511,6 +1512,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
     }
 
     return Dialog(
+      insetPadding: insetPadding,
+      shape: shape,
+      elevation: elevation,
+      clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: size.width,
         height: size.height,
@@ -1525,10 +1530,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           }),
         ),
       ),
-      insetPadding: insetPadding,
-      shape: shape,
-      elevation: elevation,
-      clipBehavior: Clip.antiAlias,
     );
   }
 }
@@ -1606,6 +1607,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             const SizedBox(width: 8),
           ],
           bottom: PreferredSize(
+            preferredSize: const Size(double.infinity, 64),
             child: Row(children: <Widget>[
               SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
               Expanded(
@@ -1650,10 +1652,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
               if (orientation == Orientation.portrait && entryModeButton != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: entryModeButton!,
+                  child: entryModeButton,
                 ),
             ]),
-            preferredSize: const Size(double.infinity, 64),
           ),
         ),
         body: _CalendarDateRangePicker(
@@ -1901,7 +1902,12 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
 
 class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> {
 
-  late Map<LogicalKeySet, Intent> _shortcutMap;
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+  };
   late Map<Type, Action<Intent>> _actionMap;
   late FocusNode _dayGridFocus;
   TraversalDirection? _dayTraversalDirection;
@@ -1911,12 +1917,6 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
   void initState() {
     super.initState();
 
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-    };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handleGridPreviousFocus),
@@ -2273,9 +2273,9 @@ class _MonthItem extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
-  /// date picker wheel will begin upon the detection of a drag gesture. If set
-  /// to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// date picker wheel will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the position
+  /// where a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -2725,12 +2725,12 @@ class _InputDateRangePickerDialog extends StatelessWidget {
         spacing: 8,
         children: <Widget>[
           TextButton(
-            child: Text(cancelText ?? localizations.cancelButtonLabel),
             onPressed: onCancel,
+            child: Text(cancelText ?? localizations.cancelButtonLabel),
           ),
           TextButton(
-            child: Text(confirmText ?? localizations.okButtonLabel),
             onPressed: onConfirm,
+            child: Text(confirmText ?? localizations.okButtonLabel),
           ),
         ],
       ),

@@ -13,6 +13,8 @@ enum FlutterProjectType {
   /// It is different than the "module" template in that it exposes and doesn't
   /// manage the platform code.
   app,
+  /// A List/Detail app template that follows community best practices.
+  skeleton,
   /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
   module,

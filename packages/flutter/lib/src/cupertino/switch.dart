@@ -7,8 +7,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -61,6 +61,7 @@ class CupertinoSwitch extends StatefulWidget {
     required this.onChanged,
     this.activeColor,
     this.trackColor,
+    this.thumbColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(dragStartBehavior != null),
@@ -106,13 +107,18 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
+  /// The color to use for the thumb of the switch.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color? thumbColor;
+
   /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used to move the
-  /// switch from on to off will begin upon the detection of a drag gesture. If
-  /// set to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// switch from on to off will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the position
+  /// where a down event was first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -129,7 +135,7 @@ class CupertinoSwitch extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _CupertinoSwitchState createState() => _CupertinoSwitchState();
+  State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -301,6 +307,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           context,
         ),
         trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
+        thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
         onChanged: widget.onChanged,
         textDirection: Directionality.of(context),
         state: this,
@@ -325,6 +332,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.value,
     required this.activeColor,
     required this.trackColor,
+    required this.thumbColor,
     required this.onChanged,
     required this.textDirection,
     required this.state,
@@ -333,6 +341,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool value;
   final Color activeColor;
   final Color trackColor;
+  final Color thumbColor;
   final ValueChanged<bool>? onChanged;
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
@@ -343,6 +352,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       activeColor: activeColor,
       trackColor: trackColor,
+      thumbColor: thumbColor,
       onChanged: onChanged,
       textDirection: textDirection,
       state: state,
@@ -355,6 +365,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..trackColor = trackColor
+      ..thumbColor = thumbColor
       ..onChanged = onChanged
       ..textDirection = textDirection;
   }
@@ -379,6 +390,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required bool value,
     required Color activeColor,
     required Color trackColor,
+    required Color thumbColor,
     ValueChanged<bool>? onChanged,
     required TextDirection textDirection,
     required _CupertinoSwitchState state,
@@ -388,6 +400,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
+       _thumbPainter = CupertinoThumbPainter.switchThumb(color: thumbColor),
        _onChanged = onChanged,
        _textDirection = textDirection,
        _state = state,
@@ -425,6 +438,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (value == _trackColor)
       return;
     _trackColor = value;
+    markNeedsPaint();
+  }
+
+  Color get thumbColor => _thumbPainter.color;
+  CupertinoThumbPainter _thumbPainter;
+  set thumbColor(Color value) {
+    assert(value != null);
+    if (value == thumbColor)
+      return;
+    _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
     markNeedsPaint();
   }
 
@@ -524,12 +547,18 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       thumbCenterY + CupertinoThumbPainter.radius,
     );
 
-    _clipRRectLayer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
-      const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
-    }, oldLayer: _clipRRectLayer);
+    _clipRRectLayer.layer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+      _thumbPainter.paint(innerContext.canvas, thumbBounds);
+    }, oldLayer: _clipRRectLayer.layer);
   }
 
-  ClipRRectLayer? _clipRRectLayer;
+  final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
+
+  @override
+  void dispose() {
+    _clipRRectLayer.layer = null;
+    super.dispose();
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

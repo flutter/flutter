@@ -18,7 +18,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart' show kExtraFrontEndOptions, kExtraGenSnapshotOptions; // for "useLegacyNames" only
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
@@ -115,9 +114,12 @@ class FlutterOptions {
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
+  static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
+  static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kInitializeFromDill = 'initialize-from-dill';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -157,7 +159,6 @@ abstract class FlutterCommand extends Command<void> {
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
-    allowTrailingOptions: false,
     usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
@@ -211,7 +212,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
       'when using the Web Server device and Dart Debug extension. '
       'This is useful for editors/debug adapters that do not support debugging '
@@ -220,7 +221,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-backend-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
       'backend service when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -229,7 +230,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption('web-server-debug-injected-client-protocol',
       allowed: <String>['sse', 'ws'],
-      defaultsTo: 'sse',
+      defaultsTo: 'ws',
       help: 'The protocol (SSE or WebSockets) to use for the injected client '
       'when using the Web Server device. '
       'Using WebSockets can improve performance but may fail when connecting through '
@@ -282,6 +283,27 @@ abstract class FlutterCommand extends Command<void> {
     }
     return bundle.defaultMainPath;
   }
+
+  /// Path to the Dart's package config file.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get packagesPath => globalResults['packages'] as String;
+
+  /// The value of the `--filesystem-scheme` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  String get fileSystemScheme =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null;
+
+  /// The values of the `--filesystem-root` argument.
+  ///
+  /// This can be overridden by some of its subclasses.
+  List<String> get fileSystemRoots =>
+    argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null;
 
   void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
@@ -364,18 +386,46 @@ abstract class FlutterCommand extends Command<void> {
             'Specifying port 0 (the default) will find a random free port.'
     );
     argParser.addFlag(
-      'disable-dds', // TODO(ianh): this should be called `dds` and default to true (see style guide about double negatives)
+      'dds',
       hide: !verboseHelp,
-      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided '
-            'when attaching to an application with an existing DDS instance (e.g., '
-            'attaching to an application currently connected to by "flutter run") or '
-            'when running certain tests.\n'
-            'Passing this flag may degrade IDE functionality if a DDS instance is not '
-            'already connected to the target application.'
+      defaultsTo: true,
+      help: 'Enable the Dart Developer Service (DDS).\n'
+            'It may be necessary to disable this when attaching to an application with '
+            'an existing DDS instance (e.g., attaching to an application currently '
+            'connected to by "flutter run"), or when running certain tests.\n'
+            'Disabling this feature may degrade IDE functionality if a DDS instance is '
+            'not already connected to the target application.'
+    );
+    argParser.addFlag(
+      'disable-dds',
+      hide: !verboseHelp,
+      help: '(deprecated; use "--no-dds" instead) '
+            'Disable the Dart Developer Service (DDS).'
     );
   }
 
-  bool get disableDds => boolArg('disable-dds');
+  bool _ddsEnabled;
+  bool get enableDds {
+    if (_ddsEnabled == null) {
+      if (argResults.wasParsed('disable-dds')) {
+        if (argResults.wasParsed('dds')) {
+          throwToolExit('The "--[no-]dds" and "--[no-]disable-dds" arguments are mutually exclusive. Only specify "--[no-]dds".');
+        }
+        _ddsEnabled = !boolArg('disable-dds');
+        // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
+        if (false) { // ignore: dead_code
+          if (_ddsEnabled) {
+            globals.printError('${globals.logger.terminal.warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
+          } else {
+            globals.printError('${globals.logger.terminal.warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.');
+          }
+        }
+      } else {
+        _ddsEnabled = boolArg('dds');
+      }
+    }
+    return _ddsEnabled;
+  }
 
   bool get _hostVmServicePortProvided => argResults.wasParsed('observatory-port') ||
                                          argResults.wasParsed('host-vmservice-port');
@@ -429,7 +479,7 @@ abstract class FlutterCommand extends Command<void> {
     // If DDS is enabled and no explicit DDS port is provided, use the
     // host-vmservice-port for DDS instead and bind the VM service to a random
     // port.
-    if (!disableDds && !argResults.wasParsed('dds-port')) {
+    if (enableDds && !argResults.wasParsed('dds-port')) {
       return null;
     }
     return _tryParseHostVmservicePort();
@@ -451,11 +501,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
     argParser.addFlag('publish-port',
-        negatable: true,
-        hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the '
-              'local network permission app dialog in debug and profile build modes (iOS devices only.)',
-        defaultsTo: enabledByDefault);
+      negatable: true,
+      hide: !verboseHelp,
+      help: 'Publish the VM service port over mDNS. Disable to prevent the '
+            'local network permission app dialog in debug and profile build modes (iOS devices only).',
+      defaultsTo: enabledByDefault,
+    );
   }
 
   bool get disablePortPublication => !boolArg('publish-port');
@@ -492,9 +543,10 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption({ bool useLegacyNames = false }) {
+  void usesDartDefineOption() {
     argParser.addMultiOption(
-      useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption,
+      FlutterOptions.kDartDefinesOption,
+      aliases: <String>[ kDartDefines ], // supported for historical reasons
       help: 'Additional key-value pairs that will be available as constants '
             'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
             'and double.fromEnvironment constructors.\n'
@@ -510,7 +562,7 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: <String, String>{
-        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.',
+        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
         'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
         'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
       }
@@ -665,15 +717,17 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Enables support for the hidden options --extra-front-end-options and
   /// --extra-gen-snapshot-options.
-  void usesExtraDartFlagOptions({ @required bool verboseHelp, bool useLegacyNames = false }) {
-    argParser.addMultiOption(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions,
+  void usesExtraDartFlagOptions({ @required bool verboseHelp }) {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      aliases: <String>[ kExtraFrontEndOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
             'For example, "--${FlutterOptions.kExtraFrontEndOptions}=--enable-experiment=nonfunction-type-aliases".',
       valueHelp: '--foo,--bar',
       splitCommas: true,
       hide: !verboseHelp,
     );
-    argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
+    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+      aliases: <String>[ kExtraGenSnapshotOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
             '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
@@ -731,6 +785,13 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       hide: hide,
     );
+    argParser.addMultiOption(
+      FlutterOptions.kAndroidProjectArgs,
+      help: 'Additional arguments specified as key=value that are passed directly to the gradle '
+            'project via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
+      splitCommas: false,
+      abbr: 'P',
+    );
   }
 
   void addNativeNullAssertions({ bool hide = false }) {
@@ -743,6 +804,14 @@ abstract class FlutterCommand extends Command<void> {
         'effect in sound mode. To report an issue with a null assertion failure in '
         'dart:html or the other dart web libraries, please file a bug at: '
         'https://github.com/dart-lang/sdk/issues/labels/web-libraries'
+    );
+  }
+
+  void usesInitializeFromDillOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kInitializeFromDill,
+      help: 'Initializes the resident compiler with a specific kernel file instead of '
+        'the default cached location.',
+      hide: hide,
     );
   }
 
@@ -826,7 +895,15 @@ abstract class FlutterCommand extends Command<void> {
             'This flag is only supported on "--release" builds. When building for Android, a single '
             'ABI must be specified at a time with the "--target-platform" flag. When building for iOS, '
             'only the symbols from the arm64 architecture are used to analyze code size.\n'
+            'By default, the intermediate output files will be placed in a transient directory in the '
+            'build directory. This can be overridden with the "--${FlutterOptions.kCodeSizeDirectory}" option.\n'
             'This flag cannot be combined with "--${FlutterOptions.kSplitDebugInfoOption}".'
+    );
+
+    argParser.addOption(
+      FlutterOptions.kCodeSizeDirectory,
+      help: 'The location to write code size analysis files. If this is not specified, files '
+            'are written to a temporary directory under the build directory.'
     );
   }
 
@@ -836,7 +913,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode }) async {
+  Future<BuildInfo> getBuildInfo({ BuildMode forcedBuildMode, File forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -845,7 +922,7 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final File packagesFile = globals.fs.file(
-      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packagesFile, logger: globals.logger, throwOnError: false);
 
@@ -864,7 +941,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
-        final String flag = '--enable-experiment=' + expFlag;
+        final String flag = '--enable-experiment=$expFlag';
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
@@ -872,10 +949,13 @@ abstract class FlutterCommand extends Command<void> {
 
     String codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
-      final Directory directory = globals.fsUtils.getUniqueDirectory(
+      Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+      }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -886,8 +966,8 @@ abstract class FlutterCommand extends Command<void> {
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
       final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
-      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
-        final File entrypointFile = globals.fs.file(targetFile);
+      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
+        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
           entrypointFile,
           packageConfig.packageOf(entrypointFile.absolute.uri),
@@ -922,6 +1002,10 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
       || boolArg(FlutterOptions.kAndroidGradleDaemon);
+
+    final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
+      ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+      : <String>[];
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -972,12 +1056,8 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
         ? extraGenSnapshotOptions
         : null,
-      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? stringsArg(FlutterOptions.kFileSystemRoot)
-          : null,
-      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArg(FlutterOptions.kFileSystemScheme)
-          : null,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
@@ -989,12 +1069,15 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: globalResults['packages'] as String
-        ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
+      androidProjectArgs: androidProjectArgs,
+      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
+          : null,
     );
   }
 
@@ -1016,8 +1099,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<CustomDimensions, String>> get usageValues async =>
-      const <CustomDimensions, String>{};
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
   /// Runs this command.
   ///
@@ -1052,11 +1134,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printStatus('${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
-          'will be removed in a future version of Flutter. '
-          'See https://flutter.dev/docs/development/tools/sdk/releases '
-          'for previous releases of Flutter.');
-      globals.printStatus('');
+      globals.printError(
+        '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
+        'will be removed in a future version of Flutter. '
+        'See https://flutter.dev/docs/development/tools/sdk/releases '
+        'for previous releases of Flutter.',
+      );
+      globals.printError('');
     }
   }
 
@@ -1101,7 +1185,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     assert(commandResult != null);
     // Send command result.
-    CommandResultEvent(commandPath, commandResult).send();
+    CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String> labels = <String>[
@@ -1160,6 +1244,7 @@ abstract class FlutterCommand extends Command<void> {
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: project.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -1181,12 +1266,9 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<CustomDimensions, Object> additionalUsageValues =
-        <CustomDimensions, Object>{
-          ...?await usageValues,
-          CustomDimensions.commandHasTerminal: globals.stdio.hasTerminal,
-        };
-      Usage.command(commandPath, parameters: additionalUsageValues);
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: globals.stdio.hasTerminal,
+      ).merge(await usageValues));
     }
 
     return runCommand();
@@ -1396,7 +1478,7 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return DevelopmentArtifact.web;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin_x64:
+    case TargetPlatform.darwin:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
@@ -1416,7 +1498,9 @@ DevelopmentArtifact artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.windows_uwp_x64:
-      // No artifacts currently supported.
+      if (featureFlags.isWindowsUwpEnabled) {
+        return DevelopmentArtifact.windowsUwp;
+      }
       return null;
   }
   return null;

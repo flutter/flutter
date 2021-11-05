@@ -112,7 +112,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       ext.kotlin_version = '1.3.50'
       repositories {
           google()
-          jcenter()
+          mavenCentral()
       }
 
       dependencies {
@@ -124,7 +124,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   allprojects {
       repositories {
           google()
-          jcenter()
+          mavenCentral()
       }
   }
 
@@ -186,7 +186,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       }
 
       defaultConfig {
-          // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+          // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "ninja.qian.splitaottest1"
           minSdkVersion 16
           targetSdkVersion 30
@@ -203,7 +203,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       }
       buildTypes {
           release {
-              // TODO: Add your own signing config for the release build.
+              // Add your own signing config for the release build.
               // Signing with the debug keys for now, so `flutter run --release` works.
               signingConfig signingConfigs.release
           }

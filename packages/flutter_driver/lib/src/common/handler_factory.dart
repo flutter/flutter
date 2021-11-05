@@ -169,6 +169,7 @@ mixin CommandHandlerFactory {
       case 'tap': return _tap(command, prober, finderFactory);
       case 'waitFor': return _waitFor(command, finderFactory);
       case 'waitForAbsent': return _waitForAbsent(command, finderFactory);
+      case 'waitForTappable': return _waitForTappable(command, finderFactory);
       case 'waitForCondition': return _waitForCondition(command);
       case 'waitUntilNoTransientCallbacks': return _waitUntilNoTransientCallbacks(command);
       case 'waitUntilNoPendingFrame': return _waitUntilNoPendingFrame(command);
@@ -233,6 +234,14 @@ mixin CommandHandlerFactory {
   Future<Result> _waitForAbsent(Command command, CreateFinderFactory finderFactory) async {
     final WaitForAbsent waitForAbsentCommand = command as WaitForAbsent;
     await waitForAbsentElement(finderFactory.createFinder(waitForAbsentCommand.finder));
+    return Result.empty;
+  }
+
+  Future<Result> _waitForTappable(Command command, CreateFinderFactory finderFactory) async {
+    final WaitForTappable waitForTappableCommand = command as WaitForTappable;
+    await waitForElement(
+      finderFactory.createFinder(waitForTappableCommand.finder).hitTestable(),
+    );
     return Result.empty;
   }
 

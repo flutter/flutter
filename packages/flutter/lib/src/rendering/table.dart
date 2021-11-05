@@ -197,7 +197,7 @@ class FlexColumnWidth extends TableColumnWidth {
   /// The [value] argument must not be null.
   const FlexColumnWidth([this.value = 1.0]) : assert(value != null);
 
-  /// The reaction of the of the remaining space once all the other columns have
+  /// The fraction of the remaining space once all the other columns have
   /// been laid out that this column should occupy.
   final double value;
 

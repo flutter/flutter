@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
-import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:flutter_devicelab/common.dart';
+import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   task(() async {
@@ -50,7 +50,7 @@ void main() {
         <String>['--suppress-analytics', 'run', '--release', '-d', device.deviceId, 'lib/main.dart'],
         isBot: false, // we just want to test the output, not have any debugging info
       );
-      int runExitCode;
+      int? runExitCode;
       run.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
@@ -80,7 +80,7 @@ void main() {
           print('run:stderr: $line');
           stderr.add(line);
         });
-      run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
+      unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';

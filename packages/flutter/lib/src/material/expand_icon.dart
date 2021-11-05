@@ -97,7 +97,7 @@ class ExpandIcon extends StatefulWidget {
   final Color? expandedColor;
 
   @override
-  _ExpandIconState createState() => _ExpandIconState();
+  State<ExpandIcon> createState() => _ExpandIconState();
 }
 
 class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {

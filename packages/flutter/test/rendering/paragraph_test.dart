@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextBox;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -28,11 +28,19 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   TextSelection emptyListSelection;
 
   @override
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     if (selection == emptyListSelection) {
       return <ui.TextBox>[];
     }
-    return super.getBoxesForSelection(selection);
+    return super.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
   }
 }
 
@@ -48,11 +56,19 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
   }) : super(text, children: children, textDirection: textDirection);
 
   @override
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     if (text.getSpanForPosition(selection.base) is WidgetSpan) {
       return <ui.TextBox>[];
     }
-    return super.getBoxesForSelection(selection);
+    return super.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
   }
 }
 
@@ -112,17 +128,104 @@ void main() {
     layout(paragraph);
 
     List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 5, extentOffset: 25)
+      const TextSelection(baseOffset: 5, extentOffset: 25),
     );
 
     expect(boxes.length, equals(1));
 
     boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 25, extentOffset: 50)
+      const TextSelection(baseOffset: 25, extentOffset: 50),
     );
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+
+  test('getBoxesForSelection test with multiple TextSpans and lines', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'First ',
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        children: <InlineSpan>[
+          TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
+          TextSpan(text: 'third fourth fifth'),
+        ],
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    // Do layout with width chosen so that this splits as
+    // First smallsecond |
+    // third fourth |
+    // fifth|
+    // The corresponding line widths come out to be:
+    // 1st line: 120px wide: 6 chars * 10px plus 12 chars * 5px.
+    // 2nd line: 130px wide: 13 chars * 10px.
+    // 3rd line: 50px wide.
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 140.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 36),
+    );
+
+    expect(boxes.length, equals(4));
+
+    // The widths of the boxes should match the calculations above.
+    // The heights should all be 10, except for the box for 'smallsecond ',
+    // which should have height 5, and be alphabetic baseline-aligned with
+    // 'First '. The Ahem font specifies alphabetic baselines at 0.2em above the
+    // bottom extent, and 0.8em below the top, so the difference in top
+    // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
+
+    // 'First ':
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
+    // 'smallsecond ' in size 5:
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
+    // 'third fourth ':
+    expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
+    // 'fifth':
+    expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+  }, skip: !isLinux); // mac typography values can differ
+
+  test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'First ',
+        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        children: <InlineSpan>[
+          TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 8.0)),
+          TextSpan(text: 'third fourth fifth'),
+        ],
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    // Do layout with width chosen so that this splits as
+    // First smallsecond |
+    // third fourth |
+    // fifth|
+    // The corresponding line widths come out to be:
+    // 1st line: 156px wide: 6 chars * 10px plus 12 chars * 8px.
+    // 2nd line: 130px wide: 13 chars * 10px.
+    // 3rd line: 50px wide.
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 160.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 36),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+      boxWidthStyle: ui.BoxWidthStyle.max,
+    );
+
+    expect(boxes.length, equals(5));
+
+    // 'First ':
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
+    // 'smallsecond ' in size 8, but on same line as previous box, so height remains 10:
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 0.0, 156.0, 10.0, TextDirection.ltr));
+    // 'third fourth ':
+    expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
+    // extra box added to extend width, as per definition of ui.BoxWidthStyle.max:
+    expect(boxes[3], const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
+    // 'fifth':
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getWordBoundary control test', () {
@@ -320,7 +423,7 @@ void main() {
     final List<ui.TextBox> boxes = <ui.TextBox>[
       for (int i = 0; i < text.length; ++i)
         ...paragraph.getBoxesForSelection(
-          TextSelection(baseOffset: i, extentOffset: i + 1)
+          TextSelection(baseOffset: i, extentOffset: i + 1),
         ),
     ];
     expect(boxes.length, equals(4));
@@ -362,7 +465,7 @@ void main() {
         '   ║ TextSpan:\n'
         '   ║   "I polished up that handle so carefullee\n'
         '   ║   That now I am the Ruler of the Queen\'s Navee!"\n'
-        '   ╚═══════════\n'
+        '   ╚═══════════\n',
       ),
     );
   });
@@ -408,7 +511,7 @@ void main() {
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 8)
+      const TextSelection(baseOffset: 0, extentOffset: 8),
     );
 
     expect(boxes.length, equals(5));
@@ -416,6 +519,47 @@ void main() {
     expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('getBoxesForSelection with boxHeightStyle for inline widgets', () {
+    const TextSpan text = TextSpan(
+      text: 'a',
+      style: TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        TextSpan(text: 'a'),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+      ],
+    );
+    // Fake the render boxes that correspond to the WidgetSpans. We use
+    // RenderParagraph to reduce the dependencies this test has. The dimensions
+    // of these get used in place of the widths and heights specified in the
+    // SizedBoxes above: each comes out as (w,h) = (14,14).
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
+
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      children: renderBoxes,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 8),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+    );
+
+    expect(boxes.length, equals(5));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 0.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
@@ -429,8 +573,8 @@ void main() {
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 1.0,
       children: renderBoxes,
@@ -447,8 +591,8 @@ void main() {
     paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 2.0,
       children: renderBoxes,
@@ -474,8 +618,8 @@ void main() {
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 1.0,
       children: renderBoxes,
@@ -492,8 +636,8 @@ void main() {
     paragraph = RenderParagraph(
       const TextSpan(
         children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence))
-        ]
+          WidgetSpan(child: Text(sentence)),
+        ],
       ),
       textScaleFactor: 2.0,
       children: renderBoxes,
@@ -541,7 +685,7 @@ void main() {
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 12)
+      const TextSelection(baseOffset: 0, extentOffset: 12),
     );
 
     expect(boxes.length, equals(9));

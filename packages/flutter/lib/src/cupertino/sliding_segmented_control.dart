@@ -198,7 +198,7 @@ class _SegmentSeparator extends StatefulWidget {
   _SegmentSeparatorState createState() => _SegmentSeparatorState();
 }
 
-class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProviderStateMixin<_SegmentSeparator>  {
+class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProviderStateMixin<_SegmentSeparator> {
   late final AnimationController separatorOpacityController;
 
   @override
@@ -402,7 +402,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
+  State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
 class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
@@ -687,11 +687,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           animation: thumbScaleAnimation,
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
-              children: children,
               highlightedIndex: highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               state: this,
+              children: children,
             );
           },
         ),
@@ -735,7 +735,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   }
 }
 
-class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> {}
+class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //
@@ -993,7 +993,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(rightMost > leftMost);
 
     // Ignore the horizontal position and the height of `thumbRect`, and
-    // calcuates them from `children`.
+    // calculates them from `children`.
     return Rect.fromLTRB(
       math.max(thumbRect.left, leftMost - _kThumbInsets.left),
       firstChildOffset.dy - _kThumbInsets.top,

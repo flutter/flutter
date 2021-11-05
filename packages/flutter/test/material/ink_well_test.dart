@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -82,9 +82,9 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
         },
         child: Material(
           child: Center(
@@ -221,8 +221,10 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
@@ -264,8 +266,10 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-           ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(
+      inkFeatures,
+      paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+    );
   });
 
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
@@ -620,8 +624,8 @@ void main() {
       child: Material(
         child: InkWell(
           onTap: () { },
-          child: const Text('Button'),
           excludeFromSemantics: true,
+          child: const Text('Button'),
         ),
       ),
     ));
@@ -1104,7 +1108,7 @@ void main() {
                           child: rightChild,
                         ),
                       ),
-                    )
+                    ),
                   ),
                 ],
               ),

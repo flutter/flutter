@@ -45,8 +45,8 @@ import 'dart:io' as io
     StdoutException,
     stdout;
 
-import 'package:meta/meta.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import 'async_guard.dart';
 import 'platform.dart';
@@ -102,7 +102,8 @@ export 'dart:io'
         systemEncoding,
         WebSocket,
         WebSocketException,
-        WebSocketTransformer;
+        WebSocketTransformer,
+        ZLibEncoder;
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);
@@ -362,7 +363,7 @@ class Stdio {
   /// Adds [stream] to [stdout].
   Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
 
-  /// Adds [srtream] to [stderr].
+  /// Adds [stream] to [stderr].
   Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 

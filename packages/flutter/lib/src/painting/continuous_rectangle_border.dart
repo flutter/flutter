@@ -48,7 +48,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
 
-   @override
+  @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
@@ -134,7 +134,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return ContinuousRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,

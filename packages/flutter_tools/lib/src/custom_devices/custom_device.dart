@@ -11,12 +11,14 @@ import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../bundle_builder.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -27,7 +29,7 @@ import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
 
-/// Replace all ocurrences of `${someName}` with the value found for that
+/// Replace all occurrences of `${someName}` with the value found for that
 /// name inside replacementValues or additionalReplacementValues.
 ///
 /// The replacement value is first looked for in [replacementValues] and then
@@ -79,7 +81,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// Add all lines emitted by [lines] to this [CustomDeviceLogReader]s [logLines]
   /// stream.
   ///
-  /// Similiar to [listenToProcessOutput], [logLines] will not be marked as done
+  /// Similar to [listenToProcessOutput], [logLines] will not be marked as done
   /// when the argument stream is done.
   ///
   /// Useful when you want to combine the contents of multiple log readers.
@@ -133,7 +135,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     return Future.wait(List<ForwardedPort>.of(_forwardedPorts).map(unforward));
   }
 
-  Future<ForwardedPort> _tryForward(int devicePort, int hostPort) async {
+  Future<ForwardedPort> tryForward(int devicePort, int hostPort) async {
     final List<String> interpolated = interpolateCommand(
       _forwardPortCommand,
       <String, String>{
@@ -190,7 +192,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
         actualHostPort += 1;
       }
 
-      final ForwardedPort port = await _tryForward(devicePort, actualHostPort);
+      final ForwardedPort port = await tryForward(devicePort, actualHostPort);
 
       if (port != null) {
         _forwardedPorts.add(port);
@@ -214,7 +216,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     assert(_forwardedPorts.contains(forwardedPort));
 
     // since a forwarded port represents a running process launched with
-    // the forwardPortCommand, unforwarding is as easy as killing the proces
+    // the forwardPortCommand, unforwarding is as easy as killing the process
     _processManager.killPid(forwardedPort.context.pid);
     _forwardedPorts.remove(forwardedPort);
   }
@@ -236,6 +238,10 @@ class CustomDeviceAppSession {
        _device = device,
        _logger = logger,
        _processManager = processManager,
+       _processUtils = ProcessUtils(
+         processManager: processManager,
+         logger: logger
+       ),
        logReader = CustomDeviceLogReader(name);
 
   final String name;
@@ -243,29 +249,136 @@ class CustomDeviceAppSession {
   final ApplicationPackage _appPackage;
   final Logger _logger;
   final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final CustomDeviceLogReader logReader;
 
   Process _process;
   int _forwardedHostPort;
 
+  /// Get the engine options for the given [debuggingOptions],
+  /// [traceStartup] and [route].
+  ///
+  /// [debuggingOptions] and [route] can be null.
+  ///
+  /// For example, `_getEngineOptions(null, false, null)` will return
+  /// `['enable-dart-profiling=true', 'enable-background-compilation=true']`
+  List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+    final List<String> options = <String>[];
+
+    void addFlag(String value) {
+      options.add(value);
+    }
+
+    addFlag('enable-dart-profiling=true');
+    addFlag('enable-background-compilation=true');
+
+    if (traceStartup) {
+      addFlag('trace-startup=true');
+    }
+    if (route != null) {
+      addFlag('route=$route');
+    }
+    if (debuggingOptions != null) {
+      if (debuggingOptions.enableSoftwareRendering) {
+        addFlag('enable-software-rendering=true');
+      }
+      if (debuggingOptions.skiaDeterministicRendering) {
+        addFlag('skia-deterministic-rendering=true');
+      }
+      if (debuggingOptions.traceSkia) {
+        addFlag('trace-skia=true');
+      }
+      if (debuggingOptions.traceAllowlist != null) {
+        addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
+      }
+      if (debuggingOptions.traceSystrace) {
+        addFlag('trace-systrace=true');
+      }
+      if (debuggingOptions.endlessTraceBuffer) {
+        addFlag('endless-trace-buffer=true');
+      }
+      if (debuggingOptions.dumpSkpOnShaderCompilation) {
+        addFlag('dump-skp-on-shader-compilation=true');
+      }
+      if (debuggingOptions.cacheSkSL) {
+        addFlag('cache-sksl=true');
+      }
+      if (debuggingOptions.purgePersistentCache) {
+        addFlag('purge-persistent-cache=true');
+      }
+      // Options only supported when there is a VM Service connection between the
+      // tool and the device, usually in debug or profile mode.
+      if (debuggingOptions.debuggingEnabled) {
+        if (debuggingOptions.deviceVmServicePort != null) {
+          addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+        }
+        if (debuggingOptions.buildInfo.isDebug) {
+          addFlag('enable-checked-mode=true');
+          addFlag('verify-entry-points=true');
+        }
+        if (debuggingOptions.startPaused) {
+          addFlag('start-paused=true');
+        }
+        if (debuggingOptions.disableServiceAuthCodes) {
+          addFlag('disable-service-auth-codes=true');
+        }
+        final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+        if (dartVmFlags.isNotEmpty) {
+          addFlag('dart-flags=$dartVmFlags');
+        }
+        if (debuggingOptions.useTestFonts) {
+          addFlag('use-test-fonts=true');
+        }
+        if (debuggingOptions.verboseSystemLogs) {
+          addFlag('verbose-logging=true');
+        }
+      }
+    }
+
+    return options;
+  }
+
+  /// Get the engine options for the given [debuggingOptions],
+  /// [traceStartup] and [route].
+  ///
+  /// [debuggingOptions] and [route] can be null.
+  ///
+  /// For example, `_getEngineOptionsForCmdline(null, false, null)` will return
+  /// `--enable-dart-profiling=true --enable-background-compilation=true`
+  String _getEngineOptionsForCmdline(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+    return _getEngineOptions(debuggingOptions, traceStartup, route).map((String e) => '--$e').join(' ');
+  }
+
+  /// Start the app on the device.
+  /// Needs the app to be installed on the device and not running already.
+  ///
+  /// [mainPath], [route], [debuggingOptions], [platformArgs] and
+  /// [userIdentifier] may be null.
+  ///
+  /// [ipv6] may not be respected since it depends on the device config whether
+  /// it uses ipv6 or ipv4
   Future<LaunchResult> start({
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier
   }) async {
+    platformArgs ??= <String, dynamic>{};
+
+    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
     final List<String> interpolated = interpolateCommand(
       _device._config.runDebugCommand,
       <String, String>{
         'remotePath': '/tmp/',
-        'appName': _appPackage.name
+        'appName': _appPackage.name,
+        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route)
       }
     );
 
-    final Process process = await _processManager.start(interpolated);
+    final Process process = await _processUtils.start(interpolated);
     assert(_process == null);
     _process = process;
 
@@ -305,6 +418,9 @@ class CustomDeviceAppSession {
     }
   }
 
+  /// Stop the app on the device.
+  /// Returns false if the app is not yet running. Also unforwards any
+  /// forwarded ports.
   Future<bool> stop() async {
     if (_process == null) {
       return false;
@@ -401,7 +517,7 @@ class CustomDevice extends Device {
   /// it will be killed with a SIGTERM, false will be returned and the timeout
   /// will be reported in the log using [_logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
-  Future<bool> _tryPing({
+  Future<bool> tryPing({
     Duration timeout,
     Map<String, String> replacementValues = const <String, String>{}
   }) async {
@@ -410,23 +526,21 @@ class CustomDevice extends Device {
       replacementValues
     );
 
-    try {
-      final RunResult result = await _processUtils.run(
-        interpolated,
-        throwOnError: true,
-        timeout: timeout
-      );
+    final RunResult result = await _processUtils.run(
+      interpolated,
+      timeout: timeout
+    );
 
-      // If the user doesn't configure a ping success regex, any ping with exitCode zero
-      // is good enough. Otherwise we check if either stdout or stderr have a match of
-      // the pingSuccessRegex.
-      return _config.pingSuccessRegex == null
-        || _config.pingSuccessRegex.hasMatch(result.stdout)
-        || _config.pingSuccessRegex.hasMatch(result.stderr);
-    } on ProcessException catch (e) {
-      _logger.printError('Error executing ping command for custom device $id: $e');
+    if (result.exitCode != 0) {
       return false;
     }
+
+    // If the user doesn't configure a ping success regex, any ping with exitCode zero
+    // is good enough. Otherwise we check if either stdout or stderr have a match of
+    // the pingSuccessRegex.
+    return _config.pingSuccessRegex == null
+      || _config.pingSuccessRegex.hasMatch(result.stdout)
+      || _config.pingSuccessRegex.hasMatch(result.stderr);
   }
 
   /// Tries to execute the configs postBuild command using [appName] for the
@@ -479,7 +593,7 @@ class CustomDevice extends Device {
   /// will be killed with a SIGTERM, false will be returned and the timeout
   /// will be reported in the log using [_logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
-  Future<bool> _tryUninstall({
+  Future<bool> tryUninstall({
     @required String appName,
     Duration timeout,
     Map<String, String> additionalReplacementValues = const <String, String>{}
@@ -513,7 +627,7 @@ class CustomDevice extends Device {
   ///
   /// [appName] is the name of the app to be installed. Substituted for any occurrence
   /// of `${appName}` in the custom device configs `install` command.
-  Future<bool> _tryInstall({
+  Future<bool> tryInstall({
     @required String localPath,
     @required String appName,
     Duration timeout,
@@ -569,11 +683,11 @@ class CustomDevice extends Device {
 
   @override
   Future<bool> installApp(covariant ApplicationPackage app, {String userIdentifier}) async {
-    if (!await _tryUninstall(appName: app.name)) {
+    if (!await tryUninstall(appName: app.name)) {
       return false;
     }
 
-    final bool result = await _tryInstall(
+    final bool result = await tryInstall(
       localPath: getAssetBuildDirectory(),
       appName: app.name
     );
@@ -593,6 +707,24 @@ class CustomDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  bool get supportsScreenshot => _config.supportsScreenshotting;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    if (supportsScreenshot == false) {
+      throw UnsupportedError('Screenshotting is not supported for this device.');
+    }
+
+    final List<String> interpolated = interpolateCommand(
+      _config.screenshotCommand,
+      <String, String>{},
+    );
+
+    final RunResult result = await _processUtils.run(interpolated, throwOnError: true);
+    await outputFile.writeAsBytes(base64Decode(result.stdout));
+  }
 
   @override
   bool isSupported() {
@@ -639,7 +771,6 @@ class CustomDevice extends Device {
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
         assetDirPath: assetBundleDir,
-        treeShakeIcons: false,
       );
 
       // if we have a post build step (needed for some embedders), execute it
@@ -673,12 +804,11 @@ class CustomDevice extends Device {
   }
 
   @override
-  // TODO(ardera): Allow configuring or auto-detecting the target platform, https://github.com/flutter/flutter/issues/78151
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_arm64;
+  Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
   Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) {
-    return _tryUninstall(appName: app.name);
+    return tryUninstall(appName: app.name);
   }
 }
 
@@ -713,9 +843,9 @@ class CustomDevices extends PollingDeviceDiscovery {
 
   CustomDevicesConfig get _customDevicesConfig => _config;
 
-  List<CustomDevice> get enabledCustomDevices {
-    return _customDevicesConfig.devices
-      .where((CustomDeviceConfig element) => !element.disabled)
+  List<CustomDevice> get _enabledCustomDevices {
+    return _customDevicesConfig.tryGetDevices()
+      .where((CustomDeviceConfig element) => element.enabled)
       .map(
         (CustomDeviceConfig config) => CustomDevice(
           config: config,
@@ -731,12 +861,12 @@ class CustomDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
 
-    final List<CustomDevice> devices = enabledCustomDevices;
+    final List<CustomDevice> devices = _enabledCustomDevices;
 
     // maps any custom device to whether its reachable or not.
     final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(
       devices,
-      await Future.wait(devices.map((CustomDevice e) => e._tryPing(timeout: timeout)))
+      await Future.wait(devices.map((CustomDevice e) => e.tryPing(timeout: timeout)))
     );
 
     // remove all the devices we couldn't reach.
@@ -748,4 +878,7 @@ class CustomDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }

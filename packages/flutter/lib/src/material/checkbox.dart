@@ -310,7 +310,23 @@ class Checkbox extends StatefulWidget {
   final OutlinedBorder? shape;
 
   /// {@template flutter.material.checkbox.side}
-  /// The side of the checkbox's border.
+  /// The color and width of the checkbox's border.
+  ///
+  /// This property can be a [MaterialStateBorderSide] that can
+  /// specify different border color and widths depending on the
+  /// checkbox's state.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is not a [MaterialStateBorderSide] and it is
+  /// non-null, then it is only rendered when the checkbox's value is
+  /// false. The difference in interpretation is for backwards
+  /// compatibility.
   /// {@endtemplate}
   ///
   /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
@@ -321,7 +337,7 @@ class Checkbox extends StatefulWidget {
   static const double width = 18.0;
 
   @override
-  _CheckboxState createState() => _CheckboxState();
+  State<Checkbox> createState() => _CheckboxState();
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, ToggleableStateMixin {
@@ -381,6 +397,14 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       }
       return themeData.unselectedWidgetColor;
     });
+  }
+
+  BorderSide? _resolveSide(BorderSide? side) {
+    if (side is MaterialStateBorderSide)
+      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
+    if (!states.contains(MaterialState.selected))
+      return side;
+    return null;
   }
 
   @override
@@ -477,7 +501,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..shape = widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(1.0)),
           )
-          ..side = widget.side ?? themeData.checkboxTheme.side,
+          ..side = _resolveSide(widget.side) ?? _resolveSide(themeData.checkboxTheme.side),
       ),
     );
   }
@@ -563,13 +587,13 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeWidth = _kStrokeWidth;
   }
 
-  void _drawBorder(Canvas canvas, Rect outer, double t, Paint paint) {
-    assert(t >= 0.0 && t <= 0.5);
-    OutlinedBorder resolvedShape = shape;
-    if (side == null) {
-      resolvedShape = resolvedShape.copyWith(side: BorderSide(width: 2, color: paint.color));
+  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
+    if (fill) {
+      canvas.drawPath(shape.getOuterPath(outer), paint);
     }
-    resolvedShape.copyWith(side: side).paint(canvas, outer);
+    if (side != null) {
+      shape.copyWith(side: side).paint(canvas, outer);
+    }
   }
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
@@ -622,14 +646,13 @@ class _CheckboxPainter extends ToggleablePainter {
     if (previousValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final Rect outer = _outerRectAt(origin, t);
-      final Path emptyCheckboxPath = shape.copyWith(side: side).getOuterPath(outer);
       final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
-        _drawBorder(canvas, outer, t, paint);
+        final BorderSide border = side ?? BorderSide(width: 2, color: paint.color);
+        _drawBox(canvas, outer, paint, border, false); // only paint the border
       } else {
-        canvas.drawPath(emptyCheckboxPath, paint);
-
+        _drawBox(canvas, outer, paint, side, true);
         final double tShrink = (t - 0.5) * 2.0;
         if (previousValue == null || value == null)
           _drawDash(canvas, origin, tShrink, strokePaint);
@@ -639,8 +662,8 @@ class _CheckboxPainter extends ToggleablePainter {
     } else { // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
       final Paint paint = Paint() ..color = _colorAt(1.0);
-      canvas.drawPath(shape.copyWith(side: side).getOuterPath(outer), paint);
 
+      _drawBox(canvas, outer, paint, side, true);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
         if (previousValue == true)

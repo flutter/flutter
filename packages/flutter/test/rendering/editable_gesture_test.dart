@@ -41,6 +41,7 @@ void main() {
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
     editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10,10)));
+    GestureBinding.instance!.pointerRouter.route(const PointerDownEvent());
     expect(spy.routeCount, greaterThan(0));
     editable.detach();
     expect(spy.routeCount, 0);
@@ -54,7 +55,7 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends Fake implements TextSelectionDelegate  { }
+class FakeEditableTextState extends Fake implements TextSelectionDelegate { }
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

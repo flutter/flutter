@@ -5,8 +5,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-
 final Stopwatch _stopwatch = Stopwatch();
 
 /// A wrapper around package:test's JSON reporter.
@@ -75,7 +73,7 @@ class FlutterCompactFormatter {
   ///
   /// Callers are responsible for splitting multiple lines before calling this
   /// method.
-  TestResult processRawOutput(String raw) {
+  TestResult? processRawOutput(String raw) {
     assert(raw != null);
     // We might be getting messages from Flutter Tool about updating/building.
     if (!raw.startsWith('{')) {
@@ -83,7 +81,7 @@ class FlutterCompactFormatter {
       return null;
     }
     final Map<String, dynamic> decoded = json.decode(raw) as Map<String, dynamic>;
-    final TestResult originalResult = _tests[decoded['testID']];
+    final TestResult? originalResult = _tests[decoded['testID']];
     switch (decoded['type'] as String) {
       case 'done':
         stdout.write(_clearLine);
@@ -104,9 +102,9 @@ class FlutterCompactFormatter {
         _tests[testData['id'] as int] = TestResult(
           id: testData['id'] as int,
           name: testData['name'] as String,
-          line: testData['root_line'] as int ?? testData['line'] as int,
-          column: testData['root_column'] as int ?? testData['column'] as int,
-          path: testData['root_url'] as String ?? testData['url'] as String,
+          line: testData['root_line'] as int? ?? testData['line'] as int,
+          column: testData['root_column'] as int? ?? testData['column'] as int,
+          path: testData['root_url'] as String? ?? testData['url'] as String,
           startTime: decoded['time'] as int,
         );
         break;
@@ -173,9 +171,9 @@ class FlutterCompactFormatter {
         case TestStatus.failed:
           failed.addAll(<String>[
             '$_bold${_red}Failed ${result.name} (${result.pathLineColumn}):',
-            result.errorMessage,
+            result.errorMessage!,
             _noColor + _red,
-            result.stackTrace,
+            result.stackTrace!,
           ]);
           failed.addAll(result.messages);
           failed.add(_noColor);
@@ -209,12 +207,12 @@ enum TestStatus {
 /// The detailed status of a test run.
 class TestResult {
   TestResult({
-    @required this.id,
-    @required this.name,
-    @required this.line,
-    @required this.column,
-    @required this.path,
-    @required this.startTime,
+    required this.id,
+    required this.name,
+    required this.line,
+    required this.column,
+    required this.path,
+    required this.startTime,
     this.status = TestStatus.started,
   })  : assert(id != null),
         assert(name != null),
@@ -254,13 +252,13 @@ class TestResult {
 
   /// The error message from the test, from an `expect`, an [Exception] or
   /// [Error].
-  String errorMessage;
+  String? errorMessage;
 
   /// The stacktrace from a test failure.
-  String stackTrace;
+  String? stackTrace;
 
   /// The time, in milliseconds relative to suite startup, that the test ended.
-  int endTime;
+  int? endTime;
 
   /// The total time, in milliseconds, that the test took.
   int get totalTime => (endTime ?? _stopwatch.elapsedMilliseconds) - startTime;

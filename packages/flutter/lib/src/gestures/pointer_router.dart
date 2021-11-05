@@ -87,6 +87,7 @@ class PointerRouter {
     throw UnsupportedError('debugGlobalRouteCount is not supported in release builds');
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
     try {
       event = event.transformed(transform);

@@ -18,6 +18,7 @@ void main() {
     expect(bottomSheetTheme.elevation, null);
     expect(bottomSheetTheme.shape, null);
     expect(bottomSheetTheme.clipBehavior, null);
+    expect(bottomSheetTheme.constraints, null);
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
@@ -39,6 +40,7 @@ void main() {
       elevation: 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
       clipBehavior: Clip.antiAlias,
+      constraints: const BoxConstraints(minWidth: 200, maxWidth: 640),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -51,6 +53,7 @@ void main() {
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
       'clipBehavior: Clip.antiAlias',
+      'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
     ]);
   });
 

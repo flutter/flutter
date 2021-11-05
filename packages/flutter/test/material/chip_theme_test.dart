@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -89,9 +87,7 @@ void main() {
       return MaterialApp(
         locale: const Locale('en', 'us'),
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: Theme(
@@ -112,7 +108,7 @@ void main() {
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -139,9 +135,7 @@ void main() {
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
         home: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
               child: Theme(
@@ -165,7 +159,7 @@ void main() {
             ),
           ),
         ),
-      ));
+      );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));

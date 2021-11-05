@@ -95,6 +95,20 @@ class TimelineSummary {
   /// The total number of rasterizer cycles recorded in the timeline.
   int countRasterizations() => _extractGpuRasterizerDrawDurations().length;
 
+  /// The total number of old generation garbage collections recorded in the timeline.
+  int oldGenerationGarbageCollections() {
+    return _timeline.events!.where((TimelineEvent event) {
+      return event.category == 'GC' && event.name == 'CollectOldGeneration';
+    }).length;
+  }
+
+  /// The total number of new generation garbage collections recorded in the timeline.
+  int newGenerationGarbageCollections() {
+    return _timeline.events!.where((TimelineEvent event) {
+      return event.category == 'GC' && event.name == 'CollectNewGeneration';
+    }).length;
+  }
+
   /// Encodes this summary as JSON.
   ///
   /// Data ends with "_time_millis" means time in milliseconds and numbers in
@@ -176,6 +190,8 @@ class TimelineSummary {
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
       'frame_rasterizer_count': countRasterizations(),
+      'new_gen_gc_count': newGenerationGarbageCollections(),
+      'old_gen_gc_count': oldGenerationGarbageCollections(),
       'frame_build_times': _extractFrameDurations()
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),

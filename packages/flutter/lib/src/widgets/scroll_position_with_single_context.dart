@@ -216,6 +216,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       );
       final double oldPixels = pixels;
       forcePixels(targetPixels);
+      isScrollingNotifier.value = true;
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();

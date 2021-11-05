@@ -33,7 +33,7 @@ void main() {
     FakeProcessManager processManager;
 
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[]);
+      processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
@@ -101,7 +101,6 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
-                bool shouldBuildPluginAsAar,
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -120,9 +119,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -206,7 +205,6 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
-                bool shouldBuildPluginAsAar,
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -222,9 +220,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -290,7 +288,6 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
-                bool shouldBuildPluginAsAar,
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -309,9 +306,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
     });
@@ -358,7 +355,7 @@ void main() {
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
       await expectLater(() async {
-       await builder.buildGradleApp(
+        await builder.buildGradleApp(
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
@@ -371,8 +368,7 @@ void main() {
           isBuildingBundle: false,
           localGradleErrors: const <GradleHandledError>[],
         );
-      },
-      throwsA(isA<ProcessException>()));
+      }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -455,7 +451,6 @@ void main() {
               String line,
               FlutterProject project,
               bool usesAndroidX,
-              bool shouldBuildPluginAsAar,
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -466,9 +461,9 @@ void main() {
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
-          'unspecified',
+          'gradle',
           label: 'gradle-random-event-label-success',
-          parameters: <String, String>{},
+          parameters: CustomDimensions(),
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
@@ -569,117 +564,6 @@ void main() {
           'apk',
         ),
       ));
-    });
-
-    testUsingContext('Can retry gradle build with plugins built as AARs', () async {
-      final AndroidGradleBuilder builder = AndroidGradleBuilder(
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: Artifacts.test(),
-        usage: testUsage,
-        gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
-      );
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          'assembleRelease',
-        ],
-        exitCode: 1,
-        stderr: '\nSome gradle message\n',
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          '-Dbuild-plugins-as-aars=true',
-          '--settings-file=settings_aar.gradle',
-          'assembleRelease'
-        ],
-        exitCode: 1,
-        stderr: '\nSome gradle message\n',
-      ));
-
-      fileSystem.directory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
-
-      fileSystem.directory('android')
-        .childFile('gradle.properties')
-        .createSync(recursive: true);
-
-      fileSystem.directory('android')
-        .childDirectory('app')
-        .childFile('build.gradle')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-
-      int testFnCalled = 0;
-      bool builtPluginAsAar = false;
-      await expectLater(() async {
-       await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-            ),
-          ),
-          target: 'lib/main.dart',
-          isBuildingBundle: false,
-          localGradleErrors: <GradleHandledError>[
-            GradleHandledError(
-              test: (String line) {
-                if (line.contains('Some gradle message')) {
-                  testFnCalled++;
-                  return true;
-                }
-                return false;
-              },
-              handler: ({
-                String line,
-                FlutterProject project,
-                bool usesAndroidX,
-                bool shouldBuildPluginAsAar,
-              }) async {
-                if (testFnCalled == 2) {
-                  builtPluginAsAar = shouldBuildPluginAsAar;
-                }
-                return GradleBuildStatus.retryWithAarPlugins;
-              },
-              eventLabel: 'random-event-label',
-            ),
-          ],
-        );
-      }, throwsToolExit(
-        message: 'Gradle task assembleRelease failed with exit code 1'
-      ));
-
-      expect(testFnCalled, equals(2));
-      expect(builtPluginAsAar, isTrue);
-
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'unspecified',
-          label: 'gradle-random-event-label-failure',
-          parameters: <String, String>{},
-        ),
-      ));
-      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {

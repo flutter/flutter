@@ -11,7 +11,7 @@ import 'package:macrobenchmarks/common.dart';
 import 'package:macrobenchmarks/main.dart';
 
 Future<void> main() async {
-  enableFlutterDriverExtension(handler: (String message) async {
+  enableFlutterDriverExtension(handler: (String? message) async {
     if (message == 'getTargetPlatform') {
       return defaultTargetPlatform.toString();
     }

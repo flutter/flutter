@@ -32,7 +32,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -75,10 +75,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     Padding(
                       padding: const EdgeInsets.all(18.0),
                       child: ElevatedButton(
-                          child: Platform.isIOS
-                              ? const Text('Continue in iOS view')
-                              : const Text('Continue in Android view'),
-                          onPressed: _launchPlatformCount),
+                        onPressed: _launchPlatformCount,
+                        child: Platform.isIOS
+                          ? const Text('Continue in iOS view')
+                          : const Text('Continue in Android view'),
+                      ),
                     ),
                   ],
                 ),
@@ -88,8 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
               child: Row(
                 children: <Widget>[
-                  Image.asset('assets/flutter-mark-square-64.png',
-                      scale: 1.5),
+                  Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
                   const Text(
                     'Flutter',
                     style: TextStyle(fontSize: 30.0),

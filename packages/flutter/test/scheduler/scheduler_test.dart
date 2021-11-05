@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=123"
+@Tags(<String>['no-shuffle'])
+
 import 'dart:async';
 import 'dart:ui' show window;
 
@@ -143,13 +149,15 @@ void main() {
       buildFinish: 15000,
       rasterStart: 16000,
       rasterFinish: 20000,
+      rasterFinishWallTime: 20010,
+      frameNumber: 1991
     )]);
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));
 
     final Map<String, dynamic> event = events.first;
-    expect(event['number'], isNonNegative);
+    expect(event['number'], 1991);
     expect(event['startTime'], 10000);
     expect(event['elapsed'], 15000);
     expect(event['build'], 5000);

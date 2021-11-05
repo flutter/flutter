@@ -5,10 +5,10 @@
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -63,9 +63,13 @@ dynamic getRenderChip(WidgetTester tester) {
   return element.renderObject;
 }
 
+// ignore: avoid_dynamic_calls
 double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
+// ignore: avoid_dynamic_calls
 double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
+// ignore: avoid_dynamic_calls
 double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+// ignore: avoid_dynamic_calls
 double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value as double;
 
 /// Adds the basic requirements for a Chip.
@@ -193,7 +197,7 @@ Widget _chipWithOptionalDeleteButton({
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
   bool hasDeleteButtonTooltip = true,
-}){
+}) {
   return _wrapForChip(
     textDirection: textDirection,
     child: Wrap(
@@ -1464,7 +1468,7 @@ void main() {
   testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
     // The font family should be preserved even if the chip overrides some label style properties
     final ThemeData theme = ThemeData(
-      fontFamily: 'MyFont'
+      fontFamily: 'MyFont',
     );
 
     Widget buildChip() {
@@ -1657,7 +1661,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1683,7 +1689,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
       semanticsTester.dispose();
     });
 
@@ -1699,7 +1710,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1735,7 +1748,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
       semanticsTester.dispose();
     });
 
@@ -1751,7 +1769,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1780,7 +1800,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -1803,7 +1828,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1832,7 +1859,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       await tester.tap(find.byType(RawChip));
       await tester.pumpWidget(MaterialApp(
@@ -1849,7 +1881,9 @@ void main() {
       ));
 
       expect(selected, true);
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1879,7 +1913,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -1897,7 +1936,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1924,7 +1965,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -1941,7 +1987,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -1965,7 +2013,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -1985,7 +2038,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -2014,7 +2069,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -2032,7 +2092,9 @@ void main() {
         ),
       ));
 
-      expect(semanticsTester, hasSemantics(
+      expect(
+        semanticsTester,
+        hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -2058,7 +2120,12 @@ void main() {
                 ],
               ),
             ],
-          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ),
+      );
 
       semanticsTester.dispose();
     });
@@ -3124,7 +3191,7 @@ void main() {
       _chipWithOptionalDeleteButton(
         deletable: true,
         hasDeleteButtonTooltip: false,
-      )
+      ),
     );
 
     // Tap at the delete icon of the chip, which is at the right

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -241,8 +239,8 @@ const String _kApacheLicense = r'''
 ''';
 
 void main() {
-  FileSystem fileSystem;
-  LicenseCollector licenseCollector;
+  late FileSystem fileSystem;
+  late LicenseCollector licenseCollector;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -429,7 +427,7 @@ void main() {
     expect(licenseResult.dependencies, isEmpty);
     expect(licenseResult.errorMessages.single,
       'package foo specified an additional license at /foo.txt, but this file could not be read:'
-      '\nFileSystemException: Invalid UTF-8 byte, path = \'/foo.txt\'',
+      "\nFileSystemException: Invalid UTF-8 byte, path = '/foo.txt'",
     );
   });
 }

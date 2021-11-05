@@ -19,8 +19,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
-  canvas.drawRect(const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
-                  ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
+  canvas.drawRect(
+    const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+    ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
+  );
 
   // The paint method of Paragraph draws the contents of the paragraph onto the
   // given canvas.

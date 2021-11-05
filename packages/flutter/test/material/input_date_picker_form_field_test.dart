@@ -241,9 +241,9 @@ void main() {
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
-      SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-      addTearDown(() => SystemChannels.platform.setMockMethodCallHandler(null));
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
 
       await tester.pumpWidget(_inputDatePickerField(autofocus: true));
       await tester.pumpAndSettle();
@@ -283,9 +283,13 @@ void main() {
         matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
       ));
       final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      // ignore: avoid_dynamic_calls
       final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      // ignore: avoid_dynamic_calls
       final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      // ignore: avoid_dynamic_calls
       final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      // ignore: avoid_dynamic_calls
       final Color containerColor = inputBorderPainter.blendedColor as Color;
 
       // Border should match

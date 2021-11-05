@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../globals_null_migrated.dart' as globals;
 import '../vmservice.dart';
 
@@ -211,54 +210,64 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   bool waitPaused = false,
   String debugName,
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
+  @visibleForTesting bool forceSequential = false,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate, forceSequential);
   await vmService.dispose();
   return result;
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool Function(String) libraryPredicate) async {
+Future<Map<String, dynamic>> _getAllCoverage(
+  vm_service.VmService service,
+  bool Function(String) libraryPredicate,
+  bool forceSequential,
+) async {
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {
-    Map<String, Object> scriptList;
+    if (isolateRef.isSystemIsolate) {
+      continue;
+    }
+    vm_service.ScriptList scriptList;
     try {
-      final vm_service.ScriptList actualScriptList = await service.getScripts(isolateRef.id);
-      scriptList = actualScriptList.json;
+      scriptList = await service.getScripts(isolateRef.id);
     } on vm_service.SentinelException {
       continue;
     }
-    final List<Future<void>> futures = <Future<void>>[];
 
-    final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};
-    final Map<String, Map<String, dynamic>> sourceReports = <String, Map<String, dynamic>>{};
+    final List<Future<void>> futures = <Future<void>>[];
+    final Map<String, vm_service.Script> scripts = <String, vm_service.Script>{};
+    final Map<String, vm_service.SourceReport> sourceReports = <String, vm_service.SourceReport>{};
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
 
-    for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-      if (!libraryPredicate(script['uri'] as String)) {
+    for (final vm_service.ScriptRef script in scriptList.scripts) {
+      final String libraryUri = script.uri;
+      if (!libraryPredicate(libraryUri)) {
         continue;
       }
-      final String scriptId = script['id'] as String;
-      futures.add(
-        service.getSourceReport(
-          isolateRef.id,
-          <String>['Coverage'],
-          scriptId: scriptId,
-          forceCompile: true,
-        )
-        .then((vm_service.SourceReport report) {
-          sourceReports[scriptId] = report.json;
-        })
-      );
-      futures.add(
-        service
-          .getObject(isolateRef.id, scriptId)
-          .then((vm_service.Obj script) {
-            scripts[scriptId] = script.json;
-          })
-      );
+      final String scriptId = script.id;
+      final Future<void> getSourceReport = service.getSourceReport(
+        isolateRef.id,
+        <String>['Coverage'],
+        scriptId: scriptId,
+        forceCompile: true,
+      )
+      .then((vm_service.SourceReport report) {
+        sourceReports[scriptId] = report;
+      });
+      if (forceSequential) {
+        await null;
+      }
+      final Future<void> getObject = service
+        .getObject(isolateRef.id, scriptId)
+        .then((vm_service.Obj response) {
+          final vm_service.Script script = response as vm_service.Script;
+          scripts[scriptId] = script;
+        });
+      futures.add(getSourceReport);
+      futures.add(getObject);
     }
     await Future.wait(futures);
     _buildCoverageMap(scripts, sourceReports, coverage);
@@ -268,27 +277,27 @@ Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool 
 
 // Build a hitmap of Uri -> Line -> Hit Count for each script object.
 void _buildCoverageMap(
-  Map<String, Map<String, dynamic>> scripts,
-  Map<String, Map<String, dynamic>> sourceReports,
+  Map<String, vm_service.Script> scripts,
+  Map<String, vm_service.SourceReport> sourceReports,
   List<Map<String, dynamic>> coverage,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (final String scriptId in scripts.keys) {
-    final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    for (final Map<String, dynamic> range in (sourceReport['ranges'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-      final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
+    final vm_service.SourceReport sourceReport = sourceReports[scriptId];
+    for (final vm_service.SourceReportRange range in sourceReport.ranges) {
+      final vm_service.SourceReportCoverage coverage = range.coverage;
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
         continue;
       }
-      final Map<String, dynamic> scriptRef = castStringKeyedMap(sourceReport['scripts'][range['scriptIndex']]);
-      final String uri = scriptRef['uri'] as String;
+      final vm_service.ScriptRef scriptRef = sourceReport.scripts[range.scriptIndex];
+      final String uri = scriptRef.uri;
 
       hitMaps[uri] ??= <int, int>{};
       final Map<int, int> hitMap = hitMaps[uri];
-      final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
-      final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
-      final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
+      final List<int> hits = coverage.hits;
+      final List<int> misses = coverage.misses;
+      final List<dynamic> tokenPositions = scripts[scriptRef.id].tokenPosTable;
       // The token positions can be null if the script has no lines that may be covered.
       if (tokenPositions == null) {
         continue;

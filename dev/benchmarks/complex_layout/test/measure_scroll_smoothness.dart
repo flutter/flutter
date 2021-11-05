@@ -6,12 +6,11 @@
 // the test should be run as:
 // flutter drive -t test/using_array.dart --driver test_driver/scrolling_test_e2e_test.dart
 
+import 'package:complex_layout/main.dart' as app;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-import 'package:complex_layout/main.dart' as app;
 
 /// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
@@ -67,7 +66,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   @override
   final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
 
-  TestScenario currentValue;
+  late TestScenario currentValue;
   bool get resample {
     switch(currentValue) {
       case TestScenario.resampleOn90Hz:
@@ -77,7 +76,6 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return false;
     }
-    throw ArgumentError;
   }
   double get frequency {
     switch(currentValue) {
@@ -88,10 +86,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return 59.0;
     }
-    throw ArgumentError;
   }
 
-  Map<String, dynamic> result;
+  Map<String, dynamic>? result;
 
   @override
   String describeValue(TestScenario value) {
@@ -105,7 +102,6 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return 'resample off with 59Hz input';
     }
-    throw ArgumentError;
   }
 
   @override
@@ -119,7 +115,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   @override
   Future<void> tearDown(TestScenario value, bool memento) async {
     binding.resamplingEnabled = memento;
-    binding.reportData[describeValue(value)] = result;
+    binding.reportData![describeValue(value)] = result;
   }
 }
 
@@ -135,16 +131,16 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     final Finder scrollerFinder = find.byKey(const ValueKey<String>('complex-scroll'));
     final ListView scroller = tester.widget<ListView>(scrollerFinder);
-    final ScrollController controller = scroller.controller;
+    final ScrollController? controller = scroller.controller;
     final List<int> frameTimestamp = <int>[];
     final List<double> scrollOffset = <double>[];
     final List<Duration> delays = <Duration>[];
     binding.addPersistentFrameCallback((Duration timeStamp) {
-      if (controller.hasClients) {
+      if (controller?.hasClients == true) {
         // This if is necessary because by the end of the test the widget tree
         // is destroyed.
         frameTimestamp.add(timeStamp.inMicroseconds);
-        scrollOffset.add(controller.offset);
+        scrollOffset.add(controller!.offset);
       }
     });
 
@@ -168,7 +164,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+        tester.binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
       }
     }
 
