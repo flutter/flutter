@@ -88,7 +88,7 @@ def is_host_build(args):
     # target_os='linux' and linux-cpu='arm64'
     # TODO(fujino): make host platform explicit
     #   https://github.com/flutter/flutter/issues/79403
-    return args.target_os is None or args.target_os == 'linux'
+    return args.target_os is None or (args.target_os == 'linux' and args.linux_cpu == 'arm64')
 
 # Determines whether a prebuilt Dart SDK can be used instead of building one.
 # We can use a prebuilt Dart SDK when:
