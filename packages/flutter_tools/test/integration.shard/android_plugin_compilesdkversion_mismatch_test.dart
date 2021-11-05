@@ -37,8 +37,6 @@ void main() {
       'flutter',
     );
 
-    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdkVersion ([0-9]+|flutter.compileSdkVersion)');
-
     // Create dummy plugin
     processManager.runSync(<String>[
       flutterBin,
@@ -60,47 +58,18 @@ void main() {
       androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
-    // Create dummy project
-    processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'create',
-      '--platforms=android',
-      'test_project',
-    ], workingDirectory: tempDir.path);
 
-    final Directory projectAppDir = tempDir.childDirectory('test_project');
-    final File pubspecFile = projectAppDir.childFile('pubspec.yaml');
-    expect(pubspecFile, exists);
-    final File projectGradleFile = projectAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');//TODO fix
+    final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
     final String pubspecFileString = pubspecFile.readAsStringSync();
 
-    // Bump down project compileSdkVersion to 30
+    // Bump down plugin example app compileSdkVersion to 30
+    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdkVersion ([0-9]+|flutter.compileSdkVersion)');
     final String newProjectGradleFile = projectBuildGradle.replaceAll(
       androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
-
-    // Add dummy plugin as dependency to dummy project
-    final String newPubspecFile= pubspecFileString.replaceFirst(
-      'dependencies:', 'dependencies:\n  test_plugin:\n    path: ../test_plugin');
-    pubspecFile.writeAsStringSync(newPubspecFile);
-
-    // Run flutter pub get to update the dependencies
-    final BufferLogger logger = BufferLogger.test();
-    final Pub pub = Pub(
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        platform: FakePlatform(),
-        botDetector: const FakeBotDetector(false),
-        usage: TestUsage(),
-      );
-
-    await pub.get(
-      context: PubContext.flutterTests,
-      directory: projectAppDir.path);
 
     // Run flutter build apk to build dummy project
     final ProcessResult result = processManager.runSync(<String>[
@@ -109,7 +78,7 @@ void main() {
       'build',
       'apk',
       '--target-platform=android-arm',
-    ], workingDirectory: projectAppDir.path);
+    ], workingDirectory: pluginExampleAppDir.path);
 
     // Check error message is thrown
     final RegExp charactersToIgnore = RegExp(r'\|/|[\n]');
