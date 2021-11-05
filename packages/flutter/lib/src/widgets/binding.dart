@@ -1115,7 +1115,6 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
       element._newWidget = this;
       element.markNeedsBuild();
     }
-    return element!;
   }
 
   @override
