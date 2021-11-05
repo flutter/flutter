@@ -714,7 +714,8 @@ static void fl_key_embedder_responder_handle_event_impl(
   out_event.struct_size = sizeof(out_event);
   out_event.timestamp = timestamp;
   out_event.physical = physical_key;
-  out_event.logical = logical_key;
+  out_event.logical =
+      last_logical_record != 0 ? last_logical_record : logical_key;
   out_event.character = nullptr;
   out_event.synthesized = false;
 
