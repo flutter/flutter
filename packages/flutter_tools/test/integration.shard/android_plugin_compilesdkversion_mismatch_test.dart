@@ -52,6 +52,7 @@ void main() {
     final Directory pluginAppDir = tempDir.childDirectory('test_plugin');
     final File pluginGradleFile = pluginAppDir.childDirectory('android').childFile('build.gradle');
     expect(pluginGradleFile, exists);
+
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
 
