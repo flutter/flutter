@@ -717,8 +717,7 @@ class ToggleButtons extends StatelessWidget {
     switch (resolvedTapTargetSize) {
       case MaterialTapTargetSize.padded:
         return ConstrainedBox(
-          // TODO: This makes it work but constrains the max height which we don't actually want.
-          constraints: const BoxConstraints(maxHeight: kMinInteractiveDimension),
+          constraints: const BoxConstraints(),
           child: _InputPadding(
             minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
             child: result,
