@@ -161,7 +161,7 @@ class MultidexProject extends Project {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 31
+      compileSdkVersion 30
 
       compileOptions {
           sourceCompatibility JavaVersion.VERSION_1_8
@@ -179,7 +179,7 @@ class MultidexProject extends Project {
       defaultConfig {
           // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "com.example.multidextest2"
-          minSdkVersion 19
+          minSdkVersion 16
           targetSdkVersion 30
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
