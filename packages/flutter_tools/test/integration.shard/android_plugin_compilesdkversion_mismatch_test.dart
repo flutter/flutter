@@ -50,6 +50,7 @@ void main() {
     final Directory pluginAppDir = tempDir.childDirectory('test_plugin');
     final File pluginGradleFile = pluginAppDir.childDirectory('android').childFile('build.gradle');
     expect(pluginGradleFile, exists);
+
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
 
@@ -60,8 +61,10 @@ void main() {
 
 
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');//TODO fix
+    
     final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
+
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
     final String pubspecFileString = pubspecFile.readAsStringSync();
 
