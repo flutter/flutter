@@ -571,7 +571,7 @@ void main() {
               SliverList(
                 delegate: SliverChildListDelegate(
                   <Widget>[
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 3; i += 1)
                       SizedBox(
                         height: 200.0,
                         child: Center(child: Text('Item $i')),
@@ -591,8 +591,8 @@ void main() {
 
     final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
     await expectLater(
-        flexibleSpaceBar,
-        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
+      flexibleSpaceBar,
+      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
     );
 
     // We drag down to fully expand the space bar.
@@ -600,8 +600,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-        flexibleSpaceBar,
-        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png')
+      flexibleSpaceBar,
+      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png')
     );
   });
 
@@ -632,7 +632,7 @@ void main() {
               SliverList(
                 delegate: SliverChildListDelegate(
                   <Widget>[
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 3; i += 1)
                       SizedBox(
                         height: 200.0,
                         child: Center(child: Text('Item $i')),
@@ -653,8 +653,8 @@ void main() {
     final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
     // This should match the default behavior
     await expectLater(
-        flexibleSpaceBar,
-        matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
+      flexibleSpaceBar,
+      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
     );
 
     // We drag down to fully expand the space bar.
@@ -662,8 +662,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-        flexibleSpaceBar,
-        matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png')
+      flexibleSpaceBar,
+      matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png')
     );
   });
 
