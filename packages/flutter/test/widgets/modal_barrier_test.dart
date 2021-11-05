@@ -504,7 +504,6 @@ class SecondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ModalBarrier(
       key: const ValueKey<String>('barrier'),
-      dismissible: true,
       onDismiss: onDismiss,
     );
   }
