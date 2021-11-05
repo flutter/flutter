@@ -112,10 +112,12 @@ void main() {
     ], workingDirectory: projectAppDir.path);
 
     // Check error message is thrown
-    expect(result.stdout.replaceAll('\n', ''),
+    final RegExp charactersToIgnore = RegExp(r'\|/|[\n]');
+
+    expect((result.stdout as String).replaceAll(charactersToIgnore, ''),
       contains('Warning: The plugin test_plugin requires Android SDK version 31.')
       );
-    expect(result.stderr.replaceAll('\n', ''),
+    expect((result.stderr as String).replaceAll(charactersToIgnore, ''),
       contains('One or more plugins require a higher Android SDK version.Fix this issue by adding the following to ${projectGradleFile.path}:android {  compileSdkVersion 31    ...}')
       );
    });
