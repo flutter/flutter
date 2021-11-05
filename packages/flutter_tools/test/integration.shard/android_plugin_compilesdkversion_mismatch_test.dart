@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -19,7 +17,7 @@ import 'test_utils.dart';
 
 void main() {
 
-  Directory tempDir;
+  late Directory tempDir;
 
   setUp(()  {
     Cache.flutterRoot = getFlutterRoot();
@@ -53,23 +51,20 @@ void main() {
 
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
-
     // Bump up plugin compileSdkVersion to 31
+    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdkVersion ([0-9]+|flutter.compileSdkVersion)');
     final String newPluginGradleFile = pluginBuildGradle.replaceAll(
       androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
-
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');//TODO fix
-    
+
     final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
 
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
-    final String pubspecFileString = pubspecFile.readAsStringSync();
 
     // Bump down plugin example app compileSdkVersion to 30
-    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdkVersion ([0-9]+|flutter.compileSdkVersion)');
     final String newProjectGradleFile = projectBuildGradle.replaceAll(
       androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
@@ -90,7 +85,11 @@ void main() {
       contains('Warning: The plugin test_plugin requires Android SDK version 31.')
       );
     expect((result.stderr as String).replaceAll(charactersToIgnore, ''),
-      contains('One or more plugins require a higher Android SDK version.Fix this issue by adding the following to ${projectGradleFile.path}:android {  compileSdkVersion 31    ...}')
-      );
+      contains('''One or more plugins require a higher Android SDK version.
+      Fix this issue by adding the following to ${projectGradleFile.path}:
+      android {
+        compileSdkVersion 31
+      }
+      '''));
    });
 }
