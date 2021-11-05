@@ -14,14 +14,18 @@ import 'package:path/path.dart' as path;
 import 'shader_test_file_utils.dart';
 
 void main() {
-  test('throws exception for invalid shader', () {
+  test('throws exception for invalid shader', () async {
     final ByteBuffer invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]).buffer;
-    expect(() => FragmentProgram(spirv: invalidBytes), throws);
+    try {
+      await FragmentProgram.compile(spirv: invalidBytes);
+      fail('expected compile to throw an exception');
+    } catch (_) {
+    }
   });
 
   test('simple shader renders correctly', () async {
     final Uint8List shaderBytes = await spvFile('general_shaders', 'functions.spv').readAsBytes();
-    final FragmentProgram program = FragmentProgram(
+    final FragmentProgram program = await FragmentProgram.compile(
       spirv: shaderBytes.buffer,
     );
     final Shader shader = program.shader(
@@ -30,9 +34,9 @@ void main() {
     _expectShaderRendersGreen(shader);
   });
 
-  test('shader with functions renders green', () {
+  test('shader with functions renders green', () async {
     final ByteBuffer spirv = spvFile('general_shaders', 'functions.spv').readAsBytesSync().buffer;
-    final FragmentProgram program = FragmentProgram(
+    final FragmentProgram program = await FragmentProgram.compile(
       spirv: spirv,
     );
     final Shader shader = program.shader(
@@ -43,7 +47,7 @@ void main() {
 
   test('shader with uniforms renders correctly', () async {
     final Uint8List shaderBytes = await spvFile('general_shaders', 'uniforms.spv').readAsBytes();
-    final FragmentProgram program = FragmentProgram(spirv: shaderBytes.buffer);
+    final FragmentProgram program = await FragmentProgram.compile(spirv: shaderBytes.buffer);
 
     final Shader shader = program.shader(
         floatUniforms: Float32List.fromList(<double>[
@@ -80,10 +84,10 @@ void main() {
   _expectShadersRenderGreen(supportedOpShaders);
   _expectShadersHaveOp(supportedOpShaders, false /* glsl ops */);
 
-  test('equality depends on floatUniforms', () {
+  test('equality depends on floatUniforms', () async {
     final ByteBuffer spirv = spvFile('general_shaders', 'simple.spv')
         .readAsBytesSync().buffer;
-    final FragmentProgram program = FragmentProgram(spirv: spirv);
+    final FragmentProgram program = await FragmentProgram.compile(spirv: spirv);
     final Float32List ones = Float32List.fromList(<double>[1]);
     final Float32List zeroes = Float32List.fromList(<double>[0]);
 
@@ -102,13 +106,13 @@ void main() {
     }
   });
 
-  test('equality depends on spirv', () {
+  test('equality depends on spirv', () async {
     final ByteBuffer spirvA = spvFile('general_shaders', 'simple.spv')
         .readAsBytesSync().buffer;
     final ByteBuffer spirvB = spvFile('general_shaders', 'uniforms.spv')
         .readAsBytesSync().buffer;
-    final FragmentProgram programA = FragmentProgram(spirv: spirvA);
-    final FragmentProgram programB = FragmentProgram(spirv: spirvB);
+    final FragmentProgram programA = await FragmentProgram.compile(spirv: spirvA);
+    final FragmentProgram programB = await FragmentProgram.compile(spirv: spirvB);
     final a = programA.shader();
     final b = programB.shader();
 
@@ -122,8 +126,8 @@ void main() {
 // of the file name within the test case.
 void _expectShadersRenderGreen(Map<String, ByteBuffer> shaders) {
   for (final String key in shaders.keys) {
-    test('$key renders green', () {
-      final FragmentProgram program = FragmentProgram(
+    test('$key renders green', () async {
+      final FragmentProgram program = await FragmentProgram.compile(
         spirv: shaders[key]!,
       );
       final Shader shader = program.shader(
