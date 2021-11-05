@@ -967,14 +967,30 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
-    if (cause == SelectionChangedCause.longPress) {
-      _editableText.bringIntoView(selection.base);
-    }
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
         _showSelectionHandles = willShowSelectionHandles;
       });
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        if (cause == SelectionChangedCause.longPress) {
+          _editableText.bringIntoView(selection.base);
+        }
+        return;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        if (cause == SelectionChangedCause.drag
+            || cause == SelectionChangedCause.keyboard) {
+          _editableText.bringIntoView(selection.extent);
+        }
+        return;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        // Do nothing.
     }
   }
 
