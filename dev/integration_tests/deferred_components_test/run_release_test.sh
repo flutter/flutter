@@ -45,7 +45,7 @@ do
     fi
     # add timeout
     current_time=$(date +%s)
-    if [[ $(( $current_time - $script_start_time_seconds )) -ge 150 ]]; then
+    if [[ $((current_time - script_start_time_seconds)) -ge 150 ]]; then
       echo "Failure: Deferred component did not load."
       exit 1
     fi
