@@ -963,6 +963,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
+    if (cause == SelectionChangedCause.scribble)
+      return true;
+
     if (_effectiveController.text.isNotEmpty)
       return true;
 
