@@ -286,6 +286,12 @@ public class DartExecutor implements BinaryMessenger {
     }
   }
 
+  @Override
+  public void enableBufferingIncomingMessages() {}
+
+  @Override
+  public void disableBufferingIncomingMessages() {}
+
   /**
    * Configuration options that specify which Dart entrypoint function is executed and where to find
    * that entrypoint and other assets required for Dart execution.
@@ -461,5 +467,11 @@ public class DartExecutor implements BinaryMessenger {
         @Nullable TaskQueue taskQueue) {
       messenger.setMessageHandler(channel, handler, taskQueue);
     }
+
+    @Override
+    public void enableBufferingIncomingMessages() {}
+
+    @Override
+    public void disableBufferingIncomingMessages() {}
   }
 }

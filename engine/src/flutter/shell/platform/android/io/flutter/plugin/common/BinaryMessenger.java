@@ -116,6 +116,22 @@ public interface BinaryMessenger {
     setMessageHandler(channel, handler);
   }
 
+  /**
+   * Enables the ability to queue messages received from Dart.
+   *
+   * <p>This is useful when there are pending channel handler registrations. For example, Dart may
+   * be initialized concurrently, and prior to the registration of the channel handlers. This
+   * implies that Dart may start sending messages while plugins are being registered.
+   */
+  void enableBufferingIncomingMessages();
+
+  /**
+   * Disables the ability to queue messages received from Dart.
+   *
+   * <p>This can be used after all pending channel handlers have been registered.
+   */
+  void disableBufferingIncomingMessages();
+
   /** Handler for incoming binary messages from Flutter. */
   interface BinaryMessageHandler {
     /**
