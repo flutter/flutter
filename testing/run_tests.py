@@ -297,12 +297,13 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
 def EnsureIosTestsAreBuilt(ios_out_dir):
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(out_dir, ios_out_dir)
+  ios_test_lib = os.path.join(tmp_out_dir, 'libios_test_flutter.dylib')
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
   message.append('autoninja -C %s ios_test_flutter' % ios_out_dir)
-  final_message = '%s doesn\'t exist. Please run the following commands: \n%s' % (
-      ios_out_dir, '\n'.join(message))
-  assert os.path.exists(tmp_out_dir), final_message
+  final_message = '%s or %s doesn\'t exist. Please run the following commands: \n%s' % (
+      ios_out_dir, ios_test_lib, '\n'.join(message))
+  assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
 
 def AssertExpectedXcodeVersion():
