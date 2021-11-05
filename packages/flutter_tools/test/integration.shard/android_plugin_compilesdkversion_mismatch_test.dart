@@ -5,14 +5,9 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
-import '../src/fakes.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -57,7 +52,7 @@ void main() {
       androidCompileSdkVersionRegExp, 'compileSdkVersion 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
-    final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');//TODO fix
+    final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');
 
     final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
@@ -83,7 +78,9 @@ void main() {
       contains('Warning: The plugin test_plugin requires Android SDK version 31.')
       );
     expect(result.stderr,
-      contains('''One or more plugins require a higher Android SDK version.
+      contains(
+      '''
+      One or more plugins require a higher Android SDK version.
       Fix this issue by adding the following to ${projectGradleFile.path}:
       android {
         compileSdkVersion 31
