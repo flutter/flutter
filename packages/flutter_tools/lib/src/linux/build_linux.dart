@@ -29,12 +29,13 @@ final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:er
 Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
-    required String target,
+    String? target,
     SizeAnalyzer? sizeAnalyzer,
     bool needCrossBuild = false,
     required TargetPlatform targetPlatform,
     String targetSysroot = '/',
   }) async {
+  target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
       'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
