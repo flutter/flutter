@@ -56,6 +56,47 @@ enum DatePickerDateOrder {
 ///    of this interface.
 // TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
+  /// Formats [number] as a decimal, inserting locale-appropriate thousands
+  /// separators as necessary.
+  String formatDecimal(int number);
+
+  /// Formats day of week, month, day of month and year in a long-width format.
+  ///
+  /// Does not abbreviate names. Appears in spoken announcements of the date
+  /// picker invoked using [showDatePicker], when accessibility mode is on.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wednesday, September 27, 2017
+  /// - Russian: Среда, Сентябрь 27, 2017
+  String formatFullDate(DateTime date);
+
+  /// Full unabbreviated year format, e.g. 2017 rather than 17.
+  String formatYear(DateTime date);
+
+  /// Formats the month and the year of the given [date].
+  ///
+  /// The returned string does not contain the day of the month.
+  String formatMonthYear(DateTime date);
+
+  /// Returns a list week days for Calendar picker.
+  List<String> get calendarWeekDays;
+
+  /// Returns a list week days in shorter form.
+  List<String> get shortWeekDays;
+
+  /// Index of the first day of week, where 0 points to Sunday, and 6 points to
+  /// Saturday.
+  ///
+  /// This getter is compatible with [narrowWeekdays]. For example:
+  ///
+  /// ```dart
+  /// var localizations = CupertinoLocalizations.of(context);
+  /// // The name of the first day of week for the current locale.
+  /// var firstDayOfWeek = localizations.calendarWeekDays[localizations.firstDayOfWeekIndex];
+  /// ```
+  int get firstDayOfWeekIndex;
+
   /// Year that is shown in [CupertinoDatePicker] spinner corresponding to the
   /// given year index.
   ///
@@ -289,6 +330,16 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultCupertinoLocalizations();
 
+  static const List<String> _calendarWeekdays = <String>[
+    'SUN',
+    'MON',
+    'TUE',
+    'WED',
+    'THU',
+    'FRI',
+    'SAT',
+  ];
+
   static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
@@ -297,6 +348,16 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
     'Fri',
     'Sat',
     'Sun',
+  ];
+
+  static const List<String> _weekdays = <String>[
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   static const List<String> _shortMonths = <String>[
@@ -446,4 +507,45 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]
   /// to create an instance of this class.
   static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
+
+  @override
+  int get firstDayOfWeekIndex =>  0;
+
+  @override
+  String formatDecimal(int number) {
+    if (number > -1000 && number < 1000)
+      return number.toString();
+
+    final String digits = number.abs().toString();
+    final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
+    final int maxDigitIndex = digits.length - 1;
+    for (int i = 0; i <= maxDigitIndex; i += 1) {
+      result.write(digits[i]);
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
+        result.write(',');
+    }
+    return result.toString();
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    final String month = _months[date.month - DateTime.january];
+    return '${_weekdays[date.weekday - DateTime.monday]}, $month ${date.day}, ${date.year}';
+  }
+
+  @override
+  String formatYear(DateTime date) => date.year.toString();
+
+  @override
+  String formatMonthYear(DateTime date) {
+    final String year = formatYear(date);
+    final String month = _months[date.month - DateTime.january];
+    return '$month $year';
+  }
+
+  @override
+  List<String> get shortWeekDays => _shortWeekdays;
+
+  @override
+  List<String> get calendarWeekDays => _calendarWeekdays;
 }
