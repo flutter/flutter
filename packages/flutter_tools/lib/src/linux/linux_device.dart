@@ -37,8 +37,6 @@ class LinuxDevice extends DesktopDevice {
 
   final OperatingSystemUtils _operatingSystemUtils;
 
-  TargetPlatform? _targetPlatform;
-
   @override
   bool isSupported() => true;
 
@@ -46,17 +44,12 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux';
 
   @override
-  Future<TargetPlatform> get targetPlatform async {
-    if (_targetPlatform == null) {
-      if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
-        _targetPlatform = TargetPlatform.linux_x64;
-      } else {
-        _targetPlatform = TargetPlatform.linux_arm64;
-      }
+  late final Future<TargetPlatform> targetPlatform = () async {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+      return TargetPlatform.linux_x64;
     }
-
-    return _targetPlatform!;
-  }
+    return TargetPlatform.linux_arm64;
+  }();
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -66,14 +59,14 @@ class LinuxDevice extends DesktopDevice {
   @override
   Future<void> buildForDevice(
     covariant LinuxApp package, {
-    String? mainPath,
+    required String mainPath,
     required BuildInfo buildInfo,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,
       buildInfo,
       target: mainPath,
-      targetPlatform: _targetPlatform,
+      targetPlatform: await targetPlatform,
     );
   }
 

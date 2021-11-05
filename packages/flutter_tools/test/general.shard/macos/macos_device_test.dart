@@ -72,6 +72,7 @@ void main() {
       package,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       prebuiltApplication: true,
+      mainPath: 'main.dart',
     );
 
     expect(result.started, true);

@@ -572,7 +572,7 @@ abstract class Device {
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String? mainPath,
+    required String mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,

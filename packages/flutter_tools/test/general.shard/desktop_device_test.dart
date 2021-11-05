@@ -93,6 +93,7 @@ void main() {
         package,
         prebuiltApplication: true,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        mainPath: 'main.dart',
       );
 
       expect(result.started, true);
@@ -107,6 +108,7 @@ void main() {
         package,
         prebuiltApplication: true,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        mainPath: 'main.dart',
       );
 
       expect(result.started, false);
@@ -128,6 +130,7 @@ void main() {
         package,
         prebuiltApplication: true,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        mainPath: 'main.dart',
       );
 
       expect(result.started, true);
@@ -193,6 +196,7 @@ void main() {
         verboseSystemLogs: true,
         nullAssertions: true,
       ),
+      mainPath: 'main.dart',
     );
 
     expect(result.started, true);
@@ -228,6 +232,7 @@ void main() {
         traceAllowlist: 'foo,bar',
         cacheSkSL: true,
       ),
+      mainPath: 'main.dart',
     );
 
     expect(result.started, true);
@@ -266,6 +271,7 @@ void main() {
         BuildInfo.debug,
         dartEntrypointArgs: <String>['arg1', 'arg2'],
       ),
+      mainPath: 'main.dart',
     );
 
     expect(result.started, true);
@@ -300,6 +306,7 @@ void main() {
         BuildInfo.debug,
         dartEntrypointArgs: <String>['arg1', 'arg2'],
       ),
+      mainPath: 'main.dart',
     );
   });
 }

@@ -111,7 +111,7 @@ abstract class DesktopDevice extends Device {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
-    String? mainPath,
+    required String mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
@@ -204,7 +204,7 @@ abstract class DesktopDevice extends Device {
   Future<void> buildForDevice(
     ApplicationPackage package, {
     required BuildInfo buildInfo,
-    String? mainPath,
+    required String mainPath,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
