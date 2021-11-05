@@ -1,4 +1,4 @@
-Signature: e901d0a4d4883e7d304f135979078aba
+Signature: a6667a702eafb6af46658ac51aa3b1bd
 
 UNUSED LICENSES:
 
@@ -1048,6 +1048,16 @@ FILE: ../../../third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../third_party/skia/modules/canvaskit/color.js
 FILE: ../../../third_party/skia/modules/canvaskit/cpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/debug.js
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/index.html
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/module_uses_ck.ts
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/package-lock.json
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser/tsconfig.json
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser_es6/index.html
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser_es6/module_uses_ck.ts
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser_es6/package-lock.json
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser_es6/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/external_test/typescript_browser_es6/tsconfig.json
 FILE: ../../../third_party/skia/modules/canvaskit/externs.js
 FILE: ../../../third_party/skia/modules/canvaskit/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
@@ -2356,6 +2366,10 @@ FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/GpuWorkSubmission.h
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipeline.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphicsPipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.cpp
@@ -2366,10 +2380,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Recording.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recording.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
-FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipeline.h
-FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/RenderPipelineDesc.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Renderer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
@@ -2404,8 +2414,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGpu.mm
-FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlRenderPipeline.h
-FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlRenderPipeline.mm
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGraphicsPipeline.h
+FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlGraphicsPipeline.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlResourceProvider.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlTexture.h
@@ -5948,6 +5958,7 @@ FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathStencilCoverOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellateOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.cpp
@@ -5955,7 +5966,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/PathCurveTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathWedgeTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/PathWedgeTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/PathXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeFixedCountTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeFixedCountTessellator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/StrokeTessellator.h
