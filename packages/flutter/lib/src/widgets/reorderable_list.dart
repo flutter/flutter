@@ -172,7 +172,7 @@ class ReorderableList extends StatefulWidget {
   /// An opt-in flag to use the adjusted value for new index in [onReorder].
   /// When set to true you will no longer need to subtract one from the new index
   /// if the item has been reordered to a position with a higher index.
-  /// 
+  ///
   /// See https://github.com/flutter/flutter/issues/24786 for more.
   /// {@endtemplate}
   final bool useAdjustedOnReorderNewIndex;
