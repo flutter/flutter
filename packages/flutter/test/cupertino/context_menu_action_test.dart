@@ -25,7 +25,7 @@ void main() {
     VoidCallback? onPressed,
     bool isDestructiveAction = false,
     bool isDefaultAction = false,
-    bool isDark = false,
+    Brightness? brightness,
   }) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
@@ -39,7 +39,7 @@ void main() {
 
     return CupertinoApp(
       theme: CupertinoThemeData(
-        brightness: isDark ? Brightness.dark : Brightness.light,
+        brightness: brightness ?? Brightness.light,
       ),
       home: CupertinoPageScaffold(
         child: Center(
@@ -93,7 +93,7 @@ void main() {
     await tester.pump();
     expect(find.byType(CupertinoContextMenuAction), paints..rect(color: _kBackgroundColor.color));
 
-    await tester.pumpWidget(_getApp(isDark: true));
+    await tester.pumpWidget(_getApp(brightness: Brightness.dark));
     expect(find.byType(CupertinoContextMenuAction), paints..rect(color: _kBackgroundColor.darkColor));
 
     final Offset actionCenterDark = tester.getCenter(find.byType(CupertinoContextMenuAction));
