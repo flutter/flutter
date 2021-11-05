@@ -69,7 +69,7 @@ void main() {
       androidCompileSdkVersionRegExp, 'compileSdkVersion 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
-    // Run flutter build apk to build dummy project
+    // Run flutter build apk to build plugin example project
     final ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -79,12 +79,10 @@ void main() {
     ], workingDirectory: pluginExampleAppDir.path);
 
     // Check error message is thrown
-    final RegExp charactersToIgnore = RegExp(r'\|/|[\n]');
-
-    expect((result.stdout as String).replaceAll(charactersToIgnore, ''),
+    expect(result.stdout,
       contains('Warning: The plugin test_plugin requires Android SDK version 31.')
       );
-    expect((result.stderr as String).replaceAll(charactersToIgnore, ''),
+    expect(result.stderr,
       contains('''One or more plugins require a higher Android SDK version.
       Fix this issue by adding the following to ${projectGradleFile.path}:
       android {
