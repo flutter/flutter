@@ -347,6 +347,12 @@ public class FlutterView extends SurfaceView
     mFirstFrameListeners.remove(listener);
   }
 
+  @Override
+  public void enableBufferingIncomingMessages() {}
+
+  @Override
+  public void disableBufferingIncomingMessages() {}
+
   /**
    * Reverts this back to the {@link SurfaceView} defaults, at the back of its window and opaque.
    */
