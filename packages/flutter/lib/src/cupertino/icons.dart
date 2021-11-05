@@ -24,10 +24,10 @@ import 'package:flutter/widgets.dart';
 /// {@tool snippet}
 ///
 /// This example shows how to create a [Row] of Cupertino [Icon]s in different colors and
-/// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
+/// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
 /// modes like VoiceOver.
 ///
-/// ![A row of icons representing a pink heart, a green bell, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_icon.png)
+/// ![The following code snippet would generate a row of icons consisting of a pink heart, a green bell, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_icon.png)
 ///
 /// ```dart
 /// Row(
