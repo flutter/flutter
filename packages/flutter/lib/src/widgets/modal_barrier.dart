@@ -47,7 +47,12 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final Color? color;
 
-  /// Whether touching the barrier will pop the current route off the [Navigator].
+  /// Specifies if the barrier will be dismissed when the user taps on it.
+  ///
+  /// If true, and [onDismiss] is non-null, [onDismiss] will be called,
+  /// otherwise the current route will be popped from the ambient [Navigator].
+  ///
+  /// If false, tapping on the barrier will do nothing.
   ///
   /// See also:
   ///
