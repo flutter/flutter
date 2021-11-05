@@ -72,8 +72,10 @@ void main() {
     final Directory projectAppDir = tempDir.childDirectory('test_project');
     final File pubspecFile = projectAppDir.childFile('pubspec.yaml');
     expect(pubspecFile, exists);
+
     final File projectGradleFile = projectAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
     expect(projectGradleFile, exists);
+
     final String projectBuildGradle = projectGradleFile.readAsStringSync();
     final String pubspecFileString = pubspecFile.readAsStringSync();
 
