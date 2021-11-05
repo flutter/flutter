@@ -1078,7 +1078,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           _editableText?.bringIntoView(selection.base);
         }
         return;
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag
             || cause == SelectionChangedCause.keyboard) {
           _editableText?.bringIntoView(selection.extent);
@@ -1086,8 +1088,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
         // Do nothing.
     }
   }
