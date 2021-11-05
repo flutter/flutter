@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:meta/meta.dart' show visibleForOverriding;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -14,7 +15,7 @@ import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
-import './state.dart';
+import './state.dart' as state_import;
 import './stdio.dart';
 import './version.dart';
 
@@ -39,7 +40,7 @@ class StartCommand extends Command<void> {
         processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
-    final String defaultPath = defaultStateFilePath(platform);
+    final String defaultPath = state_import.defaultStateFilePath(platform);
     argParser.addOption(
       kCandidateOption,
       help: 'The candidate branch the release will be based on.',
@@ -401,9 +402,17 @@ class StartContext {
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
-    writeStateToFile(stateFile, state, stdio.logs);
+    updateState(stateFile, state, stdio.logs);
 
-    stdio.printStatus(presentState(state));
+    stdio.printStatus(state_import.presentState(state));
+  }
+
+  /// Persist the state to a file.
+  ///
+  /// This can be overridden in frontend-specific implementations.
+  @visibleForOverriding
+  void updateState(File file, pb.ConductorState state, List<String> logs) {
+    state_import.writeStateToFile(file, state, logs);
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.
