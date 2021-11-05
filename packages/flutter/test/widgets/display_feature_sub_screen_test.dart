@@ -5,214 +5,316 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('DisplayFeatureSubScreen no directionality, no anchor', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(390, 0, 410, 600),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
+  group('DisplayFeatureSubScreen', () {
+    testWidgets('without Directionality or anchor', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(390, 0, 410, 600),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
 
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const DisplayFeatureSubScreen(
+            child: SizedBox(
+              key: childKey,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      );
+
+      // With no Directionality or anchorpoint, the widget throws
+      final String message = tester.takeException().toString();
+      expect(message, contains('Directionality'));
+    });
+
+    testWidgets('with anchorPoint', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(390, 0, 410, 600),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const DisplayFeatureSubScreen(
+            anchorPoint: Offset(600, 300),
+            child: SizedBox(
+              key: childKey,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      );
+
+      // anchorPoint is in the middle of the right screen
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(390.0));
+      expect(renderBox.size.height, equals(600.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
+    });
+
+    testWidgets('with infinity anchorpoint', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(390, 0, 410, 600),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const DisplayFeatureSubScreen(
+            anchorPoint: Offset.infinite,
+            child: SizedBox(
+              key: childKey,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      );
+
+      // anchorPoint is infinite, so the bottom-most & right-most screen is chosen
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(390.0));
+      expect(renderBox.size.height, equals(600.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
+    });
+
+    testWidgets('with horizontal hinge and anchorPoint', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(0, 290, 800, 310),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const DisplayFeatureSubScreen(
+            anchorPoint: Offset(1000, 1000),
+            child: SizedBox(
+              key: childKey,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(800.0));
+      expect(renderBox.size.height, equals(290.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(0,310)));
+    });
+
+    testWidgets('with multiple display features and anchorPoint', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(0, 290, 800, 310),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(390, 0, 410, 600),
+              type: DisplayFeatureType.hinge,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const DisplayFeatureSubScreen(
+            anchorPoint: Offset(1000, 1000),
+            child: SizedBox(
+              key: childKey,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(390.0));
+      expect(renderBox.size.height, equals(290.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,310)));
+    });
+
+    testWidgets('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            // Top notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 0, 700, 100),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+            // Bottom notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 500, 700, 600),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const Directionality(
+            textDirection: TextDirection.ltr,
+            child: DisplayFeatureSubScreen(
+              child: SizedBox(
+                key: childKey,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The display features provided are not wide enough to produce sub-screens
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(800.0));
+      expect(renderBox.size.height, equals(600.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
+    });
+
+    testWidgets('with padding', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            // Top notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 0, 700, 100),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+            // Bottom notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 500, 700, 600),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: const Padding(
+            padding: EdgeInsets.all(100),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: DisplayFeatureSubScreen(
+                padding: EdgeInsets.all(100),
+                child: SizedBox(
+                  key: childKey,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The display features provided are not wide enough to produce sub-screens
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(600.0));
+      expect(renderBox.size.height, equals(400.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
+    });
+
+    testWidgets('with Overlay at [100,100]', (WidgetTester tester) async {
+      const Key childKey = Key('childKey');
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+          displayFeatures: <DisplayFeature>[
+            // Top notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 0, 700, 100),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+            // Bottom notch
+            const DisplayFeature(
+              bounds: Rect.fromLTRB(100, 500, 700, 600),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+          ]
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: Padding(
+            padding: const EdgeInsets.all(100),
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              home: Container(),
+            ),
+          ),
+        ),
+      );
+
+      navigatorKey.currentState!.push(MaterialPageRoute<void>(builder: (_){
+        return const DisplayFeatureSubScreen(
           child: SizedBox(
             key: childKey,
             width: double.infinity,
             height: double.infinity,
           ),
-        ),
-      ),
-    );
+        );
+      }));
 
-    // With no Directionality or anchorpoint, the default anchorpoint is Offset.zero
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(390.0));
-    expect(renderBox.size.height, equals(600.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
-  });
+      await tester.pumpAndSettle();
 
-  testWidgets('DisplayFeatureSubScreen anchorPoint', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(390, 0, 410, 600),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
-          anchorPoint: Offset(600, 300),
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
-      ),
-    );
-
-    // anchorPoint is in the middle of the right screen
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(390.0));
-    expect(renderBox.size.height, equals(600.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
-  });
-
-  testWidgets('DisplayFeatureSubScreen anchorpoint infinity', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(390, 0, 410, 600),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
-          anchorPoint: Offset.infinite,
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
-      ),
-    );
-
-    // anchorPoint is infinite, so the bottom-most & right-most screen is chosen
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(390.0));
-    expect(renderBox.size.height, equals(600.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
-  });
-
-  testWidgets('DisplayFeatureSubScreen anchorPoint horizontal hinge', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(0, 290, 800, 310),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
-          anchorPoint: Offset(1000, 1000),
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(290.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(0,310)));
-  });
-
-  testWidgets('DisplayFeatureSubScreen anchorPoint multiple display features', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(0, 290, 800, 310),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(390, 0, 410, 600),
-            type: DisplayFeatureType.hinge,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
-          anchorPoint: Offset(1000, 1000),
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
-      ),
-    );
-
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(390.0));
-    expect(renderBox.size.height, equals(290.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,310)));
-  });
-
-  testWidgets('DisplayFeatureSubScreen anchorPoint non-splitting display features', (WidgetTester tester) async {
-    const Key childKey = Key('childKey');
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-        displayFeatures: <DisplayFeature>[
-          // Top notch
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(100, 0, 700, 100),
-            type: DisplayFeatureType.cutout,
-            state: DisplayFeatureState.unknown,
-          ),
-          // Bottom notch
-          const DisplayFeature(
-            bounds: Rect.fromLTRB(100, 500, 700, 600),
-            type: DisplayFeatureType.cutout,
-            state: DisplayFeatureState.unknown,
-          ),
-        ]
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: mediaQuery,
-        child: const DisplayFeatureSubScreen(
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
-      ),
-    );
-
-    // The display features provided are not wide enough to produce sub-screens
-    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(600.0));
-    expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
+      // The display features provided are not wide enough to produce sub-screens
+      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+      expect(renderBox.size.width, equals(600.0));
+      expect(renderBox.size.height, equals(400.0));
+      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
+    });
   });
 }
