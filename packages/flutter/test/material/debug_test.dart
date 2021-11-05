@@ -200,8 +200,6 @@ void main() {
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
-      '     _AppModelData\n'
-      '     AppModel\n'
       '     UnmanagedRestorationScope\n'
       '     RestorationScope\n'
       '     UnmanagedRestorationScope\n'
