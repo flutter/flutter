@@ -59,6 +59,7 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
                                            clip_behavior_ != Clip::hardEdge);
 
   if (UsesSaveLayer()) {
+    TRACE_EVENT0("flutter", "Canvas::saveLayer");
     context.internal_nodes_canvas->saveLayer(paint_bounds(), nullptr);
   }
   PaintChildren(context);

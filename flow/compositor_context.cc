@@ -135,7 +135,7 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     }
 
     if (needs_save_layer) {
-      FML_LOG(INFO) << "Using SaveLayer to protect non-readback surface";
+      TRACE_EVENT0("flutter", "Canvas::saveLayer");
       SkRect bounds = SkRect::Make(layer_tree.frame_size());
       SkPaint paint;
       paint.setBlendMode(SkBlendMode::kSrc);
