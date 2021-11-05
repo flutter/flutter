@@ -3768,13 +3768,15 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   ///
   /// [A current specification of valid SPIR-V is here.](https://github.com/flutter/engine/blob/master/lib/spirv/README.md)
   /// SPIR-V not meeting this specification will throw an exception.
-  ///
-  /// Performance of shader-compilation is platform dependent and is not
-  /// well-specified.  Because of this, it is reccommended to construct
-  /// `FragmentProgram` asynchronously, outside of a widget's `build`
-  /// method; this will minimize the chance of UI jank.
+  static Future<FragmentProgram> compile({
+    required ByteBuffer spirv,
+    bool debugPrint = false,
+  }) {
+    return Future<FragmentProgram>(() => FragmentProgram._(spirv: spirv, debugPrint: debugPrint));
+  }
+
   @pragma('vm:entry-point')
-  FragmentProgram({
+  FragmentProgram._({
     required ByteBuffer spirv,
     bool debugPrint = false,
   }) {

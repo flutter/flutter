@@ -802,12 +802,14 @@ class ImageDescriptor {
 }
 
 class FragmentProgram {
-  FragmentProgram({
-    required ByteBuffer spirv, // ignore: avoid_unused_constructor_parameters
-    bool debugPrint = false, // ignore: avoid_unused_constructor_parameters
+  static Future<FragmentProgram> compile({
+    required ByteBuffer spirv,
+    bool debugPrint = false,
   }) {
     throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
   }
+
+  FragmentProgram._();
 
   Shader shader({
     required Float32List floatUniforms,
