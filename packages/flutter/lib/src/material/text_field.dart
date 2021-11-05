@@ -1079,7 +1079,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         }
         return;
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.drag
+            || cause == SelectionChangedCause.keyboard) {
           _editableText?.bringIntoView(selection.extent);
         }
         return;
