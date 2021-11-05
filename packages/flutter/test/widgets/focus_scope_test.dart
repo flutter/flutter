@@ -1944,15 +1944,15 @@ void main() {
         );
       }
 
-      /// Expect: childFocusNode.canRequestFocus is true when parent canRequestFocus is true
+      // childFocusNode.canRequestFocus is true when parent canRequestFocus is true
       await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
       expect(childFocusNode.canRequestFocus, isTrue);
 
-      /// Expect: childFocusNode.canRequestFocus is false when parent canRequestFocus is false
+      // childFocusNode.canRequestFocus is false when parent canRequestFocus is false
       await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: false));
       expect(childFocusNode.canRequestFocus, isFalse);
 
-      /// Expect: childFocusNode.canRequestFocus is true again when parent canRequestFocus is true
+      // childFocusNode.canRequestFocus is true again when parent canRequestFocus is changed back to true
       await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
       expect(childFocusNode.canRequestFocus, isTrue);
     });
