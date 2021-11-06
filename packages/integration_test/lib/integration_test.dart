@@ -64,7 +64,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
           },
         );
       } on MissingPluginException {
-        print(r'''
+        debugPrint(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -214,13 +214,16 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration? timeout,
   }) async {
     await super.runTest(
       testBody,
       invariantTester,
       description: description,
-      timeout: timeout,
     );
     results[description] ??= _success;
   }
@@ -388,7 +391,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
         if (count > 20) {
-          print('delayForFrameTimings is taking longer than expected...');
+          debugPrint('delayForFrameTimings is taking longer than expected...');
         }
       }
     }
@@ -411,13 +414,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  Timeout get defaultTestTimeout => _defaultTestTimeout ?? super.defaultTestTimeout;
-
-  /// Configures the default timeout for [testWidgets].
-  ///
-  /// See [TestWidgetsFlutterBinding.defaultTestTimeout] for more details.
-  set defaultTestTimeout(Timeout timeout) => _defaultTestTimeout = timeout;
-  Timeout? _defaultTestTimeout;
+  Timeout defaultTestTimeout = Timeout.none;
 
   @override
   void attachRootWidget(Widget rootWidget) {

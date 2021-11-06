@@ -174,19 +174,19 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(const Offset(794.0, 5.0));
+    await gesture.moveTo(const Offset(794.0, 15.0));
     await tester.pumpAndSettle();
 
     expect(
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 580.0),
+          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 0.0),
-          p2: const Offset(770.0, 580.0),
+          p1: const Offset(770.0, 10.0),
+          p2: const Offset(770.0, 590.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )

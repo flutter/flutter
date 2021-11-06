@@ -347,8 +347,8 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
 
   final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  void registerDidStop(VoidCallback fn) {
-    _didStopCallbacks.add(fn);
+  void registerDidStop(VoidCallback cb) {
+    _didStopCallbacks.add(cb);
   }
 
   @override
@@ -443,8 +443,8 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
 
   final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  void registerDidStop(VoidCallback fn) {
-    _didStopCallbacks.add(fn);
+  void registerDidStop(VoidCallback cb) {
+    _didStopCallbacks.add(cb);
   }
 
   @override

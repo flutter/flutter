@@ -74,14 +74,14 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsOneWidget);
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
     expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
+    expect(controller.selection, const TextSelection.collapsed(offset: 16));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -517,9 +517,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-              initialValue: null,
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -542,9 +540,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: TextFormField(
-              initialValue: null,
-            ),
+            child: TextFormField(),
           ),
         ),
       ),
@@ -651,23 +647,6 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 1);
-  });
-
-  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
-    expect(() async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Scaffold(
-              body: TextFormField(
-                autovalidate: true,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-              ),
-            ),
-          ),
-        ),
-      );
-      }, throwsAssertionError);
   });
 
   testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {

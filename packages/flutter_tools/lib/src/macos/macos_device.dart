@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -23,10 +20,10 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -70,8 +67,8 @@ class MacOSDevice extends DesktopDevice {
   @override
   Future<void> buildForDevice(
     covariant MacOSApp package, {
-    String mainPath,
-    BuildInfo buildInfo,
+    required BuildInfo buildInfo,
+    String? mainPath,
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
@@ -82,7 +79,7 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
+  String? executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
     return package.executable(buildMode);
   }
 
@@ -92,11 +89,16 @@ class MacOSDevice extends DesktopDevice {
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
+    final String? applicationBundle = package.applicationBundle(buildMode);
+    if (applicationBundle == null) {
+      _logger.printError('Failed to foreground app; application bundle not found');
+      return;
+    }
     _processManager.run(<String>[
-      'open', package.applicationBundle(buildMode),
+      'open', applicationBundle,
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
-        print('Failed to foreground app; open returned ${result.exitCode}');
+        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
   }
@@ -104,12 +106,12 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    @required Platform platform,
-    @required MacOSWorkflow macOSWorkflow,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required MacOSWorkflow macOSWorkflow,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
@@ -132,7 +134,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

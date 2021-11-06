@@ -70,7 +70,7 @@ import 'text_field.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///

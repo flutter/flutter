@@ -51,6 +51,128 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
+  test('ListTileThemeData copyWith, ==, hashCode basics', () {
+    expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
+    expect(const ListTileThemeData().hashCode, const ListTileThemeData().copyWith().hashCode);
+  });
+
+  test('ListTileThemeData defaults', () {
+    const ListTileThemeData themeData = ListTileThemeData();
+    expect(themeData.dense, null);
+    expect(themeData.shape, null);
+    expect(themeData.style, null);
+    expect(themeData.selectedColor, null);
+    expect(themeData.iconColor, null);
+    expect(themeData.textColor, null);
+    expect(themeData.contentPadding, null);
+    expect(themeData.tileColor, null);
+    expect(themeData.selectedTileColor, null);
+    expect(themeData.horizontalTitleGap, null);
+    expect(themeData.minVerticalPadding, null);
+    expect(themeData.minLeadingWidth, null);
+    expect(themeData.enableFeedback, null);
+  });
+
+  testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTileThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ListTileThemeData(
+      dense: true,
+      shape: StadiumBorder(),
+      style: ListTileStyle.drawer,
+      selectedColor: Color(0x00000001),
+      iconColor: Color(0x00000002),
+      textColor: Color(0x00000003),
+      contentPadding: EdgeInsets.all(100),
+      tileColor: Color(0x00000004),
+      selectedTileColor: Color(0x00000005),
+      horizontalTitleGap: 200,
+      minVerticalPadding: 300,
+      minLeadingWidth: 400,
+      enableFeedback: true,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'dense: true',
+      'shape: StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))',
+      'style: drawer',
+      'selectedColor: Color(0x00000001)',
+      'iconColor: Color(0x00000002)',
+      'textColor: Color(0x00000003)',
+      'contentPadding: EdgeInsets.all(100.0)',
+      'tileColor: Color(0x00000004)',
+      'selectedTileColor: Color(0x00000005)',
+      'horizontalTitleGap: 200.0',
+      'minVerticalPadding: 300.0',
+      'minLeadingWidth: 400.0',
+      'enableFeedback: true'
+    ]);
+  });
+
+  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
+    late ListTileThemeData theme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            dense: true,
+            shape: const StadiumBorder(),
+            style: ListTileStyle.drawer,
+            selectedColor: const Color(0x00000001),
+            iconColor: const Color(0x00000002),
+            textColor: const Color(0x00000003),
+            contentPadding: const EdgeInsets.all(100),
+            tileColor: const Color(0x00000004),
+            selectedTileColor: const Color(0x00000005),
+            horizontalTitleGap: 200,
+            minVerticalPadding: 300,
+            minLeadingWidth: 400,
+            enableFeedback: true,
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  theme = ListTileTheme.of(context);
+                  return const Placeholder();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(theme.dense, true);
+    expect(theme.shape, const StadiumBorder());
+    expect(theme.style, ListTileStyle.drawer);
+    expect(theme.selectedColor, const Color(0x00000001));
+    expect(theme.iconColor, const Color(0x00000002));
+    expect(theme.textColor, const Color(0x00000003));
+    expect(theme.contentPadding, const EdgeInsets.all(100));
+    expect(theme.tileColor, const Color(0x00000004));
+    expect(theme.selectedTileColor, const Color(0x00000005));
+    expect(theme.horizontalTitleGap, 200);
+    expect(theme.minVerticalPadding, 300);
+    expect(theme.minLeadingWidth, 400);
+    expect(theme.enableFeedback, true);
+  });
+
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/go/design-lists
 
@@ -291,11 +413,13 @@ void main() {
         home: Material(
           child: Center(
             child: ListTileTheme(
-              dense: dense,
-              shape: shape,
-              selectedColor: selectedColor,
-              iconColor: iconColor,
-              textColor: textColor,
+              data: ListTileThemeData(
+                dense: dense,
+                shape: shape,
+                selectedColor: selectedColor,
+                iconColor: iconColor,
+                textColor: textColor,
+              ),
               child: Builder(
                 builder: (BuildContext context) {
                   theme = Theme.of(context);
@@ -454,10 +578,7 @@ void main() {
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
@@ -499,10 +620,7 @@ void main() {
   testWidgets('ListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
@@ -546,10 +664,7 @@ void main() {
 
     Widget buildFrame(double leadingWidth, TextDirection textDirection) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
@@ -1182,7 +1297,6 @@ void main() {
               ListTile(
                 title: Text('A', key: childKey),
                 dense: true,
-                enabled: true,
                 onTap: () {},
               ),
             ],
@@ -1230,7 +1344,6 @@ void main() {
               ListTile(
                 title: Text('A', key: childKey),
                 dense: true,
-                enabled: true,
                 autofocus: true,
                 onTap: () {},
               ),
@@ -1731,15 +1844,17 @@ void main() {
   });
 
   testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
-    late ListTileTheme theme;
+    late ListTileThemeData theme;
     bool isSelected = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: ListTileTheme(
-            tileColor: Colors.green.shade500,
-            selectedTileColor: Colors.red.shade500,
+            data: ListTileThemeData(
+              tileColor: Colors.green.shade500,
+              selectedTileColor: Colors.red.shade500,
+            ),
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
@@ -1777,8 +1892,10 @@ void main() {
       MaterialApp(
         home: Material(
           child: ListTileTheme(
-            selectedTileColor: Colors.green,
-            tileColor: Colors.red,
+            data: const ListTileThemeData(
+              selectedTileColor: Colors.green,
+              tileColor: Colors.red,
+            ),
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
@@ -1909,7 +2026,7 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              enableFeedback: enableFeedbackTheme,
+              data: const ListTileThemeData(enableFeedback: enableFeedbackTheme),
               child: ListTile(
                 title: const Text('Title'),
                 onTap: () {},
@@ -1933,7 +2050,7 @@ void main() {
         MaterialApp(
           home: Material(
             child: ListTileTheme(
-              enableFeedback: enableFeedbackTheme,
+              data: const ListTileThemeData(enableFeedback: enableFeedbackTheme),
               child: ListTile(
                 enableFeedback: enableFeedback,
                 title: const Text('Title'),
@@ -1954,15 +2071,12 @@ void main() {
   testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
             child: ListTileTheme(
-              horizontalTitleGap: themeHorizontalTitleGap,
+              data: ListTileThemeData(horizontalTitleGap: themeHorizontalTitleGap),
               child: Container(
                 alignment: Alignment.topLeft,
                 child: ListTile(
@@ -2009,10 +2123,7 @@ void main() {
   testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
@@ -2051,10 +2162,7 @@ void main() {
       VisualDensity? visualDensity,
     }) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -2096,15 +2204,12 @@ void main() {
   testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
             child: ListTileTheme(
-              minVerticalPadding: themeMinVerticalPadding,
+              data: ListTileThemeData(minVerticalPadding: themeMinVerticalPadding),
               child: Container(
                 alignment: Alignment.topLeft,
                 child: ListTile(
@@ -2145,15 +2250,12 @@ void main() {
   testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          textScaleFactor: 1.0,
-        ),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: textDirection,
           child: Material(
             child: ListTileTheme(
-              minLeadingWidth: themeMinLeadingWidth,
+              data: ListTileThemeData(minLeadingWidth: themeMinLeadingWidth),
               child: Container(
                 alignment: Alignment.topLeft,
                 child: ListTile(
@@ -2267,8 +2369,10 @@ void main() {
         home: Material(
           child: Center(
             child: ListTileTheme(
-              selectedColor: selectedColor,
-              textColor: defaultColor,
+              data: const ListTileThemeData(
+                selectedColor: selectedColor,
+                textColor: defaultColor,
+              ),
               child: Builder(
                 builder: (BuildContext context) {
                   theme = Theme.of(context);
@@ -2326,7 +2430,6 @@ void main() {
         home: Material(
           child: Center(
             child: ListTile(
-              enabled: true,
               selected: selected,
               leading: TestIcon(key: leadingKey),
               trailing: TestIcon(key: trailingKey),

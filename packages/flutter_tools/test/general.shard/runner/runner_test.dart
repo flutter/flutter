@@ -179,7 +179,6 @@ void main() {
       expect(logContents, contains('String: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[✓] Flutter'));
-      print(globals.crashReporter.runtimeType);
 
       final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
@@ -191,8 +190,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
           'FLUTTER_ROOT': '/',
-        },
-        operatingSystem: 'linux'
+        }
       ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

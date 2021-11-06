@@ -327,7 +327,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics(isHidden: false));
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
     expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
@@ -353,7 +353,7 @@ void main() {
     );
     // Scrollable maybe be marked dirty after layout.
     await tester.pumpAndSettle();
-    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics(isHidden: false));
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
     expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));

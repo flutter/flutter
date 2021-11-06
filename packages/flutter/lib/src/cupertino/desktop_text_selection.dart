@@ -55,7 +55,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
       clipboardStatus: clipboardStatus,
       endpoints: endpoints,
       globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
@@ -280,7 +280,6 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 0.0,
           // This value was measured from a screenshot of TextEdit on MacOS
           // 10.15.7 on a Macbook Pro.
           vertical: 3.0,

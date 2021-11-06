@@ -10,7 +10,7 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
-# Last manual update 2021-09-01 (changing this comment will re-build image)
+# Last manual update 2021-09-24 (changing this comment will re-build image)
 
 FROM debian:bullseye
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
@@ -131,7 +131,10 @@ RUN apt-get install -y --no-install-recommends \
   cmake \
   libgtk-3-dev \
   ninja-build \
-  pkg-config && \
+	pkg-config \
+	x11-xserver-utils \
+	xauth \
+	xvfb && \
   apt-get upgrade -y --no-install-recommends && \
   apt-get clean
 

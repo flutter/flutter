@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -288,6 +288,7 @@ void main() {
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
         expect(versionInfo['build_number'],'3');
+        expect(versionInfo['package_name'],'test');
       });
     });
 
@@ -628,7 +629,7 @@ apply plugin: 'kotlin-android'
 
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
-      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
+      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -647,7 +648,7 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('no Info.plist in target', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -660,7 +661,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -674,7 +675,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someOTHERproject');
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -689,7 +690,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isTrue);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -707,7 +708,7 @@ apply plugin: 'kotlin-android'
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isTrue);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null, '123'), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -957,7 +958,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId '$id'
@@ -974,7 +975,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 }
 ''';
 }

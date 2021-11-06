@@ -201,14 +201,14 @@ class TooltipThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
-    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
   }
 }
 
@@ -242,6 +242,10 @@ class TooltipThemeData with Diagnosticable {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
 class TooltipTheme extends InheritedTheme {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].

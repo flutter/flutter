@@ -13,11 +13,13 @@ void main() {
   Object object;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
-  const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
+  Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
+  scaffold = Scaffold(error: '');
   final bool resize = scaffold.resizeToAvoidBottomInset;
 
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(builder: (context) => Text('Fix me.'));
+  showDialog(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/44189
   const Element element = Element(myWidget);
@@ -51,25 +53,30 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/66305
   const Stack stack = Stack(clipBehavior: Clip.none);
   const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  const Stack stack = Stack(error: '');
   final behavior = stack.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidateMode: AutovalidateMode.always);
   const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
+  const Form form = Form(error: '');
   final autoMode = form.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
   const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
+  const FormField formField = FormField(error: '');
   final autoMode = formField.autovalidateMode;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.always);
   const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.disabled);
+  const TextFormField textFormField = TextFormField(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.always);
   const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.disabled);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme textTheme = TextTheme(
@@ -87,6 +94,7 @@ void main() {
     subtitle2: subtitleStyle,
     overline: overlineStyle,
   );
+  var TextTheme textTheme = TextTheme(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme copiedTextTheme = TextTheme.copyWith(
@@ -104,6 +112,7 @@ void main() {
     subtitle2: subtitleStyle,
     overline: overlineStyle,
   );
+  var TextTheme copiedTextTheme = TextTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var style;
@@ -124,83 +133,108 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.maybeOf(context);
   MediaQuery.of(context);
+  MediaQuery.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/70726
   Navigator.maybeOf(context);
   Navigator.of(context);
+  Navigator.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68908
   ScaffoldMessenger.maybeOf(context);
   ScaffoldMessenger.of(context);
+  ScaffoldMessenger.of(error: '');
+  Scaffold.of(error: '');
   Scaffold.maybeOf(context);
   Scaffold.of(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68910
   Router.maybeOf(context);
   Router.of(context);
+  Router.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68911
   Localizations.maybeLocaleOf(context);
   Localizations.localeOf(context);
+  Localizations.localeOf(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68917
   FocusTraversalOrder.maybeOf(context);
   FocusTraversalOrder.of(context);
+  FocusTraversalOrder.of(error: '');
+  FocusTraversalGroup.of(error: '');
   FocusTraversalGroup.maybeOf(context);
   FocusTraversalGroup.of(context);
   Focus.maybeOf(context);
   Focus.of(context);
+  Focus.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68921
   Shortcuts.maybeOf(context);
   Shortcuts.of(context);
+  Shortcuts.of(error: '');
+  Actions.find(error: '');
   Actions.maybeFind(context);
   Actions.find(context);
   Actions.handler(context);
   Actions.handler(context);
+  Actions.handler(error: '');
+  Actions.invoke(error: '');
   Actions.maybeInvoke(context);
   Actions.invoke(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68925
   AnimatedList.maybeOf(context);
   AnimatedList.of(context);
+  AnimatedList.of(error: '');
+  SliverAnimatedList.of(error: '');
   SliverAnimatedList.maybeOf(context);
   SliverAnimatedList.of(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68905
   MaterialBasedCupertinoThemeData.resolveFrom(context);
   MaterialBasedCupertinoThemeData.resolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/72043
   TextField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
   TextField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  TextField(error: '');
   final TextField textField;
   textField.maxLengthEnforcement;
   TextFormField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
   TextFormField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  TextFormField(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
   bottomNavigationBarItem.label;
 
   // Changes made in https://github.com/flutter/flutter/pull/65246
   RectangularSliderTrackShape();
+  RectangularSliderTrackShape(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/46115
   const InputDecoration inputDecoration = InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto);
   InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecoration();
+  InputDecoration(error: '');
   InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.auto);
   InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecoration.collapsed();
+  InputDecoration.collapsed(error: '');
   inputDecoration.floatingLabelBehavior;
   const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.auto);
   InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
   InputDecorationTheme();
+  InputDecorationTheme(error: '');
   inputDecorationTheme.floatingLabelBehavior;
   inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.never);
   inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.auto);
   inputDecorationTheme.copyWith();
+  inputDecorationTheme.copyWith(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/66482
   ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
@@ -234,6 +268,8 @@ void main() {
   ThemeData(
     textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue, selectionColor: Colors.red, selectionHandleColor: Colors.yellow,),
   );
+  ThemeData(error: '');
+  ThemeData.raw(error: '');
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.red));
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.blue));
   ThemeData.raw(textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colors.yellow));
@@ -270,12 +306,14 @@ void main() {
   Draggable draggable = Draggable();
   draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
   draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable = Draggable(error: '');
   draggable.dragAnchorStrategy;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
   LongPressDraggable longPressDraggable = LongPressDraggable();
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
   longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(error: '');
   longPressDraggable.dragAnchorStrategy;
 
   // Changes made in https://github.com/flutter/flutter/pull/64254
@@ -310,11 +348,14 @@ void main() {
   themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData(error: '');
   themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
   themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
+  themeData = ThemeData.raw(error: '');
   themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red));
+  themeData = themeData.copyWith(error: '');
   themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Colors.red));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(secondary: Colors.red));
   themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, secondary: Colors.red));
@@ -352,6 +393,8 @@ void main() {
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
   listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView(error: '');
+  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
   listWheelScrollView = ListWheelScrollView.useDelegate();
   listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
   listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
@@ -359,6 +402,7 @@ void main() {
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
   listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport = ListWheelViewport(error: '');
   listWheelViewport.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/87281
@@ -370,22 +414,27 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/87839
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
   notification.disallowIndicator();
 
   // Changes made in https://github.com/flutter/flutter/pull/86198
   AppBar appBar = AppBar();
   appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
   appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBar = AppBar(error: '');
   appBar.systemOverlayStyle;
 
   SliverAppBar sliverAppBar = SliverAppBar();
   sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
   sliverAppBar = SliverAppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  sliverAppBar = SliverAppBar(error: '');
   sliverAppBar.systemOverlayStyle;
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark);
   appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme = AppBarTheme(error: '');
+  appBarTheme = appBarTheme.copyWith(error: '');
   appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
   appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
   appBarTheme.systemOverlayStyle;

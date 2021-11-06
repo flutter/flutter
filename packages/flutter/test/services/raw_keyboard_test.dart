@@ -204,7 +204,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'macos',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -229,7 +228,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'ios',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -254,7 +252,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'windows',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -279,7 +276,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'android',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -304,7 +300,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'fuchsia',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -329,7 +324,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'linux',
-        isDown: true,
       );
       // Change the modifiers so that they show the shift key as already down
       // when this event is received, but it's not in keysPressed yet.
@@ -362,7 +356,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'web',
-        isDown: true,
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
@@ -406,7 +399,6 @@ void main() {
       final Map<String, dynamic> data3 = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.shiftRight,
         platform: 'web',
-        isDown: true,
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
@@ -450,7 +442,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'android',
-        isDown: true,
       );
       // Set only the generic "down" modifier, without setting a side.
       data['metaState'] = (data['metaState'] as int) |
@@ -488,7 +479,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'macos',
-        isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
       data['modifiers'] = (data['modifiers'] as int) |
@@ -526,7 +516,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'ios',
-        isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
       data['modifiers'] = (data['modifiers'] as int) |
@@ -564,7 +553,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'windows',
-        isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
       // Windows doesn't have a concept of "either" for the Windows (meta) key.
@@ -600,7 +588,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'linux',
-        isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
       // Windows doesn't have a concept of "either" for the Windows (meta) key.
@@ -639,7 +626,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'web',
-        isDown: true,
       );
       // Set only the generic "shift down" modifier, without setting a side.
       data['metaState'] = (data['metaState'] as int) |
@@ -767,6 +753,46 @@ void main() {
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
+      void throwingListener(RawKeyEvent event) {
+        throw 1;
+      }
+
+      // When the listener throws an error...
+      RawKeyboard.instance.addListener(throwingListener);
+
+      // Simulate a key down event.
+      FlutterErrorDetails? record;
+      await _runWhileOverridingOnError(
+        () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+          record = details;
+        }
+      );
+
+      // ... the error should be caught.
+      expect(record, isNotNull);
+      expect(record!.exception, 1);
+      final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+      expect(infos['Event'], isA<DiagnosticsProperty<RawKeyEvent>>());
+
+      // But the exception should not interrupt recording the state.
+      // Now the key handler no longer throws an error.
+      RawKeyboard.instance.removeListener(throwingListener);
+      record = null;
+
+      // Simulate a key up event.
+      await _runWhileOverridingOnError(
+        () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+          record = details;
+        }
+      );
+      // If the previous state (key down) wasn't recorded, this key up event will
+      // trigger assertions.
+      expect(record, isNull);
+    });
   });
 
   group('RawKeyEventDataAndroid', () {
@@ -1008,7 +1034,6 @@ void main() {
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
         platform: 'android',
-        isDown: true,
       );
       Map<String, dynamic>? message;
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
@@ -1077,12 +1102,10 @@ void main() {
         'source': 0x101, // Keyboard source.
         'repeatCount': 42,
       }).data, const RawKeyEventDataAndroid(
-        flags: 0,
         codePoint: 65,
         plainCodePoint: 97,
         keyCode: 29,
         scanCode: 30,
-        metaState: 0,
       ));
 
       expect(RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -2520,4 +2543,22 @@ void main() {
       }).data, isNot(equals(const RawKeyEventDataWeb(code: 'KeyA', key: 'a'))));
     });
   });
+}
+
+Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+  final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
+  FlutterError.onError = onError;
+
+  try {
+    await body();
+  } finally {
+    FlutterError.onError = oldFlutterErrorOnError;
+  }
+}
+
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+  return Map<String, DiagnosticsNode>.fromIterable(
+    infos,
+    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+  );
 }

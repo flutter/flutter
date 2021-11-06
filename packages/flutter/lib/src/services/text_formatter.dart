@@ -352,7 +352,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
     Match? previousMatch;
     for (final Match match in matches) {
-      assert(match.end > match.start);
+      assert(match.end >= match.start);
       // Compute the non-match region between this `Match` and the previous
       // `Match`. Depending on the value of `allow`, either the match region or
       // the non-match region is the banned pattern.
@@ -388,13 +388,11 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     }
 
     int adjustIndex(int originalIndex) {
-      // Add to the index the length of the replacement if needed.
-      // The condition of the ternary operator is chosen such that the index
-      // will be placed **after** the replacement text, if the index was
-      // strictly inside the banned pattern.
-      final int replacedLength = regionStart >= originalIndex ? 0 : replacementString.length;
-      // Subtract from the index the length of the banned pattern before the index.
-      return replacedLength - (originalIndex.clamp(regionStart, regionEnd) - regionStart);
+      // The length added by adding the replacementString.
+      final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
+      // The length removed by removing the replacementRange.
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
+      return replacedLength - removedLength;
     }
 
     state.selection?.base += adjustIndex(state.inputValue.selection.baseOffset);
@@ -408,69 +406,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
   static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
-}
-
-/// Old name for [FilteringTextInputFormatter.deny].
-@Deprecated(
-  'Use FilteringTextInputFormatter.deny instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.',
-)
-class BlacklistingTextInputFormatter extends FilteringTextInputFormatter {
-  /// Old name for [FilteringTextInputFormatter.deny].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.deny instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  BlacklistingTextInputFormatter(
-    Pattern blacklistedPattern, {
-    String replacementString = '',
-  }) : super.deny(blacklistedPattern, replacementString: replacementString);
-
-  /// Old name for [filterPattern].
-  @Deprecated(
-    'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  Pattern get blacklistedPattern => filterPattern;
-
-  /// Old name for [FilteringTextInputFormatter.singleLineFormatter].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.singleLineFormatter instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  static final BlacklistingTextInputFormatter singleLineFormatter
-      = BlacklistingTextInputFormatter(RegExp(r'\n'));
-}
-
-/// Old name for [FilteringTextInputFormatter.allow].
-@Deprecated(
-  'Use FilteringTextInputFormatter.allow instead. '
-  'This feature was deprecated after v1.20.0-1.0.pre.',
-)
-class WhitelistingTextInputFormatter extends FilteringTextInputFormatter {
-  /// Old name for [FilteringTextInputFormatter.allow].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.allow instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  WhitelistingTextInputFormatter(Pattern whitelistedPattern)
-    : assert(whitelistedPattern != null),
-      super.allow(whitelistedPattern);
-
-  /// Old name for [filterPattern].
-  @Deprecated(
-    'Use filterPattern instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  Pattern get whitelistedPattern => filterPattern;
-
-  /// Old name for [FilteringTextInputFormatter.digitsOnly].
-  @Deprecated(
-    'Use FilteringTextInputFormatter.digitsOnly instead. '
-    'This feature was deprecated after v1.20.0-1.0.pre.',
-  )
-  static final WhitelistingTextInputFormatter digitsOnly
-      = WhitelistingTextInputFormatter(RegExp(r'\d+'));
 }
 
 /// A [TextInputFormatter] that prevents the insertion of more characters

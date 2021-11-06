@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -114,7 +113,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
@@ -318,6 +319,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
   ///     [SystemUiMode] to have visible when the application is running.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
@@ -386,7 +388,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         try {
           response = await handler(data);
         } catch (exception, stack) {
-
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,

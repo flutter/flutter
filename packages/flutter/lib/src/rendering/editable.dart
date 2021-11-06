@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -74,6 +74,154 @@ class TextSelectionPoint {
       case null:
         return '$point';
     }
+  }
+}
+
+/// The consecutive sequence of [TextPosition]s that the caret should move to
+/// when the user navigates the paragraph using the upward arrow key or the
+/// downward arrow key.
+///
+/// {@template flutter.rendering.RenderEditable.verticalArrowKeyMovement}
+/// When the user presses the upward arrow key or the downward arrow key, on
+/// many platforms (macOS for instance), the caret will move to the previous
+/// line or the next line, while maintaining its original horizontal location.
+/// When it encounters a shorter line, the caret moves to the closest horizontal
+/// location within that line, and restores the original horizontal location
+/// when a long enough line is encountered.
+///
+/// Additionally, the caret will move to the beginning of the document if the
+/// upward arrow key is pressed and the caret is already on the first line. If
+/// the downward arrow key is pressed next, the caret will restore its original
+/// horizontal location and move to the second line. Similarly the caret moves
+/// to the end of the document if the downward arrow key is pressed when it's
+/// already on the last line.
+///
+/// Consider a left-aligned paragraph:
+///   aa|
+///   a
+///   aaa
+/// where the caret was initially placed at the end of the first line. Pressing
+/// the downward arrow key once will move the caret to the end of the second
+/// line, and twice the arrow key moves to the third line after the second "a"
+/// on that line. Pressing the downward arrow key again, the caret will move to
+/// the end of the third line (the end of the document). Pressing the upward
+/// arrow key in this state will result in the caret moving to the end of the
+/// second line.
+///
+/// Vertical caret runs are typically interrupted when the layout of the text
+/// changes (including when the text itself changes), or when the selection is
+/// changed by other input events or programmatically (for example, when the
+/// user pressed the left arrow key).
+/// {@endtemplate}
+///
+/// The [movePrevious] method moves the caret location (which is
+/// [VerticalCaretMovementRun.current]) to the previous line, and in case
+/// the caret is already on the first line, the method does nothing and returns
+/// false. Similarly the [moveNext] method moves the caret to the next line, and
+/// returns false if the caret is already on the last line.
+///
+/// If the underlying paragraph's layout changes, [isValid] becomes false and
+/// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
+/// be checked before calling [movePrevious] and [moveNext], or accessing
+/// [current].
+class VerticalCaretMovementRun extends BidirectionalIterator<TextPosition> {
+  VerticalCaretMovementRun._(
+    this._editable,
+    this._lineMetrics,
+    this._currentTextPosition,
+    this._currentLine,
+    this._currentOffset,
+  );
+
+  Offset _currentOffset;
+  int _currentLine;
+  TextPosition _currentTextPosition;
+
+  final List<ui.LineMetrics> _lineMetrics;
+  final RenderEditable _editable;
+
+  bool _isValid = true;
+  /// Whether this [VerticalCaretMovementRun] can still continue.
+  ///
+  /// A [VerticalCaretMovementRun] run is valid if the underlying text layout
+  /// hasn't changed.
+  ///
+  /// The [current] value and the [movePrevious] and [moveNext] methods must not
+  /// be accessed when [isValid] is false.
+  bool get isValid {
+    if (!_isValid) {
+      return false;
+    }
+    final List<ui.LineMetrics> newLineMetrics = _editable._textPainter.computeLineMetrics();
+    // Use the implementation detail of the computeLineMetrics method to figure
+    // out if the current text layout has been invalidated.
+    if (!identical(newLineMetrics, _lineMetrics)) {
+      _isValid = false;
+    }
+    return _isValid;
+  }
+
+  // Computes the vertical distance from the `from` line's bottom to the `to`
+  // lines top.
+  double _lineDistance(int from, int to) {
+    double lineHeight = 0;
+    for (int index = from + 1; index < to; index += 1) {
+      lineHeight += _lineMetrics[index].height;
+    }
+    return lineHeight;
+  }
+
+  final Map<int, MapEntry<Offset, TextPosition>> _positionCache = <int, MapEntry<Offset, TextPosition>>{};
+
+  MapEntry<Offset, TextPosition> _getTextPositionForLine(int lineNumber) {
+    assert(isValid);
+    assert(lineNumber >= 0);
+    final MapEntry<Offset, TextPosition>? cachedPosition = _positionCache[lineNumber];
+    if (cachedPosition != null) {
+      return cachedPosition;
+    }
+    assert(lineNumber != _currentLine);
+    final double distanceY = lineNumber > _currentLine
+      ? _lineMetrics[_currentLine].descent + _lineMetrics[lineNumber].ascent + _lineDistance(_currentLine, lineNumber)
+      : - _lineMetrics[_currentLine].ascent - _lineMetrics[lineNumber].descent - _lineDistance(lineNumber, _currentLine);
+
+    final Offset newOffset = _currentOffset.translate(0, distanceY);
+    final TextPosition closestPosition = _editable._textPainter.getPositionForOffset(newOffset);
+    final MapEntry<Offset, TextPosition> position = MapEntry<Offset, TextPosition>(newOffset, closestPosition);
+    _positionCache[lineNumber] = position;
+    return position;
+  }
+
+  @override
+  TextPosition get current {
+    assert(isValid);
+    return _currentTextPosition;
+  }
+
+  @override
+  bool moveNext() {
+    assert(isValid);
+    if (_currentLine + 1 >= _lineMetrics.length) {
+      return false;
+    }
+    final MapEntry<Offset, TextPosition> position = _getTextPositionForLine(_currentLine + 1);
+    _currentLine += 1;
+    _currentOffset = position.key;
+    _currentTextPosition = position.value;
+    return true;
+  }
+
+  @override
+  bool movePrevious() {
+    assert(isValid);
+    if (_currentLine <= 0) {
+      return false;
+    }
+    final MapEntry<Offset, TextPosition> position = _getTextPositionForLine(_currentLine - 1);
+    _currentLine -= 1;
+    _currentOffset = position.key;
+    _currentTextPosition = position.value;
+    return true;
   }
 }
 
@@ -1091,6 +1239,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The prompt rectangle will only be requested on non-web iOS applications.
   ///
   /// When set to null, the currently displayed prompt rectangle (if any) will be dismissed.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setPromptRectRange(TextRange? newRange) {
     _autocorrectHighlightPainter.highlightedRange = newRange;
   }
@@ -1598,13 +1747,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutText(maxWidth: double.infinity);
+    _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutText(maxWidth: double.infinity);
+    _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
 
@@ -1697,13 +1846,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -1881,7 +2030,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
     if (position.offset - word.start <= 1) {
-      newSelection = TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream);
+      newSelection = TextSelection.collapsed(offset: word.start);
     } else {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
@@ -1966,7 +2115,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
@@ -1990,7 +2139,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          default:
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline:
+          case ui.PlaceholderAlignment.bottom:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.top:
             baselineOffset = null;
             break;
         }
@@ -2261,6 +2414,49 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _caretPainter.showRegularCaret = _resetFloatingCursorAnimationValue == null;
   }
 
+  MapEntry<int, Offset> _lineNumberFor(TextPosition startPosition, List<ui.LineMetrics> metrics) {
+    // TODO(LongCatIsLooong): include line boundaries information in
+    // ui.LineMetrics, then we can get rid of this.
+    final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
+    int line = 0;
+    double accumulatedHeight = 0;
+    for (final ui.LineMetrics lineMetrics in metrics) {
+      if (accumulatedHeight + lineMetrics.height > offset.dy) {
+        return MapEntry<int, Offset>(line, Offset(offset.dx, lineMetrics.baseline));
+      }
+      line += 1;
+      accumulatedHeight += lineMetrics.height;
+    }
+    assert(false, 'unable to find the line for $startPosition');
+    return MapEntry<int, Offset>(math.max(0, metrics.length - 1), Offset(offset.dx, accumulatedHeight));
+  }
+
+  /// Starts a [VerticalCaretMovementRun] at the given location in the text, for
+  /// handling consecutive vertical caret movements.
+  ///
+  /// This can be used to handle consecutive upward/downward arrow key movements
+  /// in an input field.
+  ///
+  /// {@macro flutter.rendering.RenderEditable.verticalArrowKeyMovement}
+  ///
+  /// The [VerticalCaretMovementRun.isValid] property indicates whether the text
+  /// layout has changed and the vertical caret run is invalidated.
+  ///
+  /// The caller should typically discard a [VerticalCaretMovementRun] when
+  /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
+  /// occasions where the vertical caret run should be interrupted.
+  VerticalCaretMovementRun startVerticalCaretMovement(TextPosition startPosition) {
+    final List<ui.LineMetrics> metrics = _textPainter.computeLineMetrics();
+    final MapEntry<int, Offset> currentLine = _lineNumberFor(startPosition, metrics);
+    return VerticalCaretMovementRun._(
+      this,
+      metrics,
+      startPosition,
+      currentLine.key,
+      currentLine.value,
+    );
+  }
+
   void _paintContents(PaintingContext context, Offset offset) {
     debugAssertLayoutUpToDate();
     final Offset effectiveOffset = offset + _paintOffset;
@@ -2349,7 +2545,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _clipRectLayer.layer = null;
       _paintContents(context, offset);
     }
-    _paintHandleLayers(context, getEndpointsForSelection(selection!));
+    if (selection!.isValid) {
+      _paintHandleLayers(context, getEndpointsForSelection(selection!));
+    }
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
