@@ -1097,11 +1097,11 @@ void main() {
     expect(cursorOffsetSpaces.dx, inputWidth - kCaretGap);
   });
 
-  testWidgets('mobile obscureText control test', (WidgetTester tester) async {
+  testWidgets('mobile obscureTextBehavior control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          obscureText: true,
+          obscureTextBehavior: ObscureTextBehavior.delayed,
           decoration: InputDecoration(
             hintText: 'Placeholder',
           ),
@@ -1137,11 +1137,11 @@ void main() {
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
-  testWidgets('desktop obscureText control test', (WidgetTester tester) async {
+  testWidgets('desktop obscureTextBehavior control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
-          obscureText: true,
+          obscureTextBehavior: ObscureTextBehavior.delayed,
           decoration: InputDecoration(
             hintText: 'Placeholder',
           ),
@@ -2376,11 +2376,11 @@ void main() {
     // https://github.com/flutter/flutter/issues/32845
 
     final TextEditingController controller = TextEditingController();
-    Widget buildFrame(bool obscureText) {
+    Widget buildFrame(obscureTextBehavior obscureTextBehavior) {
       return overlay(
         child: TextField(
           controller: controller,
-          obscureText: obscureText,
+          obscureTextBehavior: ObscureTextBehavior.delayed,
         ),
       );
     }
@@ -2403,11 +2403,11 @@ void main() {
     // https://github.com/flutter/flutter/issues/32845
 
     final TextEditingController controller = TextEditingController();
-    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+    Widget buildFrame(obscureTextBehavior obscureTextBehavior, bool enableInteractiveSelection) {
       return overlay(
         child: TextField(
           controller: controller,
-          obscureText: obscureText,
+          obscureTextBehavior: obscureTextBehavior,
           enableInteractiveSelection: enableInteractiveSelection,
         ),
       );
@@ -2432,7 +2432,7 @@ void main() {
     await tester.pumpWidget(overlay(
       child: TextField(
         controller: controller,
-        obscureText: true,
+        obscureTextBehavior: ObscureTextBehavior.delayed,
       ),
     ));
     await tester.enterText(find.byType(TextField), 'abcde fghi');
@@ -2454,7 +2454,7 @@ void main() {
     await tester.pumpWidget(overlay(
       child: TextField(
         controller: controller,
-        obscureText: true,
+          obscureTextBehavior: ObscureTextBehavior.delayed,
       ),
     ));
     await tester.enterText(find.byType(TextField), 'abcde fghi');
@@ -4948,7 +4948,7 @@ void main() {
     final TextField textField =
       TextField(
         controller: controller,
-        obscureText: true,
+        obscureTextBehavior: ObscureTextBehavior.delayed,
       );
 
     String clipboardContent = '';
@@ -5024,7 +5024,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     final TextField textField = TextField(
       controller: controller,
-      obscureText: true,
+      obscureTextBehavior: ObscureTextBehavior.delayed,
     );
 
     const String clipboardContent = 'I love Flutter!';
@@ -5151,7 +5151,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
     final TextField textField = TextField(
       controller: controller,
-      obscureText: true,
+      obscureTextBehavior: ObscureTextBehavior.delayed,
     );
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger
