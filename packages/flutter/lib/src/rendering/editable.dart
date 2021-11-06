@@ -142,10 +142,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     TextHeightBehavior? textHeightBehavior,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
-    @Deprecated(
-      'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.',
-    )
+	ObscureTextBehavior obscureTextBehavior = ObscureTextBehavior.none,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -185,7 +182,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        assert(textWidthBasis != null),
        assert(paintCursorAboveText != null),
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
-       assert(obscureText != null || obscureTextBehavior != null),
+       assert(obscureTextBehavior != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -219,7 +216,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
        _obscuringCharacter = obscuringCharacter,
-       _obscureText = obscureText,
        _obscureTextBehavior = obscureTextBehavior,
        _readOnly = readOnly,
        _forceLine = forceLine,
@@ -447,7 +443,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     markNeedsTextLayout();
   }
 
-  /// Character used for obscuring text if [obscureText] is true.
+  /// Character used for obscuring text if [obscureTextBehavior] is not none.
   ///
   /// Cannot be null, and must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
@@ -459,16 +455,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(value != null && value.characters.length == 1);
     _obscuringCharacter = value;
     markNeedsLayout();
-  }
-
-  /// Whether to hide the text being edited (e.g., for passwords).
-  bool get obscureText => _obscureText;
-  bool _obscureText;
-  set obscureText(bool value) {
-    if (_obscureText == value)
-      return;
-    _obscureText = value;
-    markNeedsSemanticsUpdate();
   }
 
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -545,7 +531,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     debugAssertLayoutUpToDate();
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
-    if (obscureText) {
+    if (obscureTextBehavior != ObscureTextBehavior.none) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: line.start, extentOffset: line.end);
@@ -682,8 +668,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   String? _cachedPlainText;
   // Returns a plain text version of the text in the painter.
   //
-  // Returns the obscured text when [obscureText] is true. See
-  // [obscureText] and [obscuringCharacter].
+  // Returns the obscured text when [obscureTextBehavior] is not none. See
+  // [obscureTextBehavior] and [obscuringCharacter].
   String get _plainText {
     _cachedPlainText ??= _textPainter.text!.toPlainText(includeSemanticsLabels: false);
     return _cachedPlainText!;
@@ -1052,7 +1038,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// This field is used by [selectionEnabled] (which then controls
   /// the accessibility hints mentioned above). When null,
-  /// [obscureText] is used to determine the value of
+  /// [obscureTextBehavior] is used to determine the value of
   /// [selectionEnabled] instead.
   bool? get enableInteractiveSelection => _enableInteractiveSelection;
   bool? _enableInteractiveSelection;
@@ -1065,7 +1051,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// Whether interactive selection are enabled based on the values of
-  /// [enableInteractiveSelection] and [obscureText].
+  /// [enableInteractiveSelection] and [obscureTextBehavior].
   ///
   /// Since [RenderEditable] does not handle selection manipulation
   /// itself, this actually only affects whether the accessibility
@@ -1074,18 +1060,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// manipulation. It's the responsibility of this object's owner
   /// to provide selection manipulation affordances.
   ///
-  /// By default, [enableInteractiveSelection] is null, [obscureText] is false,
+  /// By default, [enableInteractiveSelection] is null, [obscureTextBehavior] is none,
   /// and this getter returns true.
   ///
-  /// If [enableInteractiveSelection] is null and [obscureText] is true, then this
-  /// getter returns false. This is the common case for password fields.
+  /// If [enableInteractiveSelection] is null and [obscureTextBehavior] is not none, 
+  /// then this getter returns false. This is the common case for password fields.
   ///
   /// If [enableInteractiveSelection] is non-null then its value is
   /// returned. An application might [enableInteractiveSelection] to
   /// true to enable interactive selection for a password field, or to
   /// false to unconditionally disable interactive selection.
   bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
+    return enableInteractiveSelection ?? obscureTextBehavior == ObscureTextBehavior.none;
   }
 
   /// The color used to paint the prompt rectangle.
@@ -1153,7 +1139,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // https://github.com/flutter/flutter/issues/77957
     if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) &&
         defaultTargetPlatform != TargetPlatform.macOS) {
-      assert(readOnly && !obscureText);
+      assert(readOnly && obscureTextBehavior == ObscureTextBehavior.none);
       // For Selectable rich text with recognizer, we need to create a semantics
       // node for each text fragment.
       config
@@ -1162,7 +1148,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     if (_cachedAttributedValue == null) {
-      if (obscureText) {
+      if (obscureTextBehavior != ObscureTextBehavior.none) {
         _cachedAttributedValue = AttributedString(obscuringCharacter * _plainText.length);
       } else {
         final StringBuffer buffer = StringBuffer();
@@ -1186,7 +1172,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     config
       ..attributedValue = _cachedAttributedValue!
-      ..isObscured = obscureText
+      ..isObscured = obscureTextBehavior != ObscureTextBehavior.none
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
@@ -1909,7 +1895,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (position.offset >= word.end)
       return TextSelection.fromPosition(position);
     // If text is obscured, the entire sentence should be treated as one word.
-    if (obscureText) {
+    if (obscureTextBehavior != ObscureTextBehavior.none) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
