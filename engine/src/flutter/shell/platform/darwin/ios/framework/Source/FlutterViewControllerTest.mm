@@ -746,6 +746,25 @@ typedef enum UIAccessibilityContrast : NSInteger {
   engine.viewController = nil;
 }
 
+- (void)testHideA11yElements {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  XCTAssertFalse(realVC.view.accessibilityElementsHidden);
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:UIApplicationWillResignActiveNotification
+                    object:nil];
+  XCTAssertTrue(realVC.view.accessibilityElementsHidden);
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:UIApplicationDidBecomeActiveNotification
+                    object:nil];
+  XCTAssertFalse(realVC.view.accessibilityElementsHidden);
+  engine.viewController = nil;
+}
+
 - (void)testNotifyLowMemory {
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
