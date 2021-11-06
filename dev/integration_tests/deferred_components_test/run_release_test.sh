@@ -43,11 +43,11 @@ do
         echo "All tests passed."
         exit 0
     fi
-    # add timeout
+    # Timeout if expected log not found
     current_time=$(date +%s)
     if [[ $((current_time - script_start_time_seconds)) -ge 150 ]]; then
-      echo "Failure: Deferred component did not load."
-      exit 1
+        echo "Failure: Deferred component did not load."
+        exit 1
     fi
 done < <(adb logcat -T "$script_start_time")
 
