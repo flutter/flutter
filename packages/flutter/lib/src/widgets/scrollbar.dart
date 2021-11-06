@@ -607,6 +607,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
 
+  bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
+
   /// Same as hitTest, but includes some padding when the [PointerEvent] is
   /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
@@ -617,17 +619,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// based on proximity. When `forHover` is true, the larger hit test area will
   /// be used.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
-    if (_thumbRect == null) {
+    if (_trackRect == null) {
       // We have not computed the scrollbar position yet.
       return false;
     }
 
-    // The thumb is not able to be hit when invisible.
-    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+    if (!_lastMetricsAreScrollable) {
       return false;
     }
 
-    final Rect interactiveRect = _trackRect ?? _thumbRect!;
+    final Rect interactiveRect = _trackRect!;
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
     );
@@ -662,8 +663,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
-    // The thumb is not able to be hit when invisible.
-    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+
+    if (!_lastMetricsAreScrollable) {
       return false;
     }
 
@@ -692,8 +693,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    // The thumb is not able to be hit when invisible.
-    if (_lastMetrics!.minScrollExtent == _lastMetrics!.maxScrollExtent) {
+    if (!_lastMetricsAreScrollable) {
       return false;
     }
 
