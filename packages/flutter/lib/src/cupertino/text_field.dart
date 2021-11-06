@@ -217,10 +217,10 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], [enableSuggestions], and [enableIMEPersonalizedLearning]
-  /// properties must not be null.
+  /// [expands], [maxLengthEnforced], [obscureTextBehavior], [prefixMode],
+  /// [readOnly], [scrollPadding], [suffixMode], [textAlign],
+  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions], 
+  /// and [enableIMEPersonalizedLearning] properties must not be null.
   ///
   /// See also:
   ///
@@ -258,11 +258,6 @@ class CupertinoTextField extends StatefulWidget {
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
-    @Deprecated(
-      'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.',
-    )
-    this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -305,11 +300,11 @@ class CupertinoTextField extends StatefulWidget {
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null || obscureTextBehavior != null),
+       assert(obscureTextBehavior != null),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+       smartDashesType = smartDashesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+       smartQuotesType = smartQuotesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
@@ -333,7 +328,6 @@ class CupertinoTextField extends StatefulWidget {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(
-       (obscureText != null && !obscureText) ||
          (
            obscureTextBehavior != null &&
            obscureTextBehavior == ObscureTextBehavior.none
@@ -354,7 +348,7 @@ class CupertinoTextField extends StatefulWidget {
        ),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? ((obscureText != null && obscureText) ||
+       toolbarOptions = toolbarOptions ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
          const ToolbarOptions(
            selectAll: true,
@@ -393,10 +387,10 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [obscureTextBehavior],
-  /// [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  /// [expands], [maxLengthEnforced], [obscureTextBehavior], [prefixMode], 
+  /// [readOnly], [scrollPadding], [suffixMode], [textAlign], 
+  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions] 
+  /// properties must not be null.
   ///
   /// See also:
   ///
@@ -431,11 +425,6 @@ class CupertinoTextField extends StatefulWidget {
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
-    @Deprecated(
-      'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.',
-    )
-    this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -478,11 +467,11 @@ class CupertinoTextField extends StatefulWidget {
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
+       assert(obscureTextBehavior != null),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+       smartDashesType = smartDashesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+       smartQuotesType = smartQuotesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
@@ -506,7 +495,6 @@ class CupertinoTextField extends StatefulWidget {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(
-         (obscureText != null && !obscureText) ||
          (
            obscureTextBehavior != null &&
            obscureTextBehavior == ObscureTextBehavior.none
@@ -528,7 +516,6 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (
-           (obscureText != null && obscureText) ||
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
          const ToolbarOptions(
            selectAll: true,
@@ -663,13 +650,6 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
-
-  @Deprecated(
-    'Use obscureTextBehavior instead. '
-    'This feature was deprecated after v2.6.0-0.0.pre.',
-  )
-  /// {@macro flutter.widgets.editableText.obscureText}
-  final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.obscureTextBehavior}
   final ObscureTextBehavior obscureTextBehavior;
@@ -852,12 +832,11 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: (obscureText != null && obscureText) ||
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: 
         (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: (obscureText != null && obscureText) ||
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: 
         (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
@@ -1273,7 +1252,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             textDirection: widget.textDirection,
             autofocus: widget.autofocus,
             obscuringCharacter: widget.obscuringCharacter,
-            obscureText: widget.obscureText,
             obscureTextBehavior: widget.obscureTextBehavior,
             autocorrect: widget.autocorrect,
             smartDashesType: widget.smartDashesType,
