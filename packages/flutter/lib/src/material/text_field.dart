@@ -181,7 +181,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// ```dart
 /// const TextField(
-///   obscureText: true,
+///   obscureTextBehavior: ObscureTextBehavior.delayed,
 ///   decoration: InputDecoration(
 ///     border: OutlineInputBorder(),
 ///     labelText: 'Password',
@@ -280,7 +280,7 @@ class TextField extends StatefulWidget {
   /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// The [textAlign], [autofocus], [obscureText],
+  /// The [textAlign], [autofocus], 
   /// [obscureTextBehavior], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], [enableSuggestions], and
@@ -308,11 +308,6 @@ class TextField extends StatefulWidget {
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
-    @Deprecated(
-      'Use obscureTextBehavior instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.',
-    )
-    this.obscureText = false,
     this.obscureTextBehavior = ObscureTextBehavior.none,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
@@ -358,11 +353,11 @@ class TextField extends StatefulWidget {
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null || obscureTextBehavior != null),
+       assert(obscureTextBehavior != null),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? ((obscureText != null && obscureText) ||
+       smartDashesType = smartDashesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? ((obscureText != null && obscureText) ||
+       smartQuotesType = smartQuotesType ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
@@ -387,7 +382,6 @@ class TextField extends StatefulWidget {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(
-         (obscureText != null && !obscureText) ||
          (
            obscureTextBehavior != null &&
            obscureTextBehavior == ObscureTextBehavior.none
@@ -405,7 +399,7 @@ class TextField extends StatefulWidget {
        ),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? ((obscureText != null && obscureText) ||
+       toolbarOptions = toolbarOptions ?? (
            (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ?
          const ToolbarOptions(
            selectAll: true,
@@ -510,13 +504,6 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
 
-  @Deprecated(
-    'Use obscureTextBehavior instead. '
-    'This feature was deprecated after v2.6.0-0.0.pre.',
-  )
-  /// {@macro flutter.widgets.editableText.obscureText}
-  final bool obscureText;
-
   /// {@macro flutter.widgets.editableText.obscureTextBehavior}
   final ObscureTextBehavior obscureTextBehavior;
 
@@ -551,8 +538,8 @@ class TextField extends StatefulWidget {
   /// Configuration of toolbar options.
   ///
   /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
+  /// will be disabled if [obscureTextBehavior] is not none. If [readOnly] is
+  /// true, paste and cut will be disabled regardless.
   final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
@@ -821,12 +808,11 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<ObscureTextBehavior>('obscureTextBehavior', obscureTextBehavior, defaultValue: ObscureTextBehavior.none));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: (obscureText != null && obscureText) ||
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: 
         (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: (obscureText != null && obscureText) ||
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: 
         (obscureTextBehavior != null && obscureTextBehavior != ObscureTextBehavior.none) ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
@@ -1254,7 +1240,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           textDirection: widget.textDirection,
           autofocus: widget.autofocus,
           obscuringCharacter: widget.obscuringCharacter,
-          obscureText: widget.obscureText,
           obscureTextBehavior: widget.obscureTextBehavior,
           autocorrect: widget.autocorrect,
           smartDashesType: widget.smartDashesType,
