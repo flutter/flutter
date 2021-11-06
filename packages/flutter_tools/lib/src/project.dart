@@ -573,7 +573,7 @@ the v1 Android embedding will be removed in future versions of Flutter.
         case DeprecationBehavior.exit:
           BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
           throwToolExit(
-            'Build failed due to use of deprecated Android v1 emebdding.',
+            'Build failed due to use of deprecated Android v1 embedding.',
             exitCode: 1,
           );
       }
