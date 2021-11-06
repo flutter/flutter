@@ -4,14 +4,12 @@
 # Legacy Component Framework v1 components.
 - test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cmx
   package: flutter_runner_tests-0.far
-# TODO(richkadel): Enable this test once the CI fuchsia image for femu tests has been updated to
-# meet the test requirements. Changes are in progress to support this test.
-# - test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
-#   packages:
-#     - flutter-embedder-test2-0.far
-#     - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/child-view2/child-view2/child-view2.far
-#     - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/parent-view2/parent-view2/parent-view2.far
-#     - flutter_jit_runner-0.far
+- test_command: run-test-component fuchsia-pkg://fuchsia.com/flutter-embedder-test2#meta/flutter-embedder-test2.cmx
+  packages:
+    - flutter-embedder-test2-0.far
+    - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/child-view2/child-view2/child-view2.far
+    - gen/flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/embedder/parent-view2/parent-view2/parent-view2.far
+    - flutter_jit_runner-0.far
 
 # v2 components.
 - test_command: run-test-suite fuchsia-pkg://fuchsia.com/flutter_runner_tzdata_tests#meta/flutter_runner_tzdata_tests.cm
