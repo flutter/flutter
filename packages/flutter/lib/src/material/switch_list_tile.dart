@@ -36,7 +36,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// the theme's [ColorScheme.secondary] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [value]; to have the list tile appear selected when the
@@ -396,7 +396,7 @@ class SwitchListTile extends StatelessWidget {
 
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
+        selectedColor: activeColor ?? Theme.of(context).colorScheme.secondary,
         child: ListTile(
           leading: leading,
           title: title,
