@@ -1600,11 +1600,11 @@ void main() {
           }, variant: TargetPlatformVariant.all());
 
           testWidgets('long run with fractional text height', (WidgetTester tester) async {
-            controller.text = "${'źdźbło\n' * 99}źdźbło";
+            controller.text = "${'źdźbło\n' * 49}źdźbło";
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)));
 
-            for (int i = 1; i < 99; i++) {
+            for (int i = 1; i <= 49; i++) {
               await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
               await tester.pump();
               expect(
@@ -1614,12 +1614,12 @@ void main() {
               );
             }
 
-            for (int i = 99; i < 1; i--) {
+            for (int i = 49; i >= 1; i--) {
               await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
               await tester.pump();
               expect(
                 controller.selection,
-                TextSelection.collapsed(offset: 2 + i * 7),
+                TextSelection.collapsed(offset: 2 + (i - 1) * 7),
                 reason: 'line $i',
               );
             }
