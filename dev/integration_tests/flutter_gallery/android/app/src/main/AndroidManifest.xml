@@ -11,7 +11,7 @@ found in the LICENSE file. -->
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:label="Gallery" android:icon="@mipmap/ic_launcher" android:name="${applicationName}">
+    <application android:label="Gallery" android:icon="@mipmap/ic_launcher">
         <activity android:name=".MainActivity"
                   android:theme="@android:style/Theme.Light.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
