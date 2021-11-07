@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 
 import '../../src/common.dart';
@@ -63,8 +61,9 @@ class MultidexProject extends Project {
   dependencies:
     flutter:
       sdk: flutter
-    cloud_firestore: ^2.5.3
-    firebase_core: ^1.6.0
+    # Pin to specific plugin versions to avoid out-of-band failures.
+    cloud_firestore: 2.5.3
+    firebase_core: 1.6.0
   ''';
 
   @override

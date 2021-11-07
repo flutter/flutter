@@ -14,7 +14,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 import 'test_device.dart';
 

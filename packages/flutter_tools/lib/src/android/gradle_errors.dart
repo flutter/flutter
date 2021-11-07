@@ -8,7 +8,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';
@@ -75,6 +75,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   transformInputIssue,
   lockFileDepMissing,
   multidexErrorHandler,
+  incompatibleKotlinVersionHandler,
 ];
 
 // Multidex error message.
@@ -470,4 +471,33 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'lock-dep-issue',
+);
+
+@visibleForTesting
+final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'Module was compiled with an incompatible version of Kotlin',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+    globals.printStatus(
+      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.',
+      emphasis: true,
+    );
+    globals.printStatus(
+      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, '
+      'then update ${gradleFile.path}:\n'
+      "ext.kotlin_version = '<latest-version>'",
+      indent: 4,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-kotlin-version',
 );
