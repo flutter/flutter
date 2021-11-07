@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -32,9 +30,9 @@ const int kCurrentUwpTemplateVersion = 0;
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
-  String target,
-  VisualStudio visualStudioOverride,
-  SizeAnalyzer sizeAnalyzer,
+  String? target,
+  VisualStudio? visualStudioOverride,
+  SizeAnalyzer? sizeAnalyzer,
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -62,13 +60,13 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     logger: globals.logger,
     processManager: globals.processManager,
   );
-  final String cmakePath = visualStudio.cmakePath;
+  final String? cmakePath = visualStudio.cmakePath;
   if (cmakePath == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final String buildModeName = getNameForBuildMode(buildInfo.mode);
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
@@ -85,7 +83,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('trace.$arch.json');
-    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
@@ -118,8 +116,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 ///
 /// Note that this feature is currently unfinished.
 Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildInfo, {
-  String target,
-  VisualStudio visualStudioOverride,
+  String? target,
+  VisualStudio? visualStudioOverride,
 }) async {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildUwpDirectory());
   if (!windowsProject.existsSync()) {
@@ -153,13 +151,13 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     logger: globals.logger,
     processManager: globals.processManager,
   );
-  final String cmakePath = visualStudio.cmakePath;
+  final String? cmakePath = visualStudio.cmakePath;
   if (cmakePath == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final String buildModeName = getNameForBuildMode(buildInfo.mode);
   final Status status = globals.logger.startProgress(
     'Building Windows UWP application...',
   );
@@ -180,21 +178,22 @@ const Map<BuildMode, String> _targets = <BuildMode, String>{
   BuildMode.release: 'release_bundle_windows_assets_uwp',
 };
 
-Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, String targetFile) async {
+Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, String? targetFile) async {
   await buildDirectory.create(recursive: true);
   int result;
-  String flutterEngine;
-  String localEngine;
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
+  String? flutterEngine;
+  String? localEngine;
+  final Artifacts artifacts = globals.artifacts!;
+  if (artifacts is LocalEngineArtifacts) {
+    final String engineOutPath = artifacts.engineOutPath;
     flutterEngine = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     localEngine = globals.fs.path.basename(engineOutPath);
   }
   try {
+    final String? buildMode = _targets[buildInfo.mode];
     result = await globals.processUtils.stream(
       <String>[
-        globals.fs.path.join(Cache.flutterRoot, 'bin', 'flutter'),
+        globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
         if (globals.logger.isVerbose)
           '--verbose',
         if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
@@ -220,7 +219,8 @@ Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, Str
           '--ExtraGenSnapshotOptions=${buildInfo.extraGenSnapshotOptions}',
         if (buildInfo.extraFrontEndOptions != null && buildInfo.extraFrontEndOptions.isNotEmpty)
           '--ExtraFrontEndOptions=${buildInfo.extraFrontEndOptions}',
-        _targets[buildInfo.mode],
+        if (buildMode != null)
+          buildMode,
       ],
       trace: true,
     );
@@ -305,21 +305,21 @@ Future<void> _runBuild(
 void _writeGeneratedFlutterConfig(
   WindowsProject windowsProject,
   BuildInfo buildInfo,
-  String target,
+  String? target,
 ) {
   final Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_ROOT': Cache.flutterRoot!,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
     if (target != null)
       'FLUTTER_TARGET': target,
     ...buildInfo.toEnvironmentConfig(),
   };
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
+  final Artifacts artifacts = globals.artifacts!;
+  if (artifacts is LocalEngineArtifacts) {
+    final String engineOutPath = artifacts.engineOutPath;
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, environment);
 }
