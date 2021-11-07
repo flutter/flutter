@@ -13,7 +13,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -75,6 +75,9 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   String get name => 'downgrade';
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -19,7 +19,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
-final SystemClock _testClock = SystemClock.fixed(DateTime(2015, 1, 1));
+final SystemClock _testClock = SystemClock.fixed(DateTime(2015));
 final DateTime _stampUpToDate = _testClock.ago(checkAgeConsideredUpToDate ~/ 2);
 final DateTime _stampOutOfDate = _testClock.ago(checkAgeConsideredUpToDate * 2);
 
@@ -477,7 +477,7 @@ void main() {
       <FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'tag', '--points-at', 'HEAD'],
-          stdout: '', // no tag
+          // no output, since there's no tag
         ),
         const FakeCommand(
           command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],

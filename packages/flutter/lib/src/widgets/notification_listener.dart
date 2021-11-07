@@ -28,69 +28,14 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// widgets with the appropriate type parameters that are ancestors of the given
 /// [BuildContext].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// This example shows a [NotificationListener] widget
 /// that listens for [ScrollNotification] notifications. When a scroll
 /// event occurs in the [NestedScrollView],
 /// this widget is notified. The events could be either a
 /// [ScrollStartNotification]or[ScrollEndNotification].
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-/// const List<String> _tabs = <String>['Months', 'Days'];
-/// const List<String> _months = <String>[ 'January','February','March', ];
-/// const List<String> _days = <String>[ 'Sunday', 'Monday','Tuesday', ];
-///   return DefaultTabController(
-///     length: _tabs.length,
-///     child: Scaffold(
-///       // Listens to the scroll events and returns the current position.
-///       body: NotificationListener<ScrollNotification>(
-///         onNotification: (ScrollNotification scrollNotification) {
-///           if (scrollNotification is ScrollStartNotification) {
-///             print('Scrolling has started');
-///           } else if (scrollNotification is ScrollEndNotification) {
-///             print('Scrolling has ended');
-///           }
-///           // Return true to cancel the notification bubbling.
-///           return true;
-///         },
-///         child: NestedScrollView(
-///           headerSliverBuilder:
-///               (BuildContext context, bool innerBoxIsScrolled) {
-///             return <Widget>[
-///               SliverAppBar(
-///                 title: const Text('Flutter Code Sample'),
-///                 pinned: true,
-///                 floating: true,
-///                 bottom: TabBar(
-///                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
-///                 ),
-///               ),
-///             ];
-///           },
-///           body: TabBarView(
-///             children: <Widget>[
-///               ListView.builder(
-///                 itemCount: _months.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text(_months[index]));
-///                 },
-///               ),
-///               ListView.builder(
-///                 itemCount: _days.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text(_days[index]));
-///                 },
-///               ),
-///            ],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/notification_listener/notification.0.dart **
 /// {@end-tool}
 ///
 /// See also:

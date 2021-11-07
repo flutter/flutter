@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithScreenshotDelegate:(nullable id<FLTIntegrationTestScreenshotDelegate>)delegate NS_DESIGNATED_INITIALIZER;
 
 /**
- * Initate dart tests and wait for results.  @c testResult will be set to a string describing the results.
+ * Initiate dart tests and wait for results.  @c testResult will be set to a string describing the results.
  *
  * @return @c YES if all tests succeeded.
  */

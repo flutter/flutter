@@ -51,7 +51,7 @@ class WebTestCompiler {
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     HostArtifact platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
-    // TODO(jonahwilliams): to support autodetect this would need to partition the source code into a
+    // TODO(zanderso): to support autodetect this would need to partition the source code into a
     // a sound and unsound set and perform separate compilations.
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
     if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {

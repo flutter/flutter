@@ -18,7 +18,7 @@ import 'base/process.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -119,7 +119,6 @@ class PubDependencies extends ArtifactSet {
     await _pub().get(
       context: PubContext.pubGet,
       directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
-      generateSyntheticPackage: false,
     );
   }
 }
@@ -197,6 +196,14 @@ class FlutterWebSdk extends CachedArtifact {
         entity.copySync(newPath);
       }
     }
+
+    final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
+    final String canvasKitUrl = '$_cipdBaseUrl/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
+    return artifactUpdater.downloadZipArchive(
+      'Downloading CanvasKit...',
+      Uri.parse(canvasKitUrl),
+      location,
+    );
   }
 }
 
@@ -843,7 +850,7 @@ class IosUsbArtifacts extends CachedArtifact {
   Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
-// TODO(jonahwilliams): upload debug desktop artifacts to host-debug and
+// TODO(zanderso): upload debug desktop artifacts to host-debug and
 // remove from existing host folder.
 // https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[

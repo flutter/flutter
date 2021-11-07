@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
+import 'drawer_theme.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -139,19 +140,36 @@ class Drawer extends StatelessWidget {
   /// The [elevation] must be non-negative.
   const Drawer({
     Key? key,
-    this.elevation = 16.0,
+    this.backgroundColor,
+    this.elevation,
+    this.shape,
     this.child,
     this.semanticLabel,
-  }) : assert(elevation != null && elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
        super(key: key);
+
+  /// Sets the color of the [Material] that holds all of the [Drawer]'s
+  /// contents.
+  ///
+  /// If this is null, then [DrawerThemeData.backgroundColor] is used. If that
+  /// is also null, then it falls back to [Material]'s default.
+  final Color? backgroundColor;
 
   /// The z-coordinate at which to place this drawer relative to its parent.
   ///
   /// This controls the size of the shadow below the drawer.
   ///
-  /// Defaults to 16, the appropriate elevation for drawers. The value is
-  /// always non-negative.
-  final double elevation;
+  /// If this is null, then [DrawerThemeData.elevation] is used. If that
+  /// is also null, then it defaults to 16.0.
+  final double? elevation;
+
+  /// The shape of the drawer.
+  ///
+  /// Defines the drawer's [Material.shape].
+  ///
+  /// If this is null, then [DrawerThemeData.shape] is used. If that
+  /// is also null, then it falls back to [Material]'s default.
+  final ShapeBorder? shape;
 
   /// The widget below this widget in the tree.
   ///
@@ -175,6 +193,7 @@ class Drawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -194,7 +213,9 @@ class Drawer extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: Material(
-          elevation: elevation,
+          color: backgroundColor ?? drawerTheme.backgroundColor,
+          elevation: elevation ?? drawerTheme.elevation ?? 16.0,
+          shape: shape ?? drawerTheme.shape,
           child: child,
         ),
       ),
@@ -277,9 +298,11 @@ class DrawerController extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
-  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  /// The color to use for the scrim that obscures the underlying content while
+  /// a drawer is open.
   ///
-  /// By default, the color used is [Colors.black54]
+  /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
+  /// is also null, then it defaults to [Colors.black54].
   final Color? scrimColor;
 
   /// Determines if the [Drawer] can be opened with a drag gesture.
@@ -317,7 +340,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _scrimColorTween = _buildScrimColorTween();
     _controller = AnimationController(
       value: widget.isDrawerOpen ? 1.0 : 0.0,
       duration: _kBaseSettleDuration,
@@ -336,6 +358,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scrimColorTween = _buildScrimColorTween();
+  }
+
+  @override
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
@@ -346,7 +374,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
           break;
-        default:
+        case AnimationStatus.forward:
+        case AnimationStatus.reverse:
           break;
       }
     }
@@ -478,7 +507,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ///
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
-    _controller.fling(velocity: 1.0);
+    _controller.fling();
     widget.drawerCallback?.call(true);
   }
 
@@ -492,7 +521,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   ColorTween _buildScrimColorTween() {
-    return ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54);
+    return ColorTween(
+      begin: Colors.transparent,
+      end: widget.scrimColor
+          ?? DrawerTheme.of(context).scrimColor
+          ?? Colors.black54,
+    );
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
@@ -586,7 +620,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: MouseRegion(
-                        opaque: true,
                         child: Container( // The drawer's "scrim"
                           color: _scrimColorTween.evaluate(_controller),
                         ),

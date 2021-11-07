@@ -1127,8 +1127,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_cupertino}
-///
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Cupertino modal route.
 /// This is accomplished by enabling state restoration by specifying
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1136,47 +1135,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Home'),
-///     ),
-///     child: Center(child: CupertinoButton(
-///       onPressed: () {
-///         Navigator.of(context).restorablePush(_modalBuilder);
-///       },
-///       child: const Text('Open Modal'),
-///     )),
-///   );
-/// }
-///
-/// static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
-///   return CupertinoModalPopupRoute<void>(
-///     builder: (BuildContext context) {
-///       return CupertinoActionSheet(
-///         title: const Text('Title'),
-///         message: const Text('Message'),
-///         actions: <CupertinoActionSheetAction>[
-///           CupertinoActionSheetAction(
-///             child: const Text('Action One'),
-///             onPressed: () {
-///               Navigator.pop(context);
-///             },
-///           ),
-///           CupertinoActionSheetAction(
-///             child: const Text('Action Two'),
-///             onPressed: () {
-///               Navigator.pop(context);
-///             },
-///           ),
-///         ],
-///       );
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/cupertino/route/show_cupertino_modal_popup.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1268,8 +1227,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_cupertino}
-///
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Cupertino dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1277,38 +1235,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     navigationBar: const CupertinoNavigationBar(
-///       middle: Text('Home'),
-///     ),
-///     child: Center(child: CupertinoButton(
-///       onPressed: () {
-///         Navigator.of(context).restorablePush(_dialogBuilder);
-///       },
-///       child: const Text('Open Dialog'),
-///     )),
-///   );
-/// }
-///
-/// static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
-///   return CupertinoDialogRoute<void>(
-///     context: context,
-///     builder: (BuildContext context) {
-///       return const CupertinoAlertDialog(
-///         title: Text('Title'),
-///         content: Text('Content'),
-///         actions: <Widget>[
-///           CupertinoDialogAction(child: Text('Yes')),
-///           CupertinoDialogAction(child: Text('No')),
-///         ],
-///       );
-///     },
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/cupertino/route/show_cupertino_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -240,7 +240,7 @@ void main() {
         ),
       ],
       columnWidths: const <int, TableColumnWidth>{
-        0: FlexColumnWidth(1.0),
+        0: FlexColumnWidth(),
         1: FlexColumnWidth(0.123),
         2: FlexColumnWidth(0.123),
         3: FlexColumnWidth(0.123),
@@ -257,7 +257,7 @@ void main() {
   test('Table paints a borderRadius', () {
     final RenderTable table = RenderTable(
       textDirection: TextDirection.ltr,
-      border: TableBorder.all(borderRadius: BorderRadius.circular(8.0)),
+      border: TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0))),
     );
     layout(table);
     table.setFlatChildren(2, <RenderBox>[

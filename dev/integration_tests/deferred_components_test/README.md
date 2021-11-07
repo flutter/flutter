@@ -1,5 +1,13 @@
 # Deferred components integration test app
 
+## Setup
+
+This integration test app requires manually downloading additional assets to build. Run
+
+`./download_assets.sh`
+
+before running any of the tests.
+
 ## Tests
 
 This app contains two sets of tests:

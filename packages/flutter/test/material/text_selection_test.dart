@@ -2,36 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
-
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments as Object;
-        break;
-    }
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          SystemChannels.platform,
+          mockClipboard.handleMethodCall,
+        );
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
   });
 
   group('canSelectAll', () {
@@ -566,7 +568,7 @@ void main() {
                   padding: const EdgeInsets.symmetric(horizontal: 250),
                   child: FittedBox(
                     child: materialTextSelectionControls.buildHandle(
-                      context, TextSelectionHandleType.right, 10.0, null,
+                      context, TextSelectionHandleType.right, 10.0,
                     ),
                   ),
                 ),
@@ -670,60 +672,5 @@ void main() {
   },
     skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
-  );
-
-  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
-  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                controller: controller,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    // Make sure the clipboard is empty.
-    await Clipboard.setData(const ClipboardData(text: ''));
-
-    // Double tap to select the first word.
-    const int index = 4;
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    // Paste is showing even though clipboard is empty.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-
-    // Tap copy to add something to the clipboard and close the menu.
-    await tester.tapAt(tester.getCenter(find.text('Copy')));
-    await tester.pumpAndSettle();
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-
-    // Double tap to show the menu again.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    // Paste still shows.
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
-  },
-    skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })
   );
 }

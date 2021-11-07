@@ -33,6 +33,7 @@ void main() {
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
+        '--verbose',
         '--platforms=ios',
         '-i',
         'objc',
@@ -191,6 +192,9 @@ void main() {
               // Skip bitcode stripping since we just checked that above.
             },
           );
+          printOnFailure('Output of xcode_backend.sh:');
+          printOnFailure(xcodeBackendResult.stdout.toString());
+          printOnFailure(xcodeBackendResult.stderr.toString());
 
           expect(xcodeBackendResult.exitCode, 0);
           expect(outputFlutterFrameworkBinary.existsSync(), isTrue);

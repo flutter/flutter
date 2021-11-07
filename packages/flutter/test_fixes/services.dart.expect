@@ -12,6 +12,12 @@ void main() {
       layoutDirection: TextDirection.ltr,
   );
   int viewId = surfaceController.viewId;
+  final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
+    error: '',
+  );
+  final TextureAndroidViewController textureController = TextureAndroidViewController(
+    error: '',
+  );
   final TextureAndroidViewController textureController = TextureAndroidViewController(
     viewId: 10,
     viewType: 'FixTester',
@@ -24,4 +30,5 @@ void main() {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.bottom]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, error: '');
 }

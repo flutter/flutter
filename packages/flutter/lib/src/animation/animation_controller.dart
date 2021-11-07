@@ -33,7 +33,6 @@ enum _AnimationDirection {
 final SpringDescription _kFlingSpringDescription = SpringDescription.withDampingRatio(
   mass: 1.0,
   stiffness: 500.0,
-  ratio: 1.0,
 );
 
 const Tolerance _kFlingTolerance = Tolerance(
@@ -693,7 +692,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance!.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(jonahwilliams): determine a better process for setting velocity.
+          // TODO(zanderso): determine a better process for setting velocity.
           // the value below was arbitrarily chosen because it worked for the drawer widget.
           scale = 200.0;
           break;

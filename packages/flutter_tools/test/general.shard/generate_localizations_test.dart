@@ -823,8 +823,6 @@ flutter:
         preferredSupportedLocales: <String>['en_US'],
         templateArbFile: Uri.file('example.arb', windows: false),
         untranslatedMessagesFile: Uri.file('untranslated', windows: false),
-        // Set synthetic package to true.
-        useSyntheticPackage: true,
       );
 
       expect(
@@ -1942,6 +1940,46 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+
+      testWithoutContext('should throw attempting to generate a select message with an incorrect message', () {
+        const String selectMessageWithoutPlaceholdersAttribute = '''
+{
+  "genderSelect": "{gender, select,}",
+  "@genderSelect": {
+    "placeholders": {
+      "gender": {}
+    }
+  }
+}''';
+
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            )
+              ..loadResources()
+              ..writeOutputFiles(BufferLogger.test());
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            allOf(
+              contains('Incorrect select message format for'),
+              contains('Check to see if the select message is in the proper ICU syntax format.'),
+            ),
+          )),
+        );
+      });
     });
 
     testWithoutContext('intl package import should be omitted in subclass files when no plurals are included', () {
@@ -2056,7 +2094,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
-        useDeferredLoading: false,
       )
         ..loadResources()
         ..writeOutputFiles(BufferLogger.test());
@@ -2113,7 +2150,6 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
-        useDeferredLoading: false,
       )
         ..loadResources()
         ..writeOutputFiles(BufferLogger.test());

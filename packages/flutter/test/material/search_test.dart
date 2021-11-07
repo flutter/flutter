@@ -7,23 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
-
-class MockClipboard {
-  dynamic _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -336,7 +321,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -350,7 +334,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -372,7 +355,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
 
     // runs while search fades in
@@ -804,10 +786,7 @@ void main() {
   testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading] and [buildActions].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(
@@ -846,10 +825,7 @@ void main() {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[rootObserver],

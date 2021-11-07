@@ -54,7 +54,7 @@ enum StretchMode {
 /// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
 /// [FlexibleSpaceBar].
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample application demonstrates the different features of the
 /// [FlexibleSpaceBar] when used in a [SliverAppBar]. This app bar is configured
 /// to stretch into the overscroll space, and uses the
@@ -62,83 +62,7 @@ enum StretchMode {
 /// `zoomBackground`. The app bar also makes use of [CollapseMode.parallax] by
 /// default.
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-/// ```dart
-/// void main() => runApp(const MaterialApp(home: MyApp()));
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       body: CustomScrollView(
-///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-///         slivers: <Widget>[
-///           SliverAppBar(
-///             stretch: true,
-///             onStretchTrigger: () {
-///               // Function callback for stretch
-///               return Future<void>.value();
-///             },
-///             expandedHeight: 300.0,
-///             flexibleSpace: FlexibleSpaceBar(
-///               stretchModes: const <StretchMode>[
-///                 StretchMode.zoomBackground,
-///                 StretchMode.blurBackground,
-///                 StretchMode.fadeTitle,
-///               ],
-///               centerTitle: true,
-///               title: const Text('Flight Report'),
-///               background: Stack(
-///                 fit: StackFit.expand,
-///                 children: <Widget>[
-///                   Image.network(
-///                     'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-///                     fit: BoxFit.cover,
-///                   ),
-///                   const DecoratedBox(
-///                     decoration: BoxDecoration(
-///                       gradient: LinearGradient(
-///                         begin: Alignment(0.0, 0.5),
-///                         end: Alignment.center,
-///                         colors: <Color>[
-///                           Color(0x60000000),
-///                           Color(0x00000000),
-///                         ],
-///                       ),
-///                     ),
-///                   ),
-///                 ],
-///               ),
-///             ),
-///           ),
-///           SliverList(
-///             delegate: SliverChildListDelegate(
-///               const <Widget>[
-///                 ListTile(
-///                   leading: Icon(Icons.wb_sunny),
-///                   title: Text('Sunday'),
-///                   subtitle: Text('sunny, h: 80, l: 65'),
-///                 ),
-///                 ListTile(
-///                   leading: Icon(Icons.wb_sunny),
-///                   title: Text('Monday'),
-///                   subtitle: Text('sunny, h: 80, l: 65'),
-///                 ),
-///                 // ListTiles++
-///               ],
-///             ),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-///
-/// ```
+/// ** See code in examples/api/lib/material/flexible_space_bar/flexible_space_bar.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -158,7 +82,9 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
+    this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
+       assert(expandedTitleScale >= 1),
        super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
@@ -198,6 +124,14 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
   /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
   final EdgeInsetsGeometry? titlePadding;
+
+  /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
+  /// due to the user scrolling downwards. The title is scaled uniformly on the
+  /// x and y axes while maintaining its bottom-left position (bottom-center if
+  /// [centerTitle] is true).
+  ///
+  /// Defaults to 1.5 and must be greater than 1.
+  final double expandedTitleScale;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -393,7 +327,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 start: effectiveCenterTitle ? 0.0 : 72.0,
                 bottom: 16.0,
               );
-            final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+            final double scaleValue = Tween<double>(begin: widget.expandedTitleScale, end: 1.0).transform(t);
             final Matrix4 scaleTransform = Matrix4.identity()
               ..scale(scaleValue, scaleValue, 1.0);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);

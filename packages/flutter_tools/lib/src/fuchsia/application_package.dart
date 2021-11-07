@@ -5,7 +5,7 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 abstract class FuchsiaApp extends ApplicationPackage {
@@ -48,7 +48,7 @@ class PrebuiltFuchsiaApp extends FuchsiaApp {
   PrebuiltFuchsiaApp({
     required String farArchive,
   }) : _farArchive = farArchive,
-       // TODO(zra): Extract the archive and extract the id from meta/package.
+       // TODO(zanderso): Extract the archive and extract the id from meta/package.
        super(projectBundleId: farArchive);
 
   final String _farArchive;
@@ -68,7 +68,7 @@ class BuildableFuchsiaApp extends FuchsiaApp {
 
   @override
   File farArchive(BuildMode buildMode) {
-    // TODO(zra): Distinguish among build modes.
+    // TODO(zanderso): Distinguish among build modes.
     final String outDir = getFuchsiaBuildDirectory();
     final String pkgDir = globals.fs.path.join(outDir, 'pkg');
     final String appName = project.project.manifest.appName;

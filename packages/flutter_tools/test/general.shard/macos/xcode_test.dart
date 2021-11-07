@@ -148,7 +148,7 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(12, 3, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
@@ -162,21 +162,21 @@ void main() {
 
         testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 0);
+          xcodeProjectInterpreter.version = Version(12, 5, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 2);
+          xcodeProjectInterpreter.version = Version(12, 3, 1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(11, 0, 0);
+          xcodeProjectInterpreter.version = Version(12, null, null);
 
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
@@ -189,28 +189,28 @@ void main() {
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(13, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
+          xcodeProjectInterpreter.version = Version(14, 0, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 0);
+          xcodeProjectInterpreter.version = Version(13, 3, 0);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 2);
+          xcodeProjectInterpreter.version = Version(13, 0, 2);
 
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
@@ -232,7 +232,7 @@ void main() {
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 0, 1);
+          xcodeProjectInterpreter.version = Version(12, 3, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -326,7 +326,7 @@ void main() {
           processManager: fakeProcessManager,
           logger: logger,
           xcode: xcode,
-          platform: null,
+          platform: FakePlatform(operatingSystem: 'macos'),
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
@@ -354,7 +354,7 @@ void main() {
           processManager: fakeProcessManager,
           logger: logger,
           xcode: xcode,
-          platform: null,
+          platform: FakePlatform(operatingSystem: 'macos'),
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
@@ -677,6 +677,19 @@ void main() {
           expect(await devices[0].sdkNameAndVersion,'iOS 13.3 17C54');
           expect(await devices[1].sdkNameAndVersion,'iOS 10.1');
           expect(await devices[2].sdkNameAndVersion,'iOS unknown version');
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+        });
+
+        testUsingContext('handles bad output',()  async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: 'Something bad happened, not JSON',
+          ));
+
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, isEmpty);
+          expect(logger.errorText, contains('xcdevice returned non-JSON response'));
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });

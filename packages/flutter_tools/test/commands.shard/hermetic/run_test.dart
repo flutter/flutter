@@ -258,7 +258,7 @@ void main() {
 
       testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
-        final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.ios, sdkNameAndVersion: 'iOS 13')
+        final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
           ..startAppSuccess = false;
 
         mockDeviceManager
@@ -302,7 +302,7 @@ void main() {
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.ios)];
+      mockDeviceManager.devices = <Device>[FakeDevice()];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -310,7 +310,7 @@ void main() {
       }));
 
       mockDeviceManager.devices = <Device>[
-        FakeDevice(targetPlatform: TargetPlatform.ios),
+        FakeDevice(),
         FakeDevice(targetPlatform: TargetPlatform.android_arm),
       ];
 
@@ -475,6 +475,9 @@ class TestRunCommand extends RunCommand {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({bool isLocalEmulator = false, TargetPlatform targetPlatform = TargetPlatform.ios, String sdkNameAndVersion = ''})
    : _isLocalEmulator = isLocalEmulator,

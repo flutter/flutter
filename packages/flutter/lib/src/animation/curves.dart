@@ -222,15 +222,73 @@ class Threshold extends Curve {
 ///
 /// The [Curves] class contains some commonly used cubic curves:
 ///
+///  * [Curves.fastLinearToSlowEaseIn]
 ///  * [Curves.ease]
 ///  * [Curves.easeIn]
+///  * [Curves.easeInToLinear]
+///  * [Curves.easeInSine]
+///  * [Curves.easeInQuad]
+///  * [Curves.easeInCubic]
+///  * [Curves.easeInQuart]
+///  * [Curves.easeInQuint]
+///  * [Curves.easeInExpo]
+///  * [Curves.easeInCirc]
+///  * [Curves.easeInBack]
 ///  * [Curves.easeOut]
+///  * [Curves.linearToEaseOut]
+///  * [Curves.easeOutSine]
+///  * [Curves.easeOutQuad]
+///  * [Curves.easeOutCubic]
+///  * [Curves.easeOutQuart]
+///  * [Curves.easeOutQuint]
+///  * [Curves.easeOutExpo]
+///  * [Curves.easeOutCirc]
+///  * [Curves.easeOutBack]
 ///  * [Curves.easeInOut]
+///  * [Curves.easeInOutSine]
+///  * [Curves.easeInOutQuad]
+///  * [Curves.easeInOutCubic]
+///  * [Curves.easeInOutQuart]
+///  * [Curves.easeInOutQuint]
+///  * [Curves.easeInOutExpo]
+///  * [Curves.easeInOutCirc]
+///  * [Curves.easeInOutBack]
+///  * [Curves.fastOutSlowIn]
+///  * [Curves.slowMiddle]
 ///
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_to_linear.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_back.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear_to_ease_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_back.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_back.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
 ///
 /// The [Cubic] class implements third-order Bézier curves.
 ///
@@ -408,105 +466,11 @@ class ThreePointCubic extends Curve {
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to use a [Curve2D] to modify the position of a widget
 /// so that it can follow an arbitrary path.
 ///
-/// ```dart preamble
-/// // This is the path that the child will follow. It's a CatmullRomSpline so
-/// // that the coordinates can be specified that it must pass through. If the
-/// // tension is set to 1.0, it will linearly interpolate between those points,
-/// // instead of interpolating smoothly.
-/// final CatmullRomSpline path = CatmullRomSpline(
-///   const <Offset>[
-///     Offset(0.05, 0.75),
-///     Offset(0.18, 0.23),
-///     Offset(0.32, 0.04),
-///     Offset(0.73, 0.5),
-///     Offset(0.42, 0.74),
-///     Offset(0.73, 0.01),
-///     Offset(0.93, 0.93),
-///     Offset(0.05, 0.75),
-///   ],
-///   startHandle: const Offset(0.93, 0.93),
-///   endHandle: const Offset(0.18, 0.23),
-///   tension: 0.0,
-/// );
-///
-/// class FollowCurve2D extends StatefulWidget {
-///   const FollowCurve2D({
-///     Key? key,
-///     required this.path,
-///     this.curve = Curves.easeInOut,
-///     required this.child,
-///     this.duration = const Duration(seconds: 1),
-///   }) : super(key: key);
-///
-///   final Curve2D path;
-///   final Curve curve;
-///   final Duration duration;
-///   final Widget child;
-///
-///   @override
-///   State<FollowCurve2D> createState() => _FollowCurve2DState();
-/// }
-///
-/// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
-///   // The animation controller for this animation.
-///   late AnimationController controller;
-///   // The animation that will be used to apply the widget's animation curve.
-///   late Animation<double> animation;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     controller = AnimationController(duration: widget.duration, vsync: this);
-///     animation = CurvedAnimation(parent: controller, curve: widget.curve);
-///     // Have the controller repeat indefinitely.  If you want it to "bounce" back
-///     // and forth, set the reverse parameter to true.
-///     controller.repeat(reverse: false);
-///     controller.addListener(() => setState(() {}));
-///   }
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     // Always have to dispose of animation controllers when done.
-///     controller.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
-///     final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
-///     return Align(
-///       alignment: Alignment(position.dx, position.dy),
-///       child: widget.child,
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-///   Widget build(BuildContext context) {
-///     return Container(
-///       color: Colors.white,
-///       alignment: Alignment.center,
-///       child: FollowCurve2D(
-///         path: path,
-///         curve: Curves.easeInOut,
-///         duration: const Duration(seconds: 3),
-///         child: CircleAvatar(
-///           backgroundColor: Colors.yellow,
-///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.headline6!,
-///             child: const Text('B'), // Buzz, buzz!
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// ```
+/// ** See code in examples/api/lib/animation/curves/curve2_d.0.dart **
 /// {@end-tool}
 ///
 abstract class Curve2D extends ParametricCurve<Offset> {
@@ -925,7 +889,7 @@ class CatmullRomCurve extends Curve {
       // and (1, 1), respectively.
       <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)],
       tension: tension,
-    ).generateSamples(start: 0.0, end: 1.0, tolerance: 1e-12).toList();
+    ).generateSamples(tolerance: 1e-12).toList();
   }
 
   /// A static accumulator for assertion failures. Not used in release mode.

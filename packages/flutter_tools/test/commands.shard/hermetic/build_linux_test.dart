@@ -28,7 +28,6 @@ import '../../src/test_flutter_command_runner.dart';
 const String _kTestFlutterRoot = '/flutter';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': _kTestFlutterRoot,
     'HOME': '/',
@@ -79,7 +78,7 @@ void main() {
         'cmake',
         '-G',
         'Ninja',
-        '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
+        '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-$target',
         '/linux',
       ],
@@ -149,7 +148,7 @@ void main() {
     Platform: () => linuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
@@ -493,13 +492,13 @@ set(BINARY_NAME "fizz_bar")
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']),
       throwsToolExit());
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
     expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Platform: () => notLinuxPlatform,
   });
 

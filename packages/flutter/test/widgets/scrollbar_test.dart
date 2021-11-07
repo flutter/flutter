@@ -259,7 +259,6 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
 
     for (final ScrollbarOrientation scrollbarOrientation in ScrollbarOrientation.values) {
       final AxisDirection axisDirection;
@@ -269,7 +268,6 @@ void main() {
         axisDirection = AxisDirection.right;
 
       painter = _buildPainter(
-        crossAxisMargin: margin,
         scrollMetrics: startingMetrics,
         scrollbarOrientation: scrollbarOrientation,
       );
@@ -319,14 +317,11 @@ void main() {
       viewportDimension: viewportDimension,
     );
     const Size size = Size(600, viewportDimension);
-    const double margin = 0;
     Rect rect;
 
     // Vertical scroll with TextDirection.ltr
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
-      textDirection: TextDirection.ltr,
     );
     painter.update(
       startingMetrics.copyWith(axisDirection: AxisDirection.down),
@@ -341,7 +336,6 @@ void main() {
 
     // Vertical scroll with TextDirection.rtl
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
       textDirection: TextDirection.rtl,
     );
@@ -358,7 +352,6 @@ void main() {
 
     // Horizontal scroll
     painter = _buildPainter(
-      crossAxisMargin: margin,
       scrollMetrics: startingMetrics,
     );
     painter.update(
@@ -883,6 +876,41 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar will show on hover without needing to scroll first for metrics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: RawScrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Hover over scrollbar with mouse. Even though we have not scrolled, the
+    // ScrollMetricsNotification will have informed the Scrollbar's hit testing.
+    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await mouseGesture.addPointer();
+    addTearDown(mouseGesture.removePointer);
+    await mouseGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+    // Scrollbar should have appeared in response to hover event.
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -989,6 +1017,139 @@ void main() {
         ),
     );
   });
+
+  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            // Don't apply a scrollbar automatically for this test.
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Try to drag the thumb into overscroll.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // The platform drag handling should not have allowed us to enter overscroll.
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Scrollbar thumb can be dragged into overscroll if the platform allows it', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            // Don't apply a scrollbar automatically for this test.
+            behavior: const ScrollBehavior().copyWith(
+              scrollbars: false,
+              physics: const AlwaysScrollableScrollPhysics(),
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                isAlwaysShown: true,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    // Try to drag the thumb into overscroll.
+    const double scrollAmount = -10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    // The platform drag handling should have allowed us to enter overscroll.
+    expect(scrollController.offset, lessThan(-66.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          // The size of the scrollbar thumb shrinks when overscrolling
+          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 80.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+  }));
 
   // Regression test for https://github.com/flutter/flutter/issues/66444
   testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
@@ -1445,6 +1606,7 @@ void main() {
         ),
     );
   });
+
   testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
@@ -1488,10 +1650,48 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 580.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
+
+  testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))
+            ),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..path(
+          includes: const <Offset>[
+            Offset(797.0, 0.0),
+            Offset(797.0, 18.0),
+          ],
+          excludes: const <Offset>[
+            Offset(796.0, 0.0),
+            Offset(798.0, 0.0),
+          ],
+        ),
+    );
+  });
+
   testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1518,6 +1718,42 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
   });
 
+  testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            shape: const CircleBorder(side: BorderSide(width: 2.0)),
+            thickness: 36.0,
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0, width: 1000),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(782.0, 180.0),
+            Offset(782.0, 180.0 - 18.0),
+            Offset(782.0 + 18.0, 180),
+            Offset(782.0, 180.0 + 18.0),
+            Offset(782.0 - 18.0, 180),
+          ],
+        )
+        ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0)
+    );
+  });
+
   testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1541,6 +1777,40 @@ void main() {
         paints
           ..rect(rect: const Rect.fromLTRB(734.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
+  });
+
+  testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thickness: 20,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0, width: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
+        ..path(
+          includes: const <Offset>[
+            Offset(800.0, 0.0),
+          ],
+          excludes: const <Offset>[
+            Offset(780.0, 0.0),
+          ],
+        ),
+    );
   });
 
   testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
@@ -1573,6 +1843,32 @@ void main() {
         paints
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
+  });
+
+  testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 1000.0),
+            ),
+          ),
+        )));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 360.0))
+    );
   });
 
   testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
@@ -1740,5 +2036,57 @@ void main() {
     expect(depths.length, 2);
     expect(depths[0], 1);
     expect(depths[1], 0);
+  });
+
+  test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
+    ScrollbarPainter createPainter({
+      Color color = const Color(0xFF000000),
+      Animation<double> fadeoutOpacityAnimation = kAlwaysCompleteAnimation,
+      Color trackColor = const Color(0x00000000),
+      Color trackBorderColor = const Color(0x00000000),
+      TextDirection textDirection = TextDirection.ltr,
+      double thickness = _kThickness,
+      EdgeInsets padding = EdgeInsets.zero,
+      double mainAxisMargin = 0.0,
+      double crossAxisMargin = 0.0,
+      Radius? radius,
+      OutlinedBorder? shape,
+      double minLength = _kMinThumbExtent,
+      double? minOverscrollLength,
+      ScrollbarOrientation scrollbarOrientation = ScrollbarOrientation.top,
+    }) {
+      return ScrollbarPainter(
+        color: color,
+        fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+        trackColor: trackColor,
+        trackBorderColor: trackBorderColor,
+        textDirection: textDirection,
+        thickness: thickness,
+        padding: padding,
+        mainAxisMargin: mainAxisMargin,
+        crossAxisMargin: crossAxisMargin,
+        radius: radius,
+        shape: shape,
+        minLength: minLength,
+        minOverscrollLength: minOverscrollLength,
+        scrollbarOrientation: scrollbarOrientation,
+      );
+    }
+    final ScrollbarPainter painter = createPainter();
+    expect(painter.shouldRepaint(createPainter()), false);
+    expect(painter.shouldRepaint(createPainter(color: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(fadeoutOpacityAnimation: kAlwaysDismissedAnimation)), true);
+    expect(painter.shouldRepaint(createPainter(trackColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(trackBorderColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(textDirection: TextDirection.rtl)), true);
+    expect(painter.shouldRepaint(createPainter(thickness: _kThickness + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(padding: const EdgeInsets.all(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(mainAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(crossAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(radius: const Radius.circular(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(shape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
+    expect(painter.shouldRepaint(createPainter(minLength: _kMinThumbExtent + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(minOverscrollLength: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
   });
 }

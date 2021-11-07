@@ -1325,7 +1325,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is
-/// not in contact with the device, and entered a target object.
+/// not in contact with the device, and exited a target object.
 ///
 /// See also:
 ///

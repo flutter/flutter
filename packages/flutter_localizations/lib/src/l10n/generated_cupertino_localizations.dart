@@ -12656,7 +12656,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'пп';
 
   @override
-  String get searchTextFieldPlaceholderLabel => 'Пошук';
+  String get searchTextFieldPlaceholderLabel => 'Шукайте';
 
   @override
   String get selectAllButtonLabel => 'Вибрати все';
