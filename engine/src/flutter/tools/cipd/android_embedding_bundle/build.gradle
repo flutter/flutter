@@ -44,7 +44,6 @@ android {
     embedding "androidx.core:core:1.6.0"
     embedding "androidx.fragment:fragment:1.1.0"
     embedding "androidx.tracing:tracing:1.0.0"
-    embedding "androidx.window:window-java:1.0.0-beta03"
 
     def lifecycle_version = "2.2.0"
     embedding "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
