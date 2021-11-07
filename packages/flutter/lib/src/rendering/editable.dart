@@ -2405,17 +2405,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // TODO(LongCatIsLooong): include line boundaries information in
     // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
-    int line = 0;
-    double accumulatedHeight = 0;
     for (final ui.LineMetrics lineMetrics in metrics) {
-      if (accumulatedHeight + lineMetrics.height > offset.dy) {
-        return MapEntry<int, Offset>(line, Offset(offset.dx, lineMetrics.baseline));
+      if (lineMetrics.baseline + lineMetrics.descent > offset.dy) {
+        return MapEntry<int, Offset>(lineMetrics.lineNumber, Offset(offset.dx, lineMetrics.baseline));
       }
-      line += 1;
-      accumulatedHeight += lineMetrics.height;
     }
     assert(false, 'unable to find the line for $startPosition');
-    return MapEntry<int, Offset>(math.max(0, metrics.length - 1), Offset(offset.dx, accumulatedHeight));
+    return MapEntry<int, Offset>(
+      math.max(0, metrics.length - 1),
+      Offset(offset.dx, metrics.isNotEmpty ? metrics.last.baseline + metrics.last.descent : 0.0),
+    );
   }
 
   /// Starts a [VerticalCaretMovementRun] at the given location in the text, for
