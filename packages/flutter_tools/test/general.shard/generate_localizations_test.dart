@@ -751,7 +751,7 @@ void main() {
         arbDirectory: Uri.directory(defaultL10nPathString),
         deferredLoading: true,
         outputClass: 'Foo',
-        outputLocalizationsFile: Uri.file('bar', windows: false),
+        outputLocalizationsFile: Uri.file('bar.dart', windows: false),
         outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
         preferredSupportedLocales: <String>['es'],
         templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
@@ -773,7 +773,7 @@ void main() {
       expect(generator.inputDirectory.path, '/lib/l10n/');
       expect(generator.outputDirectory.path, '/lib/l10n/');
       expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
-      expect(generator.baseOutputFile.path, '/lib/l10n/bar');
+      expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
       expect(generator.className, 'Foo');
       expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
       expect(generator.header, 'HEADER');
@@ -790,7 +790,7 @@ void main() {
 HEADER
 
 
-import 'bar';
+import 'bar.dart';
 
 /// The translations for English (`en`).
 class FooEn extends Foo {

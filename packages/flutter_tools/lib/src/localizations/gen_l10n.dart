@@ -1189,12 +1189,12 @@ class LocalizationsGenerator {
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-    final List<String> fileParts = outputFileName.split('.');
-    if (fileParts.last != 'dart') {
-      fileParts.add('dart');
-    }
-    final String fileName = fileParts.first;
-    final String fileExtension = fileParts.skip(1).join('.');
+    final int extensionIndex = outputFileName.indexOf('.');
+    // TBD error checking and reporting:
+    // - expect a non-empty filename (not ".foo.dart" - extensionIndex == 0)
+    // - expect to find a final ".dart" suffix (not "foo" or "foo.dart.bar")
+    final String fileName = outputFileName.substring(0, extensionIndex);
+    final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
         final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
