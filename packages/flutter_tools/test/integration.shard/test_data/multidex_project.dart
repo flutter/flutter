@@ -162,7 +162,7 @@ class MultidexProject extends Project {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 31
+      compileSdkVersion 30
 
       compileOptions {
           sourceCompatibility JavaVersion.VERSION_1_8
