@@ -567,20 +567,6 @@ void main() {
         );
       });
 
-      test('compare properly awaits validation & output before failing.', () async {
-        final Future<bool> result = comparator.compare(
-          Uint8List.fromList(_kFailPngBytes),
-          Uri.parse('flutter.golden_test.1.png'),
-        );
-        await result.then<bool>((_) {
-          fail('Compare completed before validation completed!');
-        }).catchError((Object error) {
-          // compare should throw a FlutterError as the png's does not match
-          expect(error, isFlutterError);
-          return false;
-        });
-      });
-
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
         final FakeDirectory fakeDirectory = FakeDirectory();
         fakeDirectory.existsSyncValue = true;
