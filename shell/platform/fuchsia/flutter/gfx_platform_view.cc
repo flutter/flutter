@@ -253,9 +253,6 @@ void GfxPlatformView::OnScenicEvent(
         0.0f,  // p_physical_system_gesture_inset_bottom
         0.0f,  // p_physical_system_gesture_inset_left,
         -1.0,  // p_physical_touch_slop,
-        {},    // p_physical_display_features_bounds
-        {},    // p_physical_display_features_type
-        {},    // p_physical_display_features_state
     });
   }
 }

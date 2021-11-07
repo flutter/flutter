@@ -156,7 +156,6 @@ class ViewConfiguration {
     this.systemGestureInsets = WindowPadding.zero,
     this.padding = WindowPadding.zero,
     this.gestureSettings = const GestureSettings(),
-    this.displayFeatures = const <DisplayFeature>[],
   });
 
   ViewConfiguration copyWith({
@@ -169,7 +168,6 @@ class ViewConfiguration {
     WindowPadding? systemGestureInsets,
     WindowPadding? padding,
     GestureSettings? gestureSettings,
-    List<DisplayFeature>? displayFeatures,
   }) {
     return ViewConfiguration(
       window: window ?? this.window,
@@ -181,7 +179,6 @@ class ViewConfiguration {
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
       padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
-      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -194,7 +191,6 @@ class ViewConfiguration {
   final WindowPadding systemGestureInsets;
   final WindowPadding padding;
   final GestureSettings gestureSettings;
-  final List<DisplayFeature> displayFeatures;
 
   @override
   String toString() {
@@ -327,50 +323,6 @@ abstract class WindowPadding {
   String toString() {
     return 'WindowPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
   }
-}
-
-class DisplayFeature {
-  const DisplayFeature({
-    required this.bounds,
-    required this.type,
-    required this.state,
-  });
-
-  final Rect bounds;
-  final DisplayFeatureType type;
-  final DisplayFeatureState state;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DisplayFeature && bounds == other.bounds &&
-        type == other.type && state == other.state;
-  }
-
-  @override
-  int get hashCode => hashValues(bounds, type, state);
-
-  @override
-  String toString() {
-    return 'DisplayFeature(rect: $bounds, type: $type, state: $state)';
-  }
-}
-
-enum DisplayFeatureType {
-  unknown,
-  fold,
-  hinge,
-  cutout,
-}
-
-enum DisplayFeatureState {
-  unknown,
-  postureFlat,
-  postureHalfOpened,
-  postureFlipped,
 }
 
 class Locale {

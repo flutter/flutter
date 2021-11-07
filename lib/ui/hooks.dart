@@ -26,9 +26,6 @@ void _updateWindowMetrics(
   double systemGestureInsetBottom,
   double systemGestureInsetLeft,
   double physicalTouchSlop,
-  List<double> displayFeaturesBounds,
-  List<int> displayFeaturesType,
-  List<int> displayFeaturesState,
 ) {
   PlatformDispatcher.instance._updateWindowMetrics(
     id,
@@ -48,9 +45,6 @@ void _updateWindowMetrics(
     systemGestureInsetBottom,
     systemGestureInsetLeft,
     physicalTouchSlop,
-    displayFeaturesBounds,
-    displayFeaturesType,
-    displayFeaturesState,
   );
 }
 
