@@ -30,7 +30,7 @@ import 'icon_theme_data.dart';
 /// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
 /// modes like TalkBack and VoiceOver.
 ///
-/// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+/// ![The following code snippet would generate a row of icons consisting of a pink heart, a green musical note, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
 /// Row(
