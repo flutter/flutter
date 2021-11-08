@@ -126,8 +126,8 @@ public class FlutterNativeView implements BinaryMessenger {
 
   @Override
   @UiThread
-  public TaskQueue makeBackgroundTaskQueue() {
-    return dartExecutor.getBinaryMessenger().makeBackgroundTaskQueue();
+  public TaskQueue makeBackgroundTaskQueue(TaskQueueOptions options) {
+    return dartExecutor.getBinaryMessenger().makeBackgroundTaskQueue(options);
   }
 
   @Override
