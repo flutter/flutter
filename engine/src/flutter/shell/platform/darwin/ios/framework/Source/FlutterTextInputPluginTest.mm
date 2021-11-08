@@ -227,7 +227,62 @@ FLUTTER_ASSERT_ARC
   [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
 
   // Verify behavior.
-  OCMVerify([engine showAutocorrectionPromptRectForStart:0 end:1 withClient:0]);
+  OCMVerify([engine flutterTextInputView:inputView
+      showAutocorrectionPromptRectForStart:0
+                                       end:1
+                                withClient:0]);
+}
+
+- (void)testAutocorrectionPromptRectDoesNotAppearDuringScribble {
+  if (@available(iOS 14.0, *)) {
+    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
+    inputView.textInputDelegate = engine;
+
+    __block int callCount = 0;
+    OCMStub([engine flutterTextInputView:inputView
+                showAutocorrectionPromptRectForStart:0
+                                                 end:1
+                                          withClient:0])
+        .andDo(^(NSInvocation* invocation) {
+          callCount++;
+        });
+
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart fires in response to firstRectForRange
+    XCTAssertEqual(callCount, 1);
+
+    UIScribbleInteraction* scribbleInteraction =
+        [[UIScribbleInteraction alloc] initWithDelegate:inputView];
+
+    [inputView scribbleInteractionWillBeginWriting:scribbleInteraction];
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart does not fire in response to setMarkedText during a
+    // scribble interaction.firstRectForRange
+    XCTAssertEqual(callCount, 1);
+
+    [inputView scribbleInteractionDidFinishWriting:scribbleInteraction];
+    [inputView resetScribbleInteractionStatusIfEnding];
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart fires in response to firstRectForRange.
+    XCTAssertEqual(callCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusFocusing;
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart does not fire in response to firstRectForRange during a
+    // scribble-initiated focus.
+    XCTAssertEqual(callCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusFocused;
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart does not fire in response to firstRectForRange after a
+    // scribble-initiated focus.
+    XCTAssertEqual(callCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusUnfocused;
+    [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
+    // showAutocorrectionPromptRectForStart fires in response to firstRectForRange.
+    XCTAssertEqual(callCount, 3);
+  }
 }
 
 - (void)testTextRangeFromPositionMatchesUITextViewBehavior {
@@ -379,7 +434,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -390,82 +445,91 @@ FLUTTER_ASSERT_ARC
 
   // Verify correct delta is generated.
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"] isEqualToString:@""]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"text to insert"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 0);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"] isEqualToString:@""]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"text to insert"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 0);
+                 }]]);
 
   [inputView deleteBackward];
   XCTAssertEqual(updateCount, 2);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"text to insert"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 14);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"text to insert"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@""]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 14);
+                 }]]);
 
   inputView.selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)];
   XCTAssertEqual(updateCount, 3);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"text to inser"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"text to inser"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@""]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
+                 }]]);
 
   [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]
                  withText:@"replace text"];
   XCTAssertEqual(updateCount, 4);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"text to inser"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"replace text"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 1);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"text to inser"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"replace text"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 0) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 1);
+                 }]]);
 
   [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
   XCTAssertEqual(updateCount, 5);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"replace textext to inser"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"marked text"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 12) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 12);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"replace textext to inser"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"marked text"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 12) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 12);
+                 }]]);
 
   [inputView unmarkText];
   XCTAssertEqual(updateCount, 6);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"replace textmarked textext to inser"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"] isEqualToString:@""]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"replace textmarked textext to inser"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@""]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == -1) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == -1);
+                 }]]);
 }
 
 - (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextReplacement {
@@ -474,7 +538,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -491,15 +555,16 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 2);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"Some initial text"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"new marked text."]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"Some initial text"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"new marked text."]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                 }]]);
 }
 
 - (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextInsertion {
@@ -508,7 +573,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -525,15 +590,16 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 2);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"Some initial text"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"text."]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"Some initial text"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"text."]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                 }]]);
 }
 
 - (void)testTextEditingDeltasAreGeneratedOnSetMarkedTextDeletion {
@@ -542,7 +608,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -559,15 +625,16 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 2);
 
   OCMVerify([engine
-      updateEditingClient:0
-                withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                  return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
-                             isEqualToString:@"Some initial text"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
-                             isEqualToString:@"tex"]) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
-                         ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
-                }]]);
+      flutterTextInputView:inputView
+       updateEditingClient:0
+                 withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                   return ([[state[@"deltas"] objectAtIndex:0][@"oldText"]
+                              isEqualToString:@"Some initial text"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaText"]
+                              isEqualToString:@"tex"]) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaStart"] intValue] == 13) &&
+                          ([[state[@"deltas"] objectAtIndex:0][@"deltaEnd"] intValue] == 17);
+                 }]]);
 }
 
 #pragma mark - EditingState tests
@@ -577,7 +644,7 @@ FLUTTER_ASSERT_ARC
   inputView.textInputDelegate = engine;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withState:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -609,7 +676,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -640,7 +707,7 @@ FLUTTER_ASSERT_ARC
   inputView.textInputDelegate = engine;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withState:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -682,7 +749,7 @@ FLUTTER_ASSERT_ARC
   inputView.enableDeltaModel = YES;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withDelta:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withDelta:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -723,7 +790,7 @@ FLUTTER_ASSERT_ARC
   inputView.textInputDelegate = engine;
 
   __block int updateCount = 0;
-  OCMStub([engine updateEditingClient:0 withState:[OCMArg isNotNil]])
+  OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withState:[OCMArg isNotNil]])
       .andDo(^(NSInvocation* invocation) {
         updateCount++;
       });
@@ -741,6 +808,56 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 2);
 }
 
+- (void)testSetMarkedTextDuringScribbleDoesNotTriggerUpdateEditingClient {
+  if (@available(iOS 14.0, *)) {
+    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+    inputView.textInputDelegate = engine;
+
+    __block int updateCount = 0;
+    OCMStub([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg isNotNil]])
+        .andDo(^(NSInvocation* invocation) {
+          updateCount++;
+        });
+
+    [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+    // updateEditingClient fires in response to setMarkedText.
+    XCTAssertEqual(updateCount, 1);
+
+    UIScribbleInteraction* scribbleInteraction =
+        [[UIScribbleInteraction alloc] initWithDelegate:inputView];
+
+    [inputView scribbleInteractionWillBeginWriting:scribbleInteraction];
+    [inputView setMarkedText:@"during writing" selectedRange:NSMakeRange(1, 2)];
+    // updateEditingClient does not fire in response to setMarkedText during a scribble interaction.
+    XCTAssertEqual(updateCount, 1);
+
+    [inputView scribbleInteractionDidFinishWriting:scribbleInteraction];
+    [inputView resetScribbleInteractionStatusIfEnding];
+    [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+    // updateEditingClient fires in response to setMarkedText.
+    XCTAssertEqual(updateCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusFocusing;
+    [inputView setMarkedText:@"during focus" selectedRange:NSMakeRange(1, 2)];
+    // updateEditingClient does not fire in response to setMarkedText during a scribble-initiated
+    // focus.
+    XCTAssertEqual(updateCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusFocused;
+    [inputView setMarkedText:@"after focus" selectedRange:NSMakeRange(2, 3)];
+    // updateEditingClient does not fire in response to setMarkedText after a scribble-initiated
+    // focus.
+    XCTAssertEqual(updateCount, 2);
+
+    inputView.scribbleFocusStatus = FlutterScribbleFocusStatusUnfocused;
+    [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+    // updateEditingClient fires in response to setMarkedText.
+    XCTAssertEqual(updateCount, 3);
+  }
+}
+
 - (void)testUpdateEditingClientNegativeSelection {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
   inputView.textInputDelegate = engine;
@@ -755,30 +872,33 @@ FLUTTER_ASSERT_ARC
     @"selectionExtent" : @-1
   }];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 0);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 0);
+                               }]]);
 
   // Returns (0, 0) when either end goes below 0.
   [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @-1, @"selectionExtent" : @1}];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 0);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 0);
+                               }]]);
 
   [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @-1}];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 0);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 0);
+                               }]]);
 }
 
 - (void)testUpdateEditingClientSelectionClamping {
@@ -793,11 +913,12 @@ FLUTTER_ASSERT_ARC
   [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @0}];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 0);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 0);
+                               }]]);
 
   // Needs clamping.
   [inputView setTextInputState:@{
@@ -807,21 +928,23 @@ FLUTTER_ASSERT_ARC
   }];
   [inputView updateEditingState];
 
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 9);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 9);
+                               }]]);
 
   // No clamping needed, but in reverse direction.
   [inputView
       setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @0}];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 0 &&
-                                       ([state[@"selectionExtent"] intValue] == 1);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 0 &&
+                                        ([state[@"selectionExtent"] intValue] == 1);
+                               }]]);
 
   // Both ends need clamping.
   [inputView setTextInputState:@{
@@ -830,11 +953,12 @@ FLUTTER_ASSERT_ARC
     @"selectionExtent" : @9999
   }];
   [inputView updateEditingState];
-  OCMVerify([engine updateEditingClient:0
-                              withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
-                                return ([state[@"selectionBase"] intValue]) == 9 &&
-                                       ([state[@"selectionExtent"] intValue] == 9);
-                              }]]);
+  OCMVerify([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return ([state[@"selectionBase"] intValue]) == 9 &&
+                                        ([state[@"selectionExtent"] intValue] == 9);
+                               }]]);
 }
 
 #pragma mark - UITextInput methods - Tests
@@ -882,6 +1006,130 @@ FLUTTER_ASSERT_ARC
   // Invalid marked rect is invalid.
   XCTAssertTrue(CGRectEqualToRect(kInvalidFirstRect, [inputView firstRectForRange:range]));
   XCTAssertTrue(CGRectEqualToRect(kInvalidFirstRect, [inputView firstRectForRange:range]));
+}
+
+- (void)testFirstRectForRangeReturnsCorrectSelectionRect {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  FlutterTextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  CGRect testRect = CGRectMake(100, 100, 100, 100);
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:testRect position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 200, 100, 100) position:2U],
+  ]];
+  XCTAssertTrue(CGRectEqualToRect(testRect, [inputView firstRectForRange:range]));
+
+  [inputView setTextInputState:@{@"text" : @"COM"}];
+  FlutterTextRange* rangeOutsideBounds = [FlutterTextRange rangeWithNSRange:NSMakeRange(3, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectZero, [inputView firstRectForRange:rangeOutsideBounds]));
+}
+
+- (void)testClosestPositionToPoint {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  // Minimize the vertical distance from the center of the rects first
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 200, 100, 100) position:2U],
+  ]];
+  CGPoint point = CGPointMake(150, 150);
+  XCTAssertEqual(1U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point]).index);
+
+  // Then, if the point is above the bottom of the closest rects vertically, get the closest x
+  // origin
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 200, 100, 100) position:4U],
+  ]];
+  point = CGPointMake(125, 150);
+  XCTAssertEqual(2U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point]).index);
+
+  // However, if the point is below the bottom of the closest rects vertically, get the position
+  // farthest to the right
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 300, 100, 100) position:4U],
+  ]];
+  point = CGPointMake(125, 201);
+  XCTAssertEqual(3U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point]).index);
+
+  // Also check a point at the right edge of the last selection rect
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:3U],
+  ]];
+  point = CGPointMake(125, 250);
+  XCTAssertEqual(4U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point]).index);
+}
+
+- (void)testSelectionRectsForRange {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  CGRect testRect0 = CGRectMake(100, 100, 100, 100);
+  CGRect testRect1 = CGRectMake(200, 200, 100, 100);
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:testRect0 position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:testRect1 position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 300, 100, 100) position:3U],
+  ]];
+
+  // Returns the matching rects within a range
+  FlutterTextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  XCTAssertTrue(CGRectEqualToRect(testRect0, [inputView selectionRectsForRange:range][0].rect));
+  XCTAssertTrue(CGRectEqualToRect(testRect1, [inputView selectionRectsForRange:range][1].rect));
+  XCTAssertEqual(2U, [[inputView selectionRectsForRange:range] count]);
+
+  // Returns a 0 width rect for a 0-length range
+  range = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 0)];
+  XCTAssertEqual(1U, [[inputView selectionRectsForRange:range] count]);
+  XCTAssertTrue(CGRectEqualToRect(
+      CGRectMake(testRect0.origin.x, testRect0.origin.y, 0, testRect0.size.height),
+      [inputView selectionRectsForRange:range][0].rect));
+}
+
+- (void)testClosestPositionToPointWithinRange {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  // Do not return a position before the start of the range
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 200, 100, 100) position:4U],
+  ]];
+  CGPoint point = CGPointMake(125, 150);
+  FlutterTextRange* range = [[FlutterTextRange rangeWithNSRange:NSMakeRange(3, 2)] copy];
+  XCTAssertEqual(
+      3U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point withinRange:range]).index);
+
+  // Do not return a position after the end of the range
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 200, 100, 100) position:4U],
+  ]];
+  point = CGPointMake(125, 150);
+  range = [[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)] copy];
+  XCTAssertEqual(
+      1U, ((FlutterTextPosition*)[inputView closestPositionToPoint:point withinRange:range]).index);
 }
 
 #pragma mark - Floating Cursor - Tests
@@ -939,6 +1187,52 @@ FLUTTER_ASSERT_ARC
 
   [inputView endFloatingCursor];
   XCTAssertTrue(CGRectEqualToRect(initialBounds, inputView.bounds));
+}
+
+#pragma mark - UIKeyInput Overrides - Tests
+
+- (void)testInsertTextAddsPlaceholderSelectionRects {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  [inputView
+      setTextInputState:@{@"text" : @"test", @"selectionBase" : @1, @"selectionExtent" : @1}];
+
+  FlutterTextSelectionRect* first =
+      [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U];
+  FlutterTextSelectionRect* second =
+      [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:1U];
+  FlutterTextSelectionRect* third =
+      [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 200, 100, 100) position:2U];
+  FlutterTextSelectionRect* fourth =
+      [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 300, 100, 100) position:3U];
+  [inputView setSelectionRects:@[ first, second, third, fourth ]];
+
+  // Inserts additional selection rects at the selection start
+  [inputView insertText:@"in"];
+  NSArray* selectionRects =
+      [inputView selectionRectsForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 6)]];
+  XCTAssertEqual(6U, [selectionRects count]);
+
+  XCTAssertEqual(first.position, ((FlutterTextSelectionRect*)selectionRects[0]).position);
+  XCTAssertTrue(CGRectEqualToRect(first.rect, ((FlutterTextSelectionRect*)selectionRects[0]).rect));
+
+  XCTAssertEqual(second.position, ((FlutterTextSelectionRect*)selectionRects[1]).position);
+  XCTAssertTrue(
+      CGRectEqualToRect(second.rect, ((FlutterTextSelectionRect*)selectionRects[1]).rect));
+
+  XCTAssertEqual(second.position + 1, ((FlutterTextSelectionRect*)selectionRects[2]).position);
+  XCTAssertTrue(
+      CGRectEqualToRect(second.rect, ((FlutterTextSelectionRect*)selectionRects[2]).rect));
+
+  XCTAssertEqual(second.position + 2, ((FlutterTextSelectionRect*)selectionRects[3]).position);
+  XCTAssertTrue(
+      CGRectEqualToRect(second.rect, ((FlutterTextSelectionRect*)selectionRects[3]).rect));
+
+  XCTAssertEqual(third.position + 2, ((FlutterTextSelectionRect*)selectionRects[4]).position);
+  XCTAssertTrue(CGRectEqualToRect(third.rect, ((FlutterTextSelectionRect*)selectionRects[4]).rect));
+
+  XCTAssertEqual(fourth.position + 2, ((FlutterTextSelectionRect*)selectionRects[5]).position);
+  XCTAssertTrue(
+      CGRectEqualToRect(fourth.rect, ((FlutterTextSelectionRect*)selectionRects[5]).rect));
 }
 
 #pragma mark - Autofill - Utilities
@@ -1208,7 +1502,10 @@ FLUTTER_ASSERT_ARC
   [self ensureOnlyActiveViewCanBecomeFirstResponder];
 
   // Verify behavior.
-  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil] withTag:@"field2"]);
+  OCMVerify([engine flutterTextInputView:inactiveView
+                     updateEditingClient:0
+                               withState:[OCMArg isNotNil]
+                                 withTag:@"field2"]);
 }
 
 - (void)testPasswordAutofillHack {

@@ -20,6 +20,7 @@
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
@@ -42,7 +43,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine;
 @end
 
-@interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger>
+@interface FlutterEngine () <FlutterIndirectScribbleDelegate,
+                             FlutterTextInputDelegate,
+                             FlutterBinaryMessenger>
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
@@ -331,6 +334,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)attachView {
   self.iosPlatformView->attachView();
+  [_textInputPlugin.get() setupIndirectScribbleInteraction:self.viewController];
 }
 
 - (void)setFlutterViewControllerWillDeallocObserver:(id<NSObject>)observer {
@@ -355,6 +359,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       platform_view->SetOwnerViewController({});
     }
   }
+  [_textInputPlugin.get() resetViewResponder];
   _viewController.reset();
 }
 
@@ -514,6 +519,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
   _textInputPlugin.get().textInputDelegate = self;
+  _textInputPlugin.get().indirectScribbleDelegate = self;
+  [_textInputPlugin.get() setupIndirectScribbleInteraction:self.viewController];
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] initWithEngine:[self getWeakPtr]]);
 
@@ -720,22 +727,30 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Text input delegate
 
-- (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+         updateEditingClient:(int)client
+                   withState:(NSDictionary*)state {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState"
                               arguments:@[ @(client), state ]];
 }
 
-- (void)updateEditingClient:(int)client withState:(NSDictionary*)state withTag:(NSString*)tag {
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+         updateEditingClient:(int)client
+                   withState:(NSDictionary*)state
+                     withTag:(NSString*)tag {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingStateWithTag"
                               arguments:@[ @(client), @{tag : state} ]];
 }
 
-- (void)updateEditingClient:(int)client withDelta:(NSDictionary*)delta {
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+         updateEditingClient:(int)client
+                   withDelta:(NSDictionary*)delta {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingStateWithDeltas"
                               arguments:@[ @(client), delta ]];
 }
 
-- (void)updateFloatingCursor:(FlutterFloatingCursorDragState)state
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+        updateFloatingCursor:(FlutterFloatingCursorDragState)state
                   withClient:(int)client
                 withPosition:(NSDictionary*)position {
   NSString* stateString;
@@ -754,7 +769,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               arguments:@[ @(client), stateString, position ]];
 }
 
-- (void)performAction:(FlutterTextInputAction)action withClient:(int)client {
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+               performAction:(FlutterTextInputAction)action
+                  withClient:(int)client {
   NSString* actionString;
   switch (action) {
     case FlutterTextInputActionUnspecified:
@@ -799,14 +816,62 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               arguments:@[ @(client), actionString ]];
 }
 
-- (void)showAutocorrectionPromptRectForStart:(NSUInteger)start
-                                         end:(NSUInteger)end
-                                  withClient:(int)client {
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    showAutocorrectionPromptRectForStart:(NSUInteger)start
+                                     end:(NSUInteger)end
+                              withClient:(int)client {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.showAutocorrectionPromptRect"
                               arguments:@[ @(client), @(start), @(end) ]];
 }
 
 #pragma mark - FlutterViewEngineDelegate
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView showToolbar:(int)client {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.showToolbar" arguments:@[ @(client) ]];
+}
+
+- (void)flutterTextInputPlugin:(FlutterTextInputPlugin*)textInputPlugin
+                  focusElement:(UIScribbleElementIdentifier)elementIdentifier
+                       atPoint:(CGPoint)referencePoint
+                        result:(FlutterResult)callback {
+  [_textInputChannel.get()
+      invokeMethod:@"TextInputClient.focusElement"
+         arguments:@[ elementIdentifier, @(referencePoint.x), @(referencePoint.y) ]
+            result:callback];
+}
+
+- (void)flutterTextInputPlugin:(FlutterTextInputPlugin*)textInputPlugin
+         requestElementsInRect:(CGRect)rect
+                        result:(FlutterResult)callback {
+  [_textInputChannel.get()
+      invokeMethod:@"TextInputClient.requestElementsInRect"
+         arguments:@[ @(rect.origin.x), @(rect.origin.y), @(rect.size.width), @(rect.size.height) ]
+            result:callback];
+}
+
+- (void)flutterTextInputViewScribbleInteractionBegan:(FlutterTextInputView*)textInputView {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.scribbleInteractionBegan" arguments:nil];
+}
+
+- (void)flutterTextInputViewScribbleInteractionFinished:(FlutterTextInputView*)textInputView {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.scribbleInteractionFinished"
+                              arguments:nil];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    insertTextPlaceholderWithSize:(CGSize)size
+                       withClient:(int)client {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.insertTextPlaceholder"
+                              arguments:@[ @(client), @(size.width), @(size.height) ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       removeTextPlaceholder:(int)client {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.removeTextPlaceholder"
+                              arguments:@[ @(client) ]];
+}
+
+#pragma mark - Screenshot Delegate
 
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode {
