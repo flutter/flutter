@@ -42,6 +42,8 @@ String generateCupertinoConstructor(LocaleInfo locale) {
     required intl.DateFormat fullYearFormat,
     required intl.DateFormat dayFormat,
     required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
     required intl.DateFormat singleDigitHourFormat,
     required intl.DateFormat singleDigitMinuteFormat,
     required intl.DateFormat doubleDigitMinuteFormat,
@@ -52,6 +54,8 @@ String generateCupertinoConstructor(LocaleInfo locale) {
     fullYearFormat: fullYearFormat,
     dayFormat: dayFormat,
     mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
     singleDigitHourFormat: singleDigitHourFormat,
     singleDigitMinuteFormat: singleDigitMinuteFormat,
     doubleDigitMinuteFormat: doubleDigitMinuteFormat,
@@ -68,6 +72,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
   intl.DateFormat fullYearFormat,
   intl.DateFormat dayFormat,
   intl.DateFormat mediumDateFormat,
+  intl.DateFormat longDateFormat,
+  intl.DateFormat yearMonthFormat,
   intl.DateFormat singleDigitHourFormat,
   intl.DateFormat singleDigitMinuteFormat,
   intl.DateFormat doubleDigitMinuteFormat,
@@ -76,7 +82,7 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
 ) {''';
 
 const String cupertinoFactoryArguments =
-    'fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat';
+    'fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat';
 
 const String cupertinoSupportedLanguagesConstant = 'kCupertinoSupportedLanguages';
 

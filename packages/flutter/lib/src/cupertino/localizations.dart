@@ -79,11 +79,22 @@ abstract class CupertinoLocalizations {
   /// The returned string does not contain the day of the month.
   String formatMonthYear(DateTime date);
 
-  /// Returns a list week days for Calendar picker.
-  List<String> get calendarWeekDays;
-
   /// Returns a list week days in shorter form.
   List<String> get shortWeekDays;
+
+  /// List of week day names in narrow format, usually 1- or 2-letter
+  /// abbreviations of full names.
+  ///
+  /// The list begins with the value corresponding to Sunday and ends with
+  /// Saturday. Use [firstDayOfWeekIndex] to find the first day of week in this
+  /// list.
+  ///
+  /// Examples:
+  ///
+  /// - US English: S, M, T, W, T, F, S
+  /// - Russian: вс, пн, вт, ср, чт, пт, сб - notice that the list begins with
+  ///   вс (Sunday) even though the first day of week for Russian is Monday.
+  List<String> get narrowWeekdays;
 
   /// Index of the first day of week, where 0 points to Sunday, and 6 points to
   /// Saturday.
@@ -330,24 +341,14 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultCupertinoLocalizations();
 
-  static const List<String> _calendarWeekdays = <String>[
-    'SUN',
-    'MON',
-    'TUE',
-    'WED',
-    'THU',
-    'FRI',
-    'SAT',
-  ];
-
   static const List<String> _shortWeekdays = <String>[
+    'Sun',
     'Mon',
     'Tue',
     'Wed',
     'Thu',
     'Fri',
     'Sat',
-    'Sun',
   ];
 
   static const List<String> _weekdays = <String>[
@@ -358,6 +359,16 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
     'Friday',
     'Saturday',
     'Sunday',
+  ];
+
+  static const List<String> _narrowWeekdays = <String>[
+    'S',
+    'M',
+    'T',
+    'W',
+    'T',
+    'F',
+    'S',
   ];
 
   static const List<String> _shortMonths = <String>[
@@ -389,8 +400,6 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
     'November',
     'December',
   ];
-
-
 
   @override
   String datePickerYear(int yearIndex) => yearIndex.toString();
@@ -509,6 +518,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
 
   @override
+  List<String> get narrowWeekdays => _narrowWeekdays;
+
+  @override
   int get firstDayOfWeekIndex =>  0;
 
   @override
@@ -545,7 +557,4 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   List<String> get shortWeekDays => _shortWeekdays;
-
-  @override
-  List<String> get calendarWeekDays => _calendarWeekdays;
 }

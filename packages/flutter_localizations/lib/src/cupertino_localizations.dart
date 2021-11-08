@@ -154,6 +154,19 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     return _fullYearFormat.format(date);
   }
 
+  @override
+  List<String> get shortWeekDays {
+    return _longDateFormat.dateSymbols.SHORTWEEKDAYS;
+  }
+
+  @override
+  List<String> get narrowWeekdays {
+    return _longDateFormat.dateSymbols.NARROWWEEKDAYS;
+  }
+
+  @override
+  int get firstDayOfWeekIndex => (_longDateFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
+
   /// Subclasses should provide the optional zero pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
   @protected
   String? get datePickerHourSemanticsLabelZero => null;
@@ -505,6 +518,8 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       late intl.DateFormat fullYearFormat;
       late intl.DateFormat dayFormat;
       late intl.DateFormat mediumDateFormat;
+      late intl.DateFormat longDateFormat;
+      late intl.DateFormat yearMonthFormat;
       // We don't want any additional decoration here. The am/pm is handled in
       // the date picker. We just want an hour number localized.
       late intl.DateFormat singleDigitHourFormat;
@@ -517,6 +532,8 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
+        longDateFormat = intl.DateFormat.yMMMMEEEEd(localeName);
+        yearMonthFormat = intl.DateFormat.yMMMM(localeName);
         // TODO(xster): fix when https://github.com/dart-lang/intl/issues/207 is resolved.
         singleDigitHourFormat = intl.DateFormat('HH', locale);
         singleDigitMinuteFormat = intl.DateFormat.m(locale);
@@ -538,6 +555,8 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         fullYearFormat,
         dayFormat,
         mediumDateFormat,
+        longDateFormat,
+        yearMonthFormat,
         singleDigitHourFormat,
         singleDigitMinuteFormat,
         doubleDigitMinuteFormat,

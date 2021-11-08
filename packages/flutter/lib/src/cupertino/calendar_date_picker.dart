@@ -263,7 +263,7 @@ class _CupertinoCalendarPickerState extends State<CupertinoCalendarPicker> {
               _buildPicker(),
               _CalendarPickerModeToggleButton(
                 mode: _mode,
-                title: '${_localizations.datePickerMonth(_currentDisplayedMonthDate.month) } ${_localizations.datePickerYear(_currentDisplayedMonthDate.year)}',
+                title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
                 onTitlePressed: () {
                   _handleModeChanged(_mode == CalendarPickerMode.day ? CalendarPickerMode.year : CalendarPickerMode.day);
                 },
@@ -1158,7 +1158,7 @@ class __MonthPickerState extends State<_MonthPicker> {
   List<Widget> _dayHeaders(TextStyle? headerStyle, CupertinoLocalizations localizations) {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
-      final String weekday = localizations.calendarWeekDays[i];
+      final String weekday = localizations.shortWeekDays[i];
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday.toUpperCase(), style: headerStyle)),
       ));
