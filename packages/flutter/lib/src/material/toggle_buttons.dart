@@ -232,10 +232,10 @@ class ToggleButtons extends StatelessWidget {
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
-  /// Configures the minimum size of the area within which the button may
+  /// Configures the minimum size of the area within which the buttons may
   /// be pressed.
   ///
-  /// If the [tapTargetSize] is larger than [constraints], the button will
+  /// If the [tapTargetSize] is larger than [constraints], the buttons will
   /// include a transparent margin that responds to taps.
   ///
   /// Always defaults to [ThemeData.materialTapTargetSize].
@@ -720,6 +720,7 @@ class ToggleButtons extends StatelessWidget {
           constraints: const BoxConstraints(),
           child: _InputPadding(
             minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+            direction: direction,
             child: result,
           ),
         );
@@ -1586,13 +1587,16 @@ class _InputPadding extends SingleChildRenderObjectWidget {
     Key? key,
     Widget? child,
     required this.minSize,
+    required this.direction,
   }) : super(key: key, child: child);
 
   final Size minSize;
 
+  final Axis direction;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderInputPadding(minSize);
+    return _RenderInputPadding(minSize, direction);
   }
 
   @override
@@ -1602,7 +1606,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
+  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
@@ -1610,6 +1614,15 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (_minSize == value)
       return;
     _minSize = value;
+    markNeedsLayout();
+  }
+
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (_direction == value)
+      return;
+    _direction = value;
     markNeedsLayout();
   }
 
@@ -1665,7 +1678,6 @@ class _RenderInputPadding extends RenderShiftedBox {
       constraints: constraints,
       layoutChild: ChildLayoutHelper.layoutChild,
     );
-    print('------------ performLayout: $size');
     if (child != null) {
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
@@ -1677,9 +1689,14 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (super.hitTest(result, position: position)) {
       return true;
     }
-    print('------------ hitTest position: $position, child: ${child!.size}');
 
-    final Offset center = Offset(position.dx, child!.size.height / 2);
+    // Only adjust one axis to ensure the correct button is tapped.
+    Offset center;
+    if (direction == Axis.horizontal) {
+      center = Offset(position.dx, child!.size.height / 2);
+    } else {
+      center = Offset(child!.size.width / 2, position.dy);
+    }
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
