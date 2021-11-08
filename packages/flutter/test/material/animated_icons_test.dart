@@ -26,6 +26,7 @@ class MockCanvas extends Fake implements Canvas {
   void scale(double sx, [double? sy]) {
     capturedSx = sx;
     capturedSy = sy!;
+    invocations.add(RecordedScale(sx, sy));
   }
 
   final List<RecordedCanvasCall> invocations = <RecordedCanvasCall>[];
@@ -73,6 +74,21 @@ class RecordedTranslate extends RecordedCanvasCall {
 
   @override
   int get hashCode => hashValues(dx, dy);
+}
+
+class RecordedScale extends RecordedCanvasCall {
+  const RecordedScale(this.sx, this.sy);
+
+  final double sx;
+  final double sy;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecordedScale && other.sx == sx && other.sy == sy;
+  }
+
+  @override
+  int get hashCode => hashValues(sx, sy);
 }
 
 void main() {
@@ -231,6 +247,7 @@ void main() {
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),
+      RecordedScale(0.5, 0.5),
     ]);
   });
 
@@ -252,7 +269,9 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
     customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
-    expect(canvas.invocations, isEmpty);
+    expect(canvas.invocations, const <RecordedCanvasCall>[
+      RecordedScale(0.5, 0.5),
+    ]);
   });
 
   testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
@@ -277,6 +296,7 @@ void main() {
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),
+      RecordedScale(0.5, 0.5),
     ]);
   });
 }
