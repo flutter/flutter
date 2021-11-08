@@ -554,14 +554,6 @@ class TextPainter {
     return Size(width, height);
   }
 
-  /// The horizontal space required to paint longest line of this text.
-  ///
-  /// Valid only after [layout] has been called.
-  double get longestLineWidth {
-    assert(!_debugNeedsLayout);
-    return _applyFloatingPointHack(_paragraph!.longestLine);
-  }
-
   /// Returns the distance from the top of the text to the first baseline of the
   /// given type.
   ///
