@@ -48,12 +48,20 @@ class NextCommand extends Command<void> {
 
   @override
   Future<void> run() async {
+    final File stateFile = checkouts.fileSystem.file(argResults![kStateOption]);
+    if (!stateFile.existsSync()) {
+      throw ConductorException(
+          'No persistent state file found at ${stateFile.path}.',
+      );
+    }
+    final pb.ConductorState state = state_import.readStateFromFile(stateFile);
+
     await NextContext(
       autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
       force: argResults![kForceFlag] as bool,
-      stateFile: checkouts.fileSystem.file(argResults![kStateOption]),
-    ).run();
+      stateFile: stateFile,
+    ).run(state);
   }
 }
 
@@ -74,20 +82,12 @@ class NextContext {
   final Checkouts checkouts;
   final File stateFile;
 
-  Future<void> run() async {
+  Future<void> run(pb.ConductorState state) async {
     final Stdio stdio = checkouts.stdio;
     const List<CherrypickState> finishedStates = <CherrypickState>[
       CherrypickState.COMPLETED,
       CherrypickState.ABANDONED,
     ];
-    if (!stateFile.existsSync()) {
-      throw ConductorException(
-          'No persistent state file found at ${stateFile.path}.',
-      );
-    }
-
-    final pb.ConductorState state = readStateFromFile(stateFile);
-
     switch (state.currentPhase) {
       case pb.ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
         final Remote upstream = Remote(
@@ -149,7 +149,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -175,7 +175,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -284,7 +284,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -319,7 +319,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -354,7 +354,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -377,7 +377,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -390,13 +390,17 @@ class NextContext {
     state.currentPhase = nextPhase;
     stdio.printStatus(state_import.phaseInstructions(state));
 
-    writeStateToFile(stateFile, state, stdio.logs);
+    updateState(state, stdio.logs);
   }
 
-  /// Persist the state to a file.
+  /// Save the release's [state].
+  ///
+  /// This can be overridden by frontends that may not persist the state to
+  /// disk, and/or may need to call additional update hooks each time the state
+  /// is updated.
   @visibleForOverriding
-  void writeStateToFile(File file, pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    state_import.writeStateToFile(file, state, logs);
+  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
+    state_import.writeStateToFile(stateFile, state, logs);
   }
 
   @visibleForTesting
@@ -414,8 +418,4 @@ class NextContext {
       'Unknown user input (expected "y" or "n"): $response',
     );
   }
-
-  /// Read the state from a file.
-  @visibleForOverriding
-  pb.ConductorState readStateFromFile(File file) => state_import.readStateFromFile(file);
 }
