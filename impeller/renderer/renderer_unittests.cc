@@ -198,7 +198,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
   std::shared_ptr<RenderPass> r2t_pass;
 
   {
-    RenderPassColorAttachment color0;
+    ColorAttachment color0;
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 
@@ -218,7 +218,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
 
     color0.texture->SetLabel("r2t_target");
 
-    RenderPassDescriptor r2t_desc;
+    RenderTarget r2t_desc;
     r2t_desc.SetColorAttachment(color0, 0u);
     auto cmd_buffer = context->CreateRenderCommandBuffer();
     r2t_pass = cmd_buffer->CreateRenderPass(r2t_desc);

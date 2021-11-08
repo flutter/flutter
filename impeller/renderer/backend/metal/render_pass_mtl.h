@@ -27,7 +27,7 @@ class RenderPassMTL final : public RenderPass {
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassMTL(id<MTLCommandBuffer> buffer, const RenderPassDescriptor& desc);
+  RenderPassMTL(id<MTLCommandBuffer> buffer, const RenderTarget& desc);
 
   // |RenderPass|
   bool IsValid() const override;

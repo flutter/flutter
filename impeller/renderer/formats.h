@@ -319,7 +319,7 @@ struct PipelineStencilAttachment {
   }
 };
 
-struct RenderPassAttachment {
+struct Attachment {
   std::shared_ptr<Texture> texture = nullptr;
   LoadAction load_action = LoadAction::kDontCare;
   StoreAction store_action = StoreAction::kStore;
@@ -327,15 +327,15 @@ struct RenderPassAttachment {
   constexpr operator bool() const { return static_cast<bool>(texture); }
 };
 
-struct RenderPassColorAttachment : public RenderPassAttachment {
+struct ColorAttachment : public Attachment {
   Color clear_color = Color::BlackTransparent();
 };
 
-struct RenderPassDepthAttachment : public RenderPassAttachment {
+struct DepthAttachment : public Attachment {
   double clear_depth = 0.0;
 };
 
-struct RenderPassStencilAttachment : public RenderPassAttachment {
+struct StencilAttachment : public Attachment {
   uint32_t clear_stencil = 0;
 };
 
