@@ -13,7 +13,7 @@ namespace impeller {
 
 class Context;
 class RenderPass;
-class RenderPassDescriptor;
+class RenderTarget;
 
 //------------------------------------------------------------------------------
 /// @brief      A collection of encoded commands to be submitted to the GPU for
@@ -59,7 +59,7 @@ class CommandBuffer {
   /// @return     A valid render pass or null.
   ///
   virtual std::shared_ptr<RenderPass> CreateRenderPass(
-      const RenderPassDescriptor& desc) const = 0;
+      const RenderTarget& desc) const = 0;
 
  protected:
   CommandBuffer();
