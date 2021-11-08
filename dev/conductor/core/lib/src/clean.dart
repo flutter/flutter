@@ -53,8 +53,7 @@ class CleanCommand extends Command<void> {
     final ArgResults argumentResults = argResults!;
     final File stateFile = checkouts.fileSystem.file(argumentResults[kStateOption]);
     if (!stateFile.existsSync()) {
-      throw ConductorException(
-          'No persistent state file found at ${stateFile.path}!');
+      throw ConductorException('No persistent state file found at ${stateFile.path}!');
     }
 
     if (!(argumentResults[kYesFlag] as bool)) {
@@ -71,6 +70,25 @@ class CleanCommand extends Command<void> {
       }
     }
     stdio.printStatus('Deleting persistent state file ${stateFile.path}...');
+
+    final RunContext context = RunContext(
+      stateFile: stateFile,
+    );
+    context.run();
+  }
+}
+
+/// Context for cleaning up persistent state file.
+///
+/// This is a frontend-agnostic implementation.
+class RunContext {
+  RunContext({
+    required this.stateFile,
+  });
+
+  final File stateFile;
+
+  void run() {
     stateFile.deleteSync();
   }
 }
