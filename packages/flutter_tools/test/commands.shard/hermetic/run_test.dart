@@ -251,7 +251,7 @@ void main() {
         await expectLater(createTestCommandRunner(command).run(<String>[
           'run',
           '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 emebdding.'));
+        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -293,7 +293,7 @@ void main() {
         await expectLater(createTestCommandRunner(command).run(<String>[
           'run',
           '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 emebdding.'));
+        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
