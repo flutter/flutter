@@ -35,6 +35,7 @@ void main() {
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      Cache.flutterRoot = _kFlutterRoot;
       fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
       fileSystem.directory(_kProjectRoot).createSync(recursive: true);
       fileSystem.currentDirectory = _kProjectRoot;
