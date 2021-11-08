@@ -8,14 +8,32 @@
 #import <UIKit/UIKit.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextEditingDelta.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 
-@interface FlutterTextInputPlugin : NSObject <FlutterKeySecondaryResponder>
+typedef NS_ENUM(NSInteger, FlutterScribbleFocusStatus) {
+  FlutterScribbleFocusStatusUnfocused,
+  FlutterScribbleFocusStatusFocusing,
+  FlutterScribbleFocusStatusFocused,
+};
+
+typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
+  FlutterScribbleInteractionStatusNone,
+  FlutterScribbleInteractionStatusStarted,
+  FlutterScribbleInteractionStatusEnding,
+};
+
+@interface FlutterTextInputPlugin
+    : NSObject <FlutterKeySecondaryResponder, UIIndirectScribbleInteractionDelegate>
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 @property(nonatomic, assign) UIViewController* viewController;
+@property(nonatomic, assign) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
+@property(nonatomic, strong)
+    NSMutableDictionary<UIScribbleElementIdentifier, NSValue*>* scribbleElements;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 /**
@@ -25,6 +43,13 @@
  * accessibility system.
  */
 - (UIView<UITextInput>*)textInputView;
+
+/**
+ * These are used by the UIIndirectScribbleInteractionDelegate methods to handle focusing on the
+ * correct element.
+ */
+- (void)setupIndirectScribbleInteraction:(id<FlutterViewResponder>)viewResponder;
+- (void)resetViewResponder;
 
 @end
 
@@ -51,10 +76,41 @@
 @interface FlutterTokenizer : UITextInputStringTokenizer
 @end
 
+@interface FlutterTextSelectionRect : UITextSelectionRect
+
+@property(nonatomic, assign) CGRect rect;
+@property(nonatomic) NSUInteger position;
+@property(nonatomic, assign) NSWritingDirection writingDirection;
+@property(nonatomic) BOOL containsStart;
+@property(nonatomic) BOOL containsEnd;
+@property(nonatomic) BOOL isVertical;
+
++ (instancetype)selectionRectWithRectAndInfo:(CGRect)rect
+                                    position:(NSUInteger)position
+                            writingDirection:(NSWritingDirection)writingDirection
+                               containsStart:(BOOL)containsStart
+                                 containsEnd:(BOOL)containsEnd
+                                  isVertical:(BOOL)isVertical;
+
++ (instancetype)selectionRectWithRect:(CGRect)rect position:(NSUInteger)position;
+
+- (instancetype)initWithRectAndInfo:(CGRect)rect
+                           position:(NSUInteger)position
+                   writingDirection:(NSWritingDirection)writingDirection
+                      containsStart:(BOOL)containsStart
+                        containsEnd:(BOOL)containsEnd
+                         isVertical:(BOOL)isVertical;
+
+- (instancetype)init NS_UNAVAILABLE;
+@end
+
+API_AVAILABLE(ios(13.0)) @interface FlutterTextPlaceholder : UITextPlaceholder
+@end
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 FLUTTER_DARWIN_EXPORT
 #endif
-@interface FlutterTextInputView : UIView <UITextInput>
+@interface FlutterTextInputView : UIView <UITextInput, UIScribbleInteractionDelegate>
 
 // UITextInput
 @property(nonatomic, readonly) NSMutableString* text;
@@ -80,6 +136,12 @@ FLUTTER_DARWIN_EXPORT
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 @property(nonatomic, assign) UIAccessibilityElement* backingTextInputAccessibilityObject;
+
+// Scribble Support
+@property(nonatomic, assign) id<FlutterViewResponder> viewResponder;
+@property(nonatomic) FlutterScribbleFocusStatus scribbleFocusStatus;
+@property(nonatomic, strong) NSArray<FlutterTextSelectionRect*>* selectionRects;
+- (void)resetScribbleInteractionStatusIfEnding;
 
 @end
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
