@@ -84,7 +84,7 @@ struct PipelineBuilder {
       // Configure the sole color attachments pixel format.
       // TODO(csg): This can be easily reflected but we are sticking to the
       // convention that the first stage output is the color output.
-      PipelineColorAttachment color0;
+      ColorAttachmentDescriptor color0;
       color0.format = PixelFormat::kB8G8R8A8UNormInt;
       color0.blending_enabled = true;
       desc.SetColorAttachmentDescriptor(0u, std::move(color0));

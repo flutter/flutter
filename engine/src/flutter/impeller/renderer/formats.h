@@ -181,7 +181,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
 /// ```
 ///
 /// The default blend mode is 1 - source alpha.
-struct PipelineColorAttachment {
+struct ColorAttachmentDescriptor {
   PixelFormat format = PixelFormat::kUnknown;
   bool blending_enabled = false;
 
@@ -196,7 +196,7 @@ struct PipelineColorAttachment {
   std::underlying_type_t<ColorWriteMask> write_mask =
       static_cast<uint64_t>(ColorWriteMask::kAll);
 
-  constexpr bool operator==(const PipelineColorAttachment& o) const {
+  constexpr bool operator==(const ColorAttachmentDescriptor& o) const {
     return format == o.format &&                                  //
            blending_enabled == o.blending_enabled &&              //
            src_color_blend_factor == o.src_color_blend_factor &&  //
@@ -254,7 +254,7 @@ enum class StencilOperation {
   kDecrementWrap,
 };
 
-struct PipelineDepthAttachment {
+struct DepthAttachmentDescriptor {
   //----------------------------------------------------------------------------
   /// Indicates how to compare the value with that in the depth buffer.
   ///
@@ -264,7 +264,7 @@ struct PipelineDepthAttachment {
   ///
   bool depth_write_enabled = false;
 
-  constexpr bool operator==(const PipelineDepthAttachment& o) const {
+  constexpr bool operator==(const DepthAttachmentDescriptor& o) const {
     return depth_compare == o.depth_compare &&
            depth_write_enabled == o.depth_write_enabled;
   }
@@ -274,7 +274,7 @@ struct PipelineDepthAttachment {
   }
 };
 
-struct PipelineStencilAttachment {
+struct StencilAttachmentDescriptor {
   //----------------------------------------------------------------------------
   /// Indicates the operation to perform between the reference value and the
   /// value in the stencil buffer. Both values have the read_mask applied to
@@ -305,7 +305,7 @@ struct PipelineStencilAttachment {
   ///
   uint32_t write_mask = ~0;
 
-  constexpr bool operator==(const PipelineStencilAttachment& o) const {
+  constexpr bool operator==(const StencilAttachmentDescriptor& o) const {
     return stencil_compare == o.stencil_compare &&
            stencil_failure == o.stencil_failure &&
            depth_failure == o.depth_failure &&
@@ -344,17 +344,17 @@ struct StencilAttachment : public Attachment {
 namespace std {
 
 template <>
-struct hash<impeller::PipelineDepthAttachment> {
+struct hash<impeller::DepthAttachmentDescriptor> {
   constexpr std::size_t operator()(
-      const impeller::PipelineDepthAttachment& des) const {
+      const impeller::DepthAttachmentDescriptor& des) const {
     return des.GetHash();
   }
 };
 
 template <>
-struct hash<impeller::PipelineStencilAttachment> {
+struct hash<impeller::StencilAttachmentDescriptor> {
   constexpr std::size_t operator()(
-      const impeller::PipelineStencilAttachment& des) const {
+      const impeller::StencilAttachmentDescriptor& des) const {
     return des.GetHash();
   }
 };

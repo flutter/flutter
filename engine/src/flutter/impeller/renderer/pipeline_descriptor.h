@@ -53,38 +53,38 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PipelineDescriptor& SetColorAttachmentDescriptor(
       size_t index,
-      PipelineColorAttachment desc);
+      ColorAttachmentDescriptor desc);
 
-  const PipelineColorAttachment* GetColorAttachmentDescriptor(
+  const ColorAttachmentDescriptor* GetColorAttachmentDescriptor(
       size_t index) const;
 
-  const std::map<size_t /* index */, PipelineColorAttachment>
+  const std::map<size_t /* index */, ColorAttachmentDescriptor>
   GetColorAttachmentDescriptors() const {
     return color_attachment_descriptors_;
   }
 
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
-      PipelineDepthAttachment desc);
+      DepthAttachmentDescriptor desc);
 
-  std::optional<PipelineDepthAttachment> GetDepthStencilAttachmentDescriptor()
+  std::optional<DepthAttachmentDescriptor> GetDepthStencilAttachmentDescriptor()
       const {
     return depth_attachment_descriptor_;
   }
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
-      PipelineStencilAttachment front_and_back);
+      StencilAttachmentDescriptor front_and_back);
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
-      PipelineStencilAttachment front,
-      PipelineStencilAttachment back);
+      StencilAttachmentDescriptor front,
+      StencilAttachmentDescriptor back);
 
-  std::optional<PipelineStencilAttachment> GetFrontStencilAttachmentDescriptor()
-      const {
+  std::optional<StencilAttachmentDescriptor>
+  GetFrontStencilAttachmentDescriptor() const {
     return front_stencil_attachment_descriptor_;
   }
 
-  std::optional<PipelineStencilAttachment> GetBackStencilAttachmentDescriptor()
-      const {
+  std::optional<StencilAttachmentDescriptor>
+  GetBackStencilAttachmentDescriptor() const {
     return back_stencil_attachment_descriptor_;
   }
 
@@ -106,14 +106,16 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   std::string label_;
   size_t sample_count_ = 1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
-  std::map<size_t /* index */, PipelineColorAttachment>
+  std::map<size_t /* index */, ColorAttachmentDescriptor>
       color_attachment_descriptors_;
   std::shared_ptr<VertexDescriptor> vertex_descriptor_;
   PixelFormat depth_pixel_format_ = PixelFormat::kUnknown;
   PixelFormat stencil_pixel_format_ = PixelFormat::kUnknown;
-  std::optional<PipelineDepthAttachment> depth_attachment_descriptor_;
-  std::optional<PipelineStencilAttachment> front_stencil_attachment_descriptor_;
-  std::optional<PipelineStencilAttachment> back_stencil_attachment_descriptor_;
+  std::optional<DepthAttachmentDescriptor> depth_attachment_descriptor_;
+  std::optional<StencilAttachmentDescriptor>
+      front_stencil_attachment_descriptor_;
+  std::optional<StencilAttachmentDescriptor>
+      back_stencil_attachment_descriptor_;
 };
 
 }  // namespace impeller
