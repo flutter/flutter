@@ -690,16 +690,25 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
 }
 
-- (void)testSemanticsObjectAndPlatformViewSemanticsContainerDontHaveRetainCycle {
+- (void)testFlutterPlatformViewSemanticsContainer {
   fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
       new flutter::MockAccessibilityBridge());
   fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
-  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
-  object.platformViewSemanticsContainer =
-      [[FlutterPlatformViewSemanticsContainer alloc] initWithSemanticsObject:object];
-  __weak SemanticsObject* weakObject = object;
-  object = nil;
-  XCTAssertNil(weakObject);
+  __weak UIView* weakPlatformView;
+  @autoreleasepool {
+    UIView* platformView = [[UIView alloc] init];
+
+    FlutterPlatformViewSemanticsContainer* container =
+        [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:bridge
+                                                                  uid:1
+                                                         platformView:platformView];
+    XCTAssertEqualObjects(container.accessibilityElements, @[ platformView ]);
+    weakPlatformView = platformView;
+    XCTAssertNotNil(weakPlatformView);
+  }
+  // Check if there's no more strong references to `platformView` after container and platformView
+  // are released.
+  XCTAssertNil(weakPlatformView);
 }
 
 - (void)testFlutterSwitchSemanticsObjectMatchesUISwitch {

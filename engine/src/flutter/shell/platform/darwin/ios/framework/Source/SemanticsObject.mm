@@ -300,7 +300,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   [_children release];
   _parent = nil;
   _container.get().semanticsObject = nil;
-  [_platformViewSemanticsContainer release];
   _inDealloc = YES;
   [super dealloc];
 }
@@ -319,9 +318,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)hasChildren {
-  if (_node.IsPlatformViewNode()) {
-    return YES;
-  }
   return [self.children count] != 0;
 }
 
@@ -753,31 +749,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end
 
 @interface FlutterPlatformViewSemanticsContainer ()
-@property(nonatomic, assign) SemanticsObject* semanticsObject;
 @property(nonatomic, strong) UIView* platformView;
 @end
 
 @implementation FlutterPlatformViewSemanticsContainer
 
-// Method declared as unavailable in the interface
-- (instancetype)init {
-  [self release];
-  [super doesNotRecognizeSelector:_cmd];
-  return nil;
-}
-
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)object {
-  FML_CHECK(object);
-  // Initialize with the UIView as the container.
-  // The UIView will not necessarily be accessibility parent for this object.
-  // The bridge informs the OS of the actual structure via
-  // `accessibilityContainer` and `accessibilityElementAtIndex`.
-  if (self = [super initWithAccessibilityContainer:object.bridge->view()]) {
-    _semanticsObject = object;
-    auto controller = object.bridge->GetPlatformViewsController();
-    if (controller) {
-      _platformView = [controller->GetPlatformViewByID(object.node.platformViewId) retain];
-    }
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
+                           uid:(int32_t)uid
+                  platformView:(nonnull UIView*)platformView {
+  if (self = [super initWithBridge:bridge uid:uid]) {
+    _platformView = [platformView retain];
   }
   return self;
 }
@@ -790,47 +771,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 #pragma mark - UIAccessibilityContainer overrides
 
-- (NSInteger)accessibilityElementCount {
-  // This container should only contain 2 elements:
-  // 1. The semantic object that represents this container.
-  // 2. The platform view object.
-  return 2;
-}
-
-- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  FML_DCHECK(index < 2);
-  if (index == 0) {
-    return _semanticsObject.nativeAccessibility;
-  } else {
-    return _platformView;
-  }
-}
-
-- (NSInteger)indexOfAccessibilityElement:(id)element {
-  FML_DCHECK(element == _semanticsObject || element == _platformView);
-  if (element == _semanticsObject) {
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
-#pragma mark - UIAccessibilityElement overrides
-
-- (CGRect)accessibilityFrame {
-  return _semanticsObject.accessibilityFrame;
-}
-
-- (BOOL)isAccessibilityElement {
-  return NO;
-}
-
-- (id)accessibilityContainer {
-  return [_semanticsObject accessibilityContainer];
-}
-
-- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  return [_platformView accessibilityScroll:direction];
+- (NSArray*)accessibilityElements {
+  return @[ _platformView ];
 }
 
 @end
@@ -882,12 +824,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
   SemanticsObject* child = [_semanticsObject children][index - 1];
 
-  // Swap the original `SemanticsObject` to a `PlatformViewSemanticsContainer`
-  if (child.node.IsPlatformViewNode()) {
-    child.platformViewSemanticsContainer.index = index;
-    return child.platformViewSemanticsContainer;
-  }
-
   if ([child hasChildren])
     return [child accessibilityContainer];
   return child.nativeAccessibility;
@@ -896,11 +832,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (NSInteger)indexOfAccessibilityElement:(id)element {
   if (element == _semanticsObject)
     return 0;
-
-  // FlutterPlatformViewSemanticsContainer is always the last element of its parent.
-  if ([element isKindOfClass:[FlutterPlatformViewSemanticsContainer class]]) {
-    return ((FlutterPlatformViewSemanticsContainer*)element).index;
-  }
 
   NSArray<SemanticsObject*>* children = [_semanticsObject children];
   for (size_t i = 0; i < [children count]; i++) {
