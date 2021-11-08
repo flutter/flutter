@@ -8,6 +8,8 @@ import 'proto/conductor_state.pb.dart' as pb;
 
 const String gsutilBinary = 'gsutil.py';
 
+const String kFrameworkDefaultBranch = 'master';
+
 const List<String> kReleaseChannels = <String>[
   'stable',
   'beta',
