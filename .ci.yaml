@@ -3230,7 +3230,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91272
     presubmit: false
     timeout: 60
     properties:
