@@ -251,12 +251,12 @@ constexpr MTLClearColor ToMTLClearColor(const Color& color) {
 
 MTLRenderPipelineColorAttachmentDescriptor*
 ToMTLRenderPipelineColorAttachmentDescriptor(
-    PipelineColorAttachment descriptor);
+    ColorAttachmentDescriptor descriptor);
 
 MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
-    std::optional<PipelineDepthAttachment> depth,
-    std::optional<PipelineStencilAttachment> front,
-    std::optional<PipelineStencilAttachment> back);
+    std::optional<DepthAttachmentDescriptor> depth,
+    std::optional<StencilAttachmentDescriptor> front,
+    std::optional<StencilAttachmentDescriptor> back);
 
 MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc);
 
