@@ -250,6 +250,7 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
+    bringup: true # TODO(chillers): https://github.com/flutter/flutter/issues/93225
     timeout: 30
     properties:
       tags: >
