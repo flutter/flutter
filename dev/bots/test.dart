@@ -132,6 +132,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/widgets/html_element_view_test.dart',
     'test/cupertino/scaffold_test.dart',
     'test/rendering/platform_view_test.dart',
+    'test/cupertino/context_menu_action_test.dart',
   ],
 };
 
