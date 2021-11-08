@@ -16,6 +16,7 @@ final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
+    if (language != 'as')
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language);
 

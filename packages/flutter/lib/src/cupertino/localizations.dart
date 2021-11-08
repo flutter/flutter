@@ -342,13 +342,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   const DefaultCupertinoLocalizations();
 
   static const List<String> _shortWeekdays = <String>[
-    'Sun',
     'Mon',
     'Tue',
     'Wed',
     'Thu',
     'Fri',
     'Sat',
+    'Sun',
   ];
 
   static const List<String> _weekdays = <String>[
