@@ -53,7 +53,7 @@ void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
 }
 
 std::shared_ptr<RenderPass> CommandBufferMTL::CreateRenderPass(
-    const RenderPassDescriptor& desc) const {
+    const RenderTarget& desc) const {
   if (!buffer_) {
     return nullptr;
   }

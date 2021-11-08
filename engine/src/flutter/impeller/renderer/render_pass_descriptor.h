@@ -13,37 +13,32 @@
 
 namespace impeller {
 
-class RenderPassDescriptor {
+class RenderTarget {
  public:
-  RenderPassDescriptor();
+  RenderTarget();
 
-  ~RenderPassDescriptor();
+  ~RenderTarget();
 
   bool HasColorAttachment(size_t index) const;
 
   std::optional<ISize> GetColorAttachmentSize(size_t index) const;
 
-  RenderPassDescriptor& SetColorAttachment(RenderPassColorAttachment attachment,
-                                           size_t index);
+  RenderTarget& SetColorAttachment(ColorAttachment attachment, size_t index);
 
-  RenderPassDescriptor& SetDepthAttachment(
-      RenderPassDepthAttachment attachment);
+  RenderTarget& SetDepthAttachment(DepthAttachment attachment);
 
-  RenderPassDescriptor& SetStencilAttachment(
-      RenderPassStencilAttachment attachment);
+  RenderTarget& SetStencilAttachment(StencilAttachment attachment);
 
-  const std::map<size_t, RenderPassColorAttachment>& GetColorAttachments()
-      const;
+  const std::map<size_t, ColorAttachment>& GetColorAttachments() const;
 
-  const std::optional<RenderPassDepthAttachment>& GetDepthAttachment() const;
+  const std::optional<DepthAttachment>& GetDepthAttachment() const;
 
-  const std::optional<RenderPassStencilAttachment>& GetStencilAttachment()
-      const;
+  const std::optional<StencilAttachment>& GetStencilAttachment() const;
 
  private:
-  std::map<size_t, RenderPassColorAttachment> colors_;
-  std::optional<RenderPassDepthAttachment> depth_;
-  std::optional<RenderPassStencilAttachment> stencil_;
+  std::map<size_t, ColorAttachment> colors_;
+  std::optional<DepthAttachment> depth_;
+  std::optional<StencilAttachment> stencil_;
 };
 
 }  // namespace impeller

@@ -16,7 +16,7 @@ namespace impeller {
 
 class Surface {
  public:
-  Surface(RenderPassDescriptor target_desc);
+  Surface(RenderTarget target_desc);
 
   ~Surface();
 
@@ -24,10 +24,10 @@ class Surface {
 
   bool IsValid() const;
 
-  const RenderPassDescriptor& GetTargetRenderPassDescriptor() const;
+  const RenderTarget& GetTargetRenderPassDescriptor() const;
 
  private:
-  RenderPassDescriptor desc_;
+  RenderTarget desc_;
   ISize size_;
 
   bool is_valid_ = false;

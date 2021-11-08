@@ -8,19 +8,18 @@
 
 namespace impeller {
 
-RenderPassDescriptor::RenderPassDescriptor() = default;
+RenderTarget::RenderTarget() = default;
 
-RenderPassDescriptor::~RenderPassDescriptor() = default;
+RenderTarget::~RenderTarget() = default;
 
-bool RenderPassDescriptor::HasColorAttachment(size_t index) const {
+bool RenderTarget::HasColorAttachment(size_t index) const {
   if (auto found = colors_.find(index); found != colors_.end()) {
     return true;
   }
   return false;
 }
 
-std::optional<ISize> RenderPassDescriptor::GetColorAttachmentSize(
-    size_t index) const {
+std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
   auto found = colors_.find(index);
 
   if (found == colors_.end()) {
@@ -30,43 +29,39 @@ std::optional<ISize> RenderPassDescriptor::GetColorAttachmentSize(
   return found->second.texture->GetSize();
 }
 
-RenderPassDescriptor& RenderPassDescriptor::SetColorAttachment(
-    RenderPassColorAttachment attachment,
-    size_t index) {
+RenderTarget& RenderTarget::SetColorAttachment(ColorAttachment attachment,
+                                               size_t index) {
   if (attachment) {
     colors_[index] = attachment;
   }
   return *this;
 }
 
-RenderPassDescriptor& RenderPassDescriptor::SetDepthAttachment(
-    RenderPassDepthAttachment attachment) {
+RenderTarget& RenderTarget::SetDepthAttachment(DepthAttachment attachment) {
   if (attachment) {
     depth_ = std::move(attachment);
   }
   return *this;
 }
 
-RenderPassDescriptor& RenderPassDescriptor::SetStencilAttachment(
-    RenderPassStencilAttachment attachment) {
+RenderTarget& RenderTarget::SetStencilAttachment(StencilAttachment attachment) {
   if (attachment) {
     stencil_ = std::move(attachment);
   }
   return *this;
 }
 
-const std::map<size_t, RenderPassColorAttachment>&
-RenderPassDescriptor::GetColorAttachments() const {
+const std::map<size_t, ColorAttachment>& RenderTarget::GetColorAttachments()
+    const {
   return colors_;
 }
 
-const std::optional<RenderPassDepthAttachment>&
-RenderPassDescriptor::GetDepthAttachment() const {
+const std::optional<DepthAttachment>& RenderTarget::GetDepthAttachment() const {
   return depth_;
 }
 
-const std::optional<RenderPassStencilAttachment>&
-RenderPassDescriptor::GetStencilAttachment() const {
+const std::optional<StencilAttachment>& RenderTarget::GetStencilAttachment()
+    const {
   return stencil_;
 }
 

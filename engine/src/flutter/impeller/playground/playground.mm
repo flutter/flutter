@@ -140,14 +140,14 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
         static_cast<ISize::Type>(current_drawable.texture.width),
         static_cast<ISize::Type>(current_drawable.texture.height)};
 
-    RenderPassColorAttachment color0;
+    ColorAttachment color0;
     color0.texture =
         std::make_shared<TextureMTL>(color0_desc, current_drawable.texture);
     color0.clear_color = Color::SkyBlue();
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 
-    RenderPassDescriptor desc;
+    RenderTarget desc;
     desc.SetColorAttachment(color0, 0u);
 
     Surface surface(desc);

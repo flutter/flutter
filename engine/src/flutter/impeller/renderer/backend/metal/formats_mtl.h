@@ -15,7 +15,7 @@
 
 namespace impeller {
 
-class RenderPassDescriptor;
+class RenderTarget;
 
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {

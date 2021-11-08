@@ -13,6 +13,13 @@ namespace impeller {
 class HostBuffer;
 class Allocator;
 
+//------------------------------------------------------------------------------
+/// @brief      Render passes encode render commands directed as one specific
+///             render target into an underlying command buffer.
+///
+///             Render passes can be obtained from the command buffer in which
+///             the pass is meant to encode commands into.
+///
 class RenderPass {
  public:
   virtual ~RenderPass();

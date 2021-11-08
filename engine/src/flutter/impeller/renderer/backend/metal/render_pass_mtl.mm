@@ -17,7 +17,7 @@
 
 namespace impeller {
 
-static bool ConfigureAttachment(const RenderPassAttachment& desc,
+static bool ConfigureAttachment(const Attachment& desc,
                                 MTLRenderPassAttachmentDescriptor* attachment) {
   if (!desc.texture) {
     return false;
@@ -30,7 +30,7 @@ static bool ConfigureAttachment(const RenderPassAttachment& desc,
 }
 
 static bool ConfigureColorAttachment(
-    const RenderPassColorAttachment& desc,
+    const ColorAttachment& desc,
     MTLRenderPassColorAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;
@@ -40,7 +40,7 @@ static bool ConfigureColorAttachment(
 }
 
 static bool ConfigureDepthAttachment(
-    const RenderPassDepthAttachment& desc,
+    const DepthAttachment& desc,
     MTLRenderPassDepthAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;
@@ -50,7 +50,7 @@ static bool ConfigureDepthAttachment(
 }
 
 static bool ConfigureStencilAttachment(
-    const RenderPassStencilAttachment& desc,
+    const StencilAttachment& desc,
     MTLRenderPassStencilAttachmentDescriptor* attachment) {
   if (!ConfigureAttachment(desc, attachment)) {
     return false;
@@ -61,7 +61,7 @@ static bool ConfigureStencilAttachment(
 
 // TODO(csg): Move this to formats_mtl.h
 static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
-    const RenderPassDescriptor& desc) {
+    const RenderTarget& desc) {
   auto result = [MTLRenderPassDescriptor renderPassDescriptor];
 
   const auto& colors = desc.GetColorAttachments();
@@ -93,7 +93,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 }
 
 RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer,
-                             const RenderPassDescriptor& desc)
+                             const RenderTarget& desc)
     : buffer_(buffer),
       desc_(ToMTLRenderPassDescriptor(desc)),
       transients_buffer_(HostBuffer::Create()) {
