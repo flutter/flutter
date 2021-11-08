@@ -727,7 +727,6 @@ class ToggleButtons extends StatelessWidget {
       case MaterialTapTargetSize.shrinkWrap:
         return result;
     }
-    return result;
   }
 
   @override
