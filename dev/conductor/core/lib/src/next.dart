@@ -149,7 +149,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            state_import.writeStateToFile(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -175,7 +175,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            updateState(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -284,7 +284,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            updateState(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -319,7 +319,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            updateState(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -354,7 +354,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            updateState(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -377,7 +377,7 @@ class NextContext {
           );
           if (!response) {
             stdio.printError('Aborting command.');
-            updateState(stateFile, state, stdio.logs);
+            updateState(state, stdio.logs);
             return;
           }
         }
@@ -390,13 +390,17 @@ class NextContext {
     state.currentPhase = nextPhase;
     stdio.printStatus(state_import.phaseInstructions(state));
 
-    updateState(stateFile, state, stdio.logs);
+    updateState(state, stdio.logs);
   }
 
-  /// Persist the state to a file.
+  /// Save the release's [state].
+  ///
+  /// This can be overridden by frontends that may not persist the state to
+  /// disk, and/or may need to call additional update hooks each time the state
+  /// is updated.
   @visibleForOverriding
-  void updateState(File file, pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    state_import.writeStateToFile(file, state, logs);
+  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
+    state_import.writeStateToFile(stateFile, state, logs);
   }
 
   @visibleForTesting

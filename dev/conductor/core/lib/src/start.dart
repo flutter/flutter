@@ -402,17 +402,19 @@ class StartContext {
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
-    updateState(stateFile, state, stdio.logs);
+    updateState(state, stdio.logs);
 
     stdio.printStatus(state_import.presentState(state));
   }
 
-  /// Persist the state to a file.
+  /// Save the release's [state].
   ///
-  /// This can be overridden in frontend-specific implementations.
+  /// This can be overridden by frontends that may not persist the state to
+  /// disk, and/or may need to call additional update hooks each time the state
+  /// is updated.
   @visibleForOverriding
-  void updateState(File file, pb.ConductorState state, List<String> logs) {
-    state_import.writeStateToFile(file, state, logs);
+  void updateState(pb.ConductorState state, List<String> logs) {
+    state_import.writeStateToFile(stateFile, state, logs);
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.
