@@ -988,10 +988,6 @@ class TextPainter {
   /// widgets to a particular line.
   ///
   /// Valid only after [layout] has been called.
-  ///
-  /// This can potentially return a large amount of data, so it is not recommended
-  /// to repeatedly call this. Instead, cache the results. The cached results
-  /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_debugNeedsLayout);
     return  _lineMetricsCache ??= _paragraph!.computeLineMetrics();
