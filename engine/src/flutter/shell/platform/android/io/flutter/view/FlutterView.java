@@ -830,7 +830,7 @@ public class FlutterView extends SurfaceView
 
   @Override
   @UiThread
-  public TaskQueue makeBackgroundTaskQueue() {
+  public TaskQueue makeBackgroundTaskQueue(TaskQueueOptions options) {
     return null;
   }
 

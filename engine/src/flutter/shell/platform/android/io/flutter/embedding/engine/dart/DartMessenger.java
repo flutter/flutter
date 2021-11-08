@@ -79,7 +79,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   }
 
   interface TaskQueueFactory {
-    DartMessengerTaskQueue makeBackgroundTaskQueue();
+    DartMessengerTaskQueue makeBackgroundTaskQueue(TaskQueueOptions options);
   }
 
   private static class DefaultTaskQueueFactory implements TaskQueueFactory {
@@ -89,8 +89,12 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
       executorService = FlutterInjector.instance().executorService();
     }
 
-    public DartMessengerTaskQueue makeBackgroundTaskQueue() {
-      return new DefaultTaskQueue(executorService);
+    public DartMessengerTaskQueue makeBackgroundTaskQueue(TaskQueueOptions options) {
+      if (options.getIsSerial()) {
+        return new SerialTaskQueue(executorService);
+      } else {
+        return new ConcurrentTaskQueue(executorService);
+      }
     }
   }
 
@@ -126,12 +130,26 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     }
   }
 
-  static class DefaultTaskQueue implements DartMessengerTaskQueue {
+  static class ConcurrentTaskQueue implements DartMessengerTaskQueue {
+    @NonNull private final ExecutorService executor;
+
+    ConcurrentTaskQueue(ExecutorService executor) {
+      this.executor = executor;
+    }
+
+    @Override
+    public void dispatch(@NonNull Runnable runnable) {
+      executor.execute(runnable);
+    }
+  }
+
+  /** A serial task queue that can run on a concurrent ExecutorService. */
+  static class SerialTaskQueue implements DartMessengerTaskQueue {
     @NonNull private final ExecutorService executor;
     @NonNull private final ConcurrentLinkedQueue<Runnable> queue;
     @NonNull private final AtomicBoolean isRunning;
 
-    DefaultTaskQueue(ExecutorService executor) {
+    SerialTaskQueue(ExecutorService executor) {
       this.executor = executor;
       queue = new ConcurrentLinkedQueue<>();
       isRunning = new AtomicBoolean(false);
@@ -169,8 +187,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   }
 
   @Override
-  public TaskQueue makeBackgroundTaskQueue() {
-    DartMessengerTaskQueue taskQueue = taskQueueFactory.makeBackgroundTaskQueue();
+  public TaskQueue makeBackgroundTaskQueue(TaskQueueOptions options) {
+    DartMessengerTaskQueue taskQueue = taskQueueFactory.makeBackgroundTaskQueue(options);
     TaskQueueToken token = new TaskQueueToken();
     createdTaskQueues.put(token, taskQueue);
     return token;
