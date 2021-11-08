@@ -83,7 +83,10 @@ One or more plugins require a higher Android SDK version.
 Fix this issue by adding the following to ${projectGradleFile.path}:
 android {
   compileSdkVersion 31
-}'''
+  ...
+}
+
+'''
       ));
    });
 }
