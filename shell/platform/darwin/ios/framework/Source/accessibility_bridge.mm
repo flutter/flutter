@@ -126,15 +126,6 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
       object.accessibilityCustomActions = accessibilityCustomActions;
     }
 
-    if (object.node.IsPlatformViewNode()) {
-      auto controller = GetPlatformViewsController();
-      if (controller) {
-        object.platformViewSemanticsContainer = [[[FlutterPlatformViewSemanticsContainer alloc]
-            initWithSemanticsObject:object] autorelease];
-      }
-    } else if (object.platformViewSemanticsContainer) {
-      object.platformViewSemanticsContainer = nil;
-    }
     if (needsAnnouncement) {
       // Try to be more polite - iOS 11+ supports
       // UIAccessibilitySpeechAttributeQueueAnnouncement which should avoid
@@ -268,6 +259,12 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
   } else if (node.HasFlag(flutter::SemanticsFlags::kHasImplicitScrolling)) {
     return [[[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr
                                                                  uid:node.id] autorelease];
+  } else if (node.IsPlatformViewNode()) {
+    return [[[FlutterPlatformViewSemanticsContainer alloc]
+        initWithBridge:weak_ptr
+                   uid:node.id
+          platformView:weak_ptr->GetPlatformViewsController()->GetPlatformViewByID(
+                           node.platformViewId)] autorelease];
   } else {
     return [[[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
   }

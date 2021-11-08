@@ -62,11 +62,6 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @property(nonatomic, strong) NSArray<SemanticsObject*>* children;
 
 /**
- * Used if this SemanticsObject is for a platform view.
- */
-@property(strong, nonatomic) FlutterPlatformViewSemanticsContainer* platformViewSemanticsContainer;
-
-/**
  * The UIAccessibility that represents this object.
  *
  * By default, this return self. Subclasses can override to return different
@@ -159,16 +154,14 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * * `SemanticsObject` for the other type of semantics objects.
  * * `FlutterSemanticsObject` for default implementation of `SemanticsObject`.
  */
-@interface FlutterPlatformViewSemanticsContainer : UIAccessibilityElement
+@interface FlutterPlatformViewSemanticsContainer : SemanticsObject
 
-/**
- * The position inside an accessibility container.
- */
-@property(nonatomic) NSInteger index;
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
+                           uid:(int32_t)uid NS_UNAVAILABLE;
 
-- (instancetype)init __attribute__((unavailable("Use initWithAccessibilityContainer: instead")));
-
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)object;
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
+                           uid:(int32_t)uid
+                  platformView:(UIView*)platformView NS_DESIGNATED_INITIALIZER;
 
 @end
 
