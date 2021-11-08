@@ -101,9 +101,9 @@ class DateUtils {
   ///
   /// - [DateTime.weekday] provides a 1-based index into days of week, with 1
   ///   falling on Monday.
-  /// - [CupertinoLocalizations.firstDayOfWeekIndex] provides a 0-based index
-  ///   into the [CupertinoLocalizations.calendarWeekDays] list.
-  /// - [CupertinoLocalizations.calendarWeekDays] list provides localized names of
+  /// - [MaterialLocalizations.firstDayOfWeekIndex] provides a 0-based index
+  ///   into the [MaterialLocalizations.narrowWeekdays] list.
+  /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
   ///   days of week, always starting with Sunday and ending with Saturday.
   static int firstDayOffset(int year, int month, CupertinoLocalizations localizations) {
     // 0-based day of week for the month and year, with 0 representing Monday.
