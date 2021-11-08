@@ -5812,10 +5812,109 @@ void main() {
     state.bringIntoView(TextPosition(offset: controller.text.length));
 
     await tester.pumpAndSettle();
-    // The SingleChildScrollView is scrolled instead of the EditableText to
-    // reveal the caret.
+    // The SingleChildScrollView is scrolled instead of the EditableText to reveal the caret.
     expect(outerController.offset, outerController.position.maxScrollExtent);
     expect(editableScrollController.offset, 0);
+  });
+
+  testWidgets('bringIntoView centers the viewport on caret when the caret is wider than the viewport', (WidgetTester tester) async {
+    const String text = 'to cóż że ze Szwecji';
+    final TextEditingController controller = TextEditingController(text: text);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 32.0,
+          height: 100.0,
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0),
+            cursorColor: Colors.blue,
+            cursorWidth: 48.0,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
+    expect(scrollable.controller!.offset, 0.0);
+    expect(renderEditable.maxScrollExtent, equals(977.0));
+
+    state.bringIntoView(const TextPosition(offset: 2));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 5));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 5 * 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 7));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 7 * 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 9));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 9 * 48.0 + 48.0 / 2 - 32.0 / 2);
+  });
+
+  testWidgets('bringIntoView centers the viewport on caret when the caret is taller than the viewport', (WidgetTester tester) async {
+    const String text = 'to\ncóż\nże\nze\nSzwecji';
+    final TextEditingController controller = TextEditingController(text: text);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 500.0,
+          height: 32.0,
+          child: EditableText(
+            showSelectionHandles: true,
+            maxLines: null,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: const TextStyle(fontFamily: 'Roboto', fontSize: 48.0),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
+    expect(scrollable.controller!.offset, 0.0);
+    expect(renderEditable.maxScrollExtent, equals(208.0));
+
+    state.bringIntoView(const TextPosition(offset: 3));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 7));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 10));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 3 * 48.0 + 48.0 / 2 - 32.0 / 2);
+
+    state.bringIntoView(const TextPosition(offset: 13));
+    await tester.pumpAndSettle();
+    expect(scrollable.controller!.offset, 4 * 48.0 + 48.0 / 2 - 32.0 / 2);
   });
 
   testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
@@ -5843,7 +5942,6 @@ void main() {
         ),
       ));
     }
-
 
     await buildWithPhysics();
     expect(scrollController.offset, 0);

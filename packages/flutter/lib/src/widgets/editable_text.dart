@@ -2147,7 +2147,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_isMultiline) {
       additionalOffset = rect.width >= editableSize.width
         // Center `rect` if it's oversized.
-        ? editableSize.width / 2 - rect.center.dx
+        ? rect.center.dx - editableSize.width / 2
         // Valid additional offsets range from (rect.right - size.width)
         // to (rect.left). Pick the closest one if out of range.
         : 0.0.clamp(rect.right - editableSize.width, rect.left);
@@ -2163,7 +2163,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
-        ? editableSize.height / 2 - expandedRect.center.dy
+        ? expandedRect.center.dy - editableSize.height / 2
         : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }
