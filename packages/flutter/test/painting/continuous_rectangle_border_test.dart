@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,9 +37,9 @@ void main() {
   });
 
   test('ContinuousRectangleBorder scale and lerp', () {
-    final ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
-    final ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
-    final ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
+    const ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: BorderSide(width: 10.0), borderRadius: BorderRadius.all(Radius.circular(100.0)));
+    const ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: BorderSide(width: 15.0), borderRadius: BorderRadius.all(Radius.circular(150.0)));
+    const ContinuousRectangleBorder c20 = ContinuousRectangleBorder(side: BorderSide(width: 20.0), borderRadius: BorderRadius.all(Radius.circular(200.0)));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -109,8 +113,8 @@ void main() {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.blueAccent[400],
-        shape: ContinuousRectangleBorder(
-          borderRadius: BorderRadius.circular(28.0),
+        shape: const ContinuousRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(28.0)),
         ),
       ),
     ));
@@ -230,8 +234,8 @@ void main() {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.redAccent[400],
-        shape: ContinuousRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0),
+        shape: const ContinuousRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50.0)),
         ),
       ),
     ));

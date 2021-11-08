@@ -21,7 +21,7 @@ void main() {
 
   testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
     const Spacer spacer1 = Spacer();
-    const Spacer spacer2 = Spacer(flex: 1);
+    const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);
     const Spacer spacer4 = Spacer(flex: 4);
     await tester.pumpWidget(Row(

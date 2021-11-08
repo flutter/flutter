@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -27,9 +25,7 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
-);
+final FakePlatform linux = FakePlatform();
 
 void main() {
   testWithoutContext('default configuration', () async {
@@ -108,7 +104,7 @@ void main() {
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(isMacOSEnabled: false),
+        featureFlags: TestFeatureFlags(),
         platform: macOS,
       ),
     );

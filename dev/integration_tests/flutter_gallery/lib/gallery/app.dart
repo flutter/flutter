@@ -8,11 +8,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
 import 'package:scoped_model/scoped_model.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
+import '../demo/shrine/model/app_state_model.dart';
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';

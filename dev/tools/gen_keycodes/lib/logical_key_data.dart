@@ -5,11 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gen_keycodes/utils.dart';
 import 'package:path/path.dart' as path;
 
 import 'constants.dart';
 import 'physical_key_data.dart';
+import 'utils.dart';
 
 bool _isControlCharacter(int codeUnit) {
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);

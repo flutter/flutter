@@ -2,37 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for Action.Action.overridable
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample implements a custom text input field that handles the
-// [DeleteTextIntent] intent, as well as a US telephone number input widget
-// that consists of multiple text fields for area code, prefix and line
-// number. When the backspace key is pressed, the phone number input widget
-// sends the focus to the preceding text field when the currently focused
-// field becomes empty.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
-
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 void main() {
   runApp(
@@ -44,14 +17,8 @@ void main() {
   );
 }
 
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 // This implements a custom phone number input field that handles the
-// [DeleteTextIntent] intent.
+// [DeleteCharacterIntent] intent.
 class DigitInput extends StatefulWidget {
   const DigitInput({
     Key? key,
@@ -71,9 +38,9 @@ class DigitInput extends StatefulWidget {
 }
 
 class DigitInputState extends State<DigitInput> {
-  late final Action<DeleteTextIntent> _deleteTextAction =
-      CallbackAction<DeleteTextIntent>(
-    onInvoke: (DeleteTextIntent intent) {
+  late final Action<DeleteCharacterIntent> _deleteTextAction =
+      CallbackAction<DeleteCharacterIntent>(
+    onInvoke: (DeleteCharacterIntent intent) {
       // For simplicity we delete everything in the section.
       widget.controller.clear();
     },
@@ -83,8 +50,8 @@ class DigitInputState extends State<DigitInput> {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        // Make the default `DeleteTextIntent` handler overridable.
-        DeleteTextIntent: Action<DeleteTextIntent>.overridable(
+        // Make the default `DeleteCharacterIntent` handler overridable.
+        DeleteCharacterIntent: Action<DeleteCharacterIntent>.overridable(
             defaultAction: _deleteTextAction, context: context),
       },
       child: TextField(
@@ -112,12 +79,12 @@ class SimpleUSPhoneNumberEntry extends StatefulWidget {
       _SimpleUSPhoneNumberEntryState();
 }
 
-class _DeleteDigit extends Action<DeleteTextIntent> {
+class _DeleteDigit extends Action<DeleteCharacterIntent> {
   _DeleteDigit(this.state);
 
   final _SimpleUSPhoneNumberEntryState state;
   @override
-  Object? invoke(DeleteTextIntent intent) {
+  Object? invoke(DeleteCharacterIntent intent) {
     assert(callingAction != null);
     callingAction?.invoke(intent);
 
@@ -149,53 +116,47 @@ class _SimpleUSPhoneNumberEntryState extends State<SimpleUSPhoneNumberEntry> {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        DeleteTextIntent: _DeleteDigit(this),
+        DeleteCharacterIntent: _DeleteDigit(this),
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const Expanded(
-              child: Text(
-                '(',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text('(', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: areaCodeFocusNode,
-                  controller: areaCodeController,
-                  maxLength: 3),
-              flex: 3),
+            flex: 3,
+            child: DigitInput(
+              focusNode: areaCodeFocusNode,
+              controller: areaCodeController,
+              maxLength: 3,
+            ),
+          ),
           const Expanded(
-              child: Text(
-                ')',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text(')', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: prefixFocusNode,
-                  controller: prefixController,
-                  maxLength: 3),
-              flex: 3),
+            flex: 3,
+            child: DigitInput(
+              focusNode: prefixFocusNode,
+              controller: prefixController,
+              maxLength: 3,
+            ),
+          ),
           const Expanded(
-              child: Text(
-                '-',
-                textAlign: TextAlign.center,
-              ),
-              flex: 1),
+            child: Text('-', textAlign: TextAlign.center),
+          ),
           Expanded(
-              child: DigitInput(
-                  focusNode: lineNumberFocusNode,
-                  controller: lineNumberController,
-                  textInputAction: TextInputAction.done,
-                  maxLength: 4),
-              flex: 4),
+            flex: 4,
+            child: DigitInput(
+              focusNode: lineNumberFocusNode,
+              controller: lineNumberController,
+              textInputAction: TextInputAction.done,
+              maxLength: 4,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

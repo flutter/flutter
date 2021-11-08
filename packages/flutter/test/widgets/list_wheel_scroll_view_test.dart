@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -117,7 +121,6 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            overAndUnderCenterOpacity: 1,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -1232,7 +1235,7 @@ void main() {
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -50.0),
-        100.0,
+        800.0,
       );
 
       // At this moment, the ballistics is started but 50px is still inside the

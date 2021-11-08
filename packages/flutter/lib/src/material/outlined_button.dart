@@ -48,7 +48,7 @@ import 'theme_data.dart';
 /// appearance of its outline, both the [ButtonStyle.shape] and
 /// [ButtonStyle.side] properties must be specified.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a basic [OutlinedButton].
 ///
 /// ** See code in examples/api/lib/material/outlined_button/outlined_button.0.dart **
@@ -70,6 +70,8 @@ class OutlinedButton extends ButtonStyleButton {
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
+    ValueChanged<bool>? onHover,
+    ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -79,6 +81,8 @@ class OutlinedButton extends ButtonStyleButton {
     key: key,
     onPressed: onPressed,
     onLongPress: onLongPress,
+    onHover: onHover,
+    onFocusChange: onFocusChange,
     style: style,
     focusNode: focusNode,
     autofocus: autofocus,
@@ -268,7 +272,6 @@ class OutlinedButton extends ButtonStyleButton {
       maximumSize: Size.infinite,
       side: BorderSide(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-        width: 1,
       ),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,

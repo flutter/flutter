@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -1267,7 +1266,7 @@ class _OrderedFocusInfo {
 ///
 /// {@macro flutter.widgets.FocusOrder.comparable}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This sample shows how to assign a traversal order to a widget. In the
 /// example, the focus order goes from bottom right (the "One" button) to top
 /// left (the "Six" button).
@@ -1419,7 +1418,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// To prevent the members of the group from being focused, set the
 /// [descendantsAreFocusable] attribute to false.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
 /// traversal to see the order they are traversed in.  The first row follows a
@@ -1722,9 +1721,18 @@ class DirectionalFocusIntent extends Intent {
 /// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
 /// the [WidgetsApp], with the appropriate associated directions.
 class DirectionalFocusAction extends Action<DirectionalFocusIntent> {
+  /// Creates a [DirectionalFocusAction].
+  DirectionalFocusAction() : _isForTextField = false;
+
+  /// Creates a [DirectionalFocusAction] that ignores [DirectionalFocusIntent]s
+  /// whose `ignoreTextFields` field is true.
+  DirectionalFocusAction.forTextField() : _isForTextField = true;
+
+  // Whether this action is defined in a text field.
+  final bool _isForTextField;
   @override
   void invoke(DirectionalFocusIntent intent) {
-    if (!intent.ignoreTextFields || primaryFocus!.context!.widget is! EditableText) {
+    if (!intent.ignoreTextFields || !_isForTextField) {
       primaryFocus!.focusInDirection(intent.direction);
     }
   }

@@ -86,7 +86,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     Future<ByteData?>? result;
     if (_inboundHandlers.containsKey(channel))
       result = _inboundHandlers[channel]!(data);
-    result ??= Future<ByteData?>.value(null);
+    result ??= Future<ByteData?>.value();
     if (callback != null)
       result = result.then((ByteData? result) { callback(result); return result; });
     return result;
@@ -281,7 +281,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       } on MissingPluginException {
         return null;
       } catch (error) {
-        return channel.codec.encodeErrorEnvelope(code: 'error', message: '$error', details: null);
+        return channel.codec.encodeErrorEnvelope(code: 'error', message: '$error');
       }
     }, handler);
   }

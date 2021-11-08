@@ -183,6 +183,30 @@ class CommonFinders {
     );
   }
 
+  /// Looks for widgets that contain an [Image] descendant displaying [ImageProvider]
+  /// `image` in it.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Suppose you have a button with image in it:
+  /// Button(
+  ///   child: Image.file(filePath)
+  /// )
+  ///
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithImage(Button, FileImage(filePath)));
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithImage(Type widgetType, ImageProvider image, { bool skipOffstage = true }) {
+    return find.ancestor(
+      of: find.image(image),
+      matching: find.byType(widgetType),
+    );
+  }
+
   /// Finds widgets by searching for elements with a particular type.
   ///
   /// This does not do subclass tests, so for example
