@@ -19,6 +19,7 @@ adb_path=$2
 
 # Store the time to prevent capturing logs from previous runs.
 script_start_time=$($adb_path shell 'date +"%m-%d %H:%M:%S.0"')
+script_start_time_seconds=$(date +%s)
 
 $adb_path uninstall "io.flutter.integration.deferred_components_test"
 
@@ -32,15 +33,23 @@ java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/rele
 
 $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
-sleep 30
 exit
 "
-$adb_path logcat -d -t "$script_start_time" > build/app/outputs/bundle/release/run_logcat.log
-echo ""
-if cat build/app/outputs/bundle/release/run_logcat.log | grep -q "Running deferred code"; then
-  echo "All tests passed."
-  exit 0
-fi
-cat build/app/outputs/bundle/release/run_logcat.log
+while read LOGLINE
+do
+    if [[ "${LOGLINE}" == *"Running deferred code"* ]]; then
+        echo "Found ${LOGLINE}"
+        pkill -P $$
+        echo "All tests passed."
+        exit 0
+    fi
+    # Timeout if expected log not found
+    current_time=$(date +%s)
+    if [[ $((current_time - script_start_time_seconds)) -ge 150 ]]; then
+        echo "Failure: Deferred component did not load."
+        exit 1
+    fi
+done < <(adb logcat -T "$script_start_time")
+
 echo "Failure: Deferred component did not load."
 exit 1
