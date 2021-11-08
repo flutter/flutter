@@ -52,7 +52,7 @@ void main() {
           initialDate: baseDate,
           onDateChanged: (DateTime newValue) {},
         ), locale: locale, textDirection: textDirection);
-  
+
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
         for (final String dayOfWeek in expectedDaysOfWeek) {
