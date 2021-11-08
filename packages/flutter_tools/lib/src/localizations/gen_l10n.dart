@@ -1167,6 +1167,12 @@ class LocalizationsGenerator {
 
     final String directory = _fs.path.basename(outputDirectory.path);
     final String outputFileName = _fs.path.basename(baseOutputFile.path);
+    if (!outputFileName.endsWith('.dart')) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The file name must have a .dart extension.'
+      );
+    }
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -1190,9 +1196,12 @@ class LocalizationsGenerator {
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     final int extensionIndex = outputFileName.indexOf('.');
-    // TBD error checking and reporting:
-    // - expect a non-empty filename (not ".foo.dart" - extensionIndex == 0)
-    // - expect to find a final ".dart" suffix (not "foo" or "foo.dart.bar")
+    if (extensionIndex <= 0) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The base name cannot be empty.'
+      );
+    }
     final String fileName = outputFileName.substring(0, extensionIndex);
     final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
