@@ -65,20 +65,32 @@ class TickerMode extends StatefulWidget {
   /// Obtains a [ValueNotifier] from the [TickerMode] surrounding the `context`,
   /// which indicates whether tickers are enabled in the given subtree.
   ///
-  /// When tickers are enabled or disabled, the notifier notifies its listeners.
+  /// When that [TickerMode] enabled or disabled tickers, the notifier notifies
+  /// its listeners.
   ///
   /// While the [ValueNotifier] is stable for the lifetime of the surrounding
   /// [TickerMode], calling this method does not establish a dependency between
-  /// the `context` and the [TickerMode]. When the [Widget] owning the `context`
-  /// is moved to a new location in the tree where it may have a different
-  /// [TickerMode] ancestor, it is up to the [Widget] to obtain a new
-  /// [ValueNotifier] from the new ancestor [TickerMode] by calling this method
-  /// again. [StatefulWidget]s can, for example, do this in [State.activate].
+  /// the `context` and the [TickerMode] and the widget owning the `context`
+  /// does not rebuild when the ticker mode changes from true to false or vice
+  /// versa. This is preferable when the ticker mode does not impact what is
+  /// currently rendered on screen, e.g. because it is ony used to mute/unmute a
+  /// [Ticker]. Since no dependency is established, the widget owning the
+  /// `context` is also not informed when it is moved to a new location in the
+  /// tree where it may have a different [TickerMode] ancestor. When this
+  /// happens, the widget must manually unsubscribe from the old notifier,
+  /// obtain a new one from the new ancestor [TickerMode] by calling this method
+  /// again, and re-subscribe to it. [StatefulWidget]s can, for example, do this
+  /// in [State.activate], which is called after the widget has been moved to
+  /// a new location.
   ///
   /// Alternatively, [of] can be used instead of this method to create a
   /// dependency between the provided `context` and the ancestor [TickerMode].
+  /// In this case, the widget automatically rebuilds when the ticker mode
+  /// changes or when it is moved to a new [TickerMode] ancestor, which
+  /// simplifies the management cost in the widget at the expensive of some
+  /// potential unnecessary rebuilds.
   ///
-  /// In this absence of a [TickerMode] widget, this function returns a
+  /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
   static ValueNotifier<bool> getNotifier(BuildContext context) {
     final _EffectiveTickerMode? widget = context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;

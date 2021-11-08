@@ -1808,11 +1808,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _floatingCursorResetController?.dispose();
+    _floatingCursorResetController = null;
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _cursorBlinkOpacityController?.dispose();
+    _cursorBlinkOpacityController = null;
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);

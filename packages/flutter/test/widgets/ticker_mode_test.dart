@@ -210,7 +210,7 @@ void main() {
     expect(multiTickingState().buildCount, 1);
     expect(tickingState().ticker.isTicking, isTrue);
     expect(tickingState().buildCount, 1);
-    
+
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/foo');
     await tester.pumpAndSettle();
     expect(find.text('Old route'), findsNothing);
