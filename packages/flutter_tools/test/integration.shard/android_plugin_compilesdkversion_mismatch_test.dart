@@ -78,13 +78,13 @@ void main() {
       contains('Warning: The plugin test_plugin requires Android SDK version 31.')
       );
     expect(result.stderr,
-      contains(
-      '''
-      One or more plugins require a higher Android SDK version.
-      Fix this issue by adding the following to ${projectGradleFile.path}:
-      android {
-        compileSdkVersion 31
-      }
-      '''));
+      contains('''
+One or more plugins require a higher Android SDK version.
+Fix this issue by adding the following to ${projectGradleFile.path}:
+android {
+  compileSdkVersion 31
+}
+'''
+      ));
    });
 }
