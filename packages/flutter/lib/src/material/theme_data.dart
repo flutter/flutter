@@ -362,70 +362,11 @@ class ThemeData with Diagnosticable {
     )
     bool? fixTextFieldOutlineLabel,
   }) {
-    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
-    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = _brightness == Brightness.dark;
-    visualDensity ??= VisualDensity.adaptivePlatformDensity;
-    primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
-    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
-    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
-    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
-    accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
-    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
-    final bool accentIsDark = accentColorBrightness == Brightness.dark;
-    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
-    shadowColor ??= Colors.black;
-    scaffoldBackgroundColor ??= canvasColor;
-    bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
-
-    // Create a ColorScheme that is backwards compatible as possible
-    // with the existing default ThemeData color values.
-    colorScheme ??= ColorScheme.fromSwatch(
-      primarySwatch: primarySwatch,
-      primaryColorDark: primaryColorDark,
-      accentColor: accentColor,
-      cardColor: cardColor,
-      backgroundColor: backgroundColor,
-      errorColor: errorColor,
-      brightness: _brightness,
-    );
-
-    splashFactory ??= InkSplash.splashFactory;
-    selectedRowColor ??= Colors.grey[100]!;
-    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
-    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
-    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
-    textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
-    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
-    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
-    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
-    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
-    errorColor ??= Colors.red[700]!;
+    // GENERAL CONFIGURATION
+    applyElevationOverlayColor ??= false;
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
-    pageTransitionsTheme ??= const PageTransitionsTheme();
-    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
-    typography ??= Typography.material2014(platform: platform);
-    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
-    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
-    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
-    if (fontFamily != null) {
-      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
-      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
-      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
-    }
-    textTheme = defaultTextTheme.merge(textTheme);
-    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -438,16 +379,59 @@ class ThemeData with Diagnosticable {
          materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
         break;
     }
-    applyElevationOverlayColor ??= false;
+    pageTransitionsTheme ??= const PageTransitionsTheme();
+    scrollbarTheme ??= const ScrollbarThemeData();
+    splashFactory ??= InkSplash.splashFactory;
+    visualDensity ??= VisualDensity.adaptivePlatformDensity;
 
-    // Used as the default color (fill color) for RaisedButtons. Computing the
-    // default for ButtonThemeData for the sake of backwards compatibility.
-    buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
+    // COLOR
+    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
+    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = _brightness == Brightness.dark;
+    primarySwatch ??= Colors.blue;
+    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
+    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
+    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
+    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
+    accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
+    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
+    final bool accentIsDark = accentColorBrightness == Brightness.dark;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
+    shadowColor ??= Colors.black;
+    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
+    scaffoldBackgroundColor ??= canvasColor;
+    bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    // Create a ColorScheme that is backwards compatible as possible
+    // with the existing default ThemeData color values.
+    colorScheme ??= ColorScheme.fromSwatch(
+      primarySwatch: primarySwatch,
+      primaryColorDark: primaryColorDark,
+      accentColor: accentColor,
+      cardColor: cardColor,
+      backgroundColor: backgroundColor,
+      errorColor: errorColor,
+      brightness: _brightness,
+    );
+    selectedRowColor ??= Colors.grey[100]!;
+    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
+    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
+    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
+    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
+    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
+    errorColor ??= Colors.red[700]!;
+    // The default [buttonTheme] is here because it doesn't use the defaults for
+    // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
-      buttonColor: buttonColor,
+      // Defaults to the fill color for RaisedButtons for backwards compatibility.
+      buttonColor: buttonColor ?? (isDark ? primarySwatch[600]! : Colors.grey[300]!),
       disabledColor: disabledColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
@@ -455,50 +439,71 @@ class ThemeData with Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
-    toggleButtonsTheme ??= const ToggleButtonsThemeData();
     disabledColor ??= isDark ? Colors.white38 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
-    sliderTheme ??= const SliderThemeData();
-    tabBarTheme ??= const TabBarTheme();
-    tooltipTheme ??= const TooltipThemeData();
+    // TYPOGRAPHY & ICONOGRAPHY
+    typography ??= Typography.material2014(platform: platform);
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
+    }
+    textTheme = defaultTextTheme.merge(textTheme);
+    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
+    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
+    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+
+    // COMPONENT THEMES
     appBarTheme ??= const AppBarTheme();
-    scrollbarTheme ??= const ScrollbarThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
     bottomAppBarTheme ??= const BottomAppBarTheme();
+    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
+    bottomSheetTheme ??= const BottomSheetThemeData();
+    buttonBarTheme ??= const ButtonBarThemeData();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
       brightness: colorScheme.brightness,
       labelStyle: textTheme.bodyText1!,
     );
+    checkboxTheme ??= const CheckboxThemeData();
+    dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
+    dividerTheme ??= const DividerThemeData();
+    drawerTheme ??= const DrawerThemeData();
+    elevatedButtonTheme ??= const ElevatedButtonThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    listTileTheme ??= const ListTileThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
-    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    snackBarTheme ??= const SnackBarThemeData();
-    bottomSheetTheme ??= const BottomSheetThemeData();
-    popupMenuTheme ??= const PopupMenuThemeData();
-    bannerTheme ??= const MaterialBannerThemeData();
-    dividerTheme ??= const DividerThemeData();
-    buttonBarTheme ??= const ButtonBarThemeData();
-    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
-    timePickerTheme ??= const TimePickerThemeData();
-    textButtonTheme ??= const TextButtonThemeData();
-    elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
-    textSelectionTheme ??= const TextSelectionThemeData();
-    dataTableTheme ??= const DataTableThemeData();
-    checkboxTheme ??= const CheckboxThemeData();
-    radioTheme ??= const RadioThemeData();
-    switchTheme ??= const SwitchThemeData();
+    popupMenuTheme ??= const PopupMenuThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
-    drawerTheme ??= const DrawerThemeData();
-    listTileTheme ??= const ListTileThemeData();
+    radioTheme ??= const RadioThemeData();
+    sliderTheme ??= const SliderThemeData();
+    snackBarTheme ??= const SnackBarThemeData();
+    switchTheme ??= const SwitchThemeData();
+    tabBarTheme ??= const TabBarTheme();
+    textButtonTheme ??= const TextButtonThemeData();
+    textSelectionTheme ??= const TextSelectionThemeData();
+    timePickerTheme ??= const TimePickerThemeData();
+    toggleButtonsTheme ??= const ToggleButtonsThemeData();
+    tooltipTheme ??= const TooltipThemeData();
 
-    fixTextFieldOutlineLabel ??= true;
+     // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
+    textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
+    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
+    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
+    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
+    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
+    fixTextFieldOutlineLabel ??= true;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
