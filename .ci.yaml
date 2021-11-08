@@ -1645,7 +1645,6 @@ targets:
 
   - name: Linux_android flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
