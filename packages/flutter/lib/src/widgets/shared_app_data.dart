@@ -10,7 +10,7 @@ import 'inherited_model.dart';
 /// The type of the [SharedAppData.getValue] `init` parameter.
 ///
 /// This callback is used to lazily create the initial value for
-/// an [SharedAppData] keyword.
+/// a [SharedAppData] keyword.
 typedef SharedAppDataInitCallback<T> = T Function();
 
 /// Enables sharing key/value data with its `child` and all of the

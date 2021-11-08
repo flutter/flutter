@@ -7,17 +7,17 @@
 import 'package:flutter/material.dart';
 
 class ShowSharedValue extends StatelessWidget {
-  const ShowSharedValue({ Key? key, required this.appModelKey }) : super(key: key);
+  const ShowSharedValue({ Key? key, required this.appDataKey }) : super(key: key);
 
-  final String appModelKey;
+  final String appDataKey;
 
   @override
   Widget build(BuildContext context) {
     // The SharedAppData.getValue() call here causes this widget to depend
     // on the value of the SharedAppData's 'foo' key. If it's changed, with
     // SharedAppData.setValue(), then this widget will be rebuilt.
-    final String value = SharedAppData.getValue<String, String>(context, appModelKey, () => 'initial');
-    return Text('$appModelKey: $value');
+    final String value = SharedAppData.getValue<String, String>(context, appDataKey, () => 'initial');
+    return Text('$appDataKey: $value');
   }
 }
 
@@ -42,9 +42,9 @@ class _HomeState extends State<Home> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const ShowSharedValue(appModelKey: 'foo'),
+            const ShowSharedValue(appDataKey: 'foo'),
             const SizedBox(height: 16),
-            const ShowSharedValue(appModelKey: 'bar'),
+            const ShowSharedValue(appDataKey: 'bar'),
             const SizedBox(height: 16),
             ElevatedButton(
               child: const Text('change foo'),

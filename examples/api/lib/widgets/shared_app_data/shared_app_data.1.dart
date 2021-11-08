@@ -20,7 +20,7 @@ class SharedObject {
   String toString() => describeIdentity(this);
 
   static void reset(BuildContext context) {
-    // Calling SharedAppData.set() causes dependent widgets to be rebuilt.
+    // Calling SharedAppData.setValue() causes dependent widgets to be rebuilt.
     SharedAppData.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
