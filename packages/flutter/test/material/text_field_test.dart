@@ -7972,7 +7972,7 @@ void main() {
     // down by one line.
     expect(
       textOffsetToPosition(tester, 110).dy,
-      firstCharY + lineHeight,
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 0.00001),
     );
 
     // Likewise, the first character is now scrolled out of the top of the field
@@ -8043,7 +8043,7 @@ void main() {
     // down by one line.
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      firstCharY + lineHeight,
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 0.00001),
     );
 
     // Likewise, the first character is now scrolled out of the top of the field
