@@ -70,6 +70,7 @@ void main() {
     WidgetTester tester, {
     bool forcePressEnabled = true,
     bool selectionEnabled = true,
+    FocusNode? focusNode,
   }) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     final FakeTextSelectionGestureDetectorBuilderDelegate delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
@@ -84,7 +85,10 @@ void main() {
       MaterialApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(key: editableTextKey),
+          child: FakeEditableText(
+            key: editableTextKey,
+            focusNode: focusNode,
+          ),
         ),
       ),
     );
@@ -654,6 +658,46 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isFalse);
   });
 
+  testWidgets('test TextSelectionGestureDetectorBuilder drag with focus change', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/93170
+    final FocusNode focusNode = FocusNode();
+    await pumpTextSelectionGestureDetectorBuilder(
+      tester,
+      focusNode: focusNode,
+    );
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(renderEditable.selectPositionAtCalled, isFalse);
+
+    await gesture.moveTo(const Offset(300.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
+    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
+
+    // Reset.
+    renderEditable.selectPositionAtCalled = false;
+
+    // Unfocus and continue to drag.
+    focusNode.unfocus();
+    await gesture.moveTo(const Offset(300.0, 400.0));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // This part of the gesture wasn't received because the field wasn't
+    // focused.
+    expect(renderEditable.selectPositionAtCalled, isFalse);
+    expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
+    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
+  });
+
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, forcePressEnabled: false);
     final TestGesture gesture = await tester.createGesture();
@@ -801,10 +845,13 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 }
 
 class FakeEditableText extends EditableText {
-  FakeEditableText({Key? key}): super(
+  FakeEditableText({
+    Key? key,
+    FocusNode? focusNode,
+  }): super(
     key: key,
     controller: TextEditingController(),
-    focusNode: FocusNode(),
+    focusNode: focusNode ?? FocusNode(),
     backgroundCursorColor: Colors.white,
     cursorColor: Colors.white,
     style: const TextStyle(),
@@ -822,6 +869,12 @@ class FakeEditableTextState extends EditableTextState {
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
+  void initState() {
+    super.initState();
+    widget.focusNode.requestFocus();
+  }
+
+  @override
   bool showToolbar() {
     showToolbarCalled = true;
     return true;
@@ -830,7 +883,10 @@ class FakeEditableTextState extends EditableTextState {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return FakeEditable(this, key: _editableKey);
+    return Focus(
+      focusNode: widget.focusNode,
+      child: FakeEditable(this, key: _editableKey),
+    );
   }
 }
 

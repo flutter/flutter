@@ -1196,6 +1196,8 @@ class TextSelectionGestureDetectorBuilder {
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
     if (!delegate.selectionEnabled)
       return;
+    if (!editableText.widget.focusNode.hasFocus)
+      return;
 
     // Adjust the drag start offset for possible viewport offset changes.
     final Offset startOffset = renderEditable.maxLines == 1
