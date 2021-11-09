@@ -155,14 +155,18 @@ public interface BinaryMessenger {
    * be initialized concurrently, and prior to the registration of the channel handlers. This
    * implies that Dart may start sending messages while plugins are being registered.
    */
-  void enableBufferingIncomingMessages();
+  default void enableBufferingIncomingMessages() {
+    throw new UnsupportedOperationException("enableBufferingIncomingMessages not implemented.");
+  }
 
   /**
    * Disables the ability to queue messages received from Dart.
    *
    * <p>This can be used after all pending channel handlers have been registered.
    */
-  void disableBufferingIncomingMessages();
+  default void disableBufferingIncomingMessages() {
+    throw new UnsupportedOperationException("disableBufferingIncomingMessages not implemented.");
+  }
 
   /** Handler for incoming binary messages from Flutter. */
   interface BinaryMessageHandler {
