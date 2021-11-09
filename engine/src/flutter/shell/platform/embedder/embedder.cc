@@ -1052,10 +1052,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                             node.rect.fBottom},
                 flutter_transform,
                 node.childrenInTraversalOrder.size(),
-                &node.childrenInTraversalOrder[0],
-                &node.childrenInHitTestOrder[0],
+                node.childrenInTraversalOrder.data(),
+                node.childrenInHitTestOrder.data(),
                 node.customAccessibilityActions.size(),
-                &node.customAccessibilityActions[0],
+                node.customAccessibilityActions.data(),
                 node.platformViewId,
             };
             ptr(&embedder_node, user_data);
