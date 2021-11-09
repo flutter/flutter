@@ -7,6 +7,7 @@ import 'dart:io' as io show Directory, File, Platform, stderr;
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
 import 'package:litetest/litetest.dart';
+import 'package:process_runner/process_runner.dart';
 
 Future<int> main(List<String> args) async {
   if (args.length < 2) {
@@ -199,7 +200,16 @@ Future<int> main(List<String> args) async {
     );
 
     expect(commands, isNotEmpty);
-    expect(commands.first.tidyPath, contains('clang/bin/clang-tidy'));
+    final Command command = commands.first;
+    expect(command.tidyPath, contains('clang/bin/clang-tidy'));
+    final WorkerJob job = command.createLintJob(null);
+    expect(job.command, <String>[
+      '../../buildtools/mac-x64/clang/bin/clang-tidy',
+      filePath,
+      '--',
+      '',
+      filePath,
+    ]);
   });
 
   test('Command getLintAction flags third_party files', () async {
