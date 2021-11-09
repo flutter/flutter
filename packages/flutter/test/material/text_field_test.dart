@@ -7928,7 +7928,10 @@ void main() {
     final int textLength = controller.text.length;
     final double lineHeight = findRenderEditable(tester).preferredLineHeight;
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
-    expect(textOffsetToPosition(tester, textLength).dy, firstCharY + lineHeight * 2);
+    expect(
+      textOffsetToPosition(tester, textLength).dy,
+      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 0.00001),
+    );
 
     // Start long pressing on the first line.
     final TestGesture gesture =
@@ -8002,7 +8005,10 @@ void main() {
     final int textLength = controller.text.length;
     final double lineHeight = findRenderEditable(tester).preferredLineHeight;
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
-    expect(textOffsetToPosition(tester, textLength).dy, firstCharY + lineHeight * 2);
+    expect(
+      textOffsetToPosition(tester, textLength).dy,
+      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 0.00001),
+    );
 
     await tester.tapAt(textOffsetToPosition(tester, 13));
     await tester.pumpAndSettle();
