@@ -72,7 +72,8 @@ class AndroidEGLSurface {
 class AndroidContextGL : public AndroidContext {
  public:
   AndroidContextGL(AndroidRenderingAPI rendering_api,
-                   fml::RefPtr<AndroidEnvironmentGL> environment);
+                   fml::RefPtr<AndroidEnvironmentGL> environment,
+                   const TaskRunners& taskRunners);
 
   ~AndroidContextGL();
 
@@ -131,6 +132,7 @@ class AndroidContextGL : public AndroidContext {
   EGLContext context_;
   EGLContext resource_context_;
   bool valid_ = false;
+  TaskRunners task_runners_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextGL);
 };
