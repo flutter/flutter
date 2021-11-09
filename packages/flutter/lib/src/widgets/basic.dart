@@ -1266,7 +1266,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case that axis defaults to 1.0.
   ///
-  /// For convenience, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used, which will scale the child uniformly.
+  /// For convenience, to scale the child uniformly, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used.
   ///
   /// At least one of `scale`, `scaleX`, and `scaleY` must be non-null. If `scale` is provided, the other two must be null; similarly, if it is not provided, one of the other two must be.
   ///
