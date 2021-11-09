@@ -184,7 +184,7 @@ class ClangTidy {
   Future<_ComputeJobsResult> _computeJobs(
     List<Command> commands,
     io.Directory repoPath,
-    String checks,
+    String? checks,
   ) async {
     bool sawMalformed = false;
     final List<WorkerJob> jobs = <WorkerJob>[];
