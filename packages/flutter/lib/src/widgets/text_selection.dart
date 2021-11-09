@@ -209,8 +209,9 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
+  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
+    clipboardStatus?.update();
   }
 
   /// Call [TextSelectionDelegate.copySelection] to copy current selection.
@@ -347,7 +348,7 @@ class TextSelectionOverlay {
   /// A callback that's optionally invoked when a selection handle is tapped.
   ///
   /// The [TextSelectionControls.buildHandle] implementation the text field
-  /// uses decides where the the handle's tap "hotspot" is, or whether the
+  /// uses decides where the handle's tap "hotspot" is, or whether the
   /// selection handle supports tap gestures at all. For instance,
   /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
   /// selection handle's "knob" is tapped, while

@@ -4,8 +4,9 @@
 # for every commit.
 #
 # More information at:
-#  * https://github.com/flutter/cocoon/blob/master/CI_YAML.md
+#  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
+  - main
   - master
   - dev
   - beta
@@ -249,6 +250,7 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
+    bringup: true # TODO(chillers): https://github.com/flutter/flutter/issues/93225
     timeout: 30
     properties:
       tags: >
@@ -269,6 +271,7 @@ targets:
 
   - name: Linux docs_publish
     enabled_branches:
+      - main
       - master
     recipe: flutter/flutter
     presubmit: false
@@ -353,6 +356,9 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - main
+      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
@@ -678,6 +684,7 @@ targets:
 
   - name: Linux skp_generator
     enabled_branches:
+      - main
       - master
     recipe: flutter/flutter_drone
     timeout: 60
@@ -715,7 +722,9 @@ targets:
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
-    timeout: 60
+    enabled_branches:
+      - main
+      - master
     properties:
       tags: >
         ["framework","hostonly","shard"]
@@ -1179,6 +1188,166 @@ targets:
       - bin/
       - .ci.yaml
 
+  - name: Linux web_canvaskit_tests_0
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "0"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_1
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "1"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_2
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "2"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_3
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "3"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_4
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "4"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "5"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_6
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "6"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
+  - name: Linux web_canvaskit_tests_7_last
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk"},
+          {"dependency": "chrome_and_driver"},
+          {"dependency": "goldctl"}
+        ]
+      shard: web_canvaskit_tests
+      subshard: "7_last"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/
+      - packages/
+      - bin/
+
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1465,7 +1634,6 @@ targets:
 
   - name: Linux_android flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91270
     presubmit: false
     timeout: 60
     properties:
@@ -1476,7 +1644,6 @@ targets:
 
   - name: Linux_android flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2365,6 +2532,7 @@ targets:
         ["framework","hostonly","shard"]
       validation: verify_binaries_codesigned
       validation_name: Verify binaries codesigned
+    scheduler: luci
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
@@ -2775,7 +2943,6 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     presubmit: false
     timeout: 60
     properties:
@@ -3058,7 +3225,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91272
     presubmit: false
     timeout: 60
     properties:

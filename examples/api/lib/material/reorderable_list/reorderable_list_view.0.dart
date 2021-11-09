@@ -44,7 +44,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     return ReorderableListView(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       children: <Widget>[
-        for (int index = 0; index < _items.length; index++)
+        for (int index = 0; index < _items.length; index += 1)
           ListTile(
             key: Key('$index'),
             tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,

@@ -33,7 +33,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -362,7 +361,9 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+    // This test is expected to be skipped when Platform.isWindows:
+    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
 
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();

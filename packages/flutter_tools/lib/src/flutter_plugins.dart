@@ -20,7 +20,7 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -684,6 +684,9 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 //
 
 // @dart = {{dartLanguageVersion}}
+
+// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
+export '{{mainEntrypoint}}';
 
 import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.

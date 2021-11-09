@@ -30,7 +30,7 @@ import org.gradle.util.VersionNumber
 /** For apps only. Provides the flutter extension used in app/build.gradle. */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 30
+    static int compileSdkVersion = 31
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
@@ -245,6 +245,38 @@ class FlutterPlugin implements Plugin<Project> {
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
+                }
+            }
+        }
+
+        if (project.hasProperty("multidex-enabled") &&
+            project.property("multidex-enabled").toBoolean() &&
+            project.android.defaultConfig.minSdkVersion <= 20) {
+            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_multidex_keepfile.txt")
+            project.android {
+                defaultConfig {
+                    multiDexEnabled true
+                    manifestPlaceholders = [applicationName: "io.flutter.app.FlutterMultiDexApplication"]
+                }
+                buildTypes {
+                    release {
+                        multiDexKeepFile project.file(flutterMultidexKeepfile)
+                    }
+                }
+            }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
+            }
+        } else {
+            String baseApplicationName = "android.app.Application"
+            if (project.hasProperty("base-application-name")) {
+                baseApplicationName = project.property("base-application-name")
+            }
+            project.android {
+                defaultConfig {
+                    // Setting to android.app.Application is the same as omitting the attribute.
+                    manifestPlaceholders = [applicationName: baseApplicationName]
                 }
             }
         }
