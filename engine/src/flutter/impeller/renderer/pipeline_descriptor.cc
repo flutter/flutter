@@ -132,4 +132,53 @@ PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
   return *this;
 }
 
+void PipelineDescriptor::ResetAttachments() {
+  color_attachment_descriptors_.clear();
+  depth_attachment_descriptor_.reset();
+  front_stencil_attachment_descriptor_.reset();
+  back_stencil_attachment_descriptor_.reset();
+}
+
+PixelFormat PipelineDescriptor::GetStencilPixelFormat() const {
+  return stencil_pixel_format_;
+}
+
+std::optional<StencilAttachmentDescriptor>
+PipelineDescriptor::GetFrontStencilAttachmentDescriptor() const {
+  return front_stencil_attachment_descriptor_;
+}
+
+std::optional<DepthAttachmentDescriptor>
+PipelineDescriptor::GetDepthStencilAttachmentDescriptor() const {
+  return depth_attachment_descriptor_;
+}
+
+const std::map<size_t /* index */, ColorAttachmentDescriptor>
+PipelineDescriptor::GetColorAttachmentDescriptors() const {
+  return color_attachment_descriptors_;
+}
+
+const std::shared_ptr<VertexDescriptor>&
+PipelineDescriptor::GetVertexDescriptor() const {
+  return vertex_descriptor_;
+}
+
+const std::map<ShaderStage, std::shared_ptr<const ShaderFunction>>&
+PipelineDescriptor::GetStageEntrypoints() const {
+  return entrypoints_;
+}
+
+const std::string& PipelineDescriptor::GetLabel() const {
+  return label_;
+}
+
+PixelFormat PipelineDescriptor::GetDepthPixelFormat() const {
+  return depth_pixel_format_;
+}
+
+std::optional<StencilAttachmentDescriptor>
+PipelineDescriptor::GetBackStencilAttachmentDescriptor() const {
+  return back_stencil_attachment_descriptor_;
+}
+
 }  // namespace impeller

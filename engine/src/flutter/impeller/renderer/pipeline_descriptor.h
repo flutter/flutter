@@ -30,7 +30,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PipelineDescriptor& SetLabel(std::string label);
 
-  const std::string& GetLabel() const { return label_; }
+  const std::string& GetLabel() const;
 
   PipelineDescriptor& SetSampleCount(size_t samples);
 
@@ -40,16 +40,12 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       std::shared_ptr<const ShaderFunction> function);
 
   const std::map<ShaderStage, std::shared_ptr<const ShaderFunction>>&
-  GetStageEntrypoints() const {
-    return entrypoints_;
-  }
+  GetStageEntrypoints() const;
 
   PipelineDescriptor& SetVertexDescriptor(
       std::shared_ptr<VertexDescriptor> vertex_descriptor);
 
-  const std::shared_ptr<VertexDescriptor>& GetVertexDescriptor() const {
-    return vertex_descriptor_;
-  }
+  const std::shared_ptr<VertexDescriptor>& GetVertexDescriptor() const;
 
   PipelineDescriptor& SetColorAttachmentDescriptor(
       size_t index,
@@ -59,17 +55,13 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       size_t index) const;
 
   const std::map<size_t /* index */, ColorAttachmentDescriptor>
-  GetColorAttachmentDescriptors() const {
-    return color_attachment_descriptors_;
-  }
+  GetColorAttachmentDescriptors() const;
 
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(
       DepthAttachmentDescriptor desc);
 
   std::optional<DepthAttachmentDescriptor> GetDepthStencilAttachmentDescriptor()
-      const {
-    return depth_attachment_descriptor_;
-  }
+      const;
 
   PipelineDescriptor& SetStencilAttachmentDescriptors(
       StencilAttachmentDescriptor front_and_back);
@@ -79,28 +71,26 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       StencilAttachmentDescriptor back);
 
   std::optional<StencilAttachmentDescriptor>
-  GetFrontStencilAttachmentDescriptor() const {
-    return front_stencil_attachment_descriptor_;
-  }
+  GetFrontStencilAttachmentDescriptor() const;
 
   std::optional<StencilAttachmentDescriptor>
-  GetBackStencilAttachmentDescriptor() const {
-    return back_stencil_attachment_descriptor_;
-  }
+  GetBackStencilAttachmentDescriptor() const;
 
   PipelineDescriptor& SetDepthPixelFormat(PixelFormat format);
 
-  PixelFormat GetDepthPixelFormat() const { return depth_pixel_format_; }
+  PixelFormat GetDepthPixelFormat() const;
 
   PipelineDescriptor& SetStencilPixelFormat(PixelFormat format);
 
-  PixelFormat GetStencilPixelFormat() const { return stencil_pixel_format_; }
+  PixelFormat GetStencilPixelFormat() const;
 
   // Comparable<PipelineDescriptor>
   std::size_t GetHash() const override;
 
   // Comparable<PipelineDescriptor>
   bool IsEqual(const PipelineDescriptor& other) const override;
+
+  void ResetAttachments();
 
  private:
   std::string label_;
