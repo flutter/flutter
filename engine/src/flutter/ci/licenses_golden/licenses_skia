@@ -1,4 +1,4 @@
-Signature: 251d51b0a7b446368830dcc64ace9536
+Signature: f1ecca932a51abb1c0bf2cad7eb7b537
 
 UNUSED LICENSES:
 
@@ -687,7 +687,7 @@ FILE: ../../../third_party/skia/animations/redcross#1.jpg
 FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bazel/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
-FILE: ../../../third_party/skia/bazel/supported_combinations/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
@@ -793,13 +793,23 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/gpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
-FILE: ../../../third_party/skia/experimental/webgpu-bazel/WORKSPACE
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/example/index.html
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
+FILE: ../../../third_party/skia/gm/BUILD.bazel
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
+FILE: ../../../third_party/skia/include/codec/BUILD.bazel
 FILE: ../../../third_party/skia/include/config/BUILD.bazel
 FILE: ../../../third_party/skia/include/core/BUILD.bazel
+FILE: ../../../third_party/skia/include/effects/BUILD.bazel
+FILE: ../../../third_party/skia/include/encode/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/BUILD.bazel
+FILE: ../../../third_party/skia/include/pathops/BUILD.bazel
+FILE: ../../../third_party/skia/include/ports/BUILD.bazel
+FILE: ../../../third_party/skia/include/private/BUILD.bazel
+FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
+FILE: ../../../third_party/skia/include/third_party/BUILD.bazel
+FILE: ../../../third_party/skia/include/utils/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
@@ -1044,6 +1054,7 @@ FILE: ../../../third_party/skia/infra/wasm-common/docker/emsdk-base/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/gold-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/perf-karma-chrome-tests/Dockerfile
+FILE: ../../../third_party/skia/modules/canvaskit/BUILD.bazel
 FILE: ../../../third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../third_party/skia/modules/canvaskit/color.js
 FILE: ../../../third_party/skia/modules/canvaskit/cpu.js
@@ -1093,6 +1104,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/rt_shader.js
 FILE: ../../../third_party/skia/modules/canvaskit/skottie.js
 FILE: ../../../third_party/skia/modules/canvaskit/skp.js
 FILE: ../../../third_party/skia/modules/canvaskit/util.js
+FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/gms.html
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
@@ -1176,10 +1188,21 @@ FILE: ../../../third_party/skia/site/featured-background.png
 FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
+FILE: ../../../third_party/skia/src/codec/BUILD.bazel
+FILE: ../../../third_party/skia/src/core/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
+FILE: ../../../third_party/skia/src/effects/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/BUILD.bazel
+FILE: ../../../third_party/skia/src/image/BUILD.bazel
+FILE: ../../../third_party/skia/src/images/BUILD.bazel
+FILE: ../../../third_party/skia/src/opts/BUILD.bazel
+FILE: ../../../third_party/skia/src/pathops/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
 FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
+FILE: ../../../third_party/skia/src/sfnt/BUILD.bazel
+FILE: ../../../third_party/skia/src/shaders/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
@@ -1193,6 +1216,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
+FILE: ../../../third_party/skia/src/utils/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/build_toolchain.bzl
