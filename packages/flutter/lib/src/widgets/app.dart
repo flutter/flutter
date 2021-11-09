@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'app_model.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -25,6 +24,7 @@ import 'restoration.dart';
 import 'router.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
+import 'shared_app_data.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
@@ -1631,7 +1631,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
-            color: widget.color,
+            color: widget.color.withOpacity(1.0),
             child: result,
           );
         },
@@ -1639,7 +1639,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       title = Title(
         title: widget.title,
-        color: widget.color,
+        color: widget.color.withOpacity(1.0),
         child: result,
       );
     }
@@ -1665,7 +1665,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: AppModel(
+      child: SharedAppData(
         child: Shortcuts(
           debugLabel: '<Default WidgetsApp Shortcuts>',
           shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,

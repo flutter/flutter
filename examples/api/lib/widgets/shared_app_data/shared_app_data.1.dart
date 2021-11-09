@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AppModel
+// Flutter code sample for SharedAppData
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,14 +20,14 @@ class SharedObject {
   String toString() => describeIdentity(this);
 
   static void reset(BuildContext context) {
-    // Calling AppModel.set() causes dependent widgets to be rebuilt.
-    AppModel.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
+    // Calling SharedAppData.setValue() causes dependent widgets to be rebuilt.
+    SharedAppData.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
   static SharedObject of(BuildContext context) {
     // If a value for _sharedObjectKey has never been set then the third
     // callback parameter is used to generate an initial value.
-    return AppModel.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
+    return SharedAppData.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
   }
 }
 

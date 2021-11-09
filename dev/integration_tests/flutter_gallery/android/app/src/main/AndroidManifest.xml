@@ -15,6 +15,7 @@ found in the LICENSE file. -->
         <activity android:name=".MainActivity"
                   android:theme="@android:style/Theme.Light.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+                  android:exported="true"
                   android:hardwareAccelerated="true"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>

@@ -250,6 +250,7 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
+    bringup: true # TODO(chillers): https://github.com/flutter/flutter/issues/93225
     timeout: 30
     properties:
       tags: >
@@ -1208,7 +1209,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_1
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1229,7 +1229,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1270,7 +1269,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_4
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1291,7 +1289,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1312,7 +1309,6 @@ targets:
       - bin/
 
   - name: Linux web_canvaskit_tests_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1617,7 +1613,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__image_cache_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/92018
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1649,7 +1644,6 @@ targets:
 
   - name: Linux_android flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2949,7 +2943,6 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     presubmit: false
     timeout: 60
     properties:
@@ -3232,7 +3225,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91272
     presubmit: false
     timeout: 60
     properties:
