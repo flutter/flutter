@@ -85,6 +85,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
  */

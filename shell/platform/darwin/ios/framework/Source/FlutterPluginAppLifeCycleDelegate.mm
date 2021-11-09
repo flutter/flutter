@@ -249,6 +249,18 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 }
 
 - (void)application:(UIApplication*)application
+    didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
+      continue;
+    }
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate application:application didFailToRegisterForRemoteNotificationsWithError:error];
+    }
+  }
+}
+
+- (void)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
