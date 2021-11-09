@@ -1,27 +1,24 @@
-# Copyright 2017 Google, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+# Copyright 2016 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+config("benchmark_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
+}
 static_library("benchmark") {
-  defines = [ "HAVE_STD_REGEX" ]
-
-  include_dirs = [ "//third_party/benchmark/include" ]
+  testonly = true
 
   sources = [
     "//third_party/benchmark/src/arraysize.h",
     "//third_party/benchmark/src/benchmark.cc",
+    "//third_party/benchmark/src/benchmark_api_internal.cc",
     "//third_party/benchmark/src/benchmark_api_internal.h",
+    "//third_party/benchmark/src/benchmark_main.cc",
+    "//third_party/benchmark/src/benchmark_name.cc",
     "//third_party/benchmark/src/benchmark_register.cc",
+    "//third_party/benchmark/src/benchmark_register.h",
+    "//third_party/benchmark/src/benchmark_runner.cc",
+    "//third_party/benchmark/src/benchmark_runner.h",
     "//third_party/benchmark/src/check.h",
     "//third_party/benchmark/src/colorprint.cc",
     "//third_party/benchmark/src/colorprint.h",
@@ -38,16 +35,26 @@ static_library("benchmark") {
     "//third_party/benchmark/src/json_reporter.cc",
     "//third_party/benchmark/src/log.h",
     "//third_party/benchmark/src/mutex.h",
+    "//third_party/benchmark/src/perf_counters.cc",
+    "//third_party/benchmark/src/perf_counters.h",
     "//third_party/benchmark/src/re.h",
     "//third_party/benchmark/src/reporter.cc",
     "//third_party/benchmark/src/sleep.cc",
     "//third_party/benchmark/src/sleep.h",
-    "//third_party/benchmark/src/stat.h",
+    "//third_party/benchmark/src/statistics.cc",
+    "//third_party/benchmark/src/statistics.h",
     "//third_party/benchmark/src/string_util.cc",
     "//third_party/benchmark/src/string_util.h",
     "//third_party/benchmark/src/sysinfo.cc",
     "//third_party/benchmark/src/sysinfo.h",
+    "//third_party/benchmark/src/thread_manager.h",
+    "//third_party/benchmark/src/thread_timer.h",
     "//third_party/benchmark/src/timers.cc",
     "//third_party/benchmark/src/timers.h",
+  ]
+  public_configs = [ ":benchmark_config" ]
+  defines = [
+    "HAVE_POSIX_REGEX",
+    "HAVE_THREAD_SAFETY_ATTRIBUTES",
   ]
 }
