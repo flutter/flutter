@@ -19,7 +19,6 @@ adb_path=$2
 
 # Store the time to prevent capturing logs from previous runs.
 script_start_time=$($adb_path shell 'date +"%m-%d %H:%M:%S.0"')
-script_start_time_seconds=$(date +%s)
 
 $adb_path uninstall "io.flutter.integration.deferred_components_test"
 
@@ -35,6 +34,7 @@ $adb_path shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
 exit
 "
+run_start_time_seconds=$(date +%s)
 while read LOGLINE
 do
     if [[ "${LOGLINE}" == *"Running deferred code"* ]]; then
@@ -45,8 +45,8 @@ do
     fi
     # Timeout if expected log not found
     current_time=$(date +%s)
-    if [[ $((current_time - script_start_time_seconds)) -ge 150 ]]; then
-        echo "Failure: Deferred component did not load."
+    if [[ $((current_time - run_start_time_seconds)) -ge 150 ]]; then
+        echo "Failure: Timed out, deferred component did not load."
         pkill -P $$
         exit 1
     fi
