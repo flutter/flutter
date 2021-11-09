@@ -19,10 +19,8 @@ class Options {
     this.lintAll = false,
     this.errorMessage,
     StringSink? errSink,
-  }) {
-    checks = checksArg.isNotEmpty ? '--checks=$checksArg' : '--config=';
-    _errSink = errSink ?? io.stderr;
-  }
+  }) : checks = checksArg.isNotEmpty ? '--checks=$checksArg' : null,
+       _errSink = errSink ?? io.stderr;
 
   factory Options._error(
     String message, {
@@ -131,7 +129,7 @@ class Options {
   final String checksArg;
 
   /// Check arguments to plumb through to clang-tidy.
-  late final String checks;
+  final String? checks;
 
   /// Whether all files should be linted.
   final bool lintAll;
@@ -140,7 +138,7 @@ class Options {
   /// contains the error message.
   final String? errorMessage;
 
-  late final StringSink _errSink;
+  final StringSink _errSink;
 
   /// Print command usage with an additional message.
   void printUsage({String? message}) {

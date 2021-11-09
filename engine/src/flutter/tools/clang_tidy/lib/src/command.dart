@@ -126,8 +126,13 @@ class Command {
   }
 
   /// The job for the process runner for the lint needed for this command.
-  WorkerJob createLintJob(String checks) {
-    final List<String> args = <String>[filePath, checks, '--'];
+  WorkerJob createLintJob(String? checks) {
+    final List<String> args = <String>[
+      filePath,
+      if (checks != null)
+        checks,
+      '--',
+    ];
     args.addAll(tidyArgs.split(' '));
     return WorkerJob(
       <String>[tidyPath, ...args],
