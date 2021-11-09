@@ -37,7 +37,6 @@ exit
 run_start_time_seconds=$(date +%s)
 while read LOGLINE
 do
-    echo LOGLINE
     if [[ "${LOGLINE}" == *"Running deferred code"* ]]; then
         echo "Found ${LOGLINE}"
         echo "All tests passed."
