@@ -7830,7 +7830,6 @@ void main() {
     );
 
     // The last character is now on screen near the right edge.
-    //final double screenWidth = MediaQuery.of(context).size.width;
     expect(
       textOffsetToPosition(tester, 66).dx,
       moreOrLessEquals(TestSemantics.fullScreen.width, epsilon: 2.0),
@@ -7898,7 +7897,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // The last character is now on screen near the right edge.
-    //final double screenWidth = MediaQuery.of(context).size.width;
     expect(
       textOffsetToPosition(tester, 66).dx,
       moreOrLessEquals(TestSemantics.fullScreen.width, epsilon: 2.0),
@@ -7906,6 +7904,148 @@ void main() {
 
     // The first character is now offscreen to the left.
     expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLines: 2,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Just testing the test and making sure that the last character is outside
+    // the bottom of the field.
+    final int textLength = controller.text.length;
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    final double firstCharY = textOffsetToPosition(tester, 0).dy;
+    expect(textOffsetToPosition(tester, textLength).dy, firstCharY + lineHeight * 2);
+
+    // Start long pressing on the first line.
+    final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(tester, 19));
+    // TODO(justinmc): Make sure you've got all things torn down.
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 19),
+    );
+    await tester.pumpAndSettle();
+
+    // Move down to the second line.
+    await gesture.moveBy(Offset(0.0, lineHeight));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 65),
+    );
+
+    // Still hasn't scrolled.
+    expect(
+      textOffsetToPosition(tester, 65).dy,
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
+    );
+
+    // Keep selecting down to the third and final line.
+    await gesture.moveBy(Offset(0.0, lineHeight));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 110),
+    );
+
+    // The last character is no longer three line heights down from the top of
+    // the field, it's now only two line heights down, because it has scrolled
+    // down by one line.
+    expect(
+      textOffsetToPosition(tester, 110).dy,
+      firstCharY + lineHeight,
+    );
+
+    // Likewise, the first character is now scrolled out of the top of the field
+    // by one line.
+    expect(
+      textOffsetToPosition(tester, 0).dy,
+      moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLines: 2,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Just testing the test and making sure that the last character is outside
+    // the bottom of the field.
+    final int textLength = controller.text.length;
+    final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+    final double firstCharY = textOffsetToPosition(tester, 0).dy;
+    expect(textOffsetToPosition(tester, textLength).dy, firstCharY + lineHeight * 2);
+
+    await tester.tapAt(textOffsetToPosition(tester, 13));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 13),
+    );
+
+    // Move down to the second line.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 59),
+    );
+
+    // Still hasn't scrolled.
+    expect(
+      textOffsetToPosition(tester, 66).dy,
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
+    );
+
+    // Move down to the third and final line.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 104),
+    );
+
+    // The last character is no longer three line heights down from the top of
+    // the field, it's now only two line heights down, because it has scrolled
+    // down by one line.
+    expect(
+      textOffsetToPosition(tester, textLength).dy,
+      firstCharY + lineHeight,
+    );
+
+    // Likewise, the first character is now scrolled out of the top of the field
+    // by one line.
+    expect(
+      textOffsetToPosition(tester, 0).dy,
+      moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
+    );
   }, variant: TargetPlatformVariant.all());
 
   testWidgets(
