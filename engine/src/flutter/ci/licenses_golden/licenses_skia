@@ -1,4 +1,4 @@
-Signature: bf3b1a95f8130f631692fe0a0550d7e1
+Signature: 0578ff21cb4858782f4d8236a65f8f36
 
 UNUSED LICENSES:
 
@@ -5495,6 +5495,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/CullTest.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.h
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkTransformShader.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
