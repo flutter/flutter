@@ -274,7 +274,7 @@ class TestTextInput {
     );
   }
 
-  /// Simulates a scribble interaction starting
+  /// Simulates a scribble interaction starting.
   Future<void> startScribbleInteraction() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
@@ -289,7 +289,7 @@ class TestTextInput {
     );
   }
 
-  /// Simulates a Scribble focus
+  /// Simulates a Scribble focus.
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
@@ -304,7 +304,7 @@ class TestTextInput {
     );
   }
 
-  /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction
+  /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction.
   Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
     assert(isRegistered);
     List<List<dynamic>> response = <List<dynamic>>[];
@@ -324,7 +324,7 @@ class TestTextInput {
     return response;
   }
 
-  /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil
+  /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil.
   Future<void> scribbleInsertPlaceholder() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
@@ -339,7 +339,7 @@ class TestTextInput {
     );
   }
 
-  /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released
+  /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released.
   Future<void> scribbleRemovePlaceholder() async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(

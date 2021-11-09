@@ -1687,7 +1687,7 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
 
-    // A normal selection update from the framework has 'keyboard' as the cause
+    // A normal selection update from the framework has 'keyboard' as the cause.
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: controller.text,
       selection: const TextSelection(baseOffset: 2, extentOffset: 3),
@@ -1696,7 +1696,7 @@ void main() {
 
     expect(selectionCause, SelectionChangedCause.keyboard);
 
-    // A selection update during a scribble interaction has 'scribble' as the cause
+    // A selection update during a scribble interaction has 'scribble' as the cause.
     await tester.testTextInput.startScribbleInteraction();
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: controller.text,
@@ -1760,11 +1760,11 @@ void main() {
     List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
     expect(elements.first, containsAll(elementEntry));
 
-    // Touch is outside the bounds of the widget
+    // Touch is outside the bounds of the widget.
     elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(-1, -1, 1, 1));
     expect(elements.length, 0);
 
-    // Widget is read only
+    // Widget is read only.
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -1782,7 +1782,7 @@ void main() {
     elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
     expect(elements.length, 0);
 
-    // Widget is not touchable
+    // Widget is not touchable.
     await tester.pumpWidget(
       MaterialApp(
         home: Stack(children: <Widget>[
