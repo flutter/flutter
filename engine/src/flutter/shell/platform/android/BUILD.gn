@@ -544,7 +544,7 @@ zip_bundle("flutter_jar_zip") {
 }
 
 action("gen_android_javadoc") {
-  script = "//flutter/tools/gen_javadoc.py"
+  script = "//flutter/tools/javadoc/gen_javadoc.py"
   sources = android_java_sources + embedding_dependencies_jars
 
   outputs = [ "$target_gen_dir/javadocs" ]
