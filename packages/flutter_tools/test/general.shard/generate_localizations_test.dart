@@ -1262,6 +1262,33 @@ flutter:
   /// **'The price of this item is: \${price}'**'''));
     });
 
+    testWithoutContext('should generate file for 3-letter locale', () {
+      const String singleAstESMessageArbFileString = '''
+{
+  "title": "Canadian Title"
+}''';
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile('app_ast.arb').writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_ast_ES.arb').writeAsStringSync(singleAstESMessageArbFileString);
+
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+      )
+        ..loadResources()
+        ..writeOutputFiles(BufferLogger.test());
+
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_ast.dart')), true);
+    });
+
     testWithoutContext('should generate a file per language', () {
       const String singleEnCaMessageArbFileString = '''
 {
