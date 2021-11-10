@@ -978,8 +978,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag
-            || cause == SelectionChangedCause.keyboard) {
+            || cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
         return;
@@ -987,8 +986,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag
-            || cause == SelectionChangedCause.keyboard) {
+        if (cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
         return;
