@@ -837,9 +837,12 @@ void main() {
         ),
       );
 
-      // Use golden test since adaptive indicator is too small for paint color sampling.
-      expect(find.byType(CupertinoActivityIndicator),
-      matchesGoldenFile('adaptive.circular_progress_indicator.color.png'));
+      expect(
+        find.byType(CupertinoActivityIndicator),
+        paints
+          ..rrect(rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+                color: const Color(0x935D3FD3)),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
