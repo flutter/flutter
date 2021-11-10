@@ -43,6 +43,9 @@ class Context {
 
   virtual std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const = 0;
 
+  virtual std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer()
+      const = 0;
+
  protected:
   Context();
 
