@@ -427,6 +427,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? false,
+                          indicatorColor: navigationRailTheme.indicatorColor,
                           onTap: () {
                             if (widget.onDestinationSelected != null)
                               widget.onDestinationSelected!(i);
@@ -513,6 +514,7 @@ class _RailDestination extends StatelessWidget {
     required this.indexLabel,
     this.padding,
     required this.useIndicator,
+    this.indicatorColor,
   }) : assert(minWidth != null),
        assert(minExtendedWidth != null),
        assert(icon != null),
@@ -545,6 +547,7 @@ class _RailDestination extends StatelessWidget {
   final String indexLabel;
   final EdgeInsetsGeometry? padding;
   final bool useIndicator;
+  final Color? indicatorColor;
 
   final Animation<double> _positionAnimation;
 
@@ -558,7 +561,10 @@ class _RailDestination extends StatelessWidget {
       style: labelTextStyle,
       child: label,
     );
+
     final Widget content;
+
+    const double circularIndicatorDiameter = 56;
     switch (labelType) {
       case NavigationRailLabelType.none:
         final Widget iconWithIndicator = Stack(
@@ -567,9 +573,10 @@ class _RailDestination extends StatelessWidget {
             if (useIndicator)
               NavigationIndicator(
                 animation: destinationAnimation,
-                height: 56,
-                width: 56,
-                borderRadius: 100,
+                height: circularIndicatorDiameter,
+                width: circularIndicatorDiameter,
+                borderRadius: BorderRadius.circular(circularIndicatorDiameter / 2),
+                color: indicatorColor,
               ),
             themedIcon,
           ],
@@ -644,7 +651,8 @@ class _RailDestination extends StatelessWidget {
               NavigationIndicator(
                 animation: destinationAnimation,
                 width: 56,
-                borderRadius: 100,
+                borderRadius: BorderRadius.circular(16),
+                color: indicatorColor,
               ),
             themedIcon,
           ],
@@ -686,7 +694,8 @@ class _RailDestination extends StatelessWidget {
               NavigationIndicator(
                 animation: destinationAnimation,
                 width: 56,
-                borderRadius: 100,
+                borderRadius: BorderRadius.circular(16),
+                color: indicatorColor,
               ),
             themedIcon,
           ],

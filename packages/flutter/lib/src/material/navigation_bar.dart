@@ -524,7 +524,7 @@ class NavigationIndicator extends StatelessWidget {
     this.color,
     this.width = 64,
     this.height = 32,
-    this.borderRadius = 16,
+    this.borderRadius = const BorderRadius.all(Radius.circular(16)),
   }) : super(key: key);
 
   /// Determines the scale of the indicator.
@@ -550,8 +550,8 @@ class NavigationIndicator extends StatelessWidget {
 
   /// The radius of the container that holds in the indicator.
   ///
-  /// Defaults to `16`.
-  final double borderRadius;
+  /// Defaults to `BorderRadius.circular(16)`.
+  final BorderRadius borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -595,7 +595,7 @@ class NavigationIndicator extends StatelessWidget {
                   width: width,
                   height: height,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+                    borderRadius: borderRadius,
                     color: color ?? colorScheme.secondary.withOpacity(.24),
                   ),
                 ),

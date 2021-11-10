@@ -53,6 +53,7 @@ void main() {
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
     const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -76,6 +77,7 @@ void main() {
               groupAlignment: groupAlignment,
               labelType: labelType,
               useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -99,6 +101,7 @@ void main() {
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
     expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -251,6 +254,16 @@ Material _railMaterial(WidgetTester tester) {
       matching: find.byType(Material),
     ),
   );
+}
+
+
+BoxDecoration? _indicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Container),
+    ),
+  ).decoration as BoxDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
