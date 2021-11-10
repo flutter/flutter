@@ -187,6 +187,28 @@ void main() {
 
     await dap.client.terminate();
   });
+
+  testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
+    final BasicProjectThatThrows _project = BasicProjectThatThrows();
+    await _project.setUpIn(tempDir);
+
+    // Launch the app and wait for it to stop at an exception.
+    await Future.wait(<Future<Object>>[
+      dap.client.event('stopped'),
+      dap.client.start(
+        exceptionPauseMode: 'All', // Ensure we stop on all exceptions
+        launch: () => dap.client.launch(
+          cwd: _project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
+      ),
+    ], eagerError: true);
+
+    // Ensure hot restart fully completes.
+    await dap.client.hotRestart();
+
+    await dap.client.terminate();
+  });
 }
 
 /// Extracts the output from a set of [OutputEventBody], removing any

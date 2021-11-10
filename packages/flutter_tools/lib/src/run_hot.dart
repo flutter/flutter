@@ -603,14 +603,19 @@ class HotRunner extends ResidentRunner {
             // are not thread-safe, and thus must be run on the same thread that
             // would be blocked by the pause. Simply un-pausing is not sufficient,
             // because this does not prevent the isolate from immediately hitting
-            // a breakpoint, for example if the breakpoint was placed in a loop
-            // or in a frequently called method. Instead, all breakpoints are first
-            // disabled and then the isolate resumed.
-            final List<Future<void>> breakpointRemoval = <Future<void>>[
+            // a breakpoint (for example if the breakpoint was placed in a loop
+            // or in a frequently called method) or an exception. Instead, all
+            // breakpoints are first disabled and exception pause mode set to
+            // None, and then the isolate resumed.
+            // These settings to not need restoring as Hot Restart results in
+            // new isolates, which will be configured by the editor as they are
+            // started.
+            final List<Future<void>> breakpointAndExceptionRemoval = <Future<void>>[
+              device.vmService.service.setExceptionPauseMode(isolate.id, 'None'),
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
                 device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
             ];
-            await Future.wait(breakpointRemoval);
+            await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService.service.resume(view.uiIsolate.id);
           }
         }));

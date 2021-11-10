@@ -172,10 +172,11 @@ class DapTestClient {
   Future<void> start({
     String? program,
     String? cwd,
+    String exceptionPauseMode = 'None',
     Future<Object?> Function()? launch,
   }) {
     return Future.wait(<Future<Object?>>[
-      initialize(),
+      initialize(exceptionPauseMode: exceptionPauseMode),
       launch?.call() ?? this.launch(program: program, cwd: cwd),
     ], eagerError: true);
   }
