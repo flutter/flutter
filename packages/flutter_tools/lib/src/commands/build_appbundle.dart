@@ -40,6 +40,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser.addMultiOption('target-platform',
       splitCommas: true,
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -69,6 +70,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   final String name = 'appbundle';
+
+  @override
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
