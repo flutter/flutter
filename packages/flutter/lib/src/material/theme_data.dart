@@ -232,10 +232,11 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
+    // [colorScheme] and [customColors] are the preferred way to configure colors. The other color
     // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
+    Map<String, Color>? customColors,
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
@@ -417,6 +418,7 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor,
       brightness: _brightness,
     );
+    customColors ??= {};
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
@@ -495,7 +497,7 @@ class ThemeData with Diagnosticable {
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
 
-     // DEPRECATED (newest deprecations at the bottom)
+    // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
@@ -519,6 +521,7 @@ class ThemeData with Diagnosticable {
       visualDensity: visualDensity,
       // COLOR
       colorScheme: colorScheme,
+      customColors: customColors,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
@@ -623,6 +626,7 @@ class ThemeData with Diagnosticable {
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
+    required this.customColors,
     required this.primaryColor,
     required this.primaryColorBrightness,
     required this.primaryColorLight,
@@ -1083,7 +1087,18 @@ class ThemeData with Diagnosticable {
   /// New components can be defined exclusively in terms of [colorScheme].
   /// Existing components will gradually migrate to it, to the extent
   /// that is possible without significant backwards compatibility breaks.
+  /// 
+  /// Along with [customColors], comprises the entire scheme of an app.
   final ColorScheme colorScheme;
+
+  /// A map of arbitrary names to colors that can be used throughout the app.
+  /// 
+  /// When switching themes, usages of colors with the same name will shift with
+  /// [Color.lerp].
+  /// 
+  /// Along with [colorScheme], comprises the entire scheme of an app.
+  /// See <https://m3.material.io/styles/color/the-color-system/custom-colors>.
+  final Map<String, Color?> customColors;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
@@ -1475,6 +1490,7 @@ class ThemeData with Diagnosticable {
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
+    Map<String, Color>? customColors,
     Brightness? brightness,
     Color? primaryColor,
     Brightness? primaryColorBrightness,
@@ -1614,6 +1630,7 @@ class ThemeData with Diagnosticable {
       visualDensity: visualDensity ?? this.visualDensity,
       // COLOR
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
+      customColors: customColors ?? this.customColors,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
@@ -1782,6 +1799,9 @@ class ThemeData with Diagnosticable {
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       // COLOR
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
+      customColors: a.customColors.map((String name, Color? color) {
+        return MapEntry<String, Color?>(name, Color.lerp(color, b.customColors[name], t));
+      }),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
@@ -1880,6 +1900,7 @@ class ThemeData with Diagnosticable {
         other.visualDensity == visualDensity &&
         // COLOR
         other.colorScheme == colorScheme &&
+        mapEquals(other.customColors, customColors) &&
         other.primaryColor == primaryColor &&
         other.primaryColorBrightness == primaryColorBrightness &&
         other.primaryColorLight == primaryColorLight &&
@@ -1975,6 +1996,8 @@ class ThemeData with Diagnosticable {
       visualDensity,
       // COLOR
       colorScheme,
+      customColors.entries,
+      customColors.values,
       primaryColor,
       primaryColorBrightness,
       primaryColorLight,
@@ -2070,6 +2093,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Map<String, Color?>>('customColors', customColors, defaultValue: defaultData.customColors, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
