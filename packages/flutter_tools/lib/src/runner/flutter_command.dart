@@ -1234,9 +1234,6 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    final FileSystem fileSystem = globals.fs;
-    final String flutterRoot = Cache.flutterRoot!;
-
     globals.preRunValidator.validate();
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
@@ -1257,9 +1254,9 @@ abstract class FlutterCommand extends Command<void> {
         logger: globals.logger,
         cacheDir: globals.cache.getRoot(),
         engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: fileSystem,
-        flutterRootDir: fileSystem.directory(flutterRoot),
-        outputDir: fileSystem.directory(getBuildDirectory()),
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
         projectDir: project.directory,
