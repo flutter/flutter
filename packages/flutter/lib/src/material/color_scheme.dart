@@ -9,7 +9,7 @@ import 'colors.dart';
 import 'theme_data.dart';
 
 /// A set of colors based on the
-/// [Material spec](https://m3.material.io/styles/color/the-color-system/key-colors-tones)
+/// [Material spec](https://m3.material.io/styles/color/the-color-system/color-roles)
 /// that can be used to configure the color properties of most components.
 ///
 /// The [Theme] has a color scheme, [ThemeData.colorScheme], which is constructed
@@ -461,7 +461,7 @@ class ColorScheme with Diagnosticable {
   Color get onSecondaryContainer => _onSecondaryContainer ?? onSecondary;
 
   final Color? _tertiary;
-  /// A color used as a contrasting accent that can be balance [primary]
+  /// A color used as a contrasting accent that can balance [primary]
   /// and [secondary] colors or bring heightened attention to an element,
   /// such as an input field.
   Color get tertiary => _tertiary ?? secondary;
@@ -556,7 +556,7 @@ class ColorScheme with Diagnosticable {
   /// A color that's clearly legible when drawn on [inverseSurface].
   ///
   /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [inverseSurface] and [onInverseSurface] is recommended. See
+  /// [inverseSurface] and [inverseOnSurface] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get inverseOnSurface => _inverseOnSurface ?? surface;
 
