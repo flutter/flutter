@@ -7,7 +7,7 @@ found in the LICENSE file. -->
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:name="io.flutter.app.FlutterApplication" android:label="microbenchmarks" android:icon="@mipmap/ic_launcher">
+    <application android:name="${applicationName}" android:label="microbenchmarks" android:icon="@mipmap/ic_launcher">
         <activity android:name="io.flutter.app.FlutterActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
