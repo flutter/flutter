@@ -110,7 +110,7 @@ class ClangTidy {
     final List<dynamic> buildCommandsData = jsonDecode(
       options.buildCommandsPath.readAsStringSync(),
     ) as List<dynamic>;
-    final List<Command> changedFileBuildCommands = getLintCommandsForChangedFiles(
+    final List<Command> changedFileBuildCommands = await getLintCommandsForChangedFiles(
       buildCommandsData,
       changedFiles,
     );
@@ -165,20 +165,20 @@ class ClangTidy {
   /// Given a build commands json file, and the files with local changes,
   /// compute the lint commands to run.
   @visibleForTesting
-  List<Command> getLintCommandsForChangedFiles(
+  Future<List<Command>> getLintCommandsForChangedFiles(
     List<dynamic> buildCommandsData,
     List<io.File> changedFiles,
-  ) {
-    final List<Command> buildCommands = <Command>[
-      for (final dynamic c in buildCommandsData)
-        Command.fromMap(c as Map<String, dynamic>),
-    ];
-
-    return <Command>[
-      for (final Command c in buildCommands)
-        if (c.containsAny(changedFiles))
-          c,
-    ];
+  ) async {
+    final List<Command> buildCommands = <Command>[];
+    for (final dynamic data in buildCommandsData) {
+      final Command command = Command.fromMap(data as Map<String, dynamic>);
+      final LintAction lintAction = await command.lintAction;
+      // Short-circuit the expensive containsAny call for the many third_party files.
+      if (lintAction != LintAction.skipThirdParty && command.containsAny(changedFiles)) {
+        buildCommands.add(command);
+      }
+    }
+    return buildCommands;
   }
 
   Future<_ComputeJobsResult> _computeJobs(
@@ -212,6 +212,9 @@ class ClangTidy {
         case LintAction.skipThirdParty:
           _outSink.writeln('🔷 ignoring $relativePath (third_party)');
           break;
+        case LintAction.skipMissing:
+          _outSink.writeln('🔷 ignoring $relativePath (missing)');
+          break;
       }
     }
     return _ComputeJobsResult(jobs, sawMalformed);
@@ -239,5 +242,3 @@ class ClangTidy {
     return result;
   }
 }
-
-
