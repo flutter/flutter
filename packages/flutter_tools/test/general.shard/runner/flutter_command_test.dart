@@ -98,7 +98,6 @@ void main() {
     });
 
     testUsingContext("throws toolExit if flutter_tools source dir doesn't exist", () async {
-      fileSystem.directory(Cache.flutterRoot).deleteSync(recursive: true);
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await expectToolExitLater(
         flutterCommand.run(),
