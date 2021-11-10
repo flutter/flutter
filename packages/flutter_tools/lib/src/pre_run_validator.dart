@@ -6,6 +6,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 
+/// A validator that runs before the tool runs any command.
 abstract class PreRunValidator {
   factory PreRunValidator({
     required FileSystem fileSystem,
@@ -31,9 +32,6 @@ class _DefaultPreRunValidator implements PreRunValidator {
     // an error during extraction, the user could have a valid Dart snapshot of
     // the tool but not the source directory. We still need the source, so
     // validate the source directory exists and toolExit if not.
-    //final Directory toolsDir = globals.fs.directory(
-    //  globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
-    //);
     if (!_toolsDir.existsSync()) {
       throwToolExit(
         'Flutter SDK installation appears corrupted: expected to find the '
