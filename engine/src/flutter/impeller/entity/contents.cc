@@ -14,9 +14,17 @@
 
 namespace impeller {
 
+/*******************************************************************************
+ ******* Contents
+ ******************************************************************************/
+
 Contents::Contents() = default;
 
 Contents::~Contents() = default;
+
+/*******************************************************************************
+ ******* Linear Gradient Contents
+ ******************************************************************************/
 
 LinearGradientContents::LinearGradientContents() = default;
 
@@ -41,7 +49,6 @@ const std::vector<Color>& LinearGradientContents::GetColors() const {
   return colors_;
 }
 
-// |Contents|
 bool LinearGradientContents::Render(const ContentRenderer& renderer,
                                     const Entity& entity,
                                     const Surface& surface,
@@ -82,6 +89,74 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   return pass.AddCommand(std::move(cmd));
+}
+
+/*******************************************************************************
+ ******* SolidColorContents
+ ******************************************************************************/
+
+void SolidColorContents::SetColor(Color color) {
+  color_ = color;
+}
+
+const Color& SolidColorContents::GetColor() const {
+  return color_;
+}
+
+bool SolidColorContents::Render(const ContentRenderer& renderer,
+                                const Entity& entity,
+                                const Surface& surface,
+                                RenderPass& pass) const {
+  using VS = SolidFillPipeline::VertexShader;
+
+  Command cmd;
+  cmd.label = "SolidFill";
+  cmd.pipeline = renderer.GetSolidFillPipeline();
+  if (cmd.pipeline == nullptr) {
+    return false;
+  }
+
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  {
+    auto tesselation_result = Tessellator{}.Tessellate(
+        entity.GetPath().CreatePolyline(), [&vtx_builder](auto point) {
+          VS::PerVertexData vtx;
+          vtx.vertices = point;
+          vtx_builder.AppendVertex(vtx);
+        });
+    if (!tesselation_result) {
+      return false;
+    }
+  }
+
+  cmd.BindVertices(vtx_builder.CreateVertexBuffer(
+      *renderer.GetContext()->GetPermanentsAllocator()));
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp =
+      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+  frame_info.color = entity.GetBackgroundColor();
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+
+  cmd.primitive_type = PrimitiveType::kTriangle;
+
+  if (!pass.AddCommand(std::move(cmd))) {
+    return false;
+  }
+
+  return true;
+}
+
+/*******************************************************************************
+ ******* SolidStrokeContents
+ ******************************************************************************/
+
+void SolidStrokeContents::SetColor(Color color) {
+  color_ = color;
+}
+
+const Color& SolidStrokeContents::GetColor() const {
+  return color_;
 }
 
 }  // namespace impeller

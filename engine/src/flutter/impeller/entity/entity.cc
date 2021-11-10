@@ -66,37 +66,4 @@ const std::shared_ptr<Contents>& Entity::GetContents() const {
   return contents_;
 }
 
-bool Entity::HasStroke() const {
-  return stroke_size_ > 0.0 && !stroke_color_.IsTransparent();
-}
-
-bool Entity::HasContents() const {
-  if (contents_) {
-    return true;
-  }
-  return !background_color_.IsTransparent();
-}
-
-bool Entity::HasRenderableContents() const {
-  const bool has_empty_path = path_.GetBoundingBox().IsZero();
-
-  if (has_empty_path) {
-    return false;
-  }
-
-  if (IsClip()) {
-    return true;
-  }
-
-  if (HasStroke()) {
-    return true;
-  }
-
-  if (HasContents()) {
-    return true;
-  }
-
-  return false;
-}
-
 }  // namespace impeller
