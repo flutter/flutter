@@ -232,8 +232,8 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] and [customColors] are the preferred way to configure colors. The other color
-    // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
+    // [colorScheme] and [customColors] are the preferred way to configure colors. 
+    // The other color properties (as well as brightness, primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
     Map<String, Color>? customColors,
@@ -622,8 +622,8 @@ class ThemeData with Diagnosticable {
     required this.splashFactory,
     required this.visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties will gradually be phased out, see
+    // [colorScheme] and [customColors] are the preferred way to configure colors. 
+    // The other color properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.customColors,
@@ -1093,8 +1093,8 @@ class ThemeData with Diagnosticable {
 
   /// A map of arbitrary names to colors that can be used throughout the app.
   /// 
-  /// When switching themes, usages of colors with the same name will shift with
-  /// [Color.lerp].
+  /// When switching themes, usages of colors with the same name will be 
+  /// linearly interpolated with [Color.lerp].
   /// 
   /// Along with [colorScheme], comprises the entire scheme of an app.
   /// See <https://m3.material.io/styles/color/the-color-system/custom-colors>.
@@ -1486,8 +1486,8 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties will gradually be phased out, see
+    // [colorScheme] and [customColors] are the preferred way to configure colors. 
+    // The other color properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
     Map<String, Color>? customColors,
