@@ -43,6 +43,7 @@ import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
+import 'pre_run_validator.dart';
 import 'version.dart';
 
 /// The flutter GitHub repository.
@@ -233,3 +234,5 @@ FlutterProjectFactory get projectFactory {
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
+
+PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();

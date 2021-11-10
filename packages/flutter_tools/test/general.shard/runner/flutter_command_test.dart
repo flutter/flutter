@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
@@ -36,6 +37,7 @@ void main() {
     FakeProcessInfo processInfo;
     MemoryFileSystem fileSystem;
     FakeProcessManager processManager;
+    PreRunValidator preRunValidator;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -50,6 +52,7 @@ void main() {
       processInfo.maxRss = 10;
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
+      preRunValidator = PreRunValidator(fileSystem: fileSystem);
     });
 
     tearDown(() {
@@ -105,6 +108,7 @@ void main() {
     overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => fileSystem,
+      PreRunValidator: () => preRunValidator,
       ProcessManager: () => processManager,
     });
 
