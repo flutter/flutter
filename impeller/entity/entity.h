@@ -43,12 +43,6 @@ class Entity {
 
   bool IsClip() const;
 
-  bool HasStroke() const;
-
-  bool HasContents() const;
-
-  bool HasRenderableContents() const;
-
   void SetContents(std::shared_ptr<Contents> contents);
 
   const std::shared_ptr<Contents>& GetContents() const;

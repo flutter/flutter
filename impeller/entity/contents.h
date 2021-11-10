@@ -21,7 +21,7 @@ class Contents {
  public:
   Contents();
 
-  ~Contents();
+  virtual ~Contents();
 
   virtual bool Render(const ContentRenderer& renderer,
                       const Entity& entity,
@@ -36,7 +36,7 @@ class LinearGradientContents final : public Contents {
  public:
   LinearGradientContents();
 
-  ~LinearGradientContents();
+  ~LinearGradientContents() override;
 
   // |Contents|
   bool Render(const ContentRenderer& renderer,
@@ -56,6 +56,55 @@ class LinearGradientContents final : public Contents {
   std::vector<Color> colors_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LinearGradientContents);
+};
+
+class SolidColorContents final : public Contents {
+ public:
+  SolidColorContents();
+
+  ~SolidColorContents() override;
+
+  void SetColor(Color color);
+
+  const Color& GetColor() const;
+
+  // |Contents|
+  bool Render(const ContentRenderer& renderer,
+              const Entity& entity,
+              const Surface& surface,
+              RenderPass& pass) const override;
+
+ private:
+  Color color_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SolidColorContents);
+};
+
+class SolidStrokeContents final : public Contents {
+ public:
+  SolidStrokeContents();
+
+  ~SolidStrokeContents();
+
+  void SetColor(Color color);
+
+  const Color& GetColor() const;
+
+  void SetStrokeSize(Scalar size) { stroke_size_ = size; }
+
+  Scalar GetStrokeSize() const { return stroke_size_; }
+
+  // |Contents|
+  bool Render(const ContentRenderer& renderer,
+              const Entity& entity,
+              const Surface& surface,
+              RenderPass& pass) const override;
+
+ private:
+  Color color_;
+  Scalar stroke_size_ = 0.0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SolidStrokeContents);
 };
 
 }  // namespace impeller
