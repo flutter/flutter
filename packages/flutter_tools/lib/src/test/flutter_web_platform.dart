@@ -485,6 +485,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   @override
+  // ignore: override_on_non_overriding_member
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) =>
       throw UnimplementedError();
 
