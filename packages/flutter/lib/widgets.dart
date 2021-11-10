@@ -120,7 +120,7 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
-export 'src/widgets/text_editing_intents.dart';
+export 'src/widgets/text_editing_intents.dart' hide DeleteTextIntent, DeleteByWordTextIntent, DeleteByLineTextIntent, DeleteForwardTextIntent, DeleteForwardByWordTextIntent, DeleteForwardByLineTextIntent, ExpandSelectionLeftByLineTextIntent, ExpandSelectionRightByLineTextIntent, ExpandSelectionToEndTextIntent, ExpandSelectionToStartTextIntent, ExtendSelectionDownTextIntent, ExtendSelectionLeftTextIntent, ExtendSelectionRightTextIntent, ExtendSelectionUpTextIntent, ExtendSelectionLeftByWordTextIntent, ExtendSelectionRightByWordTextIntent, MoveSelectionDownTextIntent, MoveSelectionLeftByLineTextIntent, MoveSelectionLeftByWordTextIntent, MoveSelectionLeftTextIntent, MoveSelectionToStartTextIntent, MoveSelectionRightByLineTextIntent, MoveSelectionRightByWordTextIntent, MoveSelectionRightTextIntent, MoveSelectionToEndTextIntent, MoveSelectionUpTextIntent;
 export 'src/widgets/text_selection.dart';
 export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/texture.dart';

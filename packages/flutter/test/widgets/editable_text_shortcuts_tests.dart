@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -39,6 +41,10 @@ Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
     });
   });
 }
+
+final TargetPlatformVariant allExceptFuchsia = TargetPlatformVariant(
+  TargetPlatform.values.toSet()..remove(TargetPlatform.fuchsia),
+);
 
 void main() {
   const String testText =
@@ -114,12 +120,14 @@ void main() {
       }
     },
     skip: kIsWeb, // [intended]
-    variant: TargetPlatformVariant.all(),
+    variant: allExceptFuchsia,
   );
 
   group('Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptMacOS = TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.macOS));
+      final TargetPlatformVariant allExceptMacOSAndFuchsia = TargetPlatformVariant(
+        TargetPlatform.values.toSet()..remove(TargetPlatform.macOS)..remove(TargetPlatform.fuchsia),
+      );
 
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
@@ -147,7 +155,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 19),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('backspace readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -165,7 +173,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('backspace at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -188,7 +196,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('backspace at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -212,7 +220,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 71),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -233,7 +241,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -254,7 +262,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('delete: ', () {
@@ -284,7 +292,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('delete readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -302,7 +310,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('delete at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -325,7 +333,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('delete at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -349,7 +357,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 72, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('delete inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -370,7 +378,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('delete at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -391,7 +399,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('Non-collapsed delete', () {
@@ -417,7 +425,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -438,7 +446,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('cross-cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -459,7 +467,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -480,7 +488,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 1),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('word modifier + backspace', () {
@@ -513,7 +521,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 24),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -531,7 +539,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 29, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -554,7 +562,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -578,7 +586,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 71),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -599,7 +607,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -620,7 +628,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('word modifier + delete', () {
@@ -653,7 +661,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 23),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -671,7 +679,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 23, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -694,7 +702,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -711,7 +719,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 72, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -732,7 +740,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -753,7 +761,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('line modifier + backspace', () {
@@ -786,7 +794,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
@@ -810,7 +818,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
@@ -828,7 +836,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 40),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -846,7 +854,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 29, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -869,7 +877,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -892,7 +900,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 55),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -913,7 +921,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -934,7 +942,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('line modifier + delete', () {
@@ -967,7 +975,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 23),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
@@ -986,7 +994,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 40, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
@@ -1009,7 +1017,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 40),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -1027,7 +1035,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 23, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -1050,7 +1058,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -1067,7 +1075,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 72, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -1088,7 +1096,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -1109,7 +1117,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: allExceptFuchsia);
       });
 
       group('Arrow Movement', () {
@@ -1134,7 +1142,7 @@ void main() {
                 reason: activator.toString(),
               );
             }
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1148,7 +1156,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 19,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1162,7 +1170,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
 
           testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1176,7 +1184,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
         });
 
         group('right', () {
@@ -1197,7 +1205,7 @@ void main() {
               expect(controller.selection.isCollapsed, isTrue, reason: activator.toString());
               expect(controller.selection.baseOffset, 72, reason: activator.toString());
             }
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1211,7 +1219,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 21,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1225,7 +1233,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1240,7 +1248,7 @@ void main() {
               offset: 35, // Before the newline character.
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
         });
 
         group('With initial non-collapsed selection', () {
@@ -1294,7 +1302,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 23,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1347,7 +1355,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1401,7 +1409,7 @@ void main() {
               offset: 35, // After "people".
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptMacOSAndFuchsia);
         });
 
         group('vertical movement', () {
@@ -1424,7 +1432,7 @@ void main() {
                 reason: activator.toString(),
               );
             }
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('at end', (WidgetTester tester) async {
             controller.text = testText;
@@ -1442,7 +1450,7 @@ void main() {
               expect(controller.selection.baseOffset, 72, reason: activator.toString());
               expect(controller.selection.extentOffset, 72, reason: activator.toString());
             }
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('run', (WidgetTester tester) async {
             controller.text =
@@ -1528,7 +1536,7 @@ void main() {
               offset: 4,
               affinity: TextAffinity.upstream,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
@@ -1557,7 +1565,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 3,
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
 
           testWidgets('run can be interrupted by selection changes', (WidgetTester tester) async {
             controller.text =
@@ -1592,7 +1600,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 3,   // Would have been 4 if the run wasn't interrupted.
             ));
-          }, variant: TargetPlatformVariant.all());
+          }, variant: allExceptFuchsia);
         });
       });
     },
@@ -1765,5 +1773,158 @@ void main() {
         affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
+  });
+
+  final TargetPlatformVariant fuchsiaOnly = TargetPlatformVariant.only(TargetPlatform.fuchsia);
+  group('fuchsia shortcuts', () {
+    const int _kFuchsiaKeyIdPlane = LogicalKeyboardKey.fuchsiaPlane;
+    const LogicalKeyboardKey _kBackspace = LogicalKeyboardKey(42 | _kFuchsiaKeyIdPlane);
+    const LogicalKeyboardKey _kDelete = LogicalKeyboardKey(76 | _kFuchsiaKeyIdPlane);
+    const LogicalKeyboardKey _kArrowLeft = LogicalKeyboardKey(80 | _kFuchsiaKeyIdPlane);
+    const LogicalKeyboardKey _kArrowRight = LogicalKeyboardKey(79 | _kFuchsiaKeyIdPlane);
+    const LogicalKeyboardKey _kArrowDown = LogicalKeyboardKey(81 | _kFuchsiaKeyIdPlane);
+    const LogicalKeyboardKey _kArrowUp = LogicalKeyboardKey(82 | _kFuchsiaKeyIdPlane);
+
+    int _getFuchsiaModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+      int result = 0;
+      final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+      if (isDown) {
+        pressed.add(newKey);
+      } else {
+        pressed.remove(newKey);
+      }
+      if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+        result |= RawKeyEventDataFuchsia.modifierLeftShift;
+      }
+      if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+        result |= RawKeyEventDataFuchsia.modifierRightShift;
+      }
+      if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+        result |= RawKeyEventDataFuchsia.modifierLeftMeta;
+      }
+      if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+        result |= RawKeyEventDataFuchsia.modifierRightMeta;
+      }
+      if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+        result |= RawKeyEventDataFuchsia.modifierLeftControl;
+      }
+      if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+        result |= RawKeyEventDataFuchsia.modifierRightControl;
+      }
+      if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+        result |= RawKeyEventDataFuchsia.modifierLeftAlt;
+      }
+      if (pressed.contains(LogicalKeyboardKey.altRight)) {
+        result |= RawKeyEventDataFuchsia.modifierRightAlt;
+      }
+      if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+        result |= RawKeyEventDataFuchsia.modifierCapsLock;
+      }
+      return result;
+    }
+
+    Future<bool> simulateFuchsiaKeyEvent(LogicalKeyboardKey logicalKey, bool isDown) async {
+      final Completer<bool> result = Completer<bool>();
+      final Map<String, dynamic> keyData = <String, dynamic>{
+        'type': isDown ? 'keydown' : 'keyup',
+        'keymap': 'fuchsia',
+        'hidUsage': logicalKey.keyId | LogicalKeyboardKey.unicodePlane,
+        'modifiers': _getFuchsiaModifierFlags(logicalKey, isDown),
+      };
+      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(keyData),
+        (ByteData? data) {
+          if (data == null) {
+            result.complete(false);
+            return;
+          }
+          final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+          result.complete(decoded['handled'] as bool);
+        }
+      );
+      return result.future;
+    }
+
+    Future<void> sendFuchsiaKeyCombination(
+      WidgetTester tester,
+      SingleActivator activator,
+    ) async {
+      final List<LogicalKeyboardKey> modifiers = <LogicalKeyboardKey>[
+        if (activator.control) LogicalKeyboardKey.control,
+        if (activator.shift) LogicalKeyboardKey.shift,
+        if (activator.alt) LogicalKeyboardKey.alt,
+        if (activator.meta) LogicalKeyboardKey.meta,
+      ];
+      for (final LogicalKeyboardKey modifier in modifiers) {
+        await tester.sendKeyDownEvent(modifier, platform: 'fuchsia');
+      }
+      await simulateFuchsiaKeyEvent(activator.trigger, true);
+      await simulateFuchsiaKeyEvent(activator.trigger, false);
+      await tester.pump();
+      for (final LogicalKeyboardKey modifier in modifiers.reversed) {
+        await tester.sendKeyUpEvent(modifier, platform: 'fuchsia');
+      }
+    }
+
+    setUp(() {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(
+        offset: 32,   // all good peo|ple\n
+      );
+    });
+
+    testWidgets('delete', (WidgetTester tester) async {
+      await tester.pumpWidget(buildEditableText());
+
+      // Character delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kBackspace));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'all good peple\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 31));
+
+      // Word delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kBackspace, control: true));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'all good ple\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 29));
+
+      // Line delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kBackspace, alt: true));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'ple\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 20));
+    }, variant: fuchsiaOnly);
+
+    testWidgets('arrow key navigation', (WidgetTester tester) async {
+      await tester.pumpWidget(buildEditableText());
+
+      // Verical movement.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kArrowUp));
+      expect(controller.selection, const TextSelection.collapsed(offset: 12));
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kArrowDown));
+      expect(controller.selection, const TextSelection.collapsed(offset: 32));
+
+      // Horizontal movement.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kArrowLeft));
+      expect(controller.selection, const TextSelection.collapsed(offset: 31));
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kArrowRight));
+      expect(controller.selection, const TextSelection.collapsed(offset: 32));
+    }, variant: fuchsiaOnly);
   });
 }
