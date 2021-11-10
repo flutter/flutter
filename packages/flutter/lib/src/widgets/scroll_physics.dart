@@ -428,9 +428,9 @@ class ScrollPhysics {
 /// Scroll physics that attempt to keep the scroll position in range when the
 /// contents change dimensions suddenly.
 ///
-/// If the scroll position is already out of range, this attempts to maintain
-/// the amount of overscroll or underscroll already present _and_ the position
-/// has shrunk, meaning that some content was removed. The reason for this
+/// This attempts to maintain the amount of overscroll or underscroll already present,
+/// if the scroll position is already out of range _and_ the extents
+/// have decreased, meaning that some content was removed. The reason for this
 /// condition is that when new content is added, keeping the same overscroll
 /// would mean that instead of showing it to the user, all of it is
 /// being skipped by jumping to right to the max extent.
@@ -518,7 +518,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       if (oldPosition.minScrollExtent.isFinite && oldPosition.maxScrollExtent.isFinite &&
           newPosition.minScrollExtent.isFinite && newPosition.maxScrollExtent.isFinite) {
         // In addition, if the position changed then we don't enforce
-        // the new boundary if both new and previous position are entirely finite.
+        // the new boundary if both new and previous bondaries entirely finite.
         // A common case where the position changes while one
         // of the extents is infinite is a lazily-loaded list. (If the
         // boundaries were finite, and the position changed, then we
@@ -534,22 +534,20 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     }
     if (maintainOverscroll) {
       // Force the new position to be no more out of range than it was before, if:
-      //  * it was overscrolled
-      //  * and the position has shrunk, meaning that some content was removed. The
+      //  * it was overscrolled, and
+      //  * the extents have decreased, meaning that some content was removed. The
       //    reason for this condition is that when new content is added, keeping
       //    the same overscroll would mean that instead of showing it to the user,
       //    all of it is being skipped by jumping to right to the max extent.
-      final bool shrunk = newPosition.minScrollExtent > oldPosition.minScrollExtent ||
-                          newPosition.maxScrollExtent < oldPosition.maxScrollExtent;
-      if (shrunk) {
-        if (oldPosition.pixels < oldPosition.minScrollExtent) {
-          final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
-          return newPosition.minScrollExtent - oldDelta;
-        }
-        if (oldPosition.pixels > oldPosition.maxScrollExtent) {
-          final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
-          return newPosition.maxScrollExtent + oldDelta;
-        }
+      if (oldPosition.pixels < oldPosition.minScrollExtent &&
+          newPosition.minScrollExtent > oldPosition.minScrollExtent) {
+        final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
+        return newPosition.minScrollExtent - oldDelta;
+      }
+      if (oldPosition.pixels > oldPosition.maxScrollExtent &&
+          newPosition.maxScrollExtent < oldPosition.maxScrollExtent) {
+        final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
+        return newPosition.maxScrollExtent + oldDelta;
       }
     }
     // If we're not forcing the overscroll, defer to other physics.
