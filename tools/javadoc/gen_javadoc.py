@@ -11,15 +11,15 @@ import sys
 
 ANDROID_SRC_ROOT = 'flutter/shell/platform/android'
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def JavadocBin():
-  script_path = os.path.dirname(os.path.realpath(__file__))
   if sys.platform == 'darwin':
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin', 'javadoc')
+    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin', 'javadoc')
   elif sys.platform.startswith(('cygwin', 'win')):
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe')
+    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe')
   else :
-    return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc')
+    return os.path.join(SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc')
 
 
 def main():
@@ -70,11 +70,13 @@ def main():
     'io.flutter.view',
   ]
 
+  android_package_list = os.path.join(SCRIPT_DIR, 'android_reference')
+
   command = [
     JavadocBin(),
     '-classpath', ':'.join(classpath),
     '-d', args.out_dir,
-    '-link', 'https://developer.android.com/reference/',
+    '-linkoffline', 'https://developer.android.com/reference/', android_package_list,
     '-source', '1.8',
   ] + packages
 
