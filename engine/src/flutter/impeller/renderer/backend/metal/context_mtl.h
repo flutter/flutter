@@ -61,6 +61,12 @@ class ContextMTL final : public Context,
   // |Context|
   std::shared_ptr<CommandBuffer> CreateRenderCommandBuffer() const override;
 
+  // |Context|
+  std::shared_ptr<CommandBuffer> CreateTransferCommandBuffer() const override;
+
+  std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
+      id<MTLCommandQueue> queue) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ContextMTL);
 };
 

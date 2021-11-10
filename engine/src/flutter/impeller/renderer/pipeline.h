@@ -42,10 +42,14 @@ class Pipeline {
 
   virtual bool IsValid() const = 0;
 
+  const PipelineDescriptor& GetDescriptor() const;
+
  protected:
-  Pipeline();
+  Pipeline(PipelineDescriptor desc);
 
  private:
+  const PipelineDescriptor desc_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };
 

@@ -9,7 +9,7 @@
 
 namespace impeller {
 
-Pipeline::Pipeline() = default;
+Pipeline::Pipeline(PipelineDescriptor desc) : desc_(std::move(desc)) {}
 
 Pipeline::~Pipeline() = default;
 
@@ -23,6 +23,10 @@ PipelineFuture CreatePipelineFuture(const Context& context,
   }
 
   return context.GetPipelineLibrary()->GetRenderPipeline(std::move(desc));
+}
+
+const PipelineDescriptor& Pipeline::GetDescriptor() const {
+  return desc_;
 }
 
 }  // namespace impeller

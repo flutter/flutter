@@ -108,12 +108,20 @@ std::shared_ptr<SamplerLibrary> ContextMTL::GetSamplerLibrary() const {
 }
 
 std::shared_ptr<CommandBuffer> ContextMTL::CreateRenderCommandBuffer() const {
+  return CreateCommandBufferInQueue(render_queue_);
+}
+
+std::shared_ptr<CommandBuffer> ContextMTL::CreateTransferCommandBuffer() const {
+  return CreateCommandBufferInQueue(transfer_queue_);
+}
+
+std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBufferInQueue(
+    id<MTLCommandQueue> queue) const {
   if (!IsValid()) {
     return nullptr;
   }
 
-  auto buffer =
-      std::shared_ptr<CommandBufferMTL>(new CommandBufferMTL(render_queue_));
+  auto buffer = std::shared_ptr<CommandBufferMTL>(new CommandBufferMTL(queue));
   if (!buffer->IsValid()) {
     return nullptr;
   }

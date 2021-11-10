@@ -6,9 +6,12 @@
 
 namespace impeller {
 
-PipelineMTL::PipelineMTL(id<MTLRenderPipelineState> state,
+PipelineMTL::PipelineMTL(PipelineDescriptor desc,
+                         id<MTLRenderPipelineState> state,
                          id<MTLDepthStencilState> depth_stencil_state)
-    : pipeline_state_(state), depth_stencil_state_(depth_stencil_state) {
+    : Pipeline(std::move(desc)),
+      pipeline_state_(state),
+      depth_stencil_state_(depth_stencil_state) {
   if (!pipeline_state_) {
     return;
   }
