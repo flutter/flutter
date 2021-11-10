@@ -202,7 +202,7 @@ class DapTestClient {
       } else {
         completer.completeError(message);
       }
-    } else if (message is Event) {
+    } else if (message is Event && !_eventController.isClosed) {
       _eventController.add(message);
 
       // When we see a terminated event, close the event stream so if any
