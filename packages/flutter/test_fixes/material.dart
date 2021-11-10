@@ -501,7 +501,7 @@ void main() {
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.color;
 
-  // Changes made in XXX
+  // Changes made in https://github.com/flutter/flutter/pull/93396
   ThemeData themeData = ThemeData();
   themeData = ThemeData(primaryColorBrightness: Brightness.dark);
   themeData = ThemeData.raw(primaryColorBrightness: Brightness.dark);

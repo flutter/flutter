@@ -14,7 +14,7 @@
 
 version: 1
 transforms:
-  # Changes made in XXX
+  # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
     date: 2021-10-31
     element:
@@ -25,7 +25,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorBrightness'
 
-  # Changes made in XXX
+  # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
     date: 2021-10-31
     element:
@@ -36,7 +36,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorBrightness'
 
-  # Changes made in XXX
+  # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
     date: 2021-10-31
     element:
