@@ -178,8 +178,6 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
-
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
@@ -824,15 +822,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addIgnoreDeprecationOption({ bool hide = false }) {
-    argParser.addFlag('ignore-deprecation',
-      negatable: false,
-      help: 'Indicates that the app should ignore deprecation warnings and continue to build '
-            'using deprecated APIs. Use of this flag may cause your app to fail to build when '
-            'deprecated APIs are removed.',
-    );
-  }
-
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -1257,10 +1246,8 @@ abstract class FlutterCommand extends Command<void> {
 
     await validateCommand();
 
-    final FlutterProject project = FlutterProject.current();
-    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
-
     if (shouldRunPub) {
+      final FlutterProject project = FlutterProject.current();
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
