@@ -24,6 +24,7 @@ import 'restoration.dart';
 import 'router.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
+import 'shared_app_data.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
@@ -1630,7 +1631,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
-            color: widget.color,
+            color: widget.color.withOpacity(1.0),
             child: result,
           );
         },
@@ -1638,7 +1639,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       title = Title(
         title: widget.title,
-        color: widget.color,
+        color: widget.color.withOpacity(1.0),
         child: result,
       );
     }
@@ -1664,17 +1665,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-        // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-        // fall through to the defaultShortcuts.
-        child: DefaultTextEditingShortcuts(
-          child: Actions(
-            actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: FocusTraversalGroup(
-              policy: ReadingOrderTraversalPolicy(),
-              child: child,
+      child: SharedAppData(
+        child: Shortcuts(
+          debugLabel: '<Default WidgetsApp Shortcuts>',
+          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+          // fall through to the defaultShortcuts.
+          child: DefaultTextEditingShortcuts(
+            child: Actions(
+              actions: widget.actions ?? WidgetsApp.defaultActions,
+              child: FocusTraversalGroup(
+                policy: ReadingOrderTraversalPolicy(),
+                child: child,
+              ),
             ),
           ),
         ),
