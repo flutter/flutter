@@ -1409,14 +1409,24 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   DragStartDetails? _lastDragStartDetails;
   DragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
+  bool _isMouseDragging = false;
 
   void _handleDragStart(DragStartDetails details) {
+    if (details.kind != PointerDeviceKind.mouse) {
+      _isMouseDragging = false;
+      return;
+    } else {
+      _isMouseDragging = true;
+    }
     assert(_lastDragStartDetails == null);
     _lastDragStartDetails = details;
     widget.onDragSelectionStart?.call(details);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isMouseDragging) {
+      return;
+    }
     _lastDragUpdateDetails = details;
     // Only schedule a new timer if there's no one pending.
     _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
@@ -1437,6 +1447,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleDragEnd(DragEndDetails details) {
+    if (!_isMouseDragging) {
+      return;
+    }
+    _isMouseDragging = false;
     assert(_lastDragStartDetails != null);
     if (_dragUpdateThrottleTimer != null) {
       // If there's already an update scheduled, trigger it immediately and
@@ -1529,9 +1543,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onDragSelectionEnd != null) {
       // TODO(mdebbar): Support dragging in any direction (for multiline text).
       // https://github.com/flutter/flutter/issues/28676
-      gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-        () => HorizontalDragGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.mouse),
-        (HorizontalDragGestureRecognizer instance) {
+      gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+        () => PanGestureRecognizer(debugOwner: this),
+        (PanGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
             // down event.
