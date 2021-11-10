@@ -204,10 +204,20 @@ Future<int> main(List<String> args) async {
     expect(commands, isNotEmpty);
     final Command command = commands.first;
     expect(command.tidyPath, contains('clang/bin/clang-tidy'));
-    final WorkerJob job = command.createLintJob(null);
-    expect(job.command, <String>[
+    final WorkerJob jobNoFix = command.createLintJob(null, false);
+    expect(jobNoFix.command, <String>[
       '../../buildtools/mac-x64/clang/bin/clang-tidy',
       filePath,
+      '--',
+      '',
+      filePath,
+    ]);
+
+    final WorkerJob jobWithFix = command.createLintJob(null, true);
+    expect(jobWithFix.command, <String>[
+      '../../buildtools/mac-x64/clang/bin/clang-tidy',
+      filePath,
+      '--fix',
       '--',
       '',
       filePath,
