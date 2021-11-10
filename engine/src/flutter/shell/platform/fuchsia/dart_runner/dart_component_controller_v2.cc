@@ -377,7 +377,7 @@ bool DartComponentControllerV2::RunDartMain() {
 
   tonic::DartMicrotaskQueue::StartForCurrentThread();
 
-  // TODO(fxb/79871): Create a file descriptor for each component that is
+  // TODO(fxb/88384): Create a file descriptor for each component that is
   // launched and listen for anything that is written to the component. When
   // something is written to the component, forward that message along to the
   // Fuchsia logger and decorate it with the tag that it came from the
@@ -404,7 +404,7 @@ bool DartComponentControllerV2::RunDartMain() {
   Dart_EnterIsolate(isolate_);
   Dart_EnterScope();
 
-  // TODO(fxb/79871): Support argument passing.
+  // TODO(fxb/88383): Support argument passing.
   // Note: Even though we do not support argument passing via the cml files
   // at this time, we still need to create an argument list and pass it off
   // to the invocation of main below. If we do not do this dart will look for
