@@ -361,7 +361,7 @@ class Cache {
       const String devToolsDirPath = 'dart-sdk/bin/resources/devtools';
       final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
       if (!devToolsDir.existsSync()) {
-        throw Exception('Could not find directory at $devToolsDirPath');
+        throw Exception('Could not find directory at ${devToolsDir.path}');
       }
       final String versionFilePath = '${devToolsDir.path}/version.json';
       final File versionFile = _fileSystem.file(versionFilePath);

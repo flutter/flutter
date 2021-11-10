@@ -141,6 +141,14 @@ void main() {
     });
 
     testUsingContext('create local report', () async {
+      Cache.flutterRoot = '/path/to/flutter';
+      final Directory devtoolsDir = globals.fs.directory(
+        '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+      )..createSync(recursive: true);
+      devtoolsDir.childFile('version.json').writeAsStringSync(
+        '{"version": "1.2.3"}',
+      );
+
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
