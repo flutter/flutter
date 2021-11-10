@@ -49,9 +49,9 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
   // clang-format on
 
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool isAA) override;
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool isAA) override;
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool isAA) override;
+  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   void drawPaint() override;
   void drawColor(SkColor color, SkBlendMode mode) override;
@@ -120,7 +120,8 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
 // Receives all methods on SkCanvas and sends them to a DisplayListBuilder
 class DisplayListCanvasRecorder
     : public SkCanvasVirtualEnforcer<SkNoDrawCanvas>,
-      public SkRefCnt {
+      public SkRefCnt,
+      DisplayListOpFlags {
  public:
   DisplayListCanvasRecorder(const SkRect& bounds);
 
@@ -233,80 +234,8 @@ class DisplayListCanvasRecorder
                      const SkMatrix* matrix,
                      const SkPaint* paint) override;
 
-  enum class DrawType {
-    // The operation will be an image operation
-    kImageOpType,
-    // The operation will be an imageRect operation
-    kImageRectOpType,
-    // The operation will be a fill or stroke depending on the paint.style
-    kDrawOpType,
-    // The operation will be a fill (ignoring paint.style)
-    kFillOpType,
-    // The operation will be a stroke (ignoring paint.style)
-    kStrokeOpType,
-    // The operation will be a saveLayer with a paint object
-    kSaveLayerOpType,
-  };
-
-  void RecordPaintAttributes(const SkPaint* paint, DrawType type);
-
  private:
   sk_sp<DisplayListBuilder> builder_;
-
-  // Mask bits for the various attributes that might be needed for a given
-  // operation.
-  // clang-format off
-  static constexpr int kAaNeeded_            = 1 << 0;
-  static constexpr int kColorNeeded_         = 1 << 1;
-  static constexpr int kBlendNeeded_         = 1 << 2;
-  static constexpr int kInvertColorsNeeded_  = 1 << 3;
-  static constexpr int kPaintStyleNeeded_    = 1 << 4;
-  static constexpr int kStrokeStyleNeeded_   = 1 << 5;
-  static constexpr int kShaderNeeded_        = 1 << 6;
-  static constexpr int kColorFilterNeeded_   = 1 << 7;
-  static constexpr int kImageFilterNeeded_   = 1 << 8;
-  static constexpr int kPathEffectNeeded_    = 1 << 9;
-  static constexpr int kMaskFilterNeeded_    = 1 << 10;
-  static constexpr int kDitherNeeded_        = 1 << 11;
-  // clang-format on
-
-  // Combinations of the above mask bits that are common to typical "draw"
-  // calls.
-  // Note that the strokeStyle_ is handled conditionally depending on whether
-  // the paintStyle_ attribute value is synchronized. It can also be manually
-  // specified for operations that will be always stroking, like [drawLine].
-  static constexpr int kPaintMask_ = kAaNeeded_ | kColorNeeded_ |
-                                     kBlendNeeded_ | kInvertColorsNeeded_ |
-                                     kColorFilterNeeded_ | kShaderNeeded_ |
-                                     kDitherNeeded_ | kImageFilterNeeded_;
-  static constexpr int kDrawMask_ = kPaintMask_ | kPaintStyleNeeded_ |
-                                    kMaskFilterNeeded_ | kPathEffectNeeded_;
-  static constexpr int kStrokeMask_ = kPaintMask_ | kStrokeStyleNeeded_ |
-                                      kMaskFilterNeeded_ | kPathEffectNeeded_;
-  static constexpr int kImageMask_ = kColorNeeded_ | kBlendNeeded_ |
-                                     kInvertColorsNeeded_ |
-                                     kColorFilterNeeded_ | kDitherNeeded_ |
-                                     kImageFilterNeeded_ | kMaskFilterNeeded_;
-  static constexpr int kImageRectMask_ = kImageMask_ | kAaNeeded_;
-  static constexpr int kSaveLayerMask_ =
-      kColorNeeded_ | kBlendNeeded_ | kInvertColorsNeeded_ |
-      kColorFilterNeeded_ | kImageFilterNeeded_;
-
-  bool current_aa_ = false;
-  bool current_dither_ = false;
-  SkColor current_color_ = 0xFF000000;
-  SkBlendMode current_blend_ = SkBlendMode::kSrcOver;
-  SkPaint::Style current_style_ = SkPaint::Style::kFill_Style;
-  SkScalar current_stroke_width_ = 0.0;
-  SkScalar current_miter_limit_ = 4.0;
-  SkPaint::Cap current_cap_ = SkPaint::Cap::kButt_Cap;
-  SkPaint::Join current_join_ = SkPaint::Join::kMiter_Join;
-  sk_sp<SkBlender> current_blender_;
-  sk_sp<SkShader> current_shader_;
-  sk_sp<SkColorFilter> current_color_filter_;
-  sk_sp<SkImageFilter> current_image_filter_;
-  sk_sp<SkPathEffect> current_path_effect_;
-  sk_sp<SkMaskFilter> current_mask_filter_;
 };
 
 }  // namespace flutter

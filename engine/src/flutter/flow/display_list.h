@@ -5,16 +5,21 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_H_
 
+#include <optional>
+
 #include "third_party/skia/include/core/SkBlender.h"
 #include "third_party/skia/include/core/SkBlurTypes.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPathEffect.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkVertices.h"
+
+#include "flutter/fml/logging.h"
 
 // The Flutter DisplayList mechanism encapsulates a persistent sequence of
 // rendering operations.
@@ -463,6 +468,278 @@ class Dispatcher {
                           SkScalar dpr) = 0;
 };
 
+/// The base class for the classes that maintain a list of
+/// attributes that might be important for a number of operations
+/// including which rendering attributes need to be set before
+/// calling a rendering method (all |drawSomething| calls),
+/// or for determining which exceptional conditions may need
+/// to be accounted for in bounds calculations.
+/// This class contains only protected definitions and helper methods
+/// for the public classes |DisplayListAttributeFlags| and
+/// |DisplayListSpecialGeometryFlags|.
+class DisplayListFlags {
+ protected:
+  // A drawing operation that is not geometric in nature (but which
+  // may still apply a MaskFilter - see |kUsesMaskFilter_| below).
+  static constexpr int kIsNonGeometric_ = 0;
+
+  // A geometric operation that is defined as a fill operation
+  // regardless of what the current paint Style is set to.
+  // This flag will automatically assume |kUsesMaskFilter_|.
+  static constexpr int kIsFilledGeometry_ = 1 << 0;
+
+  // A geometric operation that is defined as a stroke operation
+  // regardless of what the current paint Style is set to.
+  // This flag will automatically assume |kUsesMaskFilter_|.
+  static constexpr int kIsStrokedGeometry_ = 1 << 1;
+
+  // A geometric operation that may be a stroke or fill operation
+  // depending on the current state of the paint Style attribute.
+  // This flag will automatically assume |kUsesMaskFilter_|.
+  static constexpr int kIsDrawnGeometry_ = 1 << 2;
+
+  static constexpr int kIsAnyGeometryMask_ =  //
+      kIsFilledGeometry_ |                    //
+      kIsStrokedGeometry_ |                   //
+      kIsDrawnGeometry_;
+
+  // A primitive that floods the surface (or clip) with no
+  // natural bounds, such as |drawColor| or |drawPaint|.
+  static constexpr int kFloodsSurface_ = 1 << 3;
+
+  static constexpr int kMayHaveCaps_ = 1 << 4;
+  static constexpr int kMayHaveJoins_ = 1 << 5;
+  static constexpr int kButtCapIsSquare_ = 1 << 6;
+
+  // A geometric operation which has a path that might have
+  // end caps that are not rectilinear which means that square
+  // end caps might project further than half the stroke width
+  // from the geometry bounds.
+  // A rectilinear path such as |drawRect| will not have
+  // diagonal end caps. |drawLine| might have diagonal end
+  // caps depending on the angle of the line, and more likely
+  // |drawPath| will often have such end caps.
+  static constexpr int kMayHaveDiagonalCaps_ = 1 << 7;
+
+  // A geometric operation which has joined vertices that are
+  // not guaranteed to be smooth (angles of incoming and outgoing)
+  // segments at some joins may not have the same angle) or
+  // rectilinear (squares have right angles at the corners, but
+  // those corners will never extend past the bounding box of
+  // the geometry pre-transform).
+  // |drawRect|, |drawOval| and |drawRRect| all have well
+  // behaved joins, but |drawPath| might have joins that cause
+  // mitered extensions outside the pre-transformed bounding box.
+  static constexpr int kMayHaveAcuteJoins_ = 1 << 8;
+
+  static constexpr int kAnySpecialGeometryMask_ =           //
+      kMayHaveCaps_ | kMayHaveJoins_ | kButtCapIsSquare_ |  //
+      kMayHaveDiagonalCaps_ | kMayHaveAcuteJoins_;
+
+  // clang-format off
+  static constexpr int kUsesAntiAlias_       = 1 << 10;
+  static constexpr int kUsesDither_          = 1 << 11;
+  static constexpr int kUsesAlpha_           = 1 << 12;
+  static constexpr int kUsesColor_           = 1 << 13;
+  static constexpr int kUsesBlend_           = 1 << 14;
+  static constexpr int kUsesShader_          = 1 << 15;
+  static constexpr int kUsesColorFilter_     = 1 << 16;
+  static constexpr int kUsesPathEffect_      = 1 << 17;
+  static constexpr int kUsesMaskFilter_      = 1 << 18;
+  static constexpr int kUsesImageFilter_     = 1 << 19;
+
+  static constexpr int kIgnoresPaint_        = 1 << 30;
+  // clang-format on
+
+  static constexpr int kAnyAttributeMask_ =  //
+      kUsesAntiAlias_ | kUsesDither_ | kUsesAlpha_ | kUsesColor_ | kUsesBlend_ |
+      kUsesShader_ | kUsesColorFilter_ | kUsesPathEffect_ | kUsesMaskFilter_ |
+      kUsesImageFilter_;
+};
+
+class DisplayListFlagsBase : protected DisplayListFlags {
+ protected:
+  DisplayListFlagsBase(int flags) : flags_(flags) {}
+
+  const int flags_;
+
+  bool has_any(int qFlags) const { return (flags_ & qFlags) != 0; }
+  bool has_all(int qFlags) const { return (flags_ & qFlags) == qFlags; }
+  bool has_none(int qFlags) const { return (flags_ & qFlags) == 0; }
+};
+
+/// An attribute class for advertising specific properties of
+/// a geometric attribute that can affect the computation of
+/// the bounds of the primitive.
+class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
+ public:
+  /// The geometry may have segments that end without closing the path.
+  bool may_have_end_caps() const { return has_any(kMayHaveCaps_); }
+
+  /// The geometry may have segments connect non-continuously.
+  bool may_have_joins() const { return has_any(kMayHaveJoins_); }
+
+  /// Mainly for drawPoints(PointMode) where Butt caps are rendered as squares.
+  bool butt_cap_becomes_square() const { return has_any(kButtCapIsSquare_); }
+
+  /// The geometry may have segments that end on a diagonal
+  /// such that their end caps extend further than the default
+  /// |strokeWidth * 0.5| margin around the geometry.
+  bool may_have_diagonal_caps() const { return has_any(kMayHaveDiagonalCaps_); }
+
+  /// The geometry may have segments that meet at vertices at
+  /// an acute angle such that the miter joins will extend
+  /// further than the default |strokeWidth * 0.5| margin around
+  /// the geometry.
+  bool may_have_acute_joins() const { return has_any(kMayHaveAcuteJoins_); }
+
+ private:
+  DisplayListSpecialGeometryFlags(int flags) : DisplayListFlagsBase(flags) {
+    FML_DCHECK((flags & kAnySpecialGeometryMask_) == flags);
+  }
+
+  const DisplayListSpecialGeometryFlags with(int extra) const {
+    return extra == 0 ? *this : DisplayListSpecialGeometryFlags(flags_ | extra);
+  }
+
+  friend class DisplayListAttributeFlags;
+};
+
+class DisplayListAttributeFlags : DisplayListFlagsBase {
+ public:
+  const DisplayListSpecialGeometryFlags WithPathEffect(
+      sk_sp<SkPathEffect> effect) const {
+    if (is_geometric() && effect) {
+      SkPathEffect::DashInfo info;
+      if (effect->asADash(&info) == SkPathEffect::kDash_DashType) {
+        // A dash effect has a very simple impact. It cannot introduce any
+        // miter joins that weren't already present in the original path
+        // and it does not grow the bounds of the path, but it can add
+        // end caps to areas that might not have had them before so all
+        // we need to do is to indicate the potential for diagonal
+        // end caps and move on.
+        return special_flags_.with(kMayHaveCaps_ | kMayHaveDiagonalCaps_);
+      } else {
+        // An arbitrary path effect can introduce joins at an arbitrary
+        // angle and may change the geometry of the end caps
+        return special_flags_.with(kMayHaveCaps_ | kMayHaveDiagonalCaps_ |
+                                   kMayHaveJoins_ | kMayHaveAcuteJoins_);
+      }
+    }
+    return special_flags_;
+  }
+
+  bool ignores_paint() const { return has_any(kIgnoresPaint_); }
+
+  bool applies_anti_alias() const { return has_any(kUsesAntiAlias_); }
+  bool applies_dither() const { return has_any(kUsesDither_); }
+  bool applies_color() const { return has_any(kUsesColor_); }
+  bool applies_alpha() const { return has_any(kUsesAlpha_); }
+  bool applies_alpha_or_color() const {
+    return has_any(kUsesAlpha_ | kUsesColor_);
+  }
+
+  /// The primitive dynamically determines whether it is a stroke or fill
+  /// operation (or both) based on the setting of the |Style| attribute.
+  bool applies_style() const { return has_any(kIsDrawnGeometry_); }
+  /// The primitive can use any of the stroke attributes, such as
+  /// StrokeWidth, StrokeMiter, StrokeCap, or StrokeJoin. This
+  /// method will return if the primitive is defined as one that
+  /// strokes its geometry (such as |drawLine|) or if it is defined
+  /// as one that honors the Style attribute. If the Style attribute
+  /// is known then a more accurate answer can be returned from
+  /// the |is_stroked| method by supplying the actual setting of
+  /// the style.
+  // bool applies_stroke_attributes() const { return is_stroked(); }
+
+  bool applies_shader() const { return has_any(kUsesShader_); }
+  /// The primitive honors the current SkColorFilter, including
+  /// the related attribute InvertColors
+  bool applies_color_filter() const { return has_any(kUsesColorFilter_); }
+  /// The primitive honors the SkBlendMode or SkBlender
+  bool applies_blend() const { return has_any(kUsesBlend_); }
+  bool applies_path_effect() const { return has_any(kUsesPathEffect_); }
+  /// The primitive honors the SkMaskFilter whether set using the
+  /// filter object or using the convenience method |setMaskBlurFilter|
+  bool applies_mask_filter() const { return has_any(kUsesMaskFilter_); }
+  bool applies_image_filter() const { return has_any(kUsesImageFilter_); }
+
+  bool is_geometric() const { return has_any(kIsAnyGeometryMask_); }
+  bool always_stroked() const { return has_any(kIsStrokedGeometry_); }
+  bool is_stroked(SkPaint::Style style = SkPaint::Style::kStroke_Style) const {
+    return (
+        has_any(kIsStrokedGeometry_) ||
+        (style != SkPaint::Style::kFill_Style && has_any(kIsDrawnGeometry_)));
+  }
+
+  bool is_flood() const { return has_any(kFloodsSurface_); }
+
+ private:
+  DisplayListAttributeFlags(int flags)
+      : DisplayListFlagsBase(flags),
+        special_flags_(flags & kAnySpecialGeometryMask_) {
+    FML_DCHECK((flags & kIsAnyGeometryMask_) == kIsNonGeometric_ ||
+               (flags & kIsAnyGeometryMask_) == kIsFilledGeometry_ ||
+               (flags & kIsAnyGeometryMask_) == kIsStrokedGeometry_ ||
+               (flags & kIsAnyGeometryMask_) == kIsDrawnGeometry_);
+    FML_DCHECK(((flags & kAnyAttributeMask_) == 0) !=
+               ((flags & kIgnoresPaint_) == 0));
+    FML_DCHECK((flags & kIsAnyGeometryMask_) != 0 ||
+               (flags & kAnySpecialGeometryMask_) == 0);
+  }
+
+  const DisplayListAttributeFlags with(int extra) const {
+    return extra == 0 ? *this : DisplayListAttributeFlags(flags_ | extra);
+  }
+
+  const DisplayListAttributeFlags without(int remove) const {
+    FML_DCHECK(has_all(remove));
+    return (flags_ & ~remove);
+  }
+
+  const DisplayListSpecialGeometryFlags special_flags_;
+
+  friend class DisplayListOpFlags;
+};
+
+class DisplayListOpFlags : DisplayListFlags {
+ public:
+  static const DisplayListAttributeFlags kSaveLayerFlags;
+  static const DisplayListAttributeFlags kSaveLayerWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawColorFlags;
+  static const DisplayListAttributeFlags kDrawPaintFlags;
+  static const DisplayListAttributeFlags kDrawLineFlags;
+  // Special case flags for horizonal and vertical lines
+  static const DisplayListAttributeFlags kDrawHVLineFlags;
+  static const DisplayListAttributeFlags kDrawRectFlags;
+  static const DisplayListAttributeFlags kDrawOvalFlags;
+  static const DisplayListAttributeFlags kDrawCircleFlags;
+  static const DisplayListAttributeFlags kDrawRRectFlags;
+  static const DisplayListAttributeFlags kDrawDRRectFlags;
+  static const DisplayListAttributeFlags kDrawPathFlags;
+  static const DisplayListAttributeFlags kDrawArcNoCenterFlags;
+  static const DisplayListAttributeFlags kDrawArcWithCenterFlags;
+  static const DisplayListAttributeFlags kDrawPointsAsPointsFlags;
+  static const DisplayListAttributeFlags kDrawPointsAsLinesFlags;
+  static const DisplayListAttributeFlags kDrawPointsAsPolygonFlags;
+  static const DisplayListAttributeFlags kDrawVerticesFlags;
+  static const DisplayListAttributeFlags kDrawImageFlags;
+  static const DisplayListAttributeFlags kDrawImageWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawImageRectFlags;
+  static const DisplayListAttributeFlags kDrawImageRectWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawImageNineFlags;
+  static const DisplayListAttributeFlags kDrawImageNineWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawImageLatticeFlags;
+  static const DisplayListAttributeFlags kDrawImageLatticeWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawAtlasFlags;
+  static const DisplayListAttributeFlags kDrawAtlasWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawPictureFlags;
+  static const DisplayListAttributeFlags kDrawPictureWithPaintFlags;
+  static const DisplayListAttributeFlags kDrawDisplayListFlags;
+  static const DisplayListAttributeFlags kDrawTextBlobFlags;
+  static const DisplayListAttributeFlags kDrawShadowFlags;
+};
+
 // The primary class used to build a display list. The list of methods
 // here matches the list of methods invoked on a |Dispatcher|.
 // If there is some code that already renders to an SkCanvas object,
@@ -473,32 +750,136 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
   ~DisplayListBuilder();
 
-  void setAntiAlias(bool aa) override;
-  void setDither(bool dither) override;
-  void setInvertColors(bool invert) override;
-  void setStrokeCap(SkPaint::Cap cap) override;
-  void setStrokeJoin(SkPaint::Join join) override;
-  void setStyle(SkPaint::Style style) override;
-  void setStrokeWidth(SkScalar width) override;
-  void setStrokeMiter(SkScalar limit) override;
-  void setColor(SkColor color) override;
-  void setBlendMode(SkBlendMode mode) override;
-  void setBlender(sk_sp<SkBlender> blender) override;
-  void setShader(sk_sp<SkShader> shader) override;
-  void setImageFilter(sk_sp<SkImageFilter> filter) override;
-  void setColorFilter(sk_sp<SkColorFilter> filter) override;
-  void setPathEffect(sk_sp<SkPathEffect> effect) override;
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
+  void setAntiAlias(bool aa) override {
+    if (current_anti_alias_ != aa) {
+      onSetAntiAlias(aa);
+    }
+  }
+  void setDither(bool dither) override {
+    if (current_dither_ != dither) {
+      onSetDither(dither);
+    }
+  }
+  void setInvertColors(bool invert) override {
+    if (current_invert_colors_ != invert) {
+      onSetInvertColors(invert);
+    }
+  }
+  void setStrokeCap(SkPaint::Cap cap) override {
+    if (current_stroke_cap_ != cap) {
+      onSetStrokeCap(cap);
+    }
+  }
+  void setStrokeJoin(SkPaint::Join join) override {
+    if (current_stroke_join_ != join) {
+      onSetStrokeJoin(join);
+    }
+  }
+  void setStyle(SkPaint::Style style) override {
+    if (current_style_ != style) {
+      onSetStyle(style);
+    }
+  }
+  void setStrokeWidth(SkScalar width) override {
+    if (current_stroke_width_ != width) {
+      onSetStrokeWidth(width);
+    }
+  }
+  void setStrokeMiter(SkScalar limit) override {
+    if (current_stroke_miter_ != limit) {
+      onSetStrokeMiter(limit);
+    }
+  }
+  void setColor(SkColor color) override {
+    if (current_color_ != color) {
+      onSetColor(color);
+    }
+  }
+  void setBlendMode(SkBlendMode mode) override {
+    if (current_blender_ || current_blend_mode_ != mode) {
+      onSetBlendMode(mode);
+    }
+  }
+  void setBlender(sk_sp<SkBlender> blender) override {
+    if (!blender) {
+      setBlendMode(SkBlendMode::kSrcOver);
+    } else if (current_blender_ != blender) {
+      onSetBlender(std::move(blender));
+    }
+  }
+  void setShader(sk_sp<SkShader> shader) override {
+    if (current_shader_ != shader) {
+      onSetShader(std::move(shader));
+    }
+  }
+  void setImageFilter(sk_sp<SkImageFilter> filter) override {
+    if (current_image_filter_ != filter) {
+      onSetImageFilter(std::move(filter));
+    }
+  }
+  void setColorFilter(sk_sp<SkColorFilter> filter) override {
+    if (current_color_filter_ != filter) {
+      onSetColorFilter(std::move(filter));
+    }
+  }
+  void setPathEffect(sk_sp<SkPathEffect> effect) override {
+    if (current_path_effect_ != effect) {
+      onSetPathEffect(std::move(effect));
+    }
+  }
+  void setMaskFilter(sk_sp<SkMaskFilter> filter) override {
+    if (mask_sigma_valid(current_mask_sigma_) ||
+        current_mask_filter_ != filter) {
+      onSetMaskFilter(std::move(filter));
+    }
+  }
+  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override {
+    if (mask_sigma_valid(sigma) &&
+        (current_mask_style_ != style || current_mask_sigma_ != sigma)) {
+      onSetMaskBlurFilter(style, sigma);
+    }
+  }
+
+  bool isAntiAlias() const { return current_anti_alias_; }
+  bool isDither() const { return current_dither_; }
+  SkPaint::Style getStyle() const { return current_style_; }
+  SkColor getColor() const { return current_color_; }
+  SkScalar getStrokeWidth() const { return current_stroke_width_; }
+  SkScalar getStrokeMiter() const { return current_stroke_miter_; }
+  SkPaint::Cap getStrokeCap() const { return current_stroke_cap_; }
+  SkPaint::Join getStrokeJoin() const { return current_stroke_join_; }
+  sk_sp<SkShader> getShader() const { return current_shader_; }
+  sk_sp<SkColorFilter> getColorFilter() const { return current_color_filter_; }
+  bool isInvertColors() const { return current_invert_colors_; }
+  std::optional<SkBlendMode> getBlendMode() const {
+    if (current_blender_) {
+      // The setters will turn "Mode" style blenders into "blend_mode"s
+      return {};
+    }
+    return current_blend_mode_;
+  }
+  sk_sp<SkBlender> getBlender() const {
+    return current_blender_ ? current_blender_
+                            : SkBlender::Mode(current_blend_mode_);
+  }
+  sk_sp<SkPathEffect> getPathEffect() const { return current_path_effect_; }
+  sk_sp<SkMaskFilter> getMaskFilter() const { return current_mask_filter_; }
+  // No utility getter for the utility setter:
+  // void setMaskBlurFilter (SkBlurStyle style, SkScalar sigma)
+  sk_sp<SkImageFilter> getImageFilter() const { return current_image_filter_; }
 
   void save() override;
-  void saveLayer(const SkRect* bounds, bool restoreWithPaint) override;
+  void saveLayer(const SkRect* bounds, bool restore_with_paint) override;
   void restore() override;
+  int getSaveCount() { return save_level_ + 1; }
 
   void translate(SkScalar tx, SkScalar ty) override;
   void scale(SkScalar sx, SkScalar sy) override;
   void rotate(SkScalar degrees) override;
   void skew(SkScalar sx, SkScalar sy) override;
+
+  void setAttributesFromPaint(const SkPaint& paint,
+                              const DisplayListAttributeFlags flags);
 
   // clang-format off
 
@@ -514,9 +895,9 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
 
   // clang-format on
 
-  void clipRect(const SkRect& rect, SkClipOp clip_op, bool isAA) override;
-  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool isAA) override;
-  void clipPath(const SkPath& path, SkClipOp clip_op, bool isAA) override;
+  void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
+  void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
+  void clipPath(const SkPath& path, SkClipOp clip_op, bool is_aa) override;
 
   void drawPaint() override;
   void drawColor(SkColor color, SkBlendMode mode) override;
@@ -599,6 +980,51 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
 
   template <typename T, typename... Args>
   void* Push(size_t extra, int op_inc, Args&&... args);
+
+  // kInvalidSigma is used to indicate that no MaskBlur is currently set.
+  static constexpr SkScalar kInvalidSigma = 0.0;
+  bool mask_sigma_valid(SkScalar sigma) {
+    return SkScalarIsFinite(sigma) && sigma > 0.0;
+  }
+
+  void onSetAntiAlias(bool aa);
+  void onSetDither(bool dither);
+  void onSetInvertColors(bool invert);
+  void onSetStrokeCap(SkPaint::Cap cap);
+  void onSetStrokeJoin(SkPaint::Join join);
+  void onSetStyle(SkPaint::Style style);
+  void onSetStrokeWidth(SkScalar width);
+  void onSetStrokeMiter(SkScalar limit);
+  void onSetColor(SkColor color);
+  void onSetBlendMode(SkBlendMode mode);
+  void onSetBlender(sk_sp<SkBlender> blender);
+  void onSetShader(sk_sp<SkShader> shader);
+  void onSetImageFilter(sk_sp<SkImageFilter> filter);
+  void onSetColorFilter(sk_sp<SkColorFilter> filter);
+  void onSetPathEffect(sk_sp<SkPathEffect> effect);
+  void onSetMaskFilter(sk_sp<SkMaskFilter> filter);
+  void onSetMaskBlurFilter(SkBlurStyle style, SkScalar sigma);
+
+  // These values should match the defaults of the Dart Paint object.
+  bool current_anti_alias_ = false;
+  bool current_dither_ = false;
+  bool current_invert_colors_ = false;
+  SkColor current_color_ = 0xFF000000;
+  SkPaint::Style current_style_ = SkPaint::Style::kFill_Style;
+  SkScalar current_stroke_width_ = 0.0;
+  SkScalar current_stroke_miter_ = 4.0;
+  SkPaint::Cap current_stroke_cap_ = SkPaint::Cap::kButt_Cap;
+  SkPaint::Join current_stroke_join_ = SkPaint::Join::kMiter_Join;
+  // If |current_blender_| is set then |current_blend_mode_| should be ignored
+  SkBlendMode current_blend_mode_ = SkBlendMode::kSrcOver;
+  sk_sp<SkBlender> current_blender_;
+  sk_sp<SkShader> current_shader_;
+  sk_sp<SkColorFilter> current_color_filter_;
+  sk_sp<SkImageFilter> current_image_filter_;
+  sk_sp<SkPathEffect> current_path_effect_;
+  sk_sp<SkMaskFilter> current_mask_filter_;
+  int current_mask_style_;
+  SkScalar current_mask_sigma_ = kInvalidSigma;
 };
 
 }  // namespace flutter

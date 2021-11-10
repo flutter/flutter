@@ -7,10 +7,7 @@
 #include "flutter/flow/display_list.h"
 #include "flutter/flow/display_list_canvas.h"
 #include "flutter/flow/display_list_utils.h"
-#include "flutter/fml/logging.h"
 
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -1085,65 +1082,84 @@ DisplayListBuilder::~DisplayListBuilder() {
   }
 }
 
-void DisplayListBuilder::setAntiAlias(bool aa) {
-  Push<SetAntiAliasOp>(0, 0, aa);
+void DisplayListBuilder::onSetAntiAlias(bool aa) {
+  Push<SetAntiAliasOp>(0, 0, current_anti_alias_ = aa);
 }
-void DisplayListBuilder::setDither(bool dither) {
-  Push<SetDitherOp>(0, 0, dither);
+void DisplayListBuilder::onSetDither(bool dither) {
+  Push<SetDitherOp>(0, 0, current_dither_ = dither);
 }
-void DisplayListBuilder::setInvertColors(bool invert) {
-  Push<SetInvertColorsOp>(0, 0, invert);
+void DisplayListBuilder::onSetInvertColors(bool invert) {
+  Push<SetInvertColorsOp>(0, 0, current_invert_colors_ = invert);
 }
-void DisplayListBuilder::setStrokeCap(SkPaint::Cap cap) {
-  Push<SetStrokeCapOp>(0, 0, cap);
+void DisplayListBuilder::onSetStrokeCap(SkPaint::Cap cap) {
+  Push<SetStrokeCapOp>(0, 0, current_stroke_cap_ = cap);
 }
-void DisplayListBuilder::setStrokeJoin(SkPaint::Join join) {
-  Push<SetStrokeJoinOp>(0, 0, join);
+void DisplayListBuilder::onSetStrokeJoin(SkPaint::Join join) {
+  Push<SetStrokeJoinOp>(0, 0, current_stroke_join_ = join);
 }
-void DisplayListBuilder::setStyle(SkPaint::Style style) {
-  Push<SetStyleOp>(0, 0, style);
+void DisplayListBuilder::onSetStyle(SkPaint::Style style) {
+  Push<SetStyleOp>(0, 0, current_style_ = style);
 }
-void DisplayListBuilder::setStrokeWidth(SkScalar width) {
-  Push<SetStrokeWidthOp>(0, 0, width);
+void DisplayListBuilder::onSetStrokeWidth(SkScalar width) {
+  Push<SetStrokeWidthOp>(0, 0, current_stroke_width_ = width);
 }
-void DisplayListBuilder::setStrokeMiter(SkScalar limit) {
-  Push<SetStrokeMiterOp>(0, 0, limit);
+void DisplayListBuilder::onSetStrokeMiter(SkScalar limit) {
+  Push<SetStrokeMiterOp>(0, 0, current_stroke_miter_ = limit);
 }
-void DisplayListBuilder::setColor(SkColor color) {
-  Push<SetColorOp>(0, 0, color);
+void DisplayListBuilder::onSetColor(SkColor color) {
+  Push<SetColorOp>(0, 0, current_color_ = color);
 }
-void DisplayListBuilder::setBlendMode(SkBlendMode mode) {
-  Push<SetBlendModeOp>(0, 0, mode);
+void DisplayListBuilder::onSetBlendMode(SkBlendMode mode) {
+  current_blender_ = nullptr;
+  Push<SetBlendModeOp>(0, 0, current_blend_mode_ = mode);
 }
-void DisplayListBuilder::setBlender(sk_sp<SkBlender> blender) {
-  blender  //
-      ? Push<SetBlenderOp>(0, 0, std::move(blender))
-      : Push<ClearBlenderOp>(0, 0);
+void DisplayListBuilder::onSetBlender(sk_sp<SkBlender> blender) {
+  // setBlender(nullptr) should be redirected to setBlendMode(SrcOver)
+  // by the set method, if not then the following is inefficient but works
+  FML_DCHECK(blender);
+  SkPaint p;
+  p.setBlender(blender);
+  if (p.asBlendMode()) {
+    setBlendMode(p.asBlendMode().value());
+  } else {
+    // |current_blender_| supersedes any value of |current_blend_mode_|
+    (current_blender_ = blender)  //
+        ? Push<SetBlenderOp>(0, 0, std::move(blender))
+        : Push<ClearBlenderOp>(0, 0);
+  }
 }
-void DisplayListBuilder::setShader(sk_sp<SkShader> shader) {
-  shader  //
+void DisplayListBuilder::onSetShader(sk_sp<SkShader> shader) {
+  (current_shader_ = shader)  //
       ? Push<SetShaderOp>(0, 0, std::move(shader))
       : Push<ClearShaderOp>(0, 0);
 }
-void DisplayListBuilder::setImageFilter(sk_sp<SkImageFilter> filter) {
-  filter  //
+void DisplayListBuilder::onSetImageFilter(sk_sp<SkImageFilter> filter) {
+  (current_image_filter_ = filter)  //
       ? Push<SetImageFilterOp>(0, 0, std::move(filter))
       : Push<ClearImageFilterOp>(0, 0);
 }
-void DisplayListBuilder::setColorFilter(sk_sp<SkColorFilter> filter) {
-  filter  //
+void DisplayListBuilder::onSetColorFilter(sk_sp<SkColorFilter> filter) {
+  (current_color_filter_ = filter)  //
       ? Push<SetColorFilterOp>(0, 0, std::move(filter))
       : Push<ClearColorFilterOp>(0, 0);
 }
-void DisplayListBuilder::setPathEffect(sk_sp<SkPathEffect> effect) {
-  effect  //
+void DisplayListBuilder::onSetPathEffect(sk_sp<SkPathEffect> effect) {
+  (current_path_effect_ = effect)  //
       ? Push<SetPathEffectOp>(0, 0, std::move(effect))
       : Push<ClearPathEffectOp>(0, 0);
 }
-void DisplayListBuilder::setMaskFilter(sk_sp<SkMaskFilter> filter) {
+void DisplayListBuilder::onSetMaskFilter(sk_sp<SkMaskFilter> filter) {
+  current_mask_sigma_ = kInvalidSigma;
+  current_mask_filter_ = filter;
   Push<SetMaskFilterOp>(0, 0, std::move(filter));
 }
-void DisplayListBuilder::setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) {
+void DisplayListBuilder::onSetMaskBlurFilter(SkBlurStyle style,
+                                             SkScalar sigma) {
+  // Valid sigma is checked by setMaskBlurFilter
+  FML_DCHECK(mask_sigma_valid(sigma));
+  current_mask_filter_ = nullptr;
+  current_mask_style_ = style;
+  current_mask_sigma_ = sigma;
   switch (style) {
     case kNormal_SkBlurStyle:
       Push<SetMaskBlurFilterNormalOp>(0, 0, sigma);
@@ -1160,6 +1176,56 @@ void DisplayListBuilder::setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) {
   }
 }
 
+void DisplayListBuilder::setAttributesFromPaint(
+    const SkPaint& paint,
+    const DisplayListAttributeFlags flags) {
+  if (flags.applies_anti_alias()) {
+    setAntiAlias(paint.isAntiAlias());
+  }
+  if (flags.applies_dither()) {
+    setDither(paint.isDither());
+  }
+  if (flags.applies_alpha_or_color()) {
+    setColor(paint.getColor());
+  }
+  if (flags.applies_blend()) {
+    skstd::optional<SkBlendMode> mode_optional = paint.asBlendMode();
+    if (mode_optional) {
+      setBlendMode(mode_optional.value());
+    } else {
+      setBlender(sk_ref_sp(paint.getBlender()));
+    }
+  }
+  if (flags.applies_style()) {
+    setStyle(paint.getStyle());
+  }
+  if (flags.is_stroked(paint.getStyle())) {
+    setStrokeWidth(paint.getStrokeWidth());
+    setStrokeMiter(paint.getStrokeMiter());
+    setStrokeCap(paint.getStrokeCap());
+    setStrokeJoin(paint.getStrokeJoin());
+  }
+  if (flags.applies_shader()) {
+    setShader(sk_ref_sp(paint.getShader()));
+  }
+  if (flags.applies_color_filter()) {
+    // invert colors is a Flutter::Paint thing, not an SkPaint thing
+    // we must clear it because it is a second potential color filter
+    // that is composed with the paint's color filter.
+    setInvertColors(false);
+    setColorFilter(sk_ref_sp(paint.getColorFilter()));
+  }
+  if (flags.applies_image_filter()) {
+    setImageFilter(sk_ref_sp(paint.getImageFilter()));
+  }
+  if (flags.applies_path_effect()) {
+    setPathEffect(sk_ref_sp(paint.getPathEffect()));
+  }
+  if (flags.applies_mask_filter()) {
+    setMaskFilter(sk_ref_sp(paint.getMaskFilter()));
+  }
+}
+
 void DisplayListBuilder::save() {
   save_level_++;
   Push<SaveOp>(0, 1);
@@ -1170,24 +1236,36 @@ void DisplayListBuilder::restore() {
     save_level_--;
   }
 }
-void DisplayListBuilder::saveLayer(const SkRect* bounds, bool with_paint) {
+void DisplayListBuilder::saveLayer(const SkRect* bounds,
+                                   bool restore_with_paint) {
   save_level_++;
   bounds  //
-      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, with_paint)
-      : Push<SaveLayerOp>(0, 1, with_paint);
+      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, restore_with_paint)
+      : Push<SaveLayerOp>(0, 1, restore_with_paint);
 }
 
 void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
-  Push<TranslateOp>(0, 1, tx, ty);
+  if (SkScalarIsFinite(tx) && SkScalarIsFinite(ty) &&
+      (tx != 0.0 || ty != 0.0)) {
+    Push<TranslateOp>(0, 1, tx, ty);
+  }
 }
 void DisplayListBuilder::scale(SkScalar sx, SkScalar sy) {
-  Push<ScaleOp>(0, 1, sx, sy);
+  if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
+      (sx != 1.0 || sy != 1.0)) {
+    Push<ScaleOp>(0, 1, sx, sy);
+  }
 }
 void DisplayListBuilder::rotate(SkScalar degrees) {
-  Push<RotateOp>(0, 1, degrees);
+  if (SkScalarMod(degrees, 360.0) != 0.0) {
+    Push<RotateOp>(0, 1, degrees);
+  }
 }
 void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
-  Push<SkewOp>(0, 1, sx, sy);
+  if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
+      (sx != 0.0 || sy != 0.0)) {
+    Push<SkewOp>(0, 1, sx, sy);
+  }
 }
 
 // clang-format off
@@ -1196,7 +1274,10 @@ void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
 void DisplayListBuilder::transform2DAffine(
     SkScalar mxx, SkScalar mxy, SkScalar mxt,
     SkScalar myx, SkScalar myy, SkScalar myt) {
-  if (!(mxx == 1 && mxy == 0 && mxt == 0 &&
+  if (SkScalarsAreFinite(mxx, myx) &&
+      SkScalarsAreFinite(mxy, myy) &&
+      SkScalarsAreFinite(mxt, myt) &&
+      !(mxx == 1 && mxy == 0 && mxt == 0 &&
         myx == 0 && myy == 1 && myt == 0)) {
     Push<Transform2DAffineOp>(0, 1,
                               mxx, mxy, mxt,
@@ -1215,7 +1296,10 @@ void DisplayListBuilder::transformFullPerspective(
       mwx == 0 && mwy == 0 && mwz == 0 && mwt == 1) {
     transform2DAffine(mxx, mxy, mxt,
                       myx, myy, myt);
-  } else {
+  } else if (SkScalarsAreFinite(mxx, mxy) && SkScalarsAreFinite(mxz, mxt) &&
+             SkScalarsAreFinite(myx, myy) && SkScalarsAreFinite(myz, myt) &&
+             SkScalarsAreFinite(mzx, mzy) && SkScalarsAreFinite(mzz, mzt) &&
+             SkScalarsAreFinite(mwx, mwy) && SkScalarsAreFinite(mwz, mwt)) {
     Push<TransformFullPerspectiveOp>(0, 1,
                                      mxx, mxy, mxz, mxt,
                                      myx, myy, myz, myt,
@@ -1368,7 +1452,7 @@ void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
                                           const SkCanvas::Lattice& lattice,
                                           const SkRect& dst,
                                           SkFilterMode filter,
-                                          bool with_paint) {
+                                          bool render_with_attributes) {
   int xDivCount = lattice.fXCount;
   int yDivCount = lattice.fYCount;
   FML_DCHECK((lattice.fRectTypes == nullptr) || (lattice.fColors != nullptr));
@@ -1379,9 +1463,9 @@ void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
       (xDivCount + yDivCount) * sizeof(int) +
       cellCount * (sizeof(SkColor) + sizeof(SkCanvas::Lattice::RectType));
   SkIRect src = lattice.fBounds ? *lattice.fBounds : image->bounds();
-  void* pod = this->Push<DrawImageLatticeOp>(bytes, 1, std::move(image),
-                                             xDivCount, yDivCount, cellCount,
-                                             src, dst, filter, with_paint);
+  void* pod = this->Push<DrawImageLatticeOp>(
+      bytes, 1, std::move(image), xDivCount, yDivCount, cellCount, src, dst,
+      filter, render_with_attributes);
   CopyV(pod, lattice.fXDivs, xDivCount, lattice.fYDivs, yDivCount,
         lattice.fColors, cellCount, lattice.fRectTypes, cellCount);
 }
@@ -1462,5 +1546,166 @@ void DisplayListBuilder::drawShadow(const SkPath& path,
       ? Push<DrawShadowTransparentOccluderOp>(0, 1, path, color, elevation, dpr)
       : Push<DrawShadowOp>(0, 1, path, color, elevation, dpr);
 }
+
+// clang-format off
+// Flags common to all primitives that apply colors
+#define PAINT_FLAGS (kUsesDither_ |      \
+                     kUsesColor_ |       \
+                     kUsesAlpha_ |       \
+                     kUsesBlend_ |       \
+                     kUsesShader_ |      \
+                     kUsesColorFilter_ | \
+                     kUsesImageFilter_)
+
+// Flags common to all primitives that stroke or fill
+#define STROKE_OR_FILL_FLAGS (kIsDrawnGeometry_ | \
+                              kUsesAntiAlias_ |   \
+                              kUsesMaskFilter_ |  \
+                              kUsesPathEffect_)
+
+// Flags common to primitives that stroke geometry
+#define STROKE_FLAGS (kIsStrokedGeometry_ | \
+                      kUsesAntiAlias_ |     \
+                      kUsesMaskFilter_ |    \
+                      kUsesPathEffect_)
+
+// Flags common to primitives that render an image with paint attributes
+#define IMAGE_FLAGS_BASE (kIsNonGeometric_ |  \
+                          kUsesAlpha_ |       \
+                          kUsesDither_ |      \
+                          kUsesBlend_ |       \
+                          kUsesColorFilter_ | \
+                          kUsesImageFilter_)
+// clang-format on
+
+const DisplayListAttributeFlags DisplayListOpFlags::kSaveLayerFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kSaveLayerWithPaintFlags =
+    DisplayListAttributeFlags(kIsNonGeometric_ |   //
+                              kUsesAlpha_ |        //
+                              kUsesBlend_ |        //
+                              kUsesColorFilter_ |  //
+                              kUsesImageFilter_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawColorFlags =
+    DisplayListAttributeFlags(kFloodsSurface_ | kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPaintFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | kFloodsSurface_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawHVLineFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_FLAGS | kMayHaveCaps_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawLineFlags =
+    kDrawHVLineFlags.with(kMayHaveDiagonalCaps_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawRectFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS |
+                              kMayHaveJoins_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawOvalFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawCircleFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawRRectFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawDRRectFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPathFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS |
+                              kMayHaveCaps_ | kMayHaveDiagonalCaps_ |
+                              kMayHaveJoins_ | kMayHaveAcuteJoins_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawArcNoCenterFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS |
+                              kMayHaveCaps_ | kMayHaveDiagonalCaps_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawArcWithCenterFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS |
+                              kMayHaveJoins_ | kMayHaveAcuteJoins_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPointsAsPointsFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_FLAGS |  //
+                              kMayHaveCaps_ | kButtCapIsSquare_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPointsAsLinesFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_FLAGS |  //
+                              kMayHaveCaps_ | kMayHaveDiagonalCaps_);
+
+// Polygon mode just draws (count-1) separate lines, no joins
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPointsAsPolygonFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_FLAGS |  //
+                              kMayHaveCaps_ | kMayHaveDiagonalCaps_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawVerticesFlags =
+    DisplayListAttributeFlags(kIsNonGeometric_ |   //
+                              kUsesDither_ |       //
+                              kUsesAlpha_ |        //
+                              kUsesShader_ |       //
+                              kUsesBlend_ |        //
+                              kUsesColorFilter_ |  //
+                              kUsesImageFilter_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawImageFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawImageWithPaintFlags =
+    DisplayListAttributeFlags(IMAGE_FLAGS_BASE |  //
+                              kUsesAntiAlias_ | kUsesMaskFilter_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawImageRectFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags
+    DisplayListOpFlags::kDrawImageRectWithPaintFlags =
+        DisplayListAttributeFlags(IMAGE_FLAGS_BASE |  //
+                                  kUsesAntiAlias_ | kUsesMaskFilter_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawImageNineFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags
+    DisplayListOpFlags::kDrawImageNineWithPaintFlags =
+        DisplayListAttributeFlags(IMAGE_FLAGS_BASE);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawImageLatticeFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags
+    DisplayListOpFlags::kDrawImageLatticeWithPaintFlags =
+        DisplayListAttributeFlags(IMAGE_FLAGS_BASE);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawAtlasFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawAtlasWithPaintFlags =
+    DisplayListAttributeFlags(IMAGE_FLAGS_BASE);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPictureFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawPictureWithPaintFlags =
+    kSaveLayerWithPaintFlags;
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawDisplayListFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawTextBlobFlags =
+    DisplayListAttributeFlags(PAINT_FLAGS | STROKE_OR_FILL_FLAGS |
+                              kMayHaveJoins_)
+        .without(kUsesAntiAlias_);
+
+const DisplayListAttributeFlags DisplayListOpFlags::kDrawShadowFlags =
+    DisplayListAttributeFlags(kIgnoresPaint_);
+
+#undef PAINT_FLAGS
+#undef STROKE_OR_FILL_FLAGS
+#undef STROKE_FLAGS
+#undef IMAGE_FLAGS_BASE
 
 }  // namespace flutter
