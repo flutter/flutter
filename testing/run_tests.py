@@ -42,7 +42,7 @@ def RunCmd(cmd, forbidden_output=[], expect_failure=False, env=None, **kwargs):
   start_time = time.time()
   stdout_pipe = sys.stdout if not forbidden_output else subprocess.PIPE
   stderr_pipe = sys.stderr if not forbidden_output else subprocess.PIPE
-  process = subprocess.Popen(cmd, stdout=stdout_pipe, stderr=stderr_pipe, env=env, **kwargs)
+  process = subprocess.Popen(cmd, stdout=stdout_pipe, stderr=stderr_pipe, env=env, universal_newlines=True, **kwargs)
   stdout, stderr = process.communicate()
   end_time = time.time()
 
