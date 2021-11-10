@@ -19,6 +19,7 @@ void DisplayListCanvasDispatcher::restore() {
 }
 void DisplayListCanvasDispatcher::saveLayer(const SkRect* bounds,
                                             bool restore_with_paint) {
+  TRACE_EVENT0("flutter", "Canvas::saveLayer");
   canvas_->saveLayer(bounds, restore_with_paint ? &paint() : nullptr);
 }
 
@@ -76,7 +77,14 @@ void DisplayListCanvasDispatcher::clipPath(const SkPath& path,
 }
 
 void DisplayListCanvasDispatcher::drawPaint() {
-  canvas_->drawPaint(paint());
+  const SkPaint& sk_paint = paint();
+  SkImageFilter* filter = sk_paint.getImageFilter();
+  if (filter && !filter->asColorFilter(nullptr)) {
+    // drawPaint does an implicit saveLayer if an SkImageFilter is
+    // present that cannot be replaced by an SkColorFilter.
+    TRACE_EVENT0("flutter", "Canvas::saveLayer");
+  }
+  canvas_->drawPaint(sk_paint);
 }
 void DisplayListCanvasDispatcher::drawColor(SkColor color, SkBlendMode mode) {
   canvas_->drawColor(color, mode);
@@ -170,8 +178,13 @@ void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
 void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,
                                               const SkMatrix* matrix,
                                               bool render_with_attributes) {
-  canvas_->drawPicture(picture, matrix,
-                       render_with_attributes ? &paint() : nullptr);
+  if (render_with_attributes) {
+    // drawPicture does an implicit saveLayer if an SkPaint is supplied.
+    TRACE_EVENT0("flutter", "Canvas::saveLayer");
+    canvas_->drawPicture(picture, matrix, &paint());
+  } else {
+    canvas_->drawPicture(picture, matrix, nullptr);
+  }
 }
 void DisplayListCanvasDispatcher::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
