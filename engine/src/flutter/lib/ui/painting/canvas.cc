@@ -105,7 +105,7 @@ void Canvas::saveLayerWithoutBounds(const Paint& paint,
   if (!canvas_) {
     return;
   }
-  TRACE_EVENT0("flutter", "Canvas::saveLayer");
+  TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
   canvas_->saveLayer(nullptr, paint.paint());
 }
 
@@ -118,7 +118,7 @@ void Canvas::saveLayer(double left,
   if (!canvas_) {
     return;
   }
-  TRACE_EVENT0("flutter", "Canvas::saveLayer");
+  TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
   SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
   canvas_->saveLayer(&bounds, paint.paint());
 }
@@ -229,6 +229,13 @@ void Canvas::drawLine(double x1,
 void Canvas::drawPaint(const Paint& paint, const PaintData& paint_data) {
   if (!canvas_) {
     return;
+  }
+  const SkPaint* sk_paint = paint.paint();
+  SkImageFilter* filter = sk_paint->getImageFilter();
+  if (filter && !filter->asColorFilter(nullptr)) {
+    // drawPaint does an implicit saveLayer if an SkImageFilter is
+    // present that cannot be replaced by an SkColorFilter.
+    TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
   }
   canvas_->drawPaint(*paint.paint());
 }
