@@ -22,7 +22,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/third_party/txt/tests/txt_test_utils.h"
 #include "minikin/LayoutUtils.h"
-#include "third_party/benchmark/include/benchmark/benchmark_api.h"
+#include "third_party/benchmark/include/benchmark/benchmark.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
