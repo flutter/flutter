@@ -1014,51 +1014,6 @@ flutter:
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
     });
 
-    testWithoutContext('correctly requires @@locale property in arb file to match the filename locale suffix', () {
-      const String arbFileWithEnLocale = '''
-{
-  "@@locale": "en",
-  "title": "Stocks",
-  "@title": {
-    "description": "Title for the Stocks application"
-  }
-}''';
-
-      const String arbFileWithZhLocale = '''
-{
-  "@@locale": "zh",
-  "title": "标题",
-  "@title": {
-    "description": "Title for the Stocks application"
-  }
-}''';
-
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile('app_es.arb')
-        .writeAsStringSync(arbFileWithEnLocale);
-      l10nDirectory.childFile('app_am.arb')
-        .writeAsStringSync(arbFileWithZhLocale);
-
-      expect(
-        () {
-          LocalizationsGenerator(
-            fileSystem: fs,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_es.arb',
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          ).loadResources();
-        },
-        throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('The locale specified in @@locale and the arb filename do not match.'),
-        )),
-      );
-    });
-
     testWithoutContext("throws when arb file's locale could not be determined", () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
@@ -1117,30 +1072,6 @@ flutter:
       );
     });
 
-    testWithoutContext('throws when the base locale does not exist', () {
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile('app_en_US.arb')
-        .writeAsStringSync(singleMessageArbFileString);
-
-      expect(
-        () {
-          LocalizationsGenerator(
-            fileSystem: fs,
-            inputPathString: defaultL10nPathString,
-            outputPathString: defaultL10nPathString,
-            templateArbFileName: 'app_en_US.arb',
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          ).loadResources();
-        },
-        throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Arb file for a fallback, en, does not exist'),
-        )),
-      );
-    });
   });
 
   group('writeOutputFiles', () {
@@ -1262,7 +1193,7 @@ flutter:
   /// **'The price of this item is: \${price}'**'''));
     });
 
-    testWithoutContext('should generate a file per language', () {
+    testWithoutContext('should generate a file per arb', () {
       const String singleEnCaMessageArbFileString = '''
 {
   "title": "Canadian Title"
@@ -1283,13 +1214,8 @@ flutter:
         ..writeOutputFiles(BufferLogger.test());
 
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en_CA.dart')), true);
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en_US.dart')), false);
-
-      final String englishLocalizationsFile = fs.file(
-        fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')
-      ).readAsStringSync();
-      expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
-      expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
     });
 
     testWithoutContext('language imports are sorted when preferredSupportedLocaleString is given', () {
