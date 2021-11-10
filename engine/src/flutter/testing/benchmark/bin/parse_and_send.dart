@@ -121,5 +121,6 @@ Future<void> main(List<String> args) async {
       int.parse(pointsAndDate.date) * 1000,
       isUtc: true,
     ),
+    'flutter_engine_benchmark',
   );
 }
