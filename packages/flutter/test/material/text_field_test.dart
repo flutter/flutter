@@ -8033,6 +8033,7 @@ void main() {
 
     // Move down to the third and final line.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
     expect(
       controller.selection,
       const TextSelection.collapsed(offset: 104),

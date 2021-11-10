@@ -1076,8 +1076,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag
-            || cause == SelectionChangedCause.keyboard) {
+            || cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
         return;
@@ -1085,8 +1084,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag
-            || cause == SelectionChangedCause.keyboard) {
+        if (cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
         return;
