@@ -129,11 +129,13 @@ class Command {
   }
 
   /// The job for the process runner for the lint needed for this command.
-  WorkerJob createLintJob(String? checks) {
+  WorkerJob createLintJob(String? checks, bool fix) {
     final List<String> args = <String>[
       filePath,
       if (checks != null)
         checks,
+      if (fix)
+        '--fix',
       '--',
     ];
     args.addAll(tidyArgs.split(' '));
