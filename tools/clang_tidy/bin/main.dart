@@ -12,8 +12,14 @@
 //
 // User environment variable FLUTTER_LINT_ALL to run on all files.
 
+import 'dart:io' as io;
+
 import 'package:clang_tidy/clang_tidy.dart';
 
 Future<int> main(List<String> arguments) async {
-  return ClangTidy.fromCommandLine(arguments).run();
+  final int result = await ClangTidy.fromCommandLine(arguments).run();
+  if (result != 0) {
+    io.exit(result);
+  }
+  return result;
 }
