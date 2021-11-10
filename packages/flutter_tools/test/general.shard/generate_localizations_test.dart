@@ -1287,6 +1287,7 @@ flutter:
 
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_ast.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_ast_ES.dart')), true);
     });
 
     testWithoutContext('should generate a file per language', () {
