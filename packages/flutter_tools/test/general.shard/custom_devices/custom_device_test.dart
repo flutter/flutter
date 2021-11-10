@@ -391,7 +391,7 @@ void main() {
       processManager: processManager,
     );
 
-    final LaunchResult launchResult = await appSession.start();
+    final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
     expect(launchResult.observatoryUri, Uri.parse('http://127.0.0.1:12345/abcd/'));
@@ -428,7 +428,7 @@ void main() {
       processManager: processManager
     );
 
-    final LaunchResult launchResult = await appSession.start();
+    final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
     expect(launchResult.observatoryUri, Uri.parse('http://192.168.178.123:12345/abcd/'));

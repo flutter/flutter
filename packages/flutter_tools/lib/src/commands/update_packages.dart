@@ -36,10 +36,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.1.1', // Latest version does not resolve on our CI.
-  // "test" is pinned because 1.18.1 fails when running web tests with this error:
-  // FileSystemException: Cannot open file, path = '.../.pub-cache/hosted/pub.dartlang.org/test-1.18.1/lib/src/runner/browser/static/host.dart.js' (OS Error: No such file or directory, errno = 2)
-  // When removing this remove `pedantic` from dev/bots/allowlist.dart also.
-  'test': '1.17.12', // https://github.com/dart-lang/test/issues/1594
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
