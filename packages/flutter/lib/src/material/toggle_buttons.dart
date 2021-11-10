@@ -1578,9 +1578,10 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
 /// A widget to pad the area around a [ToggleButtons]'s children.
 ///
-/// Redirect taps that occur in the padded area around the child to the center
-/// of the child. This increases the size of the widget and it's "tap target",
-/// but not its material or its ink splashes.
+/// This widget is based on a similar one using in [ButtonStyleButton] but it
+/// only redirects taps along one axis to ensure the correct button is tapped
+/// within the [ToggleButtons]. This increases the size of the widget and it's
+/// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
     Key? key,
