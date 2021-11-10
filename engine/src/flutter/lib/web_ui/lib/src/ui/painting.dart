@@ -500,6 +500,12 @@ Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback call
   final FrameInfo frameInfo = await codec.getNextFrame();
   callback(frameInfo.image);
 }
+
+// Encodes the input pixels into a BMP file that supports transparency.
+//
+// The `pixels` should be the scanlined raw pixels, 4 bytes per pixel, from left
+// to right, then from top to down. The order of the 4 bytes of pixels is
+// decided by `format`.
 Future<Codec> _createBmp(
   Uint8List pixels,
   int width,
@@ -507,41 +513,6 @@ Future<Codec> _createBmp(
   int rowBytes,
   PixelFormat format,
 ) {
-  // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
-  final int bufferSize = 0x36 + (width * height * 4);
-  final ByteData bmpData = ByteData(bufferSize);
-  // 'BM' header
-  bmpData.setUint8(0x00, 0x42);
-  bmpData.setUint8(0x01, 0x4D);
-  // Size of data
-  bmpData.setUint32(0x02, bufferSize, Endian.little);
-  // Offset where pixel array begins
-  bmpData.setUint32(0x0A, 0x36, Endian.little);
-  // Bytes in DIB header
-  bmpData.setUint32(0x0E, 0x28, Endian.little);
-  // width
-  bmpData.setUint32(0x12, width, Endian.little);
-  // height
-  bmpData.setUint32(0x16, height, Endian.little);
-  // Color panes
-  bmpData.setUint16(0x1A, 0x01, Endian.little);
-  // 32 bpp
-  bmpData.setUint16(0x1C, 0x20, Endian.little);
-  // no compression
-  bmpData.setUint32(0x1E, 0x00, Endian.little);
-  // raw bitmap data size
-  bmpData.setUint32(0x22, width * height, Endian.little);
-  // print DPI width
-  bmpData.setUint32(0x26, width, Endian.little);
-  // print DPI height
-  bmpData.setUint32(0x2A, height, Endian.little);
-  // colors in the palette
-  bmpData.setUint32(0x2E, 0x00, Endian.little);
-  // important colors
-  bmpData.setUint32(0x32, 0x00, Endian.little);
-
-
-  int pixelDestinationIndex = 0;
   late bool swapRedBlue;
   switch (format) {
     case PixelFormat.bgra8888:
@@ -551,20 +522,61 @@ Future<Codec> _createBmp(
       swapRedBlue = false;
       break;
   }
-  for (int pixelSourceIndex = 0; pixelSourceIndex < pixels.length; pixelSourceIndex += 4) {
-    final int r = swapRedBlue ? pixels[pixelSourceIndex + 2] : pixels[pixelSourceIndex];
-    final int b = swapRedBlue ? pixels[pixelSourceIndex]     : pixels[pixelSourceIndex + 2];
-    final int g = pixels[pixelSourceIndex + 1];
-    final int a = pixels[pixelSourceIndex + 3];
 
-    // Set the pixel past the header data.
-    bmpData.setUint8(pixelDestinationIndex + 0x36, r);
-    bmpData.setUint8(pixelDestinationIndex + 0x37, g);
-    bmpData.setUint8(pixelDestinationIndex + 0x38, b);
-    bmpData.setUint8(pixelDestinationIndex + 0x39, a);
-    pixelDestinationIndex += 4;
-    if (rowBytes != width && pixelSourceIndex % width == 0) {
-      pixelSourceIndex += rowBytes - width;
+  // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
+  // The header is in the 108-byte BITMAPV4HEADER format, or as called by
+  // Chromium, WindowsV4. Do not use the 56-byte or 52-byte Adobe formats, since
+  // they're not supported.
+  const int dibSize = 0x6C /* 108: BITMAPV4HEADER */;
+  const int headerSize = dibSize + 0x0E;
+  final int bufferSize = headerSize + (width * height * 4);
+  final ByteData bmpData = ByteData(bufferSize);
+  // 'BM' header
+  bmpData.setUint16(0x00, 0x424D, Endian.big);
+  // Size of data
+  bmpData.setUint32(0x02, bufferSize, Endian.little);
+  // Offset where pixel array begins
+  bmpData.setUint32(0x0A, headerSize, Endian.little);
+  // Bytes in DIB header
+  bmpData.setUint32(0x0E, dibSize, Endian.little);
+  // Width
+  bmpData.setUint32(0x12, width, Endian.little);
+  // Height
+  bmpData.setUint32(0x16, height, Endian.little);
+  // Color panes (always 1)
+  bmpData.setUint16(0x1A, 0x01, Endian.little);
+  // bpp: 32
+  bmpData.setUint16(0x1C, 32, Endian.little);
+  // Compression method is BITFIELDS to enable bit fields
+  bmpData.setUint32(0x1E, 3, Endian.little);
+  // Raw bitmap data size
+  bmpData.setUint32(0x22, width * height, Endian.little);
+  // Print DPI width
+  bmpData.setUint32(0x26, width, Endian.little);
+  // Print DPI height
+  bmpData.setUint32(0x2A, height, Endian.little);
+  // Colors in the palette
+  bmpData.setUint32(0x2E, 0x00, Endian.little);
+  // Important colors
+  bmpData.setUint32(0x32, 0x00, Endian.little);
+  // Bitmask R
+  bmpData.setUint32(0x36, swapRedBlue ? 0x00FF0000 : 0x000000FF, Endian.little);
+  // Bitmask G
+  bmpData.setUint32(0x3A, 0x0000FF00, Endian.little);
+  // Bitmask B
+  bmpData.setUint32(0x3E, swapRedBlue ? 0x000000FF : 0x00FF0000, Endian.little);
+  // Bitmask A
+  bmpData.setUint32(0x42, 0xFF000000, Endian.little);
+
+  int destinationByte = headerSize;
+  final Uint32List combinedPixels = Uint32List.sublistView(pixels);
+  // BMP is scanlined from bottom to top. Rearrange here.
+  for (int rowCount = height - 1; rowCount >= 0; rowCount -= 1) {
+    int sourcePixel = rowCount * rowBytes;
+    for (int colCount = 0; colCount < width; colCount += 1) {
+      bmpData.setUint32(destinationByte, combinedPixels[sourcePixel], Endian.little);
+      destinationByte += 4;
+      sourcePixel += 1;
     }
   }
 
@@ -803,4 +815,3 @@ class FragmentProgram {
     required Float32List floatUniforms,
   }) => throw UnsupportedError('FragmentProgram is not supported for the CanvasKit or HTML renderers.');
 }
-
