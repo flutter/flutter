@@ -473,4 +473,11 @@ void main() {
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.backgroundColor;
+
+  // Changes made in XXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.primaryColorBrightness; // Removing field reference not supported.
 }

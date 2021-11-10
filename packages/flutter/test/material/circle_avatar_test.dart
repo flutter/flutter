@@ -148,6 +148,7 @@ void main() {
   testWidgets('CircleAvatar with light theme', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       primaryColor: Colors.grey.shade100,
+      // TODO: remove from tests?
       primaryColorBrightness: Brightness.light,
     );
     await tester.pumpWidget(

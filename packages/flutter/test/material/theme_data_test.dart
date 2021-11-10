@@ -680,7 +680,6 @@ void main() {
       // COLOR
       'colorScheme',
       'primaryColor',
-      'primaryColorBrightness',
       'primaryColorLight',
       'primaryColorDark',
       'focusColor',
@@ -753,6 +752,7 @@ void main() {
       'accentIconTheme',
       'buttonColor',
       'fixTextFieldOutlineLabel',
+      'primaryColorBrightness',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
