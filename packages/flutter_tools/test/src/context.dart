@@ -140,7 +140,6 @@ void testUsingContext(
                     // tests can override this either in the test or during setup.
                     Cache.flutterRoot ??= flutterRoot;
                   }
-                  createFlutterToolsDir();
                   return await testMethod();
                 },
               );

@@ -165,8 +165,6 @@ void test(String description, FutureOr<void> Function() body, {
         await globals.localFileSystem.dispose();
       });
 
-      createFlutterToolsDir();
-
       return body();
     },
     skip: skip,
@@ -178,28 +176,6 @@ void test(String description, FutureOr<void> Function() body, {
     // configures all tests to have a 15 minute timeout which should
     // definitely be enough.
   );
-}
-
-/// For tests using a [MemoryFileSystem], create the tools source directory.
-///
-/// This is necessary because each FlutterCommand verifies that the
-/// flutter_tools source directory exists to catch bad installations of the
-/// Flutter SDK. This only done if [globals.fs] wraps a [MemoryFileSystem].
-///
-/// See https://github.com/flutter/flutter/issues/80418 for more context.
-void createFlutterToolsDir() {
-  final FileSystem fs = globals.fs;
-  if (fs is ErrorHandlingFileSystem) {
-    final FileSystem delegate = fs.fileSystem;
-    if (delegate is MemoryFileSystem) {
-      assert(Cache.flutterRoot != null);
-      delegate
-          .directory(Cache.flutterRoot)
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .createSync(recursive: true);
-    }
-  }
 }
 
 /// Executes a test body in zone that does not allow context-based injection.
