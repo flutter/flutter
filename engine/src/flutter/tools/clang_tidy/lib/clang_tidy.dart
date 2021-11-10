@@ -48,6 +48,7 @@ class ClangTidy {
     required io.Directory repoPath,
     String checksArg = '',
     bool lintAll = false,
+    bool fix = false,
     StringSink? outSink,
     StringSink? errSink,
   }) :
@@ -56,6 +57,7 @@ class ClangTidy {
       repoPath: repoPath,
       checksArg: checksArg,
       lintAll: lintAll,
+      fix: fix,
       errSink: errSink,
     ),
     _outSink = outSink ?? io.stdout,
@@ -207,7 +209,7 @@ class ClangTidy {
           break;
         case LintAction.lint:
           _outSink.writeln('🔶 linting $relativePath');
-          jobs.add(command.createLintJob(checks));
+          jobs.add(command.createLintJob(checks, options.fix));
           break;
         case LintAction.skipThirdParty:
           _outSink.writeln('🔷 ignoring $relativePath (third_party)');
