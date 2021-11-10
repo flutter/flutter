@@ -3501,7 +3501,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
       subshard: "1_3"
@@ -3520,7 +3520,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
       subshard: "2_3"
@@ -3539,7 +3539,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
       subshard: "3_3"
@@ -3591,7 +3591,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3714,7 +3714,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3848,7 +3848,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
       subshard: "1_5"
@@ -3872,7 +3872,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
       subshard: "2_5"
@@ -3896,7 +3896,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
       subshard: "3_5"
@@ -3920,7 +3920,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
       subshard: "4_5"
@@ -3944,7 +3944,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
-          {"dependency": "vs_build"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
       subshard: "5_5"

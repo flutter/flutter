@@ -120,33 +120,17 @@ void main() {
 
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
-    final String dartFile = 'test/analyze-test-input/root/packages/foo/foo.dart'
-      .replaceAll('/', Platform.isWindows ? r'\' : '/');
-    final String xmlFile = 'test/analyze-test-input/root/packages/foo/license.xml'
+    final String lines = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'The following file does not have the right license header for dart files:\n'
-      '  $dartFile\n'
+      'The following 1 file does not have the right license header:\n'
+      '$lines\n'
       'The expected license header is:\n'
       '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '// Use of this source code is governed by a BSD-style license that can be\n'
       '// found in the LICENSE file.\n'
       '...followed by a blank line.\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'The following file does not have the right license header for xml files:\n'
-      '  $xmlFile\n'
-      'The expected license header is:\n'
-      'A header matching the regular expression "(<\\?xml version="1.0" encoding="utf-8"\\?>\\n)?",\n'
-      'followed by the following license text:\n'
-      '<!-- Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      'Use of this source code is governed by a BSD-style license that can be\n'
-      'found in the LICENSE file. -->\n'
-      '...followed by a blank line.\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'License check failed.\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
   });
