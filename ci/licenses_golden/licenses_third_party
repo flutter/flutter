@@ -1,4 +1,4 @@
-Signature: a0b6c8b0a92cb36de14ea3f8760f5043
+Signature: f1e787217c47653595918b70b947bcfa
 
 UNUSED LICENSES:
 
@@ -9787,11 +9787,6 @@ FILE: ../../../third_party/dart/benchmarks/MapLookup/dart/maps.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart2/MapLookup.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/dart2/maps.dart
 FILE: ../../../third_party/dart/benchmarks/MapLookup/generate_maps.dart
-FILE: ../../../third_party/dart/benchmarks/NativeCall/dart/NativeCall.dart
-FILE: ../../../third_party/dart/benchmarks/NativeCall/dart/dlopen_helper.dart
-FILE: ../../../third_party/dart/benchmarks/NativeCall/dart2/NativeCall.dart
-FILE: ../../../third_party/dart/benchmarks/NativeCall/dart2/dlopen_helper.dart
-FILE: ../../../third_party/dart/benchmarks/NativeCall/native/native_functions.c
 FILE: ../../../third_party/dart/benchmarks/ObjectHash/dart/ObjectHash.dart
 FILE: ../../../third_party/dart/benchmarks/ObjectHash/dart2/ObjectHash.dart
 FILE: ../../../third_party/dart/benchmarks/SDKArtifactSizes/dart/SDKArtifactSizes.dart
