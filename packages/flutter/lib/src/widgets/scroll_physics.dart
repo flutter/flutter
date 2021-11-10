@@ -517,8 +517,8 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       maintainOverscroll = false;
       if (oldPosition.minScrollExtent.isFinite && oldPosition.maxScrollExtent.isFinite &&
           newPosition.minScrollExtent.isFinite && newPosition.maxScrollExtent.isFinite) {
-        // In addition, if the position changed then we don't enforce
-        // the new boundary if both new and previous bondaries entirely finite.
+        // In addition, if the position changed then we don't enforce the new
+        // boundary if both the new and previous boundaries are entirely finite.
         // A common case where the position changes while one
         // of the extents is infinite is a lazily-loaded list. (If the
         // boundaries were finite, and the position changed, then we
