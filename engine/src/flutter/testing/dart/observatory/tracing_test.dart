@@ -23,9 +23,11 @@ void main() {
     );
 
     final Completer<void> completer = Completer<void>();
-    window.onBeginFrame = (Duration timeStamp) {
+    window.onBeginFrame = (Duration timeStamp) async {
       final PictureRecorder recorder = PictureRecorder();
       final Canvas canvas = Canvas(recorder);
+      canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
+      canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
       canvas.saveLayer(null, Paint());
       canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
       canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
@@ -37,7 +39,7 @@ void main() {
       builder.addPicture(Offset.zero, picture);
       final Scene scene = builder.build();
 
-      window.render(scene);
+      await scene.toImage(100, 100);
       scene.dispose();
       completer.complete();
     };
@@ -47,13 +49,20 @@ void main() {
     final vms.Timeline timeline = await vmService.getVMTimeline();
     await vmService.dispose();
 
+    int saveLayerRecordCount = 0;
     int saveLayerCount = 0;
     for (final vms.TimelineEvent event in timeline.traceEvents!) {
       final Map<String, dynamic> json = event.json!;
-      if (json['name'] == 'Canvas::saveLayer' && json['ph'] == 'B') {
-        saveLayerCount += 1;
+      if (json['ph'] == 'B') {
+        if (json['name'] == 'ui.Canvas::saveLayer (Recorded)') {
+          saveLayerRecordCount += 1;
+        }
+        if (json['name'] == 'Canvas::saveLayer') {
+          saveLayerCount += 1;
+        }
       }
     }
-    expect(saveLayerCount, 2);
+    expect(saveLayerRecordCount, 3);
+    expect(saveLayerCount, 3);
   });
 }
