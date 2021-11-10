@@ -7904,7 +7904,9 @@ void main() {
 
     // The first character is now offscreen to the left.
     expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all(),
+     skip: isBrowser, // [intended] Browser handles arrow keys differently.
+  );
 
   testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -8053,7 +8055,9 @@ void main() {
       textOffsetToPosition(tester, 0).dy,
       moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
     );
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.all(),
+     skip: isBrowser, // [intended] Browser handles arrow keys differently.
+  );
 
   testWidgets(
     'long tap after a double tap select is not affected',
