@@ -77,6 +77,11 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibraryMTL::GetRenderPipeline(
     return future;
   }
 
+  // TODO(csg): There is a bug here where multiple calls to GetRenderPipeline
+  // will result in multiple render pipelines of the same descriptor being
+  // created till the first instance of the creation invokes its completion
+  // callback.
+
   auto thiz = shared_from_this();
 
   auto completion_handler =
@@ -88,8 +93,10 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibraryMTL::GetRenderPipeline(
           promise->set_value(nullptr);
         } else {
           auto new_pipeline = std::shared_ptr<PipelineMTL>(new PipelineMTL(
-              render_pipeline_state,
-              CreateDepthStencilDescriptor(descriptor, device_)));
+              descriptor,                                        //
+              render_pipeline_state,                             //
+              CreateDepthStencilDescriptor(descriptor, device_)  //
+              ));
           promise->set_value(new_pipeline);
           this->SavePipeline(descriptor, new_pipeline);
         }
