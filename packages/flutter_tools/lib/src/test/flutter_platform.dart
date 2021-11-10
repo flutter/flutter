@@ -346,6 +346,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   @override
+  // ignore: override_on_non_overriding_member
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
