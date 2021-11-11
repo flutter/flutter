@@ -39,7 +39,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }) : _flutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
-       _injectedPlatform = platform {
+       _injectedPlatform = platform,
+       super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();

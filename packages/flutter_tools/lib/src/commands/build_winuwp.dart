@@ -19,7 +19,9 @@ import 'build.dart';
 
 /// A command to build a Windows UWP desktop target.
 class BuildWindowsUwpCommand extends BuildSubCommand {
-  BuildWindowsUwpCommand({ bool verboseHelp = false }) {
+  BuildWindowsUwpCommand({
+    bool verboseHelp = false,
+  }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
 

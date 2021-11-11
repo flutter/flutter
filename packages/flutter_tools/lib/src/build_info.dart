@@ -751,7 +751,7 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.windows_x64;
   }
 
-  globals.printError('Unsupported host platform, defaulting to Linux');
+  globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }

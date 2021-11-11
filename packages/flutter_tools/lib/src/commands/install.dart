@@ -98,7 +98,7 @@ Future<bool> installApp(
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        globals.printError('Warning: uninstalling old version failed');
+        globals.printWarning('Warning: uninstalling old version failed');
       }
     }
   } on ProcessException catch (e) {

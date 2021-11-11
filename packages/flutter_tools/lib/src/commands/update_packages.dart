@@ -190,7 +190,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (pubspec.checksum.value == null) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
@@ -207,7 +207,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly '
             '(checksum ${pubspec.checksum.value} != $checksum).'
@@ -1501,7 +1501,7 @@ Directory createTemporaryFlutterSdk(
       ..createSync(recursive: true);
     final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
     if (pubspecYaml == null) {
-      logger.printError(
+      logger.printWarning(
         "Unexpected package '$flutterPackage' found in packages directory",
       );
       continue;
