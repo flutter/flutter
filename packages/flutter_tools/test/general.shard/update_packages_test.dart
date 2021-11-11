@@ -129,7 +129,7 @@ void main() {
 
     // We get a warning about the unexpected package.
     expect(
-      bufferLogger.errorText,
+      bufferLogger.warningText,
       contains("Unexpected package 'extra' found in packages directory"),
     );
 

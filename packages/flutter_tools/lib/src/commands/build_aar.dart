@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({ @required bool verboseHelp }) {
+  BuildAarCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',

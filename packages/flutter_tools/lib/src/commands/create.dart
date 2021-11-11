@@ -228,7 +228,7 @@ class CreateCommand extends CreateBase {
     validateProjectDir(overwrite: overwrite);
 
     if (boolArg('with-driver-test')) {
-      globals.printError(
+      globals.printWarning(
         'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
         'visiting https://pub.dev/packages/integration_test .'
