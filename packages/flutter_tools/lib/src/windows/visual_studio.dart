@@ -167,6 +167,19 @@ class VisualStudio {
     ]);
   }
 
+  /// The generator string to pass to CMake to select this Visual Studio
+  /// version.
+  String? get cmakeGenerator {
+    // From https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html#visual-studio-generators
+    switch (_majorVersion) {
+      case 17:
+        return 'Visual Studio 17 2022';
+      case 16:
+      default:
+        return 'Visual Studio 16 2019';
+    }
+  }
+
   /// The major version of the Visual Studio install, as an integer.
   int? get _majorVersion => fullVersion != null ? int.tryParse(fullVersion!.split('.')[0]) : null;
 
