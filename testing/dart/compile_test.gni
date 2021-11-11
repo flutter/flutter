@@ -57,7 +57,7 @@ template("compile_flutter_dart_test") {
   if (flutter_prebuilt_dart_sdk) {
     action(target_name) {
       testonly = true
-      deps = common_deps + [ "//flutter:dart_sdk" ]
+      deps = common_deps
       pool = "//flutter/build/dart:dart_pool"
       script = "//build/gn_run_binary.py"
       inputs = [ invoker.dart_file ]
