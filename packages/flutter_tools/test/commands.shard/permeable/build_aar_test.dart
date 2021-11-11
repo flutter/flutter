@@ -244,7 +244,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
-          '-I=$flutterRoot/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle','aar_init_script.gradle')}',
           '-Pflutter-root=$flutterRoot',
           '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
           '-Pis-plugin=false',
