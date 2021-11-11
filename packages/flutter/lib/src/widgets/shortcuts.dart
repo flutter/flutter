@@ -732,7 +732,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   }
 }
 
-/// A widget to that creates key bindings to specific actions for its
+/// A widget that creates key bindings to specific actions for its
 /// descendants.
 ///
 /// This widget establishes a [ShortcutManager] to be used by its descendants
