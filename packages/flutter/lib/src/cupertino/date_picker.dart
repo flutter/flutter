@@ -202,6 +202,12 @@ enum _PickerColumnType {
 /// full screen width. Content texts are shown with
 /// [CupertinoTextThemeData.dateTimePickerTextStyle].
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoDatePicker] with different picker modes.
+///
+/// ** See code in examples/api/lib/cupertino/date_picker/date_picker.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
