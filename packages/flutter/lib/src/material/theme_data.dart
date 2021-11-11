@@ -362,7 +362,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after 2.6.0-11.0.pre.',
+      'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
   }) {
@@ -751,7 +751,7 @@ class ThemeData with Diagnosticable {
     required this.fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after 2.6.0-11.0.pre.',
+      'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
@@ -1470,7 +1470,7 @@ class ThemeData with Diagnosticable {
   /// of any color can be found with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after 2.6.0-11.0.pre.',
+    'This feature was deprecated after v2.6.0-11.0.pre.',
   )
   final Brightness primaryColorBrightness;
 
@@ -1618,7 +1618,7 @@ class ThemeData with Diagnosticable {
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after 2.6.0-11.0.pre.',
+      'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
   }) {
