@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -20,6 +21,7 @@ import 'package:test/fake.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -190,9 +192,12 @@ void main() {
 
   group('Gradle', () {
     Directory tempDir;
+    AndroidSdk mockAndroidSdk;
+
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -218,6 +223,28 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => FakeProcessManager.any(),
       });
+    });
+
+    testUsingContext('support ExtraDartFlagOptions',
+            () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=module']);
+
+      globals.fs.directory(globals.fs.path.join(tempDir.path, 'flutter_project',
+          'build', 'host','outputs','repo')).createSync(recursive: true);
+
+      await runBuildAarCommand(projectPath,
+          arguments: <String>[
+            '--extra-front-end-options=foo',
+            '--extra-front-end-options=bar',
+            '--extra-front-end-options=--testflag,--testflag2'
+          ]);
+    },
+        overrides: <Type, Generator>{
+          AndroidSdk: () => mockAndroidSdk,
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
     });
   });
 }
@@ -258,4 +285,11 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
     this.outputDirectoryPath = outputDirectoryPath;
     this.buildNumber = buildNumber;
   }
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk(this.directory);
+
+  @override
+  final Directory directory;
 }
