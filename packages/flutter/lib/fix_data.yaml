@@ -16,7 +16,7 @@ version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
-    date: 2021-10-31
+    date: 2021-11-11
     element:
       uris: [ 'material.dart' ]
       method: 'copyWith'
@@ -27,7 +27,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
-    date: 2021-10-31
+    date: 2021-11-11
     element:
       uris: [ 'material.dart' ]
       constructor: 'raw'
@@ -38,7 +38,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/93396
   - title: "Remove 'primaryColorBrightness'"
-    date: 2021-10-31
+    date: 2021-11-11
     element:
       uris: [ 'material.dart' ]
       constructor: ''
