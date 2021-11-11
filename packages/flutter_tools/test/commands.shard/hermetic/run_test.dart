@@ -26,7 +26,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -294,6 +294,75 @@ void main() {
       });
     });
 
+    group('Fatal Logs', () {
+      TestRunCommandWithFakeResidentRunner command;
+      MemoryFileSystem fs;
+
+      setUp(() {
+        command = TestRunCommandWithFakeResidentRunner()
+          ..fakeResidentRunner = FakeResidentRunner();
+        fs = MemoryFileSystem.test();
+      });
+
+      testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
+        try {
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--${FlutterOptions.kFatalWarnings}',
+          ]);
+        } on Exception {
+          fail('Unexpected exception thrown');
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
+        testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+        try {
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+          ]);
+        } on Exception {
+          fail('Unexpected exception thrown');
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
+        testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+        await expectLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--${FlutterOptions.kFatalWarnings}',
+        ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
+        testLogger.printError('Error: Danger Will Robinson!');
+        await expectLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--${FlutterOptions.kFatalWarnings}',
+        ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+    });
+
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
       mockDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.android_arm)];
 
@@ -496,13 +565,16 @@ class FakeDevice extends Fake implements Device {
   @override
   String get id => 'fake_device';
 
-  void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
+  void _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
 
   @override
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
   bool supportsRuntimeMode(BuildMode mode) => true;
+
+  @override
+  Future<bool> get supportsHardwareRendering async => true;
 
   @override
   bool supportsHotReload = false;
@@ -542,7 +614,7 @@ class FakeDevice extends Fake implements Device {
   @override
   final PlatformType platformType = PlatformType.ios;
 
-  bool startAppSuccess = true;
+  bool startAppSuccess;
 
   @override
   DevFSWriter createDevFSWriter(
@@ -564,8 +636,11 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    if (!startAppSuccess) {
+    if (startAppSuccess == false) {
       return LaunchResult.failed();
+    }
+    if (startAppSuccess == true) {
+      return LaunchResult.succeeded();
     }
     final String dartFlags = debuggingOptions.dartFlags;
     // In release mode, --dart-flags should be set to the empty string and
@@ -587,17 +662,19 @@ class FakeDevice extends Fake implements Device {
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  ApplicationPackage package;
+  FakeApplicationPackageFactory(this.applicationPackage);
+
+  ApplicationPackage applicationPackage;
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
-  }) async {
-    return package;
-  }
+      TargetPlatform platform, {
+        BuildInfo buildInfo,
+        File applicationBinary,
+      }) async => applicationPackage;
 }
+
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
   FakeResidentRunner fakeResidentRunner;

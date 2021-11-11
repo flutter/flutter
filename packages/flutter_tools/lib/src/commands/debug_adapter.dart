@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import '../debug_adapters/server.dart';
@@ -28,6 +26,12 @@ class DebugAdapterCommand extends FlutterCommand {
   DebugAdapterCommand({ bool verboseHelp = false}) : hidden = !verboseHelp {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
+    argParser
+      .addFlag(
+        'test',
+        help: 'Whether to use the "flutter test" debug adapter to run tests'
+            ' and emit custom events for test progress/results.',
+      );
   }
 
   @override
@@ -52,8 +56,9 @@ class DebugAdapterCommand extends FlutterCommand {
       globals.stdio.stdout.nonBlocking,
       fileSystem: globals.fs,
       platform: globals.platform,
-      ipv6: ipv6,
+      ipv6: ipv6 == true,
       enableDds: enableDds,
+      test: boolArg('test'),
     );
 
     await server.channel.closed;

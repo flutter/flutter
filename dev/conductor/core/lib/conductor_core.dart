@@ -7,6 +7,7 @@
 export 'src/candidates.dart';
 export 'src/clean.dart';
 export 'src/codesign.dart';
+export 'src/git.dart';
 export 'src/globals.dart';
 export 'src/next.dart' hide kStateOption, kYesFlag;
 export 'src/repository.dart';

@@ -432,8 +432,8 @@ void main() {
         buildMode: BuildMode.debug,
       );
 
-      expect(logger.errorText, contains('Warning: Podfile is out of date'));
-      expect(logger.errorText, contains('rm macos/Podfile'));
+      expect(logger.warningText, contains('Warning: Podfile is out of date'));
+      expect(logger.warningText, contains('rm macos/Podfile'));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 

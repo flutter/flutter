@@ -16,7 +16,7 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';
@@ -123,6 +123,10 @@ Future<void> _buildAssets(
     packagesPath: fuchsiaProject.project.packagesFile.path,
     assetDirPath: assetDir,
   );
+
+  if (assets == null) {
+    throwToolExit('Unable to find assets.', exitCode: 1);
+  }
 
   final Map<String, DevFSContent> assetEntries =
       Map<String, DevFSContent>.of(assets.entries);
