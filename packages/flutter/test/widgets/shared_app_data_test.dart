@@ -6,36 +6,36 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AppModel basics', (WidgetTester tester) async {
+  testWidgets('SharedAppData basics', (WidgetTester tester) async {
     int columnBuildCount = 0;
     int child1BuildCount = 0;
     int child2BuildCount = 0;
-    late void Function(BuildContext context) setAppModelValue;
+    late void Function(BuildContext context) setSharedAppDataValue;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: AppModel(
+        child: SharedAppData(
           child: Builder(
             builder: (BuildContext context) {
               columnBuildCount += 1;
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  setAppModelValue.call(context);
+                  setSharedAppDataValue.call(context);
                 },
                 child: Column(
                   children: <Widget>[
                     Builder(
                       builder: (BuildContext context) {
                         child1BuildCount += 1;
-                        return Text(AppModel.getValue<String, String>(context, 'child1Text', () => 'null'));
+                        return Text(SharedAppData.getValue<String, String>(context, 'child1Text', () => 'null'));
                       },
                     ),
                     Builder(
                       builder: (BuildContext context) {
                         child2BuildCount += 1;
-                        return Text(AppModel.getValue<String, String>(context, 'child2Text', () => 'null'));
+                        return Text(SharedAppData.getValue<String, String>(context, 'child2Text', () => 'null'));
                       }
                     ),
                   ],
@@ -52,11 +52,11 @@ void main() {
     expect(child2BuildCount, 1);
     expect(find.text('null').evaluate().length, 2);
 
-    // AppModel.setValue<String, String>(context, 'child1Text', 'child1')
+    // SharedAppData.setValue<String, String>(context, 'child1Text', 'child1')
     // causes the first Text widget to be rebuilt with its text to be
     // set to 'child1'. Nothing else is rebuilt.
-    setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child1Text', 'child1');
+    setSharedAppDataValue = (BuildContext context) {
+      SharedAppData.setValue<String, String>(context, 'child1Text', 'child1');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -66,11 +66,11 @@ void main() {
     expect(find.text('child1'), findsOneWidget);
     expect(find.text('null'), findsOneWidget);
 
-    // AppModel.setValue<String, String>(context, 'child2Text', 'child1')
+    // SharedAppData.setValue<String, String>(context, 'child2Text', 'child1')
     // causes the second Text widget to be rebuilt with its text to be
     // set to 'child2'. Nothing else is rebuilt.
-    setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child2Text', 'child2');
+    setSharedAppDataValue = (BuildContext context) {
+      SharedAppData.setValue<String, String>(context, 'child2Text', 'child2');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -82,9 +82,9 @@ void main() {
 
     // Resetting a key's value to the same value does not
     // cause any widgets to be rebuilt.
-    setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child1Text', 'child1');
-      AppModel.setValue<String, String>(context, 'child2Text', 'child2');
+    setSharedAppDataValue = (BuildContext context) {
+      SharedAppData.setValue<String, String>(context, 'child1Text', 'child1');
+      SharedAppData.setValue<String, String>(context, 'child2Text', 'child2');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -94,8 +94,8 @@ void main() {
 
     // More of the same, resetting the values to null..
 
-    setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child1Text', 'null');
+    setSharedAppDataValue = (BuildContext context) {
+      SharedAppData.setValue<String, String>(context, 'child1Text', 'null');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -105,8 +105,8 @@ void main() {
     expect(find.text('null'), findsOneWidget);
     expect(find.text('child2'), findsOneWidget);
 
-    setAppModelValue = (BuildContext context) {
-      AppModel.setValue<String, String>(context, 'child2Text', 'null');
+    setSharedAppDataValue = (BuildContext context) {
+      SharedAppData.setValue<String, String>(context, 'child2Text', 'null');
     };
     await tester.tap(find.byType(GestureDetector));
     await tester.pump();
@@ -116,7 +116,7 @@ void main() {
     expect(find.text('null').evaluate().length, 2);
   });
 
-  testWidgets('WidgetsApp AppModel ', (WidgetTester tester) async {
+  testWidgets('WidgetsApp SharedAppData ', (WidgetTester tester) async {
     int parentBuildCount = 0;
     int childBuildCount = 0;
 
@@ -128,13 +128,13 @@ void main() {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              AppModel.setValue<String, String>(context, 'childText', 'child');
+              SharedAppData.setValue<String, String>(context, 'childText', 'child');
             },
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
                   childBuildCount += 1;
-                  return Text(AppModel.getValue<String, String>(context, 'childText', () => 'null'));
+                  return Text(SharedAppData.getValue<String, String>(context, 'childText', () => 'null'));
                 },
               ),
             ),
@@ -154,7 +154,7 @@ void main() {
     expect(find.text('child'), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp AppModel Shadowing', (WidgetTester tester) async {
+  testWidgets('WidgetsApp SharedAppData Shadowing', (WidgetTester tester) async {
     int innerTapCount = 0;
     int outerTapCount = 0;
 
@@ -166,18 +166,18 @@ void main() {
             behavior: HitTestBehavior.opaque,
             onTap: () {
               outerTapCount += 1;
-              AppModel.setValue<String, String>(context, 'childText', 'child');
+              SharedAppData.setValue<String, String>(context, 'childText', 'child');
             },
             child: Center(
-              child: AppModel(
+              child: SharedAppData(
                 child: Builder(
                   builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
                         innerTapCount += 1;
-                        AppModel.setValue<String, String>(context, 'childText', 'child');
+                        SharedAppData.setValue<String, String>(context, 'childText', 'child');
                       },
-                      child: Text(AppModel.getValue<String, String>(context, 'childText', () => 'null')),
+                      child: Text(SharedAppData.getValue<String, String>(context, 'childText', () => 'null')),
                     );
                   },
                 ),
