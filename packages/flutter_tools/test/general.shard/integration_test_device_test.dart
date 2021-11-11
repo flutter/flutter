@@ -164,7 +164,7 @@ void main() {
         'ephemeral',
         'ephemeral',
         type: PlatformType.android,
-        launchResult: LaunchResult.succeeded(observatoryUri: null),
+        launchResult: LaunchResult.succeeded(),
       ),
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,

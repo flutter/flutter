@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:package_config/package_config.dart';
@@ -48,7 +48,7 @@ void main() {
 
   setUp(() {
     httpServer = FakeHttpServer();
-    linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
+    linux = FakePlatform(environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
@@ -741,7 +741,6 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
       enableDds: false,
@@ -1077,6 +1076,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     String projectRootPath,
     FileSystem fs,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   }) async {
     return output;
   }

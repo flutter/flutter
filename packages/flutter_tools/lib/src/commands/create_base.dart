@@ -18,7 +18,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -287,7 +287,7 @@ abstract class CreateBase extends FlutterCommand {
 
     final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
-    switch (type) {
+    switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
       case FileSystemEntityType.file:
         // Do not overwrite files.
         throwToolExit("Invalid project name: '$projectDirPath' - file exists.",
@@ -298,7 +298,9 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.",
             exitCode: 2);
         break;
-      default:
+      case FileSystemEntityType.directory:
+      case FileSystemEntityType.notFound:
+        break;
     }
   }
 
@@ -315,6 +317,7 @@ abstract class CreateBase extends FlutterCommand {
         throwToolExit(error);
       }
     }
+    assert(projectName != null);
     return projectName;
   }
 
@@ -323,8 +326,10 @@ abstract class CreateBase extends FlutterCommand {
   Map<String, Object> createTemplateContext({
     String organization,
     String projectName,
+    String titleCaseProjectName,
     String projectDescription,
     String androidLanguage,
+    String iosDevelopmentTeam,
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
@@ -358,6 +363,7 @@ abstract class CreateBase extends FlutterCommand {
     return <String, Object>{
       'organization': organization,
       'projectName': projectName,
+      'titleCaseProjectName': titleCaseProjectName,
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
@@ -375,6 +381,8 @@ abstract class CreateBase extends FlutterCommand {
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
+      'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
       'ios': ios,
@@ -396,8 +404,12 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderTemplate(
-      String templateName, Directory directory, Map<String, Object> context,
-      {bool overwrite = false}) async {
+    String templateName,
+    Directory directory,
+    Map<String, Object> context, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     final Template template = await Template.fromName(
       templateName,
       fileSystem: globals.fs,
@@ -405,7 +417,12 @@ abstract class CreateBase extends FlutterCommand {
       templateRenderer: globals.templateRenderer,
       templateManifest: _templateManifest,
     );
-    return template.render(directory, context, overwriteExisting: overwrite);
+    return template.render(
+      directory,
+      context,
+      overwriteExisting: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
   }
 
   /// Merges named templates into a single template, output to `directory`.
@@ -415,8 +432,12 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderMerged(
-      List<String> names, Directory directory, Map<String, Object> context,
-      {bool overwrite = false}) async {
+    List<String> names,
+    Directory directory,
+    Map<String, Object> context, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     final Template template = await Template.merged(
       names,
       directory,
@@ -425,7 +446,12 @@ abstract class CreateBase extends FlutterCommand {
       templateRenderer: globals.templateRenderer,
       templateManifest: _templateManifest,
     );
-    return template.render(directory, context, overwriteExisting: overwrite);
+    return template.render(
+      directory,
+      context,
+      overwriteExisting: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
   }
 
   /// Generate application project in the `directory` using `templateContext`.
@@ -433,14 +459,20 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      String templateName, Directory directory, Map<String, Object> templateContext,
-      {bool overwrite = false, bool pluginExampleApp = false}) async {
+    String templateName,
+    Directory directory,
+    Map<String, Object> templateContext, {
+    bool overwrite = false,
+    bool pluginExampleApp = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
       <String>[templateName, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
     );
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {

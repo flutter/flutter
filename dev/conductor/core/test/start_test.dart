@@ -25,6 +25,7 @@ void main() {
     const String candidateBranch = 'flutter-1.2-candidate.3';
     const String releaseChannel = 'stable';
     const String revision = 'abcd1234';
+    const String conductorVersion = 'deadbeef';
     late Checkouts checkouts;
     late MemoryFileSystem fileSystem;
     late FakePlatform platform;
@@ -66,7 +67,7 @@ void main() {
       );
       final StartCommand command = StartCommand(
         checkouts: checkouts,
-        flutterRoot: fileSystem.directory(flutterRoot),
+        conductorVersion: conductorVersion,
       );
       return CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
@@ -82,7 +83,21 @@ void main() {
         operatingSystem: 'windows',
       );
       await expectLater(
-        () async => runner.run(<String>['start']),
+        () async => runner.run(<String>[
+          'start',
+          '--$kFrameworkMirrorOption',
+          frameworkMirror,
+          '--$kEngineMirrorOption',
+          engineMirror,
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          'dev',
+          '--$kStateOption',
+          '/path/to/statefile.json',
+          '--$kIncrementOption',
+          'y',
+        ]),
         throwsExceptionWith(
           'Error! This tool is only supported on macOS and Linux',
         ),
@@ -110,10 +125,14 @@ void main() {
     test('creates state file if provided correct inputs', () async {
       const String revision2 = 'def789';
       const String revision3 = '123abc';
+      const String branchPointRevision='deadbeef';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
-      const String nextVersion = '1.2.0-3.0.pre';
+      // This is a git tag applied to the branch point, not an actual release
+      const String branchPointTag = '1.2.0-3.0.pre';
+      // This is what this release will be
+      const String nextVersion = '1.2.0-3.1.pre';
       const String incrementLevel = 'm';
 
       final Directory engine = fileSystem.directory(checkoutsParentDirectory)
@@ -229,6 +248,16 @@ void main() {
           stdout: '$previousVersion-42-gabc123',
         ),
         const FakeCommand(
+          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          stdout: branchPointRevision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', branchPointTag, branchPointRevision],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
+        ),
+        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: revision3,
         ),
@@ -236,10 +265,6 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision,
-          ),
           ...engineCommands,
           ...frameworkCommands,
         ],
@@ -282,11 +307,16 @@ void main() {
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
       expect(state.engine.dartRevision, nextDartRevision);
+      expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
+      expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
-      expect(state.conductorVersion, revision);
+      expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
+      expect(stdio.stdout, contains('Applying the tag $branchPointTag at the branch point $branchPointRevision'));
+      expect(stdio.stdout, contains('The actual release will be version $nextVersion'));
+      expect(branchPointTag != nextVersion, true);
     });
 
     test('can convert from dev style version to stable version', () async {
@@ -294,7 +324,7 @@ void main() {
       const String revision3 = '123abc';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-      const String previousVersion = '1.2.0-1.0.pre';
+      const String previousVersion = '1.2.0-3.0.pre';
       const String nextVersion = '1.2.0';
       const String incrementLevel = 'z';
 
@@ -418,10 +448,6 @@ void main() {
 
       final CommandRunner<void> runner = createRunner(
         commands: <FakeCommand>[
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision,
-          ),
           ...engineCommands,
           ...frameworkCommands,
         ],
@@ -467,7 +493,7 @@ void main() {
       expect(state.framework.candidateBranch, candidateBranch);
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
-      expect(state.conductorVersion, revision);
+      expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
     });
   }, onPlatform: <String, dynamic>{

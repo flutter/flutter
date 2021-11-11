@@ -45,7 +45,7 @@ void main() {
       didTap = true;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -302,7 +302,7 @@ void main() {
       didEndScale = true;
     };
 
-    final TestPointer touchPointer = TestPointer(1, PointerDeviceKind.touch);
+    final TestPointer touchPointer = TestPointer();
 
     final PointerDownEvent down = touchPointer.down(Offset.zero);
     scale.addPointer(down);
@@ -357,7 +357,7 @@ void main() {
     drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
     drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
@@ -455,7 +455,7 @@ void main() {
       didTap = true;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -633,7 +633,7 @@ void main() {
       updatedRotation = details.rotation;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
@@ -664,7 +664,7 @@ void main() {
     int pointerCountOfEnd = 0;
     scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);

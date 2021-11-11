@@ -15,7 +15,7 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -248,6 +248,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   String get description => 'Run Flutter unit tests for the current project.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {

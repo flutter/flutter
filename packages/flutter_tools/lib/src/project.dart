@@ -18,7 +18,7 @@ import 'cmake_project.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'template.dart';
 import 'xcode_project.dart';
@@ -219,6 +219,11 @@ class FlutterProject {
     .childDirectory('generated')
     .childDirectory(manifest.appName);
 
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('generated_main.dart');
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
@@ -349,6 +354,7 @@ class FlutterProject {
         'version': buildName,
       if (buildNumber != null)
         'build_number': buildNumber,
+      'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
   }
@@ -544,7 +550,6 @@ to migrate your project.
         'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 

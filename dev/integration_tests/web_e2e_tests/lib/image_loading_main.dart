@@ -2,8 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+final Completer<void> _assetImageCompleter = Completer<void>();
+final Completer<void> _networkImageCompleter = Completer<void>();
+
+/// Notifies that Image.asset used in the test app loaded the image.
+Future<void> get whenAssetImageLoads => _assetImageCompleter.future;
+
+/// Notifies that Image.network used in the test app loaded the image.
+Future<void> get whenNetworkImageLoads => _networkImageCompleter.future;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +41,36 @@ class MyAppState extends State<MyApp> {
         title: 'Integration Test App',
         home: Column(children: <Widget>[
           const Text('Asset image:'),
-          RepaintBoundary(child: Image.asset('assets/icons/material/material.png', package: 'flutter_gallery_assets')),
+          RepaintBoundary(child: Image.asset(
+            'assets/icons/material/material.png',
+            package: 'flutter_gallery_assets',
+            frameBuilder: (
+              BuildContext context,
+              Widget child,
+              int? frame,
+              bool wasSynchronouslyLoaded,
+            ) {
+              if (frame != null) {
+                _assetImageCompleter.complete();
+              }
+              return child;
+            },
+          )),
           const Text('Network image:'),
-          RepaintBoundary(child: Image.network('assets/packages/flutter_gallery_assets/assets/icons/material/material.png')),
+          RepaintBoundary(child: Image.network(
+            'assets/packages/flutter_gallery_assets/assets/icons/material/material.png',
+            frameBuilder: (
+              BuildContext context,
+              Widget child,
+              int? frame,
+              bool wasSynchronouslyLoaded,
+            ) {
+              if (frame != null) {
+                _networkImageCompleter.complete();
+              }
+              return child;
+            },
+          )),
       ])
     );
   }

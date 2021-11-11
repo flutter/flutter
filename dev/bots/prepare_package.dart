@@ -687,7 +687,6 @@ class ArchivePublisher {
     try {
       await _runGsUtil(
         <String>['stat', cloudPath],
-        failOk: false,
       );
     } on PreparePackageException {
       // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
@@ -737,7 +736,6 @@ Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. Will write a few GiB of data, '
         'so it should have sufficient free space. If a temp_dir is not '
@@ -745,18 +743,15 @@ Future<void> main(List<String> rawArguments) async {
         'removed automatically.',
   );
   argParser.addOption('revision',
-      defaultsTo: null,
       help: 'The Flutter git repo revision to build the '
           'archive with. Must be the full 40-character hash. Required.');
   argParser.addOption(
     'branch',
-    defaultsTo: null,
     allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(
     'output',
-    defaultsTo: null,
     help: 'The path to the directory where the output archive should be '
         'written. If --output is not specified, the archive will be written to '
         "the current directory. If the output directory doesn't exist, it, and "
@@ -764,7 +759,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'publish',
-    defaultsTo: false,
     help: 'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
         'directory: $baseUrl$releaseFolder',
@@ -772,18 +766,15 @@ Future<void> main(List<String> rawArguments) async {
   argParser.addFlag(
     'force',
     abbr: 'f',
-    defaultsTo: false,
     help: 'Overwrite a previously uploaded package.',
   );
   argParser.addFlag(
     'dry_run',
-    defaultsTo: false,
     negatable: false,
     help: 'Prints gsutil commands instead of executing them.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );

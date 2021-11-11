@@ -43,7 +43,7 @@ import 'theme.dart';
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
@@ -125,7 +125,7 @@ class AboutListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null, then its value is based on [ListTileTheme.dense].
+  /// If this property is null, then its value is based on [ListTileThemeData.dense].
   ///
   /// Dense list tiles default to a smaller height.
   final bool? dense;
@@ -566,11 +566,12 @@ class _PackagesViewState extends State<_PackagesView> {
                     );
                   },
                 );
-              default:
+              case ConnectionState.none:
+              case ConnectionState.active:
+              case ConnectionState.waiting:
                 return Material(
                     color: Theme.of(context).cardColor,
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       widget.about,
                       const Center(child: CircularProgressIndicator()),
@@ -1470,7 +1471,6 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
                     constraints: BoxConstraints.tightFor(width: masterViewWidth),
@@ -1576,7 +1576,6 @@ class _DetailView extends StatelessWidget {
     return DraggableScrollableSheet(
       initialChildSize: minHeight,
       minChildSize: minHeight,
-      maxChildSize: 1,
       expand: false,
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
@@ -1587,7 +1586,7 @@ class _DetailView extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(_kCardElevation, 0.0, _kCardElevation, 0.0),
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(3.0), bottom: Radius.zero),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(3.0)),
             ),
             child: _builder(
               context,

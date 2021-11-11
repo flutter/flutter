@@ -10,10 +10,9 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -64,6 +63,9 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override
@@ -76,7 +78,7 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(clock: const SystemClock(), workingDirectory: _commandRunner.workingDirectory),
+        : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -198,12 +200,12 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    globals.persistentToolState.redisplayWelcomeMessage = false;
+    globals.persistentToolState.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    globals.persistentToolState.redisplayWelcomeMessage = true;
+    globals.persistentToolState.setShouldRedisplayWelcomeMessage(true);
   }
 
   Future<bool> hasUncommittedChanges() async {

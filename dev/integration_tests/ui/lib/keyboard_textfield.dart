@@ -48,13 +48,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final String softKeyboardVisibility = MediaQuery.of(context).viewInsets.bottom > 100
+      ? 'keyboard visible'
+      : 'keyboard not visible';
     return Scaffold(
       body: Column(
         children: <Widget>[
           Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
+          Text(softKeyboardVisibility),
           Expanded(
             child: ListView(
               key: const ValueKey<String>(keys.kListView),

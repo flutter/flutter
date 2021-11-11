@@ -34,7 +34,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
+          data: const MediaQueryData(),
           child: RepaintBoundary(
             key: key,
             child: Container(
@@ -86,8 +86,9 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
+            child: const CupertinoActivityIndicator.partiallyRevealed(
+              progress: 0,
+            ),
           ),
         ),
       ),
@@ -129,8 +130,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child:
-                const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
+            child: const CupertinoActivityIndicator.partiallyRevealed(),
           ),
         ),
       ),
@@ -158,11 +158,37 @@ void main() {
         ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10)),
     );
   });
+
+  testWidgets('Can specify color', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: CupertinoColors.white,
+            child: const CupertinoActivityIndicator(
+              animating: false,
+              color: Color(0xFF5D3FD3),
+              radius: 100,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CupertinoActivityIndicator),
+      paints
+        ..rrect(rrect: const RRect.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
+                color: const Color(0x935d3fd3)),
+    );
+  });
 }
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
   return MediaQuery(
-    data: const MediaQueryData(platformBrightness: Brightness.light),
+    data: const MediaQueryData(),
     child: CupertinoActivityIndicator(
       animating: animating ?? true,
     ),
