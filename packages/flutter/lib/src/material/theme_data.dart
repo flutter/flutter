@@ -1464,7 +1464,9 @@ class ThemeData with Diagnosticable {
   /// of text and icons placed on top of the primary color (e.g. toolbar text).
   ///
   /// The material library no longer uses this property. The [appBarTheme] can
-  /// be used to configure the appearance of [AppBar]s. The brightness
+  /// be used to configure the appearance of [AppBar]s. The appearance of
+  /// Keyboards for [TextField]s now uses the overall theme's [Theme.brightness]
+  /// and can also be customized with [TextField.keyboardAppearance].
   /// of any color can be found with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '

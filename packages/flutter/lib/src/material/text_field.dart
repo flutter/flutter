@@ -662,7 +662,7 @@ class TextField extends StatefulWidget {
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to [ThemeData.colorScheme]'s [ColorScheme.brightness].
+  /// If unset, defaults to [ThemeData.brightness].
   final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
