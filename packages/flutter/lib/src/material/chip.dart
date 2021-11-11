@@ -225,8 +225,15 @@ abstract class DeletableChipAttributes {
   /// {@end-tool}
   VoidCallback? get onDeleted;
 
-  /// The [Color] for the delete icon. The default is based on the ambient
-  /// [IconThemeData.color].
+  /// Used to define the delete icon's color with an [IconTheme] that
+  /// contains the icon.
+  ///
+  /// The default is Color(0xde000000)
+  /// (slightly transparent black) for light themes, and Color(0xdeffffff)
+  /// (slightly transparent white) for dark themes.
+  ///
+  /// The delete icon appears if [DeletableChipAttributes.onDeleted] is
+  /// non-null.
   Color? get deleteIconColor;
 
   /// Whether to use a tooltip on the chip's delete button showing the
@@ -423,7 +430,8 @@ abstract class DisabledChipAttributes {
   /// Defaults to true. Cannot be null.
   bool get isEnabled;
 
-  /// Color to be used for the chip's background indicating that it is disabled.
+  /// Color used for the chip's background to indicate that it is not
+  /// enabled.
   ///
   /// The chip is disabled when [isEnabled] is false, or all three of
   /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],

@@ -264,87 +264,83 @@ class ChipThemeData with Diagnosticable {
     );
   }
 
-  /// Overrides the default color to be used for the unselected,
-  /// enabled chip's background.
+  /// Overrides the default for [ChipAttributes.backgroundColor]
+  /// which is used for unselected, enabled chip backgrounds.
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final Color? backgroundColor;
 
-  /// The [Color] for the delete icon. The default is Color(0xde000000)
-  /// (slightly transparent black) for light themes, and Color(0xdeffffff)
-  /// (slightly transparent white) for dark themes.
+  /// Overrides the default for [DeletableChipAttributes.deleteIconColor].
   ///
-  /// May be set to null, in which case the ambient [IconThemeData.color] is used.
+  /// This property applies to [Chip], [InputChip], [RawChip].
   final Color? deleteIconColor;
 
-  /// Overrides the default color to be used for the chip's background indicating
-  /// that it is disabled.
+  /// Overrides the default for
+  /// [DisabledChipAttributes.disabledColor], the background color
+  /// which indicates that the chip is not enabled.
   ///
-  /// The chip is disabled when [DisabledChipAttributes.isEnabled] is false, or
-  /// all three of [SelectableChipAttributes.onSelected],
-  /// [TappableChipAttributes.onPressed], and
-  /// [DeletableChipAttributes.onDeleted] are null.
-  ///
-  /// It defaults to [Colors.black38].
+  /// This property applies to [ChoiceChip], [FilterChip],
+  /// [InputChip], [RawChip].
   final Color? disabledColor;
 
-  /// Color to be used for the chip's background, indicating that it is
-  /// selected.
+  /// Overrides the default for
+  /// [SelectableChipAttributes.selectedColor], the background color
+  /// that indicates that the chip is selected.
   ///
-  /// The chip is selected when [SelectableChipAttributes.selected] is true.
+  /// This property applies to [ChoiceChip], [FilterChip],
+  /// [InputChip], [RawChip].
   final Color? selectedColor;
 
-  /// An alternate color to be used for the chip's background, indicating that
-  /// it is selected. For example, this color is used by [ChoiceChip] when the
-  /// choice is selected.
-  ///
-  /// The chip is selected when [SelectableChipAttributes.selected] is true.
+  /// Overrides the default for [ChoiceChip.selectedColor], the
+  /// background color that indicates that the chip is selected.
   final Color? secondarySelectedColor;
 
-  /// Color of the chip's shadow when the elevation is greater than 0.
+  /// Overrides the default for [SelectableChipAttributes.shadowColor], the
+  /// Color of the chip's shadow when its elevation is greater than 0.
   ///
-  /// If null, the chip defaults to [Colors.black].
-  ///
-  /// See also:
-  ///
-  ///  * [selectedShadowColor]
+  /// This property applies to [ChoiceChip], [FilterChip],
+  /// [InputChip], [RawChip].
   final Color? shadowColor;
 
-  /// Color of the chip's shadow when the elevation is greater than 0 and the
-  /// chip is selected.
+  /// Overrides the default for
+  /// [SelectableChipAttributes.selectedShadowColor], the Color of the
+  /// chip's shadow when its elevation is greater than 0 and the chip
+  /// is selected.
   ///
-  /// If null, the chip defaults to [Colors.black].
-  ///
-  /// See also:
-  ///
-  ///  * [shadowColor]
+  /// This property applies to [ChoiceChip], [FilterChip],
+  /// [InputChip], [RawChip].
   final Color? selectedShadowColor;
 
-  /// Whether or not to show a check mark when [SelectableChipAttributes.selected] is true.
+  /// Overrides the default for
+  /// [CheckmarkableChipAttributes.showCheckmark], which indicates if
+  /// a check mark should be shown.
   ///
-  /// For instance, the [ChoiceChip] sets this to false so that it can be
-  /// selected without showing the check mark.
-  ///
-  /// Defaults to true.
+  /// This property applies to [FilterChip], [InputChip], [RawChip].
   final bool? showCheckmark;
 
-  /// Color of the chip's check mark when a check mark is visible.
+  /// Overrides the default for
+  /// [CheckmarkableChipAttributes.checkmarkColor].
   ///
-  /// This will override the color set by the platform's brightness setting.
+  /// This property applies to [FilterChip], [InputChip], [RawChip].
   final Color? checkmarkColor;
 
-  /// The padding around the [Chip.label] widget.
+  /// Overrides the default for [ChipAttributes.labelPadding],
+  /// the padding around the chip's label widget.
   ///
-  /// By default, this is 4 logical pixels at the beginning and the end of the
-  /// label, and zero on top and bottom.
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final EdgeInsetsGeometry? labelPadding;
 
-  /// The padding between the contents of the chip and the outside [shape].
+  /// Overrides the default for [ChipAttributes.padding],
+  /// the padding between the contents of the chip and the outside [shape].
   ///
-  /// Defaults to 4 logical pixels on all sides.
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final EdgeInsetsGeometry? padding;
 
-  /// The color and weight of the chip's outline.
-  ///
-  /// If null, the chip defaults to the border side of [shape].
+  /// Overrides the default for [ChipAttributes.side],
+  /// the color and weight of the chip's outline.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
   /// outline. If it is a [MaterialStateBorderSide],
@@ -356,11 +352,13 @@ class ChipThemeData with Diagnosticable {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.pressed].
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final BorderSide? side;
 
-  /// The border to draw around the chip.
-  ///
-  /// If null, the chip defaults to a [StadiumBorder].
+  /// Overrides the default for [ChipAttributes.shape],
+  /// the shape of border to draw around the chip.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
   /// outline. If it is a [MaterialStateOutlinedBorder],
@@ -372,16 +370,25 @@ class ChipThemeData with Diagnosticable {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.pressed].
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final OutlinedBorder? shape;
 
-  /// The style to be applied to the chip's label.
+  /// Overrides the default for [ChipAttributes.labelStyle],
+  /// the style of the [DefaultTextStyle] that contains the
+  /// chip's label.
   ///
   /// This only has an effect on label widgets that respect the
   /// [DefaultTextStyle], such as [Text].
+  ///
+  /// This property applies to [ActionChip], [Chip],
+  /// [FilterChip], [InputChip], [RawChip].
   final TextStyle? labelStyle;
 
-  /// An alternate style to be applied to the chip's label. For example, this
-  /// style is applied to the text of a selected [ChoiceChip].
+  /// Overrides the default for [ChoiceChip.labelStyle],
+  /// the style of the [DefaultTextStyle] that contains the
+  /// chip's label.
   ///
   /// This only has an effect on label widgets that respect the
   /// [DefaultTextStyle], such as [Text].
@@ -391,14 +398,17 @@ class ChipThemeData with Diagnosticable {
   /// material color choices in the chip rendering.
   final Brightness? brightness;
 
-  /// The elevation to be applied to the chip.
+  /// Overrides the default for [ChipAttributes.elevation],
+  /// the elevation of the chip's [Material].
   ///
-  /// If null, the chip defaults to 0.
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final double? elevation;
 
-  /// The elevation to be applied to the chip during the press motion.
+  /// Overrides the default for [TappableChipAttributes.pressElevation],
+  /// the elevation of the chip's [Material] during a "press" or tap down.
   ///
-  /// If null, the chip defaults to 8.
+  /// This property applies to [ActionChip], [InputChip], [RawChip].
   final double? pressElevation;
 
   /// Creates a copy of this object but with the given fields replaced with the
