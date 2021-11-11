@@ -182,8 +182,29 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        await project.regeneratePlatformSpecificTooling();
-        expect(testLogger.warningText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('Android project not on v2 embedding exits', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        await expectToolExitLater(
+          Future<dynamic>.sync(() => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit)),
+          contains('Build failed due to use of deprecated Android v1 embedding.')
+        );
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('Android project not on v2 embedding ignore continues', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
         final FlutterProject project = await aPluginProject();
