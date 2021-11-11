@@ -13,7 +13,7 @@ List<Widget> children(int n) {
 }
 
 void main() {
-  testWidgets('Scrolling with list view changes', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
@@ -22,7 +22,21 @@ void main() {
     controller.jumpTo(thirty + 100.0); // past the end
     await tester.pump();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
-    expect(controller.position.pixels, thirty + 200.0); // same distance past the end
+    expect(controller.position.pixels, thirty + 100.0); // has the same position, but no longer overscrolled
+    expect(await tester.pumpAndSettle(), 1); // doesn't have ballistic animation...
+    expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
+  });
+
+  testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
+    final double thirty = controller.position.maxScrollExtent;
+    controller.jumpTo(thirty);
+    await tester.pump();
+    controller.jumpTo(thirty + 200.0); // past the end
+    await tester.pump();
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
+    expect(controller.position.pixels, thirty + 200.0); // has the same position, still overscrolled
     expect(await tester.pumpAndSettle(), 8); // now it goes ballistic...
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
