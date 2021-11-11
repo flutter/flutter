@@ -69,13 +69,22 @@ if (is_ios || is_mac) {
 # prebuilt Dart SDK location
 
 if (flutter_prebuilt_dart_sdk) {
-  _os_name = target_os
-  if (_os_name == "mac") {
-    _os_name = "macos"
-  } else if (_os_name == "win" || _os_name == "winuwp") {
-    _os_name = "windows"
+  _target_os_name = target_os
+  if (_target_os_name == "mac") {
+    _target_os_name = "macos"
+  } else if (_target_os_name == "win" || _target_os_name == "winuwp") {
+    _target_os_name = "windows"
   }
+
+  _host_os_name = host_os
+  if (_host_os_name == "mac") {
+    _host_os_name = "macos"
+  } else if (_host_os_name == "win" || _host_os_name == "winuwp") {
+    _host_os_name = "windows"
+  }
+
   target_prebuilt_dart_sdk =
-      "//flutter/prebuilts/$_os_name-$target_cpu/dart-sdk"
-  host_prebuilt_dart_sdk = "//flutter/prebuilts/$_os_name-$host_cpu/dart-sdk"
+      "//flutter/prebuilts/$_target_os_name-$target_cpu/dart-sdk"
+  host_prebuilt_dart_sdk =
+      "//flutter/prebuilts/$_host_os_name-$host_cpu/dart-sdk"
 }
