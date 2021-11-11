@@ -16,7 +16,7 @@ void main() {
 void testMain() {
   group('$FontManager', () {
     late FontManager fontManager;
-    const String _testFontUrl = 'packages/ui/assets/ahem.ttf';
+    const String _testFontUrl = '/assets/fonts/ahem.ttf';
 
     setUp(() {
       fontManager = FontManager();

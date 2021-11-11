@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show JsonEncoder;
 import 'dart:io' as io;
 
 import 'package:path/path.dart' as pathlib;
@@ -13,12 +14,16 @@ import '../exceptions.dart';
 import '../pipeline.dart';
 import '../utils.dart';
 
-/// Compiles web tests and their dependencies.
+/// Compiles web tests and their dependencies into web_ui/build/.
 ///
-/// Includes:
-///  * compile the test code itself
-///  * compile the page that hosts the tests
-///  * fetch the golden repo for screenshot comparison
+/// Outputs of this step:
+///
+///  * canvaskit/   - CanvasKit artifacts
+///  * assets/      - test fonts
+///  * goldens/     - the goldens fetched from flutter/goldens
+///  * host/        - compiled test host page and static artifacts
+///  * test/        - compiled test code
+///  * test_images/ - test images copied from Skis sources.
 class CompileTestsStep implements PipelineStep {
   CompileTestsStep({
     this.skipGoldensRepoFetch = false,
@@ -41,11 +46,115 @@ class CompileTestsStep implements PipelineStep {
 
   @override
   Future<void> run() async {
+    await environment.webUiBuildDir.create();
     if (!skipGoldensRepoFetch) {
       await fetchGoldensRepo();
     }
+    await copyCanvasKitFiles();
     await buildHostPage();
+    await copyTestFonts();
+    await copySkiaTestImages();
     await compileTests(testFiles ?? findAllTests());
+  }
+}
+
+const Map<String, String> _kTestFonts = <String, String>{
+  'Ahem': 'ahem.ttf',
+  'Roboto': 'Roboto-Regular.ttf',
+  'Noto Naskh Arabic UI': 'NotoNaskhArabic-Regular.ttf',
+  'Noto Color Emoji': 'NotoColorEmoji.ttf',
+};
+
+Future<void> copyTestFonts() async {
+  final String fontsPath = pathlib.join(
+    environment.flutterDirectory.path,
+    'third_party',
+    'txt',
+    'third_party',
+    'fonts',
+  );
+
+  final List<dynamic> fontManifest = <dynamic>[];
+  for (final MapEntry<String, String> fontEntry in _kTestFonts.entries) {
+    final String family = fontEntry.key;
+    final String fontFile = fontEntry.value;
+
+    fontManifest.add(<String, dynamic>{
+      'family': family,
+      'fonts': <dynamic>[
+        <String, String>{
+          'asset': 'fonts/$fontFile',
+        },
+      ],
+    });
+
+    final io.File sourceTtf = io.File(pathlib.join(fontsPath, fontFile));
+    final io.File destinationTtf = io.File(pathlib.join(
+      environment.webUiBuildDir.path,
+      'assets',
+      'fonts',
+      fontFile,
+    ));
+    await destinationTtf.create(recursive: true);
+    await sourceTtf.copy(destinationTtf.path);
+  }
+
+  final io.File fontManifestFile = io.File(pathlib.join(
+    environment.webUiBuildDir.path,
+    'assets',
+    'FontManifest.json',
+  ));
+  await fontManifestFile.create(recursive: true);
+  await fontManifestFile.writeAsString(
+    const JsonEncoder.withIndent('  ').convert(fontManifest),
+  );
+}
+
+Future<void> copySkiaTestImages() async {
+  final io.Directory testImagesDir = io.Directory(pathlib.join(
+    environment.engineSrcDir.path,
+    'third_party',
+    'skia',
+    'resources',
+    'images',
+  ));
+
+  for (final io.File imageFile in testImagesDir.listSync(recursive: true).whereType<io.File>()) {
+    final io.File destination = io.File(pathlib.join(
+      environment.webUiBuildDir.path,
+      'test_images',
+      pathlib.relative(imageFile.path, from: testImagesDir.path),
+    ));
+    destination.createSync(recursive: true);
+    await imageFile.copy(destination.path);
+  }
+}
+
+Future<void> copyCanvasKitFiles() async {
+  final io.Directory canvasKitDir = io.Directory(pathlib.join(
+    environment.engineSrcDir.path,
+    'third_party',
+    'web_dependencies',
+    'canvaskit',
+  ));
+
+  final Iterable<io.File> canvasKitFiles = canvasKitDir
+    .listSync(recursive: true, followLinks: true)
+    .whereType<io.File>();
+
+  final io.Directory targetDir = io.Directory(pathlib.join(
+    environment.webUiBuildDir.path,
+    'canvaskit',
+  ));
+
+  for (final io.File file in canvasKitFiles) {
+    final String relativePath = pathlib.relative(file.path, from: canvasKitDir.path);
+    final io.File targetFile = io.File(pathlib.join(
+      targetDir.path,
+      relativePath,
+    ));
+    await targetFile.create(recursive: true);
+    await file.copy(targetFile.path);
   }
 }
 
@@ -176,9 +285,38 @@ Future<void> buildHostPage() async {
     environment.webEngineTesterRootDir.path,
     hostDartPath,
   ));
+  final String targetDirectoryPath = pathlib.join(
+    environment.webUiBuildDir.path,
+    'host',
+  );
+  io.Directory(targetDirectoryPath).createSync(recursive: true);
+  final String targetFilePath = pathlib.join(
+    targetDirectoryPath,
+    'host.dart',
+  );
+
+  const List<String> staticFiles = <String>[
+    'favicon.ico',
+    'host.css',
+    'index.html',
+  ];
+  for (final String staticFilePath in staticFiles) {
+    final io.File source = io.File(pathlib.join(
+      environment.webEngineTesterRootDir.path,
+      'lib',
+      'static',
+      staticFilePath,
+    ));
+    final io.File destination = io.File(pathlib.join(
+      targetDirectoryPath,
+      staticFilePath,
+    ));
+    await source.copy(destination.path);
+  }
+
   final io.File timestampFile = io.File(pathlib.join(
     environment.webEngineTesterRootDir.path,
-    '$hostDartPath.js.timestamp',
+    '$targetFilePath.js.timestamp',
   ));
 
   final String timestamp =
@@ -203,7 +341,7 @@ Future<void> buildHostPage() async {
       'js',
       hostDartPath,
       '-o',
-      '$hostDartPath.js',
+      '$targetFilePath.js',
     ],
     workingDirectory: environment.webEngineTesterRootDir.path,
   );

@@ -14,9 +14,9 @@ import '../util.dart';
 import 'layout_service.dart';
 
 const String ahemFontFamily = 'Ahem';
-const String ahemFontUrl = 'packages/ui/assets/ahem.ttf';
+const String ahemFontUrl = '/assets/fonts/ahem.ttf';
 const String robotoFontFamily = 'Roboto';
-const String robotoTestFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
+const String robotoTestFontUrl = '/assets/fonts/Roboto-Regular.ttf';
 
 /// This class is responsible for registering and loading fonts.
 ///

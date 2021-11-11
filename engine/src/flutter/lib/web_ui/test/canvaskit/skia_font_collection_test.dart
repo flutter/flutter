@@ -51,7 +51,7 @@ void testMain() {
 [
    {
       "family":"Roboto",
-      "fonts":[{"asset":"packages/ui/assets/Roboto-Regular.ttf"}]
+      "fonts":[{"asset":"/fonts/Roboto-Regular.ttf"}]
    },
    {
       "family": "BrokenFont",
