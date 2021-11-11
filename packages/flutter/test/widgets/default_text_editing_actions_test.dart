@@ -73,7 +73,7 @@ void main() {
       ),
     ));
 
-    // Focus on the EditableText, which is a TextEditingActionTarget.
+    // Focus on the EditableText, which receives text editing Intents.
     focusNodeTarget.requestFocus();
     await tester.pump();
     expect(focusNodeTarget.hasFocus, isTrue);
@@ -94,7 +94,7 @@ void main() {
     expect(rightCalled, isFalse);
     expect(leftCalled, isFalse);
 
-    // Focus on the other node, which is not a TextEditingActionTarget.
+    // Focus on the other node, which does not receive text editing intents.
     focusNodeNonTarget.requestFocus();
     await tester.pump();
     expect(focusNodeTarget.hasFocus, isFalse);
@@ -108,8 +108,8 @@ void main() {
     leftCalled = false;
 
     // The right arrow key's Action is also called. That's because
-    // DoNothingAndStopPropagationTextIntent only applies if a
-    // TextEditingActionTarget is currently focused.
+    // DoNothingAndStopPropagationTextIntent only applies if an EditableText is
+    // currently focused.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(leftCalled, isFalse);
