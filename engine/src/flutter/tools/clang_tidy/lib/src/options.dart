@@ -5,6 +5,10 @@
 import 'dart:io' as io show Directory, File, Platform, stderr;
 
 import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
+
+// Path to root of the flutter/engine repository containing this script.
+final String _engineRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(io.Platform.script)))));
 
 /// A class for organizing the options to the Engine linter, and the files
 /// that it operates on.
@@ -12,7 +16,6 @@ class Options {
   /// Builds an instance of [Options] from the arguments.
   Options({
     required this.buildCommandsPath,
-    required this.repoPath,
     this.help = false,
     this.verbose = false,
     this.checksArg = '',
@@ -30,7 +33,6 @@ class Options {
     return Options(
       errorMessage: message,
       buildCommandsPath: io.File('none'),
-      repoPath: io.Directory('none'),
       errSink: errSink,
     );
   }
@@ -41,7 +43,6 @@ class Options {
     return Options(
       help: true,
       buildCommandsPath: io.File('none'),
-      repoPath: io.Directory('none'),
       errSink: errSink,
     );
   }
@@ -49,13 +50,13 @@ class Options {
   /// Builds an [Options] instance with an [ArgResults] instance.
   factory Options._fromArgResults(
     ArgResults options, {
+    required io.File buildCommandsPath,
     StringSink? errSink,
   }) {
     return Options(
       help: options['help'] as bool,
       verbose: options['verbose'] as bool,
-      buildCommandsPath: io.File(options['compile-commands'] as String),
-      repoPath: io.Directory(options['repo'] as String),
+      buildCommandsPath: buildCommandsPath,
       checksArg: options.wasParsed('checks') ? options['checks'] as String : '',
       lintAll: io.Platform.environment['FLUTTER_LINT_ALL'] != null ||
                options['lint-all'] as bool,
@@ -70,7 +71,17 @@ class Options {
     StringSink? errSink,
   }) {
     final ArgResults argResults = _argParser.parse(arguments);
-    final String? message = _checkArguments(argResults);
+
+    String? buildCommandsPath = argResults['compile-commands'] as String?;
+    // path/to/engine/src/out/variant/compile_commands.json
+    buildCommandsPath ??= path.join(
+      argResults['src-dir'] as String,
+      'out',
+      argResults['target-variant'] as String,
+      'compile_commands.json',
+    );
+    final io.File buildCommands = io.File(buildCommandsPath);
+    final String? message = _checkArguments(argResults, buildCommands);
     if (message != null) {
       return Options._error(message, errSink: errSink);
     }
@@ -79,6 +90,7 @@ class Options {
     }
     return Options._fromArgResults(
       argResults,
+      buildCommandsPath: buildCommands,
       errSink: errSink,
     );
   }
@@ -86,7 +98,9 @@ class Options {
   static final ArgParser _argParser = ArgParser()
     ..addFlag(
       'help',
+      abbr: 'h',
       help: 'Print help.',
+      negatable: false,
     )
     ..addFlag(
       'lint-all',
@@ -104,13 +118,24 @@ class Options {
       defaultsTo: false,
     )
     ..addOption(
-      'repo',
-      help: 'Use the given path as the repo path',
-    )
-    ..addOption(
       'compile-commands',
       help: 'Use the given path as the source of compile_commands.json. This '
-            'file is created by running tools/gn',
+            'file is created by running "tools/gn". Cannot be used with --target-variant '
+            'or --src-dir.',
+    )
+    ..addOption(
+      'target-variant',
+      aliases: <String>['variant'],
+      help: 'The engine variant directory containing compile_commands.json '
+            'created by running "tools/gn". Cannot be used with --compile-commands.',
+      valueHelp: 'host_debug|android_debug_unopt|ios_debug|ios_debug_sim_unopt',
+      defaultsTo: 'host_debug',
+    )
+    ..addOption(
+      'src-dir',
+      help: 'Path to the engine src directory. Cannot be used with --compile-commands.',
+      valueHelp: 'path/to/engine/src',
+      defaultsTo: path.dirname(_engineRoot),
     )
     ..addOption(
       'checks',
@@ -129,7 +154,7 @@ class Options {
   final io.File buildCommandsPath;
 
   /// The root of the flutter/engine repository.
-  final io.Directory repoPath;
+  final io.Directory repoPath = io.Directory(_engineRoot);
 
   /// Arguments to plumb through to clang-tidy formatted as a command line
   /// argument.
@@ -156,33 +181,28 @@ class Options {
       _errSink.writeln(message);
     }
     _errSink.writeln(
-      'Usage: bin/main.dart [--help] [--lint-all] [--fix] [--verbose] [--diff-branch]',
+      'Usage: bin/main.dart [--help] [--lint-all] [--fix] [--verbose] [--diff-branch] [--target-variant variant] [--src-dir path/to/engine/src]',
     );
     _errSink.writeln(_argParser.usage);
   }
 
   /// Command line argument validation.
-  static String? _checkArguments(ArgResults argResults) {
+  static String? _checkArguments(ArgResults argResults, io.File buildCommandsPath) {
     if (argResults.wasParsed('help')) {
       return null;
     }
 
-    if (!argResults.wasParsed('compile-commands')) {
-      return 'ERROR: The --compile-commands argument is required.';
+    final bool compileCommandsParsed = argResults.wasParsed('compile-commands');
+    if (compileCommandsParsed && argResults.wasParsed('target-variant')) {
+      return 'ERROR: --compile-commands option cannot be used with --target-variant.';
     }
 
-    if (!argResults.wasParsed('repo')) {
-      return 'ERROR: The --repo argument is required.';
+    if (compileCommandsParsed && argResults.wasParsed('src-dir')) {
+      return 'ERROR: --compile-commands option cannot be used with --src-dir.';
     }
 
-    final io.File buildCommandsPath = io.File(argResults['compile-commands'] as String);
     if (!buildCommandsPath.existsSync()) {
       return "ERROR: Build commands path ${buildCommandsPath.absolute.path} doesn't exist.";
-    }
-
-    final io.Directory repoPath = io.Directory(argResults['repo'] as String);
-    if (!repoPath.existsSync()) {
-      return "ERROR: Repo path ${repoPath.absolute.path} doesn't exist.";
     }
 
     return null;
