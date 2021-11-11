@@ -519,16 +519,6 @@ double convertSigmaToRadius(double sigma) {
   return sigma * 2.0;
 }
 
-/// Used to check for null values that are non-nullable.
-///
-/// This is useful when some external API (e.g. HTML DOM) disagrees with
-/// Dart type declarations (e.g. `dart:html`). Where `dart:html` may believe
-/// something to be non-null, it may actually be null (e.g. old browsers do
-/// not implement a feature, such as clipboard).
-bool isUnsoundNull(dynamic object) {
-  return object == null;
-}
-
 int clampInt(int value, int min, int max) {
   assert(min <= max);
   if (value < min) {
