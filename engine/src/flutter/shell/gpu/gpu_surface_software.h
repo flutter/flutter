@@ -39,7 +39,6 @@ class GPUSurfaceSoftware : public Surface {
   // external view embedder is present.
   const bool render_to_surface_;
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceSoftware> weak_factory_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceSoftware);
 };
 

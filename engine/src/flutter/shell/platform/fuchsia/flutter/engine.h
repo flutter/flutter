@@ -171,7 +171,6 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   bool intercept_all_input_ = false;
 
   fml::WeakPtrFactory<Engine> weak_factory_;
-
   friend class testing::EngineTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);

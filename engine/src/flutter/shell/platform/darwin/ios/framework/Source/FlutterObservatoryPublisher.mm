@@ -236,6 +236,10 @@ static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
 }
 
 - (void)dealloc {
+  // It will be destroyed and invalidate its weak pointers
+  // before any other members are destroyed.
+  _weakFactory.reset();
+
   [_delegate stopService];
   [_url release];
 

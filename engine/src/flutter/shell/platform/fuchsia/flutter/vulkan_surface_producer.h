@@ -56,6 +56,14 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
   bool TransitionSurfacesToExternal(
       const std::vector<std::unique_ptr<SurfaceProducerSurface>>& surfaces);
 
+  // Keep track of the last time we produced a surface.  This is used to
+  // determine whether it is safe to shrink |surface_pool_| or not.
+  zx::time last_produce_time_ = async::Now(async_get_default_dispatcher());
+
+  // Disallow copy and assignment.
+  VulkanSurfaceProducer(const VulkanSurfaceProducer&) = delete;
+  VulkanSurfaceProducer& operator=(const VulkanSurfaceProducer&) = delete;
+
   // Note: the order here is very important. The proctable must be destroyed
   // last because it contains the function pointers for VkDestroyDevice and
   // VkDestroyInstance.
@@ -66,14 +74,8 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
   std::unique_ptr<VulkanSurfacePool> surface_pool_;
   bool valid_ = false;
 
-  // Keep track of the last time we produced a surface.  This is used to
-  // determine whether it is safe to shrink |surface_pool_| or not.
-  zx::time last_produce_time_ = async::Now(async_get_default_dispatcher());
+  // WeakPtrFactory must be the last member.
   fml::WeakPtrFactory<VulkanSurfaceProducer> weak_factory_{this};
-
-  // Disallow copy and assignment.
-  VulkanSurfaceProducer(const VulkanSurfaceProducer&) = delete;
-  VulkanSurfaceProducer& operator=(const VulkanSurfaceProducer&) = delete;
 };
 
 }  // namespace flutter_runner

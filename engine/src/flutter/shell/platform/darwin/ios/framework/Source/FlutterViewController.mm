@@ -784,6 +784,10 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 }
 
 - (void)dealloc {
+  // It will be destroyed and invalidate its weak pointers
+  // before any other members are destroyed.
+  _weakFactory.reset();
+
   [self removeInternalPlugins];
   [self deregisterNotifications];
   [super dealloc];
