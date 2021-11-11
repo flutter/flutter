@@ -894,6 +894,12 @@ void main() {
     expect(pub.calledGet, 1);
   });
 
+  testUsingContext('Check current DevTools version', () async {
+    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+    final RegExp devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+    expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1,);
+  });
+
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
   testUsingContext('Check current Dart SDK build number', () async {
@@ -1060,7 +1066,7 @@ class FakeSecondaryCache extends Fake implements Cache {
   Directory getArtifactDirectory(String name) => artifactDirectory;
 
   @override
-  Directory getCacheDir(String name) {
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
     return artifactDirectory.childDirectory(name);
   }
 
