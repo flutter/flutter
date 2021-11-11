@@ -1,4 +1,4 @@
-Signature: 01e40d1b4079ee01d027a987ef212440
+Signature: c3d1fcbcda0ce039921b33a6b656eb9a
 
 UNUSED LICENSES:
 
@@ -669,6 +669,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/.bazelrc
+FILE: ../../../third_party/skia/.bazelversion
 FILE: ../../../third_party/skia/.clang-tidy
 FILE: ../../../third_party/skia/BUILD.bazel
 FILE: ../../../third_party/skia/CQ_COMMITTERS
@@ -688,6 +689,7 @@ FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bazel/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
+FILE: ../../../third_party/skia/bazel/macros.bzl
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
@@ -2512,12 +2514,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTypesPriv.mm
 FILE: ../../../third_party/skia/src/gpu/ops/FillPathFlags.h
-FILE: ../../../third_party/skia/src/gpu/v2/Device.cpp
-FILE: ../../../third_party/skia/src/gpu/v2/Device_v2.h
-FILE: ../../../third_party/skia/src/gpu/v2/SurfaceDrawContext.cpp
-FILE: ../../../third_party/skia/src/gpu/v2/SurfaceDrawContext_v2.h
-FILE: ../../../third_party/skia/src/gpu/v2/SurfaceFillContext_v2.cpp
-FILE: ../../../third_party/skia/src/gpu/v2/SurfaceFillContext_v2.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
@@ -5960,6 +5956,7 @@ FILE: ../../../third_party/skia/experimental/sorttoy/Fake.h
 FILE: ../../../third_party/skia/experimental/sorttoy/SortKey.h
 FILE: ../../../third_party/skia/experimental/sorttoy/sorttoy.cpp
 FILE: ../../../third_party/skia/experimental/sorttoy/sorttypes.h
+FILE: ../../../third_party/skia/gm/batchedconvexpaths.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/core/SkStringView.h
