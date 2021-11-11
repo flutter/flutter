@@ -179,32 +179,25 @@ class ChipThemeData with Diagnosticable {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
   const ChipThemeData({
-    required this.backgroundColor,
+    this.backgroundColor,
     this.deleteIconColor,
-    required this.disabledColor,
-    required this.selectedColor,
-    required this.secondarySelectedColor,
+    this.disabledColor,
+    this.selectedColor,
+    this.secondarySelectedColor,
     this.shadowColor,
     this.selectedShadowColor,
     this.showCheckmark,
     this.checkmarkColor,
     this.labelPadding,
-    required this.padding,
+    this.padding,
     this.side,
     this.shape,
-    required this.labelStyle,
-    required this.secondaryLabelStyle,
-    required this.brightness,
+    this.labelStyle,
+    this.secondaryLabelStyle,
+    this.brightness,
     this.elevation,
     this.pressElevation,
-  }) : assert(backgroundColor != null),
-       assert(disabledColor != null),
-       assert(selectedColor != null),
-       assert(secondarySelectedColor != null),
-       assert(padding != null),
-       assert(labelStyle != null),
-       assert(secondaryLabelStyle != null),
-       assert(brightness != null);
+  });
 
   /// Generates a ChipThemeData from a brightness, a primary color, and a text
   /// style.
@@ -267,14 +260,13 @@ class ChipThemeData with Diagnosticable {
       padding: padding,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
-      brightness: brightness!,
+      brightness: brightness,
     );
   }
 
-  /// Color to be used for the unselected, enabled chip's background.
-  ///
-  /// The default is light grey.
-  final Color backgroundColor;
+  /// Overrides the default color to be used for the unselected,
+  /// enabled chip's background.
+  final Color? backgroundColor;
 
   /// The [Color] for the delete icon. The default is Color(0xde000000)
   /// (slightly transparent black) for light themes, and Color(0xdeffffff)
@@ -283,7 +275,8 @@ class ChipThemeData with Diagnosticable {
   /// May be set to null, in which case the ambient [IconThemeData.color] is used.
   final Color? deleteIconColor;
 
-  /// Color to be used for the chip's background indicating that it is disabled.
+  /// Overrides the default color to be used for the chip's background indicating
+  /// that it is disabled.
   ///
   /// The chip is disabled when [DisabledChipAttributes.isEnabled] is false, or
   /// all three of [SelectableChipAttributes.onSelected],
@@ -291,20 +284,20 @@ class ChipThemeData with Diagnosticable {
   /// [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
-  final Color disabledColor;
+  final Color? disabledColor;
 
   /// Color to be used for the chip's background, indicating that it is
   /// selected.
   ///
   /// The chip is selected when [SelectableChipAttributes.selected] is true.
-  final Color selectedColor;
+  final Color? selectedColor;
 
   /// An alternate color to be used for the chip's background, indicating that
   /// it is selected. For example, this color is used by [ChoiceChip] when the
   /// choice is selected.
   ///
   /// The chip is selected when [SelectableChipAttributes.selected] is true.
-  final Color secondarySelectedColor;
+  final Color? secondarySelectedColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0.
   ///
@@ -347,7 +340,7 @@ class ChipThemeData with Diagnosticable {
   /// The padding between the contents of the chip and the outside [shape].
   ///
   /// Defaults to 4 logical pixels on all sides.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The color and weight of the chip's outline.
   ///
@@ -385,19 +378,18 @@ class ChipThemeData with Diagnosticable {
   ///
   /// This only has an effect on label widgets that respect the
   /// [DefaultTextStyle], such as [Text].
-  final TextStyle labelStyle;
+  final TextStyle? labelStyle;
 
   /// An alternate style to be applied to the chip's label. For example, this
   /// style is applied to the text of a selected [ChoiceChip].
   ///
   /// This only has an effect on label widgets that respect the
   /// [DefaultTextStyle], such as [Text].
-  final TextStyle secondaryLabelStyle;
+  final TextStyle? secondaryLabelStyle;
 
-  /// The brightness setting for this theme.
-  ///
-  /// This affects various base material color choices in the chip rendering.
-  final Brightness brightness;
+  /// Overrides the default value for all chips which affects various base
+  /// material color choices in the chip rendering.
+  final Brightness? brightness;
 
   /// The elevation to be applied to the chip.
   ///
@@ -461,20 +453,20 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null)
       return null;
     return ChipThemeData(
-      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t)!,
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
-      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t)!,
-      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t)!,
-      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t)!,
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
+      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
+      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
       checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
-      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t)!,
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       side: _lerpSides(a?.side, b?.side, t),
       shape: _lerpShapes(a?.shape, b?.shape, t),
-      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t)!,
-      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t)!,
+      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
+      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
@@ -553,28 +545,22 @@ class ChipThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final ThemeData defaultTheme = ThemeData.fallback();
-    final ChipThemeData defaultData = ChipThemeData.fromDefaults(
-      secondaryColor: defaultTheme.primaryColor,
-      brightness: defaultTheme.brightness,
-      labelStyle: defaultTheme.textTheme.bodyText1!,
-    );
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));
-    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
-    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
-    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
-    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
-    properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: defaultData.checkmarkColor));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
-    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: defaultData.side));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
-    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultData.labelStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: defaultData.secondaryLabelStyle));
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: defaultData.pressElevation));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
+    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: null));
+    properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: null));
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('pressElevation', pressElevation, defaultValue: null));
   }
 }
