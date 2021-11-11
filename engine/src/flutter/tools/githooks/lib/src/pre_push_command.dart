@@ -60,7 +60,6 @@ class PrePushCommand extends Command<bool> {
     final StringBuffer errBuffer = StringBuffer();
     final ClangTidy clangTidy = ClangTidy(
       buildCommandsPath: compileCommands,
-      repoPath: io.Directory(flutterRoot),
       outSink: outBuffer,
       errSink: errBuffer,
     );

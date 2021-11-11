@@ -7,8 +7,8 @@
 // Runs clang-tidy on files with changes.
 //
 // Basic Usage:
-// dart bin/main.dart --compile-commands <path to compile_commands.json> \
-//                    --repo <path to git repository> \
+// dart bin/main.dart --compile-commands <path to compile_commands.json>
+// dart bin/main.dart --target-variant <engine-variant>
 //
 // User environment variable FLUTTER_LINT_ALL to run on all files.
 
