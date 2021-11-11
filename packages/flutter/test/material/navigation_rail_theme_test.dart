@@ -118,6 +118,7 @@ void main() {
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
     const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -141,6 +142,7 @@ void main() {
               groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
               useIndicator: false,
+              indicatorColor: Color(0x00000096),
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -162,6 +164,7 @@ void main() {
               groupAlignment: groupAlignment,
               labelType: labelType,
               useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
             ),
           ),
         ),
@@ -181,6 +184,7 @@ void main() {
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
     expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
@@ -207,6 +211,7 @@ void main() {
       groupAlignment: 1.0,
       labelType: NavigationRailLabelType.selected,
       useIndicator: true,
+      indicatorColor: Color(0x00000096),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -228,6 +233,7 @@ void main() {
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
     expect(description[8], 'useIndicator: true');
+    expect(description[9], 'indicatorColor: Color(0x00000096)');
   });
 }
 

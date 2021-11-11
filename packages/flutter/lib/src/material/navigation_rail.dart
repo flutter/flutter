@@ -96,6 +96,7 @@ class NavigationRail extends StatefulWidget {
     this.minWidth,
     this.minExtendedWidth,
     this.useIndicator,
+    this.indicatorColor,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
@@ -292,6 +293,10 @@ class NavigationRail extends StatefulWidget {
   /// `null`, defaults to false.
   final bool? useIndicator;
 
+  /// Overrides the default value of [NavigationRail]'s selection indicator color,
+  /// when [useIndicator] is true.
+  final Color? indicatorColor;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
@@ -427,7 +432,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
                           useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? false,
-                          indicatorColor: navigationRailTheme.indicatorColor,
+                          indicatorColor: widget.indicatorColor ?? navigationRailTheme.indicatorColor,
                           onTap: () {
                             if (widget.onDestinationSelected != null)
                               widget.onDestinationSelected!(i);
@@ -553,6 +558,11 @@ class _RailDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      useIndicator || indicatorColor == null,
+      '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
+    );
+
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,

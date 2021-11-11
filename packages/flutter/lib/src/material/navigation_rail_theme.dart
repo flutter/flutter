@@ -82,7 +82,7 @@ class NavigationRailThemeData with Diagnosticable {
   /// [NavigationIndicator].
   final bool? useIndicator;
 
-  /// Overrides the default value of [NavigationRail]'s selection indicator,
+  /// Overrides the default value of [NavigationRail]'s selection indicator color,
   /// when [useIndicator] is true.
   final Color? indicatorColor;
 
