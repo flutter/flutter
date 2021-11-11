@@ -238,11 +238,7 @@ public class PlatformPlugin {
   }
 
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
-    int enabledOverlays =
-        DEFAULT_SYSTEM_UI
-            | View.SYSTEM_UI_FLAG_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+    int enabledOverlays;
 
     if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK
         && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -301,6 +297,9 @@ public class PlatformPlugin {
           View.SYSTEM_UI_FLAG_LAYOUT_STABLE
               | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+    } else {
+      // When none of the conditions are matched, return without updating the system UI overlays.
+      return;
     }
 
     mEnabledOverlays = enabledOverlays;
