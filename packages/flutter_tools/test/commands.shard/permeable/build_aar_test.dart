@@ -238,9 +238,6 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      globals.fs.directory(globals.fs.path.join(tempDir.path, 'flutter_project',
-          'build', 'host','outputs','repo')).createSync(recursive: true);
-
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
