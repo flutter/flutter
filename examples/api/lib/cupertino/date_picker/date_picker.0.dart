@@ -84,7 +84,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
       child: DefaultTextStyle(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 22.0,            
+          fontSize: 22.0,
         ),
         child: Center(
           child: Column(
@@ -103,12 +103,12 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       )
                     ),
-                    child: Text('${date.month}-${date.day}-${date.year}', 
+                    child: Text('${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
                     ),
-                  ),  
+                  ),
                 ],
               ),
               _buildItem(
@@ -125,7 +125,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       )
                     ),
-                    child: Text('${time.hour}:${time.minute}', 
+                    child: Text('${time.hour}:${time.minute}',
                     style: const TextStyle(
                       fontSize: 22.0,
                       ),
@@ -146,7 +146,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       )
                     ),
-                    child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}', 
+                    child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
