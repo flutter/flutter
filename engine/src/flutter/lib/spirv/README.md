@@ -22,14 +22,14 @@ the code will need to adhere to the following rules.
 - Control flow is prohibited aside from function calls and `return`.
   `if`, `while`, `for`, `switch`, etc.
 - No inputs from other shader stages.
-- Only float, float-vector types, and square float-matrix types.
+- Only sampler2D, float, float-vector types, and square float-matrix types.
 - Only square matrices are supported.
 - Only built-in functions present in GLSL ES 100 are used.
-- Debug symbols must be stripped, you can use the `spirv-opt` `--strip-debug` flag.
+- Only the `texture` function is supported for sampling from a sampler2D object.
 
 These rules may become less strict in future versions. Conformant SPIR-V should successfully transpile from the current version onwards.  In other words, a SPIR-V shader you use now that meets these rules should keep working, but the output of the transpiler may change for that shader.
 
-Support for textures, control flow, and structured types is planned, but not currently included.
+Support for control flow, and structured types is planned, but not currently included.
 
 ## Testing
 

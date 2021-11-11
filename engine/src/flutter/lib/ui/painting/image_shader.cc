@@ -70,6 +70,14 @@ sk_sp<SkShader> ImageShader::shader(SkSamplingOptions sampling) {
   return cached_shader_.skia_object();
 }
 
+int ImageShader::width() {
+  return sk_image_.skia_object()->width();
+}
+
+int ImageShader::height() {
+  return sk_image_.skia_object()->height();
+}
+
 ImageShader::ImageShader() = default;
 
 ImageShader::~ImageShader() = default;

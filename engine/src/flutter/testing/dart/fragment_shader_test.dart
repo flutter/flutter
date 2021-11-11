@@ -45,6 +45,21 @@ void main() {
     _expectShaderRendersGreen(shader);
   });
 
+  test('blue-green image renders green', () async {
+    final ByteBuffer spirv = spvFile('general_shaders', 'blue_green_sampler.spv').readAsBytesSync().buffer;
+    final FragmentProgram program = await FragmentProgram.compile(
+      debugPrint: true,
+      spirv: spirv,
+    );
+    final Image blueGreenImage = await _createBlueGreenImage();
+    final ImageShader imageShader = ImageShader(
+        blueGreenImage, TileMode.clamp, TileMode.clamp, _identityMatrix);
+    final Shader shader = program.shader(
+      samplerUniforms: <ImageShader>[imageShader],
+    );
+    await _expectShaderRendersGreen(shader);
+  });
+
   test('shader with uniforms renders correctly', () async {
     final Uint8List shaderBytes = await spvFile('general_shaders', 'uniforms.spv').readAsBytes();
     final FragmentProgram program = await FragmentProgram.compile(spirv: shaderBytes.buffer);
@@ -236,6 +251,7 @@ Map<String, ByteBuffer> _loadSpv(String leafFolderName) {
 const int _shaderImageDimension = 4;
 
 const Color _greenColor = Color(0xFF00FF00);
+const Color _blueColor = Color(0xFF0000FF);
 
 // Precision for checking uniform values.
 const double epsilon = 0.5 / 255.0;
@@ -244,3 +260,43 @@ const double epsilon = 0.5 / 255.0;
 double toFloat(int v) => v.toDouble() / 255.0;
 
 String toHexString(int color) => '#${color.toRadixString(16)}';
+
+// 10x10 image where the left half is blue and the right half is
+// green.
+Future<Image> _createBlueGreenImage() async {
+  final int length = 10;
+  final int bytesPerPixel = 4;
+  final Uint8List pixels = Uint8List(length * length * bytesPerPixel);
+  int i = 0;
+  for (int y = 0; y < length; y++) {
+    for (int x = 0; x < length; x++) {
+      if (x < length/2) {
+        pixels[i+2] = 0xFF;  // blue channel
+      } else {
+        pixels[i+1] = 0xFF;  // green channel
+      }
+      pixels[i+3] = 0xFF;  // alpha channel
+      i += bytesPerPixel;
+    }
+  }
+  final ImageDescriptor descriptor = ImageDescriptor.raw(
+    await ImmutableBuffer.fromUint8List(pixels),
+    width: length,
+    height: length,
+    pixelFormat: PixelFormat.rgba8888,
+  );
+  final Codec codec = await descriptor.instantiateCodec();
+  final FrameInfo frame = await codec.getNextFrame();
+  return frame.image;
+}
+
+// A single uniform with value 1.
+final Float32List _singleUniform = Float32List.fromList(<double>[1]);
+
+final Float64List _identityMatrix = Float64List.fromList(<double>[
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+]);
+
