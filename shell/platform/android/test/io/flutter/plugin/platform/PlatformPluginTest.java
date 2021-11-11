@@ -367,6 +367,26 @@ public class PlatformPluginTest {
     }
   }
 
+  @Config(sdk = 28)
+  @Test
+  public void doNotEnableEdgeToEdgeOnOlderSdk() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+    verify(fakeDecorView, never())
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+  }
+
   @Test
   public void popSystemNavigatorFlutterActivity() {
     Activity mockActivity = mock(Activity.class);
