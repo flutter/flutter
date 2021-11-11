@@ -81,6 +81,17 @@ String? getValueFromEnvOrArgs(
     'to be provided!');
 }
 
+bool getBoolFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null) {
+    return env[envName].toUpperCase() == 'TRUE';
+  }
+}
+
 /// Return multiple values from the environment or fall back to [argResults].
 ///
 /// Values read from an environment variable are assumed to be comma-delimited.

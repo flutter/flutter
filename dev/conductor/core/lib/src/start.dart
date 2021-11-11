@@ -30,6 +30,7 @@ const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
+const String kForceFlag = 'force';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -101,6 +102,11 @@ class StartCommand extends Command<void> {
         'm': 'Indicates a standard dev release.',
         'n': 'Indicates a hotfix to a dev or beta release.',
       },
+    );
+    argParser.addFlag(
+      kForceFlag,
+      abbr: 'f',
+      help: 'Override all validations of the command line inputs.',
     );
   }
 
@@ -178,6 +184,7 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
+    final bool override = argumentResults[kForceFlag];
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
