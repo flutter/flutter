@@ -49,6 +49,10 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 }
 
 - (void)dealloc {
+  // It will be destroyed and invalidate its weak pointers
+  // before any other members are destroyed.
+  _weakFactory.reset();
+
   [_primaryResponders removeAllObjects];
   [_secondaryResponders removeAllObjects];
   [_primaryResponders release];

@@ -199,6 +199,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                                       object:self
                                                     userInfo:nil];
 
+  // It will be destroyed and invalidate its weak pointers
+  // before any other members are destroyed.
+  _weakFactory.reset();
+
   /// nil out weak references.
   [_registrars
       enumerateKeysAndObjectsUsingBlock:^(id key, FlutterEngineRegistrar* registrar, BOOL* stop) {

@@ -182,67 +182,6 @@ class FlutterPlatformViewsController {
 
   using LayersMap = std::map<int64_t, std::vector<std::shared_ptr<FlutterPlatformViewLayer>>>;
 
-  // The pool of reusable view layers. The pool allows to recycle layer in each frame.
-  std::unique_ptr<FlutterPlatformViewLayerPool> layer_pool_;
-
-  // The platform view's R-tree keyed off the view id, which contains any subsequent
-  // draw operation until the next platform view or the last leaf node in the layer tree.
-  //
-  // The R-trees are deleted by the FlutterPlatformViewsController.reset().
-  std::map<int64_t, sk_sp<RTree>> platform_view_rtrees_;
-
-  // The platform view's picture recorder keyed off the view id, which contains any subsequent
-  // operation until the next platform view or the end of the last leaf node in the layer tree.
-  std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
-
-  fml::scoped_nsobject<FlutterMethodChannel> channel_;
-  fml::scoped_nsobject<UIView> flutter_view_;
-  fml::scoped_nsobject<UIViewController> flutter_view_controller_;
-  std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
-  std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
-  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
-  // Mapping a platform view ID to the top most parent view (root_view) of a platform view. In
-  // |SubmitFrame|, root_views_ are added to flutter_view_ as child views.
-  //
-  // The platform view with the view ID is a child of the root view; If the platform view is not
-  // clipped, and no clipping view is added, the root view will be the intercepting view.
-  std::map<int64_t, fml::scoped_nsobject<UIView>> root_views_;
-  // Mapping a platform view ID to its latest composition params.
-  std::map<int64_t, EmbeddedViewParams> current_composition_params_;
-  // Mapping a platform view ID to the count of the clipping operations that were applied to the
-  // platform view last time it was composited.
-  std::map<int64_t, int64_t> clip_count_;
-  SkISize frame_size_;
-
-  // The number of frames the rasterizer task runner will continue
-  // to run on the platform thread after no platform view is rendered.
-  //
-  // Note: this is an arbitrary number that attempts to account for cases
-  // where the platform view might be momentarily off the screen.
-  static const int kDefaultMergedLeaseDuration = 10;
-
-  // Method channel `OnDispose` calls adds the views to be disposed to this set to be disposed on
-  // the next frame.
-  std::unordered_set<int64_t> views_to_dispose_;
-
-  // A vector of embedded view IDs according to their composition order.
-  // The last ID in this vector belond to the that is composited on top of all others.
-  std::vector<int64_t> composition_order_;
-
-  // The latest composition order that was presented in Present().
-  std::vector<int64_t> active_composition_order_;
-
-  // Only compoiste platform views in this set.
-  std::unordered_set<int64_t> views_to_recomposite_;
-
-  // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
-  std::map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      gesture_recognizers_blocking_policies;
-
-  std::unique_ptr<fml::WeakPtrFactory<FlutterPlatformViewsController>> weak_factory_;
-
-  bool catransaction_added_ = false;
-
   void OnCreate(FlutterMethodCall* call, FlutterResult& result);
   void OnDispose(FlutterMethodCall* call, FlutterResult& result);
   void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
@@ -302,6 +241,67 @@ class FlutterPlatformViewsController {
   // Resets the state of the frame.
   void ResetFrameState();
 
+  // The pool of reusable view layers. The pool allows to recycle layer in each frame.
+  std::unique_ptr<FlutterPlatformViewLayerPool> layer_pool_;
+
+  // The platform view's R-tree keyed off the view id, which contains any subsequent
+  // draw operation until the next platform view or the last leaf node in the layer tree.
+  //
+  // The R-trees are deleted by the FlutterPlatformViewsController.reset().
+  std::map<int64_t, sk_sp<RTree>> platform_view_rtrees_;
+
+  // The platform view's picture recorder keyed off the view id, which contains any subsequent
+  // operation until the next platform view or the end of the last leaf node in the layer tree.
+  std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
+
+  fml::scoped_nsobject<FlutterMethodChannel> channel_;
+  fml::scoped_nsobject<UIView> flutter_view_;
+  fml::scoped_nsobject<UIViewController> flutter_view_controller_;
+  std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
+  std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
+  std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
+  // Mapping a platform view ID to the top most parent view (root_view) of a platform view. In
+  // |SubmitFrame|, root_views_ are added to flutter_view_ as child views.
+  //
+  // The platform view with the view ID is a child of the root view; If the platform view is not
+  // clipped, and no clipping view is added, the root view will be the intercepting view.
+  std::map<int64_t, fml::scoped_nsobject<UIView>> root_views_;
+  // Mapping a platform view ID to its latest composition params.
+  std::map<int64_t, EmbeddedViewParams> current_composition_params_;
+  // Mapping a platform view ID to the count of the clipping operations that were applied to the
+  // platform view last time it was composited.
+  std::map<int64_t, int64_t> clip_count_;
+  SkISize frame_size_;
+
+  // The number of frames the rasterizer task runner will continue
+  // to run on the platform thread after no platform view is rendered.
+  //
+  // Note: this is an arbitrary number that attempts to account for cases
+  // where the platform view might be momentarily off the screen.
+  static const int kDefaultMergedLeaseDuration = 10;
+
+  // Method channel `OnDispose` calls adds the views to be disposed to this set to be disposed on
+  // the next frame.
+  std::unordered_set<int64_t> views_to_dispose_;
+
+  // A vector of embedded view IDs according to their composition order.
+  // The last ID in this vector belond to the that is composited on top of all others.
+  std::vector<int64_t> composition_order_;
+
+  // The latest composition order that was presented in Present().
+  std::vector<int64_t> active_composition_order_;
+
+  // Only compoiste platform views in this set.
+  std::unordered_set<int64_t> views_to_recomposite_;
+
+  // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
+  std::map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
+      gesture_recognizers_blocking_policies;
+
+  bool catransaction_added_ = false;
+
+  // WeakPtrFactory must be the last member.
+  std::unique_ptr<fml::WeakPtrFactory<FlutterPlatformViewsController>> weak_factory_;
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };
 

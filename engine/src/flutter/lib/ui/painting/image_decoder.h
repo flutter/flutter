@@ -57,7 +57,6 @@ class ImageDecoder {
   std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner_;
   fml::WeakPtr<IOManager> io_manager_;
   fml::WeakPtrFactory<ImageDecoder> weak_factory_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoder);
 };
 
