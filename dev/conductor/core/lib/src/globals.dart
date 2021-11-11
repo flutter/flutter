@@ -9,6 +9,7 @@ import 'proto/conductor_state.pb.dart' as pb;
 const String gsutilBinary = 'gsutil.py';
 
 const String kFrameworkDefaultBranch = 'master';
+const String kForceFlag = 'force';
 
 const List<String> kReleaseChannels = <String>[
   'stable',
@@ -88,8 +89,9 @@ bool getBoolFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
-    return env[envName].toUpperCase() == 'TRUE';
+    return (env[envName]?.toUpperCase()) == 'TRUE';
   }
+  return argResults[name] as bool;
 }
 
 /// Return multiple values from the environment or fall back to [argResults].

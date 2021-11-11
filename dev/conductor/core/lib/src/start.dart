@@ -30,7 +30,6 @@ const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
-const String kForceFlag = 'force';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -184,7 +183,11 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final bool override = argumentResults[kForceFlag];
+    final bool force = getBoolFromEnvOrArgs(
+      kForceFlag,
+      argumentResults,
+      platform.environment,
+    );
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
@@ -205,6 +208,7 @@ class StartCommand extends Command<void> {
       releaseChannel: releaseChannel,
       stateFile: stateFile,
       stdio: stdio,
+      force: force,
     );
     return context.run();
   }
@@ -230,6 +234,7 @@ class StartContext {
     required this.releaseChannel,
     required this.stateFile,
     required this.stdio,
+    this.force = false,
   }) : git = Git(processManager);
 
   final String candidateBranch;
@@ -248,6 +253,9 @@ class StartContext {
   final String releaseChannel;
   final File stateFile;
   final Stdio stdio;
+
+  /// If validations should be overridden.
+  final bool force;
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
@@ -368,7 +376,12 @@ class StartContext {
     final Version lastVersion = Version.fromString(await framework.getFullTag(
         framework.upstreamRemote.name, candidateBranch,
         exact: false,
-    ))..ensureValid(candidateBranch, incrementLetter);
+    ));
+    // [force] means we know this would fail but need to publish anyway
+    if (!force) {
+      lastVersion.ensureValid(candidateBranch, incrementLetter);
+    }
+
     Version nextVersion = calculateNextVersion(lastVersion);
     nextVersion = await ensureBranchPointTagged(nextVersion, framework);
 
