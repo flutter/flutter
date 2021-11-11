@@ -1670,4 +1670,69 @@ void main() {
     expect(find.widgetWithText(TableRowInkWell, 'Bug'), findsNothing);
     expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
   });
+
+  testWidgets('DataTable set interior border test', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            border: TableBorder.all(width: 2, color: Colors.red),
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    final Finder finder = find.byType(DataTable);
+    expect(tester.getSize(finder), equals(const Size(800, 600)));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            border: TableBorder.all(color: Colors.red),
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    Table table = tester.widget(find.byType(Table));
+    TableBorder? tableBorder = table.border;
+    expect(tableBorder!.top.color, Colors.red);
+    expect(tableBorder.bottom.width, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    table = tester.widget(find.byType(Table));
+    tableBorder = table.border;
+    expect(tableBorder?.bottom.width, null);
+    expect(tableBorder?.top.color, null);
+  });
 }

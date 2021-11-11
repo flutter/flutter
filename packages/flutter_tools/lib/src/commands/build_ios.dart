@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
@@ -129,7 +129,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      globals.logger.printStatus('Skipping IPA');
+      globals.printStatus('Skipping IPA');
       return xcarchiveResult;
     }
 
@@ -176,14 +176,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       throwToolExit('Encountered error while building IPA:\n$errorMessage');
     }
 
-    globals.logger.printStatus('Built IPA to $outputPath.');
+    globals.printStatus('Built IPA to $outputPath.');
 
     return FlutterCommandResult.success();
   }
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({ @required bool verboseHelp }) {
+  _BuildIOSSubCommand({
+    @required bool verboseHelp
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);

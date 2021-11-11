@@ -18,11 +18,16 @@
   NSMenu *mainMenu = NSApplication.sharedApplication.mainMenu;
   XCTAssertEqual([mainMenu indexOfItemWithSubmenu:applicationMenu], 0);
 
-  XCTAssertEqual([mainMenu itemWithTitle:@"Edit"].submenu.numberOfItems, 19);
-  XCTAssertEqual([mainMenu itemWithTitle:@"View"].submenu.numberOfItems, 1);
-  XCTAssertEqual([mainMenu itemWithTitle:@"Window"].submenu.numberOfItems, 6);
+  // The number of submenu items changes depending on what the OS decides to inject.
+  // Just check there's at least one per menu item.
+  XCTAssertGreaterThanOrEqual([mainMenu itemWithTitle:@"Edit"].submenu.numberOfItems, 1);
+  XCTAssertGreaterThanOrEqual([mainMenu itemWithTitle:@"View"].submenu.numberOfItems, 1);
+  XCTAssertGreaterThanOrEqual([mainMenu itemWithTitle:@"Window"].submenu.numberOfItems, 1);
 
-  XCTAssertNil(NSApplication.sharedApplication.helpMenu);
+  NSMenu *helpMenu = NSApplication.sharedApplication.helpMenu;
+  XCTAssertNotNil(helpMenu);
+  // Only the help menu search text box.
+  XCTAssertEqual(helpMenu.numberOfItems, 0);
 }
 
 @end

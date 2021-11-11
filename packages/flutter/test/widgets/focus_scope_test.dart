@@ -1925,5 +1925,36 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/92693
+    testWidgets('Setting parent FocusScope.canRequestFocus to false, does not set descendant Focus._internalNode._canRequestFocus to false', (WidgetTester tester) async {
+      final FocusNode childFocusNode = FocusNode(debugLabel: 'node 1');
+
+      Widget buildFocusTree({required bool parentCanRequestFocus}) {
+        return FocusScope(
+          canRequestFocus: parentCanRequestFocus,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: childFocusNode,
+                child: Container(),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // childFocusNode.canRequestFocus is true when parent canRequestFocus is true
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
+      expect(childFocusNode.canRequestFocus, isTrue);
+
+      // childFocusNode.canRequestFocus is false when parent canRequestFocus is false
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: false));
+      expect(childFocusNode.canRequestFocus, isFalse);
+
+      // childFocusNode.canRequestFocus is true again when parent canRequestFocus is changed back to true
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
+      expect(childFocusNode.canRequestFocus, isTrue);
+    });
   });
 }
