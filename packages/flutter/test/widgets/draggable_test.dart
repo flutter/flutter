@@ -10,6 +10,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2681,6 +2682,44 @@ void main() {
 
   testWidgets('Drag feedback with child anchor within a non-global Overlay positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
+  });
+
+  testWidgets('Drag feedback change cursor correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: const <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedbackCursor: SystemMouseCursors.grabbing,
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+        ],
+      ),
+    ));
+
+    final Offset sourceLocation = tester.getCenter(find.text('Source'));
+
+    final TestGesture gesture = await tester.createGesture(pointer: 1, kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: sourceLocation);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(find.text('Dragging'), findsNothing);
+
+    await gesture.down(sourceLocation);
+    await tester.pump();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+
+    await gesture.moveTo(sourceLocation + const Offset(1000, 1000));
+    await tester.pump();
+    expect(find.text('Dragging'), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.text('Dragging'), findsNothing);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {

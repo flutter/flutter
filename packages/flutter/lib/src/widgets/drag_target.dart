@@ -198,6 +198,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     )
     this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
+    this.feedbackCursor = MouseCursor.defer,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -216,6 +217,13 @@ class Draggable<T extends Object> extends StatefulWidget {
 
   /// The data that will be dropped by this draggable.
   final T? data;
+
+  /// The mouse cursor for mouse pointers that are over the [feedback].
+  ///
+  /// When a mouse is over the [feedback], its cursor will be changed to the [cursor].
+  ///
+  /// The [cursor] defaults to [MouseCursor.defer]
+  final MouseCursor feedbackCursor;
 
   /// The [Axis] to restrict this draggable's movement, if specified.
   ///
@@ -551,6 +559,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       initialPosition: position,
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
+      feedbackCursor: widget.feedbackCursor,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragUpdate: (DragUpdateDetails details) {
@@ -800,6 +809,7 @@ class _DragAvatar<T extends Object> extends Drag {
     required this.overlayState,
     this.data,
     this.axis,
+    this.feedbackCursor = MouseCursor.defer,
     required Offset initialPosition,
     this.dragStartPoint = Offset.zero,
     this.feedback,
@@ -818,6 +828,7 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   final T? data;
+  final MouseCursor feedbackCursor;
   final Axis? axis;
   final Offset dragStartPoint;
   final Widget? feedback;
@@ -945,9 +956,13 @@ class _DragAvatar<T extends Object> extends Drag {
     return Positioned(
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
-      child: IgnorePointer(
-        ignoringSemantics: ignoringFeedbackSemantics,
-        child: feedback,
+      child: MouseRegion(
+        cursor: feedbackCursor,
+        opaque: false,
+        child: IgnorePointer(
+          ignoringSemantics: ignoringFeedbackSemantics,
+          child: feedback,
+        ),
       ),
     );
   }
