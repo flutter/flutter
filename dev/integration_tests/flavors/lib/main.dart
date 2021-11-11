@@ -8,6 +8,10 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
+  runMainApp();
+}
+
+void runMainApp() {
   runApp(const Center(child: Flavor()));
 }
 
@@ -24,7 +28,9 @@ class _FlavorState extends State<Flavor> {
   @override
   void initState() {
     super.initState();
-    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((String? flavor) {
+    const MethodChannel('flavor')
+        .invokeMethod<String>('getFlavor')
+        .then((String? flavor) {
       setState(() {
         _flavor = flavor;
       });
@@ -36,8 +42,8 @@ class _FlavorState extends State<Flavor> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: _flavor == null
-        ? const Text('Awaiting flavor...')
-        : Text(_flavor!, key: const ValueKey<String>('flavor')),
+          ? const Text('Awaiting flavor...')
+          : Text(_flavor!, key: const ValueKey<String>('flavor')),
     );
   }
 }

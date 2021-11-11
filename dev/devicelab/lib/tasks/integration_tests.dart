@@ -32,7 +32,7 @@ TaskFunction createFlavorsTest() {
 TaskFunction createIntegrationTestFlavorsTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
-    'lib/main.dart',
+    'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
   );
 }
