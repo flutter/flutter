@@ -238,12 +238,18 @@ class Version {
   final int y;
 
   /// Number of hotfix releases after a stable release.
+  ///
+  /// For non-stable releases, this will be 0.
   final int z;
 
   /// Zero-indexed count of dev releases after a beta release.
+  ///
+  /// For stable releases, this will be null.
   final int? m;
 
   /// Number of hotfixes required to make a dev release.
+  ///
+  /// For stable releases, this will be null.
   final int? n;
 
   /// Number of commits past last tagged dev release.
