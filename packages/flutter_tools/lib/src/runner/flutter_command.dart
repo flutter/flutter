@@ -115,6 +115,7 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kFatalWarnings = 'fatal-warnings';
 }
 
 /// flutter command categories for usage.
@@ -177,6 +178,8 @@ abstract class FlutterCommand extends Command<void> {
   bool _usesPortOption = false;
 
   bool _usesIpv6Flag = false;
+
+  bool _usesFatalWarnings = false;
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
@@ -269,6 +272,15 @@ abstract class FlutterCommand extends Command<void> {
             'the command line, then that is used instead.',
       valueHelp: 'path');
     _usesTargetOption = true;
+  }
+
+  void usesFatalWarningsOption({ required bool verboseHelp }) {
+    argParser.addFlag(FlutterOptions.kFatalWarnings,
+        hide: !verboseHelp,
+        help: 'Causes the command to fail if warnings are sent to the console '
+              'during its execution.'
+    );
+    _usesFatalWarnings = true;
   }
 
   String get targetFile {
@@ -413,10 +425,10 @@ abstract class FlutterCommand extends Command<void> {
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
       if (false) { // ignore: dead_code
         if (ddsEnabled) {
-          globals.printError('${globals.logger.terminal
+          globals.printWarning('${globals.logger.terminal
               .warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
         } else {
-          globals.printError('${globals.logger.terminal
+          globals.printWarning('${globals.logger.terminal
               .warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.');
         }
       }
@@ -1123,6 +1135,9 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
+        if (_usesFatalWarnings) {
+          globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+        }
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
@@ -1139,6 +1154,9 @@ abstract class FlutterCommand extends Command<void> {
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
+          if (_usesFatalWarnings) {
+            globals.logger.checkForFatalLogs();
+          }
         }
       },
     );
@@ -1146,13 +1164,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printError(
+      globals.printWarning(
         '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
         'will be removed in a future version of Flutter. '
         'See https://flutter.dev/docs/development/tools/sdk/releases '
-        'for previous releases of Flutter.',
+        'for previous releases of Flutter.\n',
       );
-      globals.printError('');
     }
   }
 

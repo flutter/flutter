@@ -216,7 +216,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'or as the string "none" to disable the timeout entirely.',
         defaultsTo: '30s',
       );
-      addDdsOptions(verboseHelp: verboseHelp);
+    addDdsOptions(verboseHelp: verboseHelp);
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -283,7 +284,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     // correct [requiredArtifacts] can be identified before [run] takes place.
     _isIntegrationTest = _shouldRunAsIntegrationTests(globals.fs.currentDirectory.absolute.path, _testFiles);
 
-    globals.logger.printTrace(
+    globals.printTrace(
       'Found ${_testFiles.length} files which will be executed as '
       '${_isIntegrationTest ? 'Integration' : 'Widget'} Tests.',
     );
@@ -338,7 +339,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_isIntegrationTest) {
       if (argResults.wasParsed('concurrency')) {
-        globals.logger.printStatus(
+        globals.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
           'supported when running Integration Tests.',
         );

@@ -20,7 +20,7 @@ import 'build.dart';
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     @required bool verboseHelp,
-  }) {
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();

@@ -266,7 +266,7 @@ class Dart2JSTarget extends Target {
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
-      globals.printError('Warning: dart2js did not produced expected deps list at '
+      globals.printWarning('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }

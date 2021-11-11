@@ -77,8 +77,8 @@ class ColdRunner extends ResidentRunner {
           return result;
         }
       }
-    } on Exception catch (err) {
-      globals.printError(err.toString());
+    } on Exception catch (err, stack) {
+      globals.printError('$err\n$stack');
       appFailedToStart();
       return 1;
     }

@@ -2708,4 +2708,47 @@ String orderNumber(int number) {
 AppLocalizations lookupAppLocalizations(Locale locale) {
 '''));
   });
+
+  // Regression test for https://github.com/flutter/flutter/pull/93228
+  testWithoutContext('should use num type for plural', () {
+    const String arbFile = '''
+{
+  "tryToPollute": "{count, plural, =0{零} =1{一} other{其他}}",
+  "@tryToPollute": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "withoutType": "{count, plural, =0{零} =1{一} other{其他}}",
+  "@withoutType": {
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFile);
+
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+    )
+      ..loadResources()
+      ..writeOutputFiles(BufferLogger.test());
+
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, containsIgnoringWhitespace(r'String tryToPollute(num count) {'));
+    expect(localizationsFile, containsIgnoringWhitespace(r'String withoutType(num count) {'));
+  });
 }
