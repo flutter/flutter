@@ -23,7 +23,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -309,7 +309,7 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           // ignore: avoid_print
           print(message.message);
-        } else if (message.level == 'error') {
+        } else if (message.level == 'error' || message.level == 'warning') {
           globals.stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
             globals.stdio.stderrWrite(
@@ -1009,6 +1009,18 @@ class NotifyingLogger extends DelegatingLogger {
     bool wrap,
   }) {
     _sendMessage(LogMessage('error', message, stackTrace));
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _sendMessage(LogMessage('warning', message));
   }
 
   @override

@@ -18,7 +18,7 @@ import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../globals_null_migrated.dart' as globals;
+import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -266,7 +266,7 @@ class Dart2JSTarget extends Target {
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
-      globals.printError('Warning: dart2js did not produced expected deps list at '
+      globals.printWarning('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }
@@ -410,9 +410,10 @@ class WebReleaseBundle extends Target {
 /// These assets can be cached forever and are only invalidated when the
 /// Flutter SDK is upgraded to a new version.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem);
+  const WebBuiltInAssets(this.fileSystem, this.cache);
 
   final FileSystem fileSystem;
+  final Cache cache;
 
   @override
   String get name => 'web_static_assets';
@@ -431,7 +432,15 @@ class WebBuiltInAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final Directory flutterWebSdk = globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory;
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
+    //
+    // Update this when we start building CanvasKit from sources. In the
+    // meantime, get the Web SDK directory from cache rather than through
+    // Artifacts. The latter is sensitive to `--local-engine`, which changes
+    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
+    // built as part of the engine, but fetched from CIPD, and so it won't be
+    // found in ENGINE/src/out.
+    final Directory flutterWebSdk = cache.getWebSdkDirectory();
     final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
     for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
       final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
@@ -443,9 +452,10 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem);
+  const WebServiceWorker(this.fileSystem, this.cache);
 
   final FileSystem fileSystem;
+  final Cache cache;
 
   @override
   String get name => 'web_service_worker';
@@ -454,7 +464,7 @@ class WebServiceWorker extends Target {
   List<Target> get dependencies => <Target>[
     const Dart2JSTarget(),
     const WebReleaseBundle(),
-    WebBuiltInAssets(fileSystem),
+    WebBuiltInAssets(fileSystem, cache),
   ];
 
   @override

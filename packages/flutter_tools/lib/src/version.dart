@@ -12,7 +12,7 @@ import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
@@ -277,10 +277,10 @@ class FlutterVersion {
       );
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.logger.printError('Warning: the Flutter git upstream was overridden '
+        globals.printWarning('Warning: the Flutter git upstream was overridden '
         'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
       }
-      globals.logger.printError(error.toString());
+      globals.printError(error.toString());
       rethrow;
     } finally {
       await _removeVersionCheckRemoteIfExists();

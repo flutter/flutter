@@ -72,7 +72,6 @@ void main() {
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
     final AndroidDevices androidDevices = AndroidDevices(
-      androidSdk: null,
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
