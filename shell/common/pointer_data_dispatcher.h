@@ -147,20 +147,18 @@ class SmoothPointerDataDispatcher : public DefaultPointerDataDispatcher {
   virtual ~SmoothPointerDataDispatcher();
 
  private:
+  void DispatchPendingPacket();
+  void ScheduleSecondaryVsyncCallback();
+
   // If non-null, this will be a pending pointer data packet for the next frame
   // to consume. This is used to smooth out the irregular drag events delivery.
   // See also `DispatchPointerDataPacket` and input_events_unittests.cc.
   std::unique_ptr<PointerDataPacket> pending_packet_;
   int pending_trace_flow_id_ = -1;
-
   bool is_pointer_data_in_progress_ = false;
 
+  // WeakPtrFactory must be the last member.
   fml::WeakPtrFactory<SmoothPointerDataDispatcher> weak_factory_;
-
-  void DispatchPendingPacket();
-
-  void ScheduleSecondaryVsyncCallback();
-
   FML_DISALLOW_COPY_AND_ASSIGN(SmoothPointerDataDispatcher);
 };
 

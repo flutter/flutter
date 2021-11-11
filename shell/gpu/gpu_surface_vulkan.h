@@ -55,7 +55,6 @@ class GPUSurfaceVulkan : public Surface {
   const bool render_to_surface_;
 
   fml::WeakPtrFactory<GPUSurfaceVulkan> weak_factory_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceVulkan);
 };
 

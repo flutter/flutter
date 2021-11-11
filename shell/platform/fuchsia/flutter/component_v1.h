@@ -81,28 +81,6 @@ class ComponentV1 final : public Engine::Delegate,
 #endif  // !defined(DART_PRODUCT)
 
  private:
-  flutter::Settings settings_;
-  FlutterRunnerProductConfiguration product_config_;
-  TerminationCallback termination_callback_;
-  const std::string debug_label_;
-  UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();
-  fml::UniqueFD component_data_directory_;
-  fml::UniqueFD component_assets_directory_;
-
-  fidl::Binding<fuchsia::sys::ComponentController> component_controller_;
-  fuchsia::io::DirectoryPtr directory_ptr_;
-  fuchsia::io::NodePtr cloned_directory_ptr_;
-  fidl::InterfaceRequest<fuchsia::io::Directory> directory_request_;
-  std::unique_ptr<vfs::PseudoDir> outgoing_dir_;
-  std::shared_ptr<sys::ServiceDirectory> svc_;
-  std::shared_ptr<sys::ServiceDirectory> runner_incoming_services_;
-  fidl::BindingSet<fuchsia::ui::app::ViewProvider> shells_bindings_;
-
-  fml::RefPtr<flutter::DartSnapshot> isolate_snapshot_;
-  std::set<std::unique_ptr<Engine>> shell_holders_;
-  std::pair<bool, uint32_t> last_return_code_;
-  fml::WeakPtrFactory<ComponentV1> weak_factory_;
-
   ComponentV1(
       TerminationCallback termination_callback,
       fuchsia::sys::Package package,
@@ -133,6 +111,27 @@ class ComponentV1 final : public Engine::Delegate,
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
 
+  flutter::Settings settings_;
+  FlutterRunnerProductConfiguration product_config_;
+  TerminationCallback termination_callback_;
+  const std::string debug_label_;
+  UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();
+  fml::UniqueFD component_data_directory_;
+  fml::UniqueFD component_assets_directory_;
+
+  fidl::Binding<fuchsia::sys::ComponentController> component_controller_;
+  fuchsia::io::DirectoryPtr directory_ptr_;
+  fuchsia::io::NodePtr cloned_directory_ptr_;
+  fidl::InterfaceRequest<fuchsia::io::Directory> directory_request_;
+  std::unique_ptr<vfs::PseudoDir> outgoing_dir_;
+  std::shared_ptr<sys::ServiceDirectory> svc_;
+  std::shared_ptr<sys::ServiceDirectory> runner_incoming_services_;
+  fidl::BindingSet<fuchsia::ui::app::ViewProvider> shells_bindings_;
+
+  fml::RefPtr<flutter::DartSnapshot> isolate_snapshot_;
+  std::set<std::unique_ptr<Engine>> shell_holders_;
+  std::pair<bool, uint32_t> last_return_code_;
+  fml::WeakPtrFactory<ComponentV1> weak_factory_;  // Must be the last member.
   FML_DISALLOW_COPY_AND_ASSIGN(ComponentV1);
 };
 

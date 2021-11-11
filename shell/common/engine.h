@@ -910,29 +910,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   }
 
  private:
-  Engine::Delegate& delegate_;
-  const Settings settings_;
-  std::unique_ptr<Animator> animator_;
-  std::unique_ptr<RuntimeController> runtime_controller_;
-
-  // The pointer_data_dispatcher_ depends on animator_ and runtime_controller_.
-  // So it should be defined after them to ensure that pointer_data_dispatcher_
-  // is destructed first.
-  std::unique_ptr<PointerDataDispatcher> pointer_data_dispatcher_;
-
-  std::string last_entry_point_;
-  std::string last_entry_point_library_;
-  std::string initial_route_;
-  ViewportMetrics viewport_metrics_;
-  std::shared_ptr<AssetManager> asset_manager_;
-  bool activity_running_;
-  bool have_surface_;
-  std::shared_ptr<FontCollection> font_collection_;
-  ImageDecoder image_decoder_;
-  ImageGeneratorRegistry image_generator_registry_;
-  TaskRunners task_runners_;
-  fml::WeakPtrFactory<Engine> weak_factory_;
-
   // |RuntimeDelegate|
   std::string DefaultRouteName() override;
 
@@ -981,6 +958,28 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   friend class testing::ShellTest;
 
+  Engine::Delegate& delegate_;
+  const Settings settings_;
+  std::unique_ptr<Animator> animator_;
+  std::unique_ptr<RuntimeController> runtime_controller_;
+
+  // The pointer_data_dispatcher_ depends on animator_ and runtime_controller_.
+  // So it should be defined after them to ensure that pointer_data_dispatcher_
+  // is destructed first.
+  std::unique_ptr<PointerDataDispatcher> pointer_data_dispatcher_;
+
+  std::string last_entry_point_;
+  std::string last_entry_point_library_;
+  std::string initial_route_;
+  ViewportMetrics viewport_metrics_;
+  std::shared_ptr<AssetManager> asset_manager_;
+  bool activity_running_;
+  bool have_surface_;
+  std::shared_ptr<FontCollection> font_collection_;
+  ImageDecoder image_decoder_;
+  ImageGeneratorRegistry image_generator_registry_;
+  TaskRunners task_runners_;
+  fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
