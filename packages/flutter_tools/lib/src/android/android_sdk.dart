@@ -357,7 +357,8 @@ class AndroidSdk {
           final String? versionString = const LineSplitter()
               .convert(buildProps)
               .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
-              .first!
+              .whereType<Match>()
+              .first
               .group(1);
           if (versionString == null) {
             return null;
