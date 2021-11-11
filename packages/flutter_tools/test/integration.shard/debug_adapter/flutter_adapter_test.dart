@@ -193,8 +193,10 @@ void main() {
     await _project.setUpIn(tempDir);
 
     // Launch the app and wait for it to stop at an exception.
+    int originalThreadId, newThreadId;
     await Future.wait(<Future<Object>>[
-      dap.client.event('stopped'),
+      // Capture the thread ID of the stopped thread.
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId),
       dap.client.start(
         exceptionPauseMode: 'All', // Ensure we stop on all exceptions
         launch: () => dap.client.launch(
@@ -204,8 +206,17 @@ void main() {
       ),
     ], eagerError: true);
 
-    // Ensure hot restart fully completes.
-    await dap.client.hotRestart();
+    // Hot restart, ensuring it completes and capturing the ID of the new thread
+    // to pause.
+    await Future.wait(<Future<Object>>[
+      // Capture the thread ID of the newly stopped thread.
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId),
+      dap.client.hotRestart(),
+    ], eagerError: true);
+
+    // We should not have stopped on the original thread, but the new thread
+    // from after the restart.
+    expect(newThreadId, isNot(equals(originalThreadId)));
 
     await dap.client.terminate();
   });

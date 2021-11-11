@@ -56,6 +56,10 @@ class DapTestClient {
   Stream<OutputEventBody> get outputEvents => events('output')
       .map((Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
 
+  /// Returns a stream of [StoppedEventBody] events.
+  Stream<StoppedEventBody> get stoppedEvents => events('stopped')
+      .map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
+
   /// Returns a stream of the string output from [OutputEventBody] events.
   Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
 
