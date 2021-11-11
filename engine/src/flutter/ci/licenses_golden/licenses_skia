@@ -1,4 +1,4 @@
-Signature: 759ae879457fdafc917b88dc02346d04
+Signature: a0cdcb0dc759901e6522c1261fe295e8
 
 UNUSED LICENSES:
 
@@ -5960,6 +5960,7 @@ FILE: ../../../third_party/skia/experimental/sorttoy/Fake.h
 FILE: ../../../third_party/skia/experimental/sorttoy/SortKey.h
 FILE: ../../../third_party/skia/experimental/sorttoy/sorttoy.cpp
 FILE: ../../../third_party/skia/experimental/sorttoy/sorttypes.h
+FILE: ../../../third_party/skia/gm/batchedconvexpaths.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
 FILE: ../../../third_party/skia/include/core/SkStringView.h
