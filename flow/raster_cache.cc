@@ -410,9 +410,12 @@ void RasterCache::PrepareNewFrame() {
 void RasterCache::CleanupAfterFrame() {
   picture_metrics_ = {};
   layer_metrics_ = {};
-  SweepOneCacheAfterFrame(picture_cache_, picture_metrics_);
-  SweepOneCacheAfterFrame(display_list_cache_, picture_metrics_);
-  SweepOneCacheAfterFrame(layer_cache_, layer_metrics_);
+  {
+    TRACE_EVENT0("flutter", "RasterCache::SweepCaches");
+    SweepOneCacheAfterFrame(picture_cache_, picture_metrics_);
+    SweepOneCacheAfterFrame(display_list_cache_, picture_metrics_);
+    SweepOneCacheAfterFrame(layer_cache_, layer_metrics_);
+  }
   TraceStatsToTimeline();
 }
 
