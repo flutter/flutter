@@ -91,6 +91,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         fileSystem: globals.fs,
         platform: globals.platform,
         flutterVersion: () => globals.flutterVersion,
+        devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: userMessages,
         artifacts: globals.artifacts!,
@@ -394,6 +395,7 @@ class FlutterValidator extends DoctorValidator {
   FlutterValidator({
     required Platform platform,
     required FlutterVersion Function() flutterVersion,
+    required String Function() devToolsVersion,
     required UserMessages userMessages,
     required FileSystem fileSystem,
     required Artifacts artifacts,
@@ -401,6 +403,7 @@ class FlutterValidator extends DoctorValidator {
     required String Function() flutterRoot,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _flutterVersion = flutterVersion,
+       _devToolsVersion = devToolsVersion,
        _platform = platform,
        _userMessages = userMessages,
        _fileSystem = fileSystem,
@@ -412,6 +415,7 @@ class FlutterValidator extends DoctorValidator {
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
+  final String Function() _devToolsVersion;
   final String Function() _flutterRoot;
   final UserMessages _userMessages;
   final FileSystem _fileSystem;
@@ -446,6 +450,7 @@ class FlutterValidator extends DoctorValidator {
       )));
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
+      messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
       final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
