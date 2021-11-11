@@ -245,8 +245,30 @@ void main() {
     expect(expanded.maxHeight, equals(double.infinity));
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
+  test('copyWith, ==, hashCode basics', () {
+    expect(ThemeData(), ThemeData().copyWith());
+    expect(ThemeData().hashCode, ThemeData().copyWith().hashCode);
+  });
 
+  test('== and hashCode include focusColor and hoverColor', () {
+    // regression test for https://github.com/flutter/flutter/issues/91587
+
+    // Focus color and hover color are used in the default button theme, so
+    // use an empty one to ensure that just focus and hover colors are tested.
+    const ButtonThemeData buttonTheme = ButtonThemeData();
+
+    final ThemeData focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
+    expect(focusColorBlack != focusColorWhite, true);
+    expect(focusColorBlack.hashCode != focusColorWhite.hashCode, true);
+
+    final ThemeData hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
+    expect(hoverColorBlack != hoverColorWhite, true);
+    expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
+  });
+
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -346,6 +368,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
@@ -443,6 +466,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -521,6 +545,7 @@ void main() {
       switchTheme: otherTheme.switchTheme,
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       drawerTheme: otherTheme.drawerTheme,
+      listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -596,6 +621,7 @@ void main() {
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
+    expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 
@@ -635,5 +661,112 @@ void main() {
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
     expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
+  });
+
+  test('ThemeData diagnostics include all properties', () {
+    // List of properties must match the properties in ThemeData.hashCode()
+    final Set<String> expectedPropertyNames = <String>{
+      // GENERAL CONFIGURATION
+      'androidOverscrollIndicator',
+      'applyElevationOverlayColor',
+      'cupertinoOverrideTheme',
+      'inputDecorationTheme',
+      'materialTapTargetSize',
+      'pageTransitionsTheme',
+      'platform',
+      'scrollbarTheme',
+      'splashFactory',
+      'visualDensity',
+      // COLOR
+      'colorScheme',
+      'primaryColor',
+      'primaryColorBrightness',
+      'primaryColorLight',
+      'primaryColorDark',
+      'focusColor',
+      'hoverColor',
+      'shadowColor',
+      'canvasColor',
+      'scaffoldBackgroundColor',
+      'bottomAppBarColor',
+      'cardColor',
+      'dividerColor',
+      'highlightColor',
+      'splashColor',
+      'selectedRowColor',
+      'unselectedWidgetColor',
+      'disabledColor',
+      'secondaryHeaderColor',
+      'backgroundColor',
+      'dialogBackgroundColor',
+      'indicatorColor',
+      'hintColor',
+      'errorColor',
+      'toggleableActiveColor',
+      // TYPOGRAPHY & ICONOGRAPHY
+      'typography',
+      'textTheme',
+      'primaryTextTheme',
+      'iconTheme',
+      'primaryIconTheme',
+      // COMPONENT THEMES
+      'appBarTheme',
+      'bannerTheme',
+      'bottomAppBarTheme',
+      'bottomNavigationBarTheme',
+      'bottomSheetTheme',
+      'buttonBarTheme',
+      'buttonTheme',
+      'cardTheme',
+      'checkboxTheme',
+      'chipTheme',
+      'dataTableTheme',
+      'dialogTheme',
+      'dividerTheme',
+      'drawerTheme',
+      'elevatedButtonTheme',
+      'floatingActionButtonTheme',
+      'listTileTheme',
+      'navigationBarTheme',
+      'navigationRailTheme',
+      'outlinedButtonTheme',
+      'popupMenuTheme',
+      'progressIndicatorTheme',
+      'radioTheme',
+      'sliderTheme',
+      'snackBarTheme',
+      'switchTheme',
+      'tabBarTheme',
+      'textButtonTheme',
+      'textSelectionTheme',
+      'timePickerTheme',
+      'toggleButtonsTheme',
+      'tooltipTheme',
+      // DEPRECATED (newest deprecations at the bottom)
+      'useTextSelectionTheme',
+      'textSelectionColor',
+      'cursorColor',
+      'textSelectionHandleColor',
+      'accentColor',
+      'accentColorBrightness',
+      'accentTextTheme',
+      'accentIconTheme',
+      'buttonColor',
+      'fixTextFieldOutlineLabel',
+    };
+
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    ThemeData.light().debugFillProperties(properties);
+    final List<String> propertyNameList = properties.properties
+      .map((final DiagnosticsNode node) => node.name)
+      .whereType<String>()
+      .toList();
+    final Set<String> propertyNames = propertyNameList.toSet();
+
+    // Ensure there are no duplicates.
+    expect(propertyNameList.length, propertyNames.length);
+
+    // Ensure they are all there.
+    expect(propertyNames, expectedPropertyNames);
   });
 }

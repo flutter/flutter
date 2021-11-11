@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
+const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -329,15 +330,9 @@ class SkiaGoldClient {
       final Uri requestForImage = Uri.parse(
         'https://flutter-gold.skia.org/img/images/$imageHash.png',
       );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
-        final io.HttpClientResponse response = await request.close();
-        await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
-
-      } catch(e) {
-        rethrow;
-      }
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+      final io.HttpClientResponse response = await request.close();
+      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
     },
       SkiaGoldHttpOverrides(),
     );
@@ -374,6 +369,9 @@ class SkiaGoldClient {
     if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
       keys['Platform'] = '${keys['Platform']}-browser';
+      if (platform.environment[_kWebRendererKey] == 'canvaskit') {
+        keys['WebRenderer'] = 'canvaskit';
+      }
     }
     return json.encode(keys);
   }
@@ -419,7 +417,10 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final Map<String, dynamic> keys = <String, dynamic>{
-      if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
+      if (platform.environment[_kTestBrowserKey] != null)
+        'Browser' : platform.environment[_kTestBrowserKey],
+      if (platform.environment[_kTestBrowserKey] != null && platform.environment[_kWebRendererKey] == 'canvaskit')
+        'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       'name' : testName,

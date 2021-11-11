@@ -512,16 +512,12 @@ class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
 }
 
 /// An [Intent] to highlight the previous option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompletePreviousOptionIntent extends Intent {
   /// Creates an instance of AutocompletePreviousOptionIntent.
   const AutocompletePreviousOptionIntent();
 }
 
 /// An [Intent] to highlight the next option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompleteNextOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextOptionIntent.
   const AutocompleteNextOptionIntent();

@@ -42,11 +42,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
-          child: ListTile(
-            title: Text(
-              'Item ${items[index]}',
-            ),
-          ),
           background: Container(
             color: Colors.green,
           ),
@@ -56,6 +51,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               items.removeAt(index);
             });
           },
+          child: ListTile(
+            title: Text(
+              'Item ${items[index]}',
+            ),
+          ),
         );
       },
     );

@@ -9,7 +9,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
@@ -485,11 +485,17 @@ class IosProject extends XcodeBasedProject {
       terminal: globals.terminal,
     );
 
+    final String projectName = parent.manifest.appName;
+
+    // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
+    final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
+
     template.render(
       target,
       <String, Object>{
         'ios': true,
-        'projectName': parent.manifest.appName,
+        'projectName': projectName,
+        'titleCaseProjectName': titleCaseProjectName,
         'iosIdentifier': iosBundleIdentifier,
         'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
         'iosDevelopmentTeam': iosDevelopmentTeam ?? '',

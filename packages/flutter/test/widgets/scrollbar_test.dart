@@ -2037,4 +2037,93 @@ void main() {
     expect(depths[0], 1);
     expect(depths[1], 0);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/92262
+  testWidgets('Do not crash when resize from scrollable to non-scrollable.', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame(double height) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            interactive: true,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Container(
+                width: 100.0,
+                height: height,
+                color: const Color(0xFF000000),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(700.0));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+
+    // Try to drag the thumb.
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(798.0, 5.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 5.0));
+    await tester.pumpAndSettle();
+  });
+
+  test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
+    ScrollbarPainter createPainter({
+      Color color = const Color(0xFF000000),
+      Animation<double> fadeoutOpacityAnimation = kAlwaysCompleteAnimation,
+      Color trackColor = const Color(0x00000000),
+      Color trackBorderColor = const Color(0x00000000),
+      TextDirection textDirection = TextDirection.ltr,
+      double thickness = _kThickness,
+      EdgeInsets padding = EdgeInsets.zero,
+      double mainAxisMargin = 0.0,
+      double crossAxisMargin = 0.0,
+      Radius? radius,
+      OutlinedBorder? shape,
+      double minLength = _kMinThumbExtent,
+      double? minOverscrollLength,
+      ScrollbarOrientation scrollbarOrientation = ScrollbarOrientation.top,
+    }) {
+      return ScrollbarPainter(
+        color: color,
+        fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+        trackColor: trackColor,
+        trackBorderColor: trackBorderColor,
+        textDirection: textDirection,
+        thickness: thickness,
+        padding: padding,
+        mainAxisMargin: mainAxisMargin,
+        crossAxisMargin: crossAxisMargin,
+        radius: radius,
+        shape: shape,
+        minLength: minLength,
+        minOverscrollLength: minOverscrollLength,
+        scrollbarOrientation: scrollbarOrientation,
+      );
+    }
+    final ScrollbarPainter painter = createPainter();
+    expect(painter.shouldRepaint(createPainter()), false);
+    expect(painter.shouldRepaint(createPainter(color: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(fadeoutOpacityAnimation: kAlwaysDismissedAnimation)), true);
+    expect(painter.shouldRepaint(createPainter(trackColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(trackBorderColor: const Color(0xFFFFFFFF))), true);
+    expect(painter.shouldRepaint(createPainter(textDirection: TextDirection.rtl)), true);
+    expect(painter.shouldRepaint(createPainter(thickness: _kThickness + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(padding: const EdgeInsets.all(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(mainAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(crossAxisMargin: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(radius: const Radius.circular(1.0))), true);
+    expect(painter.shouldRepaint(createPainter(shape: const CircleBorder(side: BorderSide(width: 2.0)))), true);
+    expect(painter.shouldRepaint(createPainter(minLength: _kMinThumbExtent + 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(minOverscrollLength: 1.0)), true);
+    expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
+  });
 }

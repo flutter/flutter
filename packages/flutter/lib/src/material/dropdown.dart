@@ -195,8 +195,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        child: child,
         borderRadius: itemBorderRadius,
+        child: child,
       );
     }
     child = FadeTransition(opacity: opacity, child: child);
@@ -577,7 +577,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollOffset = math.min(scrollOffset, preferredMenuHeight - menuHeight);
     }
 
-    assert(menuHeight == menuBottom - menuTop);
+    assert((menuBottom - menuTop - menuHeight).abs() < precisionErrorTolerance);
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
 }
@@ -1535,12 +1535,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     FormFieldSetter<T>? onSaved,
     FormFieldValidator<T>? validator,
-    @Deprecated(
-      'Use autovalidateMode parameter which provide more specific '
-      'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    bool autovalidate = false,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
@@ -1560,21 +1554,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(autofocus != null),
-       assert(autovalidate != null),
-       assert(
-         autovalidate == false ||
-         autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.',
-       ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
          key: key,
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
-         autovalidateMode: autovalidate
-             ? AutovalidateMode.always
-             : (autovalidateMode ?? AutovalidateMode.disabled),
+         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);

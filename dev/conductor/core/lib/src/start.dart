@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:meta/meta.dart' show visibleForOverriding;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -14,7 +15,7 @@ import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
-import './state.dart';
+import './state.dart' as state_import;
 import './stdio.dart';
 import './version.dart';
 
@@ -34,12 +35,12 @@ const String kStateOption = 'state-file';
 class StartCommand extends Command<void> {
   StartCommand({
     required this.checkouts,
-    required this.flutterRoot,
+    required this.conductorVersion,
   })  : platform = checkouts.platform,
         processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
-    final String defaultPath = defaultStateFilePath(platform);
+    final String defaultPath = state_import.defaultStateFilePath(platform);
     argParser.addOption(
       kCandidateOption,
       help: 'The candidate branch the release will be based on.',
@@ -105,17 +106,11 @@ class StartCommand extends Command<void> {
 
   final Checkouts checkouts;
 
-  /// The root directory of the Flutter repository that houses the Conductor.
-  ///
-  /// This directory is used to check the git revision of the Conductor.
-  final Directory flutterRoot;
+  final String conductorVersion;
   final FileSystem fileSystem;
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
-
-  /// Git revision for the currently running Conductor.
-  late final String conductorVersion;
 
   @override
   String get name => 'start';
@@ -125,14 +120,6 @@ class StartCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final Git git = Git(processManager);
-    conductorVersion = (await git.getOutput(
-      <String>['rev-parse', 'HEAD'],
-      'look up the current revision.',
-      workingDirectory: flutterRoot.path,
-    )).trim();
-
-    assert(conductorVersion.isNotEmpty);
     final ArgResults argumentResults = argResults!;
     if (!platform.isMacOS && !platform.isLinux) {
       throw ConductorException(
@@ -140,14 +127,6 @@ class StartCommand extends Command<void> {
       );
     }
 
-    final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
-    );
-    if (stateFile.existsSync()) {
-      throw ConductorException(
-          'Error! A persistent state file already found at ${argResults![kStateOption]}.\n\n'
-          'Run `conductor clean` to cancel a previous release.');
-    }
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
       argumentResults,
@@ -199,7 +178,76 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
+    final File stateFile = checkouts.fileSystem.file(
+      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
+    );
 
+    final StartContext context = StartContext(
+      candidateBranch: candidateBranch,
+      checkouts: checkouts,
+      dartRevision: dartRevision,
+      engineCherrypickRevisions: engineCherrypickRevisions,
+      engineMirror: engineMirror,
+      engineUpstream: engineUpstream,
+      conductorVersion: conductorVersion,
+      frameworkCherrypickRevisions: frameworkCherrypickRevisions,
+      frameworkMirror: frameworkMirror,
+      frameworkUpstream: frameworkUpstream,
+      incrementLetter: incrementLetter,
+      processManager: processManager,
+      releaseChannel: releaseChannel,
+      stateFile: stateFile,
+      stdio: stdio,
+    );
+    return context.run();
+  }
+}
+
+/// Context for starting a new release.
+///
+/// This is a frontend-agnostic implementation.
+class StartContext {
+  StartContext({
+    required this.candidateBranch,
+    required this.checkouts,
+    required this.dartRevision,
+    required this.engineCherrypickRevisions,
+    required this.engineMirror,
+    required this.engineUpstream,
+    required this.frameworkCherrypickRevisions,
+    required this.frameworkMirror,
+    required this.frameworkUpstream,
+    required this.conductorVersion,
+    required this.incrementLetter,
+    required this.processManager,
+    required this.releaseChannel,
+    required this.stateFile,
+    required this.stdio,
+  }) : git = Git(processManager);
+
+  final String candidateBranch;
+  final Checkouts checkouts;
+  final String? dartRevision;
+  final List<String> engineCherrypickRevisions;
+  final String engineMirror;
+  final String engineUpstream;
+  final List<String> frameworkCherrypickRevisions;
+  final String frameworkMirror;
+  final String frameworkUpstream;
+  final String conductorVersion;
+  final String incrementLetter;
+  final Git git;
+  final ProcessManager processManager;
+  final String releaseChannel;
+  final File stateFile;
+  final Stdio stdio;
+
+  Future<void> run() async {
+    if (stateFile.existsSync()) {
+      throw ConductorException(
+          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
+          'Run `conductor clean` to cancel a previous release.');
+    }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". Text should '
@@ -233,8 +281,8 @@ class StartCommand extends Command<void> {
     final String workingBranchName = 'cherrypicks-$candidateBranch';
     await engine.newBranch(workingBranchName);
 
-    if (dartRevision != null && dartRevision.isNotEmpty) {
-      await engine.updateDartRevision(dartRevision);
+    if (dartRevision != null && dartRevision!.isNotEmpty) {
+      await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
     final List<pb.Cherrypick> engineCherrypicks = (await _sortCherrypicks(
@@ -312,27 +360,11 @@ class StartCommand extends Command<void> {
     // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
         framework.upstreamRemote.name, candidateBranch,
-        exact: false));
-    Version nextVersion;
-    if (incrementLetter == 'm') {
-      nextVersion = Version.fromCandidateBranch(candidateBranch);
-    } else {
-      if (incrementLetter == 'z') {
-        if (lastVersion.type == VersionType.stable) {
-          nextVersion = Version.increment(lastVersion, incrementLetter);
-        } else {
-          // This is the first stable release, so hardcode the z as 0
-          nextVersion = Version(
-            x: lastVersion.x,
-            y: lastVersion.y,
-            z: 0,
-            type: VersionType.stable,
-          );
-        }
-      } else {
-        nextVersion = Version.increment(lastVersion, incrementLetter);
-      }
-    }
+        exact: false,
+    ))..ensureValid(candidateBranch, incrementLetter);
+    Version nextVersion = calculateNextVersion(lastVersion);
+    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+
     state.releaseVersion = nextVersion.toString();
 
     final String frameworkHead = await framework.reverseParse('HEAD');
@@ -353,9 +385,67 @@ class StartCommand extends Command<void> {
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
-    writeStateToFile(stateFile, state, stdio.logs);
+    updateState(state, stdio.logs);
 
-    stdio.printStatus(presentState(state));
+    stdio.printStatus(state_import.presentState(state));
+  }
+
+  /// Save the release's [state].
+  ///
+  /// This can be overridden by frontends that may not persist the state to
+  /// disk, and/or may need to call additional update hooks each time the state
+  /// is updated.
+  @visibleForOverriding
+  void updateState(pb.ConductorState state, List<String> logs) {
+    state_import.writeStateToFile(stateFile, state, logs);
+  }
+
+  /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
+  Version calculateNextVersion(Version lastVersion) {
+    if (incrementLetter == 'm') {
+      return Version.fromCandidateBranch(candidateBranch);
+    }
+    if (incrementLetter == 'z') {
+      if (lastVersion.type == VersionType.stable) {
+        return Version.increment(lastVersion, incrementLetter);
+      }
+      // This is the first stable release, so hardcode the z as 0
+      return Version(
+          x: lastVersion.x,
+          y: lastVersion.y,
+          z: 0,
+          type: VersionType.stable,
+      );
+    }
+    return Version.increment(lastVersion, incrementLetter);
+  }
+
+  /// Ensures the branch point [candidateBranch] and `master` has a version tag.
+  ///
+  /// This is necessary for version reporting for users on the `master` channel
+  /// to be correct.
+  Future<Version> ensureBranchPointTagged(
+    Version requestedVersion,
+    FrameworkRepository framework,
+  ) async {
+    if (incrementLetter != 'm') {
+      // in this case, there must have been a previous tagged release, so skip
+      // tagging the branch point
+      return requestedVersion;
+    }
+    final String branchPoint = await framework.branchPoint(
+      candidateBranch,
+      kFrameworkDefaultBranch,
+    );
+    stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
+    await framework.tag(
+      branchPoint,
+      requestedVersion.toString(),
+      frameworkUpstream,
+    );
+    final Version nextVersion = Version.increment(requestedVersion, 'n');
+    stdio.printStatus('The actual release will be version $nextVersion.');
+    return nextVersion;
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.

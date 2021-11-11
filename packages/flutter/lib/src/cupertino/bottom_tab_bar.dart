@@ -44,6 +44,12 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoTabBar] placed in a [CupertinoTabScaffold].
+///
+/// ** See code in examples/api/lib/cupertino/bottom_tab_bar/bottom_tab_bar.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], which hosts the [CupertinoTabBar] at the bottom.

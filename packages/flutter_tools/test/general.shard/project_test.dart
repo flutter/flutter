@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -183,7 +183,7 @@ void main() {
         // android:name="flutterEmbedding" android:value="2" />.
 
         await project.regeneratePlatformSpecificTooling();
-        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.warningText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
         final FlutterProject project = await aPluginProject();

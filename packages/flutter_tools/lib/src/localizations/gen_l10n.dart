@@ -87,7 +87,7 @@ List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
-    final String? type = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$type ${placeholder.name}';
   }).toList();
 }
@@ -226,7 +226,7 @@ String _generatePluralMethod(Message message, String translationForMessage) {
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String? placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? placeholderType = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$placeholderType ${placeholder.name}';
   }).toList();
 
@@ -1167,6 +1167,12 @@ class LocalizationsGenerator {
 
     final String directory = _fs.path.basename(outputDirectory.path);
     final String outputFileName = _fs.path.basename(baseOutputFile.path);
+    if (!outputFileName.endsWith('.dart')) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The file name must have a .dart extension.'
+      );
+    }
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -1189,10 +1195,18 @@ class LocalizationsGenerator {
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-    final String fileName = outputFileName.split('.')[0];
+    final int extensionIndex = outputFileName.indexOf('.');
+    if (extensionIndex <= 0) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The base name cannot be empty.'
+      );
+    }
+    final String fileName = outputFileName.substring(0, extensionIndex);
+    final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.dart');
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1229,9 +1243,9 @@ class LocalizationsGenerator {
       .map((LocaleInfo locale) {
         final String library = '${fileName}_${locale.toString()}';
         if (useDeferredLoading) {
-          return "import '$library.dart' deferred as $library;";
+          return "import '$library.$fileExtension' deferred as $library;";
         } else {
-          return "import '$library.dart';";
+          return "import '$library.$fileExtension';";
         }
       })
       .toList()

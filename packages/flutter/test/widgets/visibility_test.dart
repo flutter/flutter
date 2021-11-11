@@ -106,9 +106,9 @@ void main() {
 
     await tester.pumpWidget(Center(
       child: Visibility(
-        child: testChild,
         replacement: const Placeholder(),
         visible: false,
+        child: testChild,
       ),
     ));
     expect(find.byType(Text, skipOffstage: false), findsNothing);
@@ -123,8 +123,8 @@ void main() {
 
     await tester.pumpWidget(Center(
       child: Visibility(
-        child: testChild,
         replacement: const Placeholder(),
+        child: testChild,
       ),
     ));
     expect(find.byType(Text, skipOffstage: false), findsOneWidget);

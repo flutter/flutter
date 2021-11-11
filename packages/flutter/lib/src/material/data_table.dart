@@ -391,6 +391,7 @@ class DataTable extends StatelessWidget {
     this.dividerThickness,
     required this.rows,
     this.checkboxHorizontalMargin,
+    this.border,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -614,6 +615,9 @@ class DataTable extends StatelessWidget {
   /// of the table and the checkbox, as well as the margin between the checkbox
   /// and the content in the first data column. This value defaults to 24.0.
   final double? checkboxHorizontalMargin;
+
+  /// The style to use when painting the boundary and interior divisions of the table.
+  final TableBorder? border;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -1022,6 +1026,7 @@ class DataTable extends StatelessWidget {
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,
+          border: border,
         ),
       ),
     );

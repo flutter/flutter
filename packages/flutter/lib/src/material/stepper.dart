@@ -759,7 +759,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
                 duration: kThemeAnimationDuration,
-                child: Column(children: stepPanels, crossAxisAlignment: CrossAxisAlignment.stretch),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: stepPanels),
               ),
               _buildVerticalControls(widget.currentStep),
             ],

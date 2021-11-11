@@ -606,7 +606,7 @@ class RawKeyboard {
   /// This property is only a wrapper over [KeyEventManager.keyMessageHandler],
   /// and is kept only for backward compatibility. New code should use
   /// [KeyEventManager.keyMessageHandler] to set custom global key event
-  /// handler.  Setting [keyEventHandler] will cause
+  /// handler. Setting [keyEventHandler] will cause
   /// [KeyEventManager.keyMessageHandler] to be set with a converted handler.
   /// If [KeyEventManager.keyMessageHandler] is set by [FocusManager] (the most
   /// common situation), then the exact value of [keyEventHandler] is a dummy
@@ -673,8 +673,25 @@ class RawKeyboard {
     );
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
-      if (_listeners.contains(listener)) {
-        listener(event);
+      try {
+        if (_listeners.contains(listener)) {
+          listener(event);
+        }
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<RawKeyEvent>('Event', event);
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while processing a raw key listener'),
+          informationCollector: collector,
+        ));
       }
     }
 

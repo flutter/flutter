@@ -45,8 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Persistence Example'),
       ),
       body: PageStorage(
-        child: pages[currentTab],
         bucket: _bucket,
+        child: pages[currentTab],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentTab,

@@ -1,0 +1,9 @@
+include: ../analysis_options.yaml
+
+linter:
+  rules:
+    # Tests try to throw and catch things in exciting ways all the time, so
+    # we disable these lints for the tests.
+    only_throw_errors: false
+    avoid_catches_without_on_clauses: false
+    avoid_catching_errors: false

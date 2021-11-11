@@ -408,8 +408,8 @@ class _PlatformItem extends StatelessWidget {
   final GalleryOptions? options;
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
-  String? _platformLabel(TargetPlatform? platform) {
-    switch(platform) {
+  String _platformLabel(TargetPlatform platform) {
+    switch (platform) {
       case TargetPlatform.android:
         return 'Mountain View';
       case TargetPlatform.fuchsia:
@@ -422,9 +422,6 @@ class _PlatformItem extends StatelessWidget {
         return 'Material Desktop (macOS)';
       case TargetPlatform.windows:
         return 'Material Desktop (Windows)';
-      default:
-        assert(false);
-        return null;
     }
   }
 
@@ -439,7 +436,7 @@ class _PlatformItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Platform mechanics'),
                  Text(
-                   _platformLabel(options!.platform)!,
+                   _platformLabel(options!.platform!),
                    style: Theme.of(context).primaryTextTheme.bodyText2,
                  ),
               ],
@@ -452,7 +449,7 @@ class _PlatformItem extends StatelessWidget {
               return TargetPlatform.values.map((TargetPlatform platform) {
                 return PopupMenuItem<TargetPlatform>(
                   value: platform,
-                  child: Text(_platformLabel(platform)!),
+                  child: Text(_platformLabel(platform)),
                 );
               }).toList();
             },

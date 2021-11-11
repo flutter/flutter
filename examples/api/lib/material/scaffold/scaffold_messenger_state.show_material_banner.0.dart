@@ -39,8 +39,8 @@ class MyStatelessWidget extends StatelessWidget {
             content: Text('This is a MaterialBanner'),
             actions: <Widget>[
               TextButton(
-                child: Text('DISMISS'),
                 onPressed: null,
+                child: Text('DISMISS'),
               ),
             ],
           ),

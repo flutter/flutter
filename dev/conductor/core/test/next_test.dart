@@ -1052,6 +1052,34 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
+
+  group('prompt', () {
+    test('throws if user inputs character that is not "y" or "n"', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final TestStdio stdio = TestStdio(
+        stdin: <String>['x'],
+        verbose: true,
+      );
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory('/'),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.empty(),
+        stdio: stdio,
+      );
+      final NextContext context = NextContext(
+        autoAccept: false,
+        force: false,
+        checkouts: checkouts,
+        stateFile: fileSystem.file('/statefile.json'),
+      );
+
+      expect(
+        () => context.prompt('Asking a question?', stdio),
+        throwsExceptionWith('Unknown user input (expected "y" or "n")'),
+      );
+    });
+  });
 }
 
 void _initializeCiYamlFile(

@@ -705,7 +705,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 ///
 /// Used by [_NavigationDestinationBuilder].
 class _NavigationBarDestinationSemantics extends StatelessWidget {
-  /// Adds the the appropriate semantics for navigation bar destinations to the
+  /// Adds the appropriate semantics for navigation bar destinations to the
   /// [child].
   const _NavigationBarDestinationSemantics({
     Key? key,

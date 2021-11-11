@@ -686,7 +686,7 @@ class FakeProcessManager extends Fake implements ProcessManager {
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
-  Object? getExpectationForTestThrowable;
+  Exception? getExpectationForTestThrowable;
   @override
   Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {

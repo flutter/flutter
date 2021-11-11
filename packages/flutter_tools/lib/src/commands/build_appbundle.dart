@@ -12,14 +12,16 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
-  BuildAppBundleCommand({bool verboseHelp = false}) {
+  BuildAppBundleCommand({
+    bool verboseHelp = false,
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -39,6 +41,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    addMultidexOption();
     argParser.addMultiOption('target-platform',
       splitCommas: true,
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -110,6 +113,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      multidexEnabled: boolArg('multidex'),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
@@ -144,6 +148,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
+    globals.terminal.usesTerminalUi = true;
     await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,

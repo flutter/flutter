@@ -321,6 +321,45 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
+  testWidgets('CheckboxListTile respects checkbox side', (WidgetTester tester) async {
+    Widget buildApp(BorderSide side) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CheckboxListTile(
+                value: false,
+                onChanged: (bool? newValue) {},
+                side: side,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    const BorderSide side1 = BorderSide(
+      color: Color(0xfff44336),
+    );
+    await tester.pumpWidget(buildApp(side1));
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side1);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side1);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+      ..drrect(color: const Color(0xfff44336)),
+    );
+    const BorderSide side2 = BorderSide(
+      color: Color(0xff424242),
+    );
+    await tester.pumpWidget(buildApp(side2));
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side2);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+      ..drrect(color: const Color(0xff424242)),
+    );
+  });
+
   testWidgets('CheckboxListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {

@@ -636,8 +636,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
       case TimeOfDayFormat.HH_colon_mm:
         return _formatTwoDigitZeroPad(timeOfDay.hour);
-      default:
-        throw AssertionError('$runtimeType does not support $format.');
+      case TimeOfDayFormat.a_space_h_colon_mm:
+      case TimeOfDayFormat.frenchCanadian:
+      case TimeOfDayFormat.H_colon_mm:
+      case TimeOfDayFormat.HH_dot_mm:
+         throw AssertionError('$runtimeType does not support $format.');
     }
   }
 
