@@ -65,7 +65,7 @@ void testMain() {
   font-family: 'Noto Naskh Arabic UI';
   font-style: normal;
   font-weight: 400;
-  src: url(packages/ui/assets/NotoNaskhArabic-Regular.ttf) format('ttf');
+  src: url(/assets/fonts/NotoNaskhArabic-Regular.ttf) format('ttf');
   unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
 }
 ''';
@@ -113,7 +113,7 @@ void testMain() {
           '''
 @font-face {
   font-family: 'Noto Color Emoji';
-  src: url(packages/ui/assets/NotoColorEmoji.ttf) format('ttf');
+  src: url(/assets/fonts/NotoColorEmoji.ttf) format('ttf');
 }
 ''';
 
@@ -125,7 +125,7 @@ void testMain() {
   font-family: 'Noto Naskh Arabic UI';
   font-style: normal;
   font-weight: 400;
-  src: url(packages/ui/assets/NotoNaskhArabic-Regular.ttf) format('ttf');
+  src: url(/assets/fonts/NotoNaskhArabic-Regular.ttf) format('ttf');
   unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
 }
 ''';
@@ -173,7 +173,7 @@ void testMain() {
           '''
 @font-face {
   font-family: 'Noto Color Emoji';
-  src: url(packages/ui/assets/NotoColorEmoji.ttf) format('ttf');
+  src: url(/assets/fonts/NotoColorEmoji.ttf) format('ttf');
 }
 ''';
 

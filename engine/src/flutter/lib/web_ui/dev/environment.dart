@@ -151,7 +151,7 @@ class Environment {
 
   /// Path to the clone of the flutter/goldens repository.
   io.Directory get webUiGoldensRepositoryDirectory => io.Directory(pathlib.join(
-        webUiDartToolDir.path,
+        webUiBuildDir.path,
         'goldens',
       ));
 

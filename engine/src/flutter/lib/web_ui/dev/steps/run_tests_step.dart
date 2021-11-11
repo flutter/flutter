@@ -66,7 +66,6 @@ class RunTestsStep implements PipelineStep {
 
   @override
   Future<void> run() async {
-    _copyTestFontsIntoWebUi();
     await _prepareTestResultsDirectory();
     await browserEnvironment.prepareEnvironment();
 
@@ -171,30 +170,6 @@ Future<void> _prepareTestResultsDirectory() async {
     environment.webUiTestResultsDirectory.deleteSync(recursive: true);
   }
   environment.webUiTestResultsDirectory.createSync(recursive: true);
-}
-
-const List<String> _kTestFonts = <String>[
-  'ahem.ttf',
-  'Roboto-Regular.ttf',
-  'NotoNaskhArabic-Regular.ttf',
-  'NotoColorEmoji.ttf',
-];
-
-void _copyTestFontsIntoWebUi() {
-  final String fontsPath = pathlib.join(
-    environment.flutterDirectory.path,
-    'third_party',
-    'txt',
-    'third_party',
-    'fonts',
-  );
-
-  for (final String fontFile in _kTestFonts) {
-    final io.File sourceTtf = io.File(pathlib.join(fontsPath, fontFile));
-    final String destinationTtfPath =
-        pathlib.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);
-    sourceTtf.copySync(destinationTtfPath);
-  }
 }
 
 /// Runs a batch of tests.

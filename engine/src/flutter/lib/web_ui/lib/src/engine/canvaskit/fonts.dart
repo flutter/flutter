@@ -20,7 +20,7 @@ const String _robotoUrl =
     'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
 // URL for the Ahem font, only used in tests.
-const String _ahemUrl = 'packages/ui/assets/ahem.ttf';
+const String _ahemUrl = '/assets/fonts/ahem.ttf';
 
 /// Manages the fonts used in the Skia-based backend.
 class SkiaFontCollection {
