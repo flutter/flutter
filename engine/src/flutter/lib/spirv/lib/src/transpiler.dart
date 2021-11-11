@@ -51,7 +51,7 @@ const String _mainFunctionName = 'main';
 /// https://www.khronos.org/registry/spir-v/specs/unified1/SPIRV.html#OpConstant
 class _Transpiler {
   _Transpiler(this.spirv, this.target) {
-    out = src;
+    out = header;
   }
 
   final Uint32List spirv;
@@ -59,6 +59,23 @@ class _Transpiler {
 
   /// The resulting source code of the target language is written to src.
   final StringBuffer src = StringBuffer();
+
+  /// Contains shader header, constants, and uniforms.
+  final StringBuffer header = StringBuffer();
+
+  /// The main body of code, contains function definitions.
+  final StringBuffer body = StringBuffer();
+
+  /// Uniform declarations.
+  final Map<int, String> uniformDeclarations = <int, String>{};
+
+  /// Declarations for sampler sizes in SkSL.
+  ///
+  /// This is because the SkSL eval function uses texel coordinates when
+  /// sampling an ImageShader, and SkSL does not support the textureSize
+  /// function. These uniforms allow adding support for normalized
+  /// coordinates for [opImageSampleImplicitLod].
+  final Map<int, String> samplerSizeDeclarations = <int, String>{};
 
   /// ID mapped to numerical types.
   final Map<int, _Type> types = <int, _Type>{};
@@ -79,6 +96,9 @@ class _Transpiler {
 
   /// ID mapped to ID. Used by [OpLoad].
   final Map<int, int> alias = <int, int>{};
+
+  /// ID mapped to a string to use instead of a generated name.
+  final Map<int, String> nameOverloads = <int, String>{};
 
   /// The ID for a constant true value.
   /// See [opConstantTrue].
@@ -113,6 +133,14 @@ class _Transpiler {
   /// See [opTypeFloat].
   int floatType = 0;
 
+  /// The ID of the image type.
+  /// See [opTypeImage].
+  int imageType = 0;
+
+  /// The ID of the sampledImage type.
+  /// See [opTypeSampledImage].
+  int sampledImageType = 0;
+
   /// The ID of the function that is currently being defined.
   /// Set by [opFunction] and unset by [opFunctionEnd].
   int currentFunction = 0;
@@ -131,8 +159,11 @@ class _Transpiler {
   /// Set by [opDecorate].
   int fragCoord = 0;
 
-  /// The number of floats used by uniform
+  /// The number of floats used by uniforms.
   int uniformFloatCount = 0;
+
+  /// The number of samplers used by uniforms.
+  int samplerCount = 0;
 
   /// Current indentation to prepend to new lines.
   String indent = '';
@@ -147,6 +178,9 @@ class _Transpiler {
   void transpile() {
     parseHeader();
     writeHeader();
+
+    // Parse instructions and write to body.
+    out = body;
     while (position < spirv.length) {
       final int lastPosition = position;
       parseInstruction();
@@ -154,10 +188,33 @@ class _Transpiler {
       assert(position > lastPosition);
     }
 
-    src.writeln();
     // TODO(antrob): Investigate if `List<bool>.filled(maxFunctionId, false)` can be used here instead.
     final Set<int> visited = <int>{};
     writeFunctionAndDeps(visited, entryPoint);
+
+    // Add uniform declarations to header.
+    if (uniformDeclarations.isNotEmpty) {
+      header.writeln();
+      final List<int> locations = uniformDeclarations.keys.toList();
+      locations.sort((int a, int b) => a - b);
+      for (final int location in locations) {
+        header.writeln(uniformDeclarations[location]);
+      }
+    }
+
+    // Add SkSL sampler size declarations to header.
+    if (samplerSizeDeclarations.isNotEmpty) {
+      header.writeln();
+      final List<int> locations = samplerSizeDeclarations.keys.toList();
+      locations.sort((int a, int b) => a - b);
+      for (final int location in locations) {
+        header.writeln(samplerSizeDeclarations[location]);
+      }
+    }
+
+    src.write(header);
+    src.writeln();
+    src.write(body);
   }
 
   TranspileException failure(String why) =>
@@ -171,19 +228,19 @@ class _Transpiler {
     for (final int dep in functionDeps[function]!) {
       writeFunctionAndDeps(visited, dep);
     }
-    src.write(functionDefs[function]!.toString());
+    out.write(functionDefs[function]!.toString());
   }
 
   void writeHeader() {
     switch (target) {
       case TargetLanguage.glslES:
-        src.writeln('#version 100\n');
-        src.writeln('precision mediump float;\n');
+        out.writeln('#version 100\n');
+        out.writeln('precision mediump float;\n');
         break;
       case TargetLanguage.glslES300:
-        src.writeln('#version 300 es\n');
-        src.writeln('precision mediump float;\n');
-        src.writeln('layout ( location = 0 ) out vec4 $_colorVariableName;\n');
+        out.writeln('#version 300 es\n');
+        out.writeln('precision mediump float;\n');
+        out.writeln('layout ( location = 0 ) out vec4 $_colorVariableName;\n');
         break;
       default:
         break;
@@ -193,11 +250,14 @@ class _Transpiler {
   String resolveName(int id) {
     if (alias.containsKey(id)) {
       return resolveName(alias[id]!);
+    }
+    if (nameOverloads.containsKey(id)) {
+      return nameOverloads[id]!;
     } else if (constantTrue > 0 && id == constantTrue) {
       return 'true';
     } else if (constantFalse > 0 && id == constantFalse) {
       return 'false';
-    } else if (id == colorOutput) {
+    } if (id == colorOutput) {
       if (target == TargetLanguage.glslES) {
         return _glslESColorName;
       } else {
@@ -259,6 +319,7 @@ class _Transpiler {
     out.writeln('$indent$type $name = $type($value);');
   }
 
+
   /// Read an instruction word, and handle the operation.
   ///
   /// SPIR-V instructions contain an op-code as well as a
@@ -308,6 +369,12 @@ class _Transpiler {
         break;
       case _opTypeMatrix:
         opTypeMatrix();
+        break;
+      case _opTypeImage:
+        opTypeImage();
+        break;
+      case _opTypeSampledImage:
+        opTypeSampledImage();
         break;
       case _opTypePointer:
         opTypePointer();
@@ -368,6 +435,9 @@ class _Transpiler {
         break;
       case _opCompositeExtract:
         opCompositeExtract();
+        break;
+      case _opImageSampleImplicitLod:
+        opImageSampleImplicitLod();
         break;
       case _opFNegate:
         opFNegate();
@@ -557,6 +627,54 @@ class _Transpiler {
     types[id] = t;
   }
 
+  void opTypeImage() {
+    if (imageType != 0) {
+      throw failure('Image type was previously declared.');
+    }
+    final int id = readWord();
+    final int sampledType = readWord();
+    if (types[sampledType] != _Type.float) {
+      throw failure('Sampled type must be float.');
+    }
+    final int dimensionality = readWord();
+    if (dimensionality != _dim2D) {
+      throw failure('Dimensionality must be 2D.');
+    }
+    final int depth = readWord();
+    if (depth != 0) {
+      throw failure('Depth must be 0.');
+    }
+    final int arrayed = readWord();
+    if (arrayed != 0) {
+      throw failure('Arrayed must be 0.');
+    }
+    final int multisampled = readWord();
+    if (multisampled != 0) {
+      throw failure('Multisampled must be 0.');
+    }
+    final int sampled = readWord();
+    if (sampled != 1) {
+      throw failure('Sampled must be 1.');
+    }
+    imageType = id;
+  }
+
+  void opTypeSampledImage() {
+    if (sampledImageType != 0) {
+      throw failure('imageSampledType was previously declared.');
+    }
+    if (imageType == 0) {
+      throw failure('imageType has not yet been declared.');
+    }
+    final int id = readWord();
+    final int imgType = readWord();
+    if (imgType != imageType) {
+      throw failure('Invalid image type.');
+    }
+    sampledImageType = id;
+    types[id] = _Type.sampledImage;
+  }
+
   void opTypePointer() {
     final int id = readWord();
     // ignore storage class
@@ -580,14 +698,12 @@ class _Transpiler {
   }
 
   void opConstantTrue() {
-    // Skip type operand.
-    position++;
+    position++;  // Skip type operand.
     constantTrue = readWord();
   }
 
   void opConstantFalse() {
-    // Skip type operand.
-    position++;
+    position++;  // Skip type operand.
     constantFalse = readWord();
   }
 
@@ -604,21 +720,21 @@ class _Transpiler {
       valueString = '$v';
     }
     final String typeName = resolveType(type);
-    src.writeln('const $typeName $id = $valueString;');
+    header.writeln('const $typeName $id = $valueString;');
   }
 
   void opConstantComposite() {
     final String type = resolveType(readWord());
     final String id = resolveName(readWord());
-    src.write('const $type $id = $type(');
+    header.write('const $type $id = $type(');
     final int count = nextPosition - position;
     for (int i = 0; i < count; i++) {
-      src.write(resolveName(readWord()));
+      header.write(resolveName(readWord()));
       if (i < count - 1) {
-        src.write(', ');
+        header.write(', ');
       }
     }
-    src.writeln(');');
+    header.writeln(');');
   }
 
   void opFunction() {
@@ -685,7 +801,7 @@ class _Transpiler {
     // Remove trailing two space characters, if present.
     indent = indent.substring(0, max(0, indent.length - 2));
     currentFunction = 0;
-    out = src;
+    out = body;
     currentFunctionType = null;
   }
 
@@ -721,16 +837,27 @@ class _Transpiler {
 
     switch (storageClass) {
       case _storageClassUniformConstant:
-        if (target == TargetLanguage.glslES300) {
-          final String location = locations[id].toString();
-          src.write('layout ( location = $location ) ');
+        int? location = locations[id];
+        if (location == null) {
+          throw failure('$id had no location specified');
         }
-        src.writeln('uniform $type $name;');
+        String prefix = '';
+        if (target == TargetLanguage.glslES300) {
+          prefix = 'layout ( location = $location ) ';
+        }
+        uniformDeclarations[location] = '${prefix}uniform $type $name;';
         final _Type? t = types[typeId];
         if (t == null) {
           throw failure('$typeId is not a defined type');
         }
-        uniformFloatCount += _typeFloatCounts[t]!;
+        if (t == _Type.sampledImage) {
+          samplerCount++;
+          if (target == TargetLanguage.sksl) {
+            samplerSizeDeclarations[location] = 'uniform half2 ${name}_size;';
+          }
+        } else {
+          uniformFloatCount += _typeFloatCounts[t]!;
+        }
         return;
       case _storageClassInput:
         return;
@@ -772,7 +899,7 @@ class _Transpiler {
 
   void opAccessChain() {
     final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
+    final int id = readWord();
     final String base = resolveName(readWord());
 
     // opAccessChain currently only supports indexed access.
@@ -780,13 +907,13 @@ class _Transpiler {
     // Currently, structs will be caught before this method is called,
     // since using the instruction to define a struct type will throw
     // an exception.
-    out.write('$indent$type $name = $base');
+    String overload = base;
     final int count = nextPosition - position;
     for (int i = 0; i < count; i++) {
       final String index = resolveName(readWord());
-      out.write('[$index]');
+      overload += '[$index]';
     }
-    out.writeln(';');
+    nameOverloads[id] = overload;
   }
 
   void opDecorate() {
@@ -851,6 +978,18 @@ class _Transpiler {
       out.write('[$index]');
     }
     out.writeln(';');
+  }
+
+  void opImageSampleImplicitLod() {
+    final String type = resolveType(readWord());
+    final String name = resolveName(readWord());
+    final String sampledImage = resolveName(readWord());
+    final String coordinate = resolveName(readWord());
+    if (target == TargetLanguage.sksl) {
+      out.writeln('$indent$type $name = $sampledImage.eval(${sampledImage}_size * $coordinate);');
+    } else {
+      out.writeln('$indent$type $name = texture($sampledImage, $coordinate);');
+    }
   }
 
   void opFNegate() {

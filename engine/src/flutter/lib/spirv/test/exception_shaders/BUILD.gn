@@ -10,6 +10,16 @@ if (enable_unittests) {
     tool = "//flutter/lib/spirv/test:spirv_assembler"
 
     sources = [
+      "image_type_arrayed_must_be_zero.spvasm",
+      "image_type_depth_must_be_zero.spvasm",
+      "image_type_dimensionality_must_be_2D.spvasm",
+      "image_type_multisampled_must_be_zero.spvasm",
+      "image_type_must_be_float.spvasm",
+      "image_type_previously_declared.spvasm",
+      "image_type_sampled_must_be_one.spvasm",
+      "sampled_image_type_image_type_not_declared.spvasm",
+      "sampled_image_type_invalid_image_type.spvasm",
+      "sampled_image_type_previously_declared.spvasm",
       "unassigned_function_type.spvasm",
       "unassigned_pointer_type.spvasm",
       "unassigned_type.spvasm",

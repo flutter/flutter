@@ -3787,15 +3787,14 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
     );
     _init(result.src, debugPrint);
     _uniformFloatCount = result.uniformFloatCount;
+    _samplerCount = result.samplerCount;
   }
 
   late final int _uniformFloatCount;
+  late final int _samplerCount;
 
   void _constructor() native 'FragmentProgram_constructor';
   void _init(String sksl, bool debugPrint) native 'FragmentProgram_init';
-
-  // TODO(chriscraws): Add `List<ImageShader>? children` as a parameter to [build].
-  // https://github.com/flutter/flutter/issues/85240
 
   /// Constructs a [Shader] object suitable for use by [Paint.shader] with
   /// the given uniforms.
@@ -3831,24 +3830,51 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
   /// c: [4, 5, 6]
   /// d: [7, 8, 9, 10] // 2x2 matrix in column-major order
   ///
+  /// `imageSamplers` must also be sized correctly, matching the number of UniformConstant
+  /// variables of type SampledImage specified in the SPIR-V code.
+  ///
+  /// Consider the following snippit of GLSL code.
+  ///
+  /// ```
+  /// layout (location = 0) uniform sampler2D a;
+  /// layout (location = 1) uniform sampler2D b;
+  /// ```
+  ///
+  /// After being compiled to SPIR-V  `imageSamplers` must have a length
+  /// of 2.
+  ///
   /// Once a [Shader] is built, uniform values cannot be changed. Instead,
   /// [shader] must be called again with new uniform values.
   Shader shader({
     Float32List? floatUniforms,
+    List<ImageShader>? samplerUniforms,
   }) {
     if (floatUniforms == null) {
       floatUniforms = Float32List(_uniformFloatCount);
     }
     if (floatUniforms.length != _uniformFloatCount) {
       throw ArgumentError(
-        'FragmentShader floatUniforms size: ${floatUniforms.length} must match given shader uniform count: $_uniformFloatCount.');
+        'floatUniforms size: ${floatUniforms.length} must match given shader uniform count: $_uniformFloatCount.');
     }
-    final _FragmentShader shader = _FragmentShader(this, Float32List.fromList(floatUniforms));
-    _shader(shader, floatUniforms);
+    if (_samplerCount > 0 && (samplerUniforms == null || samplerUniforms.length != _samplerCount)) {
+      throw ArgumentError('samplerUniforms must have length $_samplerCount');
+    }
+    if (samplerUniforms == null) {
+      samplerUniforms = <ImageShader>[];
+    } else {
+      samplerUniforms = <ImageShader>[...samplerUniforms];
+    }
+    final _FragmentShader shader = _FragmentShader(
+        this, Float32List.fromList(floatUniforms), samplerUniforms);
+    _shader(shader, floatUniforms, samplerUniforms);
     return shader;
   }
 
-  void _shader(_FragmentShader shader, Float32List floatUniforms) native 'FragmentProgram_shader';
+  void _shader(
+    _FragmentShader shader,
+    Float32List floatUniforms,
+    List<ImageShader> samplerUniforms,
+  ) native 'FragmentProgram_shader';
 }
 
 @pragma('vm:entry-point')
@@ -3857,10 +3883,15 @@ class _FragmentShader extends Shader {
   /// or extended directly.
   ///
   /// To create a [_FragmentShader], use a [FragmentProgram].
-  _FragmentShader(this._builder, this._floatUniforms) : super._();
+  _FragmentShader(
+    this._builder,
+    this._floatUniforms,
+    this._samplerUniforms,
+  ) : super._();
 
   final FragmentProgram _builder;
   final Float32List _floatUniforms;
+  final List<ImageShader> _samplerUniforms;
 
   @override
   bool operator ==(Object other) {
@@ -3870,11 +3901,12 @@ class _FragmentShader extends Shader {
       return false;
     return other is _FragmentShader
         && other._builder == _builder
-        && _listEquals<double>(other._floatUniforms, _floatUniforms);
+        && _listEquals<double>(other._floatUniforms, _floatUniforms)
+        && _listEquals<ImageShader>(other._samplerUniforms, _samplerUniforms);
   }
 
   @override
-  int get hashCode => hashValues(_builder, hashList(_floatUniforms));
+  int get hashCode => hashValues(_builder, hashList(_floatUniforms), hashList(_samplerUniforms));
 }
 
 /// Defines how a list of points is interpreted when drawing a set of triangles.
