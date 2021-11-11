@@ -1775,6 +1775,8 @@ void main() {
     }, variant: macOSOnly);
   });
 
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/93450 .
+  // Remove these tests once the above issue is resolved.
   final TargetPlatformVariant fuchsiaOnly = TargetPlatformVariant.only(TargetPlatform.fuchsia);
   group('fuchsia shortcuts', () {
     const int _kFuchsiaKeyIdPlane = LogicalKeyboardKey.fuchsiaPlane;
@@ -1910,6 +1912,44 @@ void main() {
       );
       expect(controller.selection, const TextSelection.collapsed(offset: 20));
     }, variant: fuchsiaOnly);
+
+    testWidgets('delete forward', (WidgetTester tester) async {
+      await tester.pumpWidget(buildEditableText());
+
+      // Character delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kDelete));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'all good peole\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 32));
+
+      // Word delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kDelete, control: true));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'all good peo\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 32));
+
+      // Line delete.
+      await sendFuchsiaKeyCombination(tester, const SingleActivator(_kDelete, alt: true));
+      expect(
+        controller.text,
+        'Now is the time for\n'
+        'all good peo\n'
+        'to come to the aid\n'
+        'of their country.',
+      );
+      expect(controller.selection, const TextSelection.collapsed(offset: 32));
+    }, variant: fuchsiaOnly);
+
 
     testWidgets('arrow key navigation', (WidgetTester tester) async {
       await tester.pumpWidget(buildEditableText());

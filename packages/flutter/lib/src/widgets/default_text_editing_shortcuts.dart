@@ -235,6 +235,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   static const LogicalKeyboardKey _kArrowDown = LogicalKeyboardKey(81 | _kFuchsiaKeyIdPlane);
   static const LogicalKeyboardKey _kArrowUp = LogicalKeyboardKey(82 | _kFuchsiaKeyIdPlane);
 
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/93450 .
+  // The keys should be normalized in the Fuchsia embedder.
   static const Map<ShortcutActivator, Intent> _fuchsiaShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(_kBackspace): DeleteCharacterIntent(forward: false),
     SingleActivator(_kBackspace, control: true): DeleteToNextWordBoundaryIntent(forward: false),

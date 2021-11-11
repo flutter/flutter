@@ -15,6 +15,11 @@ import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/93450 .
+final TargetPlatformVariant allPlatformsExceptFuchsia = TargetPlatformVariant(
+  TargetPlatform.values.toSet()..remove(TargetPlatform.fuchsia),
+);
+
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
 
 class _MatchesMethodCall extends Matcher {
@@ -5039,7 +5044,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+  }, variant: allPlatformsExceptFuchsia, skip: kIsWeb); // [intended]
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
@@ -5049,7 +5054,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+  }, variant: allPlatformsExceptFuchsia, skip: kIsWeb); // [intended]
 
   testWidgets(
     'keyboard shortcuts respect read-only',
@@ -5227,7 +5232,7 @@ void main() {
     },
     // On web, using keyboard for selection is handled by the browser.
     skip: kIsWeb, // [intended]
-    variant: TargetPlatformVariant.all(),
+    variant: allPlatformsExceptFuchsia,
   );
 
   testWidgets('home/end keys', (WidgetTester tester) async {
@@ -5355,7 +5360,7 @@ void main() {
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
+    variant: allPlatformsExceptFuchsia,
   );
 
   testWidgets('shift + home/end keys', (WidgetTester tester) async {
@@ -5553,7 +5558,7 @@ void main() {
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
+    variant: allPlatformsExceptFuchsia,
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
@@ -8060,7 +8065,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+  }, variant: allPlatformsExceptFuchsia, skip: kIsWeb); // [intended]
 
   testWidgets('navigating multiline text', (WidgetTester tester) async {
     const String multilineText = 'word word word\nword word\nword'; // 15 + 10 + 4;
@@ -8207,7 +8212,7 @@ void main() {
     expect(controller.selection.baseOffset, 15);
     expect(controller.selection.extentOffset, 24);
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+  }, variant: allPlatformsExceptFuchsia, skip: kIsWeb); // [intended]
 
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
