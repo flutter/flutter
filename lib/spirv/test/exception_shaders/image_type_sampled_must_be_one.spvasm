@@ -1,0 +1,63 @@
+; Copyright 2013 The Flutter Authors. All rights reserved.
+; Use of this source code is governed by a BSD-style license that can be
+; found in the LICENSE file.
+;
+; SPIR-V
+; Version: 1.0
+; Generator: Khronos Glslang Reference Front End; 8
+; Bound: 28
+; Schema: 0
+;
+; Line 43 contains an image type with 'sampled' not set to one.
+;
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %gl_FragCoord %oColor
+               OpExecutionMode %main OriginLowerLeft
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %uv "uv"
+               OpName %gl_FragCoord "gl_FragCoord"
+               OpName %iResolution "iResolution"
+               OpName %oColor "oColor"
+               OpName %iImage "iImage"
+               OpDecorate %gl_FragCoord BuiltIn FragCoord
+               OpDecorate %iResolution Location 1
+               OpDecorate %oColor Location 0
+               OpDecorate %iImage Location 0
+               OpDecorate %iImage DescriptorSet 0
+               OpDecorate %iImage Binding 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%gl_FragCoord = OpVariable %_ptr_Input_v4float Input
+%_ptr_UniformConstant_v2float = OpTypePointer UniformConstant %v2float
+%iResolution = OpVariable %_ptr_UniformConstant_v2float UniformConstant
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+     %oColor = OpVariable %_ptr_Output_v4float Output
+         %21 = OpTypeImage %float 2D 0 0 0 0 Unknown
+         %22 = OpTypeSampledImage %21
+%_ptr_UniformConstant_22 = OpTypePointer UniformConstant %22
+     %iImage = OpVariable %_ptr_UniformConstant_22 UniformConstant
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+         %uv = OpVariable %_ptr_Function_v2float Function
+         %13 = OpLoad %v4float %gl_FragCoord
+         %14 = OpVectorShuffle %v2float %13 %13 0 1
+         %17 = OpLoad %v2float %iResolution
+         %18 = OpFDiv %v2float %14 %17
+               OpStore %uv %18
+         %25 = OpLoad %22 %iImage
+         %26 = OpLoad %v2float %uv
+         %27 = OpImageSampleImplicitLod %v4float %25 %26
+               OpStore %oColor %27
+               OpReturn
+               OpFunctionEnd
+
+
+

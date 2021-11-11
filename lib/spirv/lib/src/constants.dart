@@ -34,6 +34,9 @@ const int _decorationLocation = 30;
 // Explicitly supported builtin types
 const int _builtinFragCoord = 15;
 
+// Explicitly supported dimensionalities
+const int _dim2D = 1;
+
 // Ops that have no semantic meaning in output and can be safely ignored
 const int _opSource = 3;
 const int _opSourceExtension = 4;
@@ -55,6 +58,8 @@ const int _opTypeInt = 21;
 const int _opTypeFloat = 22;
 const int _opTypeVector = 23;
 const int _opTypeMatrix = 24;
+const int _opTypeImage = 25;
+const int _opTypeSampledImage = 27;
 const int _opTypePointer = 32;
 const int _opTypeFunction = 33;
 const int _opConstantTrue = 41;
@@ -74,6 +79,8 @@ const int _opDecorate = 71;
 const int _opVectorShuffle = 79;
 const int _opCompositeConstruct = 80;
 const int _opCompositeExtract = 81;
+const int _opImageSampleImplicitLod = 87;
+const int _opImageQuerySize = 104;
 const int _opConvertFToS = 110;
 const int _opConvertSToF = 111;
 const int _opFNegate = 127;

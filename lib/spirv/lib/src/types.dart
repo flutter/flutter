@@ -15,6 +15,7 @@ enum _Type {
   float2x2,
   float3x3,
   float4x4,
+  sampledImage,
 }
 
 class _FunctionType {
@@ -47,6 +48,7 @@ const Map<_Type, String> _skslTypeNames = <_Type, String>{
   _Type.float2x2: 'float2x2',
   _Type.float3x3: 'float3x3',
   _Type.float4x4: 'float4x4',
+  _Type.sampledImage: 'shader',
 };
 
 const Map<_Type, String> _glslTypeNames = <_Type, String>{
@@ -60,6 +62,7 @@ const Map<_Type, String> _glslTypeNames = <_Type, String>{
   _Type.float2x2: 'mat2',
   _Type.float3x3: 'mat3',
   _Type.float4x4: 'mat4',
+  _Type.sampledImage: 'sampler2D',
 };
 
 const Map<_Type, int> _typeFloatCounts = <_Type, int>{
