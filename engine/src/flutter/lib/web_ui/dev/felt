@@ -33,14 +33,13 @@ HOST_DEBUG_UNOPT_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt"
 DART_SDK_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt/dart-sdk"
 GN="${FLUTTER_DIR}/tools/gn"
 DART_TOOL_DIR="${WEB_UI_DIR}/.dart_tool"
-PUB_PATH="$DART_SDK_DIR/bin/pub"
 DART_PATH="$DART_SDK_DIR/bin/dart"
 SNAPSHOT_PATH="${DART_TOOL_DIR}/felt.snapshot"
 STAMP_PATH="${DART_TOOL_DIR}/felt.snapshot.stamp"
 SCRIPT_PATH="${DEV_DIR}/felt.dart"
 REVISION="$(cd "$FLUTTER_DIR"; git rev-parse HEAD)"
 
-if [ ! -f "${PUB_PATH}" -o ! -f "${DART_PATH}" ]
+if [ ! -f "${DART_PATH}" ]
 then
   echo "Compiling the Dart SDK."
   gclient sync
@@ -49,11 +48,11 @@ then
 fi
 
 install_deps() {
-  echo "Running \`pub get\` in 'engine/src/flutter/lib/web_ui'"
-  (cd "$WEB_UI_DIR"; $PUB_PATH get)
+  echo "Running \`dart pub get\` in 'engine/src/flutter/lib/web_ui'"
+  (cd "$WEB_UI_DIR"; $DART_PATH pub get)
 
-  echo "Running \`pub get\` in 'engine/src/flutter/web_sdk/web_engine_tester'"
-  (cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; $PUB_PATH get)
+  echo "Running \`dart pub get\` in 'engine/src/flutter/web_sdk/web_engine_tester'"
+  (cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; $DART_PATH pub get)
 }
 
 KERNEL_NAME=`uname`
