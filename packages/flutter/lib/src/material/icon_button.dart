@@ -306,6 +306,7 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+    final IconThemeData iconTheme = IconTheme.of(context);
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
@@ -363,11 +364,12 @@ class IconButton extends StatelessWidget {
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
         splashColor: splashColor ?? theme.splashColor,
-        radius: splashRadius ?? math.max(
-          Material.defaultSplashRadius,
-          (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-        ),
+        radius: splashRadius ?? iconTheme.splashRadius ??
+          math.max(
+            Material.defaultSplashRadius,
+            (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+          ),
         child: result,
       ),
     );

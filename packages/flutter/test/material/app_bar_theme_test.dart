@@ -38,8 +38,8 @@ void main() {
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
     expect(widget.shape, null);
-    expect(iconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
+    expect(iconTheme.data, const IconThemeData(color: Colors.white, splashRadius: 18));
+    expect(actionsIconTheme.data, const IconThemeData(color: Colors.white, splashRadius: 18));
     expect(actionIconText.text.style!.color, Colors.white);
     expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
