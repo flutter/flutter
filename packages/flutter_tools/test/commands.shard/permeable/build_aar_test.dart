@@ -7,6 +7,7 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -21,6 +22,7 @@ import 'package:test/fake.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -193,11 +195,17 @@ void main() {
   group('Gradle', () {
     Directory tempDir;
     AndroidSdk mockAndroidSdk;
-
+    String gradlew;
+    FakeProcessManager processManager;
+    String flutterRoot;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', '.android',
+          globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      processManager = FakeProcessManager.empty();
+      flutterRoot = getFlutterRoot();
     });
 
     tearDown(() {
@@ -233,19 +241,41 @@ void main() {
       globals.fs.directory(globals.fs.path.join(tempDir.path, 'flutter_project',
           'build', 'host','outputs','repo')).createSync(recursive: true);
 
-      await runBuildAarCommand(projectPath,
-          arguments: <String>[
-            '--extra-front-end-options=foo',
-            '--extra-front-end-options=bar',
-            '--extra-front-end-options=--testflag,--testflag2'
-          ]);
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          gradlew,
+          '-I=$flutterRoot/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-Pflutter-root=$flutterRoot',
+          '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
+          '-Pis-plugin=false',
+          '-PbuildNumber=1.0',
+          '-q',
+          '-Ptarget=lib/main.dart',
+          '-Pdart-obfuscation=false',
+          '-Pextra-front-end-options=foo,bar',
+          '-Ptrack-widget-creation=true',
+          '-Ptree-shake-icons=true',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          'assembleAarRelease'
+        ],
+        exitCode: 1,
+      ));
+
+      await expectLater(() => runBuildAarCommand(projectPath, arguments: <String>[
+        '--no-debug',
+        '--no-profile',
+        '--extra-front-end-options=foo',
+        '--extra-front-end-options=bar',
+      ]), throwsToolExit(message: 'Gradle task assembleAarRelease failed with exit code 1'));
+      expect(processManager, hasNoRemainingExpectations);
     },
         overrides: <Type, Generator>{
           AndroidSdk: () => mockAndroidSdk,
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: () => processManager,
           FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
-    });
+          AndroidStudio: () => FakeAndroidStudio(),
+        });
   });
 }
 
@@ -292,4 +322,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final Directory directory;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }
