@@ -41,6 +41,5 @@ cd "$SCRIPT_DIR"
 "$DART" \
   --disable-dart-dev \
   "$SRC_DIR/flutter/tools/clang_tidy/bin/main.dart" \
-  --compile-commands="$COMPILE_COMMANDS" \
-  --repo="$SRC_DIR/flutter" \
+  --src-dir="$SRC_DIR" \
   "$@"

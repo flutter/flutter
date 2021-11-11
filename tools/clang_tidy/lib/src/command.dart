@@ -134,8 +134,10 @@ class Command {
       filePath,
       if (checks != null)
         checks,
-      if (fix)
+      if (fix) ...<String>[
         '--fix',
+        '--format-style=file',
+      ],
       '--',
     ];
     args.addAll(tidyArgs.split(' '));
