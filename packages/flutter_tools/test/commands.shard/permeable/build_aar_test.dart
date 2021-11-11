@@ -250,7 +250,7 @@ void main() {
           '-Pis-plugin=false',
           '-PbuildNumber=1.0',
           '-q',
-          '-Ptarget=lib/main.dart',
+          '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
           '-Pdart-obfuscation=false',
           '-Pextra-front-end-options=foo,bar',
           '-Ptrack-widget-creation=true',
