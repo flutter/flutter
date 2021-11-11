@@ -282,7 +282,7 @@ template("application_snapshot") {
                                "testonly",
                                "visibility",
                              ])
-      deps = extra_deps + [ "//flutter:dart_sdk" ]
+      deps = extra_deps
       script = "//build/gn_run_binary.py"
       inputs = extra_inputs
       outputs = [ output ]
@@ -293,7 +293,7 @@ template("application_snapshot") {
       if (is_win) {
         ext = ".exe"
       }
-      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_build_dir)
 
       args = [ dart ]
       args += snapshot_vm_args

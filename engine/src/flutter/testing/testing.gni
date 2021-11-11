@@ -58,7 +58,7 @@ template("_frontend_server") {
   if (flutter_prebuilt_dart_sdk) {
     action(target_name) {
       testonly = invoker.testonly
-      deps = invoker.deps + [ "//flutter:dart_sdk" ]
+      deps = invoker.deps
       script = "//build/gn_run_binary.py"
       inputs = invoker.inputs
       outputs = invoker.outputs
@@ -71,7 +71,7 @@ template("_frontend_server") {
       }
       dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
       frontend_server = rebase_path(
-              "$root_out_dir/dart-sdk/bin/snapshots/frontend_server.dart.snapshot")
+              "$host_prebuilt_dart_sdk/bin/snapshots/frontend_server.dart.snapshot")
 
       args = [
                dart,
