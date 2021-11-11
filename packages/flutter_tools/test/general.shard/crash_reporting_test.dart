@@ -354,7 +354,7 @@ class MockCrashReportSender extends MockClient {
         final String name = nameMatch[1]!;
         final String value = part.split('\n').skip(2).join('\n').trim();
         return <String>[name, value];
-      }).whereType<List<String>>(),
+      }),
       key: (dynamic key) {
         final List<String> pair = key as List<String>;
         return pair[0];

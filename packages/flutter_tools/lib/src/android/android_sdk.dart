@@ -198,7 +198,7 @@ class AndroidSdk {
       }
     }
 
-    for (final String searchPath in searchPaths.whereType<String>()) {
+    for (final String searchPath in searchPaths) {
       if (globals.fs.directory(searchPath).existsSync()) {
         return searchPath;
       }
@@ -357,8 +357,7 @@ class AndroidSdk {
           final String? versionString = const LineSplitter()
               .convert(buildProps)
               .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
-              .whereType<Match>()
-              .first
+              .first!
               .group(1);
           if (versionString == null) {
             return null;
