@@ -38,20 +38,11 @@ class CleanCommand extends Command<bool> with ArgUtils<bool> {
 
   @override
   FutureOr<bool> run() async {
-    final io.Directory assetsDir = io.Directory(path.join(
-      environment.webUiRootDir.path, 'lib', 'assets'
-    ));
-    final Iterable<io.File> fontFiles = assetsDir
-      .listSync()
-      .whereType<io.File>()
-      .where((io.File file) => file.path.endsWith('.ttf'));
-
     final List<io.FileSystemEntity> thingsToBeCleaned = <io.FileSystemEntity>[
       environment.webUiDartToolDir,
       environment.webUiBuildDir,
       io.File(path.join(environment.webUiRootDir.path, '.packages')),
       io.File(path.join(environment.webUiRootDir.path, 'pubspec.lock')),
-      ...fontFiles,
       if (_alsoCleanNinja)
         environment.outDir,
       if(_alsoCleanFlutterRepo)
