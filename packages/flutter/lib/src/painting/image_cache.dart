@@ -193,6 +193,11 @@ class ImageCache {
     for (final _CachedImage image in _cache.values) {
       image.dispose();
     }
+
+    for (final _PendingImage pendingImage in _pendingImages.values) {
+      pendingImage.removeListener();
+    }
+
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
