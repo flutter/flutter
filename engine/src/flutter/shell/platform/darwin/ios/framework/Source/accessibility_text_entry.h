@@ -14,10 +14,10 @@
 @interface FlutterInactiveTextInput : UIView <UITextInput>
 
 @property(nonatomic, copy) NSString* text;
-@property(nonatomic, readonly) NSMutableString* markedText;
-@property(readwrite, copy) UITextRange* selectedTextRange;
-@property(nonatomic, strong) UITextRange* markedTextRange;
-@property(nonatomic, copy) NSDictionary* markedTextStyle;
+@property(nonatomic, copy, readonly) NSMutableString* markedText;
+@property(copy) UITextRange* selectedTextRange;
+@property(nonatomic, strong, readonly) UITextRange* markedTextRange;
+@property(nonatomic, copy) NSDictionary<NSAttributedStringKey, id>* markedTextStyle;
 @property(nonatomic, assign) id<UITextInputDelegate> inputDelegate;
 
 @end

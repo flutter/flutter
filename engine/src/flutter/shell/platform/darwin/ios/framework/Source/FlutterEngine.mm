@@ -215,6 +215,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   [_registrars release];
   _binaryMessenger.parent = nil;
   [_binaryMessenger release];
+  [_isolateId release];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   if (_flutterViewControllerWillDeallocObserver) {

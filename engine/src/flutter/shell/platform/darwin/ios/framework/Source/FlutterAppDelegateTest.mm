@@ -121,6 +121,22 @@ FLUTTER_ASSERT_ARC
                                            arguments:@"/custom/route#fragment"]);
 }
 
+- (void)testReleasesWindowOnDealloc {
+  __weak UIWindow* weakWindow;
+  @autoreleasepool {
+    id mockWindow = OCMClassMock([UIWindow class]);
+    FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
+    appDelegate.window = mockWindow;
+    weakWindow = mockWindow;
+    XCTAssertNotNil(weakWindow);
+    [mockWindow stopMocking];
+    mockWindow = nil;
+    appDelegate = nil;
+  }
+  // App delegate has released the window.
+  XCTAssertNil(weakWindow);
+}
+
 #pragma mark - Deep linking
 
 - (void)testUniversalLinkPushRoute {

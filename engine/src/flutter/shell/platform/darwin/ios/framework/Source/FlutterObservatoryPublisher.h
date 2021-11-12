@@ -14,7 +14,7 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-@property(nonatomic, readonly) NSURL* url;
+@property(nonatomic, retain, readonly) NSURL* url;
 
 @end
 

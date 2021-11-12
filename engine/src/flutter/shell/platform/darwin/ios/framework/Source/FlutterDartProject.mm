@@ -273,7 +273,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   if (exceptionDomains == nil) {
     return @"";
   }
-  NSMutableArray* networkConfigArray = [[NSMutableArray alloc] init];
+  NSMutableArray* networkConfigArray = [[[NSMutableArray alloc] init] autorelease];
   for (NSString* domain in exceptionDomains) {
     NSDictionary* domainConfiguration = [exceptionDomains objectForKey:domain];
     // Default value is false.
@@ -288,7 +288,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   NSData* jsonData = [NSJSONSerialization dataWithJSONObject:networkConfigArray
                                                      options:0
                                                        error:NULL];
-  return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+  return [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] autorelease];
 }
 
 + (bool)allowsArbitraryLoads:(NSDictionary*)appTransportSecurity {
