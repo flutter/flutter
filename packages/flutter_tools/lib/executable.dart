@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'runner.dart' as runner;
 import 'src/artifacts.dart';
 import 'src/base/context.dart';
-import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';

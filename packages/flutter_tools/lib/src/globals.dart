@@ -39,11 +39,11 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
-import 'pre_run_validator.dart';
 import 'version.dart';
 
 /// The flutter GitHub repository.
