@@ -73,7 +73,7 @@ typedef struct MouseState {
  * Keyboard animation properties
  */
 @property(nonatomic, assign) double targetViewInsetBottom;
-@property(nonatomic, strong) CADisplayLink* displayLink;
+@property(nonatomic, retain) CADisplayLink* displayLink;
 
 /**
  * Creates and registers plugins used by this view controller.
@@ -671,21 +671,24 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 }
 
 - (void)addInternalPlugins {
-  [self.keyboardManager release];
-  self.keyboardManager = [[FlutterKeyboardManager alloc] init];
+  self.keyboardManager = [[[FlutterKeyboardManager alloc] init] autorelease];
+  fml::WeakPtr<FlutterViewController> weakSelf = [self getWeakPtr];
   FlutterSendKeyEvent sendEvent =
       ^(const FlutterKeyEvent& event, FlutterKeyEventCallback callback, void* userData) {
-        [_engine.get() sendKeyEvent:event callback:callback userData:userData];
+        [weakSelf.get()->_engine.get() sendKeyEvent:event callback:callback userData:userData];
       };
   [self.keyboardManager
       addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc] initWithSendEvent:sendEvent]];
-  [self.keyboardManager addPrimaryResponder:[[FlutterChannelKeyResponder alloc]
-                                                initWithChannel:self.engine.keyEventChannel]];
-  [self.keyboardManager addSecondaryResponder:self.engine.textInputPlugin];
+  FlutterChannelKeyResponder* responder = [[[FlutterChannelKeyResponder alloc]
+      initWithChannel:self.engine.keyEventChannel] autorelease];
+  [self.keyboardManager addPrimaryResponder:responder];
+  FlutterTextInputPlugin* textInputPlugin = self.engine.textInputPlugin;
+  if (textInputPlugin != nil) {
+    [self.keyboardManager addSecondaryResponder:textInputPlugin];
+  }
 }
 
 - (void)removeInternalPlugins {
-  [self.keyboardManager release];
   self.keyboardManager = nil;
 }
 
@@ -790,6 +793,8 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
   [self removeInternalPlugins];
   [self deregisterNotifications];
+
+  [_displayLink release];
   [super dealloc];
 }
 
@@ -1733,6 +1738,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)encodeRestorableStateWithCoder:(NSCoder*)coder {
   NSData* restorationData = [[_engine.get() restorationPlugin] restorationData];
   [coder encodeDataObject:restorationData];
+  [super encodeRestorableStateWithCoder:coder];
 }
 
 - (void)decodeRestorableStateWithCoder:(NSCoder*)coder {

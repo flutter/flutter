@@ -7,6 +7,14 @@
 #include "flutter/lib/ui/plugins/callback_cache.h"
 
 @implementation FlutterCallbackInformation
+
+- (void)dealloc {
+  [_callbackName release];
+  [_callbackClassName release];
+  [_callbackLibraryPath release];
+  [super dealloc];
+}
+
 @end
 
 @implementation FlutterCallbackCache

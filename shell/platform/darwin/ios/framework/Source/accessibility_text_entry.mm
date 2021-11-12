@@ -16,8 +16,13 @@ static const UIAccessibilityTraits UIAccessibilityTraitUndocumentedEmptyLine = 0
 @synthesize beginningOfDocument = _beginningOfDocument;
 @synthesize endOfDocument = _endOfDocument;
 
-- (instancetype)init {
-  return [super init];
+- (void)dealloc {
+  [_text release];
+  [_markedText release];
+  [_markedTextRange release];
+  [_selectedTextRange release];
+  [_markedTextStyle release];
+  [super dealloc];
 }
 
 - (BOOL)hasText {

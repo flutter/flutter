@@ -34,6 +34,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (void)dealloc {
   [_lifeCycleDelegate release];
   [_rootFlutterViewControllerGetter release];
+  [_window release];
   [super dealloc];
 }
 

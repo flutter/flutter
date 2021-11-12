@@ -84,7 +84,7 @@ void ResetAnchor(CALayer* layer) {
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  if ([super initWithFrame:frame]) {
+  if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
   }
   return self;
