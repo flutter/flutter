@@ -44,12 +44,19 @@ static const int kMaxTouchDeviceId = 128;
 
 }  // namespace
 
-WindowWin32::WindowWin32()
-    : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId) {
+WindowWin32::WindowWin32() : WindowWin32(nullptr) {}
+
+WindowWin32::WindowWin32(
+    std::unique_ptr<TextInputManagerWin32> text_input_manager)
+    : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
+      text_input_manager_(std::move(text_input_manager)) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
   // kWmDpiChangedBeforeParent message.
   current_dpi_ = GetDpiForHWND(nullptr);
+  if (text_input_manager_ == nullptr) {
+    text_input_manager_ = std::make_unique<TextInputManagerWin32>();
+  }
 }
 
 WindowWin32::~WindowWin32() {
@@ -119,7 +126,7 @@ LRESULT CALLBACK WindowWin32::WndProc(HWND const window,
 
     auto that = static_cast<WindowWin32*>(cs->lpCreateParams);
     that->window_handle_ = window;
-    that->text_input_manager_.SetWindowHandle(window);
+    that->text_input_manager_->SetWindowHandle(window);
     RegisterTouchWindow(window, 0);
   } else if (WindowWin32* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
@@ -170,14 +177,14 @@ void WindowWin32::OnImeSetContext(UINT const message,
                                   WPARAM const wparam,
                                   LPARAM const lparam) {
   if (wparam != 0) {
-    text_input_manager_.CreateImeWindow();
+    text_input_manager_->CreateImeWindow();
   }
 }
 
 void WindowWin32::OnImeStartComposition(UINT const message,
                                         WPARAM const wparam,
                                         LPARAM const lparam) {
-  text_input_manager_.CreateImeWindow();
+  text_input_manager_->CreateImeWindow();
   OnComposeBegin();
 }
 
@@ -185,21 +192,22 @@ void WindowWin32::OnImeComposition(UINT const message,
                                    WPARAM const wparam,
                                    LPARAM const lparam) {
   // Update the IME window position.
-  text_input_manager_.UpdateImeWindow();
+  text_input_manager_->UpdateImeWindow();
 
   if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
-    long pos = text_input_manager_.GetComposingCursorPosition();
+    long pos = text_input_manager_->GetComposingCursorPosition();
     std::optional<std::u16string> text =
-        text_input_manager_.GetComposingString();
+        text_input_manager_->GetComposingString();
     if (text) {
       OnComposeChange(text.value(), pos);
     }
-  } else if (lparam & GCS_RESULTSTR) {
+  }
+  if (lparam & GCS_RESULTSTR) {
     // Commit but don't end composing.
     // Read the committed composing string.
-    long pos = text_input_manager_.GetComposingCursorPosition();
-    std::optional<std::u16string> text = text_input_manager_.GetResultString();
+    long pos = text_input_manager_->GetComposingCursorPosition();
+    std::optional<std::u16string> text = text_input_manager_->GetResultString();
     if (text) {
       OnComposeChange(text.value(), pos);
       OnComposeCommit();
@@ -210,7 +218,7 @@ void WindowWin32::OnImeComposition(UINT const message,
 void WindowWin32::OnImeEndComposition(UINT const message,
                                       WPARAM const wparam,
                                       LPARAM const lparam) {
-  text_input_manager_.DestroyImeWindow();
+  text_input_manager_->DestroyImeWindow();
   OnComposeEnd();
 }
 
@@ -223,11 +231,11 @@ void WindowWin32::OnImeRequest(UINT const message,
 }
 
 void WindowWin32::AbortImeComposing() {
-  text_input_manager_.AbortComposing();
+  text_input_manager_->AbortComposing();
 }
 
 void WindowWin32::UpdateCursorRect(const Rect& rect) {
-  text_input_manager_.UpdateCaretRect(rect);
+  text_input_manager_->UpdateCaretRect(rect);
 }
 
 static uint16_t ResolveKeyCode(uint16_t original,
@@ -588,7 +596,7 @@ HWND WindowWin32::GetWindowHandle() {
 
 void WindowWin32::Destroy() {
   if (window_handle_) {
-    text_input_manager_.SetWindowHandle(nullptr);
+    text_input_manager_->SetWindowHandle(nullptr);
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
   }
