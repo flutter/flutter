@@ -19,8 +19,7 @@ the code will need to adhere to the following rules.
 - The output can only be written to from the main function.
 - `gl_FragCoord` can only be read from the main function, and its z and w components
   have no meaning.
-- Control flow is prohibited aside from function calls and `return`.
-  `if`, `while`, `for`, `switch`, etc.
+- Control flow is prohibited (`if`, `while`, `for`, `switch`, etc.) aside from function calls and `return`.
 - No inputs from other shader stages.
 - Only sampler2D, float, float-vector types, and square float-matrix types.
 - Only square matrices are supported.
@@ -29,7 +28,7 @@ the code will need to adhere to the following rules.
 
 These rules may become less strict in future versions. Conformant SPIR-V should successfully transpile from the current version onwards.  In other words, a SPIR-V shader you use now that meets these rules should keep working, but the output of the transpiler may change for that shader.
 
-Support for control flow, and structured types is planned, but not currently included.
+Support for control flow and structured types is planned but not currently included.
 
 ## Testing
 
