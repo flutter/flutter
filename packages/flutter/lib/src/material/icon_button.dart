@@ -378,7 +378,7 @@ class IconButton extends StatelessWidget {
           overlayColor: overlayColor,
           highlightColor: highlightColor,
           foregroundColor: MaterialStateProperty.all<Color>(currentColor ?? iconTheme.color ?? theme.colorScheme.primary),
-          minimumSize: ButtonStyleButton.allOrNull<Size>(
+          minimumSize: MaterialStateProperty.all<Size>(
             Size.fromRadius(
               splashRadius ?? math.max(
                 Material.defaultSplashRadius,
