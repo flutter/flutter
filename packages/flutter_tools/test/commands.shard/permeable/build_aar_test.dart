@@ -201,7 +201,7 @@ void main() {
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      mockAndroidSdk = FakeAndroidSdk();
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', '.android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
       processManager = FakeProcessManager.empty();
@@ -233,8 +233,7 @@ void main() {
       });
     });
 
-    testUsingContext('support ExtraDartFlagOptions',
-            () async {
+    testUsingContext('support ExtraDartFlagOptions', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
@@ -253,7 +252,7 @@ void main() {
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
         exitCode: 1,
       ));
@@ -266,13 +265,13 @@ void main() {
       ]), throwsToolExit(message: 'Gradle task assembleAarRelease failed with exit code 1'));
       expect(processManager, hasNoRemainingExpectations);
     },
-        overrides: <Type, Generator>{
-          AndroidSdk: () => mockAndroidSdk,
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-          ProcessManager: () => processManager,
-          FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
-          AndroidStudio: () => FakeAndroidStudio(),
-        });
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      ProcessManager: () => processManager,
+      FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
   });
 }
 
@@ -315,10 +314,6 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
-  FakeAndroidSdk(this.directory);
-
-  @override
-  final Directory directory;
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
