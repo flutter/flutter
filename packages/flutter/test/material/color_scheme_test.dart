@@ -36,7 +36,7 @@ void main() {
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.inverseSurface, scheme.onSurface);
-    expect(scheme.inverseOnSurface, scheme.surface);
+    expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.shadow, scheme.onBackground);
     expect(scheme.brightness, Brightness.light);
@@ -75,7 +75,7 @@ void main() {
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.inverseSurface, scheme.onSurface);
-    expect(scheme.inverseOnSurface, scheme.surface);
+    expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.shadow, scheme.onBackground);
     expect(scheme.brightness, Brightness.dark);
@@ -114,7 +114,7 @@ void main() {
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.inverseSurface, scheme.onSurface);
-    expect(scheme.inverseOnSurface, scheme.surface);
+    expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.shadow, scheme.onBackground);
     expect(scheme.brightness, Brightness.light);
@@ -153,7 +153,7 @@ void main() {
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.inverseSurface, scheme.onSurface);
-    expect(scheme.inverseOnSurface, scheme.surface);
+    expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.shadow, scheme.onBackground);
     expect(scheme.brightness, Brightness.dark);

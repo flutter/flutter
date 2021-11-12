@@ -42,7 +42,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     required this.brightness,
@@ -81,7 +81,7 @@ class ColorScheme with Diagnosticable {
        _surfaceVariant = surfaceVariant,
        _onSurfaceVariant = onSurfaceVariant,
        _inverseSurface = inverseSurface,
-       _inverseOnSurface = inverseOnSurface,
+       _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _shadow = shadow,
        _primaryVariant = primaryVariant,
@@ -114,7 +114,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     this.brightness = Brightness.light,
@@ -153,7 +153,7 @@ class ColorScheme with Diagnosticable {
        _surfaceVariant = surfaceVariant,
        _onSurfaceVariant = onSurfaceVariant,
        _inverseSurface = inverseSurface,
-       _inverseOnSurface = inverseOnSurface,
+       _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _shadow = shadow,
        _primaryVariant = primaryVariant,
@@ -186,7 +186,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     this.brightness = Brightness.dark,
@@ -225,7 +225,7 @@ class ColorScheme with Diagnosticable {
        _surfaceVariant = surfaceVariant,
        _onSurfaceVariant = onSurfaceVariant,
        _inverseSurface = inverseSurface,
-       _inverseOnSurface = inverseOnSurface,
+       _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _shadow = shadow,
        _primaryVariant = primaryVariant,
@@ -258,7 +258,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     this.brightness = Brightness.light,
@@ -297,7 +297,7 @@ class ColorScheme with Diagnosticable {
        _surfaceVariant = surfaceVariant,
        _onSurfaceVariant = onSurfaceVariant,
        _inverseSurface = inverseSurface,
-       _inverseOnSurface = inverseOnSurface,
+       _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _shadow = shadow,
        _primaryVariant = primaryVariant,
@@ -330,7 +330,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     this.brightness = Brightness.dark,
@@ -369,7 +369,7 @@ class ColorScheme with Diagnosticable {
        _surfaceVariant = surfaceVariant,
        _onSurfaceVariant = onSurfaceVariant,
        _inverseSurface = inverseSurface,
-       _inverseOnSurface = inverseOnSurface,
+       _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _shadow = shadow,
        _primaryVariant = primaryVariant,
@@ -552,13 +552,13 @@ class ColorScheme with Diagnosticable {
   /// an alert.
   Color get inverseSurface => _inverseSurface ?? onSurface;
 
-  final Color? _inverseOnSurface;
+  final Color? _onInverseSurface;
   /// A color that's clearly legible when drawn on [inverseSurface].
   ///
   /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [inverseSurface] and [inverseOnSurface] is recommended. See
+  /// [inverseSurface] and [onInverseSurface] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
-  Color get inverseOnSurface => _inverseOnSurface ?? surface;
+  Color get onInverseSurface => _onInverseSurface ?? surface;
 
   final Color? _inversePrimary;
   /// An accent color used for displaying the reverse of what’s seen in the
@@ -616,7 +616,7 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
     Color? onSurfaceVariant,
     Color? inverseSurface,
-    Color? inverseOnSurface,
+    Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
     Brightness? brightness,
@@ -656,7 +656,7 @@ class ColorScheme with Diagnosticable {
       surfaceVariant : surfaceVariant ?? this.surfaceVariant,
       onSurfaceVariant : onSurfaceVariant ?? this.onSurfaceVariant,
       inverseSurface : inverseSurface ?? this.inverseSurface,
-      inverseOnSurface : inverseOnSurface ?? this.inverseOnSurface,
+      onInverseSurface : onInverseSurface ?? this.onInverseSurface,
       inversePrimary : inversePrimary ?? this.inversePrimary,
       shadow : shadow ?? this.shadow,
       brightness: brightness ?? this.brightness,
@@ -694,7 +694,7 @@ class ColorScheme with Diagnosticable {
       surfaceVariant: Color.lerp(a.surfaceVariant, b.surfaceVariant, t),
       onSurfaceVariant: Color.lerp(a.onSurfaceVariant, b.onSurfaceVariant, t),
       inverseSurface: Color.lerp(a.inverseSurface, b.inverseSurface, t),
-      inverseOnSurface: Color.lerp(a.inverseOnSurface, b.inverseOnSurface, t),
+      onInverseSurface: Color.lerp(a.onInverseSurface, b.onInverseSurface, t),
       inversePrimary: Color.lerp(a.inversePrimary, b.inversePrimary, t),
       shadow: Color.lerp(a.shadow, b.shadow, t),
       brightness: t < 0.5 ? a.brightness : b.brightness,
@@ -734,7 +734,7 @@ class ColorScheme with Diagnosticable {
       && other.surfaceVariant == surfaceVariant
       && other.onSurfaceVariant == onSurfaceVariant
       && other.inverseSurface == inverseSurface
-      && other.inverseOnSurface == inverseOnSurface
+      && other.onInverseSurface == onInverseSurface
       && other.inversePrimary == inversePrimary
       && other.shadow == shadow
       && other.brightness == brightness
@@ -769,7 +769,7 @@ class ColorScheme with Diagnosticable {
       surfaceVariant,
       onSurfaceVariant,
       inverseSurface,
-      inverseOnSurface,
+      onInverseSurface,
       inversePrimary,
       shadow,
       brightness,
@@ -806,7 +806,7 @@ class ColorScheme with Diagnosticable {
     properties.add(ColorProperty('surfaceVariant', surfaceVariant, defaultValue: defaultScheme.surfaceVariant));
     properties.add(ColorProperty('onSurfaceVariant', onSurfaceVariant, defaultValue: defaultScheme.onSurfaceVariant));
     properties.add(ColorProperty('inverseSurface', inverseSurface, defaultValue: defaultScheme.inverseSurface));
-    properties.add(ColorProperty('inverseOnSurface', inverseOnSurface, defaultValue: defaultScheme.inverseOnSurface));
+    properties.add(ColorProperty('onInverseSurface', onInverseSurface, defaultValue: defaultScheme.onInverseSurface));
     properties.add(ColorProperty('inversePrimary', inversePrimary, defaultValue: defaultScheme.inversePrimary));
     properties.add(ColorProperty('shadow', shadow, defaultValue: defaultScheme.shadow));
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: defaultScheme.brightness));
