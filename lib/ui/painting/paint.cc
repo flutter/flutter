@@ -65,31 +65,28 @@ constexpr float invert_colors[20] = {
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
 enum MaskFilterType { Null, Blur };
 
-Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data)
-    : paint_objects_(paint_objects), paint_data_(paint_data) {}
-
-const SkPaint* Paint::paint(SkPaint& paint) const {
-  if (isNull()) {
-    return nullptr;
+Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
+  is_null_ = Dart_IsNull(paint_data);
+  if (is_null_) {
+    return;
   }
-  FML_DCHECK(paint == SkPaint());
 
-  tonic::DartByteData byte_data(paint_data_);
+  tonic::DartByteData byte_data(paint_data);
   FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
 
   const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
   const float* float_data = static_cast<const float*>(byte_data.data());
 
   Dart_Handle values[kObjectCount];
-  if (!Dart_IsNull(paint_objects_)) {
-    FML_DCHECK(Dart_IsList(paint_objects_));
+  if (!Dart_IsNull(paint_objects)) {
+    FML_DCHECK(Dart_IsList(paint_objects));
     intptr_t length = 0;
-    Dart_ListLength(paint_objects_, &length);
+    Dart_ListLength(paint_objects, &length);
 
     FML_CHECK(length == kObjectCount);
     if (Dart_IsError(
-            Dart_ListGetRange(paint_objects_, 0, kObjectCount, values))) {
-      return nullptr;
+            Dart_ListGetRange(paint_objects, 0, kObjectCount, values))) {
+      return;
     }
 
     Dart_Handle shader = values[kShaderIndex];
@@ -97,75 +94,75 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
       Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
       auto sampling =
           ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-      paint.setShader(decoded->shader(sampling));
+      paint_.setShader(decoded->shader(sampling));
     }
 
     Dart_Handle color_filter = values[kColorFilterIndex];
     if (!Dart_IsNull(color_filter)) {
       ColorFilter* decoded_color_filter =
           tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-      paint.setColorFilter(decoded_color_filter->filter());
+      paint_.setColorFilter(decoded_color_filter->filter());
     }
 
     Dart_Handle image_filter = values[kImageFilterIndex];
     if (!Dart_IsNull(image_filter)) {
       ImageFilter* decoded =
           tonic::DartConverter<ImageFilter*>::FromDart(image_filter);
-      paint.setImageFilter(decoded->filter());
+      paint_.setImageFilter(decoded->filter());
     }
   }
 
-  paint.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
+  paint_.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
 
   uint32_t encoded_color = uint_data[kColorIndex];
   if (encoded_color) {
     SkColor color = encoded_color ^ kColorDefault;
-    paint.setColor(color);
+    paint_.setColor(color);
   }
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   if (encoded_blend_mode) {
     uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
-    paint.setBlendMode(static_cast<SkBlendMode>(blend_mode));
+    paint_.setBlendMode(static_cast<SkBlendMode>(blend_mode));
   }
 
   uint32_t style = uint_data[kStyleIndex];
   if (style) {
-    paint.setStyle(static_cast<SkPaint::Style>(style));
+    paint_.setStyle(static_cast<SkPaint::Style>(style));
   }
 
   float stroke_width = float_data[kStrokeWidthIndex];
   if (stroke_width != 0.0) {
-    paint.setStrokeWidth(stroke_width);
+    paint_.setStrokeWidth(stroke_width);
   }
 
   uint32_t stroke_cap = uint_data[kStrokeCapIndex];
   if (stroke_cap) {
-    paint.setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
+    paint_.setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
   }
 
   uint32_t stroke_join = uint_data[kStrokeJoinIndex];
   if (stroke_join) {
-    paint.setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
+    paint_.setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
   }
 
   float stroke_miter_limit = float_data[kStrokeMiterLimitIndex];
   if (stroke_miter_limit != 0.0) {
-    paint.setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
+    paint_.setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
   }
 
   if (uint_data[kInvertColorIndex]) {
     sk_sp<SkColorFilter> invert_filter =
         ColorFilter::MakeColorMatrixFilter255(invert_colors);
-    sk_sp<SkColorFilter> current_filter = paint.refColorFilter();
+    sk_sp<SkColorFilter> current_filter = paint_.refColorFilter();
     if (current_filter) {
       invert_filter = invert_filter->makeComposed(current_filter);
     }
-    paint.setColorFilter(invert_filter);
+    paint_.setColorFilter(invert_filter);
   }
 
   if (uint_data[kDitherIndex]) {
-    paint.setDither(true);
+    paint_.setDither(true);
   }
 
   switch (uint_data[kMaskFilterIndex]) {
@@ -175,138 +172,9 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
       SkBlurStyle blur_style =
           static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
       double sigma = float_data[kMaskFilterSigmaIndex];
-      paint.setMaskFilter(SkMaskFilter::MakeBlur(blur_style, sigma));
+      paint_.setMaskFilter(SkMaskFilter::MakeBlur(blur_style, sigma));
       break;
   }
-
-  return &paint;
-}
-
-bool Paint::sync_to(DisplayListBuilder* builder,
-                    const DisplayListAttributeFlags& flags) const {
-  if (isNull()) {
-    return false;
-  }
-  tonic::DartByteData byte_data(paint_data_);
-  FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
-
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
-
-  Dart_Handle values[kObjectCount];
-  if (Dart_IsNull(paint_objects_)) {
-    if (flags.applies_shader()) {
-      builder->setShader(nullptr);
-    }
-    if (flags.applies_color_filter()) {
-      builder->setColorFilter(nullptr);
-    }
-    if (flags.applies_image_filter()) {
-      builder->setImageFilter(nullptr);
-    }
-  } else {
-    FML_DCHECK(Dart_IsList(paint_objects_));
-    intptr_t length = 0;
-    Dart_ListLength(paint_objects_, &length);
-
-    FML_CHECK(length == kObjectCount);
-    if (Dart_IsError(
-            Dart_ListGetRange(paint_objects_, 0, kObjectCount, values))) {
-      return false;
-    }
-
-    if (flags.applies_shader()) {
-      Dart_Handle shader = values[kShaderIndex];
-      if (Dart_IsNull(shader)) {
-        builder->setShader(nullptr);
-      } else {
-        Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
-        auto sampling =
-            ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-        builder->setShader(decoded->shader(sampling));
-      }
-    }
-
-    if (flags.applies_color_filter()) {
-      Dart_Handle color_filter = values[kColorFilterIndex];
-      if (Dart_IsNull(color_filter)) {
-        builder->setColorFilter(nullptr);
-      } else {
-        ColorFilter* decoded_color_filter =
-            tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-        builder->setColorFilter(decoded_color_filter->filter());
-      }
-    }
-
-    if (flags.applies_image_filter()) {
-      Dart_Handle image_filter = values[kImageFilterIndex];
-      if (Dart_IsNull(image_filter)) {
-        builder->setImageFilter(nullptr);
-      } else {
-        ImageFilter* decoded =
-            tonic::DartConverter<ImageFilter*>::FromDart(image_filter);
-        builder->setImageFilter(decoded->filter());
-      }
-    }
-  }
-
-  if (flags.applies_anti_alias()) {
-    builder->setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
-  }
-
-  if (flags.applies_alpha_or_color()) {
-    uint32_t encoded_color = uint_data[kColorIndex];
-    builder->setColor(encoded_color ^ kColorDefault);
-  }
-
-  if (flags.applies_blend()) {
-    uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
-    uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
-    builder->setBlendMode(static_cast<SkBlendMode>(blend_mode));
-  }
-
-  if (flags.applies_style()) {
-    uint32_t style = uint_data[kStyleIndex];
-    builder->setStyle(static_cast<SkPaint::Style>(style));
-  }
-
-  if (flags.is_stroked(builder->getStyle())) {
-    float stroke_width = float_data[kStrokeWidthIndex];
-    builder->setStrokeWidth(stroke_width);
-
-    float stroke_miter_limit = float_data[kStrokeMiterLimitIndex];
-    builder->setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
-
-    uint32_t stroke_cap = uint_data[kStrokeCapIndex];
-    builder->setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
-
-    uint32_t stroke_join = uint_data[kStrokeJoinIndex];
-    builder->setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
-  }
-
-  if (flags.applies_color_filter()) {
-    builder->setInvertColors(uint_data[kInvertColorIndex] != 0);
-  }
-
-  if (flags.applies_dither()) {
-    builder->setDither(uint_data[kDitherIndex] != 0);
-  }
-
-  if (flags.applies_mask_filter()) {
-    switch (uint_data[kMaskFilterIndex]) {
-      case Null:
-        builder->setMaskFilter(nullptr);
-        break;
-      case Blur:
-        SkBlurStyle blur_style =
-            static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
-        double sigma = float_data[kMaskFilterSigmaIndex];
-        builder->setMaskBlurFilter(blur_style, sigma);
-        break;
-    }
-  }
-
-  return true;
 }
 
 }  // namespace flutter

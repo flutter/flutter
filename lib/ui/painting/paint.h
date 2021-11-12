@@ -8,8 +8,6 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
-#include "flow/display_list.h"
-
 namespace flutter {
 
 class Paint {
@@ -17,25 +15,13 @@ class Paint {
   Paint() = default;
   Paint(Dart_Handle paint_objects, Dart_Handle paint_data);
 
-  const SkPaint* paint(SkPaint& paint) const;
-
-  /// Synchronize the Dart properties to the display list according
-  /// to the attribute flags that indicate which properties are needed.
-  /// The return value indicates if the paint was non-null and can
-  /// either be DCHECKed or used to indicate to the DisplayList
-  /// draw operation whether or not to use the synchronized attributes
-  /// (mainly the drawImage and saveLayer methods).
-  bool sync_to(DisplayListBuilder* builder,
-               const DisplayListAttributeFlags& flags) const;
-
-  bool isNull() const { return Dart_IsNull(paint_data_); }
-  bool isNotNull() const { return !Dart_IsNull(paint_data_); }
+  const SkPaint* paint() const { return is_null_ ? nullptr : &paint_; }
 
  private:
   friend struct tonic::DartConverter<Paint>;
 
-  Dart_Handle paint_objects_;
-  Dart_Handle paint_data_;
+  SkPaint paint_;
+  bool is_null_ = true;
 };
 
 // The PaintData argument is a placeholder to receive encoded data for Paint
