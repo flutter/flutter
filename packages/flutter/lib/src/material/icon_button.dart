@@ -373,7 +373,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         onPressed: onPressed,
         style: ButtonStyle(
-          padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+          padding: MaterialStateProperty.all(EdgeInsets.zero),
           shape: ButtonStyleButton.allOrNull<CircleBorder>(const CircleBorder()),
           overlayColor: overlayColor,
           highlightColor: highlightColor,
