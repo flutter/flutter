@@ -15,11 +15,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import io.flutter.FlutterInjector
 import io.flutter.embedding.android.FlutterFragment
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 
 class MainActivity : FragmentActivity() {
-    private val numberOfFlutters = 10
+    private val numberOfFlutters = 20
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

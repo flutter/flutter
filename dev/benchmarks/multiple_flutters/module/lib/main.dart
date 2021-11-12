@@ -118,37 +118,54 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const <Widget>[
-                  Icon(
+                children: <Widget>[
+                  const Icon(
                     Icons.favorite,
                     color: Colors.pink,
                     size: 24.0,
                     semanticLabel: 'Text to announce in accessibility modes',
                   ),
-                  Icon(
+                  const Icon(
                     Icons.audiotrack,
                     color: Colors.green,
                     size: 30.0,
                   ),
-                  Icon(
+                  const Icon(
                     Icons.beach_access,
                     color: Colors.blue,
                     size: 36.0,
                   ),
-                  Icon(
+                  const Icon(
                     Icons.zoom_out,
                     color: Colors.amber,
                     size: 36.0,
                   ),
-                  Icon(
+                  const Icon(
                     Icons.money,
                     color: Colors.lightGreen,
                     size: 36.0,
                   ),
-                  Icon(
+                  const Icon(
                     Icons.bug_report,
                     color: Colors.teal,
                     size: 36.0,
+                  ),
+                  Container(
+                    width: 36.0,
+                    height: 36.0,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment(0.8,
+                            0.0), // 10% of the width, so there are ten blinds.
+                        colors: <Color>[
+                          Color(0xffee0000),
+                          Color(0xffeeee00)
+                        ], // red to yellow
+                        tileMode: TileMode
+                            .repeated, // repeats the gradient over the canvas
+                      ),
+                    ),
                   ),
                 ],
               ),
