@@ -39,9 +39,11 @@ config("internal_config") {
     ]
   } else {
     cflags = [
+      "-fPIC",
       "-Wno-header-hygiene",
       "-Wno-newline-eof",
       "-Wno-nonportable-include-path",
+      "-Wno-range-loop-construct",
       "-Wno-thread-safety-analysis",
       "-Wno-undefined-var-template",
       "-Wno-unneeded-internal-declaration",
@@ -825,26 +827,28 @@ config("swiftshader_libvulkan_private_config") {
     defines = [
       "VK_USE_PLATFORM_XLIB_KHR",
       "VK_USE_PLATFORM_XCB_KHR",
-      "VK_EXPORT=__attribute__((visibility(\"default\")))",
     ]
   } else if (is_fuchsia) {
     defines = [
       "VK_USE_PLATFORM_FUCHSIA=1",
-      "VK_EXPORT=__attribute__((visibility(\"default\")))",
     ]
   } else if (is_win) {
     defines = [
       "VK_USE_PLATFORM_WIN32_KHR=1",
-      "VK_EXPORT=",
     ]
   } else if (is_mac) {
     defines = [
       "VK_USE_PLATFORM_MACOS_MVK=1",
       "VK_USE_PLATFORM_METAL_EXT=1",
-      "VK_EXPORT=__attribute__((visibility(\"default\")))",
     ]
   } else {
     defines = [ "VK_EXPORT=" ]
+  }
+
+  if (is_win) {
+    defines += [ "VK_EXPORT=__declspec(dllexport)" ]
+  } else {
+    defines += [ "VK_EXPORT=__attribute__((visibility(\"default\")))" ]
   }
 
   if (is_clang) {
@@ -881,7 +885,6 @@ shared_library("vulkan") {
   public = []
 
   sources = [
-    "$source_root/src/Common/SharedLibrary.cpp",
     "$source_root/src/Vulkan/VkBuffer.cpp",
     "$source_root/src/Vulkan/VkBufferView.cpp",
     "$source_root/src/Vulkan/VkCommandBuffer.cpp",
@@ -1213,8 +1216,10 @@ config("spvtools_internal_config") {
 
   if (is_clang) {
     cflags = [
+      "-Wno-deprecated-declarations",
       "-Wno-implicit-fallthrough",
       "-Wno-newline-eof",
+      "-Wno-range-loop-construct",
     ]
   }
 }
