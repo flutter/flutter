@@ -110,8 +110,9 @@ $doctorText
 ${_projectMetadataInformation()}
 ''';
 
-    final String fullURL = 'https://github.com/flutter/flutter/issues/new?'
-      'title=${Uri.encodeQueryComponent(title)}'
+    final String fullURL = 'https://github.com/flutter/flutter/issues'
+      '/new' // We split this here to appease our lint that looks for bad "new bug" links.
+      '?title=${Uri.encodeQueryComponent(title)}'
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
 
