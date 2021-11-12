@@ -625,9 +625,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
 }
 
 void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
-  final String codesignIdentity = environment.defines[kCodesignIdentity];
+  String codesignIdentity = environment.defines[kCodesignIdentity];
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
-    return;
+    codesignIdentity = '-';
   }
   final ProcessResult result = environment.processManager.runSync(<String>[
     'codesign',
