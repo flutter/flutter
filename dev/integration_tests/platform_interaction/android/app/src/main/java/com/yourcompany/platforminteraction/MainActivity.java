@@ -6,10 +6,16 @@ package com.yourcompany.platforminteraction;
 
 import android.os.Bundle;
 
-import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
+import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    GeneratedPluginRegistrant.registerWith(this);
+  }
   public void finish() {
     BasicMessageChannel channel =
         new BasicMessageChannel<>(getFlutterView(), "navigation-test", StringCodec.INSTANCE);

@@ -36,7 +36,6 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addMultidexOption();
-    addIgnoreDeprecationOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
@@ -54,9 +53,6 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String name = 'apk';
-
-  @override
-  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
