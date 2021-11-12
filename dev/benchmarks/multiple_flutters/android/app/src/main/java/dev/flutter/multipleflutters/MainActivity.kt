@@ -19,7 +19,7 @@ import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 
 class MainActivity : FragmentActivity() {
-    private val numberOfFlutters = 5
+    private val numberOfFlutters = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

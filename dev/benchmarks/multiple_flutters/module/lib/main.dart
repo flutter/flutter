@@ -118,42 +118,38 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  const Icon(
+                children: const <Widget>[
+                  Icon(
                     Icons.favorite,
                     color: Colors.pink,
                     size: 24.0,
                     semanticLabel: 'Text to announce in accessibility modes',
                   ),
-                  const Icon(
+                  Icon(
                     Icons.audiotrack,
                     color: Colors.green,
                     size: 30.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.beach_access,
                     color: Colors.blue,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.zoom_out,
                     color: Colors.amber,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.money,
                     color: Colors.lightGreen,
                     size: 36.0,
                   ),
-                  const Icon(
+                  Icon(
                     Icons.bug_report,
                     color: Colors.teal,
                     size: 36.0,
                   ),
-                  Image.asset('food/fruits.png',
-                      package: 'flutter_gallery_assets',
-                      width: 36.0,
-                      height: 36.0),
                 ],
               ),
               CustomPaint(
