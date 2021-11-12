@@ -449,6 +449,7 @@ void main() {
 
     testUsingContext('test without bot', () async {
       Cache.flutterRoot = '';
+      globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
