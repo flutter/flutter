@@ -262,6 +262,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
       (Set<MaterialState> states) => effectiveValue((ButtonStyle? style) => style?.overlayColor?.resolve(states)),
     );
 
+    final Color? highlightColor = effectiveValue((ButtonStyle? style) => style?.highlightColor);
     final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
@@ -365,7 +366,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with MaterialStateMixin
           autofocus: widget.autofocus,
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
-          highlightColor: Colors.transparent,
+          highlightColor: highlightColor ?? Colors.transparent,
           customBorder: resolvedShape,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedForegroundColor),

@@ -8,11 +8,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
+import 'button_style_button.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_state.dart';
+import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -306,6 +311,8 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
+    final IconThemeData iconTheme = IconTheme.of(context);
+
     Color? currentColor;
     if (onPressed != null)
       currentColor = color;
@@ -348,24 +355,40 @@ class IconButton extends StatelessWidget {
       );
     }
 
+    final MaterialStateProperty<Color?> overlayColor =
+      _IconButtonDefaultOverlay(
+        defaultColor: Colors.red,
+        splashColor: splashColor ?? theme.splashColor,
+        focusColor: focusColor ?? theme.focusColor,
+        hoverColor: hoverColor ?? theme.hoverColor,
+      );
+    final MaterialStateProperty<MouseCursor?> cursor = mouseCursor != null ? MaterialStateProperty.all<MouseCursor?>(mouseCursor) :
+      _IconButtonDefaultMouseCursor(SystemMouseCursors.click, SystemMouseCursors.forbidden);
+
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: InkResponse(
+      child: TextButton(
         focusNode: focusNode,
         autofocus: autofocus,
-        canRequestFocus: onPressed != null,
-        onTap: onPressed,
-        mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
-        enableFeedback: enableFeedback,
-        focusColor: focusColor ?? theme.focusColor,
-        hoverColor: hoverColor ?? theme.hoverColor,
-        highlightColor: highlightColor ?? theme.highlightColor,
-        splashColor: splashColor ?? theme.splashColor,
-        radius: splashRadius ?? math.max(
-          Material.defaultSplashRadius,
-          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+        onPressed: onPressed,
+        style: ButtonStyle(
+          padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+          shape: ButtonStyleButton.allOrNull<CircleBorder>(const CircleBorder()),
+          overlayColor: overlayColor,
+          highlightColor: highlightColor,
+          foregroundColor: MaterialStateProperty.all<Color>(currentColor ?? iconTheme.color ?? theme.colorScheme.primary),
+          minimumSize: ButtonStyleButton.allOrNull<Size>(
+            Size.fromRadius(
+              splashRadius ?? math.max(
+                Material.defaultSplashRadius,
+                (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+                // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+              )
+            ),
+          ),
+          mouseCursor: cursor,
+          enableFeedback: enableFeedback,
         ),
         child: result,
       ),
@@ -386,5 +409,46 @@ class IconButton extends StatelessWidget {
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+  }
+}
+
+@immutable
+class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
+  _IconButtonDefaultOverlay({required this.defaultColor, required this.focusColor, required this.hoverColor, required this.splashColor});
+
+  final Color defaultColor;
+  final Color focusColor;
+  final Color hoverColor;
+  final Color splashColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered))
+      return hoverColor;
+    if (states.contains(MaterialState.focused))
+      return focusColor.withOpacity(0.12);
+    if (states.contains(MaterialState.pressed))
+      return splashColor.withOpacity(0.12);
+    return defaultColor;
+  }
+
+  @override
+  String toString() {
+    return '{hovered: $hoverColor, focused: $focusColor, pressed: $splashColor, otherwise: $defaultColor}';
+  }
+}
+
+@immutable
+class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+  _IconButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
+
+  final MouseCursor enabledCursor;
+  final MouseCursor disabledCursor;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return disabledCursor;
+    return enabledCursor;
   }
 }

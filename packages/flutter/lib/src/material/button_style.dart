@@ -103,6 +103,7 @@ class ButtonStyle with Diagnosticable {
     this.textStyle,
     this.backgroundColor,
     this.foregroundColor,
+    this.highlightColor,
     this.overlayColor,
     this.shadowColor,
     this.elevation,
@@ -137,6 +138,9 @@ class ButtonStyle with Diagnosticable {
   /// compute a default [foregroundColor] and use that instead of the
   /// [textStyle]'s color.
   final MaterialStateProperty<Color?>? foregroundColor;
+
+  /// The color of the pressed highlight. 
+  final Color? highlightColor;
 
   /// The highlight color that's typically used to indicate that
   /// the button is focused, hovered, or pressed.
@@ -265,6 +269,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<TextStyle?>? textStyle,
     MaterialStateProperty<Color?>? backgroundColor,
     MaterialStateProperty<Color?>? foregroundColor,
+    Color? highlightColor,
     MaterialStateProperty<Color?>? overlayColor,
     MaterialStateProperty<Color?>? shadowColor,
     MaterialStateProperty<double?>? elevation,
@@ -286,6 +291,7 @@ class ButtonStyle with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      highlightColor: highlightColor ?? this.highlightColor,
       overlayColor: overlayColor ?? this.overlayColor,
       shadowColor: shadowColor ?? this.shadowColor,
       elevation: elevation ?? this.elevation,
@@ -317,6 +323,7 @@ class ButtonStyle with Diagnosticable {
       textStyle: textStyle ?? style.textStyle,
       backgroundColor: backgroundColor ?? style.backgroundColor,
       foregroundColor: foregroundColor ?? style.foregroundColor,
+      highlightColor: highlightColor ?? style.highlightColor,
       overlayColor: overlayColor ?? style.overlayColor,
       shadowColor: shadowColor ?? style.shadowColor,
       elevation: elevation ?? style.elevation,
@@ -342,6 +349,7 @@ class ButtonStyle with Diagnosticable {
       textStyle,
       backgroundColor,
       foregroundColor,
+      highlightColor,
       overlayColor,
       shadowColor,
       elevation,
@@ -371,6 +379,7 @@ class ButtonStyle with Diagnosticable {
         && other.textStyle == textStyle
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
+        && other.highlightColor == highlightColor
         && other.overlayColor == overlayColor
         && other.shadowColor == shadowColor
         && other.elevation == elevation
@@ -395,6 +404,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color?>('highlightColor', highlightColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
