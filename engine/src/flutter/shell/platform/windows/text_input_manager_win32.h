@@ -28,7 +28,7 @@ namespace flutter {
 class TextInputManagerWin32 {
  public:
   TextInputManagerWin32() noexcept = default;
-  ~TextInputManagerWin32() = default;
+  virtual ~TextInputManagerWin32() = default;
 
   TextInputManagerWin32(const TextInputManagerWin32&) = delete;
   TextInputManagerWin32& operator=(const TextInputManagerWin32&) = delete;
@@ -60,7 +60,7 @@ class TextInputManagerWin32 {
   void UpdateCaretRect(const Rect& rect);
 
   // Returns the cursor position relative to the start of the composing range.
-  long GetComposingCursorPosition() const;
+  virtual long GetComposingCursorPosition() const;
 
   // Returns the contents of the composing string.
   //
@@ -68,14 +68,14 @@ class TextInputManagerWin32 {
   // GCS_COMPSTR flag is set in the lparam. In some IMEs, this string may also
   // be set in events where the GCS_RESULTSTR flag is set. This contains the
   // in-progress composing string.
-  std::optional<std::u16string> GetComposingString() const;
+  virtual std::optional<std::u16string> GetComposingString() const;
 
   // Returns the contents of the result string.
   //
   // This may be called in response to WM_IME_COMPOSITION events where the
   // GCS_RESULTSTR flag is set in the lparam. This contains the final string to
   // be committed in the composing region when composition is ended.
-  std::optional<std::u16string> GetResultString() const;
+  virtual std::optional<std::u16string> GetResultString() const;
 
   /// Aborts IME composing.
   ///

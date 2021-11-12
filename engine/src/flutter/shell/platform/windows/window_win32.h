@@ -25,6 +25,7 @@ namespace flutter {
 class WindowWin32 {
  public:
   WindowWin32();
+  WindowWin32(std::unique_ptr<TextInputManagerWin32> text_input_manager);
   virtual ~WindowWin32();
 
   // Initializes as a child window with size using |width| and |height| and
@@ -143,31 +144,31 @@ class WindowWin32 {
 
   // Called when a window is activated in order to configure IME support for
   // multi-step text input.
-  void OnImeSetContext(UINT const message,
-                       WPARAM const wparam,
-                       LPARAM const lparam);
+  virtual void OnImeSetContext(UINT const message,
+                               WPARAM const wparam,
+                               LPARAM const lparam);
 
   // Called when multi-step text input begins when using an IME.
-  void OnImeStartComposition(UINT const message,
-                             WPARAM const wparam,
-                             LPARAM const lparam);
+  virtual void OnImeStartComposition(UINT const message,
+                                     WPARAM const wparam,
+                                     LPARAM const lparam);
 
   // Called when edits/commit of multi-step text input occurs when using an IME.
-  void OnImeComposition(UINT const message,
-                        WPARAM const wparam,
-                        LPARAM const lparam);
+  virtual void OnImeComposition(UINT const message,
+                                WPARAM const wparam,
+                                LPARAM const lparam);
 
   // Called when multi-step text input ends when using an IME.
-  void OnImeEndComposition(UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam);
+  virtual void OnImeEndComposition(UINT const message,
+                                   WPARAM const wparam,
+                                   LPARAM const lparam);
 
   // Called when the user triggers an IME-specific request such as input
   // reconversion, where an existing input sequence is returned to composing
   // mode to select an alternative candidate conversion.
-  void OnImeRequest(UINT const message,
-                    WPARAM const wparam,
-                    LPARAM const lparam);
+  virtual void OnImeRequest(UINT const message,
+                            WPARAM const wparam,
+                            LPARAM const lparam);
 
   // Called when the app ends IME composing, such as when the text input client
   // is cleared or changed.
@@ -264,7 +265,7 @@ class WindowWin32 {
   std::map<uint16_t, std::u16string> text_for_scancode_on_redispatch_;
 
   // Manages IME state.
-  TextInputManagerWin32 text_input_manager_;
+  std::unique_ptr<TextInputManagerWin32> text_input_manager_;
 
   // Used for temporarily storing the WM_TOUCH-provided touch points.
   std::vector<TOUCHINPUT> touch_points_;

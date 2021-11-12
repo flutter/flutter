@@ -253,6 +253,8 @@ executable("flutter_windows_unittests") {
       "platform_handler_unittests.cc",
       "testing/flutter_window_win32_test.cc",
       "testing/flutter_window_win32_test.h",
+      "testing/mock_text_input_manager_win32.cc",
+      "testing/mock_text_input_manager_win32.h",
       "testing/mock_window_binding_handler.cc",
       "testing/mock_window_binding_handler.h",
       "testing/mock_window_win32.cc",

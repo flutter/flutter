@@ -6,8 +6,10 @@
 
 namespace flutter {
 namespace testing {
-
 MockWin32Window::MockWin32Window() : WindowWin32(){};
+MockWin32Window::MockWin32Window(
+    std::unique_ptr<TextInputManagerWin32> text_input_manager)
+    : WindowWin32(std::move(text_input_manager)){};
 
 MockWin32Window::~MockWin32Window() = default;
 
@@ -33,6 +35,12 @@ LRESULT MockWin32Window::Win32SendMessage(HWND hWnd,
                                           WPARAM const wparam,
                                           LPARAM const lparam) {
   return HandleMessage(message, wparam, lparam);
+}
+
+void MockWin32Window::CallOnImeComposition(UINT const message,
+                                           WPARAM const wparam,
+                                           LPARAM const lparam) {
+  WindowWin32::OnImeComposition(message, wparam, lparam);
 }
 
 }  // namespace testing
