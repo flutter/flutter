@@ -22,6 +22,7 @@ bool ShouldUseMetalRenderer() {
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     auto device = MTLCreateSystemDefaultDevice();
     ios_version_supports_metal = [device supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v3];
+    [device release];
   }
   return ios_version_supports_metal;
 }

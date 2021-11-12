@@ -18,15 +18,15 @@ FLUTTER_DARWIN_EXPORT
 /**
  * The name of the callback.
  */
-@property(retain) NSString* callbackName;
+@property(copy) NSString* callbackName;
 /**
  * The class name of the callback.
  */
-@property(retain) NSString* callbackClassName;
+@property(copy) NSString* callbackClassName;
 /**
  * The library path of the callback.
  */
-@property(retain) NSString* callbackLibraryPath;
+@property(copy) NSString* callbackLibraryPath;
 @end
 
 /**

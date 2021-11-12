@@ -146,7 +146,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end  // FlutterSwitchSemanticsObject
 
 @interface FlutterScrollableSemanticsObject ()
-@property(nonatomic, strong) FlutterSemanticsScrollView* scrollView;
+@property(nonatomic, retain) FlutterSemanticsScrollView* scrollView;
 @end
 
 @implementation FlutterScrollableSemanticsObject {
@@ -409,7 +409,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                                          withAttributes:
                                              (const flutter::StringAttributes&)attributes {
   NSMutableAttributedString* attributedString =
-      [[NSMutableAttributedString alloc] initWithString:string];
+      [[[NSMutableAttributedString alloc] initWithString:string] autorelease];
   for (const auto& attribute : attributes) {
     NSRange range = NSMakeRange(attribute->start, attribute->end - attribute->start);
     switch (attribute->type) {
@@ -749,7 +749,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end
 
 @interface FlutterPlatformViewSemanticsContainer ()
-@property(nonatomic, strong) UIView* platformView;
+@property(nonatomic, retain) UIView* platformView;
 @end
 
 @implementation FlutterPlatformViewSemanticsContainer

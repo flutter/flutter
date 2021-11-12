@@ -10,7 +10,7 @@
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    _sharedInstance = [FlutterBinaryCodec new];
+    _sharedInstance = [[FlutterBinaryCodec alloc] init];
   }
   return _sharedInstance;
 }
@@ -29,7 +29,7 @@
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    _sharedInstance = [FlutterStringCodec new];
+    _sharedInstance = [[FlutterStringCodec alloc] init];
   }
   return _sharedInstance;
 }
@@ -54,7 +54,7 @@
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    _sharedInstance = [FlutterJSONMessageCodec new];
+    _sharedInstance = [[FlutterJSONMessageCodec alloc] init];
   }
   return _sharedInstance;
 }
@@ -109,7 +109,7 @@
 + (instancetype)sharedInstance {
   static id _sharedInstance = nil;
   if (!_sharedInstance) {
-    _sharedInstance = [FlutterJSONMethodCodec new];
+    _sharedInstance = [[FlutterJSONMethodCodec alloc] init];
   }
   return _sharedInstance;
 }

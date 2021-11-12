@@ -349,7 +349,7 @@ void HandleResponse(bool handled, void* user_data);
  *
  * Set by the initializer.
  */
-@property(nonatomic) FlutterSendKeyEvent sendEvent;
+@property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
 
 /**
  * A map of pressed keys.
@@ -357,7 +357,7 @@ void HandleResponse(bool handled, void* user_data);
  * The keys of the dictionary are physical keys, while the values are the logical keys
  * of the key down event.
  */
-@property(nonatomic) NSMutableDictionary<NSNumber*, NSNumber*>* pressingRecords;
+@property(nonatomic, retain, readonly) NSMutableDictionary<NSNumber*, NSNumber*>* pressingRecords;
 
 /**
  * A constant mask for NSEvent.modifierFlags that Flutter synchronizes with.
@@ -396,7 +396,8 @@ void HandleResponse(bool handled, void* user_data);
  * Its values are |responseId|s, and keys are the callback that was received
  * along with the event.
  */
-@property(nonatomic) NSMutableDictionary<NSNumber*, FlutterAsyncKeyCallback>* pendingResponses;
+@property(nonatomic, retain, readonly)
+    NSMutableDictionary<NSNumber*, FlutterAsyncKeyCallback>* pendingResponses;
 
 /**
  * Compare the last modifier flags and the current, and dispatch synthesized

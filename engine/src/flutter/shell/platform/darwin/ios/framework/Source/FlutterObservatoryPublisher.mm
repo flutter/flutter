@@ -206,8 +206,8 @@ static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
             // uri comes in as something like 'http://127.0.0.1:XXXXX/' where XXXXX is the port
             // number.
             if (weak) {
-              NSURL* url =
-                  [[NSURL alloc] initWithString:[NSString stringWithUTF8String:uri.c_str()]];
+              NSURL* url = [[[NSURL alloc]
+                  initWithString:[NSString stringWithUTF8String:uri.c_str()]] autorelease];
               weak.get().url = url;
               if (weak.get().enableObservatoryPublication) {
                 [[weak.get() delegate] publishServiceProtocolPort:url];

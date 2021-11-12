@@ -760,6 +760,21 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [self waitForExpectations:@[ expectation ] timeout:1.0];
 }
 
+- (void)testReleasesKeyboardManagerOnDealloc {
+  __weak FlutterKeyboardManager* weakKeyboardManager = nil;
+  @autoreleasepool {
+    FlutterViewController* viewController = [[FlutterViewController alloc] init];
+
+    [viewController addInternalPlugins];
+    weakKeyboardManager = viewController.keyboardManager;
+    XCTAssertNotNil(weakKeyboardManager);
+    [viewController deregisterNotifications];
+    viewController = nil;
+  }
+  // View controller has released the keyboard manager.
+  XCTAssertNil(weakKeyboardManager);
+}
+
 - (void)testDoesntLoadViewInInit {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];

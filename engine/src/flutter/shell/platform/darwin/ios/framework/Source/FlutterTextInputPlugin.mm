@@ -650,7 +650,7 @@ static BOOL isScribbleAvailable() {
 // currently only support UITextFields, and password saving only supports
 // UITextFields and UITextViews, as of iOS 13.5.
 @interface FlutterSecureTextInputView : FlutterTextInputView
-@property(nonatomic, strong, readonly) UITextField* textField;
+@property(nonatomic, retain, readonly) UITextField* textField;
 @end
 
 @implementation FlutterSecureTextInputView {
@@ -693,7 +693,7 @@ static BOOL isScribbleAvailable() {
 @property(nonatomic, assign) CGRect markedRect;
 @property(nonatomic) BOOL isVisibleToAutofill;
 @property(nonatomic, assign) BOOL accessibilityEnabled;
-@property(nonatomic, strong) UITextInteraction* textInteraction API_AVAILABLE(ios(13.0));
+@property(nonatomic, retain) UITextInteraction* textInteraction API_AVAILABLE(ios(13.0));
 
 - (void)setEditableTransform:(NSArray*)matrix;
 @end
@@ -872,6 +872,9 @@ static BOOL isScribbleAvailable() {
   [_autofillId release];
   [_inputViewController release];
   [_selectionRects release];
+  [_markedTextStyle release];
+  [_textContentType release];
+  [_textInteraction release];
   [super dealloc];
 }
 
@@ -957,8 +960,8 @@ static BOOL isScribbleAvailable() {
 }
 
 - (NSRange)clampSelection:(NSRange)range forText:(NSString*)text {
-  int start = MIN(MAX(range.location, 0), text.length);
-  int length = MIN(range.length, text.length - start);
+  NSUInteger start = MIN(MAX(range.location, 0), text.length);
+  NSUInteger length = MIN(range.length, text.length - start);
   return NSMakeRange(start, length);
 }
 
@@ -1118,8 +1121,8 @@ static BOOL isScribbleAvailable() {
   NSRange textRange = ((FlutterTextRange*)range).range;
   NSAssert(textRange.location != NSNotFound, @"Expected a valid text range.");
   // Sanitize the range to prevent going out of bounds.
-  int location = MIN(textRange.location, self.text.length);
-  int length = MIN(self.text.length - location, textRange.length);
+  NSUInteger location = MIN(textRange.location, self.text.length);
+  NSUInteger length = MIN(self.text.length - location, textRange.length);
   NSRange safeRange = NSMakeRange(location, length);
   return [self.text substringWithRange:safeRange];
 }
@@ -1918,8 +1921,8 @@ static BOOL isScribbleAvailable() {
 // The current password-autofillable input fields that have yet to be saved.
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
-@property(nonatomic, strong) FlutterTextInputView* activeView;
-@property(nonatomic, strong) FlutterTextInputViewAccessibilityHider* inputHider;
+@property(nonatomic, retain) FlutterTextInputView* activeView;
+@property(nonatomic, retain) FlutterTextInputViewAccessibilityHider* inputHider;
 @property(nonatomic, readonly) id<FlutterViewResponder> viewResponder;
 @end
 
