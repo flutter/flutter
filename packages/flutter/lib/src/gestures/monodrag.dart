@@ -616,10 +616,10 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
   PanGestureRecognizer({
     Object? debugOwner,
-    PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : super(
          debugOwner: debugOwner,
-         kind: kind,
+         supportedDevices: supportedDevices,
        );
 
   @override

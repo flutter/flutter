@@ -1528,7 +1528,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
       gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-        () => PanGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.mouse),
+        () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
         (PanGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
