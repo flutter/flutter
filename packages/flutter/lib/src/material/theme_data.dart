@@ -1465,9 +1465,10 @@ class ThemeData with Diagnosticable {
   ///
   /// The material library no longer uses this property. The [appBarTheme] can
   /// be used to configure the appearance of [AppBar]s. The appearance of
-  /// Keyboards for [TextField]s now uses the overall theme's [Theme.brightness]
-  /// and can also be customized with [TextField.keyboardAppearance].
-  /// of any color can be found with [ThemeData.estimateBrightnessForColor].
+  /// Keyboards for [TextField]s now uses the overall theme's
+  /// [ThemeData.brightness] and can also be customized with
+  /// [TextField.keyboardAppearance]. The brightness of any color can be found
+  /// with [ThemeData.estimateBrightnessForColor].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.6.0-11.0.pre.',
