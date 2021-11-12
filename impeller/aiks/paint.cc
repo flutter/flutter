@@ -6,6 +6,14 @@
 
 namespace impeller {
 
-//
+std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
+  if (!color.IsTransparent()) {
+    auto solid_color = std::make_shared<SolidColorContents>();
+    solid_color->SetColor(color);
+    return solid_color;
+  }
+
+  return nullptr;
+}
 
 }  // namespace impeller

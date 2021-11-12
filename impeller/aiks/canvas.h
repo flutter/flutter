@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/aiks/canvas_pass.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/aiks/picture.h"
 #include "impeller/geometry/matrix.h"
@@ -58,8 +59,9 @@ class Canvas {
 
  private:
   std::stack<Matrix> xformation_stack_;
-  std::stack<Paint> paint_stack_;
-  std::vector<Entity> ops_;
+  std::vector<CanvasPass> passes_;
+
+  CanvasPass& GetCurrentPass();
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

@@ -12,10 +12,7 @@ namespace impeller {
 
 Canvas::Canvas() {
   xformation_stack_.push({});
-
-  Paint default_paint;
-  default_paint.color = Color::White();
-  paint_stack_.push(default_paint);
+  passes_.emplace_back(CanvasPass{});
 }
 
 Canvas::~Canvas() = default;
@@ -23,7 +20,6 @@ Canvas::~Canvas() = default;
 void Canvas::Save() {
   FML_DCHECK(xformation_stack_.size() > 0);
   xformation_stack_.push(xformation_stack_.top());
-  paint_stack_.push(paint_stack_.top());
 }
 
 bool Canvas::Restore() {
@@ -32,7 +28,6 @@ bool Canvas::Restore() {
     return false;
   }
   xformation_stack_.pop();
-  paint_stack_.pop();
   return true;
 }
 
@@ -69,21 +64,15 @@ void Canvas::RestoreToCount(size_t count) {
 }
 
 void Canvas::DrawPath(Path path, Paint paint) {
-  Color color = paint.color;
-  color.alpha *= paint_stack_.top().color.alpha;
-
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
-  entity.SetBackgroundColor(color);
-  entity.SetContents(std::move(paint.contents));
-
-  ops_.emplace_back(std::move(entity));
+  entity.SetContents(paint.CreateContentsForEntity());
+  GetCurrentPass().PushEntity(std::move(entity));
 }
 
 void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
   Save();
-  paint_stack_.top() = paint;
 }
 
 void Canvas::ClipPath(Path path) {
@@ -91,24 +80,33 @@ void Canvas::ClipPath(Path path) {
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
   entity.SetIsClip(true);
-  ops_.emplace_back(std::move(entity));
+  GetCurrentPass().PushEntity(std::move(entity));
 }
 
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
 void Canvas::DrawPicture(const Picture& picture) {
-  for (const auto& entity : picture.entities) {
-    auto new_entity = entity;
-    new_entity.SetTransformation(GetCurrentTransformation() *
-                                 new_entity.GetTransformation());
-    ops_.emplace_back(std::move(new_entity));
+  for (const auto& pass : picture.passes) {
+    CanvasPass new_pass;
+    for (const auto& entity : pass.GetPassEntities()) {
+      auto new_entity = entity;
+      new_entity.SetTransformation(GetCurrentTransformation() *
+                                   entity.GetTransformation());
+      new_pass.PushEntity(std::move(new_entity));
+    }
+    passes_.emplace_back(std::move(new_pass));
   }
 }
 
 Picture Canvas::EndRecordingAsPicture() {
   Picture picture;
-  picture.entities = std::move(ops_);
+  picture.passes = std::move(passes_);
   return picture;
+}
+
+CanvasPass& Canvas::GetCurrentPass() {
+  FML_DCHECK(!passes_.empty());
+  return passes_.back();
 }
 
 }  // namespace impeller
