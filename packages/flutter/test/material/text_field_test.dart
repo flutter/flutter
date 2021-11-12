@@ -7932,7 +7932,7 @@ void main() {
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 0.00001),
+      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 1),
     );
 
     // Start long pressing on the first line.
@@ -7974,7 +7974,7 @@ void main() {
     // down by one line.
     expect(
       textOffsetToPosition(tester, 110).dy,
-      moreOrLessEquals(firstCharY + lineHeight, epsilon: 0.00001),
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
     );
 
     // Likewise, the first character is now scrolled out of the top of the field
@@ -8009,7 +8009,7 @@ void main() {
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 0.00001),
+      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 1),
     );
 
     await tester.tapAt(textOffsetToPosition(tester, 13));
@@ -8046,7 +8046,7 @@ void main() {
     // down by one line.
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      moreOrLessEquals(firstCharY + lineHeight, epsilon: 0.00001),
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
     );
 
     // Likewise, the first character is now scrolled out of the top of the field
@@ -8083,7 +8083,7 @@ void main() {
     final double firstCharY = textOffsetToPosition(tester, 0).dy;
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 0.00001),
+      moreOrLessEquals(firstCharY + lineHeight * 2, epsilon: 1),
     );
 
     // Start selecting on the first line.
@@ -8128,7 +8128,7 @@ void main() {
     // down by one line.
     expect(
       textOffsetToPosition(tester, textLength).dy,
-      firstCharY + lineHeight,
+      moreOrLessEquals(firstCharY + lineHeight, epsilon: 1),
     );
 
     // Likewise, the first character is now scrolled out of the top of the field
