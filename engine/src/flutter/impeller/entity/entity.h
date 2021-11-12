@@ -23,10 +23,6 @@ class Entity {
 
   void SetTransformation(const Matrix& transformation);
 
-  const Color& GetBackgroundColor() const;
-
-  void SetBackgroundColor(const Color& backgroundColor);
-
   const Color& GetStrokeColor() const;
 
   void SetStrokeColor(const Color& strokeColor);
@@ -49,9 +45,7 @@ class Entity {
 
  private:
   Matrix transformation_;
-  Color background_color_;
   std::shared_ptr<Contents> contents_;
-
   Path path_;
   Color stroke_color_;
   double stroke_size_ = 1.0;

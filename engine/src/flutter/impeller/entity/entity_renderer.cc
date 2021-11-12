@@ -37,9 +37,11 @@ bool EntityRenderer::RenderEntities(const Surface& surface,
   }
 
   for (const auto& entity : entities) {
-    if (auto contents = entity.GetContents();
-        !contents->Render(*content_renderer_, entity, surface, onscreen_pass)) {
-      return false;
+    if (auto contents = entity.GetContents()) {
+      if (!contents->Render(*content_renderer_, entity, surface,
+                            onscreen_pass)) {
+        return false;
+      }
     }
   }
 

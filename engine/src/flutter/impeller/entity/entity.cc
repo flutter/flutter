@@ -18,14 +18,6 @@ void Entity::SetTransformation(const Matrix& transformation) {
   transformation_ = transformation;
 }
 
-const Color& Entity::GetBackgroundColor() const {
-  return background_color_;
-}
-
-void Entity::SetBackgroundColor(const Color& backgroundColor) {
-  background_color_ = backgroundColor;
-}
-
 const Color& Entity::GetStrokeColor() const {
   return stroke_color_;
 }
