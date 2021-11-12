@@ -8,6 +8,8 @@ impeller_component("aiks") {
   sources = [
     "canvas.cc",
     "canvas.h",
+    "canvas_pass.cc",
+    "canvas_pass.h",
     "image.cc",
     "image.h",
     "paint.cc",

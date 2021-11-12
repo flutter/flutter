@@ -14,7 +14,8 @@ namespace impeller {
 struct Paint {
   Color color;
   Scalar stroke_width = 0.0;
-  std::shared_ptr<Contents> contents;
+
+  std::shared_ptr<Contents> CreateContentsForEntity() const;
 };
 
 }  // namespace impeller

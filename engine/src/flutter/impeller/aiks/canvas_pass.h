@@ -4,17 +4,25 @@
 
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/aiks/canvas_pass.h"
 #include "impeller/entity/entity.h"
 
 namespace impeller {
 
-struct Picture {
-  std::vector<CanvasPass> passes;
+class CanvasPass {
+ public:
+  CanvasPass();
+
+  ~CanvasPass();
+
+  void PushEntity(Entity entity);
+
+  const std::vector<Entity>& GetPassEntities() const;
+
+ private:
+  std::vector<Entity> ops_;
 };
 
 }  // namespace impeller

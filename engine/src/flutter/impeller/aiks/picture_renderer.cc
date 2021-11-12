@@ -29,10 +29,14 @@ bool PictureRenderer::Render(const Surface& surface,
     return false;
   }
 
-  return entity_renderer_.RenderEntities(surface,          //
-                                         onscreen_pass,    //
-                                         picture.entities  //
-  );
+  for (const auto& pass : picture.passes) {
+    if (!entity_renderer_.RenderEntities(surface, onscreen_pass,
+                                         pass.GetPassEntities())) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace impeller

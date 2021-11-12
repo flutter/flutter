@@ -84,7 +84,7 @@ class SolidStrokeContents final : public Contents {
  public:
   SolidStrokeContents();
 
-  ~SolidStrokeContents();
+  ~SolidStrokeContents() override;
 
   void SetColor(Color color);
 

@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
-
-#include <memory>
-#include <vector>
-
-#include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas_pass.h"
-#include "impeller/entity/entity.h"
 
 namespace impeller {
 
-struct Picture {
-  std::vector<CanvasPass> passes;
-};
+CanvasPass::CanvasPass() = default;
+
+CanvasPass::~CanvasPass() = default;
+
+void CanvasPass::PushEntity(Entity entity) {
+  ops_.emplace_back(std::move(entity));
+}
+
+const std::vector<Entity>& CanvasPass::GetPassEntities() const {
+  return ops_;
+}
 
 }  // namespace impeller

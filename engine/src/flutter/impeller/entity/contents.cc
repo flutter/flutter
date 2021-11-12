@@ -95,6 +95,10 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
  ******* SolidColorContents
  ******************************************************************************/
 
+SolidColorContents::SolidColorContents() = default;
+
+SolidColorContents::~SolidColorContents() = default;
+
 void SolidColorContents::SetColor(Color color) {
   color_ = color;
 }
@@ -135,7 +139,7 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp =
       Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
-  frame_info.color = entity.GetBackgroundColor();
+  frame_info.color = color_;
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   cmd.primitive_type = PrimitiveType::kTriangle;
