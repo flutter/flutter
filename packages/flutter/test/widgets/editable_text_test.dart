@@ -5574,7 +5574,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5685,7 +5685,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5709,10 +5709,7 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      equals(const TextSelection.collapsed(
-        offset: testText.length,
-        affinity: TextAffinity.downstream,
-      )),
+      equals(const TextSelection.collapsed(offset: testText.length)),
     );
 
     await sendKeys(
@@ -5754,7 +5751,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+            style: Typography.material2018().black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -5796,10 +5793,7 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      equals(const TextSelection.collapsed(
-        offset: testText.length,
-        affinity: TextAffinity.downstream,
-      )),
+      equals(const TextSelection.collapsed(offset: testText.length)),
     );
 
     await sendKeys(
