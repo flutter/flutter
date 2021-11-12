@@ -1052,6 +1052,10 @@ void main() {
         tester,
         selectionControls: spy,
       );
+      final CapturedThemes themes = InheritedTheme.capture(
+          from: selectionOverlay.context,
+          to: null
+      );
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..endHandleType = TextSelectionHandleType.right
@@ -1059,7 +1063,7 @@ void main() {
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);
@@ -1077,7 +1081,7 @@ void main() {
       await tester.pump();
       expect(find.byKey(spy.toolBarKey), findsNothing);
 
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       selectionOverlay.showToolbar();
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
@@ -1097,6 +1101,10 @@ void main() {
         tester,
         selectionControls: spy,
       );
+      final CapturedThemes themes = InheritedTheme.capture(
+          from: selectionOverlay.context,
+          to: null
+      );
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.collapsed
         ..endHandleType = TextSelectionHandleType.collapsed
@@ -1104,7 +1112,7 @@ void main() {
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
@@ -1117,6 +1125,10 @@ void main() {
         tester,
         selectionControls: spy,
       );
+      final CapturedThemes themes = InheritedTheme.capture(
+          from: selectionOverlay.context,
+          to: null
+      );
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..lineHeightAtStart = 10.0
@@ -1126,7 +1138,7 @@ void main() {
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       await tester.pump();
       Text leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
       Text rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
@@ -1154,6 +1166,10 @@ void main() {
         onSelectionHandleTapped: handleTapped,
         selectionControls: spy,
       );
+      final CapturedThemes themes = InheritedTheme.capture(
+          from: selectionOverlay.context,
+          to: null
+      );
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..lineHeightAtStart = 10.0
@@ -1163,7 +1179,7 @@ void main() {
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);
@@ -1201,6 +1217,10 @@ void main() {
         onEndDragEnd: endDragEnd,
         selectionControls: spy,
       );
+      final CapturedThemes themes = InheritedTheme.capture(
+          from: selectionOverlay.context,
+          to: null
+      );
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.left
         ..lineHeightAtStart = 10.0
@@ -1210,7 +1230,7 @@ void main() {
           TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
           TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
         ];
-      selectionOverlay.showHandles();
+      selectionOverlay.showHandles(themes);
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);

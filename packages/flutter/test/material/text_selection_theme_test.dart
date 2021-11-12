@@ -62,11 +62,16 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = false;
     });
+
     // Test TextField's cursor & selection color.
+    final TextEditingController editingController = TextEditingController(text: 'abc def ghi');
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
-          child: TextField(autofocus: true),
+          child: TextField(
+            controller: editingController,
+            autofocus: true,
+          ),
         ),
       ),
     );
@@ -78,25 +83,16 @@ void main() {
     expect(renderEditable.cursorColor, defaultCursorColor);
     expect(renderEditable.selectionColor?.value, defaultSelectionColor.value);
 
+    // Select 'def'.
+    editingController.selection = const TextSelection(baseOffset: 4, extentOffset: 7);
+
     // Test the selection handle color.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return materialTextSelectionControls.buildHandle(
-                context,
-                TextSelectionHandleType.left,
-                10.0,
-              );
-            },
-          ),
-        ),
-      ),
-    );
     await tester.pumpAndSettle();
-    final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    expect(handle, paints..path(color: defaultSelectionHandleColor));
+    final Iterable<RenderBox> handles = tester.renderObjectList<RenderBox>(find.byType(CustomPaint));
+    final RenderBox leftHandle = handles.first;
+    final RenderBox rightHandle = handles.last;
+    expect(leftHandle, paints..path(color: defaultSelectionHandleColor));
+    expect(rightHandle, paints..path(color: defaultSelectionHandleColor));
   });
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
@@ -115,11 +111,15 @@ void main() {
     });
 
     // Test TextField's cursor & selection color.
+    final TextEditingController editingController = TextEditingController(text: 'abc def ghi');
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: TextField(autofocus: true),
+        home: Material(
+          child: TextField(
+            controller: editingController,
+            autofocus: true,
+          ),
         ),
       ),
     );
@@ -130,29 +130,20 @@ void main() {
     expect(renderEditable.cursorColor, textSelectionTheme.cursorColor);
     expect(renderEditable.selectionColor, textSelectionTheme.selectionColor);
 
+    // Select 'def'.
+    editingController.selection = const TextSelection(baseOffset: 4, extentOffset: 7);
+
     // Test the selection handle color.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return materialTextSelectionControls.buildHandle(
-                context,
-                TextSelectionHandleType.left,
-                10.0,
-              );
-            },
-          ),
-        ),
-      ),
-    );
     await tester.pumpAndSettle();
-    final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
+    final Iterable<RenderBox> handles = tester.renderObjectList<RenderBox>(find.byType(CustomPaint));
+    final RenderBox leftHandle = handles.first;
+    final RenderBox rightHandle = handles.last;
+    expect(leftHandle, paints..path(color: textSelectionTheme.selectionHandleColor));
+    expect(rightHandle, paints..path(color: textSelectionTheme.selectionHandleColor));
   });
 
   testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -171,14 +162,19 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = false;
     });
+
     // Test TextField's cursor & selection color.
+    final TextEditingController editingController = TextEditingController(text: 'abc def ghi');
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: TextField(autofocus: true),
+            child: TextField(
+              controller: editingController,
+              autofocus: true,
+            ),
           ),
         ),
       ),
@@ -189,29 +185,16 @@ void main() {
     expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor);
     expect(renderEditable.selectionColor, widgetTextSelectionTheme.selectionColor);
 
+    // Select 'def'.
+    editingController.selection = const TextSelection(baseOffset: 4, extentOffset: 7);
+
     // Test the selection handle color.
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: TextSelectionTheme(
-            data: widgetTextSelectionTheme,
-            child: Builder(
-              builder: (BuildContext context) {
-                return materialTextSelectionControls.buildHandle(
-                  context,
-                  TextSelectionHandleType.left,
-                  10.0,
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
     await tester.pumpAndSettle();
-    final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    expect(handle, paints..path(color: widgetTextSelectionTheme.selectionHandleColor));
+    final Iterable<RenderBox> handles = tester.renderObjectList<RenderBox>(find.byType(CustomPaint));
+    final RenderBox leftHandle = handles.first;
+    final RenderBox rightHandle = handles.last;
+    expect(leftHandle, paints..path(color: widgetTextSelectionTheme.selectionHandleColor));
+    expect(rightHandle, paints..path(color: widgetTextSelectionTheme.selectionHandleColor));
   });
 
   testWidgets('TextField parameters will override theme settings', (WidgetTester tester) async {

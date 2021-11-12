@@ -16,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
@@ -558,8 +559,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   /// Returns true if the handles are shown, false if the handles can't be
   /// shown.
   bool _showHandles() {
+    final CapturedThemes themes = InheritedTheme.capture(from: context, to: null);
     if (_selectionOverlay != null) {
-      _selectionOverlay!.showHandles();
+      _selectionOverlay!.showHandles(themes);
       return true;
     }
 
@@ -568,7 +570,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
 
     _createSelectionOverlay();
-    _selectionOverlay!.showHandles();
+    _selectionOverlay!.showHandles(themes);
     return true;
   }
 

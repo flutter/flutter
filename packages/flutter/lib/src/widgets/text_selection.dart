@@ -19,6 +19,7 @@ import 'container.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'inherited_theme.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -326,9 +327,9 @@ class TextSelectionOverlay {
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
-  void showHandles() {
+  void showHandles(CapturedThemes themes) {
     _updateSelectionOverlay();
-    _selectionOverlay.showHandles();
+    _selectionOverlay.showHandles(themes);
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
@@ -792,14 +793,14 @@ class SelectionOverlay {
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
   /// {@endtemplate}
-  void showHandles() {
+  void showHandles(CapturedThemes themes) {
     if (_handles != null) {
       return;
     }
 
     _handles = <OverlayEntry>[
-      OverlayEntry(builder: _buildStartHandle),
-      OverlayEntry(builder: _buildEndHandle),
+      OverlayEntry(builder: (_) => _buildStartHandle(themes)),
+      OverlayEntry(builder: (_) => _buildEndHandle(themes)),
     ];
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
@@ -891,7 +892,7 @@ class SelectionOverlay {
     hide();
   }
 
-  Widget _buildStartHandle(BuildContext context) {
+  Widget _buildStartHandle(CapturedThemes themes) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null) {
@@ -911,11 +912,11 @@ class SelectionOverlay {
       );
     }
     return ExcludeSemantics(
-      child: handle,
+      child: themes.wrap(handle),
     );
   }
 
-  Widget _buildEndHandle(BuildContext context) {
+  Widget _buildEndHandle(CapturedThemes themes) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
@@ -936,7 +937,7 @@ class SelectionOverlay {
       );
     }
     return ExcludeSemantics(
-      child: handle,
+      child: themes.wrap(handle),
     );
   }
 

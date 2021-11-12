@@ -25,6 +25,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'scroll_configuration.dart';
@@ -2530,7 +2531,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _selectionOverlay!.update(_value);
       }
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
-      _selectionOverlay!.showHandles();
+      final CapturedThemes themes = InheritedTheme.capture(from: context, to: null);
+      _selectionOverlay!.showHandles(themes);
     }
     // TODO(chunhtai): we should make sure selection actually changed before
     // we call the onSelectionChanged.
