@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
