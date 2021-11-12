@@ -4,13 +4,13 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'navigation_bar.dart';
 import 'navigation_rail_theme.dart';
 import 'theme.dart';
 
