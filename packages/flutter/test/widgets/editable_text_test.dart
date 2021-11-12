@@ -5709,7 +5709,10 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      equals(const TextSelection.collapsed(offset: testText.length)),
+      equals(const TextSelection.collapsed(
+        offset: testText.length,
+        affinity: TextAffinity.upstream,
+      )),
     );
 
     await sendKeys(
@@ -5723,10 +5726,7 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      equals(const TextSelection.collapsed(
-        offset: 0,
-        affinity: TextAffinity.upstream,
-      )),
+      equals(const TextSelection.collapsed(offset: 0)),
     );
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -5793,7 +5793,10 @@ void main() {
     await tester.pump();
     expect(
       controller.selection,
-      equals(const TextSelection.collapsed(offset: testText.length)),
+      equals(const TextSelection.collapsed(
+        offset: testText.length,
+        affinity: TextAffinity.upstream,
+      )),
     );
 
     await sendKeys(
