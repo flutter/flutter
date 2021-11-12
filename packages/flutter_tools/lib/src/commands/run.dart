@@ -251,7 +251,6 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
     addMultidexOption();
-    addIgnoreDeprecationOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -342,10 +341,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   final String name = 'run';
-
-  @override
-  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
-  DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
 
   @override
   final String description = 'Run your Flutter app on an attached device.';
@@ -479,10 +474,6 @@ class RunCommand extends RunCommandBase {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
-    }
-
-    if (devices.any((Device device) => device is AndroidDevice)) {
-      _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
