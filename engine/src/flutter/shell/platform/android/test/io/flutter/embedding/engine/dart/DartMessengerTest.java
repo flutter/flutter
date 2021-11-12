@@ -311,6 +311,7 @@ public class DartMessengerTest {
     verify(fakeFlutterJni).invokePlatformMessageEmptyResponseCallback(replyId);
   }
 
+  @Test
   public void testSerialTaskQueue() throws InterruptedException {
     final FlutterJNI fakeFlutterJni = mock(FlutterJNI.class);
     final DartMessenger messenger = new DartMessenger(fakeFlutterJni);
