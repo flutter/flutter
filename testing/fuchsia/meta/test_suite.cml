@@ -1,4 +1,7 @@
 {
+    facets: {
+        "fuchsia.test": { type: "system" },
+    },
     program: {
         // TODO(fxbug.dev/80338): Switch to gtest_runner after the filters in
         // `gtest_filters.yaml` are supported by `--test-filter` and
