@@ -1,4 +1,4 @@
-Signature: cce4f7c0eda6f4bb3d08a3ed0adb2fe6
+Signature: 2eade6c56e10cf65054b3ffa3e18efea
 
 UNUSED LICENSES:
 
@@ -2265,6 +2265,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/realm_builder.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/binder.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/component.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connect.fidl
