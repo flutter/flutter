@@ -929,18 +929,23 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      try {
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
-      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
-      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
+        final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
+        gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+        gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
+        await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
 
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
-      expect(fakeAndroidSdk.reinitialized, true);
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+        expect(fakeAndroidSdk.reinitialized, true);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
