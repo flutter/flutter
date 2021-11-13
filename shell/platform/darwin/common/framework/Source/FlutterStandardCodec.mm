@@ -36,8 +36,9 @@
 }
 
 - (NSData*)encode:(id)message {
-  if (message == nil)
+  if (message == nil) {
     return nil;
+  }
   NSMutableData* data = [NSMutableData dataWithCapacity:32];
   FlutterStandardWriter* writer = [_readerWriter writerWithData:data];
   [writer writeValue:message];
@@ -45,8 +46,9 @@
 }
 
 - (id)decode:(NSData*)message {
-  if ([message length] == 0)
+  if ([message length] == 0) {
     return nil;
+  }
   FlutterStandardReader* reader = [_readerWriter readerWithData:message];
   id value = [reader readValue];
   NSAssert(![reader hasMore], @"Corrupted standard message");
@@ -193,10 +195,12 @@ using namespace flutter;
 }
 
 - (BOOL)isEqual:(id)object {
-  if (self == object)
+  if (self == object) {
     return YES;
-  if (![object isKindOfClass:[FlutterStandardTypedData class]])
+  }
+  if (![object isKindOfClass:[FlutterStandardTypedData class]]) {
     return NO;
+  }
   FlutterStandardTypedData* other = (FlutterStandardTypedData*)object;
   return self.type == other.type && self.elementCount == other.elementCount &&
          [self.data isEqual:other.data];

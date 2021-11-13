@@ -51,8 +51,9 @@ static NSCursor* GetCursorForKind(NSString* kind) {
     };
   }
   NSCursor* result = [systemCursors objectForKey:kind];
-  if (result == nil)
+  if (result == nil) {
     return [NSCursor arrowCursor];
+  }
   return result;
 }
 

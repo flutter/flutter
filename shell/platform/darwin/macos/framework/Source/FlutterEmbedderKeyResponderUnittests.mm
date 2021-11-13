@@ -51,8 +51,9 @@
 }
 
 - (void)dealloc {
-  if (_data->character != nullptr)
+  if (_data->character != nullptr) {
     delete[] _data->character;
+  }
   delete _data;
 }
 @end

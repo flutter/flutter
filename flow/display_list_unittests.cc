@@ -859,8 +859,9 @@ static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
   for (size_t i = 0; i < allGroups.size(); i++) {
     DisplayListInvocationGroup& group = allGroups[i];
     size_t j = (i == g_index ? v_index : 0);
-    if (j >= group.variants.size())
+    if (j >= group.variants.size()) {
       continue;
+    }
     DisplayListInvocation& invocation = group.variants[j];
     op_count += invocation.op_count();
     byte_count += invocation.raw_byte_count();

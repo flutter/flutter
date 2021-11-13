@@ -1212,15 +1212,18 @@ void Shell::HandleEngineSkiaMessage(std::unique_ptr<PlatformMessage> message) {
   rapidjson::Document document;
   document.Parse(reinterpret_cast<const char*>(data.GetMapping()),
                  data.GetSize());
-  if (document.HasParseError() || !document.IsObject())
+  if (document.HasParseError() || !document.IsObject()) {
     return;
+  }
   auto root = document.GetObject();
   auto method = root.FindMember("method");
-  if (method->value != "Skia.setResourceCacheMaxBytes")
+  if (method->value != "Skia.setResourceCacheMaxBytes") {
     return;
+  }
   auto args = root.FindMember("args");
-  if (args == root.MemberEnd() || !args->value.IsInt())
+  if (args == root.MemberEnd() || !args->value.IsInt()) {
     return;
+  }
 
   task_runners_.GetRasterTaskRunner()->PostTask(
       [rasterizer = rasterizer_->GetWeakPtr(), max_bytes = args->value.GetInt(),

@@ -1287,14 +1287,18 @@ class CanvasCompareTester {
       const uint32_t* test_row = test_pixels.addr32(0, y);
       for (int x = 0; x < width; x++) {
         if (bounds && test_row[x] != untouched) {
-          if (minX > x)
+          if (minX > x) {
             minX = x;
-          if (minY > y)
+          }
+          if (minY > y) {
             minY = y;
-          if (maxX <= x)
+          }
+          if (maxX <= x) {
             maxX = x + 1;
-          if (maxY <= y)
+          }
+          if (maxY <= y) {
             maxY = y + 1;
+          }
           if (!i_bounds.contains(x, y)) {
             pixels_oob++;
           }
