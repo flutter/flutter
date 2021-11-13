@@ -435,7 +435,7 @@ class StartContext {
     }
     final String branchPoint = await framework.branchPoint(
       candidateBranch,
-      kFrameworkDefaultBranch,
+      FrameworkRepository.defaultBranch,
     );
     stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
     await framework.tag(

@@ -56,16 +56,23 @@ abstract class Repository {
     required this.platform,
     required this.fileSystem,
     required this.parentDirectory,
+    required this.requiredLocalBranches,
     this.initialRef,
     this.localUpstream = false,
     this.previousCheckoutLocation,
     this.mirrorRemote,
   })  : git = Git(processManager),
-        assert(localUpstream != null),
         assert(upstreamRemote.url.isNotEmpty);
 
   final String name;
   final Remote upstreamRemote;
+
+  /// Branches that must exist locally in this [Repository].
+  ///
+  /// If this [Repository] is used as a local upstream for another, the
+  /// downstream may try to fetch these branches, and git will fail if they do
+  /// not exist.
+  final List<String> requiredLocalBranches;
 
   /// Remote for user's mirror.
   ///
@@ -162,7 +169,7 @@ abstract class Repository {
     if (localUpstream) {
       // These branches must exist locally for the repo that depends on it
       // to fetch and push to.
-      for (final String channel in kReleaseChannels) {
+      for (final String channel in requiredLocalBranches) {
         await git.run(
           <String>['checkout', channel, '--'],
           'check out branch $channel locally',
@@ -465,6 +472,7 @@ class FrameworkRepository extends Repository {
     String? previousCheckoutLocation,
     String? initialRef,
     Remote? mirrorRemote,
+    List<String>? additionalRequiredLocalBranches,
   }) : super(
           name: name,
           upstreamRemote: upstreamRemote,
@@ -477,6 +485,10 @@ class FrameworkRepository extends Repository {
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
           previousCheckoutLocation: previousCheckoutLocation,
+          requiredLocalBranches: <String>[
+            ...?additionalRequiredLocalBranches,
+            ...kReleaseChannels,
+          ],
         );
 
   /// A [FrameworkRepository] with the host conductor's repo set as upstream.
@@ -501,9 +513,7 @@ class FrameworkRepository extends Repository {
   }
 
   final Checkouts checkouts;
-  static const String defaultUpstream =
-      'git@github.com:flutter/flutter.git';
-
+  static const String defaultUpstream = 'git@github.com:flutter/flutter.git';
   static const String defaultBranch = 'master';
 
   Future<CiYaml> get ciYaml async {
@@ -717,6 +727,7 @@ class EngineRepository extends Repository {
     bool localUpstream = false,
     String? previousCheckoutLocation,
     Remote? mirrorRemote,
+    List<String>? additionalRequiredLocalBranches,
   }) : super(
           name: name,
           upstreamRemote: upstreamRemote,
@@ -729,6 +740,7 @@ class EngineRepository extends Repository {
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
           previousCheckoutLocation: previousCheckoutLocation,
+          requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 
   final Checkouts checkouts;
