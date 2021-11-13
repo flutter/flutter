@@ -39,8 +39,9 @@ void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
 void Window::DispatchKeyDataPacket(const KeyDataPacket& packet,
                                    uint64_t response_id) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
-  if (!dart_state)
+  if (!dart_state) {
     return;
+  }
   tonic::DartState::Scope scope(dart_state);
 
   const std::vector<uint8_t>& buffer = packet.data();

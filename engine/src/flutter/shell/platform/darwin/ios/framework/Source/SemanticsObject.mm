@@ -439,16 +439,18 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 #pragma mark - UIAccessibility overrides
 
 - (BOOL)isAccessibilityElement {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return false;
+  }
 
   // Note: hit detection will only apply to elements that report
   // -isAccessibilityElement of YES. The framework will continue scanning the
   // entire element tree looking for such a hit.
 
   //  We enforce in the framework that no other useful semantics are merged with these nodes.
-  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute))
+  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute)) {
     return false;
+  }
 
   // If the node is scrollable AND hidden OR
   // The node has a label, value, or hint OR
@@ -465,8 +467,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges {
-  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute))
+  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute)) {
     [edges addObject:self];
+  }
   if ([self hasChildren]) {
     for (SemanticsObject* child in self.children) {
       [child collectRoutes:edges];
@@ -475,8 +478,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action {
-  if (![self node].HasAction(flutter::SemanticsAction::kCustomAction))
+  if (![self node].HasAction(flutter::SemanticsAction::kCustomAction)) {
     return NO;
+  }
   int32_t action_id = action.uid;
   std::vector<uint8_t> args;
   args.push_back(3);  // type=int32.
@@ -491,8 +495,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (NSString*)accessibilityLabel {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return nil;
+  }
   NSString* label = nil;
   if (![self node].label.empty()) {
     label = @([self node].label.data());
@@ -506,30 +511,35 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (NSAttributedString*)accessibilityAttributedLabel {
   NSString* label = [self accessibilityLabel];
-  if (label.length == 0)
+  if (label.length == 0) {
     return nil;
+  }
   return [self createAttributedStringFromString:label withAttributes:[self node].labelAttributes];
 }
 
 - (NSString*)accessibilityHint {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return nil;
+  }
 
-  if ([self node].hint.empty())
+  if ([self node].hint.empty()) {
     return nil;
+  }
   return @([self node].hint.data());
 }
 
 - (NSAttributedString*)accessibilityAttributedHint {
   NSString* hint = [self accessibilityHint];
-  if (hint.length == 0)
+  if (hint.length == 0) {
     return nil;
+  }
   return [self createAttributedStringFromString:hint withAttributes:[self node].hintAttributes];
 }
 
 - (NSString*)accessibilityValue {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return nil;
+  }
 
   if (![self node].value.empty()) {
     return @([self node].value.data());
@@ -551,14 +561,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (NSAttributedString*)accessibilityAttributedValue {
   NSString* value = [self accessibilityValue];
-  if (value.length == 0)
+  if (value.length == 0) {
     return nil;
+  }
   return [self createAttributedStringFromString:value withAttributes:[self node].valueAttributes];
 }
 
 - (CGRect)accessibilityFrame {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return CGRectMake(0, 0, 0, 0);
+  }
 
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden)) {
     return [super accessibilityFrame];
@@ -593,9 +605,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
 
   if ([self hasChildren] || [self uid] == kRootNodeId) {
-    if (_container == nil)
+    if (_container == nil) {
       _container.reset([[SemanticsObjectContainer alloc] initWithSemanticsObject:self
                                                                           bridge:[self bridge]]);
+    }
     return _container.get();
   }
   if ([self parent] == nil) {
@@ -610,17 +623,20 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 #pragma mark - UIAccessibilityAction overrides
 
 - (BOOL)accessibilityActivate {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return NO;
-  if (![self node].HasAction(flutter::SemanticsAction::kTap))
+  }
+  if (![self node].HasAction(flutter::SemanticsAction::kTap)) {
     return NO;
+  }
   [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kTap);
   return YES;
 }
 
 - (void)accessibilityIncrement {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return;
+  }
   if ([self node].HasAction(flutter::SemanticsAction::kIncrease)) {
     [self node].value = [self node].increasedValue;
     [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kIncrease);
@@ -628,8 +644,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)accessibilityDecrement {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return;
+  }
   if ([self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     [self node].value = [self node].decreasedValue;
     [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDecrease);
@@ -637,20 +654,24 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return NO;
+  }
   flutter::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
-  if (![self node].HasAction(action))
+  if (![self node].HasAction(action)) {
     return NO;
+  }
   [self bridge]->DispatchSemanticsAction([self uid], action);
   return YES;
 }
 
 - (BOOL)accessibilityPerformEscape {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return NO;
-  if (![self node].HasAction(flutter::SemanticsAction::kDismiss))
+  }
+  if (![self node].HasAction(flutter::SemanticsAction::kDismiss)) {
     return NO;
+  }
   [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDismiss);
   return YES;
 }
@@ -658,8 +679,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 #pragma mark UIAccessibilityFocus overrides
 
 - (void)accessibilityElementDidBecomeFocused {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return;
+  }
   [self bridge]->AccessibilityObjectDidBecomeFocused([self uid]);
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden) ||
       [self node].HasFlag(flutter::SemanticsFlags::kIsHeader)) {
@@ -672,8 +694,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)accessibilityElementDidLoseFocus {
-  if (![self isAccessibilityBridgeAlive])
+  if (![self isAccessibilityBridgeAlive]) {
     return;
+  }
   [self bridge]->AccessibilityObjectDidLoseFocus([self uid]);
   if ([self node].HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
     [self bridge]->DispatchSemanticsAction([self uid],
@@ -816,29 +839,33 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  if (index < 0 || index >= [self accessibilityElementCount])
+  if (index < 0 || index >= [self accessibilityElementCount]) {
     return nil;
+  }
   if (index == 0) {
     return _semanticsObject.nativeAccessibility;
   }
 
   SemanticsObject* child = [_semanticsObject children][index - 1];
 
-  if ([child hasChildren])
+  if ([child hasChildren]) {
     return [child accessibilityContainer];
+  }
   return child.nativeAccessibility;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
-  if (element == _semanticsObject)
+  if (element == _semanticsObject) {
     return 0;
+  }
 
   NSArray<SemanticsObject*>* children = [_semanticsObject children];
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
     if ((![child hasChildren] && child == element) ||
-        ([child hasChildren] && [child accessibilityContainer] == element))
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
       return i + 1;
+    }
   }
   return NSNotFound;
 }

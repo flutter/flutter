@@ -250,10 +250,12 @@ const uint8_t* DartSnapshot::GetInstructionsMapping() const {
 }
 
 bool DartSnapshot::IsDontNeedSafe() const {
-  if (data_ && !data_->IsDontNeedSafe())
+  if (data_ && !data_->IsDontNeedSafe()) {
     return false;
-  if (instructions_ && !instructions_->IsDontNeedSafe())
+  }
+  if (instructions_ && !instructions_->IsDontNeedSafe()) {
     return false;
+  }
   return true;
 }
 

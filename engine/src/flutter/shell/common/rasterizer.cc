@@ -272,8 +272,9 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
     snapshot_surface = surface_.get();
   } else if (snapshot_surface_producer_) {
     pbuffer_surface = snapshot_surface_producer_->CreateSnapshotSurface();
-    if (pbuffer_surface && pbuffer_surface->GetContext())
+    if (pbuffer_surface && pbuffer_surface->GetContext()) {
       snapshot_surface = pbuffer_surface.get();
+    }
   }
 
   if (!snapshot_surface) {

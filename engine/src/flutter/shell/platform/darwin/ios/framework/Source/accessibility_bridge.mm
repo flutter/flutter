@@ -326,8 +326,9 @@ SemanticsObject* AccessibilityBridge::FindNextFocusableIfNecessary() {
 SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* parent) {
   SemanticsObject* currentObject = parent ?: objects_.get()[@(kRootNodeId)];
   ;
-  if (!currentObject)
+  if (!currentObject) {
     return nil;
+  }
 
   if (currentObject.isAccessibilityElement) {
     return currentObject;
