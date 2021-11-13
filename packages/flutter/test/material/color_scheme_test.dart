@@ -12,6 +12,7 @@ void main() {
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
     const ColorScheme scheme = ColorScheme.light();
+    expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff6200ee));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, scheme.primary);
@@ -28,18 +29,17 @@ void main() {
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, scheme.error);
     expect(scheme.onErrorContainer, scheme.onError);
-    expect(scheme.outline, scheme.onBackground);
     expect(scheme.background, const Color(0xffffffff));
     expect(scheme.onBackground, const Color(0xff000000));
     expect(scheme.surface, const Color(0xffffffff));
     expect(scheme.onSurface, const Color(0xff000000));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
+    expect(scheme.outline, scheme.onBackground);
+    expect(scheme.shadow, scheme.onBackground);
     expect(scheme.inverseSurface, scheme.onSurface);
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
-    expect(scheme.shadow, scheme.onBackground);
-    expect(scheme.brightness, Brightness.light);
 
     expect(scheme.primaryVariant, const Color(0xff3700b3));
     expect(scheme.secondaryVariant, const Color(0xff018786));
@@ -51,6 +51,7 @@ void main() {
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
     const ColorScheme scheme = ColorScheme.dark();
+    expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffbb86fc));
     expect(scheme.onPrimary, const Color(0xff000000));
     expect(scheme.primaryContainer, scheme.primary);
@@ -67,18 +68,17 @@ void main() {
     expect(scheme.onError, const Color(0xff000000));
     expect(scheme.errorContainer, scheme.error);
     expect(scheme.onErrorContainer, scheme.onError);
-    expect(scheme.outline, scheme.onBackground);
     expect(scheme.background, const Color(0xff121212));
     expect(scheme.onBackground, const Color(0xffffffff));
     expect(scheme.surface, const Color(0xff121212));
     expect(scheme.onSurface, const Color(0xffffffff));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
+    expect(scheme.outline, scheme.onBackground);
+    expect(scheme.shadow, scheme.onBackground);
     expect(scheme.inverseSurface, scheme.onSurface);
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
-    expect(scheme.shadow, scheme.onBackground);
-    expect(scheme.brightness, Brightness.dark);
 
     expect(scheme.primaryVariant, const Color(0xff3700b3));
     expect(scheme.secondaryVariant, const Color(0xff03dac6));
@@ -90,6 +90,7 @@ void main() {
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
     const ColorScheme scheme = ColorScheme.highContrastLight();
+    expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff0000ba));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, scheme.primary);
@@ -106,18 +107,17 @@ void main() {
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, scheme.error);
     expect(scheme.onErrorContainer, scheme.onError);
-    expect(scheme.outline, scheme.onBackground);
     expect(scheme.background, const Color(0xffffffff));
     expect(scheme.onBackground, const Color(0xff000000));
     expect(scheme.surface, const Color(0xffffffff));
     expect(scheme.onSurface, const Color(0xff000000));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
+    expect(scheme.outline, scheme.onBackground);
+    expect(scheme.shadow, scheme.onBackground);
     expect(scheme.inverseSurface, scheme.onSurface);
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
-    expect(scheme.shadow, scheme.onBackground);
-    expect(scheme.brightness, Brightness.light);
 
     expect(scheme.primaryVariant, const Color(0xff000088));
     expect(scheme.secondaryVariant, const Color(0xff018786));
@@ -129,6 +129,7 @@ void main() {
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
     const ColorScheme scheme = ColorScheme.highContrastDark();
+    expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffefb7ff));
     expect(scheme.onPrimary, const Color(0xff000000));
     expect(scheme.primaryContainer, scheme.primary);
@@ -145,18 +146,17 @@ void main() {
     expect(scheme.onError, const Color(0xff000000));
     expect(scheme.errorContainer, scheme.error);
     expect(scheme.onErrorContainer, scheme.onError);
-    expect(scheme.outline, scheme.onBackground);
     expect(scheme.background, const Color(0xff121212));
     expect(scheme.onBackground, const Color(0xffffffff));
     expect(scheme.surface, const Color(0xff121212));
     expect(scheme.onSurface, const Color(0xffffffff));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
+    expect(scheme.outline, scheme.onBackground);
+    expect(scheme.shadow, scheme.onBackground);
     expect(scheme.inverseSurface, scheme.onSurface);
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
-    expect(scheme.shadow, scheme.onBackground);
-    expect(scheme.brightness, Brightness.dark);
 
     expect(scheme.primaryVariant, const Color(0xffbe9eff));
     expect(scheme.secondaryVariant, const Color(0xff66fff9));
