@@ -1,4 +1,4 @@
-Signature: 1dd27762b300fedd5f34436ff24bf6f3
+Signature: 35638023ad0f802c9c157137dbfc3073
 
 UNUSED LICENSES:
 
@@ -800,6 +800,7 @@ FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
 FILE: ../../../third_party/skia/gm/BUILD.bazel
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
+FILE: ../../../third_party/skia/include/android/BUILD.bazel
 FILE: ../../../third_party/skia/include/codec/BUILD.bazel
 FILE: ../../../third_party/skia/include/config/BUILD.bazel
 FILE: ../../../third_party/skia/include/core/BUILD.bazel
@@ -1190,6 +1191,7 @@ FILE: ../../../third_party/skia/site/featured-background.png
 FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
+FILE: ../../../third_party/skia/src/android/BUILD.bazel
 FILE: ../../../third_party/skia/src/codec/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
