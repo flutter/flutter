@@ -432,7 +432,7 @@ class OutlineInputBorder extends InputBorder {
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
-      path.moveTo(scaledRRect.left + start + extent, 0.0);
+      path.moveTo(scaledRRect.left + start + extent, scaledRRect.top);
       path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
       path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
     } else if (start + extent < scaledRRect.width) {
