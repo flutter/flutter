@@ -17,6 +17,16 @@ import 'theme_data.dart';
 @immutable
 class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance.
+  ///
+  /// For the color parameters that are nullable, it is still recommended
+  /// that applications provide values for them. They are only nullable due
+  /// to backwards compatibility concerns.
+  ///
+  /// If a color is not provided, the closest fallback color from the given
+  /// colors will be used for it (e.g. [primaryContainer] will default
+  /// to [primary]). Material 3 makes use of these colors for many component
+  /// defaults, so for the best results the application should supply colors
+  /// for all the parameters.
   const ColorScheme({
     required this.brightness,
     required this.primary,
@@ -423,8 +433,8 @@ class ColorScheme with Diagnosticable {
 
   /// A color that's clearly legible when drawn on [primary].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [primary]
-  /// and [onPrimary] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [primary] and [onPrimary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onPrimary;
 
@@ -435,8 +445,9 @@ class ColorScheme with Diagnosticable {
   final Color? _onPrimaryContainer;
   /// A color that's clearly legible when drawn on [primaryContainer].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [primaryContainer] and [onPrimaryContainer] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [primaryContainer] and [onPrimaryContainer] of at least 4.5:1
+  /// is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onPrimaryContainer => _onPrimaryContainer ?? onPrimary;
 
@@ -446,8 +457,8 @@ class ColorScheme with Diagnosticable {
 
   /// A color that's clearly legible when drawn on [secondary].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [secondary]
-  /// and [onSecondary] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [secondary] and [onSecondary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSecondary;
 
@@ -458,8 +469,9 @@ class ColorScheme with Diagnosticable {
   final Color? _onSecondaryContainer;
   /// A color that's clearly legible when drawn on [secondaryContainer].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [secondaryContainer] and [onSecondaryContainer] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [secondaryContainer] and [onSecondaryContainer] of at least 4.5:1 is
+  /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onSecondaryContainer => _onSecondaryContainer ?? onSecondary;
 
@@ -472,8 +484,8 @@ class ColorScheme with Diagnosticable {
   final Color? _onTertiary;
   /// A color that's clearly legible when drawn on [tertiary].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [tertiary] and [onTertiary] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [tertiary] and [onTertiary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onTertiary => _onTertiary ?? onSecondary;
 
@@ -484,8 +496,9 @@ class ColorScheme with Diagnosticable {
   final Color? _onTertiaryContainer;
   /// A color that's clearly legible when drawn on [tertiaryContainer].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [tertiaryContainer] and [onTertiaryContainer] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [tertiaryContainer] and [onTertiaryContainer] of at least 4.5:1 is
+  /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onTertiaryContainer => _onTertiaryContainer ?? onTertiary;
 
@@ -495,8 +508,8 @@ class ColorScheme with Diagnosticable {
 
   /// A color that's clearly legible when drawn on [error].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [error]
-  /// and [onError] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [error] and [onError] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onError;
 
@@ -507,8 +520,9 @@ class ColorScheme with Diagnosticable {
   final Color? _onErrorContainer;
   /// A color that's clearly legible when drawn on [errorContainer].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [errorContainer] and [onErrorContainer] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [errorContainer] and [onErrorContainer] of at least 4.5:1 is
+  /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onErrorContainer => _onErrorContainer ?? onError;
 
@@ -517,8 +531,8 @@ class ColorScheme with Diagnosticable {
 
   /// A color that's clearly legible when drawn on [background].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [background]
-  /// and [onBackground] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [background] and [onBackground] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onBackground;
 
@@ -527,8 +541,8 @@ class ColorScheme with Diagnosticable {
 
   /// A color that's clearly legible when drawn on [surface].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [surface]
-  /// and [onSurface] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [surface] and [onSurface] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSurface;
 
@@ -540,8 +554,9 @@ class ColorScheme with Diagnosticable {
   final Color? _onSurfaceVariant;
   /// A color that's clearly legible when drawn on [surfaceVariant].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [surfaceVariant] and [onSurfaceVariant] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [surfaceVariant] and [onSurfaceVariant] of at least 4.5:1 is
+  /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onSurfaceVariant => _onSurfaceVariant ?? onSurface;
 
@@ -562,15 +577,15 @@ class ColorScheme with Diagnosticable {
   final Color? _onInverseSurface;
   /// A color that's clearly legible when drawn on [inverseSurface].
   ///
-  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for
-  /// [inverseSurface] and [onInverseSurface] is recommended. See
+  /// To ensure that an app is accessible, a contrast ratio between
+  /// [inverseSurface] and [onInverseSurface] of at least 4.5:1 is
+  /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   Color get onInverseSurface => _onInverseSurface ?? surface;
 
   final Color? _inversePrimary;
-  /// An accent color used for displaying the reverse of what’s seen in the
-  /// surrounding UI, for example in a SnackBar to bring attention to
-  /// an alert.
+  /// An accent color used for displaying a highlight color on [inverseSurface]
+  /// backgrounds, like button text in a SnackBar.
   Color get inversePrimary => _inversePrimary ?? onPrimary;
 
   final Color? _primaryVariant;
