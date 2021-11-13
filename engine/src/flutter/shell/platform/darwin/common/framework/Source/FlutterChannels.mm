@@ -61,8 +61,9 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 
 - (void)sendMessage:(id)message reply:(FlutterReply)callback {
   FlutterBinaryReply reply = ^(NSData* data) {
-    if (callback)
+    if (callback) {
       callback([_codec decode:data]);
+    }
   };
   [_messenger sendOnChannel:_name message:[_codec encode:message] binaryReply:reply];
 }
@@ -118,10 +119,12 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 }
 
 - (BOOL)isEqual:(id)object {
-  if (self == object)
+  if (self == object) {
     return YES;
-  if (![object isKindOfClass:[FlutterError class]])
+  }
+  if (![object isKindOfClass:[FlutterError class]]) {
     return NO;
+  }
   FlutterError* other = (FlutterError*)object;
   return [self.code isEqual:other.code] &&
          ((!self.message && !other.message) || [self.message isEqual:other.message]) &&
@@ -154,10 +157,12 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 }
 
 - (BOOL)isEqual:(id)object {
-  if (self == object)
+  if (self == object) {
     return YES;
-  if (![object isKindOfClass:[FlutterMethodCall class]])
+  }
+  if (![object isKindOfClass:[FlutterMethodCall class]]) {
     return NO;
+  }
   FlutterMethodCall* other = (FlutterMethodCall*)object;
   return [self.method isEqual:[other method]] &&
          ((!self.arguments && !other.arguments) || [self.arguments isEqual:other.arguments]);
@@ -242,12 +247,13 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
     FlutterMethodCall* call = [codec decodeMethodCall:message];
     handler(call, ^(id result) {
-      if (result == FlutterMethodNotImplemented)
+      if (result == FlutterMethodNotImplemented) {
         callback(nil);
-      else if ([result isKindOfClass:[FlutterError class]])
+      } else if ([result isKindOfClass:[FlutterError class]]) {
         callback([codec encodeErrorEnvelope:(FlutterError*)result]);
-      else
+      } else {
         callback([codec encodeSuccessEnvelope:result]);
+      }
     });
   };
   _connection = [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
@@ -309,23 +315,26 @@ static void SetStreamHandlerMessageHandlerOnChannel(NSObject<FlutterStreamHandle
     if ([call.method isEqual:@"listen"]) {
       if (currentSink) {
         FlutterError* error = [handler onCancelWithArguments:nil];
-        if (error)
+        if (error) {
           NSLog(@"Failed to cancel existing stream: %@. %@ (%@)", error.code, error.message,
                 error.details);
+        }
       }
       currentSink = ^(id event) {
-        if (event == FlutterEndOfEventStream)
+        if (event == FlutterEndOfEventStream) {
           [messenger sendOnChannel:name message:nil];
-        else if ([event isKindOfClass:[FlutterError class]])
+        } else if ([event isKindOfClass:[FlutterError class]]) {
           [messenger sendOnChannel:name message:[codec encodeErrorEnvelope:(FlutterError*)event]];
-        else
+        } else {
           [messenger sendOnChannel:name message:[codec encodeSuccessEnvelope:event]];
+        }
       };
       FlutterError* error = [handler onListenWithArguments:call.arguments eventSink:currentSink];
-      if (error)
+      if (error) {
         callback([codec encodeErrorEnvelope:error]);
-      else
+      } else {
         callback([codec encodeSuccessEnvelope:nil]);
+      }
     } else if ([call.method isEqual:@"cancel"]) {
       if (!currentSink) {
         callback(
@@ -336,10 +345,11 @@ static void SetStreamHandlerMessageHandlerOnChannel(NSObject<FlutterStreamHandle
       }
       currentSink = nil;
       FlutterError* error = [handler onCancelWithArguments:call.arguments];
-      if (error)
+      if (error) {
         callback([codec encodeErrorEnvelope:error]);
-      else
+      } else {
         callback([codec encodeSuccessEnvelope:nil]);
+      }
     } else {
       callback(nil);
     }

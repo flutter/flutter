@@ -35,8 +35,9 @@
 }
 
 - (NSData*)encode:(id)message {
-  if (message == nil)
+  if (message == nil) {
     return nil;
+  }
   NSAssert([message isKindOfClass:[NSString class]], @"");
   NSString* stringMessage = message;
   const char* utf8 = stringMessage.UTF8String;
@@ -44,8 +45,9 @@
 }
 
 - (NSString*)decode:(NSData*)message {
-  if (message == nil)
+  if (message == nil) {
     return nil;
+  }
   return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding] autorelease];
 }
 @end
@@ -60,8 +62,9 @@
 }
 
 - (NSData*)encode:(id)message {
-  if (message == nil)
+  if (message == nil) {
     return nil;
+  }
   NSData* encoding;
   if ([message isKindOfClass:[NSArray class]] || [message isKindOfClass:[NSDictionary class]]) {
     encoding = [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
@@ -78,8 +81,9 @@
 }
 
 - (id)decode:(NSData*)message {
-  if ([message length] == 0)
+  if ([message length] == 0) {
     return nil;
+  }
   BOOL isSimpleValue = NO;
   id decoded = nil;
   if (0 < message.length) {
@@ -143,8 +147,9 @@
 
 - (id)decodeEnvelope:(NSData*)envelope {
   NSArray* array = [[FlutterJSONMessageCodec sharedInstance] decode:envelope];
-  if (array.count == 1)
+  if (array.count == 1) {
     return [self unwrapNil:array[0]];
+  }
   NSAssert(array.count == 3, @"Invalid JSON envelope");
   id code = array[0];
   id message = [self unwrapNil:array[1]];

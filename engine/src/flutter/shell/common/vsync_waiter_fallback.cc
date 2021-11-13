@@ -17,8 +17,9 @@ static fml::TimePoint SnapToNextTick(fml::TimePoint value,
                                      fml::TimePoint tick_phase,
                                      fml::TimeDelta tick_interval) {
   fml::TimeDelta offset = (tick_phase - value) % tick_interval;
-  if (offset != fml::TimeDelta::Zero())
+  if (offset != fml::TimeDelta::Zero()) {
     offset = offset + tick_interval;
+  }
   return value + offset;
 }
 

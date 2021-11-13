@@ -518,8 +518,9 @@ TEST(FlutterViewControllerTest, TestKeyboardIsRestartedOnEngineRestart) {
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
                         userData:(nullable void*)userData {
-  if (callback != nullptr)
+  if (callback != nullptr) {
     callback(false, userData);
+  }
 }
 
 @end

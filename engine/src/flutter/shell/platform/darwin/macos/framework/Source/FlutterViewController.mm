@@ -404,8 +404,9 @@ static void CommonInit(FlutterViewController* controller) {
                                          ([[event window] firstResponder] ==
                                           weakSelf.flutterView) &&
                                          ([event modifierFlags] & NSEventModifierFlagCommand) &&
-                                         ([event type] == NSEventTypeKeyUp))
+                                         ([event type] == NSEventTypeKeyUp)) {
                                        [weakSelf keyUp:event];
+                                     }
                                      return event;
                                    }];
 }

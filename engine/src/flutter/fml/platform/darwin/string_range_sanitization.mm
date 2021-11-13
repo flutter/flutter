@@ -10,8 +10,9 @@ NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index) {
   if (text == nil || index > text.length) {
     return NSMakeRange(NSNotFound, 0);
   }
-  if (index < text.length)
+  if (index < text.length) {
     return [text rangeOfComposedCharacterSequenceAtIndex:index];
+  }
   return NSMakeRange(index, 0);
 }
 

@@ -9,25 +9,28 @@
 void checkEncodeDecode(id value, NSData* expectedEncoding) {
   FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
-  if (expectedEncoding == nil)
+  if (expectedEncoding == nil) {
     ASSERT_TRUE(encoded == nil);
-  else
+  } else {
     ASSERT_TRUE([encoded isEqual:expectedEncoding]);
+  }
   id decoded = [codec decode:encoded];
-  if (value == nil || value == [NSNull null])
+  if (value == nil || value == [NSNull null]) {
     ASSERT_TRUE(decoded == nil);
-  else
+  } else {
     ASSERT_TRUE([value isEqual:decoded]);
+  }
 }
 
 void checkEncodeDecode(id value) {
   FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   id decoded = [codec decode:encoded];
-  if (value == nil || value == [NSNull null])
+  if (value == nil || value == [NSNull null]) {
     ASSERT_TRUE(decoded == nil);
-  else
+  } else {
     ASSERT_TRUE([value isEqual:decoded]);
+  }
 }
 
 TEST(FlutterStandardCodec, CanDecodeZeroLength) {

@@ -78,8 +78,9 @@ static uint64_t GetPhysicalKeyForKeyCode(unsigned short keyCode) {
  */
 static uint64_t GetLogicalKeyForModifier(unsigned short keyCode, uint64_t hidCode) {
   NSNumber* fromKeyCode = [keyCodeToLogicalKey objectForKey:@(keyCode)];
-  if (fromKeyCode != nil)
+  if (fromKeyCode != nil) {
     return fromKeyCode.unsignedLongLongValue;
+  }
   return KeyOfPlane(hidCode, kMacosPlane);
 }
 
@@ -120,8 +121,9 @@ static uint64_t toLower(uint64_t n) {
 static uint64_t GetLogicalKeyForEvent(NSEvent* event, uint64_t physicalKey) {
   // Look to see if the keyCode can be mapped from keycode.
   NSNumber* fromKeyCode = [keyCodeToLogicalKey objectForKey:@(event.keyCode)];
-  if (fromKeyCode != nil)
+  if (fromKeyCode != nil) {
     return fromKeyCode.unsignedLongLongValue;
+  }
 
   NSString* keyLabel = event.charactersIgnoringModifiers;
   NSUInteger keyLabelLength = [keyLabel length];

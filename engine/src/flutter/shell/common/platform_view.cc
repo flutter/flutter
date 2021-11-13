@@ -113,8 +113,9 @@ void PlatformView::UpdateSemantics(SemanticsNodeUpdates update,
 
 void PlatformView::HandlePlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
-  if (auto response = message->response())
+  if (auto response = message->response()) {
     response->CompleteEmpty();
+  }
 }
 
 void PlatformView::OnPreEngineRestart() const {}

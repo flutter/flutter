@@ -242,8 +242,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 #pragma mark - Common view controller initialization tasks
 
 - (void)performCommonViewControllerInitialization {
-  if (_initialized)
+  if (_initialized) {
     return;
+  }
 
   _initialized = YES;
 
@@ -803,8 +804,9 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 - (void)applicationBecameActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationBecameActive");
   self.view.accessibilityElementsHidden = NO;
-  if (_viewportMetrics.physical_width)
+  if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
+  }
   [self goToApplicationLifecycle:@"AppLifecycleState.resumed"];
 }
 
@@ -1424,8 +1426,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 #else
   _isVoiceOverRunning = UIAccessibilityIsVoiceOverRunning();
   bool enabled = _isVoiceOverRunning || UIAccessibilityIsSwitchControlRunning();
-  if (enabled)
+  if (enabled) {
     flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kAccessibleNavigation);
+  }
   platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
   platformView->SetAccessibilityFeatures(flags);
 #endif
@@ -1471,32 +1474,33 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   // We compute the scale as relative difference from size L (large, the default size), where
   // L is assumed to have scale 1.0.
-  if ([category isEqualToString:UIContentSizeCategoryExtraSmall])
+  if ([category isEqualToString:UIContentSizeCategoryExtraSmall]) {
     return xs / l;
-  else if ([category isEqualToString:UIContentSizeCategorySmall])
+  } else if ([category isEqualToString:UIContentSizeCategorySmall]) {
     return s / l;
-  else if ([category isEqualToString:UIContentSizeCategoryMedium])
+  } else if ([category isEqualToString:UIContentSizeCategoryMedium]) {
     return m / l;
-  else if ([category isEqualToString:UIContentSizeCategoryLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryLarge]) {
     return 1.0;
-  else if ([category isEqualToString:UIContentSizeCategoryExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryExtraLarge]) {
     return xl / l;
-  else if ([category isEqualToString:UIContentSizeCategoryExtraExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryExtraExtraLarge]) {
     return xxl / l;
-  else if ([category isEqualToString:UIContentSizeCategoryExtraExtraExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryExtraExtraExtraLarge]) {
     return xxxl / l;
-  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityMedium])
+  } else if ([category isEqualToString:UIContentSizeCategoryAccessibilityMedium]) {
     return ax1 / l;
-  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryAccessibilityLarge]) {
     return ax2 / l;
-  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraLarge]) {
     return ax3 / l;
-  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraLarge]) {
     return ax4 / l;
-  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraExtraLarge])
+  } else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraExtraLarge]) {
     return ax5 / l;
-  else
+  } else {
     return 1.0;
+  }
 }
 
 - (BOOL)isAlwaysUse24HourFormat {

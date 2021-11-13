@@ -78,29 +78,39 @@ static BOOL shouldShowSystemKeyboard(NSDictionary* type) {
 }
 static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   NSString* inputType = type[@"name"];
-  if ([inputType isEqualToString:@"TextInputType.address"])
+  if ([inputType isEqualToString:@"TextInputType.address"]) {
     return UIKeyboardTypeDefault;
-  if ([inputType isEqualToString:@"TextInputType.datetime"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.datetime"]) {
     return UIKeyboardTypeNumbersAndPunctuation;
-  if ([inputType isEqualToString:@"TextInputType.emailAddress"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.emailAddress"]) {
     return UIKeyboardTypeEmailAddress;
-  if ([inputType isEqualToString:@"TextInputType.multiline"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.multiline"]) {
     return UIKeyboardTypeDefault;
-  if ([inputType isEqualToString:@"TextInputType.name"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.name"]) {
     return UIKeyboardTypeNamePhonePad;
+  }
   if ([inputType isEqualToString:@"TextInputType.number"]) {
-    if ([type[@"signed"] boolValue])
+    if ([type[@"signed"] boolValue]) {
       return UIKeyboardTypeNumbersAndPunctuation;
-    if ([type[@"decimal"] boolValue])
+    }
+    if ([type[@"decimal"] boolValue]) {
       return UIKeyboardTypeDecimalPad;
+    }
     return UIKeyboardTypeNumberPad;
   }
-  if ([inputType isEqualToString:@"TextInputType.phone"])
+  if ([inputType isEqualToString:@"TextInputType.phone"]) {
     return UIKeyboardTypePhonePad;
-  if ([inputType isEqualToString:@"TextInputType.text"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.text"]) {
     return UIKeyboardTypeDefault;
-  if ([inputType isEqualToString:@"TextInputType.url"])
+  }
+  if ([inputType isEqualToString:@"TextInputType.url"]) {
     return UIKeyboardTypeURL;
+  }
   return UIKeyboardTypeDefault;
 }
 
@@ -121,39 +131,51 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   // has "unspecified." These 2 terms seem to mean the same thing but we need
   // to pick just one. "unspecified" was chosen because "default" is often a
   // reserved word in languages with switch statements (dart, java, etc).
-  if ([inputType isEqualToString:@"TextInputAction.unspecified"])
+  if ([inputType isEqualToString:@"TextInputAction.unspecified"]) {
     return UIReturnKeyDefault;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.done"])
+  if ([inputType isEqualToString:@"TextInputAction.done"]) {
     return UIReturnKeyDone;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.go"])
+  if ([inputType isEqualToString:@"TextInputAction.go"]) {
     return UIReturnKeyGo;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.send"])
+  if ([inputType isEqualToString:@"TextInputAction.send"]) {
     return UIReturnKeySend;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.search"])
+  if ([inputType isEqualToString:@"TextInputAction.search"]) {
     return UIReturnKeySearch;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.next"])
+  if ([inputType isEqualToString:@"TextInputAction.next"]) {
     return UIReturnKeyNext;
+  }
 
-  if (@available(iOS 9.0, *))
-    if ([inputType isEqualToString:@"TextInputAction.continueAction"])
+  if (@available(iOS 9.0, *)) {
+    if ([inputType isEqualToString:@"TextInputAction.continueAction"]) {
       return UIReturnKeyContinue;
+    }
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.join"])
+  if ([inputType isEqualToString:@"TextInputAction.join"]) {
     return UIReturnKeyJoin;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.route"])
+  if ([inputType isEqualToString:@"TextInputAction.route"]) {
     return UIReturnKeyRoute;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.emergencyCall"])
+  if ([inputType isEqualToString:@"TextInputAction.emergencyCall"]) {
     return UIReturnKeyEmergencyCall;
+  }
 
-  if ([inputType isEqualToString:@"TextInputAction.newline"])
+  if ([inputType isEqualToString:@"TextInputAction.newline"]) {
     return UIReturnKeyDefault;
+  }
 
   // Present default key if bad input type is given.
   return UIReturnKeyDefault;
@@ -354,8 +376,9 @@ static BOOL isFieldPasswordRelated(NSDictionary* configuration) {
     }
 
     BOOL isSecureTextEntry = [configuration[kSecureTextEntry] boolValue];
-    if (isSecureTextEntry)
+    if (isSecureTextEntry) {
       return YES;
+    }
 
     NSDictionary* autofill = configuration[kAutofillProperties];
     UITextContentType contentType = ToUITextContentType(autofill[kAutofillHints]);
@@ -910,8 +933,9 @@ static BOOL isScribbleAvailable() {
     [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:selectedRange]];
 
     _selectionAffinity = _kTextAffinityDownstream;
-    if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
+    if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)]) {
       _selectionAffinity = _kTextAffinityUpstream;
+    }
     [self.inputDelegate selectionDidChange:self];
   }
 
@@ -1136,8 +1160,9 @@ static BOOL isScribbleAvailable() {
   // * reduce the length by the intersection length
   // * adjust the location by newLength - oldLength + intersectionLength
   NSRange intersectionRange = NSIntersectionRange(range, selectedRange);
-  if (range.location <= selectedRange.location)
+  if (range.location <= selectedRange.location) {
     selectedRange.location += text.length - range.length;
+  }
   if (intersectionRange.location != NSNotFound) {
     selectedRange.location += intersectionRange.length;
     selectedRange.length -= intersectionRange.length;
@@ -1230,8 +1255,9 @@ static BOOL isScribbleAvailable() {
     return;
   }
 
-  if (markedText == nil)
+  if (markedText == nil) {
     markedText = @"";
+  }
 
   if (markedTextRange.length > 0) {
     // Replace text in the marked range with the new text.
@@ -1265,8 +1291,9 @@ static BOOL isScribbleAvailable() {
 }
 
 - (void)unmarkText {
-  if (!self.markedTextRange)
+  if (!self.markedTextRange) {
     return;
+  }
   self.markedTextRange = nil;
   if (_enableDeltaModel) {
     [self updateEditingStateWithDelta:[FlutterTextEditingDelta deltaWithNonText:self.text]];
@@ -1314,11 +1341,13 @@ static BOOL isScribbleAvailable() {
   }
 
   if (offset >= 0) {
-    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i)
+    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i) {
       offsetPosition = [self incrementOffsetPosition:offsetPosition];
+    }
   } else {
-    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i)
+    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i) {
       offsetPosition = [self decrementOffsetPosition:offsetPosition];
+    }
   }
   return [FlutterTextPosition positionWithIndex:offsetPosition];
 }
@@ -1348,10 +1377,12 @@ static BOOL isScribbleAvailable() {
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
   NSUInteger positionIndex = ((FlutterTextPosition*)position).index;
   NSUInteger otherIndex = ((FlutterTextPosition*)other).index;
-  if (positionIndex < otherIndex)
+  if (positionIndex < otherIndex) {
     return NSOrderedAscending;
-  if (positionIndex > otherIndex)
+  }
+  if (positionIndex > otherIndex) {
     return NSOrderedDescending;
+  }
   return NSOrderedSame;
 }
 
@@ -1832,8 +1863,9 @@ static BOOL isScribbleAvailable() {
     }
   }
 
-  if (!_selectedTextRange.isEmpty)
+  if (!_selectedTextRange.isEmpty) {
     [self replaceRange:_selectedTextRange withText:@""];
+  }
 }
 
 - (void)postAccessibilityNotification:(UIAccessibilityNotifications)notification target:(id)target {
