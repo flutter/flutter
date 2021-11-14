@@ -26,22 +26,22 @@ struct Win32Message {
   HWND hWnd;
 };
 
-typedef enum {
+typedef enum WmFieldExtended {
   kNotExtended = 0,
   kExtended = 1,
 } WmFieldExtended;
 
-typedef enum {
+typedef enum WmFieldContext {
   kNoContext = 0,
   kAltHeld = 1,
 } WmFieldContext;
 
-typedef enum {
+typedef enum WmFieldPrevState {
   kWasUp = 0,
   kWasDown = 1,
 } WmFieldPrevState;
 
-typedef enum {
+typedef enum WmFieldTransitionState {
   kBeingReleased = 0,
   kBeingPressed = 1,
 } WmFieldTransitionState;
@@ -49,7 +49,7 @@ typedef enum {
 // WM_KEYDOWN messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown.
-typedef struct {
+typedef struct WmKeyDownInfo {
   uint32_t key;
 
   uint8_t scan_code;
@@ -74,7 +74,7 @@ typedef struct {
 // WM_KEYUP  messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup.
-typedef struct {
+typedef struct WmKeyUpInfo {
   uint32_t key;
 
   uint8_t scan_code;
@@ -96,7 +96,7 @@ typedef struct {
 // WM_CHAR  messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-char.
-typedef struct {
+typedef struct WmCharInfo {
   uint32_t char_code;
 
   uint8_t scan_code;
@@ -118,7 +118,7 @@ typedef struct {
 // WM_SYSKEYUP  messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup.
-typedef struct {
+typedef struct WmSysKeyUpInfo {
   uint32_t key;
 
   uint8_t scan_code;
@@ -140,7 +140,7 @@ typedef struct {
 // WM_DEADCHAR messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-deadchar.
-typedef struct {
+typedef struct WmDeadCharInfo {
   uint32_t char_code;
 
   uint8_t scan_code;
