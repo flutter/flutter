@@ -99,7 +99,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'bfa04ad85fed176aa909f880ef5c8009c945ba03',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3dc3ec56b3dc76ba60c8348053a9f6ef3446b0f2',
 
    # Fuchsia compatibility
    #
@@ -632,12 +632,11 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  # TODO(fxb/4443): Remove this when Fuchsia can provide the Windows Clang Toolchain
-  'src/third_party/llvm-build/Release+Asserts': {
+  'src/buildtools/windows-x64/clang': {
     'packages': [
       {
-        'package': 'flutter/clang/win-amd64',
-        'version': 'git_revision:5ec206df8534d2dd8cb9217c3180e5ddba587393'
+        'package': 'fuchsia/third_party/clang/windows-amd64',
+        'version': 'a4WSJSNW8w7fYZ5GoOcCM7PlBxrXknK4ni71zZV1R_gC'
       }
     ],
     'condition': 'download_windows_deps',
