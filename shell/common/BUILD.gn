@@ -220,7 +220,7 @@ if (enable_unittests) {
       ":shell_unittests_gpu_configuration_config",
     ]
 
-    # SwiftShader only supports x86/x64_64
+    # SwiftShader only supports x86/x86_64
     if (target_cpu == "x86" || target_cpu == "x64") {
       if (test_enable_gl) {
         sources += [
