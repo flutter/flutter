@@ -4321,7 +4321,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  Flex({
+  const Flex({
     Key? key,
     required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -4698,7 +4698,7 @@ class Row extends Flex {
   /// unless the row has no children or only one child) or to disambiguate
   /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
   /// must not be null.
-  Row({
+  const Row({
     Key? key,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
@@ -4898,7 +4898,7 @@ class Column extends Flex {
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to disambiguate `start` or `end` values for the
   /// [crossAxisAlignment], the [textDirection] must not be null.
-  Column({
+  const Column({
     Key? key,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
