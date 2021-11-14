@@ -133,6 +133,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
       )
+      ..addFlag('coverage-for-parent-package',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Generate coverage for the parent package when running '
+              'integration test on the example like project.'
+      )
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -371,10 +377,21 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
+    Directory coverageDirectory;
+    final bool coverageForParentPackage = boolArg('coverage-for-parent-package');
+    if (coverageForParentPackage) {
+      coverageDirectory = globals.fs.currentDirectory.parent.childDirectory('lib');
+    }
+
     final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
-      final String projectName = flutterProject.manifest.appName;
+      String projectName;
+      if (coverageForParentPackage) {
+        projectName = FlutterProject.parent().manifest.appName;
+      } else {
+        projectName = flutterProject.manifest.appName;
+      }
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
@@ -459,9 +476,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     );
 
     if (collector != null) {
+      String packagesPath;
+      if (coverageForParentPackage) {
+        globals.fs.currentDirectory = flutterProject.directory.parent;
+        packagesPath = flutterProject.directory.parent.childFile('.packages').path;
+      }
       final bool collectionResult = await collector.collectCoverageData(
         stringArg('coverage-path'),
+        packagesPath: packagesPath,
         mergeCoverageData: boolArg('merge-coverage'),
+        coverageDirectory: coverageDirectory,
       );
       if (!collectionResult) {
         throwToolExit(null);

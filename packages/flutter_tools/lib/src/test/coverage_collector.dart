@@ -13,7 +13,6 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
-
 import 'test_device.dart';
 import 'watcher.dart';
 
@@ -125,26 +124,34 @@ class CoverageCollector extends TestWatcher {
   /// call [collectCoverage] for each process first.
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
+    String packagesPath,
     Directory coverageDirectory,
   }) async {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
+      packagesPath ??= this.packagesPath;
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
-      final String packagePath = globals.fs.currentDirectory.path;
+      final String projectPath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
-        ? <String>[globals.fs.path.join(packagePath, 'lib')]
+        ? <String>[globals.fs.path.join(projectPath, 'lib')]
         : <String>[coverageDirectory.path];
-      formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
+      formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: projectPath);
     }
     final String result = await formatter.format(_globalHitmap);
     _globalHitmap = null;
     return result;
   }
 
-  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
+  Future<bool> collectCoverageData(
+    String coveragePath, {
+    String packagesPath,
+    bool mergeCoverageData = false,
+    Directory coverageDirectory,
+  }) async {
     final String coverageData = await finalizeCoverage(
+      packagesPath: packagesPath,
       coverageDirectory: coverageDirectory,
     );
     _logMessage('coverage information collection complete');

@@ -87,6 +87,10 @@ class FlutterProject {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static FlutterProject current() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
 
+  /// Returns a parent [FlutterProject] view of the current directory or a ToolExit error,
+  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  static FlutterProject parent() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory.parent);
+
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
   static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
