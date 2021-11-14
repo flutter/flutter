@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-default_clang_base_path = "//third_party/llvm-build/Release+Asserts"
+default_clang_base_path = "//buildtools/windows-x64/clang"
 
 declare_args() {
   # Path to the directory containing the VC binaries for the right
