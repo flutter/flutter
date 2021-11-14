@@ -34,7 +34,6 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// {@end-tool}
 ///
 /// See also:
-/// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
 class CupertinoButton extends StatefulWidget {
