@@ -32,7 +32,7 @@ class MyStatelessWidget extends StatefulWidget {
 
 class _MyStatelessWidgetState extends State<MyStatelessWidget> {
   Duration duration = const Duration(hours: 1, minutes: 23, seconds: 59);
-  
+
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
