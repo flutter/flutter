@@ -205,7 +205,7 @@ enum _PickerColumnType {
 /// {@tool dartpad}
 /// This example shows a [CupertinoDatePicker] with different picker modes.
 ///
-/// ** See code in examples/api/lib/cupertino/date_picker/date_picker.0.dart **
+/// ** See code in examples/api/lib/cupertino/date_picker/cupertino_date_picker.0.dart **
 /// {@end-tool}
 ///
 /// See also:
