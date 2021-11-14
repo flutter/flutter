@@ -1043,12 +1043,24 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
-          ),
-          children: pickers,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500.0),
+                  child: CustomMultiChildLayout(
+                    delegate: _DatePickerLayoutDelegate(
+                      columnWidths: columnWidths,
+                      textDirectionFactor: textDirectionFactor,
+                    ),
+                    children: pickers,
+                  ),
+                ),
+              ),
+            );
+          }
         ),
       ),
     );
@@ -1424,12 +1436,24 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
-        child: CustomMultiChildLayout(
-          delegate: _DatePickerLayoutDelegate(
-            columnWidths: columnWidths,
-            textDirectionFactor: textDirectionFactor,
-          ),
-          children: pickers,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(
+              width: constraints.maxWidth,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500.0),
+                  child: CustomMultiChildLayout(
+                    delegate: _DatePickerLayoutDelegate(
+                      columnWidths: columnWidths,
+                      textDirectionFactor: textDirectionFactor,
+                    ),
+                    children: pickers,
+                  ),
+                ),
+              ),
+            );
+          }
         ),
       ),
     );

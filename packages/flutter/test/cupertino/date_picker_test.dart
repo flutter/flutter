@@ -1220,6 +1220,31 @@ void main() {
       );
     });
 
+    testWidgets('DatePicker respects maxWidth constraint', (WidgetTester tester) async {
+      Widget _buildApp(CupertinoDatePickerMode mode) {
+        return CupertinoApp(
+          home: Center(
+            child: RepaintBoundary(
+              child: CupertinoDatePicker(
+                mode: mode,
+                initialDateTime: DateTime(2019, 1, 1, 4, 12, 30),
+                onDateTimeChanged: (_) {},
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.date));
+      expect(tester.getSize(find.byType(CustomMultiChildLayout)).width, 500.0);
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.dateAndTime));
+      expect(tester.getSize(find.byType(CustomMultiChildLayout)).width, 500.0);
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.time));
+      expect(tester.getSize(find.byType(CustomMultiChildLayout)).width, 500.0);
+    }, variant: TargetPlatformVariant.desktop());
+
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
