@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../../widgets.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -550,7 +551,10 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       axis: widget.axis,
       initialPosition: position,
       dragStartPoint: dragStartPoint,
-      feedback: widget.feedback,
+      feedback: DefaultTextStyle(
+        style: DefaultTextStyle.of(context).style,
+        child: widget.feedback,
+      ),
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragUpdate: (DragUpdateDetails details) {

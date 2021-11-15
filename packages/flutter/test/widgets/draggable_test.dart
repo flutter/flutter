@@ -2204,6 +2204,36 @@ void main() {
     expect(didTap, isFalse);
   });
 
+  testWidgets('Draggable not change TextStyle at dragging', (WidgetTester tester) async {
+    const TextStyle s1 = TextStyle(
+      height: 10,
+      color: Colors.blue,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MaterialApp(
+          home: DefaultTextStyle(
+            style: s1,
+            child: Draggable<Object>(
+              feedback: Text('Dragging'),
+              child: Text('Source'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    expect(find.text('Dragging'), findsNothing);
+    await tester.startGesture(firstLocation, pointer: 13);
+    await tester.pump();
+
+    final RichText text = tester.firstWidget(find.text('Dragging', findRichText: true));
+    expect(text, isNotNull);
+    expect(text.text.style, s1);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/6128.
   testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
     await tester.pumpWidget(
