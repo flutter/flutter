@@ -30,7 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  double _currentSliderValue = 20;
+  double _currentSliderValue =  0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +41,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           children: <Widget>[
             Text('$_currentSliderValue'),
             CupertinoSlider(
+              key: const Key('slider'),
               value: _currentSliderValue,
               divisions: 5,
               max: 100,

@@ -36,7 +36,7 @@ import 'thumb_painter.dart';
 /// slider with a new [value] to update the visual appearance of the slider.
 ///
 /// {@tool dartpad}
-/// This example shows [CupertinoSlider] in action.
+/// This example shows how to show the current slider value as it changes.
 ///
 /// ** See code in examples/api/lib/cupertino/slider/cupertino_slider.0.dart **
 /// {@end-tool}
