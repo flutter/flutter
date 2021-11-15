@@ -328,6 +328,7 @@ Future<void> main() async {
   });
 
   testWidgets('Set custom height', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/51704
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
       height: tabBarHeight,
