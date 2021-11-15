@@ -70,12 +70,13 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                   CupertinoButton(
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
-                      mode: CupertinoDatePickerMode.date,
-                      use24hFormat: true,
-                      onDateTimeChanged: (DateTime newDateTime) {
-                        setState(() => date = newDateTime);
+                        initialDateTime: date,
+                        mode: CupertinoDatePickerMode.date,
+                        use24hFormat: true,
+                        onDateTimeChanged: (DateTime newDateTime) {
+                          setState(() => date = newDateTime);
                         },
-                      )
+                      ),
                     ),
                     child: Text('${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
@@ -91,13 +92,13 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                   CupertinoButton(
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
-                        mode: CupertinoDatePickerMode.time,
                         initialDateTime: time,
+                        mode: CupertinoDatePickerMode.time,
                         use24hFormat: true,
                         onDateTimeChanged: (DateTime newDateTime) {
-                        setState(() => time = newDateTime);
+                          setState(() => time = newDateTime);
                         },
-                      )
+                      ),
                     ),
                     child: Text('${time.hour}:${time.minute}',
                     style: const TextStyle(
@@ -116,9 +117,9 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         initialDateTime: dateTime,
                         use24hFormat: true,
                         onDateTimeChanged: (DateTime newDateTime) {
-                        setState(() => dateTime = newDateTime);
+                          setState(() => dateTime = newDateTime);
                         },
-                      )
+                      ),
                     ),
                     child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
