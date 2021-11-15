@@ -220,17 +220,19 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
-  final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-  if (luciBotId.startsWith('luci-dart-')) {
+  if (_runningInDartHHHBot) {
     // The Dart HHH bots intentionally modify the local artifact cache
     // and then use this script to run Flutter's test suites.
     // Because the artifacts have been changed, this particular test will return
     // a false positive and should be skipped.
     print('${yellow}Skipping Flutter Engine Version Validation for swarming '
-          'bot $luciBotId.');
+          'bot $_luciBotId.');
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
@@ -1506,6 +1508,7 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
       '-v',
       '--platform=chrome',
       '--web-renderer=$webRenderer',
+      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
       '--sound-null-safety',
       ...flutterTestArgs,
       ...tests,
