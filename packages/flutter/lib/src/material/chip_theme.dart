@@ -296,11 +296,11 @@ class ChipThemeData with Diagnosticable {
   /// background color that indicates that the chip is selected.
   final Color? secondarySelectedColor;
 
-  /// Overrides the default for [SelectableChipAttributes.shadowColor], the
+  /// Overrides the default for [ChipAttributes.shadowColor], the
   /// Color of the chip's shadow when its elevation is greater than 0.
   ///
-  /// This property applies to [ChoiceChip], [FilterChip],
-  /// [InputChip], [RawChip].
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final Color? shadowColor;
 
   /// Overrides the default for
