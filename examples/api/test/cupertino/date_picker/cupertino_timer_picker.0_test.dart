@@ -17,7 +17,7 @@ void main() {
     await tester.tap(find.text('1:23:42.000000'));
     await tester.pumpAndSettle();
 
-    // Drag all three date wheels.
+    // Drag hour, minute, and second hand to change the time.
     await tester.drag(find.text('1'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('23'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('42'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
@@ -25,7 +25,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    //Close the date picker.
+    // Close the timer picker.
     await tester.tapAt(const Offset(1.0, 1.0));
     await tester.pumpAndSettle();
 
