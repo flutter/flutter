@@ -35,9 +35,19 @@ static std::string ShaderLibraryDirectory() {
   return fml::paths::JoinPaths({path_result.second, "shaders"});
 }
 
+static std::vector<std::string> ShaderLibraryPathsForPlayground() {
+  std::vector<std::string> paths;
+  paths.emplace_back(fml::paths::JoinPaths(
+      {ShaderLibraryDirectory(), "shader_fixtures.metallib"}));
+  paths.emplace_back(
+      fml::paths::JoinPaths({fml::paths::GetExecutableDirectoryPath().second,
+                             "shaders", "entity.metallib"}));
+  return paths;
+}
+
 Playground::Playground()
-    : renderer_(std::make_shared<ContextMTL>(ShaderLibraryDirectory(),
-                                             "shader_fixtures.metallib")) {}
+    : renderer_(
+          std::make_shared<ContextMTL>(ShaderLibraryPathsForPlayground())) {}
 
 Playground::~Playground() = default;
 
