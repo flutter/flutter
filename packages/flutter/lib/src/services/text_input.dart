@@ -14,16 +14,18 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-import '../../services.dart' show Clipboard;
 import 'autofill.dart';
+import 'clipboard.dart' show Clipboard;
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
+import 'text_editing_intents.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -1104,55 +1106,43 @@ abstract class TextInputClient {
   void connectionClosed();
 }
 
-/// An interface to receive granular information from [TextInput].
+/// A bidirectional communication channel between the current active text input
+/// field and the system's text input control.
 ///
-/// See also:
+/// Once established, a connection can be used to send messages to, and receive
+/// commands from the platform's text input plugin. The [TextInputConnection]
+/// class provides concrete implementations for sending messages to the text
+/// input plugin (the host platform's text input system) via the
+/// [SystemChannels.textInput] method channel. Subclasses must implement
+/// [_handleMethodCallInvocation] to handle commands sent by the
+/// system's text input control. Some systems can send "dynamic" commands to an
+/// input field. For instance, on Android there is
+/// `InputConnection.performPrivateCommand`, and on macOS there is
+/// `-[NSTextInputClient doCommandBySelector:]`.
 ///
-///  * [TextInput.attach]
-///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
-///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
-///    to true.
-abstract class DeltaTextInputClient extends TextInputClient {
-  /// Requests that this client update its editing state by applying the deltas
-  /// received from the engine.
-  ///
-  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
-  /// to the client's editing state. A change is any mutation to the raw text
-  /// value, or any updates to the selection and/or composing region.
-  ///
-  /// Here is an example of what implementation of this method could look like:
-  /// {@tool snippet}
-  /// @override
-  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue newValue = _previousValue;
-  ///   for (final TextEditingDelta delta in textEditingDeltas) {
-  ///     newValue = delta.apply(newValue);
-  ///   }
-  ///   _localValue = newValue;
-  /// }
-  /// {@end-tool}
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
-}
-
-/// An interface for interacting with a text input control.
+/// ## Lifecycle
 ///
-/// See also:
+/// An input connection is typically initiated by a Flutter text input field
+/// when it gains focus. In some rare occasions the platform will request a
+/// "restart" from the Flutter framework when it loses track of the current
+/// input state, and the framework should typically drop the current connection,
+/// if any, and establish a new input connection to the platform's text input.
 ///
-///  * [TextInput.attach], a method used to establish a [TextInputConnection]
-///    between the system's text input and a [TextInputClient].
-///  * [EditableText], a [TextInputClient] that connects to and interacts with
-///    the system's text input using a [TextInputConnection].
-class TextInputConnection {
-  TextInputConnection._(this._client)
-      : assert(_client != null),
-        _id = _nextId++;
-
-  Size? _cachedSize;
-  Matrix4? _cachedTransform;
-  Rect? _cachedRect;
-  Rect? _cachedCaretRect;
+/// There can be at most one attached input connection at any given time per
+/// application.
+///
+/// The connection can be terminated by either the Flutter framework, when the
+/// input field decides it should stop receiving input (for example, when it
+/// loses focus), or the platform (for example, the user switches to a different
+/// tab on the web).
+///
+/// This class is extended by the [TextInputConnection] class and the [] class
+/// in the flutter framework.
+abstract class TextInputConnection {
+  TextInputConnection._() : _id = _nextId++;
 
   static int _nextId = 1;
+
   final int _id;
 
   /// Resets the internal ID counter for testing purposes.
@@ -1167,8 +1157,6 @@ class TextInputConnection {
       return true;
     }());
   }
-
-  final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
@@ -1206,6 +1194,8 @@ class TextInputConnection {
     TextInput._instance._setEditingState(value);
   }
 
+  Size? _cachedSize;
+  Matrix4? _cachedTransform;
   /// Send the size and transform of the editable text to engine.
   ///
   /// The values are sent as platform messages so they can be used on web for
@@ -1229,6 +1219,8 @@ class TextInputConnection {
     }
   }
 
+  Rect? _cachedRect;
+  Rect? _cachedCaretRect;
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
   ///
@@ -1313,6 +1305,190 @@ class TextInputConnection {
   void connectionClosedReceived() {
     TextInput._instance._currentConnection = null;
     assert(!attached);
+  }
+
+  /// Handles the incoming commands sent from the embedder's text input plugin.
+  @protected
+  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall);
+}
+
+/// An interface for interacting with a text input control.
+///
+/// See also:
+///
+///  * [TextInput.attach], a method used to establish a [TextInputConnection]
+///    between the system's text input and a [TextInputClient].
+///  * [EditableText], a [TextInputClient] that connects to and interacts with
+///    the system's text input using a [TextInputConnection].
+class IntentTextInputConnection extends TextInputConnection {
+  IntentTextInputConnection(this._dispatcher) : super._();
+
+  final Future<dynamic> Function(Iterable<Intent>) _dispatcher;
+
+  Iterable<Intent> _methodCallToIntent(MethodCall methodCall) sync* {
+    final String method = methodCall.method;
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    switch (method) {
+      case 'TextInputClient.requestExistingInputState':
+       yield TextInputConnectionControlIntent.reconnect;
+       return;
+      case 'TextInputClient.updateEditingStateWithTag':
+        final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+        final Map<String, TextEditingValue> autofillValue = <String, TextEditingValue>{};
+        for (final String tag in editingValue.keys) {
+          autofillValue[tag] = TextEditingValue.fromJSON(
+            editingValue[tag] as Map<String, dynamic>,
+          );
+        }
+        yield PerformAutofillIntent(autofillValue);
+        return;
+    }
+
+    final int connectionId = args[0] as int;
+    if (connectionId != _id) {
+      // If the client IDs don't match, the incoming message was for a different
+      // connection.
+      bool debugAllowAnyway = false;
+      assert(() {
+        // In debug builds we allow "-1" as a magical client ID that ignores
+        // this verification step so that tests can always get through, even
+        // when they are not mocking the engine side of text input.
+        if (connectionId == -1)
+          debugAllowAnyway = true;
+        return true;
+      }());
+      if (!debugAllowAnyway)
+        return;
+    }
+
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        final TextEditingValue newEditingValue = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+        yield UpdateTextEditingValueIntent.withNewValue(newEditingValue);
+        return;
+      case 'TextInputClient.performAction':
+        yield PerformIMEActionIntent(_toTextInputAction(args[1] as String));
+        return;
+      case 'TextInputClient.performPrivateCommand':
+        yield PrivateTextInputCommand(methodCall);
+        return;
+      case 'TextInputClient.updateFloatingCursor':
+        final RawFloatingCursorPoint floatingCursorPoint = _toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        );
+        yield UpdateFloatingCursorIntent(floatingCursorPoint);
+        return;
+      case 'TextInputClient.onConnectionClosed':
+        yield TextInputConnectionControlIntent.close;
+        return;
+      case 'TextInputClient.showAutocorrectionPromptRect':
+        yield HighlightAutocorrectTextRangeIntent(
+          TextRange(start: args[1] as int, end: args[2] as int),
+        );
+        return;
+    }
+  }
+
+  /// Handles the incoming commands sent from the embedder's text input plugin.
+  @override
+  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) => _dispatcher(_methodCallToIntent(methodCall));
+}
+
+class _TextInputConnection extends TextInputConnection {
+  _TextInputConnection._(this._client, this._configuration)
+      : assert(_client != null),
+        super._();
+
+  final TextInputClient _client;
+  // This is currently only to respond to "requestExistingInputState" which is
+  // Android only, so it doesn't have to be updated even when "updateConfig" is
+  // called.
+  final TextInputConfiguration _configuration;
+
+  @override
+  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) {
+    final String method = methodCall.method;
+
+    // The requestExistingInputState request needs to be handled regardless of
+    // the client ID, as long as we have a _currentConnection.
+    if (method == 'TextInputClient.requestExistingInputState') {
+      TextInput._instance._attach(this, _configuration);
+      final TextEditingValue? editingValue = _client.currentTextEditingValue;
+      if (editingValue != null) {
+        TextInput._instance._setEditingState(editingValue);
+      }
+      return Future<dynamic>.value();
+    }
+
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    // The updateEditingStateWithTag request (autofill) can come up even to a
+    // text field that doesn't have a connection.
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final AutofillScope? scope = _client.currentAutofillScope;
+      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
+      }
+
+      return Future<dynamic>.value();
+    }
+
+    final int client = args[0] as int;
+    if (client != _id) {
+      // If the client IDs don't match, the incoming message was for a different
+      // client.
+      bool debugAllowAnyway = false;
+      assert(() {
+        // In debug builds we allow "-1" as a magical client ID that ignores
+        // this verification step so that tests can always get through, even
+        // when they are not mocking the engine side of text input.
+        if (client == -1)
+          debugAllowAnyway = true;
+        return true;
+      }());
+      if (!debugAllowAnyway)
+        return Future<dynamic>.value();
+    }
+
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        _client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.performAction':
+        _client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performPrivateCommand':
+        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
+        _client.performPrivateCommand(
+          firstArg['action'] as String,
+          firstArg['data'] as Map<String, dynamic>,
+        );
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _client.updateFloatingCursor(_toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        ));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _client.connectionClosed();
+        break;
+      case 'TextInputClient.showAutocorrectionPromptRect':
+        _client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      default:
+        throw MissingPluginException();
+    }
+    return Future<dynamic>.value();
   }
 }
 
@@ -1424,10 +1600,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
 ///    wants to take user input from the keyboard.
 class TextInput {
-  TextInput._() {
-    _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_handleTextInputInvocation);
-  }
+  TextInput._();
 
   /// Set the [MethodChannel] used to communicate with the system's text input
   /// control.
@@ -1482,9 +1655,8 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    assert(client != null);
     assert(configuration != null);
-    final TextInputConnection connection = TextInputConnection._(client);
+    final TextInputConnection connection = _TextInputConnection._(client, configuration);
     _instance._attach(connection, configuration);
     return connection;
   }
@@ -1494,7 +1666,6 @@ class TextInput {
   /// `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
-    assert(connection._client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
@@ -1502,7 +1673,6 @@ class TextInput {
       <dynamic>[ connection._id, configuration.toJson() ],
     );
     _currentConnection = connection;
-    _currentConfiguration = configuration;
   }
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
@@ -1527,109 +1697,13 @@ class TextInput {
     return true;
   }
 
-  late MethodChannel _channel;
+  late MethodChannel _channel = SystemChannels.textInput
+    ..setMethodCallHandler(_handleTextInputInvocation);
 
   TextInputConnection? _currentConnection;
-  late TextInputConfiguration _currentConfiguration;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
-    final String method = methodCall.method;
-
-    // The requestExistingInputState request needs to be handled regardless of
-    // the client ID, as long as we have a _currentConnection.
-    if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection!._client != null);
-      _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
-      if (editingValue != null) {
-        _setEditingState(editingValue);
-      }
-      return;
-    }
-
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
-
-    // The updateEditingStateWithTag request (autofill) can come up even to a
-    // text field that doesn't have a connection.
-    if (method == 'TextInputClient.updateEditingStateWithTag') {
-      assert(_currentConnection!._client != null);
-      final TextInputClient client = _currentConnection!._client;
-      final AutofillScope? scope = client.currentAutofillScope;
-      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
-      for (final String tag in editingValue.keys) {
-        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
-          editingValue[tag] as Map<String, dynamic>,
-        );
-        final AutofillClient? client = scope?.getAutofillClient(tag);
-        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
-          client.autofill(textEditingValue);
-        }
-      }
-
-      return;
-    }
-
-    final int client = args[0] as int;
-    if (client != _currentConnection!._id) {
-      // If the client IDs don't match, the incoming message was for a different
-      // client.
-      bool debugAllowAnyway = false;
-      assert(() {
-        // In debug builds we allow "-1" as a magical client ID that ignores
-        // this verification step so that tests can always get through, even
-        // when they are not mocking the engine side of text input.
-        if (client == -1)
-          debugAllowAnyway = true;
-        return true;
-      }());
-      if (!debugAllowAnyway)
-        return;
-    }
-
-    switch (method) {
-      case 'TextInputClient.updateEditingState':
-        _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
-        break;
-      case 'TextInputClient.updateEditingStateWithDeltas':
-        assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
-        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
-
-        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
-
-        for (final dynamic encodedDelta in encoded['deltas']) {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
-          deltas.add(delta);
-        }
-
-        (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
-        break;
-      case 'TextInputClient.performAction':
-        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
-        break;
-      case 'TextInputClient.performPrivateCommand':
-        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
-        _currentConnection!._client.performPrivateCommand(
-          firstArg['action'] as String,
-          firstArg['data'] as Map<String, dynamic>,
-        );
-        break;
-      case 'TextInputClient.updateFloatingCursor':
-        _currentConnection!._client.updateFloatingCursor(_toTextPoint(
-          _toTextCursorAction(args[1] as String),
-          args[2] as Map<String, dynamic>,
-        ));
-        break;
-      case 'TextInputClient.onConnectionClosed':
-        _currentConnection!._client.connectionClosed();
-        break;
-      case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
-        break;
-      default:
-        throw MissingPluginException();
-    }
+    return _currentConnection?._handleMethodCallInvocation(methodCall);
   }
 
   bool _hidePending = false;

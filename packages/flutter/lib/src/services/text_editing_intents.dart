@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
+import 'text_editing.dart';
 
 /// An [Intent] to send the event straight to the engine.
 ///
@@ -14,6 +14,12 @@ import 'actions.dart';
 class DoNothingAndStopPropagationTextIntent extends Intent {
   /// Creates an instance of [DoNothingAndStopPropagationTextIntent].
   const DoNothingAndStopPropagationTextIntent();
+}
+
+class PrivateTextInputCommand extends Intent {
+  const PrivateTextInputCommand(this.methodCall);
+
+  final MethodCall methodCall;
 }
 
 /// A text editing related [Intent] that performs an operation towards a given
@@ -224,4 +230,52 @@ class UpdateSelectionIntent extends Intent {
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+}
+
+class PerformAutofillIntent extends Intent {
+  const PerformAutofillIntent(this.autofillValue);
+
+  final Map<String, TextEditingValue> autofillValue;
+}
+
+class PerformIMEActionIntent extends Intent {
+  const PerformIMEActionIntent(this.textInputAction);
+
+  final TextInputAction textInputAction;
+}
+
+class UpdateTextEditingValueIntent extends Intent {
+  const UpdateTextEditingValueIntent.apply(this.modify, {
+    this.cause = SelectionChangedCause.keyboard,
+  });
+
+  UpdateTextEditingValueIntent.withNewValue(TextEditingValue newTextEditingValue, {
+    SelectionChangedCause cause = SelectionChangedCause.keyboard,
+  }) : this.apply(_constValue(newTextEditingValue), cause: cause);
+
+  final TextEditingValue Function(TextEditingValue) modify;
+  final SelectionChangedCause cause;
+
+  static TextEditingValue Function(TextEditingValue) _constValue(TextEditingValue newTextEditingValue) {
+    return (TextEditingValue oldValue) => newTextEditingValue;
+  }
+}
+
+class TextInputConnectionControlIntent extends Intent {
+  const TextInputConnectionControlIntent._(this._controlCode);
+  final int _controlCode;
+
+  static const TextInputConnectionControlIntent close = TextInputConnectionControlIntent._(0);
+  static const TextInputConnectionControlIntent reconnect = TextInputConnectionControlIntent._(1);
+}
+
+class UpdateFloatingCursorIntent extends Intent {
+  const UpdateFloatingCursorIntent(this.floatingCursorPoint);
+  final RawFloatingCursorPoint floatingCursorPoint;
+}
+
+class HighlightAutocorrectTextRangeIntent extends Intent {
+  const HighlightAutocorrectTextRangeIntent(this.highlightRange);
+
+  final TextRange highlightRange;
 }
