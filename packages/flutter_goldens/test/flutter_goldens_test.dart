@@ -180,6 +180,7 @@ void main() {
           '--work-dir', '/workDirectory/temp',
           '--test-name', 'golden_file_test',
           '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
         ],
         null,
       );

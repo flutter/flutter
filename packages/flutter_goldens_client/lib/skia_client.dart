@@ -177,6 +177,7 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      '--passfail',
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
