@@ -1705,12 +1705,13 @@ targets:
 
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","android","linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
+    runIf:
+      - dev/**
     scheduler: luci
 
   - name: Linux_android image_list_jit_reported_duration
@@ -3168,12 +3169,13 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+    runIf:
+      - dev/**
     scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
