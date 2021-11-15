@@ -8,15 +8,25 @@
 
 namespace impeller {
 
-ShaderLibraryMTL::ShaderLibraryMTL(id<MTLLibrary> library)
-    : library_(library) {}
+ShaderLibraryMTL::ShaderLibraryMTL(NSArray<id<MTLLibrary>>* libraries)
+    : libraries_(libraries) {
+  if (libraries_ == nil || libraries_.count == 0) {
+    return;
+  }
+
+  is_valid_ = true;
+}
 
 ShaderLibraryMTL::~ShaderLibraryMTL() = default;
+
+bool ShaderLibraryMTL::IsValid() const {
+  return is_valid_;
+}
 
 std::shared_ptr<const ShaderFunction> ShaderLibraryMTL::GetFunction(
     const std::string_view& name,
     ShaderStage stage) {
-  if (!library_) {
+  if (!IsValid()) {
     return nullptr;
   }
 
@@ -26,8 +36,16 @@ std::shared_ptr<const ShaderFunction> ShaderLibraryMTL::GetFunction(
     return found->second;
   }
 
-  auto function = [library_ newFunctionWithName:@(name.data())];
-  if (!function) {
+  id<MTLFunction> function = nil;
+
+  for (size_t i = 0, count = [libraries_ count]; i < count; i++) {
+    function = [libraries_[i] newFunctionWithName:@(name.data())];
+    if (function) {
+      break;
+    }
+  }
+
+  if (function == nil) {
     return nullptr;
   }
 
