@@ -1049,7 +1049,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               width: constraints.maxWidth,
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 495.0),
+                  constraints: const BoxConstraints(maxWidth: 500.0),
                   child: CustomMultiChildLayout(
                     delegate: _DatePickerLayoutDelegate(
                       columnWidths: columnWidths,
@@ -1442,7 +1442,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               width: constraints.maxWidth,
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 495.0),
+                  constraints: const BoxConstraints(maxWidth: 500.0),
                   child: CustomMultiChildLayout(
                     delegate: _DatePickerLayoutDelegate(
                       columnWidths: columnWidths,
