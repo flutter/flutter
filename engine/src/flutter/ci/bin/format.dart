@@ -804,7 +804,7 @@ Future<String> _getDiffBaseRevision(ProcessManager processManager, Directory rep
   if (upstreamUrl.isEmpty) {
     upstream = 'origin';
   }
-  await _runGit(<String>['fetch', upstream, 'master'], processRunner);
+  await _runGit(<String>['fetch', upstream, 'main'], processRunner);
   String result = '';
   try {
     // This is the preferred command to use, but developer checkouts often do
