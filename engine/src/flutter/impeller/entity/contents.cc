@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents.h"
 
+#include <memory>
+
 #include "flutter/fml/logging.h"
 #include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
@@ -149,6 +151,12 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
   }
 
   return true;
+}
+
+std::unique_ptr<SolidColorContents> SolidColorContents::Make(Color color) {
+  auto contents = std::make_unique<SolidColorContents>();
+  contents->SetColor(color);
+  return contents;
 }
 
 /*******************************************************************************
