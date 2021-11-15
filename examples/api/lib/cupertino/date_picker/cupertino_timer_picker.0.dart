@@ -5,7 +5,6 @@
 // Flutter code sample for CupertinoTimerPicker
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
@@ -31,7 +30,7 @@ class MyStatelessWidget extends StatefulWidget {
 }
 
 class _MyStatelessWidgetState extends State<MyStatelessWidget> {
-  Duration duration = const Duration(hours: 1, minutes: 23, seconds: 59);
+  Duration duration = const Duration(hours: 1, minutes: 23, seconds: 42);
 
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
@@ -72,8 +71,8 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         initialTimerDuration: duration,
                         onTimerDurationChanged: (Duration newDuration) {
                           setState(() => duration = newDuration);
-                          },
-                        ),
+                        },
+                      ),
                     ),
                     child: Text('$duration',
                       style: const TextStyle(
