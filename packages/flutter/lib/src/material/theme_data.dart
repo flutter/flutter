@@ -1088,6 +1088,10 @@ class ThemeData with Diagnosticable {
   /// As they are updated to include Material 3 support this documentation
   /// will be modified to indicate exactly what widgets this flag will affect.
   ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app. Some components will be migrated
+  /// before others and typography changes will be coming in stages.
+  ///
   /// [useMaterial3] defaults to false. After all the migrated components
   /// have landed on stable, we will change this to be true by default. After
   /// that change has landed on stable, we will deprecate this flag and remove
