@@ -632,7 +632,7 @@ class ColorScheme with Diagnosticable {
     Color? onSurfaceVariant,
     Color? outline,
     Color? shadow,
-     Color? inverseSurface,
+    Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
     @Deprecated(
