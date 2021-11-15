@@ -327,7 +327,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
   });
 
-  testWidgets('Set height', (WidgetTester tester) async {
+  testWidgets('Set custom height', (WidgetTester tester) async {
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
       height: tabBarHeight,
