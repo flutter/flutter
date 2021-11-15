@@ -69,7 +69,11 @@ struct PipelineBuilder {
           FragmentShader::kEntrypointName, ShaderStage::kFragment);
 
       if (!vertex_function || !fragment_function) {
-        FML_LOG(ERROR) << "Could not resolve pipeline entrypoint(s).";
+        FML_LOG(ERROR) << "Could not resolve pipeline entrypoint(s) '"
+                       << VertexShader::kEntrypointName << "' and '"
+                       << FragmentShader::kEntrypointName
+                       << "' for pipline named '" << VertexShader::kLabel
+                       << "'.";
         return false;
       }
 
@@ -82,7 +86,9 @@ struct PipelineBuilder {
       auto vertex_descriptor = std::make_shared<VertexDescriptor>();
       if (!vertex_descriptor->SetStageInputs(
               VertexShader::kAllShaderStageInputs)) {
-        FML_LOG(ERROR) << "Could not configure vertex descriptor.";
+        FML_LOG(ERROR)
+            << "Could not configure vertex descriptor for pipeline named '"
+            << VertexShader::kLabel << "'.";
         return false;
       }
       desc.SetVertexDescriptor(std::move(vertex_descriptor));
