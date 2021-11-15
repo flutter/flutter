@@ -94,7 +94,9 @@ void main() {
     expect(icon.size, const Size(24.0, 24.0));
   });
 
-  testWidgets('when null, iconSize is overridden by IconTheme.of(context).size', (WidgetTester tester) async {
+  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
+    RenderBox icon;
+
     await tester.pumpWidget(
       wrap(
         child: IconTheme(
@@ -107,7 +109,64 @@ void main() {
       ),
     );
 
-    final RenderBox icon = tester.renderObject(find.byType(Icon));
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 10),
+            ),
+            child: IconButton(
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 20),
+            ),
+            child: IconTheme(
+              data: const IconThemeData(size: 10),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: IconTheme(
+            data: const IconThemeData(size: 20),
+            child: Theme(
+              data: ThemeData(
+                iconTheme: const IconThemeData(size: 10),
+              ),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
     expect(icon.size, const Size(10.0, 10.0));
   });
 
