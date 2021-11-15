@@ -1583,6 +1583,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android fast_scroll_heavy_gridview__memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/93661
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
