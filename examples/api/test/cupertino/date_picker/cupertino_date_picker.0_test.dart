@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
-  testWidgets('Can pick date, time and dateTime from CupertinoDatePicker', (WidgetTester tester) async {
+  testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
@@ -16,7 +16,7 @@ void main() {
     await tester.tap(find.text('10-26-2016'));
     await tester.pumpAndSettle();
 
-    // Drag all three date wheels.
+    // Drag month, day and year wheels to change the picked date.
     await tester.drag(find.text('October'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('26'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('2016'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
@@ -24,7 +24,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    //Close the date picker.
+    // Close the date picker.
     await tester.tapAt(const Offset(1.0, 1.0));
     await tester.pumpAndSettle();
 
@@ -34,7 +34,7 @@ void main() {
     await tester.tap(find.text('22:35'));
     await tester.pumpAndSettle();
 
-    // Drag hour and minute wheels
+    // Drag hour and minute wheels to change the picked time.
     await tester.drag(find.text('22'), const Offset(0.0, 50.0), touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('35'), const Offset(0.0, 50.0), touchSlopY: 0, warnIfMissed: false); // see top of file
 
@@ -51,7 +51,7 @@ void main() {
     await tester.tap(find.text('8-3-2016 17:45'));
     await tester.pumpAndSettle();
 
-    // Drag time wheeels.
+    // Drag hour and minute wheels to change the picked time.
     await tester.drag(find.text('17'), const Offset(0.0, 50.0), touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('45'), const Offset(0.0, 50.0), touchSlopY: 0, warnIfMissed: false); // see top of file
 
