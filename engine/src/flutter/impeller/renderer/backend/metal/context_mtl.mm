@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/metal/context_mtl.h"
 
+#include <Foundation/Foundation.h>
+
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
@@ -12,8 +14,30 @@
 
 namespace impeller {
 
-ContextMTL::ContextMTL(std::string shaders_directory,
-                       std::string main_library_file_name)
+static NSArray<id<MTLLibrary>>* ShaderLibrariesFromFiles(
+    id<MTLDevice> device,
+    const std::vector<std::string>& libraries_paths) {
+  NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
+  for (const auto& library_path : libraries_paths) {
+    if (!fml::IsFile(library_path)) {
+      FML_LOG(ERROR) << "Shader library does not exist at path '"
+                     << library_path << "'";
+      continue;
+    }
+    NSError* shader_library_error = nil;
+    auto library = [device newLibraryWithFile:@(library_path.c_str())
+                                        error:&shader_library_error];
+    if (!library) {
+      FML_LOG(ERROR) << "Could not create shader library: "
+                     << shader_library_error.localizedDescription.UTF8String;
+      continue;
+    }
+    [found_libraries addObject:library];
+  }
+  return found_libraries;
+}
+
+ContextMTL::ContextMTL(const std::vector<std::string>& libraries_paths)
     : device_(::MTLCreateSystemDefaultDevice()) {
   // Setup device.
   if (!device_) {
@@ -33,31 +57,14 @@ ContextMTL::ContextMTL(std::string shaders_directory,
 
   // Setup the shader library.
   {
-    NSError* shader_library_error = nil;
-    auto shader_library_path =
-        fml::paths::JoinPaths({shaders_directory, main_library_file_name});
-
-    auto library_exists = fml::IsFile(shader_library_path);
-
-    if (!library_exists) {
-      FML_LOG(ERROR) << "Shader library does not exist at path '"
-                     << shader_library_path
-                     << "'. No piplines can be created in this context.";
-    }
-    auto library =
-        library_exists
-            ? [device_ newLibraryWithFile:@(shader_library_path.c_str())
-                                    error:&shader_library_error]
-            : [device_ newDefaultLibrary];
-    if (!library && shader_library_error) {
-      FML_LOG(ERROR) << "Could not create shader library: "
-                     << shader_library_error.localizedDescription.UTF8String;
+    // std::make_shared disallowed because of private friend ctor.
+    auto library = std::shared_ptr<ShaderLibraryMTL>(new ShaderLibraryMTL(
+        ShaderLibrariesFromFiles(device_, libraries_paths)));
+    if (!library->IsValid()) {
+      FML_DLOG(ERROR) << "Could not create valid Metal shader library.";
       return;
     }
-
-    // std::make_shared disallowed because of private friend ctor.
-    shader_library_ =
-        std::shared_ptr<ShaderLibraryMTL>(new ShaderLibraryMTL(library));
+    shader_library_ = std::move(library);
   }
 
   // Setup the pipeline library.

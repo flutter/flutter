@@ -22,7 +22,7 @@ namespace impeller {
 class ContextMTL final : public Context,
                          public BackendCast<ContextMTL, Context> {
  public:
-  ContextMTL(std::string shaders_directory, std::string main_library_file_name);
+  ContextMTL(const std::vector<std::string>& shader_libraries);
 
   // |Context|
   ~ContextMTL() override;

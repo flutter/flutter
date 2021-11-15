@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <Foundation/Foundation.h>
 #include <Metal/Metal.h>
 
 #include <memory>
@@ -22,6 +23,9 @@ class ShaderLibraryMTL final : public ShaderLibrary {
 
   // |ShaderLibrary|
   ~ShaderLibraryMTL() override;
+
+  // |ShaderLibrary|
+  bool IsValid() const override;
 
  private:
   friend class ContextMTL;
@@ -53,10 +57,11 @@ class ShaderLibraryMTL final : public ShaderLibrary {
                                        ShaderKey::Equal>;
 
   UniqueID library_id_;
-  id<MTLLibrary> library_ = nullptr;
+  NSArray<id<MTLLibrary>>* libraries_ = nullptr;
   Functions functions_;
+  bool is_valid_ = false;
 
-  ShaderLibraryMTL(id<MTLLibrary> library);
+  ShaderLibraryMTL(NSArray<id<MTLLibrary>>* libraries);
 
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(
