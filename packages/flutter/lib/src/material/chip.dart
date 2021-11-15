@@ -228,8 +228,8 @@ abstract class DeletableChipAttributes {
   /// Used to define the delete icon's color with an [IconTheme] that
   /// contains the icon.
   ///
-  /// The default is Color(0xde000000)
-  /// (slightly transparent black) for light themes, and Color(0xdeffffff)
+  /// The default is `Color(0xde000000)`
+  /// (slightly transparent black) for light themes, and `Color(0xdeffffff)`
   /// (slightly transparent white) for dark themes.
   ///
   /// The delete icon appears if [DeletableChipAttributes.onDeleted] is
@@ -430,7 +430,7 @@ abstract class DisabledChipAttributes {
   /// Defaults to true. Cannot be null.
   bool get isEnabled;
 
-  /// Color used for the chip's background to indicate that it is not
+  /// The color used for the chip's background to indicate that it is not
   /// enabled.
   ///
   /// The chip is disabled when [isEnabled] is false, or all three of
@@ -1737,7 +1737,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       end: widget.backgroundColor
         ?? chipTheme.backgroundColor
         ?? theme.chipTheme.backgroundColor
-        ?? chipDefaults.backgroundColor, //defaultBackgroundColor.withAlpha(0x1f),
+        ?? chipDefaults.backgroundColor,
     );
     final ColorTween selectTween = ColorTween(
       begin: backgroundTween.evaluate(enableController),
@@ -1815,7 +1815,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       container: true,
       button: true,
       child: _wrapWithTooltip(
-        tooltip: widget.useDeleteButtonTooltip ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip : null,
+        tooltip: widget.useDeleteButtonTooltip
+          ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip
+          : null,
         enabled: widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
@@ -1825,7 +1827,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
-              color: widget.deleteIconColor ?? chipTheme.deleteIconColor ?? theme.chipTheme.deleteIconColor ?? chipDefaults.deleteIconColor,
+              color: widget.deleteIconColor
+                ?? chipTheme.deleteIconColor
+                ?? theme.chipTheme.deleteIconColor
+                ?? chipDefaults.deleteIconColor,
             ),
             child: widget.deleteIcon,
           ),
@@ -1865,19 +1870,45 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     );
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
-    final double elevation = widget.elevation ?? chipTheme.elevation ?? theme.chipTheme.elevation ?? _defaultElevation;
-    final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? theme.chipTheme.pressElevation ?? _defaultPressElevation;
-    final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? theme.chipTheme.shadowColor ?? _defaultShadowColor;
-    final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
-    final Color? checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor ?? theme.chipTheme.checkmarkColor;
-    final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? theme.chipTheme.showCheckmark ?? true;
-    final EdgeInsetsGeometry padding = widget.padding ?? chipTheme.padding ?? theme.chipTheme.padding ?? chipDefaults.padding!;
 
-    final TextStyle? labelStyle = widget.labelStyle ?? chipTheme.labelStyle ?? theme.chipTheme.labelStyle;
+    final double elevation = widget.elevation
+      ?? chipTheme.elevation
+      ?? theme.chipTheme.elevation
+      ?? _defaultElevation;
+    final double pressElevation = widget.pressElevation
+      ?? chipTheme.pressElevation
+      ?? theme.chipTheme.pressElevation
+      ?? _defaultPressElevation;
+    final Color shadowColor = widget.shadowColor
+      ?? chipTheme.shadowColor
+      ?? theme.chipTheme.shadowColor
+      ?? _defaultShadowColor;
+    final Color selectedShadowColor = widget.selectedShadowColor
+      ?? chipTheme.selectedShadowColor
+      ?? theme.chipTheme.selectedShadowColor
+      ?? _defaultShadowColor;
+    final Color? checkmarkColor = widget.checkmarkColor
+      ?? chipTheme.checkmarkColor
+      ?? theme.chipTheme.checkmarkColor;
+    final bool showCheckmark = widget.showCheckmark
+      ?? chipTheme.showCheckmark
+      ?? theme.chipTheme.showCheckmark
+      ?? true;
+    final EdgeInsetsGeometry padding = widget.padding
+      ?? chipTheme.padding
+      ?? theme.chipTheme.padding
+      ?? chipDefaults.padding!;
+    final TextStyle? labelStyle = widget.labelStyle
+      ?? chipTheme.labelStyle
+      ?? theme.chipTheme.labelStyle;
+    final EdgeInsetsGeometry labelPadding = widget.labelPadding
+      ?? chipTheme.labelPadding
+      ?? theme.chipTheme.labelPadding
+      ?? _defaultLabelPadding;
+
     final TextStyle effectiveLabelStyle = chipDefaults.labelStyle!.merge(labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
-    final EdgeInsetsGeometry labelPadding = widget.labelPadding ?? chipTheme.labelPadding ?? theme.chipTheme.labelPadding ?? _defaultLabelPadding;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
