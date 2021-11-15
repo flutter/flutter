@@ -20,7 +20,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{},
 );
 

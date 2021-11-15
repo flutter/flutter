@@ -11,6 +11,7 @@
 @Tags(<String>['no-shuffle'])
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -105,18 +106,18 @@ void main() {
     testWithoutContext('skipped based on environment.generateDartPluginRegistry',
         () async {
       final Environment environment = Environment.test(
-          fileSystem.currentDirectory,
-          artifacts: null,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: false);
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+      );
 
       expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
       final Environment environment2 = Environment.test(
           fileSystem.currentDirectory,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -143,7 +144,7 @@ void main() {
           const DartPluginRegistrantTarget().canSkip(
             Environment.test(
               fileSystem.currentDirectory,
-              artifacts: null,
+              artifacts: Artifacts.test(),
               fileSystem: fileSystem,
               logger: BufferLogger.test(),
               processManager: FakeProcessManager.any(),
@@ -163,7 +164,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -197,7 +198,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -241,6 +242,9 @@ void main() {
           '//\n'
           '\n'
           '// @dart = 2.12\n'
+          '\n'
+          '// When `package:path_provider_example/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
+          "export 'package:path_provider_example/main.dart';\n"
           '\n'
           "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
@@ -290,7 +294,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -337,7 +341,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -380,6 +384,9 @@ void main() {
           '//\n'
           '\n'
           '// @dart = 2.12\n'
+          '\n'
+          '// When `file:///root/external.dart` defines `main`, that definition is shadowed by the definition below.\n'
+          "export 'file:///root/external.dart';\n"
           '\n'
           "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"

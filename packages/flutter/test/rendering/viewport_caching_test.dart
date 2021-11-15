@@ -66,7 +66,6 @@ void main() {
       () => RenderViewport(
         crossAxisDirection: AxisDirection.left,
         offset: ViewportOffset.zero(),
-        cacheExtent: null,
         cacheExtentStyle: CacheExtentStyle.viewport,
         children: children,
       ),

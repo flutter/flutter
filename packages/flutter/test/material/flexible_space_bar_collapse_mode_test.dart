@@ -102,7 +102,6 @@ void main() {
                   background: Container(
                     key: appbarContainerKey,
                   ),
-                  collapseMode: CollapseMode.parallax,
                 ),
               ),
               SliverToBoxAdapter(

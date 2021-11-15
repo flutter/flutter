@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:file/file.dart';
-import 'package:file/local.dart';
-import 'package:platform/platform.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
 
 const String gsutilBinary = 'gsutil.py';
+
+const String kFrameworkDefaultBranch = 'master';
+const String kForceFlag = 'force';
 
 const List<String> kReleaseChannels = <String>[
   'stable',
@@ -39,28 +39,6 @@ class ConductorException implements Exception {
 
   @override
   String toString() => 'Exception: $message';
-}
-
-Directory? _flutterRoot;
-Directory get localFlutterRoot {
-  if (_flutterRoot != null) {
-    return _flutterRoot!;
-  }
-  String filePath;
-  const FileSystem fileSystem = LocalFileSystem();
-  const Platform platform = LocalPlatform();
-
-  filePath = platform.script.toFilePath();
-  final String checkoutsDirname = fileSystem.path.normalize(
-    fileSystem.path.join(
-      fileSystem.path.dirname(filePath),
-      '..', // flutter/dev/tools
-      '..', // flutter/dev
-      '..', // flutter
-    ),
-  );
-  _flutterRoot = fileSystem.directory(checkoutsDirname);
-  return _flutterRoot!;
 }
 
 bool assertsEnabled() {
@@ -102,6 +80,18 @@ String? getValueFromEnvOrArgs(
   throw ConductorException(
     'Expected either the CLI arg --$name or the environment variable $envName '
     'to be provided!');
+}
+
+bool getBoolFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null) {
+    return (env[envName]?.toUpperCase()) == 'TRUE';
+  }
+  return argResults[name] as bool;
 }
 
 /// Return multiple values from the environment or fall back to [argResults].

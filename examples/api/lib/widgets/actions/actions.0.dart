@@ -34,7 +34,7 @@ class Model {
 
   int save() {
     if (isDirty.value) {
-      print('Saved Data: ${data.value}');
+      debugPrint('Saved Data: ${data.value}');
       isDirty.value = false;
     }
     return data.value;

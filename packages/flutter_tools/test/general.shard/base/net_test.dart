@@ -150,10 +150,10 @@ void main() {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final Net net = createNet(
       FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.HandshakeException('')),
-        FakeRequest(invalid, responseError: const io.HandshakeException('')),
-        FakeRequest(invalid, responseError: const io.HandshakeException('')),
-        FakeRequest(invalid, responseError: const io.HandshakeException('')),
+        FakeRequest(invalid, responseError: const io.HandshakeException()),
+        FakeRequest(invalid, responseError: const io.HandshakeException()),
+        FakeRequest(invalid, responseError: const io.HandshakeException()),
+        FakeRequest(invalid, responseError: const io.HandshakeException()),
       ])
     );
     String? error;

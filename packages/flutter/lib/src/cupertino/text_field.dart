@@ -29,7 +29,6 @@ const BorderSide _kDefaultRoundedBorderSide = BorderSide(
     color: Color(0x33000000),
     darkColor: Color(0x33FFFFFF),
   ),
-  style: BorderStyle.solid,
   width: 0.0,
 );
 const Border _kDefaultRoundedBorder = Border(

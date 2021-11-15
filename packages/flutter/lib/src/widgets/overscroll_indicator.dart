@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
@@ -737,6 +738,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+    double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
@@ -749,9 +752,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
+              mainAxisSize = size.width;
               break;
             case Axis.vertical:
               y += stretch;
+              mainAxisSize = size.height;
               break;
           }
 
@@ -759,13 +764,21 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             _lastOverscrollNotification?.overscroll ?? 0.0
           );
 
-          return ClipRect(
-            child: Transform(
-              alignment: alignment,
-              transform: Matrix4.diagonal3Values(x, y, 1.0),
-              child: widget.child,
-            ),
+          final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
+
+          final Widget transform = Transform(
+            alignment: alignment,
+            transform: Matrix4.diagonal3Values(x, y, 1.0),
+            child: widget.child,
           );
+
+          // Only clip if the viewport dimension is smaller than that of the
+          // screen size in the main axis. If the viewport takes up the whole
+          // screen, overflow from transforming the viewport is irrelevant.
+          if (stretch != 0.0 && viewportDimension != mainAxisSize) {
+            return ClipRect(child: transform);
+          }
+          return transform;
         },
       ),
     );

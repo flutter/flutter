@@ -16,7 +16,7 @@ import '../base/net.dart';
 import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -36,10 +36,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.1.1', // Latest version does not resolve on our CI.
-  // "test" is pinned because 1.18.1 fails when running web tests with this error:
-  // FileSystemException: Cannot open file, path = '.../.pub-cache/hosted/pub.dartlang.org/test-1.18.1/lib/src/runner/browser/static/host.dart.js' (OS Error: No such file or directory, errno = 2)
-  // When removing this remove `pedantic` from dev/bots/allowlist.dart also.
-  'test': '1.17.12', // https://github.com/dart-lang/test/issues/1594
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -194,7 +190,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (pubspec.checksum.value == null) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
@@ -211,7 +207,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly '
             '(checksum ${pubspec.checksum.value} != $checksum).'
@@ -850,7 +846,10 @@ class PubspecYaml {
             }
             endOfDevDependencies = output.length;
             break;
-          default:
+          case Section.builders:
+          case Section.dependencyOverrides:
+          case Section.header:
+          case Section.other:
             // In other sections, pass everything through in its original form.
             output.add(data.line);
             if (data.lockLine != null) {
@@ -1502,7 +1501,7 @@ Directory createTemporaryFlutterSdk(
       ..createSync(recursive: true);
     final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
     if (pubspecYaml == null) {
-      logger.printError(
+      logger.printWarning(
         "Unexpected package '$flutterPackage' found in packages directory",
       );
       continue;

@@ -26,7 +26,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    platform = FakePlatform(operatingSystem: 'linux');
+    platform = FakePlatform();
   });
 
   setUpAll(() {

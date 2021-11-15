@@ -167,16 +167,16 @@ void main() {
   }
 
   runAddListenerBenchmark(_kNumWarmUp, addResult: false);
-  runAddListenerBenchmark(_kNumIterations, addResult: true);
+  runAddListenerBenchmark(_kNumIterations);
 
   runNotifyListenerBenchmark(_kNumWarmUp, addResult: false);
-  runNotifyListenerBenchmark(_kNumIterations, addResult: true);
+  runNotifyListenerBenchmark(_kNumIterations);
 
   runRemoveListenerBenchmark(_kNumWarmUp, addResult: false);
-  runRemoveListenerBenchmark(_kNumIterations, addResult: true);
+  runRemoveListenerBenchmark(_kNumIterations);
 
   runRemoveListenerWhileNotifyingBenchmark(_kNumWarmUp, addResult: false);
-  runRemoveListenerWhileNotifyingBenchmark(_kNumIterations, addResult: true);
+  runRemoveListenerWhileNotifyingBenchmark(_kNumIterations);
 
   printer.printToStdout();
 }

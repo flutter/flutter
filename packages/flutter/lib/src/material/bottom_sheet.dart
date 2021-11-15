@@ -215,14 +215,22 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     bool isClosing = false;
@@ -318,7 +326,6 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
       maxHeight: isScrollControlled
         ? constraints.maxHeight
         : constraints.maxHeight * 9.0 / 16.0,
@@ -501,7 +508,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+      _animationController = BottomSheet.createAnimationController(navigator!);
     }
     return _animationController!;
   }

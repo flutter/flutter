@@ -2,24 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
 import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -33,24 +28,6 @@ const List<int> _kTestPngBytes =
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
   120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
   78, 68, 174, 66, 96, 130];
-
-// 1x1 colored pixel
-const List<int> _kFailPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84,
-  120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
-  0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
-
-Future<void> testWithOutput(String name, Future<void> Function() body, String expectedOutput) async {
-  test(name, () async {
-    final StringBuffer output = StringBuffer();
-    void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
-      output.write(line);
-    }
-    await runZoned<Future<void>>(body, zoneSpecification: ZoneSpecification(print: _recordPrint));
-    expect(output.toString(), expectedOutput);
-  });
-}
 
 void main() {
   late MemoryFileSystem fs;
@@ -172,6 +149,45 @@ void main() {
 
       expect(
         skiaClient.imgtestInit(),
+        throwsException,
+      );
+    });
+
+    test('throws for error state from imgtestAdd', () {
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+      platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'GOLDCTL' : 'goldctl',
+          },
+          operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
+
+      expect(
+        skiaClient.imgtestAdd('golden_file_test', goldenFile),
         throwsException,
       );
     });
@@ -569,7 +585,6 @@ void main() {
 
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.expectationForTestValues['flutter.new_golden_test.1'] = '';
         fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
       });
@@ -582,48 +597,6 @@ void main() {
           ),
           isTrue,
         );
-      });
-
-      testWithOutput('passes non-existent baseline for new test, null expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. '
-         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-         'Validate image output found at flutter/test/library/'
-      );
-
-      testWithOutput('passes non-existent baseline for new test, empty expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.2'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2. '
-        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-        'Validate image output found at flutter/test/library/'
-      );
-
-      test('compare properly awaits validation & output before failing.', () async {
-        final Completer<bool> completer = Completer<bool>();
-        final Future<bool> result = comparator.compare(
-          Uint8List.fromList(_kFailPngBytes),
-          Uri.parse('flutter.golden_test.1.png'),
-        );
-        bool shouldThrow = true;
-        result.then((_) {
-          if (shouldThrow)
-            fail('Compare completed before validation completed!');
-        });
-        await Future<void>.value();
-        shouldThrow = false;
-        completer.complete(Future<bool>.value(false));
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
@@ -648,6 +621,8 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+        // reset property or it will carry on to other tests
+        fakeSkiaClient.getExpectationForTestThrowable = null;
       });
     });
   });
@@ -713,17 +688,17 @@ class FakeProcessManager extends Fake implements ProcessManager {
     workingDirectories.add(workingDirectory);
     final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
     if (result == null && fallbackProcessResult == null) {
-      // Throwing here might gobble up the exception message if a test fails.
-      print('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
+      printOnFailure('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
       fail('See above.');
     }
     return result ?? fallbackProcessResult!;
   }
 }
 
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
-  Object? getExpectationForTestThrowable;
+  Exception? getExpectationForTestThrowable;
   @override
   Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {

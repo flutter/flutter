@@ -12,7 +12,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../globals_null_migrated.dart' as globals show xcode;
+import '../../globals.dart' as globals show xcode;
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -35,7 +35,6 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode,
@@ -626,9 +625,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
 }
 
 void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
-  final String codesignIdentity = environment.defines[kCodesignIdentity];
+  String codesignIdentity = environment.defines[kCodesignIdentity];
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
-    return;
+    codesignIdentity = '-';
   }
   final ProcessResult result = environment.processManager.runSync(<String>[
     'codesign',

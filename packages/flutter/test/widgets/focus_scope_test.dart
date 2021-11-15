@@ -81,7 +81,7 @@ void main() {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
       await tester.pumpWidget(
-        TestFocus(key: key, name: 'a'),
+        TestFocus(key: key),
       );
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
@@ -99,7 +99,7 @@ void main() {
       await tester.pumpWidget(
         Column(
           children: <Widget>[
-            TestFocus(key: keyA, name: 'a'),
+            TestFocus(key: keyA),
             TestFocus(key: keyB, name: 'b'),
           ],
         ),
@@ -134,7 +134,7 @@ void main() {
       await tester.pumpWidget(
         Column(
           children: <Widget>[
-            TestFocus(key: keyA, name: 'a'),
+            TestFocus(key: keyA),
             TestFocus(key: keyB, name: 'b', autofocus: true),
           ],
         ),
@@ -157,7 +157,6 @@ void main() {
           children: <Widget>[
             TestFocus(
               key: keyA,
-              name: 'a',
               autofocus: true,
             ),
             TestFocus(
@@ -211,7 +210,6 @@ void main() {
             children: <Widget>[
               TestFocus(
                 key: key,
-                name: 'a',
                 debugLabel: 'Child',
               ),
             ],
@@ -363,7 +361,6 @@ void main() {
                   children: <Widget>[
                     TestFocus(
                       key: keyA,
-                      name: 'a',
                       autofocus: true,
                       debugLabel: 'Child A',
                     ),
@@ -454,7 +451,6 @@ void main() {
           children: <Widget>[
             TestFocus(
               key: keyA,
-              name: 'a',
             ),
             TestFocus(
               key: keyB,
@@ -552,7 +548,6 @@ void main() {
               TestFocus(
                 debugLabel: 'Widget A',
                 key: keyA,
-                name: 'a',
               ),
               TestFocus(
                 debugLabel: 'Widget B',
@@ -616,7 +611,6 @@ void main() {
                     TestFocus(
                       debugLabel: 'Child A',
                       key: keyA,
-                      name: 'a',
                     ),
                   ],
                 ),
@@ -679,7 +673,6 @@ void main() {
                     TestFocus(
                       debugLabel: 'Child A',
                       key: keyA,
-                      name: 'a',
                     ),
                   ],
                 ),
@@ -763,7 +756,6 @@ void main() {
                     TestFocus(
                       debugLabel: 'Child A',
                       key: keyA,
-                      name: 'a',
                     ),
                   ],
                 ),
@@ -842,7 +834,6 @@ void main() {
                 children: <Widget>[
                   TestFocus(
                     key: keyA,
-                    name: 'a',
                   ),
                 ],
               ),
@@ -893,7 +884,6 @@ void main() {
                 children: <Widget>[
                   TestFocus(
                     key: keyA,
-                    name: 'a',
                   ),
                 ],
               ),
@@ -926,7 +916,6 @@ void main() {
                   TestFocus(
                     debugLabel: 'Child A',
                     key: keyA,
-                    name: 'a',
                   ),
                 ],
               ),
@@ -969,7 +958,6 @@ void main() {
                   TestFocus(
                     debugLabel: 'Child A',
                     key: keyA,
-                    name: 'a',
                   ),
                 ],
               ),
@@ -1409,7 +1397,7 @@ void main() {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
       await tester.pumpWidget(
-        TestFocus(key: key, name: 'a'),
+        TestFocus(key: key),
       );
 
       final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
@@ -1437,7 +1425,7 @@ void main() {
     testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
-      final TestFocus testFocus = TestFocus(key: key, name: 'a');
+      final TestFocus testFocus = TestFocus(key: key);
       await tester.pumpWidget(
         testFocus,
       );
@@ -1832,7 +1820,6 @@ void main() {
       bool? gotFocus;
       await tester.pumpWidget(
         ExcludeFocus(
-          excluding: true,
           child: Focus(
             onFocusChange: (bool focused) => gotFocus = focused,
             child: Focus(
@@ -1907,7 +1894,6 @@ void main() {
       // Now turn off the focus for the subtree.
       await tester.pumpWidget(
         ExcludeFocus(
-          excluding: true,
           child: Focus(
             focusNode: parentFocusNode,
             child: Column(
@@ -1938,6 +1924,37 @@ void main() {
       await tester.pumpWidget(ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/92693
+    testWidgets('Setting parent FocusScope.canRequestFocus to false, does not set descendant Focus._internalNode._canRequestFocus to false', (WidgetTester tester) async {
+      final FocusNode childFocusNode = FocusNode(debugLabel: 'node 1');
+
+      Widget buildFocusTree({required bool parentCanRequestFocus}) {
+        return FocusScope(
+          canRequestFocus: parentCanRequestFocus,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: childFocusNode,
+                child: Container(),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // childFocusNode.canRequestFocus is true when parent canRequestFocus is true
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
+      expect(childFocusNode.canRequestFocus, isTrue);
+
+      // childFocusNode.canRequestFocus is false when parent canRequestFocus is false
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: false));
+      expect(childFocusNode.canRequestFocus, isFalse);
+
+      // childFocusNode.canRequestFocus is true again when parent canRequestFocus is changed back to true
+      await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
+      expect(childFocusNode.canRequestFocus, isTrue);
     });
   });
 }

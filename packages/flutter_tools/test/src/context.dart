@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -127,7 +127,7 @@ void testUsingContext(
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-          return runZoned<Future<dynamic>>(() {
+          return runZonedGuarded<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -148,9 +148,10 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
-            print(error);
-            print(stackTrace);
+          }, (Object error, StackTrace stackTrace) {
+            // When things fail, it's ok to print to the console!
+            print(error); // ignore: avoid_print
+            print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
             throw error;
           });
@@ -176,7 +177,9 @@ void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
-      print(bufferLogger.errorText);
+      // This is where the logger outputting errors is implemented, so it has
+      // to use `print`.
+      print(bufferLogger.errorText); // ignore: avoid_print
     }
     bufferLogger.clear();
   }
@@ -291,10 +294,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 12.0.1';
+  String get versionText => 'Xcode 12.3';
 
   @override
-  Version get version => Version(12, 0, 1);
+  Version get version => Version(12, 3, null);
 
   @override
   Future<Map<String, String>> getBuildSettings(

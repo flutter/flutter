@@ -146,7 +146,7 @@ void main() {
     verifyPaintPosition(key4, const Offset(0.0, 950.0), false);
     verifyPaintPosition(key5, const Offset(0.0, 1500.0), false);
     position.animateTo(550.0, curve: Curves.linear, duration: const Duration(minutes: 1));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     verifyPaintPosition(key1, Offset.zero, false);
     verifyPaintPosition(key2, Offset.zero, true);
     verifyPaintPosition(key3, const Offset(0.0, 200.0), true);

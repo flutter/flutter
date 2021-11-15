@@ -18,7 +18,7 @@ import '../build_info.dart';
 import '../dart/language_version.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../version.dart';
 import 'first_run.dart';
 

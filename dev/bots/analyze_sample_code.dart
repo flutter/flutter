@@ -30,14 +30,12 @@ Future<void> main(List<String> arguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
           'directory in the system temp folder. If specified, will not be '
           'automatically removed at the end of execution.',
   );
   argParser.addFlag(
     'verbose',
-    defaultsTo: false,
     negatable: false,
     help: 'Print verbose output for the analysis process.',
   );
@@ -52,12 +50,10 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag(
     'include-dart-ui',
     defaultsTo: true,
-    negatable: true,
     help: 'Includes the dart:ui code supplied by the engine in the analysis.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -69,7 +65,6 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag(
     'global-activate-snippets',
     defaultsTo: true,
-    negatable: true,
     help: 'Whether or not to "pub global activate" the snippets package. If set, will '
           'activate version $_snippetsActivateVersion',
   );
@@ -476,7 +471,6 @@ class SampleChecker {
         if (!Platform.environment.containsKey('FLUTTER_ROOT')) 'FLUTTER_ROOT': _flutterRoot,
         if (_flutterVersion!.isNotEmpty) 'FLUTTER_VERSION': _flutterVersion!,
       },
-      includeParentEnvironment: true,
     );
   }
 
@@ -1155,7 +1149,7 @@ class Sample {
     final StringBuffer buf = StringBuffer('sample ${args.join(' ')}\n');
     int count = start.line;
     for (final String line in input) {
-      buf.writeln(' ${count.toString().padLeft(4, ' ')}: $line');
+      buf.writeln(' ${count.toString().padLeft(4)}: $line');
       count++;
     }
     return buf.toString();

@@ -34,7 +34,15 @@ class MyStatelessWidget extends StatelessWidget {
       body: Center(
         child: PhysicalShape(
           elevation: 5.0,
+          clipper: ShapeBorderClipper(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+          ),
+          color: Colors.orange,
           child: const SizedBox(
+            height: 200.0,
+            width: 200.0,
             child: Center(
               child: Text(
                 'Hello, World!',
@@ -44,14 +52,7 @@ class MyStatelessWidget extends StatelessWidget {
                 ),
               ),
             ),
-            height: 200.0,
-            width: 200.0,
           ),
-          clipper: ShapeBorderClipper(
-              shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          )),
-          color: Colors.orange,
         ),
       ),
     );

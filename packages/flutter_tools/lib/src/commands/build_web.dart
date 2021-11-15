@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -20,7 +20,7 @@ import 'build.dart';
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     @required bool verboseHelp,
-  }) {
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
@@ -29,7 +29,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
-    addNativeNullAssertions(hide: false);
+    addNativeNullAssertions();
     argParser.addFlag('csp',
       defaultsTo: false,
       negatable: false,

@@ -502,7 +502,6 @@ void main() {
         ]).writeTimelineToFile(
           'test',
           destinationDirectory: tempDir.path,
-          includeSummary: true,
         );
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();

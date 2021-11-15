@@ -118,7 +118,7 @@ class Table extends RenderObjectWidget {
     Key? key,
     this.children = const <TableRow>[],
     this.columnWidths,
-    this.defaultColumnWidth = const FlexColumnWidth(1.0),
+    this.defaultColumnWidth = const FlexColumnWidth(),
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,

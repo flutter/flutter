@@ -94,7 +94,7 @@ void main() {
       equals('TextStyle(inherit: false, <no style specified>)'),
     );
     expect(
-      const TextStyle(inherit: true).toString(),
+      const TextStyle().toString(),
       equals('TextStyle(<all styles inherited>)'),
     );
 
@@ -465,7 +465,7 @@ void main() {
     final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
 
     const TextStyle style1 = TextStyle(fontSize: 25);
-    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
+    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();
 
     expect(paragraphStyle0 == paragraphStyle1, true);
   });

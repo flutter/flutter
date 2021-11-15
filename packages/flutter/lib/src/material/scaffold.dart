@@ -279,7 +279,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<SnackBarClosedReason>(),
         () {
           assert(_snackBars.first == controller);
-          hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+          hideCurrentSnackBar();
         },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -405,7 +405,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<MaterialBannerClosedReason>(),
           () {
         assert(_materialBanners.first == controller);
-        hideCurrentMaterialBanner(reason: MaterialBannerClosedReason.hide);
+        hideCurrentMaterialBanner();
       },
       null, // MaterialBanner doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -1960,17 +1960,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _drawerOpened.value = isOpened;
-    });
-    widget.onDrawerChanged?.call(isOpened);
+    if (_drawerOpened.value != isOpened) {
+      setState(() {
+        _drawerOpened.value = isOpened;
+      });
+      widget.onDrawerChanged?.call(isOpened);
+    }
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _endDrawerOpened.value = isOpened;
-    });
-    widget.onEndDrawerChanged?.call(isOpened);
+    if (_endDrawerOpened.value != isOpened) {
+      setState(() {
+        _endDrawerOpened.value = isOpened;
+      });
+      widget.onEndDrawerChanged?.call(isOpened);
+    }
   }
 
   /// Opens the [Drawer] (if any).
@@ -2067,7 +2071,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       Completer<SnackBarClosedReason>(),
       () {
         assert(_snackBars.first == controller);
-        hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+        hideCurrentSnackBar();
       },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -2577,8 +2581,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _previousFloatingActionButtonLocation = _floatingActionButtonLocation;
     _floatingActionButtonMoveController = AnimationController(
       vsync: this,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
@@ -2980,7 +2982,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: false,
+        removeBottomPadding: widget.bottomNavigationBar != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }

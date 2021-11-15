@@ -607,6 +607,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
 
+  bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
+
   /// Same as hitTest, but includes some padding when the [PointerEvent] is
   /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
@@ -617,12 +619,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// based on proximity. When `forHover` is true, the larger hit test area will
   /// be used.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
-    if (_thumbRect == null) {
+    if (_trackRect == null) {
       // We have not computed the scrollbar position yet.
       return false;
     }
 
-    final Rect interactiveRect = _trackRect ?? _thumbRect!;
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
+    final Rect interactiveRect = _trackRect!;
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
     );
@@ -658,6 +664,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
     switch (kind) {
       case PointerDeviceKind.touch:
         final Rect touchThumbRect = _thumbRect!.expandToInclude(
@@ -682,25 +692,31 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
+
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
     return _thumbRect!.contains(position!);
   }
 
   @override
-  bool shouldRepaint(ScrollbarPainter old) {
+  bool shouldRepaint(ScrollbarPainter oldDelegate) {
     // Should repaint if any properties changed.
-    return color != old.color
-        || trackColor != old.trackColor
-        || trackBorderColor != old.trackBorderColor
-        || textDirection != old.textDirection
-        || thickness != old.thickness
-        || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
-        || mainAxisMargin != old.mainAxisMargin
-        || crossAxisMargin != old.crossAxisMargin
-        || radius != old.radius
-        || minLength != old.minLength
-        || padding != old.padding
-        || minOverscrollLength != old.minOverscrollLength
-        || scrollbarOrientation != old.scrollbarOrientation;
+    return color != oldDelegate.color
+        || trackColor != oldDelegate.trackColor
+        || trackBorderColor != oldDelegate.trackBorderColor
+        || textDirection != oldDelegate.textDirection
+        || thickness != oldDelegate.thickness
+        || fadeoutOpacityAnimation != oldDelegate.fadeoutOpacityAnimation
+        || mainAxisMargin != oldDelegate.mainAxisMargin
+        || crossAxisMargin != oldDelegate.crossAxisMargin
+        || radius != oldDelegate.radius
+        || shape != oldDelegate.shape
+        || padding != oldDelegate.padding
+        || minLength != oldDelegate.minLength
+        || minOverscrollLength != oldDelegate.minOverscrollLength
+        || scrollbarOrientation != oldDelegate.scrollbarOrientation;
   }
 
   @override
@@ -1276,7 +1292,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert (() {
       try {
         scrollController!.position;
-      } catch (_) {
+      } catch (error) {
+        if (scrollController == null || scrollController.positions.length <= 1) {
+          rethrow;
+        }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             'The $controllerForError is currently attached to more than one '
@@ -1311,9 +1330,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
-  void  updateScrollbarPainter() {
+  void updateScrollbarPainter() {
     scrollbarPainter
-      ..color =  widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
@@ -1343,6 +1362,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _updateScrollPosition(Offset updatedOffset) {
     assert(_currentController != null);
     assert(_dragScrollbarAxisOffset != null);
+
     final ScrollPosition position = _currentController!.position;
     late double primaryDelta;
     switch (position.axisDirection) {

@@ -10,7 +10,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
-import '../../globals_null_migrated.dart' as globals show xcode;
+import '../../globals.dart' as globals show xcode;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -154,7 +154,6 @@ class KernelSnapshot extends Target {
       processManager: environment.processManager,
       artifacts: environment.artifacts,
       fileSystemRoots: <String>[],
-      fileSystemScheme: null,
     );
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
@@ -194,8 +193,20 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
+        break;
     }
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -242,7 +253,6 @@ abstract class AotElfBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,

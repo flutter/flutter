@@ -890,8 +890,8 @@ void main() {
   });
 
   testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
-    final RoundedRectangleBorder roundedRectangleBorder =
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(5));
+    const RoundedRectangleBorder roundedRectangleBorder =
+        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 
     const BorderSide side = BorderSide(
       width: 4,
@@ -978,7 +978,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildCheckbox(active: false, useOverlay: false));
+    await tester.pumpWidget(buildCheckbox(useOverlay: false));
     await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1006,7 +1006,7 @@ void main() {
       reason: 'Default active pressed Checkbox should have overlay color from fillColor',
     );
 
-    await tester.pumpWidget(buildCheckbox(active: false));
+    await tester.pumpWidget(buildCheckbox());
     await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1252,7 +1252,7 @@ void main() {
     expect(getCheckboxRenderer(), isNot(paints..drrect())); // no border
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
 
-    await tester.pumpWidget(buildApp(value: null));
+    await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), isNot(paints..drrect())); // no border
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
@@ -1305,7 +1305,7 @@ void main() {
     await tester.pumpAndSettle();
     expectBorder();
 
-    await tester.pumpWidget(buildApp(value: null));
+    await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expectBorder();
   });

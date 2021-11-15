@@ -9,7 +9,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -98,7 +98,7 @@ Future<bool> installApp(
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        globals.printError('Warning: uninstalling old version failed');
+        globals.printWarning('Warning: uninstalling old version failed');
       }
     }
   } on ProcessException catch (e) {

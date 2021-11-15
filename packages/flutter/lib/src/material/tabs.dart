@@ -124,7 +124,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             margin: iconMargin,
@@ -1396,10 +1395,18 @@ class _TabBarViewState extends State<TabBarView> {
     if (_pageController.page == _currentIndex!.toDouble())
       return Future<void>.value();
 
+    final Duration duration = _controller!.animationDuration;
+
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_currentIndex!);
+      return Future<void>.value();
+    }
+
     final int previousIndex = _controller!.previousIndex;
+
     if ((_currentIndex! - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -1419,7 +1426,7 @@ class _TabBarViewState extends State<TabBarView> {
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+    await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
     setState(() {

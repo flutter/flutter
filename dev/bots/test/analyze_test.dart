@@ -193,6 +193,6 @@ void main() {
         const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
         const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
-    ), exitCode: 0);
+    ));
   });
 }

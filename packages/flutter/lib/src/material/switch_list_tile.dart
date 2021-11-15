@@ -146,6 +146,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -191,6 +192,7 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
+    this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -289,7 +291,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
+  /// If this property is null then its value is based on [ListTileThemeData.dense].
   final bool? dense;
 
   /// The tile's internal padding.
@@ -321,7 +323,7 @@ class SwitchListTile extends StatelessWidget {
   /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
-  /// {@macro flutter.material.ListTileTheme.shape}
+  /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
   /// If non-null, defines the background color when [SwitchListTile.selected] is true.
@@ -341,6 +343,9 @@ class SwitchListTile extends StatelessWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// The color for the tile's [Material] when a pointer is hovering over it.
+  final Color? hoverColor;
 
   @override
   Widget build(BuildContext context) {
@@ -410,6 +415,7 @@ class SwitchListTile extends StatelessWidget {
           visualDensity: visualDensity,
           focusNode: focusNode,
           enableFeedback: enableFeedback,
+          hoverColor: hoverColor,
         ),
       ),
     );

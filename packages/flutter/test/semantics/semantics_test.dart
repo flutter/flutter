@@ -69,6 +69,10 @@ void main() {
       expect(config.label, 'label1');
       expect(config.attributedLabel.string, 'label1');
       expect(config.attributedLabel.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label1")',
+      );
 
       config.attributedLabel = AttributedString(
         'label2',
@@ -81,16 +85,28 @@ void main() {
       expect(config.attributedLabel.attributes.length, 1);
       expect(config.attributedLabel.attributes[0] is SpellOutStringAttribute, isTrue);
       expect(config.attributedLabel.attributes[0].range, const TextRange(start: 0, end: 1));
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label2" [SpellOutStringAttribute(TextRange(start: 0, end: 1))])',
+      );
 
       config.label = 'label3';
       expect(config.label, 'label3');
       expect(config.attributedLabel.string, 'label3');
       expect(config.attributedLabel.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3")',
+      );
 
       config.value = 'value1';
       expect(config.value, 'value1');
       expect(config.attributedValue.string, 'value1');
       expect(config.attributedValue.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value1")',
+      );
 
       config.attributedValue = AttributedString(
           'value2',
@@ -103,16 +119,28 @@ void main() {
       expect(config.attributedValue.attributes.length, 1);
       expect(config.attributedValue.attributes[0] is SpellOutStringAttribute, isTrue);
       expect(config.attributedValue.attributes[0].range, const TextRange(start: 0, end: 1));
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#5(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value2" [SpellOutStringAttribute(TextRange(start: 0, end: 1))])',
+      );
 
       config.value = 'value3';
       expect(config.value, 'value3');
       expect(config.attributedValue.string, 'value3');
       expect(config.attributedValue.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value3")',
+      );
 
       config.hint = 'hint1';
       expect(config.hint, 'hint1');
       expect(config.attributedHint.string, 'hint1');
       expect(config.attributedHint.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value3", hint: "hint1")',
+      );
 
       config.attributedHint = AttributedString(
           'hint2',
@@ -125,11 +153,19 @@ void main() {
       expect(config.attributedHint.attributes.length, 1);
       expect(config.attributedHint.attributes[0] is SpellOutStringAttribute, isTrue);
       expect(config.attributedHint.attributes[0].range, const TextRange(start: 0, end: 1));
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#8(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value3", hint: "hint2" [SpellOutStringAttribute(TextRange(start: 0, end: 1))])',
+      );
 
       config.hint = 'hint3';
       expect(config.hint, 'hint3');
       expect(config.attributedHint.string, 'hint3');
       expect(config.attributedHint.attributes.isEmpty, isTrue);
+      expect(
+        (SemanticsNode()..updateWith(config: config)).toString(),
+        'SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible, label: "label3", value: "value3", hint: "hint3")',
+      );
     });
 
     test('mutate existing semantic node list errors', () {
@@ -241,13 +277,10 @@ void main() {
         isSemanticBoundary: true,
         child: TestRender(
           hasLongPressAction: true,
-          isSemanticBoundary: false,
           child: middle = TestRender(
             hasScrollLeftAction: true,
-            isSemanticBoundary: false,
             child: TestRender(
               hasScrollRightAction: true,
-              isSemanticBoundary: false,
               child: TestRender(
                 hasScrollUpAction: true,
                 isSemanticBoundary: true,
@@ -292,7 +325,7 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      root.toStringDeep(),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -378,7 +411,7 @@ void main() {
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
     );
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      root.toStringDeep(),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -433,7 +466,7 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
+      rootComplex.toStringDeep(),
       'SemanticsNode#7\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -555,7 +588,7 @@ void main() {
     final SemanticsNode allProperties = SemanticsNode()
       ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
-      ..updateWith(config: config, childrenInInversePaintOrder: null);
+      ..updateWith(config: config);
     expect(
       allProperties.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -657,6 +690,7 @@ void main() {
     expect(result.attributes.length, 2);
     expect(result.attributes[0].range, const TextRange(start:0, end:4));
     expect(result.attributes[0] is SpellOutStringAttribute, isTrue);
+    expect(result.toString(), "AttributedString('string1string2', attributes: [SpellOutStringAttribute(TextRange(start: 0, end: 4)), LocaleStringAttribute(TextRange(start: 7, end: 11), es-MX)])");
   });
 
   test('Semantics id does not repeat', () {

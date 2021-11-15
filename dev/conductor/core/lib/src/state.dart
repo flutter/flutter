@@ -42,10 +42,10 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('Conductor version: ${state.conductorVersion}');
   buffer.writeln('Release channel: ${state.releaseChannel}');
   buffer.writeln('Release version: ${state.releaseVersion}');
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
   buffer.writeln('Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Engine Repo');
   buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
   buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
@@ -77,7 +77,7 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Framework cherrypicks.');
   }
-  buffer.writeln('');
+  buffer.writeln();
   if (state.currentPhase == ReleasePhase.VERIFY_RELEASE) {
     buffer.writeln(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
@@ -88,7 +88,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln(presentPhases(state.currentPhase));
 
   buffer.writeln(phaseInstructions(state));
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Issue `conductor next` when you are ready to proceed.');
   return buffer.toString();
 }

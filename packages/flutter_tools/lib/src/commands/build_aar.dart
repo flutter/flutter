@@ -13,14 +13,14 @@ import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({ @required bool verboseHelp }) {
+  BuildAarCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -44,6 +44,7 @@ class BuildAarCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);

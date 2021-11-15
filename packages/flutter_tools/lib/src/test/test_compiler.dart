@@ -14,7 +14,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -81,7 +81,7 @@ class TestCompiler {
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
-      return Future<String>.value(null);
+      return Future<String>.value();
     }
     compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;

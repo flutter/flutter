@@ -52,7 +52,7 @@ void main() {
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsNothing);
@@ -64,7 +64,7 @@ void main() {
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.text('About Pirate app'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
@@ -82,7 +82,7 @@ void main() {
     });
 
     await tester.tap(find.text('VIEW LICENSES'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
@@ -92,7 +92,7 @@ void main() {
       findsOneWidget,
     );
     await tester.tap(find.text('Pirate package '));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
@@ -143,7 +143,7 @@ void main() {
 
     // Check license is displayed after entering into license page for 'AAA'.
     await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('BBB'), findsOneWidget);
 
     /// Go back to list of packages.
@@ -153,7 +153,7 @@ void main() {
     /// Check license is displayed after entering into license page for
     /// 'Another package'.
     await tester.tap(find.text('Another package'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
   });
 
@@ -219,7 +219,7 @@ void main() {
 
     // Check license is displayed after entering into license page for 'AAA'.
     await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('BBB'), findsOneWidget);
 
     /// Go back to list of packages.
@@ -229,7 +229,7 @@ void main() {
     /// Check license is displayed after entering into license page for
     /// 'Another package'.
     await tester.tap(find.text('Another package'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
   });
 
@@ -271,7 +271,7 @@ void main() {
 
     // Check license is displayed after entering into license page for 'AAA'.
     await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     // Check for titles style.
     final Text title = tester.widget(find.text('AAA'));
@@ -329,7 +329,7 @@ void main() {
 
     // Check license is displayed after entering into license page for 'AAA'.
     await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     // Check for titles style.
     final Text title = tester.widget(find.text('AAA'));
@@ -728,7 +728,7 @@ void main() {
     expect(find.text('AAA'), findsOneWidget);
     // Check license is displayed after entering into license page for 'AAA'.
     await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     // The inherited ScrollBehavior should not apply Scrollbars since they are
     // already built in to the widget.

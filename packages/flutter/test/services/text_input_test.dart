@@ -18,13 +18,11 @@ void main() {
       const TextSelection invalidSelection1 = TextSelection(
         baseOffset: -1,
         extentOffset: 0,
-        affinity: TextAffinity.downstream,
         isDirectional: true,
       );
       const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
         extentOffset: -1,
         affinity: TextAffinity.upstream,
-        isDirectional: false,
       );
       expect(invalidSelection1, invalidSelection2);
       expect(invalidSelection1.hashCode, invalidSelection2.hashCode);
@@ -34,7 +32,6 @@ void main() {
       const TextSelection selection1 = TextSelection(
         baseOffset: 1,
         extentOffset: 2,
-        affinity: TextAffinity.downstream,
       );
       const TextSelection selection2 = TextSelection(
         baseOffset: 1,
@@ -43,6 +40,110 @@ void main() {
       );
       expect(selection1, selection2);
       expect(selection1.hashCode, selection2.hashCode);
+    });
+  });
+
+  group('TextEditingValue', () {
+    group('replaced', () {
+      const String testText = 'From a false proposition, anything follows.';
+
+      test('selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 13);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('reversed selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('insert', () {
+        const TextSelection selection = TextSelection.collapsed(offset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, 'AA'),
+          const TextEditingValue(
+            text:  'From AAa false proposition, anything follows.',
+            // The caret moves to the end of the text inserted.
+            selection: TextSelection.collapsed(offset: 7),
+          ),
+        );
+      });
+
+      test('replace before selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Replace the first whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 4, end: 5), 'AA'),
+          const TextEditingValue(text:  'FromAAa false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 6)),
+        );
+      });
+
+      test('replace after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "p" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), 'AA'),
+          const TextEditingValue(text:  'From a false AAroposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('replace inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "a" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), 'AA'),
+          const TextEditingValue(text:  'From AA false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('replace inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the second whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), 'AA'),
+          const TextEditingValue(text:  'From a falseAAproposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('delete after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "p".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), ''),
+          const TextEditingValue(text:  'From a false roposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('delete inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "a".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), ''),
+          const TextEditingValue(text:  'From  false proposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+
+      test('delete inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the second whitespace.
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), ''),
+          const TextEditingValue(text:  'From a falseproposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
     });
   });
 
@@ -66,7 +167,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -85,7 +186,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -129,7 +230,6 @@ void main() {
 
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
-        inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
         autocorrect: false,

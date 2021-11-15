@@ -2190,6 +2190,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       }
     }
     if (!hitCurrentFocus)
-      focusNode.unfocus(disposition: UnfocusDisposition.scope);
+      focusNode.unfocus();
   }
 }

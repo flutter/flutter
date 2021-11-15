@@ -107,7 +107,6 @@ class _CardDataItem extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Align(
               alignment: page!.id == 'H'

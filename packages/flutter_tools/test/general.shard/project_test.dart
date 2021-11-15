@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -182,7 +182,28 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        await project.regeneratePlatformSpecificTooling();
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('Android project not on v2 embedding exits', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        await expectToolExitLater(
+          Future<dynamic>.sync(() => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit)),
+          contains('Build failed due to use of deprecated Android v1 embedding.')
+        );
+        expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+      });
+      _testInMemory('Android project not on v2 embedding ignore continues', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android plugin without example app does not show a warning', () async {
@@ -288,6 +309,7 @@ void main() {
         expect(versionInfo['app_name'],'test');
         expect(versionInfo['version'],'1.0.0');
         expect(versionInfo['build_number'],'3');
+        expect(versionInfo['package_name'],'test');
       });
     });
 

@@ -173,7 +173,6 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverFillViewport(
-              padEnds: true,
               viewportFraction: 0.5,
               delegate: delegate,
             ),

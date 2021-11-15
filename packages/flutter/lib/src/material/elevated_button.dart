@@ -298,7 +298,6 @@ class ElevatedButton extends ButtonStyleButton {
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
       maximumSize: Size.infinite,
-      side: null,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,

@@ -298,6 +298,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+{{#hasIosDevelopmentTeam}}
+				DEVELOPMENT_TEAM = {{iosDevelopmentTeam}};
+{{/hasIosDevelopmentTeam}}
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -421,6 +424,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+{{#hasIosDevelopmentTeam}}
+				DEVELOPMENT_TEAM = {{iosDevelopmentTeam}};
+{{/hasIosDevelopmentTeam}}
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -439,6 +445,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+{{#hasIosDevelopmentTeam}}
+				DEVELOPMENT_TEAM = {{iosDevelopmentTeam}};
+{{/hasIosDevelopmentTeam}}
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -263,6 +263,25 @@ class _DefaultPub implements Pub {
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       status?.cancel();
+      if (exception is io.ProcessException) {
+        final StringBuffer buffer = StringBuffer(exception.message);
+        buffer.writeln('Working directory: "$directory"');
+        final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
+        if (env.entries.isNotEmpty) {
+          buffer.writeln('pub env: {');
+          for (final MapEntry<String, String> entry in env.entries) {
+            buffer.writeln('  "${entry.key}": "${entry.value}",');
+          }
+          buffer.writeln('}');
+        }
+
+        throw io.ProcessException(
+          exception.executable,
+          exception.arguments,
+          buffer.toString(),
+          exception.errorCode,
+        );
+      }
       rethrow;
     }
 

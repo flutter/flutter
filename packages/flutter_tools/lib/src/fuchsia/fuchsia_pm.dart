@@ -8,7 +8,7 @@ import '../base/io.dart';
 import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
 
@@ -87,7 +87,7 @@ class FuchsiaPM {
   ///
   /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
-  /// [FuchsiaDevFinder.resolve] or [FuchsiaFfx.resolve] and [port] should be an unused port for the
+  /// [FuchsiaFfx.resolve], and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
     final File? pm = globals.fuchsiaArtifacts?.pm;
@@ -157,7 +157,7 @@ class FuchsiaPM {
 /// var server = FuchsiaPackageServer(
 ///     '/path/to/repo',
 ///     'server_name',
-///     await FuchsiaDevFinder.resolve(deviceName),
+///     await FuchsiaFfx.resolve(deviceName),
 ///     await freshPort());
 /// try {
 ///   await server.start();

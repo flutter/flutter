@@ -516,12 +516,10 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.fixTextFieldOutlineLabel = false,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(floatingLabelProgress != null);
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -543,7 +541,6 @@ class _Decoration {
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
-  final bool fixTextFieldOutlineLabel;
 
   @override
   bool operator ==(Object other) {
@@ -571,8 +568,7 @@ class _Decoration {
         && other.suffixIcon == suffixIcon
         && other.helperError == helperError
         && other.counter == counter
-        && other.container == container
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        && other.container == container;
   }
 
   @override
@@ -597,7 +593,6 @@ class _Decoration {
       helperError,
       counter,
       container,
-      fixTextFieldOutlineLabel,
     );
   }
 }
@@ -1518,9 +1513,7 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border != null && decoration.border!.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
-      final double floatingY = decoration.fixTextFieldOutlineLabel
-        ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
-        : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
+      final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double dx;
       switch (textDirection) {
@@ -2147,43 +2140,57 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // If the label is a floating placeholder, it's always shown.
   bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
 
-  // The base style for the inline label or hint when they're displayed "inline",
+  // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
-  TextStyle _getInlineStyle(ThemeData themeData) {
+  TextStyle _getInlineLabelStyle(ThemeData themeData) {
+    final TextStyle defaultStyle = TextStyle(
+      color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
+    );
+
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
 
-    if (style == null) {
-      return themeData.textTheme.subtitle1!.merge(widget.baseStyle)
-        .copyWith(color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor);
-    }
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .merge(defaultStyle)
+      .merge(style)
+      .copyWith(height: 1);
+  }
 
-    return themeData.textTheme.subtitle1!.merge(style.merge(widget.baseStyle));
+  // The base style for the inline hint when they're displayed "inline",
+  // i.e. when they appear in place of the empty text field.
+  TextStyle _getInlineHintStyle(ThemeData themeData) {
+    final TextStyle defaultStyle = TextStyle(
+      color: decoration!.enabled ? themeData.hintColor : themeData.disabledColor,
+    );
+
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.hintStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
+
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .merge(defaultStyle)
+      .merge(style);
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
-
-    if (style == null) {
+    TextStyle getFallbackTextStyle() {
       final Color color = decoration!.errorText != null
         ? decoration!.errorStyle?.color ?? themeData.errorColor
         : _getActiveColor(themeData);
-      final TextStyle style = themeData.textTheme.subtitle1!.merge(widget.baseStyle);
-      // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-      // Setting TextStyle.height to 1 ensures that the label's height will equal
-      // its font size.
-      return themeData.fixTextFieldOutlineLabel
-        ? style
-          .copyWith(height: 1, color: decoration!.enabled ? color : themeData.disabledColor)
-          .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle)
-        : style
-          .copyWith(color: decoration!.enabled ? color : themeData.disabledColor)
-          .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
+
+      return TextStyle(color: decoration!.enabled ? color : themeData.disabledColor)
+        .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
     }
-    return style
-      .copyWith(height: themeData.fixTextFieldOutlineLabel ? 1 : null)
-      .merge(widget.baseStyle);
+
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
+      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
+
+    return themeData.textTheme.subtitle1!
+      .merge(widget.baseStyle)
+      .copyWith(height: 1)
+      .merge(getFallbackTextStyle())
+      .merge(style);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
@@ -2240,10 +2247,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inlineStyle = _getInlineStyle(themeData);
-    final TextBaseline textBaseline = inlineStyle.textBaseline!;
+    final TextStyle labelStyle = _getInlineLabelStyle(themeData);
+    final TextBaseline textBaseline = labelStyle.textBaseline!;
 
-    final TextStyle hintStyle = inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.hintStyle, materialState));
+    final TextStyle hintStyle = _getInlineHintStyle(themeData);
     final Widget? hint = decoration!.hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
@@ -2278,12 +2285,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-    // Setting TextStyle.height to 1 ensures that the label's height will equal
-    // its font size.
-    final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
-      ? inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState)).copyWith(height: 1)
-      : inlineStyle.merge(MaterialStateProperty.resolveAs(decoration!.labelStyle, materialState));
     final Widget? label = decoration!.labelText == null && decoration!.label == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2295,7 +2296,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           curve: _kTransitionCurve,
           style: widget._labelShouldWithdraw
             ? _getFloatingLabelStyle(themeData)
-            : inlineLabelStyle,
+            : labelStyle,
           child: decoration!.label ?? Text(
             decoration!.labelText!,
             overflow: TextOverflow.ellipsis,
@@ -2417,7 +2418,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
       if (decoration!.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
@@ -2458,8 +2459,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffixIcon: suffixIcon,
         helperError: helperError,
         counter: counter,
-        container: container,
-        fixTextFieldOutlineLabel: themeData.fixTextFieldOutlineLabel,
+        container: container
       ),
       textDirection: textDirection,
       textBaseline: textBaseline,
@@ -2931,12 +2931,24 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// `heightFactor`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how the prefix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.prefix_icon.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [prefix] and [prefixText], which are other ways to show content
   ///    before the text field (but after the icon).
   ///  * [suffixIcon], which is the same but on the trailing edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? prefixIcon;
 
   /// The constraints for the prefix icon.
@@ -3041,12 +3053,24 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
+  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// `heightFactor`.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how the suffix icon alignment can be changed using [Align] with
+  /// a fixed `widthFactor` and `heightFactor`.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.suffix_icon.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [Icon] and [ImageIcon], which are typically used to show icons.
   ///  * [suffix] and [suffixText], which are other ways to show content
   ///    after the text field (but before the icon).
   ///  * [prefixIcon], which is the same but on the leading edge.
+  ///  * [Align] A widget that aligns its child within itself and optionally
+  ///    sizes itself based on the child's size.
   final Widget? suffixIcon;
 
   /// Optional widget to place on the line after the input.

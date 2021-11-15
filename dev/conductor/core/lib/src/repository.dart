@@ -496,7 +496,6 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream,
         url: 'file://$upstreamPath/',
       ),
-      localUpstream: false,
       previousCheckoutLocation: previousCheckoutLocation,
     );
   }

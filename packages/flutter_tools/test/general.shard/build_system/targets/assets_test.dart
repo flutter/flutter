@@ -69,7 +69,7 @@ flutter:
     expect(depfile, exists);
 
     final DepfileService depfileService = DepfileService(
-      logger: null,
+      logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );
     final Depfile dependencies = depfileService.parse(depfile);

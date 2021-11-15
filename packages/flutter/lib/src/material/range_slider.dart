@@ -814,7 +814,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   // (0,0).
   Rect get _trackRect => _sliderTheme.rangeTrackShape!.getPreferredRect(
     parentBox: this,
-    offset: Offset.zero,
     sliderTheme: _sliderTheme,
     isDiscrete: false,
   );

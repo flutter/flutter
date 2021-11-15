@@ -30,7 +30,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -347,7 +347,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
-      expect(await FakeCrashingDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
@@ -428,7 +428,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format', () async {
-      expect(await FakeDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -495,7 +495,7 @@ void main() {
     final BufferLogger wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
     );
-    expect(await FakeDoctor(wrapLogger).diagnose(verbose: true), isFalse);
+    expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
     expect(wrapLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'

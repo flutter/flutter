@@ -79,7 +79,7 @@ class AutocompleteBasicUserExample extends StatelessWidget {
         });
       },
       onSelected: (User selection) {
-        print('You just selected ${_displayStringForOption(selection)}');
+        debugPrint('You just selected ${_displayStringForOption(selection)}');
       },
     );
   }

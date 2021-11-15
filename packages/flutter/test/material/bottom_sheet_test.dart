@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,6 +23,70 @@ void main() {
     // If the animation were linear, these two values would be the same.
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
+
+  testWidgets('Throw if enable drag without an animation controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89168
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomSheet(
+          onClosing: () {},
+          builder: (_) => Container(
+            height: 200,
+            color: Colors.red,
+            child: const Text('BottomSheet'),
+          ),
+        ),
+      ),
+    );
+
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+
+    expect(error, isNotNull);
+    FlutterError.onError = handler;
+  });
+
+  testWidgets('Disposing app while bottom sheet is disappearing does not crash', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    // Bring up bottom sheet.
+    bool showBottomSheetThenCalled = false;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    ).then<void>((void value) {
+      showBottomSheetThenCalled = true;
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+
+    // Start closing animation of Bottom sheet.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+
+    // Dispose app by replacing it with a container. This shouldn't crash.
+    await tester.pumpWidget(Container());
+  });
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     late BuildContext savedContext;
@@ -527,7 +592,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
-    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
     const Clip clipBehavior = Clip.antiAlias;
     const Color barrierColor = Colors.red;
 
