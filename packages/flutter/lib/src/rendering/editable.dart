@@ -2410,7 +2410,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         return MapEntry<int, Offset>(lineMetrics.lineNumber, Offset(offset.dx, lineMetrics.baseline));
       }
     }
-    assert(false, 'unable to find the line for $startPosition');
+    assert(startPosition.offset == 0, 'unable to find the line for $startPosition');
     return MapEntry<int, Offset>(
       math.max(0, metrics.length - 1),
       Offset(offset.dx, metrics.isNotEmpty ? metrics.last.baseline + metrics.last.descent : 0.0),
