@@ -499,7 +499,7 @@ class FloatingLabelAlignment {
 
   /// Aligns a floating label to the leftmost possible position in an
   /// [InputDecorator].
-  static const FloatingLabelAlignment left = FloatingLabelAlignment._(x: -1.0);
+  static const FloatingLabelAlignment start = FloatingLabelAlignment._(x: -1.0);
   /// Aligns a floating label to the center position on top of an [InputDecorator].
   static const FloatingLabelAlignment center = FloatingLabelAlignment._(x: 0.0);
 
@@ -2950,7 +2950,8 @@ class InputDecoration {
   /// {@template flutter.material.inputDecoration.floatingLabelAlignment}
   /// Defines **where** the floating label should be displayed.
   ///
-  /// [FloatingLabelAlignment.left] aligns the floating label to the leftmost
+  /// [FloatingLabelAlignment.start] aligns the floating label to the leftmost
+  /// (when [TextDirection.ltr]) or rightmost (when [TextDirection.rtl]),
   /// possible position, which is vertically adjacent to the label, on top of
   /// the field.
   ///
@@ -3860,7 +3861,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
-    this.floatingLabelAlignment = FloatingLabelAlignment.left,
+    this.floatingLabelAlignment = FloatingLabelAlignment.start,
     this.isDense = false,
     this.contentPadding,
     this.isCollapsed = false,
@@ -3976,7 +3977,7 @@ class InputDecorationTheme with Diagnosticable {
 
   /// {@macro flutter.material.inputDecoration.floatingLabelAlignment}
   ///
-  /// Defaults to [FloatingLabelAlignment.left].
+  /// Defaults to [FloatingLabelAlignment.start].
   final FloatingLabelAlignment floatingLabelAlignment;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses

@@ -2964,84 +2964,130 @@ void main() {
   });
 
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
-    expect(FloatingLabelAlignment.left.toString(), 'FloatingLabelAlignment(x: -1.0)');
+    expect(FloatingLabelAlignment.start.toString(), 'FloatingLabelAlignment(x: -1.0)');
     expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment(x: 0.0)');
   });
 
-  testWidgets('InputDecorator centerFloatingLabel layout', (WidgetTester tester) async {
-    // LTR with icon
-    await tester.pumpWidget(
-      buildInputDecorator(
+  group('floatingLabelAlignment', () {
+    Widget buildID({required TextDirection td, required bool icon, required FloatingLabelAlignment fla}) {
+      return buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        // textDirection: TextDirection.ltr (default),
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          icon: Icon(Icons.insert_link),
+        textDirection: td,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          floatingLabelAlignment: fla,
+          icon: icon ? const Icon(Icons.insert_link) : null,
           labelText: 'label',
           hintText: 'hint',
           filled: true,
         ),
-      ),
-    );
-    // icon (40) + (decorator (800) - icon (40)) / 2
-    expect(tester.getCenter(find.text('label')).dx, 420.0);
+      );
+    }
 
-    // LTR without icon
-    await tester.pumpWidget(
-      buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
-        // textDirection: TextDirection.ltr (default),
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          labelText: 'label',
-          hintText: 'hint',
-          filled: true,
-        ),
-      ),
-    );
-    // decorator (800) / 2
-    expect(tester.getCenter(find.text('label')).dx, 400.0);
+    group('LTR with icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.ltr,
+            icon: true,
+            fla: FloatingLabelAlignment.start,
+          ),
+        );
+        // icon (40) + contentPadding (40)
+        expect(tester.getTopLeft(find.text('label')).dx, 80.0);
+      });
 
-    // RTL with icon
-    await tester.pumpWidget(
-      buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
-        textDirection: TextDirection.rtl,
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          icon: Icon(Icons.insert_link),
-          labelText: 'label',
-          hintText: 'hint',
-          filled: true,
-        ),
-      ),
-    );
-    // (decorator (800) / icon (40)) / 2
-    expect(tester.getCenter(find.text('label')).dx, 380.0);
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.ltr,
+            icon: true,
+            fla: FloatingLabelAlignment.center,
+          ),
+        );
+        // icon (40) + (decorator (800) - icon (40)) / 2
+        expect(tester.getCenter(find.text('label')).dx, 420.0);
+      });
+    });
 
-    // RTL without icon
-    await tester.pumpWidget(
-      buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
-        textDirection: TextDirection.rtl,
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          labelText: 'label',
-          hintText: 'hint',
-          filled: true,
-        ),
-      ),
-    );
-    // decorator (800) / 2
-    expect(tester.getCenter(find.text('label')).dx, 400.0);
+    group('LTR without icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.ltr,
+            icon: false,
+            fla: FloatingLabelAlignment.start,
+          ),
+        );
+        // contentPadding (40)
+        expect(tester.getTopLeft(find.text('label')).dx, 40.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.ltr,
+            icon: false,
+            fla: FloatingLabelAlignment.center,
+          ),
+        );
+        // decorator (800) / 2
+        expect(tester.getCenter(find.text('label')).dx, 400.0);
+      });
+    });
+
+    group('RTL with icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.rtl,
+            icon: true,
+            fla: FloatingLabelAlignment.start,
+          ),
+        );
+        // decorator (800) - icon (40) - contentPadding (40)
+        expect(tester.getTopRight(find.text('label')).dx, 720.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.rtl,
+            icon: true,
+            fla: FloatingLabelAlignment.center,
+          ),
+        );
+        // (decorator (800) / icon (40)) / 2
+        expect(tester.getCenter(find.text('label')).dx, 380.0);
+      });
+    });
+
+    group('RTL without icon aligned', () {
+      testWidgets('start', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.rtl,
+            icon: false,
+            fla: FloatingLabelAlignment.start,
+          ),
+        );
+        // decorator (800) - contentPadding (40)
+        expect(tester.getTopRight(find.text('label')).dx, 760.0);
+      });
+
+      testWidgets('center', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildID(
+            td: TextDirection.rtl,
+            icon: false,
+            fla: FloatingLabelAlignment.center,
+          ),
+        );
+        // decorator (800) / 2
+        expect(tester.getCenter(find.text('label')).dx, 400.0);
+      });
+    });
   });
 
   testWidgets('InputDecorator prefix/suffix dense layout', (WidgetTester tester) async {
