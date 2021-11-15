@@ -4,13 +4,14 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/entity_playground.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/playground.h"
 
 namespace impeller {
 namespace testing {
 
-using EntityTest = Playground;
+using EntityTest = EntityPlayground;
 
 TEST_F(EntityTest, CanCreateEntity) {
   Entity entity;
@@ -20,6 +21,8 @@ TEST_F(EntityTest, CanCreateEntity) {
 TEST_F(EntityTest, CanDrawRect) {
   Entity entity;
   entity.SetPath(PathBuilder{}.AddRect({100, 100, 100, 100}).CreatePath());
+  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
 }  // namespace testing

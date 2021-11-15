@@ -64,6 +64,8 @@ class SolidColorContents final : public Contents {
 
   ~SolidColorContents() override;
 
+  static std::unique_ptr<SolidColorContents> Make(Color color);
+
   void SetColor(Color color);
 
   const Color& GetColor() const;

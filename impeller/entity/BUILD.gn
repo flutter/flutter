@@ -38,7 +38,11 @@ impeller_component("entity") {
 impeller_component("entity_unittests") {
   testonly = true
 
-  sources = [ "entity_unittests.cc" ]
+  sources = [
+    "entity_playground.cc",
+    "entity_playground.h",
+    "entity_unittests.cc",
+  ]
 
   deps = [
     ":entity",
