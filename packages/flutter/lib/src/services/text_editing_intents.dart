@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
+import 'text_editing.dart';
 
 /// An [Intent] to send the event straight to the engine.
 ///

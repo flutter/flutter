@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'framework.dart';
 import 'shortcuts.dart';
-import 'text_editing_intents.dart';
 
 /// A [Shortcuts] widget with the shortcuts used for the default text editing
 /// behavior.
