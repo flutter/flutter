@@ -319,7 +319,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
-       assert(cursorWidth != null && cursorWidth >= 0.0),
+       assert(cursorWidth != null),
        assert(cursorHeight == null || cursorHeight >= 0.0),
        assert(readOnly != null),
        assert(forceLine != null),
@@ -1741,7 +1741,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText();
-    return _textPainter.maxIntrinsicWidth + _caretMargin;
+    return _textPainter.maxIntrinsicWidth + math.max(0, _caretMargin);
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].

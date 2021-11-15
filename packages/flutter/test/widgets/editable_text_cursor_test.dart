@@ -55,6 +55,28 @@ void main() {
     expect(editableText.cursorRadius!.x, 2.0);
   });
 
+  testWidgets('cursor can accept negative width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            cursorWidth: -10.0,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorWidth, -10.0);
+  });
+
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
