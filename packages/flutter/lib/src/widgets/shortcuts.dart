@@ -1005,9 +1005,11 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.accepts(event, RawKeyboard.instance)) {
-      bindings[activator]!.call();
-      return true;
+    if (activator.triggers?.contains(event.logicalKey) ?? true) {
+      if (activator.accepts(event, RawKeyboard.instance)) {
+        bindings[activator]!.call();
+        return true;
+      }
     }
     return false;
   }
