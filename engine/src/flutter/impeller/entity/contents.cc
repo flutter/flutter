@@ -115,6 +115,10 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
                                 const Entity& entity,
                                 const Surface& surface,
                                 RenderPass& pass) const {
+  if (color_.IsTransparent()) {
+    return true;
+  }
+
   using VS = SolidFillPipeline::VertexShader;
 
   Command cmd;
@@ -163,18 +167,6 @@ std::unique_ptr<SolidColorContents> SolidColorContents::Make(Color color) {
   auto contents = std::make_unique<SolidColorContents>();
   contents->SetColor(color);
   return contents;
-}
-
-/*******************************************************************************
- ******* SolidStrokeContents
- ******************************************************************************/
-
-void SolidStrokeContents::SetColor(Color color) {
-  color_ = color;
-}
-
-const Color& SolidStrokeContents::GetColor() const {
-  return color_;
 }
 
 /*******************************************************************************
@@ -265,6 +257,41 @@ void TextureContents::SetSourceRect(const IRect& source_rect) {
 
 const IRect& TextureContents::GetSourceRect() const {
   return source_rect_;
+}
+
+/*******************************************************************************
+ ******* SolidStrokeContents
+ ******************************************************************************/
+
+SolidStrokeContents::SolidStrokeContents() = default;
+
+SolidStrokeContents::~SolidStrokeContents() = default;
+
+void SolidStrokeContents::SetColor(Color color) {
+  color_ = color;
+}
+
+const Color& SolidStrokeContents::GetColor() const {
+  return color_;
+}
+
+bool SolidStrokeContents::Render(const ContentRenderer& renderer,
+                                 const Entity& entity,
+                                 const Surface& surface,
+                                 RenderPass& pass) const {
+  if (color_.IsTransparent() || stroke_size_ <= 0.0) {
+    return true;
+  }
+
+  return false;
+}
+
+void SolidStrokeContents::SetStrokeSize(Scalar size) {
+  stroke_size_ = size;
+}
+
+Scalar SolidStrokeContents::GetStrokeSize() const {
+  return stroke_size_;
 }
 
 }  // namespace impeller

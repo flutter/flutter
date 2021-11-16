@@ -7,10 +7,18 @@
 namespace impeller {
 
 std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
-  if (!color.IsTransparent()) {
-    auto solid_color = std::make_shared<SolidColorContents>();
-    solid_color->SetColor(color);
-    return solid_color;
+  switch (style) {
+    case Style::kFill: {
+      auto solid_color = std::make_shared<SolidColorContents>();
+      solid_color->SetColor(color);
+      return solid_color;
+    }
+    case Style::kStroke: {
+      auto solid_stroke = std::make_shared<SolidStrokeContents>();
+      solid_stroke->SetColor(color);
+      solid_stroke->SetStrokeSize(stroke_width);
+      return solid_stroke;
+    }
   }
 
   return nullptr;

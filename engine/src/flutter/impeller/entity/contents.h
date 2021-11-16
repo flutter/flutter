@@ -122,9 +122,9 @@ class SolidStrokeContents final : public Contents {
 
   const Color& GetColor() const;
 
-  void SetStrokeSize(Scalar size) { stroke_size_ = size; }
+  void SetStrokeSize(Scalar size);
 
-  Scalar GetStrokeSize() const { return stroke_size_; }
+  Scalar GetStrokeSize() const;
 
   // |Contents|
   bool Render(const ContentRenderer& renderer,
