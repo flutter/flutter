@@ -73,7 +73,7 @@ struct TSize {
 
   constexpr bool IsPositive() const { return width * height > 0.0; }
 
-  constexpr bool IsEmpty() { return !IsPositive(); }
+  constexpr bool IsEmpty() const { return !IsPositive(); }
 
   constexpr size_t MipCount() const {
     if (!IsPositive()) {

@@ -28,15 +28,44 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
 
   void SetLabel(std::string label);
 
-  template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
-  [[nodiscard]] BufferView EmplaceUniform(const T& t) {
-    return Emplace(reinterpret_cast<const void*>(&t), sizeof(T),
-                   std::max(alignof(T), DefaultUniformAlignment()));
+  //----------------------------------------------------------------------------
+  /// @brief      Emplace uniform data onto the host buffer. Ensure that backend
+  ///             specific uniform alignment requirements are respected.
+  ///
+  /// @param[in]  uniform     The uniform struct to emplace onto the buffer.
+  ///
+  /// @tparam     UniformType The type of the uniform struct.
+  ///
+  /// @return     The buffer view.
+  ///
+  template <class UniformType,
+            class = std::enable_if_t<std::is_standard_layout_v<UniformType>>>
+  [[nodiscard]] BufferView EmplaceUniform(const UniformType& uniform) {
+    const auto alignment =
+        std::max(alignof(UniformType), DefaultUniformAlignment());
+    return Emplace(reinterpret_cast<const void*>(&uniform),  // buffer
+                   sizeof(UniformType),                      // size
+                   alignment                                 // alignment
+    );
   }
 
-  template <class T, class = std::enable_if_t<std::is_standard_layout_v<T>>>
-  [[nodiscard]] BufferView Emplace(const T& t) {
-    return Emplace(reinterpret_cast<const void*>(&t), sizeof(T), alignof(T));
+  //----------------------------------------------------------------------------
+  /// @brief      Emplace non-uniform data (like contiguous vertices) onto the
+  ///             host buffer.
+  ///
+  /// @param[in]  buffer        The buffer data.
+  ///
+  /// @tparam     BufferType    The type of the buffer data.
+  ///
+  /// @return     The buffer view.
+  ///
+  template <class BufferType,
+            class = std::enable_if_t<std::is_standard_layout_v<BufferType>>>
+  [[nodiscard]] BufferView Emplace(const BufferType& buffer) {
+    return Emplace(reinterpret_cast<const void*>(&buffer),  // buffer
+                   sizeof(BufferType),                      // size
+                   alignof(BufferType)                      // alignment
+    );
   }
 
   [[nodiscard]] BufferView Emplace(const void* buffer,

@@ -27,6 +27,8 @@ struct TPoint {
 
   constexpr TPoint(Type x, Type y) : x(x), y(y) {}
 
+  static constexpr TPoint<Type> MakeXY(Type x, Type y) { return {x, y}; }
+
   constexpr bool operator==(const TPoint& p) const {
     return p.x == x && p.y == y;
   }

@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
+#include "impeller/geometry/path_builder.h"
 
 namespace impeller {
 
@@ -96,6 +97,45 @@ void Canvas::DrawPicture(const Picture& picture) {
     }
     passes_.emplace_back(std::move(new_pass));
   }
+}
+
+void Canvas::DrawImage(std::shared_ptr<Image> image,
+                       Point offset,
+                       Paint paint) {
+  if (!image) {
+    return;
+  }
+
+  const auto source = IRect::MakeSize(image->GetSize());
+  const auto dest =
+      Rect::MakeXYWH(offset.x, offset.y, source.size.width, source.size.height);
+
+  DrawImageRect(image, source, dest, std::move(paint));
+}
+
+void Canvas::DrawImageRect(std::shared_ptr<Image> image,
+                           IRect source,
+                           Rect dest,
+                           Paint paint) {
+  if (!image || source.size.IsEmpty() || dest.size.IsEmpty()) {
+    return;
+  }
+
+  auto size = image->GetSize();
+
+  if (size.IsEmpty()) {
+    return;
+  }
+
+  auto contents = std::make_shared<TextureContents>();
+  contents->SetTexture(image->GetTexture());
+  contents->SetSourceRect(source);
+
+  Entity entity;
+  entity.SetPath(PathBuilder{}.AddRect(dest).CreatePath());
+  entity.SetContents(contents);
+  entity.SetTransformation(GetCurrentTransformation());
+  GetCurrentPass().PushEntity(std::move(entity));
 }
 
 Picture Canvas::EndRecordingAsPicture() {

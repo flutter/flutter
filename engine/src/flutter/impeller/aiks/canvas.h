@@ -11,10 +11,12 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas_pass.h"
+#include "impeller/aiks/image.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/aiks/picture.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
+#include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
 
 namespace impeller {
@@ -48,6 +50,13 @@ class Canvas {
   void Rotate(Radians radians);
 
   void DrawPath(Path path, Paint paint);
+
+  void DrawImage(std::shared_ptr<Image> image, Point offset, Paint paint);
+
+  void DrawImageRect(std::shared_ptr<Image> image,
+                     IRect source,
+                     Rect dest,
+                     Paint paint);
 
   void ClipPath(Path path);
 

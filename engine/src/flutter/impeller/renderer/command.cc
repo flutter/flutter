@@ -43,8 +43,6 @@ bool Command::BindResource(ShaderStage stage,
   }
 
   if (!slot.HasTexture()) {
-    FML_DLOG(WARNING) << "Texture named " << slot.name
-                      << " is not actually used in the shader.";
     return true;
   }
 
@@ -70,8 +68,6 @@ bool Command::BindResource(ShaderStage stage,
   }
 
   if (!slot.HasSampler()) {
-    FML_DLOG(WARNING) << "Sampler named " << slot.name
-                      << " is not actually used in the shader.";
     return true;
   }
 

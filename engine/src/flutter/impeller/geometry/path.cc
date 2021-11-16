@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "path.h"
+#include "impeller/geometry/path.h"
+
+#include <optional>
 
 namespace impeller {
 
@@ -172,21 +174,44 @@ std::vector<Point> Path::CreatePolyline(
 }
 
 Rect Path::GetBoundingBox() const {
-  Rect box;
+  if (linears_.empty() && quads_.empty() && cubics_.empty()) {
+    return {};
+  }
+
+  std::optional<Point> min, max;
+
+  auto clamp = [&min, &max](const std::vector<Point>& extrema) {
+    for (const auto& extremum : extrema) {
+      if (!min.has_value()) {
+        min = extremum;
+      }
+
+      if (!max.has_value()) {
+        max = extremum;
+      }
+
+      min->x = std::min(min->x, extremum.x);
+      min->y = std::min(min->y, extremum.y);
+      max->x = std::max(max->x, extremum.x);
+      max->y = std::max(max->y, extremum.y);
+    }
+  };
 
   for (const auto& linear : linears_) {
-    box = box.WithPoints(linear.Extrema());
+    clamp(linear.Extrema());
   }
 
   for (const auto& quad : quads_) {
-    box = box.WithPoints(quad.Extrema());
+    clamp(quad.Extrema());
   }
 
   for (const auto& cubic : cubics_) {
-    box = box.WithPoints(cubic.Extrema());
+    clamp(cubic.Extrema());
   }
 
-  return box;
+  const auto difference = *max - *min;
+
+  return {min->x, min->y, difference.x, difference.y};
 }
 
 }  // namespace impeller

@@ -19,7 +19,7 @@ struct TRect {
   TPoint<Type> origin;
   TSize<Type> size;
 
-  constexpr TRect() : origin({0.0, 0.0}), size({0.0, 0.0}) {}
+  constexpr TRect() : origin({0, 0}), size({0, 0}) {}
 
   constexpr TRect(TSize<Type> size) : origin({0.0, 0.0}), size(size) {}
 
@@ -38,6 +38,14 @@ struct TRect {
                                   Type right,
                                   Type bottom) {
     return TRect(left, top, right - left, bottom - top);
+  }
+
+  constexpr static TRect MakeXYWH(Type x, Type y, Type width, Type height) {
+    return TRect(x, y, width, height);
+  }
+
+  constexpr static TRect MakeSize(const TSize<Type>& size) {
+    return TRect(0.0, 0.0, size.width, size.height);
   }
 
   template <class U>
@@ -75,6 +83,8 @@ struct TRect {
   }
 
   constexpr bool IsZero() const { return size.IsZero(); }
+
+  constexpr bool IsEmpty() const { return size.IsEmpty(); }
 
   constexpr TRect WithPoint(const TPoint<Type>& p) const {
     TRect copy = *this;

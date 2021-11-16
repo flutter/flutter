@@ -9,7 +9,9 @@
 #include "flutter/fml/logging.h"
 #include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
 #include "impeller/renderer/tessellator.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -135,6 +137,10 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
     }
   }
 
+  if (!vtx_builder.HasVertices()) {
+    return true;
+  }
+
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(
       *renderer.GetContext()->GetPermanentsAllocator()));
 
@@ -169,6 +175,96 @@ void SolidStrokeContents::SetColor(Color color) {
 
 const Color& SolidStrokeContents::GetColor() const {
   return color_;
+}
+
+/*******************************************************************************
+ ******* TextureContents
+ ******************************************************************************/
+
+TextureContents::TextureContents() = default;
+
+TextureContents::~TextureContents() = default;
+
+void TextureContents::SetTexture(std::shared_ptr<Texture> texture) {
+  texture_ = std::move(texture);
+}
+
+std::shared_ptr<Texture> TextureContents::GetTexture() const {
+  return texture_;
+}
+
+bool TextureContents::Render(const ContentRenderer& renderer,
+                             const Entity& entity,
+                             const Surface& surface,
+                             RenderPass& pass) const {
+  if (texture_ == nullptr) {
+    return true;
+  }
+
+  using VS = TextureFillVertexShader;
+  using FS = TextureFillFragmentShader;
+
+  const auto coverage_rect = entity.GetPath().GetBoundingBox();
+  if (coverage_rect.size.IsEmpty()) {
+    return true;
+  }
+
+  const auto texture_size = texture_->GetSize();
+  if (texture_size.IsEmpty()) {
+    return true;
+  }
+
+  if (source_rect_.IsEmpty()) {
+    return true;
+  }
+
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  {
+    const auto tess_result = Tessellator{}.Tessellate(
+        entity.GetPath().CreatePolyline(),
+        [&vertex_builder, &coverage_rect](Point vtx) {
+          VS::PerVertexData data;
+          data.vertices = vtx;
+          data.texture_coords =
+              ((vtx - coverage_rect.origin) / coverage_rect.size);
+          vertex_builder.AppendVertex(data);
+        });
+    if (!tess_result) {
+      return false;
+    }
+  }
+
+  if (!vertex_builder.HasVertices()) {
+    return true;
+  }
+
+  auto& host_buffer = pass.GetTransientsBuffer();
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp =
+      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+
+  auto frame_info_view = host_buffer.EmplaceUniform(frame_info);
+
+  Command cmd;
+  cmd.label = "TextureFill";
+  cmd.pipeline = renderer.GetTexturePipeline();
+  cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
+  VS::BindFrameInfo(cmd, frame_info_view);
+  FS::BindTextureSampler(
+      cmd, texture_,
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler({}));
+  pass.AddCommand(std::move(cmd));
+
+  return true;
+}
+
+void TextureContents::SetSourceRect(const IRect& source_rect) {
+  source_rect_ = source_rect;
+}
+
+const IRect& TextureContents::GetSourceRect() const {
+  return source_rect_;
 }
 
 }  // namespace impeller
