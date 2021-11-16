@@ -34,6 +34,9 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// Provide a trasparent [Material] widget when wrapping the button with a widget
+/// without an underlying [Material] widget (e.g. [CircleAvatar]).
+///
 /// The hit region of an icon button will, if possible, be at least
 /// kMinInteractiveDimension pixels in size, regardless of the actual
 /// [iconSize], to satisfy the [touch target size](https://material.io/design/layout/spacing-methods.html#touch-targets)
@@ -90,6 +93,16 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
 /// ** See code in examples/api/lib/material/icon_button/icon_button.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// Here is an example of an [IconButton] wrapped with a widget that does not have an
+/// underyling [Material] widget. In this case, we provide trasparent [Material] to [IconButton] widget
+/// with a custom shape, if necessary and clipBehavior set to [Clip.antiAliasWithSaveLayer].
+///
+/// This helps to render splash effect correctly over the IconButton instead of beneath the [IconButton] widget.
+///
+/// ** See code in examples/api/lib/material/icon_button/icon_button.2.dart **
 /// {@end-tool}
 ///
 /// See also:

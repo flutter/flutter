@@ -30,17 +30,21 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: Center(
-        child: Ink(
-          decoration: const ShapeDecoration(
-            color: Colors.lightBlue,
-            shape: CircleBorder(),
-          ),
+    return Center(
+      // CircleAvatar does not have an underlying Material.
+      child: CircleAvatar(
+        // Provide a transparent Material when wrapping IconButton
+        // with a widget that does not have an underlying Material.
+        child: Material(
+          // This is to clip Matrial shape for underlying CircleAvatar.
+          // Clip behavior is none by default. 
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          // This provides a splash effect over the CircleAvatar.
+          type: MaterialType.transparency,
+          // This is to match the CircleAvatar's shape.
+          shape: const CircleBorder(),
           child: IconButton(
             icon: const Icon(Icons.android),
-            color: Colors.white,
             onPressed: () {},
           ),
         ),
