@@ -4868,6 +4868,5 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
-    // Text selection styles are not fully supported on web.
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/93723
+  });
 }
