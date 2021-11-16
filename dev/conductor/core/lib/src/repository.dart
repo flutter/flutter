@@ -470,7 +470,7 @@ class FrameworkRepository extends Repository {
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     String? previousCheckoutLocation,
-    String? initialRef,
+    String initialRef = FrameworkRepository.defaultBranch,
     Remote? mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
@@ -751,7 +751,7 @@ class EngineRepository extends Repository {
   }
 
   static const String defaultUpstream = 'git@github.com:flutter/engine.git';
-  static const String defaultBranch = 'master';
+  static const String defaultBranch = 'main';
 
   /// Update the `dart_revision` entry in the DEPS file.
   Future<void> updateDartRevision(

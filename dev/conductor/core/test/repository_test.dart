@@ -46,6 +46,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'checkout',
+          'upstream/${FrameworkRepository.defaultBranch}',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
           'rev-parse',
           'HEAD',
         ], stdout: commit),
@@ -91,6 +96,11 @@ void main() {
           FrameworkRepository.defaultUpstream,
           fileSystem.path
               .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -143,6 +153,11 @@ void main() {
           FrameworkRepository.defaultUpstream,
           fileSystem.path
               .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -232,7 +247,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/master',
+          'upstream/${EngineRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -289,7 +304,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/master',
+          'upstream/${EngineRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -389,12 +404,17 @@ vars = {
 # Friendly note
 
 enabled_branches:
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
 ''');
         }),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/${FrameworkRepository.defaultBranch}',
+        ]),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -412,13 +432,13 @@ enabled_branches:
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
         (await framework.ciYaml).enabledBranches,
-        <String>['master', 'dev', 'beta', 'stable'],
+        <String>[FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
       );
 
       (await framework.ciYaml).enableBranch('foo');
       expect(
         (await framework.ciYaml).enabledBranches,
-        <String>['foo', 'master', 'dev', 'beta', 'stable'],
+        <String>['foo', FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
       );
 
       expect(
@@ -428,7 +448,7 @@ enabled_branches:
 
 enabled_branches:
   - foo
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
@@ -455,12 +475,17 @@ enabled_branches:
           ciYaml.createSync(recursive: true);
           ciYaml.writeAsStringSync('''
 enabled_branches:
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
 ''');
         }),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'upstream/${FrameworkRepository.defaultBranch}',
+        ]),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -477,12 +502,12 @@ enabled_branches:
 
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
-        () async => (await framework.ciYaml).enableBranch('master'),
-        throwsExceptionWith('.ci.yaml already contains the branch master'),
+        () async => (await framework.ciYaml).enableBranch(FrameworkRepository.defaultBranch),
+        throwsExceptionWith('.ci.yaml already contains the branch ${FrameworkRepository.defaultBranch}'),
       );
     });
 
-    test('repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
+    test('framework repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
       const String commit = 'deadbeef';
       const String candidateBranch = 'flutter-1.2-candidate.3';
       bool createdCandidateBranch = false;
@@ -513,6 +538,9 @@ enabled_branches:
           command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
         ),
         const FakeCommand(
+          command: <String>['git', 'checkout', 'upstream/${FrameworkRepository.defaultBranch}'],
+        ),
+        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: commit,
         ),
@@ -526,6 +554,52 @@ enabled_branches:
       );
 
       final Repository repo = FrameworkRepository(
+        checkouts,
+        additionalRequiredLocalBranches: <String>[candidateBranch],
+        localUpstream: true,
+      );
+      // call this so that repo.lazilyInitialize() is called.
+      await repo.checkoutDirectory;
+
+      expect(processManager.hasRemainingExpectations, false);
+      expect(createdCandidateBranch, true);
+    });
+
+    test('engine repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
+      const String commit = 'deadbeef';
+      const String candidateBranch = 'flutter-1.2-candidate.3';
+      bool createdCandidateBranch = false;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+        ]),
+        FakeCommand(
+          command: const <String>['git', 'checkout', candidateBranch, '--'],
+          onRun: () => createdCandidateBranch = true,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'upstream/${EngineRepository.defaultBranch}'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: commit,
+        ),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Repository repo = EngineRepository(
         checkouts,
         additionalRequiredLocalBranches: <String>[candidateBranch],
         localUpstream: true,
