@@ -897,7 +897,8 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );
-  });
+    // Text selection styles are not fully supported on web.
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/93723
 
   testWidgets(
     'text field toolbar options correctly changes options',
