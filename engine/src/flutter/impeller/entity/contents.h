@@ -4,11 +4,14 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/renderer/texture.h"
 
 namespace impeller {
 
@@ -80,6 +83,33 @@ class SolidColorContents final : public Contents {
   Color color_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidColorContents);
+};
+
+class TextureContents final : public Contents {
+ public:
+  TextureContents();
+
+  ~TextureContents() override;
+
+  void SetTexture(std::shared_ptr<Texture> texture);
+
+  std::shared_ptr<Texture> GetTexture() const;
+
+  void SetSourceRect(const IRect& source_rect);
+
+  const IRect& GetSourceRect() const;
+
+  // |Contents|
+  bool Render(const ContentRenderer& renderer,
+              const Entity& entity,
+              const Surface& surface,
+              RenderPass& pass) const override;
+
+ public:
+  std::shared_ptr<Texture> texture_;
+  IRect source_rect_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TextureContents);
 };
 
 class SolidStrokeContents final : public Contents {

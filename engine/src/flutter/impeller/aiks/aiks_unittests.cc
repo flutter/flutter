@@ -3,13 +3,18 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
+#include "impeller/aiks/image.h"
 #include "impeller/geometry/geometry_unittests.h"
+#include "impeller/geometry/path_builder.h"
 
 namespace impeller {
 namespace testing {
 
-TEST(AiksTest, CanvasCTMCanBeUpdated) {
+using AiksTest = AiksPlayground;
+
+TEST_F(AiksTest, CanvasCTMCanBeUpdated) {
   Canvas canvas;
   Matrix identity;
   ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(), identity);
@@ -18,7 +23,7 @@ TEST(AiksTest, CanvasCTMCanBeUpdated) {
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
 }
 
-TEST(AiksTest, CanvasCanPushPopCTM) {
+TEST_F(AiksTest, CanvasCanPushPopCTM) {
   Canvas canvas;
   ASSERT_EQ(canvas.GetSaveCount(), 1u);
   ASSERT_EQ(canvas.Restore(), false);
@@ -32,6 +37,43 @@ TEST(AiksTest, CanvasCanPushPopCTM) {
   ASSERT_EQ(canvas.GetSaveCount(), 1u);
   ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(),
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
+}
+
+TEST_F(AiksTest, CanRenderColoredRect) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Red();
+  canvas.DrawPath(PathBuilder{}
+                      .AddRect(Rect::MakeXYWH(100.0, 100.0, 100.0, 100.0))
+                      .CreatePath(),
+                  paint);
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderImage) {
+  Canvas canvas;
+  Paint paint;
+  auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
+  paint.color = Color::Red();
+  canvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderImageRect) {
+  Canvas canvas;
+  Paint paint;
+  auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
+  auto source_rect = IRect::MakeSize(image->GetSize());
+
+  // Render the bottom right quarter of the source image in a stretched rect.
+  source_rect.size.width /= 2;
+  source_rect.size.height /= 2;
+  source_rect.origin.x += source_rect.size.width;
+  source_rect.origin.y += source_rect.size.height;
+
+  canvas.DrawImageRect(image, source_rect, Rect::MakeXYWH(100, 100, 600, 600),
+                       paint);
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing

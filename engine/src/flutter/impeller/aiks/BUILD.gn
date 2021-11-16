@@ -31,10 +31,15 @@ impeller_component("aiks") {
 
 impeller_component("aiks_unittests") {
   testonly = true
-  sources = [ "aiks_unittests.cc" ]
+  sources = [
+    "aiks_playground.cc",
+    "aiks_playground.h",
+    "aiks_unittests.cc",
+  ]
   deps = [
     ":aiks",
     "../geometry:geometry_unittests",
+    "../playground",
     "//flutter/testing",
   ]
 }

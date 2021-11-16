@@ -22,7 +22,7 @@ TEST_F(EntityTest, CanDrawRect) {
   Entity entity;
   entity.SetPath(PathBuilder{}.AddRect({100, 100, 100, 100}).CreatePath());
   entity.SetContents(SolidColorContents::Make(Color::Red()));
-  ASSERT_TRUE(OpenPlaygroundHere(entity));
+  // ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
 }  // namespace testing
