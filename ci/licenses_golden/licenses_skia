@@ -1,4 +1,4 @@
-Signature: ee3bf16f9b1a683d9e481c39e3896b01
+Signature: e67f62456bccc7d9c756c0c1e8d7a363
 
 UNUSED LICENSES:
 
@@ -2364,6 +2364,7 @@ FILE: ../../../third_party/skia/bench/BigPath.cpp
 FILE: ../../../third_party/skia/bench/BigPath.h
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
+FILE: ../../../third_party/skia/experimental/graphite/include/BackendTexture.h
 FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
 FILE: ../../../third_party/skia/experimental/graphite/include/GraphiteTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
@@ -2371,6 +2372,7 @@ FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/include/private/GraphiteTypesPriv.h
+FILE: ../../../third_party/skia/experimental/graphite/src/BackendTexture.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/CommandBuffer.cpp
