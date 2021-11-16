@@ -272,97 +272,99 @@ struct DisplayListInvocationGroup {
 
 std::vector<DisplayListInvocationGroup> allGroups = {
   { "SetAntiAlias", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(false);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(true);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setAntiAlias(false);}},
     }
   },
   { "SetDither", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setDither(false);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setDither(true);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setDither(false);}},
     }
   },
   { "SetInvertColors", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setInvertColors(false);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setInvertColors(true);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setInvertColors(false);}},
     }
   },
   { "SetStrokeCap", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kButt_Cap);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kRound_Cap);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kSquare_Cap);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeCap(SkPaint::kButt_Cap);}},
     }
   },
   { "SetStrokeJoin", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kBevel_Join);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kRound_Join);}},
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kMiter_Join);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeJoin(SkPaint::kMiter_Join);}},
     }
   },
   { "SetStyle", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kFill_Style);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStroke_Style);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kStrokeAndFill_Style);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStyle(SkPaint::kFill_Style);}},
     }
   },
   { "SetStrokeWidth", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeWidth(0.0);}},
+      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeWidth(1.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeWidth(5.0);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeWidth(0.0);}},
     }
   },
   { "SetStrokeMiter", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(0.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(5.0);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setStrokeMiter(4.0);}},
     }
   },
   { "SetColor", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setColor(SK_ColorGREEN);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setColor(SK_ColorBLUE);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setColor(SK_ColorBLACK);}},
     }
   },
-  { "SetBlendMode", {
+  { "SetBlendModeOrBlender", {
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kSrcIn);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kDstIn);}},
-    }
-  },
-  { "SetBlender", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setBlender(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender2);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setBlender(TestBlender3);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setBlendMode(SkBlendMode::kSrcOver);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setBlender(nullptr);}},
     }
   },
   { "SetShader", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setShader(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setShader(TestShader1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setShader(TestShader2);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setShader(TestShader3);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setShader(nullptr);}},
     }
   },
   { "SetImageFilter", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(TestImageFilter1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(TestImageFilter2);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setImageFilter(nullptr);}},
     }
   },
   { "SetColorFilter", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(TestColorFilter1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(TestColorFilter2);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setColorFilter(nullptr);}},
     }
   },
   { "SetPathEffect", {
-      {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(TestPathEffect1);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(TestPathEffect2);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setPathEffect(nullptr);}},
     }
   },
   { "SetMaskFilter", {
-      {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(nullptr);}},
       {0, 16, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(TestMaskFilter);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kNormal_SkBlurStyle, 3.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kNormal_SkBlurStyle, 5.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kSolid_SkBlurStyle, 3.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kInner_SkBlurStyle, 3.0);}},
       {0, 8, 0, 0, [](DisplayListBuilder& b) {b.setMaskBlurFilter(kOuter_SkBlurStyle, 3.0);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.setMaskFilter(nullptr);}},
     }
   },
   { "Save(Layer)+Restore", {
@@ -376,33 +378,34 @@ std::vector<DisplayListInvocationGroup> allGroups = {
   },
   { "Translate", {
       // cv.translate(0, 0) is ignored
-      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.translate(0, 0);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.translate(10, 10);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.translate(10, 15);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.translate(15, 10);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.translate(0, 0);}},
     }
   },
   { "Scale", {
       // cv.scale(1, 1) is ignored
-      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.scale(1, 1);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.scale(2, 2);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.scale(2, 3);}},
       {1, 16, 1, 16, [](DisplayListBuilder& b) {b.scale(3, 2);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.scale(1, 1);}},
     }
   },
   { "Rotate", {
       // cv.rotate(0) is ignored, otherwise expressed as concat(rotmatrix)
-      {1, 8, 0, 0, [](DisplayListBuilder& b) {b.rotate(0);}},
       {1, 8, 1, 32, [](DisplayListBuilder& b) {b.rotate(30);}},
       {1, 8, 1, 32, [](DisplayListBuilder& b) {b.rotate(45);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.rotate(0);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.rotate(360);}},
     }
   },
   { "Skew", {
       // cv.skew(0, 0) is ignored, otherwise expressed as concat(skewmatrix)
-      {1, 16, 0, 0, [](DisplayListBuilder& b) {b.skew(0, 0);}},
       {1, 16, 1, 32, [](DisplayListBuilder& b) {b.skew(0.1, 0.1);}},
       {1, 16, 1, 32, [](DisplayListBuilder& b) {b.skew(0.1, 0.2);}},
       {1, 16, 1, 32, [](DisplayListBuilder& b) {b.skew(0.2, 0.1);}},
+      {0, 0, 0, 0, [](DisplayListBuilder& b) {b.skew(0, 0);}},
     }
   },
   { "Transform2DAffine", {
@@ -833,7 +836,9 @@ TEST(DisplayList, SingleOpDisplayListsCompareToEachOther) {
         sk_sp<DisplayList> listB = listsB[j];
         auto desc = group.op_name + "(variant " + std::to_string(i + 1) +
                     " ==? variant " + std::to_string(j + 1) + ")";
-        if (i == j) {
+        if (i == j ||
+            (group.variants[i].is_empty() && group.variants[j].is_empty())) {
+          // They are the same variant, or both variants are NOPs
           ASSERT_EQ(listA->op_count(false), listB->op_count(false)) << desc;
           ASSERT_EQ(listA->bytes(false), listB->bytes(false)) << desc;
           ASSERT_EQ(listA->op_count(true), listB->op_count(true)) << desc;
@@ -850,6 +855,31 @@ TEST(DisplayList, SingleOpDisplayListsCompareToEachOther) {
       }
     }
   }
+}
+
+TEST(DisplayList, FullRotationsAreNop) {
+  DisplayListBuilder builder;
+  builder.rotate(0);
+  builder.rotate(360);
+  builder.rotate(720);
+  builder.rotate(1080);
+  builder.rotate(1440);
+  sk_sp<DisplayList> dl = builder.Build();
+  ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
+  ASSERT_EQ(dl->bytes(true), sizeof(DisplayList));
+  ASSERT_EQ(dl->op_count(false), 0);
+  ASSERT_EQ(dl->op_count(true), 0);
+}
+
+TEST(DisplayList, AllBlendModeNops) {
+  DisplayListBuilder builder;
+  builder.setBlendMode(SkBlendMode::kSrcOver);
+  builder.setBlender(nullptr);
+  sk_sp<DisplayList> dl = builder.Build();
+  ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
+  ASSERT_EQ(dl->bytes(true), sizeof(DisplayList));
+  ASSERT_EQ(dl->op_count(false), 0);
+  ASSERT_EQ(dl->op_count(true), 0);
 }
 
 static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
@@ -873,7 +903,7 @@ static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
     name = "Default";
   } else {
     name = allGroups[g_index].op_name;
-    if (v_index < 0) {
+    if (v_index >= allGroups[g_index].variants.size()) {
       name += " skipped";
     } else {
       name += " variant " + std::to_string(v_index + 1);
@@ -890,12 +920,12 @@ TEST(DisplayList, DisplayListsWithVaryingOpComparisons) {
   for (size_t gi = 0; gi < allGroups.size(); gi++) {
     DisplayListInvocationGroup& group = allGroups[gi];
     sk_sp<DisplayList> missing_dl = Build(gi, group.variants.size());
-    auto desc = "[Group " + std::to_string(gi + 1) + " omitted]";
+    auto desc = "[Group " + group.op_name + " omitted]";
     ASSERT_TRUE(missing_dl->Equals(*missing_dl)) << desc << " == itself";
     ASSERT_FALSE(missing_dl->Equals(*default_dl)) << desc << " != Default";
     ASSERT_FALSE(default_dl->Equals(*missing_dl)) << "Default != " << desc;
     for (size_t vi = 0; vi < group.variants.size(); vi++) {
-      auto desc = "[Group " + std::to_string(gi + 1) + " variant " +
+      auto desc = "[Group " + group.op_name + " variant " +
                   std::to_string(vi + 1) + "]";
       sk_sp<DisplayList> variant_dl = Build(gi, vi);
       ASSERT_TRUE(variant_dl->Equals(*variant_dl)) << desc << " == itself";
@@ -1116,6 +1146,255 @@ TEST(DisplayList, NestedOpCountMetricsSameAsSkPicture) {
   auto sk_display_list = dl_recorder.Build();
   ASSERT_EQ(display_list->op_count(), 1);
   ASSERT_EQ(display_list->op_count(true), 36);
+}
+
+class AttributeRefTester {
+ public:
+  virtual void setRefToPaint(SkPaint& paint) const = 0;
+  virtual void setRefToDisplayList(DisplayListBuilder& builder) const = 0;
+  virtual bool ref_is_unique() const = 0;
+
+  void testDisplayList() {
+    {
+      DisplayListBuilder builder;
+      setRefToDisplayList(builder);
+      builder.drawRect(SkRect::MakeLTRB(50, 50, 100, 100));
+      ASSERT_FALSE(ref_is_unique());
+    }
+    ASSERT_TRUE(ref_is_unique());
+  }
+  void testPaint() {
+    {
+      SkPaint paint;
+      setRefToPaint(paint);
+      ASSERT_FALSE(ref_is_unique());
+    }
+    ASSERT_TRUE(ref_is_unique());
+  }
+  void testCanvasRecorder() {
+    {
+      sk_sp<DisplayList> display_list;
+      {
+        DisplayListCanvasRecorder recorder(SkRect::MakeLTRB(0, 0, 200, 200));
+        {
+          {
+            SkPaint paint;
+            setRefToPaint(paint);
+            recorder.drawRect(SkRect::MakeLTRB(50, 50, 100, 100), paint);
+            ASSERT_FALSE(ref_is_unique());
+          }
+          ASSERT_FALSE(ref_is_unique());
+        }
+        display_list = recorder.Build();
+        ASSERT_FALSE(ref_is_unique());
+      }
+      ASSERT_FALSE(ref_is_unique());
+    }
+    ASSERT_TRUE(ref_is_unique());
+  }
+
+  void test() {
+    testDisplayList();
+    testPaint();
+    testCanvasRecorder();
+  }
+};
+
+TEST(DisplayList, DisplayListImageFilterRefHandling) {
+  class ImageFilterRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setImageFilter(image_filter);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setImageFilter(image_filter);
+    }
+    bool ref_is_unique() const override { return image_filter->unique(); }
+
+   private:
+    sk_sp<SkImageFilter> image_filter = SkImageFilters::Blur(2.0, 2.0, nullptr);
+  };
+
+  ImageFilterRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListColorFilterRefHandling) {
+  class ColorFilterRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setColorFilter(color_filter);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setColorFilter(color_filter);
+    }
+    bool ref_is_unique() const override { return color_filter->unique(); }
+
+   private:
+    sk_sp<SkColorFilter> color_filter =
+        SkColorFilters::Blend(SK_ColorBLUE, SkBlendMode::kSrcIn);
+  };
+
+  ColorFilterRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListMaskFilterRefHandling) {
+  class MaskFilterRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setMaskFilter(mask_filter);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setMaskFilter(mask_filter);
+    }
+    bool ref_is_unique() const override { return mask_filter->unique(); }
+
+   private:
+    sk_sp<SkMaskFilter> mask_filter =
+        SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
+  };
+
+  MaskFilterRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListBlenderRefHandling) {
+  class BlenderRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setBlender(blender);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setBlender(blender);
+    }
+    bool ref_is_unique() const override { return blender->unique(); }
+
+   private:
+    sk_sp<SkBlender> blender =
+        SkBlenders::Arithmetic(0.25, 0.25, 0.25, 0.25, true);
+  };
+
+  BlenderRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListShaderRefHandling) {
+  class ShaderRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setShader(shader);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setShader(shader);
+    }
+    bool ref_is_unique() const override { return shader->unique(); }
+
+   private:
+    sk_sp<SkShader> shader = SkShaders::Color(SK_ColorBLUE);
+  };
+
+  ShaderRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListPathEffectRefHandling) {
+  class PathEffectRefTester : public virtual AttributeRefTester {
+   public:
+    void setRefToPaint(SkPaint& paint) const override {
+      paint.setPathEffect(path_effect);
+    }
+    void setRefToDisplayList(DisplayListBuilder& builder) const override {
+      builder.setPathEffect(path_effect);
+    }
+    bool ref_is_unique() const override { return path_effect->unique(); }
+
+   private:
+    sk_sp<SkPathEffect> path_effect =
+        SkDashPathEffect::Make(TestDashes1, 2, 0.0);
+  };
+
+  PathEffectRefTester tester;
+  tester.test();
+  ASSERT_TRUE(tester.ref_is_unique());
+}
+
+TEST(DisplayList, DisplayListFullPerspectiveTransformHandling) {
+  // SkM44 constructor takes row-major order
+  SkM44 sk_matrix = SkM44(
+      // clang-format off
+       1,  2,  3,  4,
+       5,  6,  7,  8,
+       9, 10, 11, 12,
+      13, 14, 15, 16
+      // clang-format on
+  );
+
+  {  // First test ==
+    DisplayListBuilder builder;
+    // builder.transformFullPerspective takes row-major order
+    builder.transformFullPerspective(
+        // clang-format off
+         1,  2,  3,  4,
+         5,  6,  7,  8,
+         9, 10, 11, 12,
+        13, 14, 15, 16
+        // clang-format on
+    );
+    sk_sp<DisplayList> display_list = builder.Build();
+    sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(10, 10);
+    SkCanvas* canvas = surface->getCanvas();
+    display_list->RenderTo(canvas);
+    SkM44 dl_matrix = canvas->getLocalToDevice();
+    ASSERT_EQ(sk_matrix, dl_matrix);
+  }
+  {  // Next test !=
+    DisplayListBuilder builder;
+    // builder.transformFullPerspective takes row-major order
+    builder.transformFullPerspective(
+        // clang-format off
+         1,  5,  9, 13,
+         2,  6,  7, 11,
+         3,  7, 11, 15,
+         4,  8, 12, 16
+        // clang-format on
+    );
+    sk_sp<DisplayList> display_list = builder.Build();
+    sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(10, 10);
+    SkCanvas* canvas = surface->getCanvas();
+    display_list->RenderTo(canvas);
+    SkM44 dl_matrix = canvas->getLocalToDevice();
+    ASSERT_NE(sk_matrix, dl_matrix);
+  }
+}
+
+TEST(DisplayList, SetMaskBlurSigmaZeroResetsMaskFilter) {
+  DisplayListBuilder builder;
+  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
+  builder.drawRect({10, 10, 20, 20});
+  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 0.0);
+  EXPECT_EQ(builder.getMaskFilter(), nullptr);
+  builder.drawRect({30, 30, 40, 40});
+  sk_sp<DisplayList> display_list = builder.Build();
+  ASSERT_EQ(display_list->op_count(), 2);
+  ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
+}
+
+TEST(DisplayList, SetMaskFilterNullResetsMaskFilter) {
+  DisplayListBuilder builder;
+  builder.setMaskBlurFilter(SkBlurStyle::kNormal_SkBlurStyle, 2.0);
+  builder.drawRect({10, 10, 20, 20});
+  builder.setMaskFilter(nullptr);
+  EXPECT_EQ(builder.getMaskFilter(), nullptr);
+  builder.drawRect({30, 30, 40, 40});
+  sk_sp<DisplayList> display_list = builder.Build();
+  ASSERT_EQ(display_list->op_count(), 2);
+  ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
 }
 
 }  // namespace testing
