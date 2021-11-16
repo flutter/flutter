@@ -499,6 +499,7 @@ class FrameworkRepository extends Repository {
     Checkouts checkouts, {
     String name = 'framework',
     String? previousCheckoutLocation,
+    String initialRef = FrameworkRepository.defaultBranch,
     required String upstreamPath,
   }) {
     return FrameworkRepository(
@@ -509,7 +510,7 @@ class FrameworkRepository extends Repository {
         url: 'file://$upstreamPath/',
       ),
       previousCheckoutLocation: previousCheckoutLocation,
-      initialRef: 'HEAD', // local may not have default branch
+      initialRef: initialRef,
     );
   }
 
