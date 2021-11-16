@@ -4,27 +4,22 @@
 
 #pragma once
 
-#include <memory>
-
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/aiks/picture.h"
+#include "impeller/playground/playground.h"
 
 namespace impeller {
 
-class Image {
+class AiksPlayground : public Playground {
  public:
-  Image(std::shared_ptr<Texture> texture);
+  AiksPlayground();
 
-  ~Image();
+  ~AiksPlayground();
 
-  ISize GetSize() const;
-
-  std::shared_ptr<Texture> GetTexture() const;
+  bool OpenPlaygroundHere(const Picture& picture);
 
  private:
-  const std::shared_ptr<Texture> texture_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Image);
+  FML_DISALLOW_COPY_AND_ASSIGN(AiksPlayground);
 };
 
 }  // namespace impeller

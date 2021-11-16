@@ -6,8 +6,16 @@
 
 namespace impeller {
 
-Image::Image() = default;
+Image::Image(std::shared_ptr<Texture> texture) : texture_(std::move(texture)) {}
 
 Image::~Image() = default;
+
+ISize Image::GetSize() const {
+  return texture_ ? texture_->GetSize() : ISize{};
+}
+
+std::shared_ptr<Texture> Image::GetTexture() const {
+  return texture_;
+}
 
 }  // namespace impeller

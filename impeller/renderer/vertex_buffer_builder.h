@@ -33,6 +33,8 @@ class VertexBufferBuilder {
 
   void Reserve(size_t count) { return vertices_.reserve(count); }
 
+  bool HasVertices() const { return !vertices_.empty(); }
+
   VertexBufferBuilder& AppendVertex(VertexType_ vertex) {
     vertices_.emplace_back(std::move(vertex));
     return *this;
@@ -71,13 +73,9 @@ class VertexBufferBuilder {
   std::string label_;
 
   BufferView CreateVertexBufferView(HostBuffer& buffer) const {
-    auto view =
-        buffer.Emplace(vertices_.data(), vertices_.size() * sizeof(VertexType),
-                       alignof(VertexType));
-    if (!label_.empty()) {
-      view.SetLabel(SPrintF("%s Vertices"), label_.c_str());
-    }
-    return view;
+    return buffer.Emplace(vertices_.data(),
+                          vertices_.size() * sizeof(VertexType),
+                          alignof(VertexType));
   }
 
   BufferView CreateVertexBufferView(Allocator& allocator) const {
@@ -105,13 +103,9 @@ class VertexBufferBuilder {
 
   BufferView CreateIndexBufferView(HostBuffer& buffer) const {
     const auto index_buffer = CreateIndexBuffer();
-    auto view = buffer.Emplace(index_buffer.data(),
-                               index_buffer.size() * sizeof(IndexType),
-                               alignof(IndexType));
-    if (!label_.empty()) {
-      view.SetLabel(SPrintF("%s Indices"), label_);
-    }
-    return view;
+    return buffer.Emplace(index_buffer.data(),
+                          index_buffer.size() * sizeof(IndexType),
+                          alignof(IndexType));
   }
 
   BufferView CreateIndexBufferView(Allocator& allocator) const {
