@@ -4,16 +4,19 @@
 
 declare_args() {
   shell_enable_gl = !is_fuchsia
-  shell_enable_metal = false
 
-  # TODO(dworsham): Enable once Fuchsia supports Vulkan through the embedder.
+  # The logic for enabling Vulkan and Metal is in tools/gn.
+  shell_enable_metal = false
   shell_enable_vulkan = false
+
   shell_enable_software = true
 }
 
 declare_args() {
   test_enable_gl = shell_enable_gl
   test_enable_metal = shell_enable_metal
-  test_enable_vulkan = is_fuchsia
+
+  # The Vulkan unittests are combined with the GL unittests.
+  test_enable_vulkan = is_fuchsia || shell_enable_gl
   test_enable_software = shell_enable_software
 }

@@ -4,6 +4,7 @@
 
 #include "vulkan_debug_report.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <vector>
 

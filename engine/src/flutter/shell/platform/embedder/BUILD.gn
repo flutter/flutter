@@ -242,6 +242,13 @@ if (enable_unittests) {
 
       deps += [ "//flutter/testing:metal" ]
     }
+
+    if (test_enable_vulkan) {
+      deps += [
+        "//flutter/testing:vulkan",
+        "//flutter/vulkan",
+      ]
+    }
   }
 
   # Tests the build in FLUTTER_ENGINE_NO_PROTOTYPES mode.

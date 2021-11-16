@@ -7,6 +7,7 @@ assert(is_ios)
 import("//build/config/ios/ios_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
+import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
 import("//flutter/testing/testing.gni")
@@ -216,6 +217,10 @@ source_set("ios_test_flutter_mrc") {
     "//third_party/rapidjson",
     "//third_party/skia",
   ]
+
+  if (shell_enable_vulkan) {
+    deps += [ "//flutter/vulkan" ]
+  }
 }
 
 shared_library("ios_test_flutter") {
