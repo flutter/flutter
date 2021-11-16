@@ -176,6 +176,12 @@ class Environment {
         'goldens',
       ));
 
+  /// Path to the base directory to be used by Skia Gold.
+  io.Directory get webUiSkiaGoldDirectory => io.Directory(pathlib.join(
+        webUiDartToolDir.path,
+        'skia_gold',
+      ));
+
   /// Directory to add test results which would later be uploaded to a gcs
   /// bucket by LUCI.
   io.Directory get webUiTestResultsDirectory => io.Directory(pathlib.join(

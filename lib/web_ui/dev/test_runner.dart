@@ -10,8 +10,6 @@ import 'package:path/path.dart' as path;
 
 import 'package:watcher/src/watch_event.dart';
 
-import 'browser.dart';
-import 'common.dart';
 import 'pipeline.dart';
 import 'steps/compile_tests_step.dart';
 import 'steps/run_tests_step.dart';
@@ -111,7 +109,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   bool get runAllTests => targets.isEmpty;
 
   /// The name of the browser to run tests in.
-  String get browser => stringArg('browser');
+  String get browserName => stringArg('browser');
 
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
@@ -122,8 +120,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
   @override
   Future<bool> run() async {
-    final BrowserEnvironment browserEnvironment = getBrowserEnvironment(browser);
-
     final List<FilePath> testFiles = runAllTests
           ? findAllTests()
           : targetFiles;
@@ -135,7 +131,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         testFiles: testFiles,
       ),
       RunTestsStep(
-        browserEnvironment: browserEnvironment,
+        browserName: browserName,
         testFiles: testFiles,
         isDebug: isDebug,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,

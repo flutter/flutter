@@ -35,6 +35,7 @@ import 'package:test_core/src/util/stack_trace_mapper.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_test_utils/goldens.dart';
 import 'package:web_test_utils/image_compare.dart';
+import 'package:web_test_utils/skia_client.dart';
 
 import 'browser.dart';
 import 'common.dart';
@@ -51,6 +52,7 @@ class BrowserPlatform extends PlatformPlugin {
   static Future<BrowserPlatform> start({
     required BrowserEnvironment browserEnvironment,
     required bool doUpdateScreenshotGoldens,
+    required SkiaGoldClient? skiaClient,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
@@ -59,6 +61,7 @@ class BrowserPlatform extends PlatformPlugin {
       isDebug: Configuration.current.pauseAfterLoad,
       doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
       packageConfig: await loadPackageConfigUri((await Isolate.packageConfig)!),
+      skiaClient: skiaClient,
     );
   }
 
@@ -98,12 +101,17 @@ class BrowserPlatform extends PlatformPlugin {
 
   final PackageConfig packageConfig;
 
+  /// A client for communicating with the Skia Gold backend to fetch, compare
+  /// and update images.
+  final SkiaGoldClient? skiaClient;
+
   BrowserPlatform._({
     required this.browserEnvironment,
     required this.server,
     required this.isDebug,
     required this.doUpdateScreenshotGoldens,
     required this.packageConfig,
+    required this.skiaClient,
   }) : _screenshotManager = browserEnvironment.getScreenshotManager() {
     // The cascade of request handlers.
     final shelf.Cascade cascade = shelf.Cascade()
@@ -267,9 +275,6 @@ class BrowserPlatform extends PlatformPlugin {
       write = true;
     }
 
-    filename =
-        filename.replaceAll('.png', '${_screenshotManager!.filenameSuffix}.png');
-
     String goldensDirectory;
     if (filename.startsWith('__local__')) {
       filename = filename.substring('__local__/'.length);
@@ -297,13 +302,16 @@ class BrowserPlatform extends PlatformPlugin {
     final Image screenshot = await _screenshotManager!.capture(regionAsRectange);
 
     return compareImage(
-        screenshot,
-        doUpdateScreenshotGoldens,
-        filename,
-        pixelComparison,
-        maxDiffRateFailure,
-        goldensDirectory: goldensDirectory,
-        write: write);
+      screenshot,
+      doUpdateScreenshotGoldens,
+      filename,
+      pixelComparison,
+      maxDiffRateFailure,
+      skiaClient,
+      goldensDirectory: goldensDirectory,
+      filenameSuffix: _screenshotManager!.filenameSuffix,
+      write: write,
+    );
   }
 
   static const Map<String, String> contentTypes = <String, String>{
