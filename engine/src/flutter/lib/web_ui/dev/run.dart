@@ -49,7 +49,7 @@ class RunCommand extends Command<bool> with ArgUtils<bool> {
       'compile_tests': CompileTestsStep(),
       for (final String browserName in kAllBrowserNames)
         'run_tests_$browserName': RunTestsStep(
-          browserEnvironment: getBrowserEnvironment(browserName),
+          browserName: browserName,
           isDebug: false,
           doUpdateScreenshotGoldens: false,
         ),

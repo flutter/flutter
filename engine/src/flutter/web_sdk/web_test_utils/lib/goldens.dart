@@ -4,7 +4,6 @@
 
 import 'dart:io' as io;
 import 'package:image/image.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:yaml/yaml.dart';
@@ -104,7 +103,7 @@ class ImageDiff {
   }
 
   static int _average(Iterable<int> values) {
-    return values.reduce((a, b) => a + b) ~/ values.length;
+    return values.reduce((int a, int b) => a + b) ~/ values.length;
   }
 
   /// The value of the pixel at [x] and [y] coordinates.
@@ -129,9 +128,9 @@ class ImageDiff {
           _reflectedPixel(image, x + 1, y + 1),
         ];
         return <int>[
-          _average(pixels.map((p) => getRed(p))),
-          _average(pixels.map((p) => getGreen(p))),
-          _average(pixels.map((p) => getBlue(p))),
+          _average(pixels.map((int p) => getRed(p))),
+          _average(pixels.map((int p) => getGreen(p))),
+          _average(pixels.map((int p) => getBlue(p))),
         ];
       case PixelComparison.precise:
         final int pixel = image.getPixel(x, y);
@@ -141,7 +140,7 @@ class ImageDiff {
           getBlue(pixel),
         ];
       default:
-        throw 'Unrecognized pixel comparison value: ${pixelComparison}';
+        throw 'Unrecognized pixel comparison value: $pixelComparison';
     }
   }
 
@@ -188,7 +187,7 @@ class ImageDiff {
 
 /// Returns text explaining pixel difference rate.
 String getPrintableDiffFilesInfo(double diffRate, double maxRate) =>
-    '(${((diffRate) * 100).toStringAsFixed(4)}% of pixels were different. '
+    '(${(diffRate * 100).toStringAsFixed(4)}% of pixels were different. '
     'Maximum allowed rate is: ${(maxRate * 100).toStringAsFixed(4)}%).';
 
 /// Downloads the repository that stores the golden files.
