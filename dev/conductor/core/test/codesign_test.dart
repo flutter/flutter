@@ -115,7 +115,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/HEAD',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -204,7 +204,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/HEAD',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -297,7 +297,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/HEAD',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -389,7 +389,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/HEAD',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -453,7 +453,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/HEAD',
+          'upstream/${FrameworkRepository.defaultBranch}',
         ]),
         const FakeCommand(command: <String>[
           'git',
