@@ -37,7 +37,7 @@ class MyStatelessWidget extends StatelessWidget {
         // with a widget that does not have an underlying Material.
         child: Material(
           // This is to clip Matrial shape for underlying CircleAvatar.
-          // Clip behavior is none by default. 
+          // Clip behavior is none by default.
           clipBehavior: Clip.antiAliasWithSaveLayer,
           // This provides a splash effect over the CircleAvatar.
           type: MaterialType.transparency,
