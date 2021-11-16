@@ -312,6 +312,17 @@ def to_gn_args(args):
       gn_args['skia_use_metal'] = True
       gn_args['shell_enable_metal'] = True
 
+    # Enable Vulkan on all platforms except for Android and iOS. This is just
+    # to save on mobile binary size, as there's no reason the Vulkan embedder
+    # features can't work on these platforms.
+    if args.target_os not in ['android', 'ios']:
+      gn_args['skia_use_vulkan'] = True
+      gn_args['shell_enable_vulkan'] = True
+      # Disable VMA's use of std::shared_mutex in environments where the
+      # standard library doesn't support it.
+      if args.target_os == 'ios' or sys.platform.startswith(('cygwin', 'win')):
+        gn_args['skia_disable_vma_stl_shared_mutex'] = True
+
     if sys.platform.startswith(('cygwin', 'win')):
       # The buildroot currently isn't set up to support Vulkan in the
       # Windows ANGLE build, so disable it regardless of enable_vulkan's value.

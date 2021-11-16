@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/fml/native_library.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "vulkan_handle.h"
@@ -105,6 +106,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(ResetCommandBuffer);
   DEFINE_PROC(ResetFences);
   DEFINE_PROC(WaitForFences);
+#ifndef TEST_VULKAN_PROCS
 #if OS_ANDROID
   DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
@@ -123,18 +125,20 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(SetBufferCollectionConstraintsFUCHSIAX);
   DEFINE_PROC(GetBufferCollectionPropertiesFUCHSIAX);
 #endif  // OS_FUCHSIA
+#endif  // TEST_VULKAN_PROCS
 
 #undef DEFINE_PROC
 
  private:
-  void* handle_;
+  fml::RefPtr<fml::NativeLibrary> handle_;
   bool acquired_mandatory_proc_addresses_;
   VulkanHandle<VkInstance> instance_;
   VulkanHandle<VkDevice> device_;
 
   VulkanProcTable();
+  VulkanProcTable(const char* path);
   ~VulkanProcTable();
-  bool OpenLibraryHandle();
+  bool OpenLibraryHandle(const char* path);
   bool SetupLoaderProcAddresses();
   bool CloseLibraryHandle();
   PFN_vkVoidFunction AcquireProc(

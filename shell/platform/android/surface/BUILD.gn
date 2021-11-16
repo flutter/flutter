@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/shell/config.gni")
+
 source_set("surface") {
   sources = [
     "android_surface.cc",
@@ -54,4 +56,8 @@ source_set("surface_mock") {
     "//third_party/googletest:gtest",
     "//third_party/skia",
   ]
+
+  if (shell_enable_vulkan) {
+    deps += [ "//flutter/vulkan" ]
+  }
 }
