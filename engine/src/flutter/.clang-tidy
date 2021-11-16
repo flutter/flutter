@@ -1,1 +1,8 @@
 Checks: 'google-*'
+
+# Only warnings treated as errors are reported
+# in the "ci/lint.sh" script and pre-push git hook.
+# Add checks when all warnings are fixed
+# to prevent new warnings from being introduced.
+# https://github.com/flutter/flutter/issues/93279
+WarningsAsErrors: 'clang-analyzer-osx.*'
