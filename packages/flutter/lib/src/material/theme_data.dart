@@ -466,11 +466,7 @@ class ThemeData with Diagnosticable {
     bottomSheetTheme ??= const BottomSheetThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
     cardTheme ??= const CardTheme();
-    chipTheme ??= ChipThemeData.fromDefaults(
-      secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
-      brightness: colorScheme.brightness,
-      labelStyle: textTheme.bodyText1!,
-    );
+    chipTheme ??= const ChipThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
