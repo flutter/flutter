@@ -509,6 +509,7 @@ class FrameworkRepository extends Repository {
         url: 'file://$upstreamPath/',
       ),
       previousCheckoutLocation: previousCheckoutLocation,
+      initialRef: 'HEAD', // local may not have default branch
     );
   }
 
