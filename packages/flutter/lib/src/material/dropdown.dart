@@ -1276,6 +1276,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       borderRadius: widget.borderRadius,
     );
 
+    if (!_hasPrimaryFocus) {
+      focusNode?.requestFocus();
+    }
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null)
