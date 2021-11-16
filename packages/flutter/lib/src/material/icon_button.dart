@@ -34,8 +34,8 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// When button is transformed or rendered in a without an underlying [Material] widget
-/// it renders splash effect of the button undernearth trasforming widget.
+/// When the button is transformed or rendered in a without an underlying [Material] widget
+/// it renders splash effect of the button undernearth the transforming widget.
 ///
 /// Provide a transparent [Material] widget when rendering the button on a widget
 /// without an underlying [Material] widget (e.g. [CircleAvatar]). This also means
@@ -101,10 +101,10 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// {@tool dartpad}
 /// Here is an example of an [IconButton] rendered on a widget that does not have an
-/// underyling [Material] widget. In this case, we provide transparent [Material] to [IconButton] widget
+/// underyling [Material] widget. In this case, we wrap [IconButton] widget with transparent [Material]
 /// with a custom shape, if necessary and set clipBehavior to [Clip.antiAliasWithSaveLayer].
 ///
-/// This helps to render splash effect correctly over the IconButton instead of beneath the [IconButton] widget.
+/// This helps to render splash effect correctly over the Parent widget instead of beneath the [IconButton] widget.
 ///
 /// ** See code in examples/api/lib/material/icon_button/icon_button.2.dart **
 /// {@end-tool}
