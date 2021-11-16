@@ -2050,8 +2050,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(widget.baseStyle)
       .copyWith(height: 1)
       .merge(getFallbackTextStyle())
-      .merge(floatingLabelStyle)
-      .copyWith(color: getFallbackTextStyle().color);
+      .merge(floatingLabelStyle);
 
     if (decoration!.errorText != null) {
       style = style.copyWith(color: decoration!.errorStyle?.color ?? themeData.errorColor);

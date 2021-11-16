@@ -5715,4 +5715,45 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, -5.5);
 
   });
+
+  testWidgets('InputDecorator label uses errorStyle color when errorText is not null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890
+    const TextStyle normalStyle = TextStyle(color: Colors.blue);
+    const TextStyle errorStyle = TextStyle(color: Colors.red);
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          filled: true,
+          labelStyle: normalStyle,
+          errorStyle: errorStyle,
+        ),
+      ),
+    );
+
+    AnimatedDefaultTextStyle label = tester.widget(find.byType(AnimatedDefaultTextStyle).last);
+    expect(label.style.color, normalStyle.color);
+
+    // If errorText is specified then label text should use errorStyle color
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          errorText: 'error',
+          filled: true,
+          labelStyle: normalStyle,
+          errorStyle: errorStyle,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    label = tester.widget(find.byType(AnimatedDefaultTextStyle).last);
+    expect(label.style.color, errorStyle.color);
+  });
 }
