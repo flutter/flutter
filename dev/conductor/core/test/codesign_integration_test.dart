@@ -35,6 +35,11 @@ void main() {
       fileSystem.file(platform.executable),
     );
 
+    final String currentHead = (processManager.runSync(
+      <String>['git', 'rev-parse', 'HEAD'],
+      workingDirectory: flutterRoot.path,
+    ).stdout as String).trim();
+
     final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
       ..addCommand(
           CodesignCommand(checkouts: checkouts, flutterRoot: flutterRoot));
@@ -45,6 +50,8 @@ void main() {
         '--verify',
         // Only verify if the correct binaries are in the cache
         '--no-signatures',
+        '--revision',
+        currentHead,
       ]);
     } on ConductorException catch (e) {
       print(stdio.error);
