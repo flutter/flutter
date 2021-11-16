@@ -4868,5 +4868,6 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
-  });
+    // This golden file test is marked negative on web
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/93719
 }
