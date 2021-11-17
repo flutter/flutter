@@ -118,7 +118,7 @@ GtkWidget* fl_gl_area_new(GdkGLContext* context) {
   g_return_val_if_fail(GDK_IS_GL_CONTEXT(context), nullptr);
   FlGLArea* area =
       reinterpret_cast<FlGLArea*>(g_object_new(fl_gl_area_get_type(), nullptr));
-  area->context = context;
+  area->context = GDK_GL_CONTEXT(g_object_ref(context));
   return GTK_WIDGET(area);
 }
 
