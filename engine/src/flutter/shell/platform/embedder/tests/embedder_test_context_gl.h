@@ -16,7 +16,7 @@ class EmbedderTestContextGL : public EmbedderTestContext {
   using GLGetFBOCallback = std::function<void(FlutterFrameInfo frame_info)>;
   using GLPresentCallback = std::function<void(uint32_t fbo_id)>;
 
-  EmbedderTestContextGL(std::string assets_path = "");
+  explicit EmbedderTestContextGL(std::string assets_path = "");
 
   ~EmbedderTestContextGL() override;
 

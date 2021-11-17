@@ -41,7 +41,7 @@ class UIDartState : public tonic::DartState {
   ///         UIDartState, a pointer to the resource can be added to this
   ///         struct with appropriate default construction.
   struct Context {
-    Context(const TaskRunners& task_runners);
+    explicit Context(const TaskRunners& task_runners);
 
     Context(const TaskRunners& task_runners,
             fml::WeakPtr<SnapshotDelegate> snapshot_delegate,

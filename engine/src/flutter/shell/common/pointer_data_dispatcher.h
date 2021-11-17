@@ -84,7 +84,8 @@ class PointerDataDispatcher {
 ///
 class DefaultPointerDataDispatcher : public PointerDataDispatcher {
  public:
-  DefaultPointerDataDispatcher(Delegate& delegate) : delegate_(delegate) {}
+  explicit DefaultPointerDataDispatcher(Delegate& delegate)
+      : delegate_(delegate) {}
 
   // |PointerDataDispatcer|
   void DispatchPacket(std::unique_ptr<PointerDataPacket> packet,
@@ -138,7 +139,7 @@ class DefaultPointerDataDispatcher : public PointerDataDispatcher {
 /// See also input_events_unittests.cc where we test all our claims above.
 class SmoothPointerDataDispatcher : public DefaultPointerDataDispatcher {
  public:
-  SmoothPointerDataDispatcher(Delegate& delegate);
+  explicit SmoothPointerDataDispatcher(Delegate& delegate);
 
   // |PointerDataDispatcer|
   void DispatchPacket(std::unique_ptr<PointerDataPacket> packet,

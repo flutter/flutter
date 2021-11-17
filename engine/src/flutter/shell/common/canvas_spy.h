@@ -24,7 +24,7 @@ class DidDrawCanvas;
 /// are specific to empty canvases.
 class CanvasSpy {
  public:
-  CanvasSpy(SkCanvas* target_canvas);
+  explicit CanvasSpy(SkCanvas* target_canvas);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns true if any non transparent content has been drawn

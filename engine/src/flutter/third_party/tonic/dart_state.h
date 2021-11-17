@@ -38,8 +38,9 @@ class DartState : public std::enable_shared_from_this<DartState> {
     DartApiScope api_scope_;
   };
 
-  DartState(int dirfd = -1,
-            std::function<void(Dart_Handle)> message_epilogue = nullptr);
+  explicit DartState(
+      int dirfd = -1,
+      std::function<void(Dart_Handle)> message_epilogue = nullptr);
   virtual ~DartState();
 
   static DartState* From(Dart_Isolate isolate);

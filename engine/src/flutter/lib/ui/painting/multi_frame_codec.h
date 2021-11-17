@@ -13,7 +13,7 @@ namespace flutter {
 
 class MultiFrameCodec : public Codec {
  public:
-  MultiFrameCodec(std::shared_ptr<ImageGenerator> generator);
+  explicit MultiFrameCodec(std::shared_ptr<ImageGenerator> generator);
 
   ~MultiFrameCodec() override;
 
@@ -37,7 +37,7 @@ class MultiFrameCodec : public Codec {
   // shares it with the IO task runner's decoding work, and sets the live_
   // member to false when it is destructed.
   struct State {
-    State(std::shared_ptr<ImageGenerator> generator);
+    explicit State(std::shared_ptr<ImageGenerator> generator);
 
     const std::shared_ptr<ImageGenerator> generator_;
     const int frameCount_;

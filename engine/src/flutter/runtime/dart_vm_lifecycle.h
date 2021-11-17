@@ -49,7 +49,7 @@ class DartVMRef {
 
   static std::shared_ptr<IsolateNameServer> GetIsolateNameServer();
 
-  operator bool() const { return static_cast<bool>(vm_); }
+  explicit operator bool() const { return static_cast<bool>(vm_); }
 
   DartVM* get() {
     FML_DCHECK(vm_);
@@ -81,7 +81,7 @@ class DartVMRef {
 
   std::shared_ptr<DartVM> vm_;
 
-  DartVMRef(std::shared_ptr<DartVM> vm);
+  explicit DartVMRef(std::shared_ptr<DartVM> vm);
 
   // Only used by Dart Isolate to register itself with the VM.
   static DartVM* GetRunningVM();

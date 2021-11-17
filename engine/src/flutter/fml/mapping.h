@@ -44,9 +44,9 @@ class FileMapping final : public Mapping {
     kExecute,
   };
 
-  FileMapping(const fml::UniqueFD& fd,
-              std::initializer_list<Protection> protection = {
-                  Protection::kRead});
+  explicit FileMapping(const fml::UniqueFD& fd,
+                       std::initializer_list<Protection> protection = {
+                           Protection::kRead});
 
   ~FileMapping() override;
 
@@ -91,9 +91,9 @@ class FileMapping final : public Mapping {
 
 class DataMapping final : public Mapping {
  public:
-  DataMapping(std::vector<uint8_t> data);
+  explicit DataMapping(std::vector<uint8_t> data);
 
-  DataMapping(const std::string& string);
+  explicit DataMapping(const std::string& string);
 
   ~DataMapping() override;
 

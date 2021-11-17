@@ -33,7 +33,8 @@ class ScopedCleanupClosure {
  public:
   ScopedCleanupClosure() = default;
 
-  ScopedCleanupClosure(const fml::closure& closure) : closure_(closure) {}
+  explicit ScopedCleanupClosure(const fml::closure& closure)
+      : closure_(closure) {}
 
   ~ScopedCleanupClosure() {
     if (closure_) {

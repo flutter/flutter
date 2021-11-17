@@ -14,7 +14,7 @@ namespace fml {
 
 class CountDownLatch {
  public:
-  CountDownLatch(size_t count);
+  explicit CountDownLatch(size_t count);
 
   ~CountDownLatch();
 

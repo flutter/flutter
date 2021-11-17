@@ -11,7 +11,7 @@ namespace benchmarking {
 
 class ScopedPauseTiming {
  public:
-  ScopedPauseTiming(::benchmark::State& state, bool enabled = true)
+  explicit ScopedPauseTiming(::benchmark::State& state, bool enabled = true)
       : state_(state), enabled_(enabled) {
     if (enabled_) {
       state_.PauseTiming();

@@ -16,7 +16,7 @@ namespace tonic {
 
 class DartArgIterator {
  public:
-  DartArgIterator(Dart_NativeArguments args, int start_index = 1)
+  explicit DartArgIterator(Dart_NativeArguments args, int start_index = 1)
       : args_(args), index_(start_index), had_exception_(false) {}
 
   template <typename T>

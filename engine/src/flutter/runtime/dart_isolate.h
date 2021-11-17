@@ -415,7 +415,7 @@ class DartIsolate : public UIDartState {
   friend class IsolateConfiguration;
   class AutoFireClosure {
    public:
-    AutoFireClosure(const fml::closure& closure);
+    explicit AutoFireClosure(const fml::closure& closure);
 
     ~AutoFireClosure();
 

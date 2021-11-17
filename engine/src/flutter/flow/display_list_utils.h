@@ -199,7 +199,7 @@ class ClipBoundsDispatchHelper : public virtual Dispatcher,
  public:
   ClipBoundsDispatchHelper() : ClipBoundsDispatchHelper(nullptr) {}
 
-  ClipBoundsDispatchHelper(const SkRect* cull_rect)
+  explicit ClipBoundsDispatchHelper(const SkRect* cull_rect)
       : has_clip_(cull_rect),
         bounds_(cull_rect && !cull_rect->isEmpty() ? *cull_rect
                                                    : SkRect::MakeEmpty()) {}
@@ -279,7 +279,7 @@ class DisplayListBoundsCalculator final
   // queried using |isUnbounded| if an alternate plan is available
   // for such cases.
   // The flag should never be set if a cull_rect is provided.
-  DisplayListBoundsCalculator(const SkRect* cull_rect = nullptr);
+  explicit DisplayListBoundsCalculator(const SkRect* cull_rect = nullptr);
 
   void setStrokeCap(SkPaint::Cap cap) override;
   void setStrokeJoin(SkPaint::Join join) override;
@@ -403,7 +403,8 @@ class DisplayListBoundsCalculator final
     // the stack.
     // Some layers may substitute their own accumulator to compute
     // their own local bounds while they are on the stack.
-    LayerData(BoundsAccumulator* outer) : outer_(outer), is_unbounded_(false) {}
+    explicit LayerData(BoundsAccumulator* outer)
+        : outer_(outer), is_unbounded_(false) {}
     virtual ~LayerData() = default;
 
     // The accumulator to use while this layer is put in play by

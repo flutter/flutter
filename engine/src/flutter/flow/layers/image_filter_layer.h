@@ -12,7 +12,7 @@ namespace flutter {
 
 class ImageFilterLayer : public MergedContainerLayer {
  public:
-  ImageFilterLayer(sk_sp<SkImageFilter> filter);
+  explicit ImageFilterLayer(sk_sp<SkImageFilter> filter);
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 

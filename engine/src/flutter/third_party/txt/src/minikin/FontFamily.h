@@ -41,7 +41,7 @@ class FontStyle {
       : FontStyle(0 /* variant */, 4 /* weight */, false /* italic */) {}
   FontStyle(int weight, bool italic)
       : FontStyle(0 /* variant */, weight, italic) {}
-  FontStyle(uint32_t langListId)  // NOLINT(implicit)
+  FontStyle(uint32_t langListId)  // NOLINT(google-explicit-constructor)
       : FontStyle(langListId,
                   0 /* variant */,
                   4 /* weight */,

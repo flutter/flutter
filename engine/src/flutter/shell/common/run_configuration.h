@@ -66,7 +66,8 @@ class RunConfiguration {
   ///
   /// @param[in]  configuration  The configuration
   ///
-  RunConfiguration(std::unique_ptr<IsolateConfiguration> configuration);
+  explicit RunConfiguration(
+      std::unique_ptr<IsolateConfiguration> configuration);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a run configuration with the specified isolate

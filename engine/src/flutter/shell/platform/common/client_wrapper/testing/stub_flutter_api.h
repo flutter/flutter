@@ -87,7 +87,7 @@ class StubFlutterApi {
 class ScopedStubFlutterApi {
  public:
   // Calls SetTestFlutterStub with |stub|.
-  ScopedStubFlutterApi(std::unique_ptr<StubFlutterApi> stub);
+  explicit ScopedStubFlutterApi(std::unique_ptr<StubFlutterApi> stub);
 
   // Restores the previous test stub.
   ~ScopedStubFlutterApi();

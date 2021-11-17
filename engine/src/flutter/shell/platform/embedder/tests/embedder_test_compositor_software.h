@@ -12,7 +12,7 @@ namespace testing {
 
 class EmbedderTestCompositorSoftware : public EmbedderTestCompositor {
  public:
-  EmbedderTestCompositorSoftware(SkISize surface_size);
+  explicit EmbedderTestCompositorSoftware(SkISize surface_size);
 
   ~EmbedderTestCompositorSoftware() override;
 

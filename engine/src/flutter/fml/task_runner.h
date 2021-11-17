@@ -63,7 +63,7 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
                                const fml::closure& task);
 
  protected:
-  TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
+  explicit TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
 
  private:
   fml::RefPtr<MessageLoopImpl> loop_;

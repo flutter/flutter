@@ -71,7 +71,7 @@ class Pipeline {
       return result;
     }
 
-    operator bool() const { return continuation_ != nullptr; }
+    explicit operator bool() const { return continuation_ != nullptr; }
 
    private:
     friend class Pipeline;

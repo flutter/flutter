@@ -29,7 +29,7 @@ namespace txt {
 
 class AssetFontManager : public SkFontMgr {
  public:
-  AssetFontManager(std::unique_ptr<FontAssetProvider> font_provider);
+  explicit AssetFontManager(std::unique_ptr<FontAssetProvider> font_provider);
 
   ~AssetFontManager() override;
 

@@ -56,7 +56,7 @@ class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {
   Handle handle_ = nullptr;
   bool close_handle_ = true;
 
-  NativeLibrary(const char* path);
+  explicit NativeLibrary(const char* path);
 
   NativeLibrary(Handle handle, bool close_handle);
 

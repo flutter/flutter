@@ -37,7 +37,7 @@ class SkiaConcurrentExecutor : public SkExecutor {
   ///
   /// @param[in]  on_work  The work callback.
   ///
-  SkiaConcurrentExecutor(const OnWorkCallback& on_work);
+  explicit SkiaConcurrentExecutor(const OnWorkCallback& on_work);
 
   // |SkExecutor|
   ~SkiaConcurrentExecutor() override;

@@ -57,7 +57,7 @@ class GLContextResult {
   bool GetResult();
 
  protected:
-  GLContextResult(bool static_result);
+  explicit GLContextResult(bool static_result);
   bool result_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GLContextResult);
@@ -78,7 +78,7 @@ class GLContextDefaultResult : public GLContextResult {
   ///
   /// @param  static_result a static value that will be returned from
   /// |GetResult|
-  GLContextDefaultResult(bool static_result);
+  explicit GLContextDefaultResult(bool static_result);
 
   ~GLContextDefaultResult() override;
 
@@ -99,7 +99,7 @@ class GLContextSwitch final : public GLContextResult {
   /// @param  context The context that is going to be set as the current
   /// context. The |GLContextSwitch| should not outlive the owner of the gl
   /// context wrapped inside the `context`.
-  GLContextSwitch(std::unique_ptr<SwitchableGLContext> context);
+  explicit GLContextSwitch(std::unique_ptr<SwitchableGLContext> context);
 
   ~GLContextSwitch() override;
 

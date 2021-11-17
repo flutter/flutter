@@ -12,7 +12,7 @@ namespace testing {
 
 class EmbedderTestContextSoftware : public EmbedderTestContext {
  public:
-  EmbedderTestContextSoftware(std::string assets_path = "");
+  explicit EmbedderTestContextSoftware(std::string assets_path = "");
 
   ~EmbedderTestContextSoftware() override;
 

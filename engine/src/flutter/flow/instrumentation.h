@@ -16,7 +16,7 @@ namespace flutter {
 
 class Stopwatch {
  public:
-  Stopwatch(fml::Milliseconds frame_budget = fml::kDefaultFrameBudget);
+  explicit Stopwatch(fml::Milliseconds frame_budget = fml::kDefaultFrameBudget);
 
   ~Stopwatch();
 

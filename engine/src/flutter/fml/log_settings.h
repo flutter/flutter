@@ -37,7 +37,7 @@ int GetMinLogLevel();
 
 class ScopedSetLogSettings {
  public:
-  ScopedSetLogSettings(const LogSettings& settings);
+  explicit ScopedSetLogSettings(const LogSettings& settings);
   ~ScopedSetLogSettings();
 
  private:

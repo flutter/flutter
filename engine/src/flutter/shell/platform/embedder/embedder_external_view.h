@@ -26,7 +26,8 @@ class EmbedderExternalView {
 
     ViewIdentifier() {}
 
-    ViewIdentifier(PlatformViewID view_id) : platform_view_id(view_id) {}
+    explicit ViewIdentifier(PlatformViewID view_id)
+        : platform_view_id(view_id) {}
 
     struct Hash {
       constexpr std::size_t operator()(const ViewIdentifier& desc) const {

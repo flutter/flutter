@@ -110,7 +110,8 @@ class HyphenEdit {
   static uint32_t editForNextLine(HyphenationType type);
 
   HyphenEdit() : hyphen(NO_EDIT) {}
-  HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) {}  // NOLINT(implicit)
+  HyphenEdit(uint32_t hyphenInt)  // NOLINT(google-explicit-constructor)
+      : hyphen(hyphenInt) {}
   uint32_t getHyphen() const { return hyphen; }
   bool operator==(const HyphenEdit& other) const {
     return hyphen == other.hyphen;

@@ -15,7 +15,7 @@ namespace testing {
 
 class TestGLSurface {
  public:
-  TestGLSurface(SkISize surface_size);
+  explicit TestGLSurface(SkISize surface_size);
 
   ~TestGLSurface();
 

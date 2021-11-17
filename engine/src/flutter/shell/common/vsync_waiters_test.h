@@ -49,7 +49,7 @@ class ConstantFiringVsyncWaiter : public VsyncWaiter {
   static constexpr fml::TimePoint frame_target_time =
       fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(100));
 
-  ConstantFiringVsyncWaiter(TaskRunners task_runners)
+  explicit ConstantFiringVsyncWaiter(TaskRunners task_runners)
       : VsyncWaiter(std::move(task_runners)) {}
 
  protected:

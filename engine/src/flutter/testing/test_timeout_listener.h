@@ -19,7 +19,7 @@ class PendingTests;
 
 class TestTimeoutListener : public ::testing::EmptyTestEventListener {
  public:
-  TestTimeoutListener(fml::TimeDelta timeout);
+  explicit TestTimeoutListener(fml::TimeDelta timeout);
 
   ~TestTimeoutListener();
 

@@ -82,7 +82,7 @@ DartVMRef DartVMRef::Create(Settings settings,
 
   if (!vm) {
     FML_LOG(ERROR) << "Could not create Dart VM instance.";
-    return {nullptr};
+    return DartVMRef{nullptr};
   }
 
   gVMData = vm->GetVMData();
