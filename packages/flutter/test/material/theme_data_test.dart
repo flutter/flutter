@@ -51,6 +51,16 @@ void main() {
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
+  test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
+    const TextTheme noBodyText1TextTheme = TextTheme();
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
+
+    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.bodyText1!.color!.withAlpha(0xde)));
+    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.bodyText1!.color!.withAlpha(0xde)));
+  });
+
   test('Default icon theme contrasts with brightness', () {
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
