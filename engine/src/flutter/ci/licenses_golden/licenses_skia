@@ -1,4 +1,4 @@
-Signature: e67f62456bccc7d9c756c0c1e8d7a363
+Signature: 92dfee6edf4fd539a7ccb4a2272547c3
 
 UNUSED LICENSES:
 
@@ -2371,7 +2371,6 @@ FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
 FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
-FILE: ../../../third_party/skia/experimental/graphite/include/private/GraphiteTypesPriv.h
 FILE: ../../../third_party/skia/experimental/graphite/src/BackendTexture.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
@@ -2393,6 +2392,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/DrawList.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawOrder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawTypes.h
+FILE: ../../../third_party/skia/experimental/graphite/src/EnumBitMask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
 FILE: ../../../third_party/skia/experimental/graphite/src/GpuWorkSubmission.h
@@ -2413,6 +2414,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Renderer.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceProvider.h
+FILE: ../../../third_party/skia/experimental/graphite/src/ResourceTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/src/SkStuff.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Surface_Graphite.h
@@ -2438,6 +2440,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Shape.h
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Transform.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/Transform_graphite.h
+FILE: ../../../third_party/skia/experimental/graphite/src/geom/VectorTypes.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCaps.mm
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlCommandBuffer.h
@@ -2535,6 +2538,8 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsConstantExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramVisitor.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLSwitchCaseContainsExit.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugInfo.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugInfo.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLChildCall.cpp
