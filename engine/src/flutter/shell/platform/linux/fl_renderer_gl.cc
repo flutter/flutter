@@ -103,7 +103,6 @@ static gboolean fl_renderer_gl_present_layers(FlRenderer* renderer,
       case kFlutterLayerContentTypeBackingStore: {
         const FlutterBackingStore* backing_store = layer->backing_store;
         auto framebuffer = &backing_store->open_gl.framebuffer;
-        g_object_ref(context);
         fl_view_add_gl_area(
             view, context,
             reinterpret_cast<FlBackingStoreProvider*>(framebuffer->user_data));
