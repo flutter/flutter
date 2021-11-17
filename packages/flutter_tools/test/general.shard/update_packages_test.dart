@@ -108,7 +108,7 @@ void main() {
     // Create already parsed pubspecs.
     final PubspecYaml flutterPubspec = PubspecYaml(flutter);
 
-    final PubspecDependency gitDependency = flutterPubspec.dependencies.whereType<PubspecDependency>().firstWhere((PubspecDependency dep) => dep.kind == DependencyKind.git);
+    final PubspecDependency gitDependency = flutterPubspec.dependencies.firstWhere((PubspecDependency dep) => dep.kind == DependencyKind.git);
     expect(
       gitDependency.lockLine,
       '''
