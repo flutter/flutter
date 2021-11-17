@@ -13,8 +13,11 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
@@ -480,6 +483,27 @@ abstract class CreateBase extends FlutterCommand {
     }
 
     if (boolArg('pub')) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        platform: globals.platform,
+        projectDir: project.directory,
+        generateDartPluginRegistry: true,
+      );
+
+      // Generate the l10n synthetic package that will be injected into the
+      // package_config in the call to pub.get() below.
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+
       await pub.get(
         context: PubContext.create,
         directory: directory.path,
