@@ -222,7 +222,7 @@ class FontFallbackData {
 
   void registerFallbackFont(String family, Uint8List bytes) {
     final SkTypeface? typeface =
-        canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes);
+        canvasKit.Typeface.MakeFreeTypeFaceFromData(bytes.buffer);
     if (typeface == null) {
       printWarning('Failed to parse fallback font $family as a font.');
       return;

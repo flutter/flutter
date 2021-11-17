@@ -84,7 +84,7 @@ class SkiaFontCollection {
     }
 
     final SkTypeface? typeface =
-        canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(list);
+        canvasKit.Typeface.MakeFreeTypeFaceFromData(list.buffer);
     if (typeface != null) {
       _registeredFonts.add(RegisteredFont(list, fontFamily, typeface));
       await ensureFontsLoaded();
@@ -160,7 +160,7 @@ class SkiaFontCollection {
 
     final Uint8List bytes = buffer.asUint8List();
     final SkTypeface? typeface =
-        canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes);
+        canvasKit.Typeface.MakeFreeTypeFaceFromData(bytes.buffer);
     if (typeface != null) {
       return RegisteredFont(bytes, family, typeface);
     } else {
