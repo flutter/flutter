@@ -43,12 +43,65 @@ bool FocusDelegate::HandlePlatformMessage(
       next_focus_request_ = std::move(response);
     }
   } else if (method->value == "View.focus.request") {
-    return RequestFocus(std::move(request), std::move(response));
+    auto args_it = request.FindMember("args");
+    if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return false;
+    }
+    const auto& args = args_it->value;
+
+    auto view_ref = args.FindMember("viewRef");
+    if (!view_ref->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not a uint64";
+      return false;
+    }
+
+    zx_handle_t handle = view_ref->value.GetUint64();
+    zx_handle_t out_handle;
+    zx_status_t status =
+        zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
+      return false;
+    }
+    auto ref = fuchsia::ui::views::ViewRef({
+        .reference = zx::eventpair(out_handle),
+    });
+    return RequestFocusByViewRef(std::move(ref), std::move(response));
+
+  } else if (method->value == "View.focus.requestById") {
+    auto args_it = request.FindMember("args");
+    if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found.";
+      return false;
+    }
+    const auto& args = args_it->value;
+
+    auto view_id = args.FindMember("viewId");
+    if (!view_id->value.IsUint64()) {
+      FML_LOG(ERROR) << "Argument 'viewId' is not a uint64";
+      return false;
+    }
+
+    auto id = view_id->value.GetUint64();
+    if (child_view_view_refs_.count(id) != 1) {
+      FML_LOG(ERROR) << "Argument 'viewId' (" << id
+                     << ") does not refer to a valid ChildView";
+      return false;
+    }
+
+    return RequestFocusById(id, std::move(response));
   } else {
     return false;
   }
   // All of our methods complete the platform message response.
   return true;
+}
+
+void FocusDelegate::OnChildViewViewRef(uint64_t view_id,
+                                       fuchsia::ui::views::ViewRef view_ref) {
+  FML_CHECK(child_view_view_refs_.count(view_id) == 0);
+  child_view_view_refs_[view_id] = std::move(view_ref);
 }
 
 void FocusDelegate::Complete(
@@ -60,35 +113,24 @@ void FocusDelegate::Complete(
   }
 }
 
-bool FocusDelegate::RequestFocus(
-    rapidjson::Value request,
+bool FocusDelegate::RequestFocusById(
+    uint64_t view_id,
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
-  auto args_it = request.FindMember("args");
-  if (args_it == request.MemberEnd() || !args_it->value.IsObject()) {
-    FML_LOG(ERROR) << "No arguments found.";
-    return false;
-  }
-  const auto& args = args_it->value;
-
-  auto view_ref = args.FindMember("viewRef");
-  if (!view_ref->value.IsUint64()) {
-    FML_LOG(ERROR) << "Argument 'viewRef' is not a uint64";
-    return false;
-  }
-
-  zx_handle_t handle = view_ref->value.GetUint64();
-  zx_handle_t out_handle;
-  zx_status_t status =
-      zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
+  fuchsia::ui::views::ViewRef ref;
+  auto status = child_view_view_refs_[view_id].Clone(&ref);
   if (status != ZX_OK) {
-    FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
+    FML_LOG(ERROR) << "Failed to clone ViewRef";
     return false;
   }
-  auto ref = fuchsia::ui::views::ViewRef({
-      .reference = zx::eventpair(out_handle),
-  });
+
+  return RequestFocusByViewRef(std::move(ref), std::move(response));
+}
+
+bool FocusDelegate::RequestFocusByViewRef(
+    fuchsia::ui::views::ViewRef view_ref,
+    fml::RefPtr<flutter::PlatformMessageResponse> response) {
   focuser_->RequestFocus(
-      std::move(ref),
+      std::move(view_ref),
       [this, response = std::move(response)](
           fuchsia::ui::views::Focuser_RequestFocus_Result result) {
         int result_code =

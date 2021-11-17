@@ -136,6 +136,21 @@ void FlatlandPlatformView::OnChildViewStatus(
           });
 }
 
+void FlatlandPlatformView::OnChildViewViewRef(
+    uint64_t content_id,
+    uint64_t view_id,
+    fuchsia::ui::views::ViewRef view_ref) {
+  FML_CHECK(child_view_info_.count(content_id) == 1);
+
+  focus_delegate_->OnChildViewViewRef(view_id, std::move(view_ref));
+
+  child_view_info_.at(content_id)
+      .child_view_watcher->GetViewRef(
+          [this, content_id, view_id](fuchsia::ui::views::ViewRef view_ref) {
+            this->OnChildViewViewRef(content_id, view_id, std::move(view_ref));
+          });
+}
+
 void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
                                         int64_t view_id_raw,
                                         bool hit_testable,
@@ -147,10 +162,15 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
                            fuchsia::ui::composition::ContentId content_id,
                            fuchsia::ui::composition::ChildViewWatcherPtr
                                child_view_watcher) {
+    FML_CHECK(weak);
+    FML_CHECK(weak->child_view_info_.count(content_id.value) == 0);
+    FML_CHECK(child_view_watcher);
+
     child_view_watcher.set_error_handler([](zx_status_t status) {
       FML_LOG(ERROR) << "Interface error on: ChildViewWatcher status: "
                      << status;
     });
+
     platform_task_runner->PostTask(
         fml::MakeCopyable([weak, view_id, content_id,
                            watcher = std::move(child_view_watcher)]() mutable {
@@ -161,8 +181,6 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
             return;
           }
 
-          FML_DCHECK(weak->child_view_info_.count(content_id.value) == 0);
-          FML_DCHECK(watcher);
           weak->child_view_info_.emplace(
               std::piecewise_construct, std::forward_as_tuple(content_id.value),
               std::forward_as_tuple(view_id, std::move(watcher)));
@@ -172,6 +190,14 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
                   [weak, id = content_id.value](
                       fuchsia::ui::composition::ChildViewStatus status) {
                     weak->OnChildViewStatus(id, status);
+                  });
+
+          weak->child_view_info_.at(content_id.value)
+              .child_view_watcher->GetViewRef(
+                  [weak, content_id = content_id.value,
+                   view_id](fuchsia::ui::views::ViewRef view_ref) {
+                    weak->OnChildViewViewRef(content_id, view_id,
+                                             std::move(view_ref));
                   });
         }));
   };
