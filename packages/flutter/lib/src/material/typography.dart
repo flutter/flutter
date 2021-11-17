@@ -565,7 +565,7 @@ class Typography with Diagnosticable {
     bodyMedium : TextStyle(debugLabel: 'englishLike bodyMedium 2014',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     bodySmall   : TextStyle(debugLabel: 'englishLike bodySmall 2014',  inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     labelLarge    : TextStyle(debugLabel: 'englishLike labelLarge 2014',   inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    labelMedium  : TextStyle(debugLabel: 'englishLike labelMedium 2014', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
+    labelMedium  : TextStyle(debugLabel: 'englishLike labelMedium 2014', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     labelSmall  : TextStyle(debugLabel: 'englishLike labelSmall 2014', inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
