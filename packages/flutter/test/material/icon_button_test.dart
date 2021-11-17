@@ -80,7 +80,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-            data: const IconThemeData(size: null),
+            data: const IconThemeData(),
             child: IconButton(
               focusNode: focusNode,
               onPressed: mockOnPressedFunction.handler,
