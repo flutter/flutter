@@ -72,6 +72,7 @@ namespace testing {
 
 namespace {
 constexpr uint64_t kScanCodeKeyA = 0x1e;
+constexpr uint64_t kScanCodeAltLeft = 0x38;
 constexpr uint64_t kScanCodeNumpad1 = 0x4f;
 constexpr uint64_t kScanCodeNumLock = 0x45;
 constexpr uint64_t kScanCodeControl = 0x1d;
@@ -79,6 +80,7 @@ constexpr uint64_t kScanCodeShiftLeft = 0x2a;
 constexpr uint64_t kScanCodeShiftRight = 0x36;
 
 constexpr uint64_t kVirtualKeyA = 0x41;
+constexpr uint64_t kVirtualAltLeft = 0xa4;
 
 using namespace ::flutter::testing::keycodes;
 }  // namespace
@@ -1002,6 +1004,52 @@ TEST(KeyboardKeyEmbedderHandlerTest, SynthesizeWithInitialTogglingState) {
   event->callback(true, event->user_data);
   EXPECT_EQ(last_handled, true);
   results.clear();
+}
+
+TEST(KeyboardKeyEmbedderHandlerTest, SysKeyPress) {
+  TestKeystate key_state;
+  std::vector<TestFlutterKeyEvent> results;
+  TestFlutterKeyEvent* event;
+  bool last_handled = false;
+
+  std::unique_ptr<KeyboardKeyEmbedderHandler> handler =
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [&results](const FlutterKeyEvent& event,
+                     FlutterKeyEventCallback callback, void* user_data) {
+            results.emplace_back(event, callback, user_data);
+          },
+          key_state.Getter());
+
+  // Press KeyAltLeft.
+  handler->KeyboardHook(
+      kVirtualAltLeft, kScanCodeAltLeft, WM_SYSKEYDOWN, 0, false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(last_handled, false);
+  EXPECT_EQ(results.size(), 1);
+  event = results.data();
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalAltLeft);
+  EXPECT_EQ(event->logical, kLogicalAltLeft);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, false);
+
+  event->callback(true, event->user_data);
+  EXPECT_EQ(last_handled, true);
+  results.clear();
+  key_state.Set(kVirtualAltLeft, true);
+
+  // Release KeyAltLeft.
+  handler->KeyboardHook(
+      kVirtualAltLeft, kScanCodeAltLeft, WM_SYSKEYUP, 0, false, true,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(results.size(), 1);
+  event = results.data();
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalAltLeft);
+  EXPECT_EQ(event->logical, kLogicalAltLeft);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, false);
+  event->callback(false, event->user_data);
 }
 
 }  // namespace testing

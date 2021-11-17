@@ -189,9 +189,11 @@ void KeyboardKeyChannelHandler::KeyboardHook(
   event.AddMember(kModifiersKey, GetModsForKeyState(), allocator);
 
   switch (action) {
+    case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
       event.AddMember(kTypeKey, kKeyDown, allocator);
       break;
+    case WM_SYSKEYUP:
     case WM_KEYUP:
       event.AddMember(kTypeKey, kKeyUp, allocator);
       break;

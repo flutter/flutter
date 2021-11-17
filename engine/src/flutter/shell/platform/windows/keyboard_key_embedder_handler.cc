@@ -167,8 +167,9 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     std::function<void(bool)> callback) {
   const uint64_t physical_key = GetPhysicalKey(scancode, extended);
   const uint64_t logical_key = GetLogicalKey(key, extended, scancode);
-  assert(action == WM_KEYDOWN || action == WM_KEYUP);
-  const bool is_physical_down = action == WM_KEYDOWN;
+  assert(action == WM_KEYDOWN || action == WM_KEYUP ||
+         action == WM_SYSKEYDOWN || action == WM_SYSKEYUP);
+  const bool is_physical_down = action == WM_KEYDOWN || action == WM_SYSKEYDOWN;
 
   auto last_logical_record_iter = pressingRecords_.find(physical_key);
   const bool had_record = last_logical_record_iter != pressingRecords_.end();

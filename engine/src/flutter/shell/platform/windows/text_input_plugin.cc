@@ -70,7 +70,7 @@ bool TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
   if (active_model_ == nullptr) {
     return false;
   }
-  if (action == WM_KEYDOWN) {
+  if (action == WM_KEYDOWN || action == WM_SYSKEYDOWN) {
     // Most editing keys (arrow keys, backspace, delete, etc.) are handled in
     // the framework, so don't need to be handled at this layer.
     switch (key) {

@@ -766,9 +766,11 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   EXPECT_EQ(key_calls.size(), 0);
 
   // Release AltGr. Win32 doesn't dispatch ControlLeft up. Instead Flutter will
-  // dispatch one.
+  // dispatch one. The AltGr is a system key, so will be handled by Win32's
+  // default WndProc.
   tester.InjectMessages(
-      1, WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(kWmResultZero));
+      1,
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(kWmResultDefault));
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalAltRight,
