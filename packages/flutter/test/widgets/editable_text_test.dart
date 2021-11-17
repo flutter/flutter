@@ -5818,7 +5818,7 @@ void main() {
   });
 
   testWidgets('bringIntoView centers the viewport on caret when the caret is wider than the viewport', (WidgetTester tester) async {
-    const String text = 'to cóż że ze Szwecji';
+    const String text = 'to coz ze ze Szwecji';
     final TextEditingController controller = TextEditingController(text: text);
 
     await tester.pumpWidget(MaterialApp(
@@ -5831,7 +5831,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0),
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
             cursorColor: Colors.blue,
             cursorWidth: 48.0,
             backgroundCursorColor: Colors.grey,
@@ -5868,7 +5868,7 @@ void main() {
   });
 
   testWidgets('bringIntoView centers the viewport on caret when the caret is taller than the viewport', (WidgetTester tester) async {
-    const String text = 'to\ncóż\nże\nze\nSzwecji';
+    const String text = 'to\ncoz\nze\nze\nSzwecji';
     final TextEditingController controller = TextEditingController(text: text);
 
     await tester.pumpWidget(MaterialApp(
@@ -5882,7 +5882,7 @@ void main() {
             maxLines: null,
             controller: controller,
             focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Roboto', fontSize: 48.0),
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
