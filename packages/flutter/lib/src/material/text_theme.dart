@@ -133,55 +133,95 @@ class TextTheme with Diagnosticable {
        labelLarge = labelLarge ?? button,
        labelSmall = labelSmall ?? overline;
 
-  /// Extremely large text.
+  /// Large size of the display styles.
+  ///
+  /// These styles are reserved for short, important text or numerals
   final TextStyle? displayLarge;
 
-  /// Very, very large text.
+  /// Medium size of the display styles.
   ///
-  /// Used for the date in the dialog shown by [showDatePicker].
+  /// These styles are reserved for short, important text or numerals
   final TextStyle? displayMedium;
 
-  /// Very large text.
+  /// Small size of the display styles.
+  ///
+  /// These styles are reserved for short, important text or numerals
   final TextStyle? displaySmall;
 
-  /// TODO: TBD
+  /// Large size of the headline styles.
+  ///
+  /// Headline styles are smaller than display styles. They're best-suited for
+  /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineLarge;
 
-  /// Large text.
+  /// Medium size of the headline styles.
+  ///
+  /// Headline styles are smaller than display styles. They're best-suited for
+  /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineMedium;
 
-  /// Used for large text in dialogs (e.g., the month and year in the dialog
-  /// shown by [showDatePicker]).
+  /// Small size of the headline styles.
+  ///
+  /// Headline styles are smaller than display styles. They're best-suited for
+  /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineSmall;
 
-  /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
-  /// and [AlertDialog.title]).
+  /// Large size of the title styles.
+  ///
+  /// Titles are smaller than headline styles and should be used for shorter,
+  /// medium-emphasis text.
   final TextStyle? titleLarge;
 
-  /// Used for the primary text in lists (e.g., [ListTile.title]).
+  /// Medium size of the title styles.
+  ///
+  /// Titles are smaller than headline styles and should be used for shorter,
+  /// medium-emphasis text.
   final TextStyle? titleMedium;
 
-  /// For medium emphasis text that's a little smaller than [subtitle1].
+  /// Small size of the title styles.
+  ///
+  /// Titles are smaller than headline styles and should be used for shorter,
+  /// medium-emphasis text.
   final TextStyle? titleSmall;
 
-  /// Used for emphasizing text that would otherwise be [bodyText2].
+  /// Large size of the body styles.
+  ///
+  /// Body styles are used for longer passages of text.
   final TextStyle? bodyLarge;
 
+  /// Medium size of the body styles.
+  ///
+  /// Body styles are used for longer passages of text.
+  ///
   /// The default text style for [Material].
   final TextStyle? bodyMedium;
 
-  /// Used for auxiliary text associated with images.
+  /// Small size of the body styles.
+  ///
+  /// Body styles are used for longer passages of text.
   final TextStyle? bodySmall;
 
+  /// Large size of the label styles.
+  ///
+  /// Label styles are smaller, utilitarian styles, used for areas of the UI
+  /// such as text inside of components or very small supporting text in the
+  /// content body, like captions.
+  ///
   /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
   final TextStyle? labelLarge;
 
-  /// TODO: TBD
+  /// Medium size of the label styles.
+  ///
+  /// Label styles are smaller, utilitarian styles, used for areas of the UI
+  /// such as text inside of components or very small supporting text in the
+  /// content body, like captions.
   final TextStyle? labelMedium;
 
-  /// The smallest style.
+  /// Small size of the label styles.
   ///
-  /// Typically used for captions or to introduce a (larger) headline.
+  /// Label styles are smaller, utilitarian styles, used for areas of the UI
+  /// such as text inside of components or very small supporting text in the
+  /// content body, like captions.
   final TextStyle? labelSmall;
 
   /// Extremely large text.
