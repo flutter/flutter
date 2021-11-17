@@ -21,7 +21,7 @@ namespace flutter {
 
 class EmbedderResources {
  public:
-  EmbedderResources(runtime::ResourcesEntry* resources_table);
+  explicit EmbedderResources(runtime::ResourcesEntry* resources_table);
 
   static const int kNoSuchInstance;
 

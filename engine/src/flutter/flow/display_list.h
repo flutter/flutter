@@ -747,7 +747,7 @@ class DisplayListOpFlags : DisplayListFlags {
 // the DisplayListCanvasRecorder class.
 class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
  public:
-  DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
+  explicit DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
   ~DisplayListBuilder();
 
   void setAntiAlias(bool aa) override {

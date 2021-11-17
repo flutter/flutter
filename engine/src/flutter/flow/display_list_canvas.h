@@ -27,7 +27,7 @@ namespace flutter {
 class DisplayListCanvasDispatcher : public virtual Dispatcher,
                                     public SkPaintDispatchHelper {
  public:
-  DisplayListCanvasDispatcher(SkCanvas* canvas) : canvas_(canvas) {}
+  explicit DisplayListCanvasDispatcher(SkCanvas* canvas) : canvas_(canvas) {}
 
   void save() override;
   void restore() override;
@@ -123,7 +123,7 @@ class DisplayListCanvasRecorder
       public SkRefCnt,
       DisplayListOpFlags {
  public:
-  DisplayListCanvasRecorder(const SkRect& bounds);
+  explicit DisplayListCanvasRecorder(const SkRect& bounds);
 
   const sk_sp<DisplayListBuilder> builder() { return builder_; }
 

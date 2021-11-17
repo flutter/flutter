@@ -21,7 +21,7 @@ namespace internal {
 // vary based on the template type.
 class ReplyManager {
  public:
-  ReplyManager(BinaryReply reply_handler_);
+  explicit ReplyManager(BinaryReply reply_handler_);
   ~ReplyManager();
 
   // Prevent copying.

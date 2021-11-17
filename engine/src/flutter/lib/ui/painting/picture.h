@@ -58,8 +58,8 @@ class Picture : public RefCountedDartWrappable<Picture> {
       Dart_Handle raw_image_callback);
 
  private:
-  Picture(flutter::SkiaGPUObject<SkPicture> picture);
-  Picture(flutter::SkiaGPUObject<DisplayList> display_list);
+  explicit Picture(flutter::SkiaGPUObject<SkPicture> picture);
+  explicit Picture(flutter::SkiaGPUObject<DisplayList> display_list);
 
   flutter::SkiaGPUObject<SkPicture> picture_;
   flutter::SkiaGPUObject<DisplayList> display_list_;

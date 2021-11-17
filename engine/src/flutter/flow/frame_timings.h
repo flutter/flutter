@@ -41,7 +41,7 @@ class FrameTimingsRecorder {
   FrameTimingsRecorder();
 
   /// Constructor with a pre-populated frame number.
-  FrameTimingsRecorder(uint64_t frame_number);
+  explicit FrameTimingsRecorder(uint64_t frame_number);
 
   ~FrameTimingsRecorder();
 

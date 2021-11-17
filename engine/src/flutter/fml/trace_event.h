@@ -343,7 +343,7 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id);
 
 class ScopedInstantEnd {
  public:
-  ScopedInstantEnd(const char* str) : label_(str) {}
+  explicit ScopedInstantEnd(const char* str) : label_(str) {}
 
   ~ScopedInstantEnd() { TraceEventEnd(label_); }
 
@@ -360,7 +360,7 @@ class ScopedInstantEnd {
 // leads to corrupted or missing traces in the UI.
 class TraceFlow {
  public:
-  TraceFlow(const char* label) : label_(label), nonce_(TraceNonce()) {
+  explicit TraceFlow(const char* label) : label_(label), nonce_(TraceNonce()) {
     TraceEventFlowBegin0("flutter", label_, nonce_);
   }
 

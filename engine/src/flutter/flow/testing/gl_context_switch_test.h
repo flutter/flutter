@@ -20,7 +20,7 @@ class GLContextSwitchTest : public ::testing::Test {
 /// The renderer context used for testing
 class TestSwitchableGLContext : public SwitchableGLContext {
  public:
-  TestSwitchableGLContext(int context);
+  explicit TestSwitchableGLContext(int context);
 
   ~TestSwitchableGLContext() override;
 

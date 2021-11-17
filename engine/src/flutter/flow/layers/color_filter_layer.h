@@ -12,7 +12,7 @@ namespace flutter {
 
 class ColorFilterLayer : public ContainerLayer {
  public:
-  ColorFilterLayer(sk_sp<SkColorFilter> filter);
+  explicit ColorFilterLayer(sk_sp<SkColorFilter> filter);
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 

@@ -37,7 +37,7 @@ class FragmentShader : public Shader {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  FragmentShader(sk_sp<SkShader> shader);
+  explicit FragmentShader(sk_sp<SkShader> shader);
 
   sk_sp<SkShader> shader_;
 };

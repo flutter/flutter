@@ -105,7 +105,7 @@ DEFINE_SET_ENUM_OP(Join)
 struct SetStyleOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStyle;
 
-  SetStyleOp(SkPaint::Style style) : style(style) {}
+  explicit SetStyleOp(SkPaint::Style style) : style(style) {}
 
   const SkPaint::Style style;
 
@@ -115,7 +115,7 @@ struct SetStyleOp final : DLOp {
 struct SetStrokeWidthOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStrokeWidth;
 
-  SetStrokeWidthOp(SkScalar width) : width(width) {}
+  explicit SetStrokeWidthOp(SkScalar width) : width(width) {}
 
   const SkScalar width;
 
@@ -127,7 +127,7 @@ struct SetStrokeWidthOp final : DLOp {
 struct SetStrokeMiterOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetStrokeMiter;
 
-  SetStrokeMiterOp(SkScalar limit) : limit(limit) {}
+  explicit SetStrokeMiterOp(SkScalar limit) : limit(limit) {}
 
   const SkScalar limit;
 
@@ -140,7 +140,7 @@ struct SetStrokeMiterOp final : DLOp {
 struct SetColorOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetColor;
 
-  SetColorOp(SkColor color) : color(color) {}
+  explicit SetColorOp(SkColor color) : color(color) {}
 
   const SkColor color;
 
@@ -150,7 +150,7 @@ struct SetColorOp final : DLOp {
 struct SetBlendModeOp final : DLOp {
   static const auto kType = DisplayListOpType::kSetBlendMode;
 
-  SetBlendModeOp(SkBlendMode mode) : mode(mode) {}
+  explicit SetBlendModeOp(SkBlendMode mode) : mode(mode) {}
 
   const SkBlendMode mode;
 
@@ -224,7 +224,7 @@ struct SaveOp final : DLOp {
 struct SaveLayerOp final : DLOp {
   static const auto kType = DisplayListOpType::kSaveLayer;
 
-  SaveLayerOp(bool with_paint) : with_paint(with_paint) {}
+  explicit SaveLayerOp(bool with_paint) : with_paint(with_paint) {}
 
   bool with_paint;
 
@@ -283,7 +283,7 @@ struct ScaleOp final : DLOp {
 struct RotateOp final : DLOp {
   static const auto kType = DisplayListOpType::kRotate;
 
-  RotateOp(SkScalar degrees) : degrees(degrees) {}
+  explicit RotateOp(SkScalar degrees) : degrees(degrees) {}
 
   const SkScalar degrees;
 
@@ -454,7 +454,7 @@ DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 struct DrawPathOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawPath;
 
-  DrawPathOp(SkPath path) : path(path) {}
+  explicit DrawPathOp(SkPath path) : path(path) {}
 
   const SkPath path;
 
@@ -804,7 +804,7 @@ struct DrawSkPictureMatrixOp final : DLOp {
 struct DrawDisplayListOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawDisplayList;
 
-  DrawDisplayListOp(const sk_sp<DisplayList> display_list)
+  explicit DrawDisplayListOp(const sk_sp<DisplayList> display_list)
       : display_list(std::move(display_list)) {}
 
   sk_sp<DisplayList> display_list;

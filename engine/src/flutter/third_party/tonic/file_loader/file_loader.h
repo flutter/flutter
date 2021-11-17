@@ -18,7 +18,7 @@ namespace tonic {
 
 class FileLoader {
  public:
-  FileLoader(int dirfd = -1);
+  explicit FileLoader(int dirfd = -1);
   ~FileLoader();
 
   bool LoadPackagesMap(const std::string& packages);

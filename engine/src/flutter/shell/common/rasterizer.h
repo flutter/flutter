@@ -105,7 +105,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///
   /// @param[in]  delegate                   The rasterizer delegate.
   ///
-  Rasterizer(Delegate& delegate);
+  explicit Rasterizer(Delegate& delegate);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the rasterizer. This must happen on the raster task

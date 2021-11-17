@@ -26,7 +26,7 @@ namespace internal {
 
 class ThreadLocalPointer {
  public:
-  ThreadLocalPointer(void (*destroy)(void*));
+  explicit ThreadLocalPointer(void (*destroy)(void*));
   ~ThreadLocalPointer();
 
   void* get() const;

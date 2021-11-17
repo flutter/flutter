@@ -36,9 +36,10 @@ class EmbedderConfigBuilder {
     kNoInitialize,
   };
 
-  EmbedderConfigBuilder(EmbedderTestContext& context,
-                        InitializationPreference preference =
-                            InitializationPreference::kSnapshotsInitialize);
+  explicit EmbedderConfigBuilder(
+      EmbedderTestContext& context,
+      InitializationPreference preference =
+          InitializationPreference::kSnapshotsInitialize);
 
   ~EmbedderConfigBuilder();
 
