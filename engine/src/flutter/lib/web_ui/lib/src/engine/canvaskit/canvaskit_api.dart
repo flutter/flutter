@@ -104,6 +104,7 @@ class CanvasKit {
 
   external SkFontMgrNamespace get FontMgr;
   external TypefaceFontProviderNamespace get TypefaceFontProvider;
+  external SkTypefaceFactory get Typeface;
   external int GetWebGLContext(
       html.CanvasElement canvas, SkWebGLContextOptions options);
   external SkGrContext MakeGrContext(int glContext);
@@ -1869,12 +1870,17 @@ class SkTonalColors {
 class SkFontMgrNamespace {
   // TODO(yjbanov): can this be made non-null? It returns null in our unit-tests right now.
   external SkFontMgr? FromData(List<Uint8List> fonts);
-  external SkFontMgr RefDefault();
 }
 
 @JS()
 class TypefaceFontProviderNamespace {
   external TypefaceFontProvider Make();
+}
+
+@JS()
+@anonymous
+class SkTypefaceFactory {
+  external SkTypeface? MakeFreeTypeFaceFromData(ByteBuffer fontData);
 }
 
 /// Collects Skia objects that are no longer necessary.
