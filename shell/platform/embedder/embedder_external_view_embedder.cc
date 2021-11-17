@@ -72,15 +72,16 @@ void EmbedderExternalViewEmbedder::BeginFrame(
 void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
-  FML_DCHECK(pending_views_.count(view_id) == 0);
+  auto vid = EmbedderExternalView::ViewIdentifier(view_id);
+  FML_DCHECK(pending_views_.count(vid) == 0);
 
-  pending_views_[view_id] = std::make_unique<EmbedderExternalView>(
+  pending_views_[vid] = std::make_unique<EmbedderExternalView>(
       pending_frame_size_,              // frame size
       pending_surface_transformation_,  // surface xformation
-      view_id,                          // view identifier
+      vid,                              // view identifier
       std::move(params)                 // embedded view params
   );
-  composition_order_.push_back(view_id);
+  composition_order_.push_back(vid);
 }
 
 // |ExternalViewEmbedder|
@@ -111,7 +112,8 @@ std::vector<SkCanvas*> EmbedderExternalViewEmbedder::GetCurrentCanvases() {
 
 // |ExternalViewEmbedder|
 SkCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
-  auto found = pending_views_.find(view_id);
+  auto vid = EmbedderExternalView::ViewIdentifier(view_id);
+  auto found = pending_views_.find(vid);
   if (found == pending_views_.end()) {
     FML_DCHECK(false) << "Attempted to composite a view that was not "
                          "pre-rolled.";

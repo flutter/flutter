@@ -44,7 +44,7 @@ class AssetManagerFontStyleSet : public SkFontStyleSet {
   std::string family_name_;
 
   struct TypefaceAsset {
-    TypefaceAsset(std::string a);
+    explicit TypefaceAsset(std::string a);
 
     TypefaceAsset(const TypefaceAsset& other);
 
@@ -60,7 +60,8 @@ class AssetManagerFontStyleSet : public SkFontStyleSet {
 
 class AssetManagerFontProvider : public txt::FontAssetProvider {
  public:
-  AssetManagerFontProvider(std::shared_ptr<AssetManager> asset_manager);
+  explicit AssetManagerFontProvider(
+      std::shared_ptr<AssetManager> asset_manager);
 
   ~AssetManagerFontProvider() override;
 

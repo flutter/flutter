@@ -48,7 +48,7 @@ enum class EmbedderTestContextType {
 
 class EmbedderTestContext {
  public:
-  EmbedderTestContext(std::string assets_path = "");
+  explicit EmbedderTestContext(std::string assets_path = "");
 
   virtual ~EmbedderTestContext();
 

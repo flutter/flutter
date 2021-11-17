@@ -133,7 +133,8 @@ class BuiltinSkiaImageGenerator : public ImageGenerator {
  public:
   ~BuiltinSkiaImageGenerator();
 
-  BuiltinSkiaImageGenerator(std::unique_ptr<SkImageGenerator> generator);
+  explicit BuiltinSkiaImageGenerator(
+      std::unique_ptr<SkImageGenerator> generator);
 
   // |ImageGenerator|
   const SkImageInfo& GetInfo() override;
@@ -171,9 +172,9 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
  public:
   ~BuiltinSkiaCodecImageGenerator();
 
-  BuiltinSkiaCodecImageGenerator(std::unique_ptr<SkCodec> codec);
+  explicit BuiltinSkiaCodecImageGenerator(std::unique_ptr<SkCodec> codec);
 
-  BuiltinSkiaCodecImageGenerator(sk_sp<SkData> buffer);
+  explicit BuiltinSkiaCodecImageGenerator(sk_sp<SkData> buffer);
 
   // |ImageGenerator|
   const SkImageInfo& GetInfo() override;

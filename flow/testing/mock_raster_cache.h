@@ -24,7 +24,7 @@ namespace testing {
  */
 class MockRasterCacheResult : public RasterCacheResult {
  public:
-  MockRasterCacheResult(SkIRect device_rect);
+  explicit MockRasterCacheResult(SkIRect device_rect);
 
   void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const override{};
 

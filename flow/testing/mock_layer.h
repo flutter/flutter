@@ -16,10 +16,10 @@ namespace testing {
 // verify the data against expected values.
 class MockLayer : public Layer {
  public:
-  MockLayer(SkPath path,
-            SkPaint paint = SkPaint(),
-            bool fake_has_platform_view = false,
-            bool fake_reads_surface = false);
+  explicit MockLayer(SkPath path,
+                     SkPaint paint = SkPaint(),
+                     bool fake_has_platform_view = false,
+                     bool fake_reads_surface = false);
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;

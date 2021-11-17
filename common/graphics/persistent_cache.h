@@ -59,7 +59,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
     static const uint32_t kSignature = 0xA869593F;
     static const uint32_t kVersion1 = 1;
 
-    CacheObjectHeader(uint32_t p_key_size) : key_size(p_key_size) {}
+    explicit CacheObjectHeader(uint32_t p_key_size) : key_size(p_key_size) {}
 
     uint32_t signature = kSignature;
     uint32_t version = kVersion1;
@@ -163,7 +163,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 
   bool IsValid() const;
 
-  PersistentCache(bool read_only = false);
+  explicit PersistentCache(bool read_only = false);
 
   // |GrContextOptions::PersistentCache|
   void store(const SkData& key, const SkData& data) override;

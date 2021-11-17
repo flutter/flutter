@@ -49,17 +49,18 @@ class WeakPtr {
   WeakPtr() : ptr_(nullptr) {}
 
   // Copy constructor.
-  explicit WeakPtr(const WeakPtr<T>& r) = default;
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  WeakPtr(const WeakPtr<T>& r) = default;
 
   template <typename U>
-  WeakPtr(const WeakPtr<U>& r)
+  WeakPtr(const WeakPtr<U>& r)  // NOLINT(google-explicit-constructor)
       : ptr_(static_cast<T*>(r.ptr_)), flag_(r.flag_), checker_(r.checker_) {}
 
   // Move constructor.
   WeakPtr(WeakPtr<T>&& r) = default;
 
   template <typename U>
-  WeakPtr(WeakPtr<U>&& r)
+  WeakPtr(WeakPtr<U>&& r)  // NOLINT(google-explicit-constructor)
       : ptr_(static_cast<T*>(r.ptr_)),
         flag_(std::move(r.flag_)),
         checker_(r.checker_) {}
@@ -155,12 +156,14 @@ class TaskRunnerAffineWeakPtr : public WeakPtr<T> {
   TaskRunnerAffineWeakPtr(const TaskRunnerAffineWeakPtr<T>& r) = default;
 
   template <typename U>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   TaskRunnerAffineWeakPtr(const TaskRunnerAffineWeakPtr<U>& r)
       : WeakPtr<T>(r), checker_(r.checker_) {}
 
   TaskRunnerAffineWeakPtr(TaskRunnerAffineWeakPtr<T>&& r) = default;
 
   template <typename U>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   TaskRunnerAffineWeakPtr(TaskRunnerAffineWeakPtr<U>&& r)
       : WeakPtr<T>(r), checker_(r.checker_) {}
 

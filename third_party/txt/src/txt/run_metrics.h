@@ -25,7 +25,7 @@ namespace txt {
 // Contains the font metrics and TextStyle of a unique run.
 class RunMetrics {
  public:
-  RunMetrics(const TextStyle* style) : text_style(style) {}
+  explicit RunMetrics(const TextStyle* style) : text_style(style) {}
 
   RunMetrics(const TextStyle* style, const SkFontMetrics& metrics)
       : text_style(style), font_metrics(metrics) {}

@@ -21,7 +21,9 @@ class TaskQueueId {
   /// Intializes a task queue with the given value as it's ID.
   explicit TaskQueueId(size_t value) : value_(value) {}
 
-  operator size_t() const { return value_; }
+  operator size_t() const {  // NOLINT(google-explicit-constructor)
+    return value_;
+  }
 
  private:
   size_t value_ = kUnmerged;

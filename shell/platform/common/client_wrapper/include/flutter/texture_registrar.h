@@ -27,7 +27,7 @@ class PixelBufferTexture {
   // As the callback is usually invoked from the render thread, the callee must
   // take care of proper synchronization. It also needs to be ensured that the
   // returned buffer isn't released prior to unregistering this texture.
-  PixelBufferTexture(CopyBufferCallback copy_buffer_callback)
+  explicit PixelBufferTexture(CopyBufferCallback copy_buffer_callback)
       : copy_buffer_callback_(copy_buffer_callback) {}
 
   // Returns the callback-provided FlutterDesktopPixelBuffer that contains the
