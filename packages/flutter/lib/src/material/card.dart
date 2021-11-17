@@ -69,6 +69,7 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
   /// is used. If that's null then [ThemeData.cardColor] is used.
+  /// /// If null, [Card] uses [ThemeData.cardColor].
   final Color? color;
 
   /// The color to paint the shadow below the card.
@@ -76,6 +77,7 @@ class Card extends StatelessWidget {
   /// If null then the ambient [CardTheme]'s shadowColor is used.
   /// If that's null too, then the overall theme's [ThemeData.shadowColor]
   /// (default black) is used.
+  ///   /// If null, [Card] defaults to fully opaque black.
   final Color? shadowColor;
 
   /// The z-coordinate at which to place this card. This controls the size of
@@ -106,6 +108,8 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.clipBehavior] of
   /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
+  ///   /// If null, [Card] uses [Clip.none].
+
   final Clip? clipBehavior;
 
   /// The empty space that surrounds the card.
@@ -140,7 +144,7 @@ class Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final CardTheme cardTheme = CardTheme.of(context);
+    final CardThemeData cardTheme = CardTheme.of(context);
 
     return Semantics(
       container: semanticContainer,

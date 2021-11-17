@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('CardTheme copyWith, ==, hashCode basics', () {
-    expect(const CardTheme(), const CardTheme().copyWith());
-    expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
+  test('CardThemeData copyWith, ==, hashCode basics', () {
+    expect(const CardThemeData(), const CardThemeData().copyWith());
+    expect(const CardThemeData().hashCode, const CardThemeData().copyWith().hashCode);
   });
 
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
@@ -29,13 +29,12 @@ void main() {
     expect(material.color, Colors.white);
     expect(material.elevation, 1.0);
     expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)),
     ));
   });
 
   testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+    final CardThemeData cardTheme = _cardTheme();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(cardTheme: cardTheme),
@@ -91,7 +90,7 @@ void main() {
   });
 
   testWidgets('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+    final CardThemeData cardTheme = _cardTheme();
     final ThemeData themeData = _themeData().copyWith(cardTheme: cardTheme);
 
     await tester.pumpWidget(MaterialApp(
@@ -120,7 +119,7 @@ void main() {
   });
 
   testWidgets('CardTheme customizes shape', (WidgetTester tester) async {
-    const CardTheme cardTheme = CardTheme(
+    const CardThemeData cardTheme = CardThemeData(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
       elevation: 1.0,
@@ -149,8 +148,8 @@ void main() {
   });
 }
 
-CardTheme _cardTheme() {
-  return const CardTheme(
+CardThemeData _cardTheme() {
+  return const CardThemeData(
     clipBehavior: Clip.antiAlias,
     color: Colors.green,
     shadowColor: Colors.red,

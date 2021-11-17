@@ -767,7 +767,7 @@ void main() {
       sliderTheme: sliderTheme,
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
       tooltipTheme: const TooltipThemeData(height: 100),
-      cardTheme: const CardTheme(color: Colors.black),
+      cardTheme: const CardThemeData(color: Colors.black),
       chipTheme: chipTheme,
       platform: TargetPlatform.iOS,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

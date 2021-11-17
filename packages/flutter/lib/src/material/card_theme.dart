@@ -9,30 +9,33 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines default property values for descendant [Card] widgets.
+/// Used with [CardTheme] to define default property values for
+/// descendant [Card] widgets.
 ///
-/// Descendant widgets obtain the current [CardTheme] object using
-/// `CardTheme.of(context)`. Instances of [CardTheme] can be
-/// customized with [CardTheme.copyWith].
+/// Descendant widgets obtain the current [CardThemeData] object
+/// using `CardTheme.of(context)`. Instances of
+/// [CardThemeData] can be customized with
+/// [CardThemeData.copyWith].
 ///
-/// Typically a [CardTheme] is specified as part of the overall [Theme]
-/// with [ThemeData.cardTheme].
+/// A [CardThemeData] is often specified as part of the
+/// overall [Theme] with [ThemeData.cardTheme].
 ///
-/// All [CardTheme] properties are `null` by default. When null, the [Card]
-/// will use the values from [ThemeData] if they exist, otherwise it will
-/// provide its own defaults.
+/// All [CardThemeData] properties are `null` by default.
+/// When a theme property is null, the [Card] will provide its own
+/// default based on the overall [Theme]'s textTheme and
+/// colorScheme. See the individual [Card] properties for details.
 ///
 /// See also:
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class CardTheme with Diagnosticable {
-
-  /// Creates a theme that can be used for [ThemeData.cardTheme].
+class CardThemeData with Diagnosticable {
+  /// Creates a card theme configuration that can be used for [ThemeData.cardTheme]
+  /// or [CardTheme].
   ///
   /// The [elevation] must be null or non-negative.
-  const CardTheme({
+  const CardThemeData({
     this.clipBehavior,
     this.color,
     this.shadowColor,
@@ -41,41 +44,27 @@ class CardTheme with Diagnosticable {
     this.shape,
   }) : assert(elevation == null || elevation >= 0.0);
 
-  /// Default value for [Card.clipBehavior].
-  ///
-  /// If null, [Card] uses [Clip.none].
+  /// Overrides the default value for [Card.clipBehavior].
   final Clip? clipBehavior;
 
-  /// Default value for [Card.color].
-  ///
-  /// If null, [Card] uses [ThemeData.cardColor].
+  /// Overrides the default value for [Card.color].
   final Color? color;
 
-  /// Default value for [Card.shadowColor].
-  ///
-  /// If null, [Card] defaults to fully opaque black.
+  /// Overrides the default value for [Card.shadowColor].
   final Color? shadowColor;
 
-  /// Default value for [Card.elevation].
-  ///
-  /// If null, [Card] uses a default of 1.0.
+  /// Overrides the default value for [Card.elevation].
   final double? elevation;
 
-  /// Default value for [Card.margin].
-  ///
-  /// If null, [Card] uses a default margin of 4.0 logical pixels on all sides:
-  /// `EdgeInsets.all(4.0)`.
+  /// Overrides the default value for [Card.margin].
   final EdgeInsetsGeometry? margin;
 
-  /// Default value for [Card.shape].
-  ///
-  /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
-  /// corner radius of 4.0.
+  /// Overrides the default value for [Card.shape].
   final ShapeBorder? shape;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
-  CardTheme copyWith({
+  CardThemeData copyWith({
     Clip? clipBehavior,
     Color? color,
     Color? shadowColor,
@@ -83,7 +72,7 @@ class CardTheme with Diagnosticable {
     EdgeInsetsGeometry? margin,
     ShapeBorder? shape,
   }) {
-    return CardTheme(
+    return CardThemeData(
       clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -93,19 +82,14 @@ class CardTheme with Diagnosticable {
     );
   }
 
-  /// The [ThemeData.cardTheme] property of the ambient [Theme].
-  static CardTheme of(BuildContext context) {
-    return Theme.of(context).cardTheme;
-  }
-
-  /// Linearly interpolate between two Card themes.
+  /// Linearly interpolate between two CardThemeData objects.
   ///
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
+  static CardThemeData lerp(CardThemeData? a, CardThemeData? b, double t) {
     assert(t != null);
-    return CardTheme(
+    return CardThemeData(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
@@ -133,7 +117,7 @@ class CardTheme with Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is CardTheme
+    return other is CardThemeData
         && other.clipBehavior == clipBehavior
         && other.color == color
         && other.shadowColor == shadowColor
@@ -152,4 +136,145 @@ class CardTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
+}
+
+/// Defines default property values for descendant [Card] widgets.
+///
+/// Values specified here are used for [Card] properties that are not given
+/// an explicit non-null value.
+///
+/// Descendant widgets obtain the current [CardThemeData] object using
+/// `CardTheme.of(context)`. Instances of [CardThemeData] can be
+/// customized with [CardTheme.copyWith].
+///
+/// Typically a [CardThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.cardTheme].
+///
+/// All [CardThemeData] properties are `null` by default. When null,
+/// the [Card] will use the values from [ThemeData.cardTheme] if they
+/// are non-null, otherwise it will provide its own defaults.
+@immutable
+class CardTheme extends InheritedTheme {
+  /// Creates a card theme that defines the color and style parameters for
+  /// descendant [Card]s.
+  ///
+  /// Only the [data] parameter should be used. The other parameters are
+  /// redundant (are now obsolete) and will be deprecated in a future update.
+  const CardTheme({
+    Key? key,
+    CardThemeData? data,
+    Clip? clipBehavior,
+    Color? color,
+    Color? shadowColor,
+    double? elevation,
+    EdgeInsetsGeometry? margin,
+    ShapeBorder? shape,
+    Widget? child,
+  }) : assert(
+         data == null ||
+         (clipBehavior ??
+          color ??
+          shadowColor ??
+          elevation ??
+          margin ??
+          shape) == null),
+        assert(elevation == null || elevation >= 0.0),
+        _data = data,
+        _clipBehavior = clipBehavior,
+        _color = color,
+        _shadowColor = shadowColor,
+        _elevation = elevation,
+        _margin = margin,
+        _shape = shape,
+        super(key: key, child: child ?? const SizedBox());
+
+  final CardThemeData? _data;
+  final Clip? _clipBehavior;
+  final Color? _color;
+  final Color? _shadowColor;
+  final double? _elevation;
+  final EdgeInsetsGeometry? _margin;
+  final ShapeBorder? _shape;
+
+  /// The configuration of this theme.
+  CardThemeData get data {
+    return _data ?? CardThemeData(
+      clipBehavior: _clipBehavior,
+      color: _color,
+      shadowColor: _shadowColor,
+      elevation: _elevation,
+      margin: _margin,
+      shape: _shape,
+    );
+  }
+
+  /// Overrides the default value for [Card.clipBehavior].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.clipBehavior] property instead.
+  Clip? get clipBehavior => _data != null ? _data!.clipBehavior : _clipBehavior;
+
+  /// Overrides the default value for [Card.color].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.color] property instead.
+  Color? get color => _data != null ? _data!.color : _color;
+
+  /// Overrides the default value for [Card.shadowColor].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.shadowColor] property instead.
+  Color? get shadowColor => _data != null ? _data!.shadowColor : _shadowColor;
+
+  /// Overrides the default value for [Card.elevation].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.elevation] property instead.
+  double? get elevation => _data != null ? _data!.elevation : _elevation;
+
+  /// Overrides the default value for [Card.margin].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.margin] property instead.
+  EdgeInsetsGeometry? get margin => _data != null ? _data!.margin : _margin;
+
+  /// Overrides the default value for [Card.shape].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [CardThemeData.shape] property instead.
+  ShapeBorder? get shape => _data != null ? _data!.shape : _shape;
+
+
+  /// The [data] property of the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If there is no enclosing [CardTheme] widget, then
+  /// [ThemeData.cardTheme] is used (see [Theme.of]).
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// CardThemeData theme = CardTheme.of(context);
+  /// ```
+  static CardThemeData of(BuildContext context) {
+    final CardTheme? result = context.dependOnInheritedWidgetOfExactType<CardTheme>();
+    return result?.data ?? Theme.of(context).cardTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return CardTheme(
+      data: CardThemeData(
+        clipBehavior: clipBehavior,
+        color: color,
+        shadowColor: shadowColor,
+        elevation: elevation,
+        margin: margin,
+        shape: shape,
+      ),
+    );
+  }
+
+  @override
+  bool updateShouldNotify(CardTheme oldWidget) => data != oldWidget.data;
 }
