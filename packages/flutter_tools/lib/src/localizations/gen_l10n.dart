@@ -1151,7 +1151,6 @@ class LocalizationsGenerator {
   String _generateCode() {
     bool isBaseClassLocale(LocaleInfo locale, String language) {
       return locale.languageCode == language
-          && locale.countryCode == null
           && locale.scriptCode == null;
     }
 
