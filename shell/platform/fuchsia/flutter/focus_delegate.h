@@ -8,6 +8,8 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 
+#include <unordered_map>
+
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
@@ -48,9 +50,16 @@ class FocusDelegate {
       rapidjson::Value request,
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
+  void OnChildViewViewRef(uint64_t view_id,
+                          fuchsia::ui::views::ViewRef view_ref);
+
  private:
   fuchsia::ui::views::ViewRefFocusedPtr view_ref_focused_;
   fuchsia::ui::views::FocuserPtr focuser_;
+
+  std::unordered_map<uint64_t /*fuchsia::ui::composition::ContentId*/,
+                     fuchsia::ui::views::ViewRef>
+      child_view_view_refs_;
 
   std::function<void(fuchsia::ui::views::FocusState)> watch_loop_;
   bool is_focused_ = false;
@@ -60,9 +69,12 @@ class FocusDelegate {
                 std::string value);
 
   /// Completes a platform message request by attempting to give focus for a
-  /// given viewRef.
-  bool RequestFocus(rapidjson::Value request,
-                    fml::RefPtr<flutter::PlatformMessageResponse> response);
+  /// given view.
+  bool RequestFocusById(uint64_t view_id,
+                        fml::RefPtr<flutter::PlatformMessageResponse> response);
+  bool RequestFocusByViewRef(
+      fuchsia::ui::views::ViewRef view_ref,
+      fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FocusDelegate);
 };
