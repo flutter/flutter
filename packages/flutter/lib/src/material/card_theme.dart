@@ -145,7 +145,7 @@ class CardThemeData with Diagnosticable {
 ///
 /// Descendant widgets obtain the current [CardThemeData] object using
 /// `CardTheme.of(context)`. Instances of [CardThemeData] can be
-/// customized with [CardTheme.copyWith].
+/// customized with [CardThemeData.copyWith].
 ///
 /// Typically a [CardThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.cardTheme].
