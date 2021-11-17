@@ -466,20 +466,8 @@ class AppResourceBundle {
             // If @@locale was not defined, use the filename locale suffix.
             localeString = parserLocaleString;
           } else {
-            // If the localeString was defined in @@locale and in the filename, verify to
-            // see if the parsed locale matches, throw an error if it does not. This
-            // prevents developers from confusing issues when both @@locale and
-            // "_{locale}" is specified in the filename.
-            if (localeString != parserLocaleString) {
-              throw L10nException(
-                'The locale specified in @@locale and the arb filename do not match. \n'
-                'Please make sure that they match, since this prevents any confusion \n'
-                'with which locale to use. Otherwise, specify the locale in either the \n'
-                'filename of the @@locale key only.\n'
-                'Current @@locale value: $localeString\n'
-                'Current filename extension: $parserLocaleString'
-              );
-            }
+            final Locale? parseLocale = Locale.tryParse(localeString);
+            localeString = parseLocale.toString().replaceAll('-', '_');
           }
           break;
         }
@@ -538,22 +526,6 @@ class AppResourceBundleCollection {
         languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
       }
     }
-
-    languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
-        return locale.toString();
-      }).toList();
-      if (!localeStrings.contains(language)) {
-        throw L10nException(
-          'Arb file for a fallback, $language, does not exist, even though \n'
-          'the following locale(s) exist: $listOfCorrespondingLocales. \n'
-          'When locales specify a script code or country code, a \n'
-          'base locale (without the script code or country code) should \n'
-          'exist as the fallback. Please create a {fileName}_$language.arb \n'
-          'file.'
-        );
-      }
-    });
 
     return AppResourceBundleCollection._(directory, localeToBundle, languageToLocales);
   }
