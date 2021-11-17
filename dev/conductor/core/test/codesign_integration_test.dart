@@ -60,8 +60,6 @@ void main() {
         '--verify',
         // Only verify if the correct binaries are in the cache
         '--no-signatures',
-        '--revision',
-        currentHead,
       ]);
     } on ConductorException catch (e) {
       print(stdio.error);
