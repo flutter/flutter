@@ -53,6 +53,9 @@ class FlatlandPlatformView final : public flutter_runner::PlatformView {
       fuchsia::ui::composition::ParentViewportStatus status);
   void OnChildViewStatus(uint64_t content_id,
                          fuchsia::ui::composition::ChildViewStatus status);
+  void OnChildViewViewRef(uint64_t content_id,
+                          uint64_t view_id,
+                          fuchsia::ui::views::ViewRef view_ref);
 
  private:
   void OnCreateView(ViewCallback on_view_created,
