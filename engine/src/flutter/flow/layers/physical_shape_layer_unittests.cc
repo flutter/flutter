@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/physical_shape_layer.h"
 
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -348,6 +349,44 @@ TEST_F(PhysicalShapeLayerTest, Readback) {
   EXPECT_TRUE(ReadbackResult(context, hard, reader, true));
   EXPECT_TRUE(ReadbackResult(context, soft, reader, true));
   EXPECT_TRUE(ReadbackResult(context, save_layer, reader, true));
+}
+
+using PhysicalShapeLayerDiffTest = DiffContextTest;
+
+TEST_F(PhysicalShapeLayerDiffTest, NoClipPaintRegion) {
+  MockLayerTree tree1;
+  const SkPath layer_path = SkPath().addRect(SkRect::MakeXYWH(0, 0, 100, 100));
+  auto layer =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           layer_path, Clip::none);
+
+  const SkPath layer_path2 =
+      SkPath().addRect(SkRect::MakeXYWH(200, 200, 200, 200));
+  auto layer2 = std::make_shared<MockLayer>(layer_path2);
+  layer->Add(layer2);
+  tree1.root()->Add(layer);
+
+  auto damage = DiffLayerTree(tree1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 400, 400));
+}
+
+TEST_F(PhysicalShapeLayerDiffTest, ClipPaintRegion) {
+  MockLayerTree tree1;
+  const SkPath layer_path = SkPath().addRect(SkRect::MakeXYWH(0, 0, 100, 100));
+  auto layer =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           layer_path, Clip::hardEdge);
+
+  const SkPath layer_path2 =
+      SkPath().addRect(SkRect::MakeXYWH(200, 200, 200, 200));
+  auto layer2 = std::make_shared<MockLayer>(layer_path2);
+  layer->Add(layer2);
+  tree1.root()->Add(layer);
+
+  auto damage = DiffLayerTree(tree1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
 }
 
 }  // namespace testing

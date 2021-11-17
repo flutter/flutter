@@ -46,7 +46,8 @@ void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
   context->AddLayerBounds(bounds);
 
-  if (context->PushCullRect(bounds)) {
+  // Only push cull rect if there is clip.
+  if (clip_behavior_ == Clip::none || context->PushCullRect(bounds)) {
     DiffChildren(context, prev);
   }
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
