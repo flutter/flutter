@@ -67,6 +67,22 @@ TEST(KeyboardKeyChannelHandlerTest, KeyboardHookHandling) {
       [&last_handled](bool handled) { last_handled = handled; });
   EXPECT_EQ(received_scancode, kUnhandledScanCode);
   EXPECT_EQ(last_handled, false);
+
+  received_scancode = 0;
+
+  handler.KeyboardHook(
+      64, kHandledScanCode, WM_SYSKEYDOWN, L'a', false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(received_scancode, kHandledScanCode);
+  EXPECT_EQ(last_handled, true);
+
+  received_scancode = 0;
+
+  handler.KeyboardHook(
+      64, kUnhandledScanCode, WM_SYSKEYDOWN, L'c', false, false,
+      [&last_handled](bool handled) { last_handled = handled; });
+  EXPECT_EQ(received_scancode, kUnhandledScanCode);
+  EXPECT_EQ(last_handled, false);
 }
 
 TEST(KeyboardKeyChannelHandlerTest, ExtendedKeysAreSentToRedispatch) {

@@ -234,10 +234,12 @@ class TestFlutterWindowsView : public FlutterWindowsView {
  public:
   TestFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding,
                          WPARAM virtual_key,
-                         bool is_printable = true)
+                         bool is_printable = true,
+                         bool is_syskey = false)
       : FlutterWindowsView(std::move(window_binding)),
         virtual_key_(virtual_key),
-        is_printable_(is_printable) {}
+        is_printable_(is_printable),
+        is_syskey_(is_syskey) {}
 
   SpyKeyboardKeyHandler* key_event_handler;
   SpyTextInputPlugin* text_input_plugin;
@@ -271,9 +273,10 @@ class TestFlutterWindowsView : public FlutterWindowsView {
     // Simulate the event loop by just sending the event sent to
     // "SendInput" directly to the window.
     const KEYBDINPUT kbdinput = pInputs->ki;
-    const UINT message =
-        (kbdinput.dwFlags & KEYEVENTF_KEYUP) ? WM_KEYUP : WM_KEYDOWN;
     const bool is_key_up = kbdinput.dwFlags & KEYEVENTF_KEYUP;
+    const UINT message = is_key_up ? (is_syskey_ ? WM_SYSKEYUP : WM_KEYUP)
+                                   : (is_syskey_ ? WM_SYSKEYDOWN : WM_KEYDOWN);
+
     const LPARAM lparam = CreateKeyEventLparam(
         kbdinput.wScan, kbdinput.dwFlags & KEYEVENTF_EXTENDEDKEY, is_key_up);
     // Windows would normally fill in the virtual key code for us, so we
@@ -297,6 +300,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   std::vector<Win32Message> pending_responds_;
   WPARAM virtual_key_;
   bool is_printable_;
+  bool is_syskey_;
 };
 
 // The static value to return as the "handled" value from the framework for key
@@ -380,6 +384,59 @@ TEST(FlutterWindowWin32Test, NonPrintableKeyDownPropagation) {
         .Times(0);
     win32window.InjectMessages(1,
                                Win32Message{WM_KEYDOWN, virtual_key, lparam});
+    flutter_windows_view.InjectPendingEvents(&win32window);
+  }
+}
+
+// Tests key event propagation of system (WM_SYSKEYDOWN) key down events.
+TEST(FlutterWindowWin32Test, SystemKeyDownPropagation) {
+  ::testing::InSequence in_sequence;
+
+  constexpr WPARAM virtual_key = VK_LEFT;
+  constexpr WPARAM scan_code = 10;
+  constexpr char32_t character = 0;
+  MockFlutterWindowWin32 win32window;
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  TestFlutterWindowsView flutter_windows_view(
+      std::move(window_binding_handler), virtual_key, false /* is_printable */,
+      true /* is_syskey */);
+  win32window.SetView(&flutter_windows_view);
+  LPARAM lparam = CreateKeyEventLparam(scan_code, false, false);
+
+  // Test an event not handled by the framework
+  {
+    test_response = false;
+    flutter_windows_view.SetEngine(std::move(GetTestEngine()));
+    EXPECT_CALL(*flutter_windows_view.key_event_handler,
+                KeyboardHook(_, virtual_key, scan_code, WM_SYSKEYDOWN,
+                             character, false /* extended */, _))
+        .Times(2)
+        .RetiresOnSaturation();
+    EXPECT_CALL(*flutter_windows_view.text_input_plugin,
+                KeyboardHook(_, _, _, _, _, _, _))
+        .Times(1)
+        .RetiresOnSaturation();
+    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_, _))
+        .Times(0);
+    EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_, _))
+        .Times(0);
+    win32window.InjectMessages(
+        1, Win32Message{WM_SYSKEYDOWN, virtual_key, lparam, kWmResultDefault});
+    flutter_windows_view.InjectPendingEvents(&win32window);
+  }
+
+  // Test an event handled by the framework
+  {
+    test_response = true;
+    EXPECT_CALL(*flutter_windows_view.key_event_handler,
+                KeyboardHook(_, _, _, _, _, _, _))
+        .Times(0);
+    EXPECT_CALL(*flutter_windows_view.text_input_plugin,
+                KeyboardHook(_, _, _, _, _, _, _))
+        .Times(0);
+    win32window.InjectMessages(
+        1, Win32Message{WM_SYSKEYDOWN, virtual_key, lparam, kWmResultDefault});
     flutter_windows_view.InjectPendingEvents(&win32window);
   }
 }

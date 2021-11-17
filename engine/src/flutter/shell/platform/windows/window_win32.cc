@@ -499,7 +499,8 @@ WindowWin32::HandleMessage(UINT const message,
                 ? Win32MapVkToChar(keycode_for_char_message_)
             : IsPrintable(code_point) ? code_point
                                       : 0;
-        bool handled = OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN,
+        bool handled = OnKey(keycode_for_char_message_, scancode,
+                             message == WM_SYSCHAR ? WM_SYSKEYDOWN : WM_KEYDOWN,
                              event_character, extended, was_down);
         keycode_for_char_message_ = 0;
         if (handled) {
@@ -515,6 +516,12 @@ WindowWin32::HandleMessage(UINT const message,
           // record the text here for the redispached event to use.
           if (message == WM_CHAR) {
             text_for_scancode_on_redispatch_[scancode] = text;
+          }
+
+          // For system characters, always pass them to the default WndProc so
+          // that system keys like the ALT-TAB are processed correctly.
+          if (message == WM_SYSCHAR) {
+            break;
           }
           return 0;
         }
@@ -567,9 +574,17 @@ WindowWin32::HandleMessage(UINT const message,
       const bool extended = ((lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.
       keyCode = ResolveKeyCode(keyCode, extended, scancode);
-      const int action = is_keydown_message ? WM_KEYDOWN : WM_KEYUP;
       const bool was_down = lparam & 0x40000000;
+      bool is_syskey = message == WM_SYSKEYDOWN || message == WM_SYSKEYUP;
+      const int action = is_keydown_message
+                             ? (is_syskey ? WM_SYSKEYDOWN : WM_KEYDOWN)
+                             : (is_syskey ? WM_SYSKEYUP : WM_KEYUP);
       if (OnKey(keyCode, scancode, action, 0, extended, was_down)) {
+        // For system keys, always pass them to the default WndProc so that keys
+        // like the ALT-TAB or Kanji switches are processed correctly.
+        if (is_syskey) {
+          break;
+        }
         return 0;
       }
       break;
