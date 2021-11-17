@@ -1,4 +1,4 @@
-Signature: 0bdcbc324937bfe2439aec5ac64e2227
+Signature: 986d0fa409b1eeec8763d9bb420facd2
 
 UNUSED LICENSES:
 
@@ -671,6 +671,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/.bazelrc
 FILE: ../../../third_party/skia/.bazelversion
 FILE: ../../../third_party/skia/.clang-tidy
+FILE: ../../../third_party/skia/.vpython
 FILE: ../../../third_party/skia/BUILD.bazel
 FILE: ../../../third_party/skia/CQ_COMMITTERS
 FILE: ../../../third_party/skia/DEPS
