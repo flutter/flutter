@@ -196,6 +196,26 @@ void main() {
 
       expect(logger.errorText, isEmpty);
     });
+
+    testWithoutContext('throws if emulator not found', () async {
+      mockSdk.emulatorPath = null;
+
+      final AndroidEmulator emulator = AndroidEmulator(
+        emulatorID,
+        processManager: FakeProcessManager.empty(),
+        androidSdk: mockSdk,
+        logger: BufferLogger.test(),
+      );
+
+      await expectLater(
+        () => emulator.launch(startupDuration: Duration.zero),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('Emulator is missing from the Android SDK'),
+        )),
+      );
+    });
   });
 }
 

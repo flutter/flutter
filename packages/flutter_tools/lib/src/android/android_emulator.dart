@@ -151,7 +151,7 @@ class AndroidEmulator extends Emulator {
   Future<void> launch({@visibleForTesting Duration? startupDuration, bool coldBoot = false}) async {
     final String? emulatorPath = _androidSdk?.emulatorPath;
     if (emulatorPath == null) {
-      throwToolExit('Emulator is missing from the Android SDK');
+      throw Exception('Emulator is missing from the Android SDK');
     }
     final List<String> command = <String>[
       emulatorPath,
