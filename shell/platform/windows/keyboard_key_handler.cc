@@ -67,7 +67,8 @@ static bool IsKeyDownAltRight(int action, int virtual_key, bool extended) {
 #ifdef WINUWP
   return false;
 #else
-  return virtual_key == VK_RMENU && extended && action == WM_KEYDOWN;
+  return virtual_key == VK_RMENU && extended &&
+         (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
 #endif
 }
 
@@ -78,7 +79,8 @@ static bool IsKeyUpAltRight(int action, int virtual_key, bool extended) {
 #ifdef WINUWP
   return false;
 #else
-  return virtual_key == VK_RMENU && extended && action == WM_KEYUP;
+  return virtual_key == VK_RMENU && extended &&
+         (action == WM_KEYUP || action == WM_SYSKEYUP);
 #endif
 }
 
@@ -89,7 +91,8 @@ static bool IsKeyDownCtrlLeft(int action, int virtual_key) {
 #ifdef WINUWP
   return false;
 #else
-  return virtual_key == VK_LCONTROL && action == WM_KEYDOWN;
+  return virtual_key == VK_LCONTROL &&
+         (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
 #endif
 }
 
@@ -125,6 +128,10 @@ void KeyboardKeyHandler::DispatchEvent(const PendingEvent& event) {
   return;
 #else
   char32_t character = event.character;
+
+  if (event.action == WM_SYSKEYDOWN || event.action == WM_SYSKEYUP) {
+    return;
+  }
 
   INPUT input_event{
       .type = INPUT_KEYBOARD,

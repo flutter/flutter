@@ -142,6 +142,22 @@ TEST(MockWin32Window, KeyUp) {
   window.InjectWindowMessage(WM_KEYUP, 16, lparam);
 }
 
+TEST(MockWin32Window, SysKeyDown) {
+  MockWin32Window window;
+  EXPECT_CALL(window, OnKey(_, _, _, _, _, _)).Times(1);
+  LPARAM lparam = CreateKeyEventLparam(42, false, false);
+  // send a "Shift" key down event.
+  window.InjectWindowMessage(WM_SYSKEYDOWN, 16, lparam);
+}
+
+TEST(MockWin32Window, SysKeyUp) {
+  MockWin32Window window;
+  EXPECT_CALL(window, OnKey(_, _, _, _, _, _)).Times(1);
+  LPARAM lparam = CreateKeyEventLparam(42, false, true);
+  // send a "Shift" key up event.
+  window.InjectWindowMessage(WM_SYSKEYUP, 16, lparam);
+}
+
 TEST(MockWin32Window, KeyDownPrintable) {
   MockWin32Window window;
   LPARAM lparam = CreateKeyEventLparam(30, false, false);
