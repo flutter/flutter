@@ -44,7 +44,6 @@ class MyStatelessWidget extends StatelessWidget {
         child: InkWell(
             onTap: () { /* ... */ },
             child: const Align(
-              alignment: Alignment.center,
               child: Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(
