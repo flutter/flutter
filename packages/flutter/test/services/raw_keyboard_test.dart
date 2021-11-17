@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -346,6 +348,56 @@ void main() {
           },
         ),
       );
+    }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      Future<void> simulate(bool keyDown, int scancode, int keycode, int modifiers) async {
+        final Map<String, dynamic> data = <String, dynamic>{
+            'type': keyDown ? 'keydown' : 'keyup',
+            'keymap': 'linux',
+            'toolkit': 'gtk',
+            'scanCode': scancode,
+            'keyCode': keycode,
+            'modifiers': modifiers,
+          };
+        // Dispatch an empty key data to disable HardwareKeyboard sanity check,
+        // since we're only testing if the raw keyboard can handle the message.
+        // In real application the embedder responder will send correct key data
+        // (which is tested in the engine.)
+        TestDefaultBinaryMessengerBinding.instance!.keyEventManager.handleKeyData(const ui.KeyData(
+          type: ui.KeyEventType.down,
+          timeStamp: Duration.zero,
+          logical: 0,
+          physical: 0,
+          character: null,
+          synthesized: false,
+        ));
+        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData? data) {},
+        );
+      }
+
+      RawKeyboard.instance.addListener(print);
+
+      await simulate(true, 0x6c, 0xffea, 0x2000000);
+      await simulate(true, 0x32, 0xfe08, 0x2000008);
+      await simulate(false, 0x6c, 0xfe03, 0x2002008);
+      await simulate(true, 0x6c, 0xfe03, 0x2002000);
+      // expect(
+      //   RawKeyboard.instance.keysPressed,
+      //   equals(
+      //     <LogicalKeyboardKey>{
+      //       LogicalKeyboardKey.shiftLeft,
+      //       // Linux doesn't have a concept of left/right keys, so they're all
+      //       // shown as down when either is pressed.
+      //       LogicalKeyboardKey.shiftRight,
+      //       LogicalKeyboardKey.keyA,
+      //     },
+      //   ),
+      // );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
