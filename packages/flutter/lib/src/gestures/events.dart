@@ -2036,7 +2036,9 @@ mixin _CopyPointerCancelEvent on PointerEvent {
   }
 }
 
-/// The input from the pointer is no longer directed towards this receiver.
+/// The input from the pointer is no longer directed towards this receiver. The
+/// "receiver" in this context does not refer to a widget, but the entire
+/// client. Usually triggered by the platform interrupting the client.
 ///
 /// See also:
 ///

@@ -6089,7 +6089,9 @@ class Listener extends SingleChildRenderObjectWidget {
   final PointerHoverEventListener? onPointerHover;
 
   /// Called when the input from a pointer that triggered an [onPointerDown] is
-  /// no longer directed towards this receiver.
+  /// no longer directed towards this receiver. The "receiver" in this context
+  /// does not refer to a widget, but the entire client. Usually triggered by
+  /// the platform interrupting the client.
   final PointerCancelEventListener? onPointerCancel;
 
   /// Called when a pointer signal occurs over this object.
