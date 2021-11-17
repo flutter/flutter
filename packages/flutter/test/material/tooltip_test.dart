@@ -584,7 +584,7 @@ void main() {
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
-    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(blackMountainView bodyText2)).copyWith');
+    expect(textStyle.debugLabel, '((englishLike bodyMedium 2014).merge(blackMountainView bodyMedium)).copyWith');
   });
 
   testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
