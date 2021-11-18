@@ -22,11 +22,13 @@ void main() {
   group('safety checks', () {
     test('superset', () {
       expect(testIsSuperset(codepointsA, codepointsA), true);
+      
       expect(testIsSuperset(codepointsA, codepointsB), true);
       expect(testIsSuperset(codepointsB, codepointsA), false);
     });
     test('stability', () {
       expect(testIsStable(codepointsA, codepointsA), true);
+
       expect(testIsStable(codepointsA, codepointsB), false);
       expect(testIsStable(codepointsB, codepointsA), false);
 
