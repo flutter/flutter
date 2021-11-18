@@ -332,9 +332,8 @@ bool _testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldC
 
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
     stderr.writeln(
-    '❌ new codepoints file does not contain all ${oldCodepointsSet.length}' 
-    'existing codepoints. Missing: ${oldCodepointsSet.difference(newCodepointsSet)}'
-);
+        '❌ new codepoints file does not contain all ${oldCodepointsSet.length}'
+        'existing codepoints. Missing: ${oldCodepointsSet.difference(newCodepointsSet)}');
     return false;
   } else {
     final int diff = newCodepointsSet.length - oldCodepointsSet.length;
@@ -367,8 +366,7 @@ bool _testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCod
   }
 }
 
-void _regenerateCodepointsFile(
-    File oldCodepointsFile, Map<String, String> newTokenPairMap) {
+void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
   final StringBuffer buf = StringBuffer();
@@ -489,8 +487,7 @@ class _Icon {
   static String generateFlutterId(String id) {
     String flutterId = id;
     // Exact identifier rewrites.
-    for (final MapEntry<String, String> rewritePair
-        in identifierExactRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in identifierExactRewrites.entries) {
       final String shortId = _Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
