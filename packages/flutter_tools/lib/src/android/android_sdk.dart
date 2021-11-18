@@ -198,7 +198,7 @@ class AndroidSdk {
       }
     }
 
-    for (final String searchPath in searchPaths.whereType<String>()) {
+    for (final String searchPath in searchPaths) {
       if (globals.fs.directory(searchPath).existsSync()) {
         return searchPath;
       }

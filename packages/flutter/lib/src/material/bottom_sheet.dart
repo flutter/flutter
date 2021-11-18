@@ -508,7 +508,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+      _animationController = BottomSheet.createAnimationController(navigator!);
     }
     return _animationController!;
   }

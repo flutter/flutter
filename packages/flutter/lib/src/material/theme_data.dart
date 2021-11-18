@@ -239,7 +239,6 @@ class ThemeData with Diagnosticable {
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -361,6 +360,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
     // GENERAL CONFIGURATION
     applyElevationOverlayColor ??= false;
@@ -390,10 +394,10 @@ class ThemeData with Diagnosticable {
     final bool isDark = _brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -466,11 +470,7 @@ class ThemeData with Diagnosticable {
     bottomSheetTheme ??= const BottomSheetThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
     cardTheme ??= const CardTheme();
-    chipTheme ??= ChipThemeData.fromDefaults(
-      secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
-      brightness: colorScheme.brightness,
-      labelStyle: textTheme.bodyText1!,
-    );
+    chipTheme ??= const ChipThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
@@ -504,6 +504,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
+    primaryColorBrightness = _primaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -520,7 +521,6 @@ class ThemeData with Diagnosticable {
       // COLOR
       colorScheme: colorScheme,
       primaryColor: primaryColor,
-      primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
       focusColor: focusColor,
@@ -593,6 +593,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme,
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness,
     );
   }
 
@@ -624,7 +625,6 @@ class ThemeData with Diagnosticable {
     // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.primaryColor,
-    required this.primaryColorBrightness,
     required this.primaryColorLight,
     required this.primaryColorDark,
     required this.focusColor,
@@ -745,6 +745,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(inputDecorationTheme != null),
@@ -757,7 +762,6 @@ class ThemeData with Diagnosticable {
         // COLOR
        assert(colorScheme != null),
        assert(primaryColor != null),
-       assert(primaryColorBrightness != null),
        assert(primaryColorLight != null),
        assert(primaryColorDark != null),
        assert(focusColor != null),
@@ -829,7 +833,8 @@ class ThemeData with Diagnosticable {
        assert(accentTextTheme != null),
        assert(accentIconTheme != null),
        assert(buttonColor != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(fixTextFieldOutlineLabel != null),
+       assert(primaryColorBrightness != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1092,10 +1097,6 @@ class ThemeData with Diagnosticable {
   /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
-
-  /// The brightness of the [primaryColor]. Used to determine the color of text and
-  /// icons placed on top of the primary color (e.g. toolbar text).
-  final Brightness primaryColorBrightness;
 
   /// A lighter version of the [primaryColor].
   final Color primaryColorLight;
@@ -1455,6 +1456,21 @@ class ThemeData with Diagnosticable {
   )
   final bool fixTextFieldOutlineLabel;
 
+  /// Obsolete property that was originally used to determine the color
+  /// of text and icons placed on top of the primary color (e.g. toolbar text).
+  ///
+  /// The material library no longer uses this property. The [appBarTheme] can
+  /// be used to configure the appearance of [AppBar]s. The appearance of
+  /// Keyboards for [TextField]s now uses the overall theme's
+  /// [ThemeData.brightness] and can also be customized with
+  /// [TextField.keyboardAppearance]. The brightness of any color can be found
+  /// with [ThemeData.estimateBrightnessForColor].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.6.0-11.0.pre.',
+  )
+  final Brightness primaryColorBrightness;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1477,7 +1493,6 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     Brightness? brightness,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -1598,6 +1613,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1615,7 +1635,6 @@ class ThemeData with Diagnosticable {
       // COLOR
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       focusColor: focusColor ?? this.focusColor,
@@ -1688,6 +1707,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
     );
   }
 
@@ -1783,7 +1803,6 @@ class ThemeData with Diagnosticable {
       // COLOR
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
-      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
@@ -1856,6 +1875,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
+      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
     );
   }
 
@@ -1881,7 +1901,6 @@ class ThemeData with Diagnosticable {
         // COLOR
         other.colorScheme == colorScheme &&
         other.primaryColor == primaryColor &&
-        other.primaryColorBrightness == primaryColorBrightness &&
         other.primaryColorLight == primaryColorLight &&
         other.primaryColorDark == primaryColorDark &&
         other.focusColor == focusColor &&
@@ -1953,7 +1972,8 @@ class ThemeData with Diagnosticable {
         other.accentTextTheme == accentTextTheme &&
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
-        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
+        other.primaryColorBrightness == primaryColorBrightness;
   }
 
   @override
@@ -1976,7 +1996,6 @@ class ThemeData with Diagnosticable {
       // COLOR
       colorScheme,
       primaryColor,
-      primaryColorBrightness,
       primaryColorLight,
       primaryColorDark,
       focusColor,
@@ -2049,6 +2068,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme,
       buttonColor,
       fixTextFieldOutlineLabel,
+      primaryColorBrightness,
     ];
     return hashList(values);
   }
@@ -2071,7 +2091,6 @@ class ThemeData with Diagnosticable {
     // COLORS
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
@@ -2144,6 +2163,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
   }
 }
 

@@ -102,6 +102,11 @@ class StartCommand extends Command<void> {
         'n': 'Indicates a hotfix to a dev or beta release.',
       },
     );
+    argParser.addFlag(
+      kForceFlag,
+      abbr: 'f',
+      help: 'Override all validations of the command line inputs.',
+    );
   }
 
   final Checkouts checkouts;
@@ -178,6 +183,11 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
+    final bool force = getBoolFromEnvOrArgs(
+      kForceFlag,
+      argumentResults,
+      platform.environment,
+    );
     final File stateFile = checkouts.fileSystem.file(
       getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
     );
@@ -198,6 +208,7 @@ class StartCommand extends Command<void> {
       releaseChannel: releaseChannel,
       stateFile: stateFile,
       stdio: stdio,
+      force: force,
     );
     return context.run();
   }
@@ -223,6 +234,7 @@ class StartContext {
     required this.releaseChannel,
     required this.stateFile,
     required this.stdio,
+    this.force = false,
   }) : git = Git(processManager);
 
   final String candidateBranch;
@@ -241,6 +253,9 @@ class StartContext {
   final String releaseChannel;
   final File stateFile;
   final Stdio stdio;
+
+  /// If validations should be overridden.
+  final bool force;
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
@@ -361,27 +376,15 @@ class StartContext {
     final Version lastVersion = Version.fromString(await framework.getFullTag(
         framework.upstreamRemote.name, candidateBranch,
         exact: false,
-    ))..ensureValid(candidateBranch, incrementLetter);
-    Version nextVersion;
-    if (incrementLetter == 'm') {
-      nextVersion = Version.fromCandidateBranch(candidateBranch);
-    } else {
-      if (incrementLetter == 'z') {
-        if (lastVersion.type == VersionType.stable) {
-          nextVersion = Version.increment(lastVersion, incrementLetter);
-        } else {
-          // This is the first stable release, so hardcode the z as 0
-          nextVersion = Version(
-            x: lastVersion.x,
-            y: lastVersion.y,
-            z: 0,
-            type: VersionType.stable,
-          );
-        }
-      } else {
-        nextVersion = Version.increment(lastVersion, incrementLetter);
-      }
+    ));
+    // [force] means we know this would fail but need to publish anyway
+    if (!force) {
+      lastVersion.ensureValid(candidateBranch, incrementLetter);
     }
+
+    Version nextVersion = calculateNextVersion(lastVersion);
+    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+
     state.releaseVersion = nextVersion.toString();
 
     final String frameworkHead = await framework.reverseParse('HEAD');
@@ -415,6 +418,54 @@ class StartContext {
   @visibleForOverriding
   void updateState(pb.ConductorState state, List<String> logs) {
     state_import.writeStateToFile(stateFile, state, logs);
+  }
+
+  /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
+  Version calculateNextVersion(Version lastVersion) {
+    if (incrementLetter == 'm') {
+      return Version.fromCandidateBranch(candidateBranch);
+    }
+    if (incrementLetter == 'z') {
+      if (lastVersion.type == VersionType.stable) {
+        return Version.increment(lastVersion, incrementLetter);
+      }
+      // This is the first stable release, so hardcode the z as 0
+      return Version(
+          x: lastVersion.x,
+          y: lastVersion.y,
+          z: 0,
+          type: VersionType.stable,
+      );
+    }
+    return Version.increment(lastVersion, incrementLetter);
+  }
+
+  /// Ensures the branch point [candidateBranch] and `master` has a version tag.
+  ///
+  /// This is necessary for version reporting for users on the `master` channel
+  /// to be correct.
+  Future<Version> ensureBranchPointTagged(
+    Version requestedVersion,
+    FrameworkRepository framework,
+  ) async {
+    if (incrementLetter != 'm') {
+      // in this case, there must have been a previous tagged release, so skip
+      // tagging the branch point
+      return requestedVersion;
+    }
+    final String branchPoint = await framework.branchPoint(
+      candidateBranch,
+      kFrameworkDefaultBranch,
+    );
+    stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
+    await framework.tag(
+      branchPoint,
+      requestedVersion.toString(),
+      frameworkUpstream,
+    );
+    final Version nextVersion = Version.increment(requestedVersion, 'n');
+    stdio.printStatus('The actual release will be version $nextVersion.');
+    return nextVersion;
   }
 
   // To minimize merge conflicts, sort the commits by rev-list order.
