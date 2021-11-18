@@ -102,7 +102,7 @@ unsigned int BuiltinSkiaCodecImageGenerator::GetPlayCount() const {
 
 const ImageGenerator::FrameInfo BuiltinSkiaCodecImageGenerator::GetFrameInfo(
     unsigned int frame_index) const {
-  SkCodec::FrameInfo info;
+  SkCodec::FrameInfo info = {};
   codec_generator_->getFrameInfo(frame_index, &info);
   return {
       .required_frame = info.fRequiredFrame == SkCodec::kNoFrame

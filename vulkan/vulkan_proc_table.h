@@ -26,7 +26,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
    public:
     using Proto = T;
 
-    Proc(T proc = nullptr) : proc_(proc) {}
+    explicit Proc(T proc = nullptr) : proc_(proc) {}
 
     ~Proc() { proc_ = nullptr; }
 
@@ -40,9 +40,9 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
       return *this;
     }
 
-    operator bool() const { return proc_ != nullptr; }
+    explicit operator bool() const { return proc_ != nullptr; }
 
-    operator T() const { return proc_; }
+    operator T() const { return proc_; }  // NOLINT(google-explicit-constructor)
 
    private:
     T proc_;
@@ -136,7 +136,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   VulkanHandle<VkDevice> device_;
 
   VulkanProcTable();
-  VulkanProcTable(const char* path);
+  explicit VulkanProcTable(const char* path);
   ~VulkanProcTable();
   bool OpenLibraryHandle(const char* path);
   bool SetupLoaderProcAddresses();

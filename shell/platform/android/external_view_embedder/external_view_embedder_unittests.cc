@@ -112,7 +112,7 @@ TEST(AndroidExternalViewEmbedder, GetCurrentCanvases) {
   ASSERT_EQ(SkISize::Make(10, 20), canvases[1]->getBaseLayerSize());
 }
 
-TEST(AndroidExternalViewEmbedder, GetCurrentCanvases__CompositeOrder) {
+TEST(AndroidExternalViewEmbedder, GetCurrentCanvasesCompositeOrder) {
   auto jni_mock = std::make_shared<JNIMock>();
 
   auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
@@ -248,7 +248,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect) {
   ASSERT_EQ(SkRect::MakeXYWH(15, 30, 45, 60), embedder->GetViewRect(view_id));
 }
 
-TEST(AndroidExternalViewEmbedder, PlatformViewRect__ChangedParams) {
+TEST(AndroidExternalViewEmbedder, PlatformViewRectChangedParams) {
   auto jni_mock = std::make_shared<JNIMock>();
 
   auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
@@ -488,7 +488,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
   }
 }
 
-TEST(AndroidExternalViewEmbedder, SubmitFrame__overlayComposition) {
+TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
@@ -590,7 +590,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame__overlayComposition) {
   embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
 }
 
-TEST(AndroidExternalViewEmbedder, SubmitFrame__platformViewWithoutAnyOverlay) {
+TEST(AndroidExternalViewEmbedder, SubmitFramePlatformViewWithoutAnyOverlay) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
       std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);

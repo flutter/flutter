@@ -99,7 +99,7 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
     return true;
   }();
 
-  instance_ = {handle, nullptr};
+  instance_ = VulkanHandle<VkInstance>{handle, nullptr};
   return true;
 }
 
@@ -147,7 +147,7 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
   ACQUIRE_PROC(GetBufferCollectionPropertiesFUCHSIAX, handle);
 #endif  // OS_FUCHSIA
 #endif  // TEST_VULKAN_PROCS
-  device_ = {handle, nullptr};
+  device_ = VulkanHandle<VkDevice>{handle, nullptr};
   return true;
 }
 
@@ -193,13 +193,14 @@ GrVkGetProc VulkanProcTable::CreateSkiaGetProc() const {
 
   return [this](const char* proc_name, VkInstance instance, VkDevice device) {
     if (device != VK_NULL_HANDLE) {
-      auto result = AcquireProc(proc_name, {device, nullptr});
+      auto result =
+          AcquireProc(proc_name, VulkanHandle<VkDevice>{device, nullptr});
       if (result != nullptr) {
         return result;
       }
     }
 
-    return AcquireProc(proc_name, {instance, nullptr});
+    return AcquireProc(proc_name, VulkanHandle<VkInstance>{instance, nullptr});
   };
 }
 

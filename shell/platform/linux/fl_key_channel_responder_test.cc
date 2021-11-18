@@ -39,7 +39,7 @@ static char* clone_string(const char* string) {
   }
   size_t len = strlen(string);
   char* result = g_new(char, len + 1);
-  strcpy(result, string);
+  strncpy(result, string, len + 1);
   return result;
 }
 

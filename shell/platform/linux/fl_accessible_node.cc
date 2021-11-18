@@ -112,8 +112,9 @@ static gboolean has_action(FlutterSemanticsAction actions,
 
 // Gets the nth action.
 static ActionData* get_action(FlAccessibleNode* self, gint index) {
-  if (index < 0 || static_cast<guint>(index) >= self->actions->len)
+  if (index < 0 || static_cast<guint>(index) >= self->actions->len) {
     return nullptr;
+  }
   return static_cast<ActionData*>(g_ptr_array_index(self->actions, index));
 }
 

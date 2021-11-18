@@ -9,4 +9,5 @@ Checks: "google-*,\
 # to prevent new warnings being introduced.
 # https://github.com/flutter/flutter/issues/93279
 WarningsAsErrors: "clang-analyzer-osx.*,\
-google-objc-*"
+google-objc-*,\
+google-explicit-constructor"

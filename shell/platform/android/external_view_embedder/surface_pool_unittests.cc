@@ -36,7 +36,7 @@ class TestAndroidSurfaceFactory : public AndroidSurfaceFactory {
   TestSurfaceProducer surface_producer_;
 };
 
-TEST(SurfacePool, GetLayer__AllocateOneLayer) {
+TEST(SurfacePool, GetLayerAllocateOneLayer) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
@@ -100,7 +100,7 @@ TEST(SurfacePool, GetUnusedLayers) {
   ASSERT_EQ(layer, pool->GetUnusedLayers()[0]);
 }
 
-TEST(SurfacePool, GetLayer__Recycle) {
+TEST(SurfacePool, GetLayerRecycle) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context_1 = GrDirectContext::MakeMock(nullptr);
@@ -145,7 +145,7 @@ TEST(SurfacePool, GetLayer__Recycle) {
             layer_2->gr_context_key);
 }
 
-TEST(SurfacePool, GetLayer__AllocateTwoLayers) {
+TEST(SurfacePool, GetLayerAllocateTwoLayers) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
@@ -219,7 +219,7 @@ TEST(SurfacePool, DestroyLayers) {
   ASSERT_TRUE(pool->GetUnusedLayers().empty());
 }
 
-TEST(SurfacePool, DestroyLayers__frameSizeChanged) {
+TEST(SurfacePool, DestroyLayersFrameSizeChanged) {
   auto pool = std::make_unique<SurfacePool>();
   auto jni_mock = std::make_shared<JNIMock>();
 

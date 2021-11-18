@@ -25,9 +25,10 @@ class VulkanProvider {
                                            &fence)) != VK_SUCCESS)
       return vulkan::VulkanHandle<VkFence>();
 
-    return {fence, [this](VkFence fence) {
-              vk().DestroyFence(vk_device(), fence, nullptr);
-            }};
+    return VulkanHandle<VkFence>{fence, [this](VkFence fence) {
+                                   vk().DestroyFence(vk_device(), fence,
+                                                     nullptr);
+                                 }};
   }
 };
 

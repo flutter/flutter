@@ -86,7 +86,7 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
       return false;
     }
 
-    out_vulkan_image->vk_image = {
+    out_vulkan_image->vk_image = vulkan::VulkanHandle<VkImage_T*>{
         vk_image, [&vulkan_provider = vulkan_provider](VkImage image) {
           vulkan_provider.vk().DestroyImage(vulkan_provider.vk_device(), image,
                                             NULL);
@@ -290,11 +290,12 @@ bool VulkanSurface::AllocateDeviceMemory(
     return false;
   }
 
-  collection_ = {collection, [&vulkan_provider = vulkan_provider_](
-                                 VkBufferCollectionFUCHSIAX collection) {
-                   vulkan_provider.vk().DestroyBufferCollectionFUCHSIAX(
-                       vulkan_provider.vk_device(), collection, nullptr);
-                 }};
+  collection_ = vulkan::VulkanHandle<VkBufferCollectionFUCHSIAX_T*>{
+      collection, [&vulkan_provider = vulkan_provider_](
+                      VkBufferCollectionFUCHSIAX collection) {
+        vulkan_provider.vk().DestroyBufferCollectionFUCHSIAX(
+            vulkan_provider.vk_device(), collection, nullptr);
+      }};
 
   VulkanImage vulkan_image;
   LOG_AND_RETURN(!CreateVulkanImage(vulkan_provider_, size, &vulkan_image),
@@ -339,11 +340,12 @@ bool VulkanSurface::AllocateDeviceMemory(
       return false;
     }
 
-    vk_memory_ = {vk_memory,
-                  [&vulkan_provider = vulkan_provider_](VkDeviceMemory memory) {
-                    vulkan_provider.vk().FreeMemory(vulkan_provider.vk_device(),
-                                                    memory, NULL);
-                  }};
+    vk_memory_ = vulkan::VulkanHandle<VkDeviceMemory_T*>{
+        vk_memory,
+        [&vulkan_provider = vulkan_provider_](VkDeviceMemory memory) {
+          vulkan_provider.vk().FreeMemory(vulkan_provider.vk_device(), memory,
+                                          NULL);
+        }};
 
     vk_memory_info_ = allocation_info;
   }
