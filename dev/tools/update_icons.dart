@@ -17,8 +17,7 @@ const String _iconsTemplatePathOption = 'icons-template';
 const String _newCodepointsPathOption = 'new-codepoints';
 const String _oldCodepointsPathOption = 'old-codepoints';
 const String _dryRunOption = 'dry-run';
-const String _enforceIconSupersetOption = 'enforce-icon-presence';
-const String _enforceIconStabilityOption = 'enforce-icon-stability';
+const String _enforceSafetyChecks = 'enforce-safety-checks';
 
 const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
@@ -194,11 +193,10 @@ void main(List<String> args) {
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
   final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
-  stderr.writeln('Performing safety checks for codepoint files');
+  stderr.writeln('Performing safety checks');
   final bool isSuperset = _testIsSuperset(newTokenPairMap, oldTokenPairMap);
   final bool isStable = _testIsStable(newTokenPairMap, oldTokenPairMap);
-  if ((!isSuperset && argResults[_enforceIconSupersetOption] as bool) ||
-      (!isStable && argResults[_enforceIconStabilityOption] as bool)) {
+  if ((!isSuperset || !isStable) && argResults[_enforceSafetyChecks] as bool) {
     exit(1);
   }
   final String iconsTemplate = iconsTemplateFile.readAsStringSync();
@@ -229,13 +227,10 @@ ArgResults _handleArguments(List<String> args) {
     ..addOption(_oldCodepointsPathOption,
         defaultsTo: _defaultOldCodepointsPath,
         help: 'Location of the existing codepoints directory')
-    ..addFlag(_dryRunOption, defaultsTo: false)
-    ..addFlag(_enforceIconSupersetOption,
+    ..addFlag(_dryRunOption)
+    ..addFlag(_enforceSafetyChecks,
         defaultsTo: true,
-        help: 'Whether to exit if an existing icon is no longer present')
-    ..addFlag(_enforceIconStabilityOption,
-        defaultsTo: true,
-        help: "Whether to exit if an existing icon's codepoint has changed");
+        help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable');
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
       print(argParser.usage);
@@ -347,7 +342,7 @@ bool _testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldC
 
 bool _testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
-  final List<String> unstable = [];
+  final List<String> unstable = <String>[];
 
   oldCodepoints.forEach((String key, String value) {
     if (newCodepoints.containsKey(key)) {
