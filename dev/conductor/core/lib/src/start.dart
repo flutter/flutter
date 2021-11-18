@@ -221,7 +221,6 @@ class StartCommand extends Command<void> {
 class StartContext extends Context {
   StartContext({
     required this.candidateBranch,
-    required this.checkouts,
     required this.dartRevision,
     required this.engineCherrypickRevisions,
     required this.engineMirror,
@@ -233,13 +232,18 @@ class StartContext extends Context {
     required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
-    required this.stateFile,
     required this.stdio,
+    required Checkouts checkouts,
+    required File stateFile,
     this.force = false,
-  }) : git = Git(processManager);
+  }) :
+    git = Git(processManager),
+    super(
+      checkouts: checkouts,
+      stateFile: stateFile,
+    );
 
   final String candidateBranch;
-  final Checkouts checkouts;
   final String? dartRevision;
   final List<String> engineCherrypickRevisions;
   final String engineMirror;
@@ -252,7 +256,6 @@ class StartContext extends Context {
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
-  final File stateFile;
   final Stdio stdio;
 
   /// If validations should be overridden.
@@ -409,16 +412,6 @@ class StartContext extends Context {
     updateState(state, stdio.logs);
 
     stdio.printStatus(state_import.presentState(state));
-  }
-
-  /// Save the release's [state].
-  ///
-  /// This can be overridden by frontends that may not persist the state to
-  /// disk, and/or may need to call additional update hooks each time the state
-  /// is updated.
-  @visibleForOverriding
-  void updateState(pb.ConductorState state, List<String> logs) {
-    state_import.writeStateToFile(stateFile, state, logs);
   }
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].

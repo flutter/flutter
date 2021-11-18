@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show visibleForOverriding;
 
 import 'context.dart';
 import 'globals.dart';
@@ -74,14 +73,15 @@ class NextContext extends Context {
   const NextContext({
     required this.autoAccept,
     required this.force,
-    required this.checkouts,
-    required this.stateFile,
-  });
+    required Checkouts checkouts,
+    required File stateFile,
+  }) : super(
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
 
   final bool autoAccept;
   final bool force;
-  final Checkouts checkouts;
-  final File stateFile;
 
   Future<void> run(pb.ConductorState state) async {
     final Stdio stdio = checkouts.stdio;
@@ -211,14 +211,14 @@ class NextContext extends Context {
         final String engineRevision = await engine.reverseParse('HEAD');
 
         final Remote upstream = Remote(
-            name: RemoteName.upstream,
-            url: state.framework.upstream.url,
+          name: RemoteName.upstream,
+          url: state.framework.upstream.url,
         );
         final FrameworkRepository framework = FrameworkRepository(
-            checkouts,
-            initialRef: state.framework.workingBranch,
-            upstreamRemote: upstream,
-            previousCheckoutLocation: state.framework.checkoutPath,
+          checkouts,
+          initialRef: state.framework.workingBranch,
+          upstreamRemote: upstream,
+          previousCheckoutLocation: state.framework.checkoutPath,
         );
 
         // Check if the current candidate branch is enabled
@@ -392,15 +392,5 @@ class NextContext extends Context {
     stdio.printStatus(state_import.phaseInstructions(state));
 
     updateState(state, stdio.logs);
-  }
-
-  /// Save the release's [state].
-  ///
-  /// This can be overridden by frontends that may not persist the state to
-  /// disk, and/or may need to call additional update hooks each time the state
-  /// is updated.
-  @visibleForOverriding
-  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    state_import.writeStateToFile(stateFile, state, logs);
   }
 }
