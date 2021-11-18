@@ -27,18 +27,6 @@ void main() {
 
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
-Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
-    {ui.Rect region = kDefaultRegion, bool write = false}) async {
-  final EnginePlatformDispatcher dispatcher =
-      ui.window.platformDispatcher as EnginePlatformDispatcher;
-  final LayerSceneBuilder sb = LayerSceneBuilder();
-  sb.pushOffset(0, 0);
-  sb.addPicture(ui.Offset.zero, picture);
-  dispatcher.rasterizer!.draw(sb.build().layerTree);
-  await matchGoldenFile(goldenFile,
-      region: region, maxDiffRatePercent: 0.0, write: write);
-}
-
 void testMain() {
   group('CkCanvas', () {
     setUpCanvasKitTest();
@@ -63,7 +51,10 @@ void testMain() {
       expect(canvas.runtimeType, CkCanvas);
       drawTestPicture(canvas);
       await matchPictureGolden(
-          'canvaskit_picture.png', recorder.endRecording());
+        'canvaskit_picture.png',
+        recorder.endRecording(),
+        region: kDefaultRegion,
+      );
     // Safari does not support weak refs (FinalizationRegistry).
     // This test should be revisited when Safari ships weak refs.
     // TODO(yjbanov): skip Firefox due to a crash: https://github.com/flutter/flutter/issues/86632
@@ -78,7 +69,7 @@ void testMain() {
       drawTestPicture(canvas);
 
       final CkPicture originalPicture = recorder.endRecording();
-      await matchPictureGolden('canvaskit_picture.png', originalPicture);
+      await matchPictureGolden('canvaskit_picture.png', originalPicture, region: kDefaultRegion);
 
       final ByteData originalPixels =
           (await (await originalPicture.toImage(50, 50)).toByteData())!;
@@ -93,7 +84,7 @@ void testMain() {
       final ByteData restoredPixels =
         (await (await restoredPicture.toImage(50, 50)).toByteData())!;
 
-      await matchPictureGolden('canvaskit_picture.png', restoredPicture);
+      await matchPictureGolden('canvaskit_picture.png', restoredPicture, region: kDefaultRegion);
       expect(restoredPixels.buffer.asUint8List(),
           originalPixels.buffer.asUint8List());
     });
@@ -140,11 +131,7 @@ void testMain() {
             );
             canvas.drawRect(psl.paintBounds, shadowBoundsPaint);
 
-            final CkParagraphBuilder pb = CkParagraphBuilder(
-              CkParagraphStyle(),
-            );
-            pb.addText('$elevation');
-            final CkParagraph p = pb.build();
+            final CkParagraph p = makeSimpleText('$elevation');
             p.layout(const ui.ParagraphConstraints(width: 1000));
             canvas.drawParagraph(
                 p, ui.Offset(20 - p.maxIntrinsicWidth / 2, 20 - p.height / 2));
@@ -1137,19 +1124,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.restore();
 
   canvas.translate(60, 0);
-  final CkParagraphBuilder pb = CkParagraphBuilder(CkParagraphStyle(
-    fontFamily: 'Roboto',
-    fontStyle: ui.FontStyle.normal,
-    fontWeight: ui.FontWeight.normal,
-    fontSize: 18,
-  ));
-  pb.pushStyle(CkTextStyle(
-    color: const ui.Color(0xFF0000AA),
-  ));
-  pb.addText('Hello');
-  pb.pop();
-  final CkParagraph p = pb.build();
-  p.layout(const ui.ParagraphConstraints(width: 1000));
+  final CkParagraph p = makeSimpleText('Hello', fontSize: 18, color: const ui.Color(0xFF0000AA));
   canvas.drawParagraph(
     p,
     const ui.Offset(10, 20),
@@ -1192,7 +1167,7 @@ CkImage generateTestImage() {
         colorSpace: SkColorSpaceSRGB,
       ),
       imageData,
-      4 * 20);
+      4 * 20)!;
   return CkImage(skImage);
 }
 

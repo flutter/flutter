@@ -697,7 +697,7 @@ class HtmlViewEmbedder {
 
     // Try reusing a cached overlay created for another platform view.
     final Surface overlay = SurfaceFactory.instance.getOverlay()!;
-    overlay.createOrUpdateSurfaces(_frameSize);
+    overlay.createOrUpdateSurface(_frameSize);
     _overlays[viewId] = overlay;
   }
 

@@ -463,8 +463,7 @@ Future<Codec> instantiateImageCodec(
   bool allowUpscaling = true,
 }) async {
   if (engine.useCanvasKit) {
-    // TODO(hterkelsen): Implement targetWidth and targetHeight support.
-    return engine.skiaInstantiateImageCodec(list);
+    return engine.skiaInstantiateImageCodec(list, targetWidth, targetHeight);
   } else {
     final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
     return engine.HtmlBlobCodec(blob);

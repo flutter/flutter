@@ -52,6 +52,7 @@ class RunCommand extends Command<bool> with ArgUtils<bool> {
           browserName: browserName,
           isDebug: false,
           doUpdateScreenshotGoldens: false,
+          overridePathToCanvasKit: null,
         ),
     };
 

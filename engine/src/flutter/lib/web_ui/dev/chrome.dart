@@ -93,7 +93,14 @@ class Chrome extends Browser {
           '--headless',
         if (isChromeNoSandbox)
           '--no-sandbox',
-        '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight', // When headless, this is the actual size of the viewport
+        // When headless, this is the actual size of the viewport.
+        if (!debug)
+          '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight',
+        // When debugging, run in maximized mode so there's enough room for DevTools.
+        if (debug)
+          '--start-maximized',
+        if (debug)
+          '--auto-open-devtools-for-tabs',
         '--disable-extensions',
         '--disable-popup-blocking',
         // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
