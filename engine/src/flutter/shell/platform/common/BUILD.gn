@@ -39,11 +39,15 @@ copy("publish_headers") {
 
 source_set("common_cpp_input") {
   public = [
+    "text_editing_delta.h",
     "text_input_model.h",
     "text_range.h",
   ]
 
-  sources = [ "text_input_model.cc" ]
+  sources = [
+    "text_editing_delta.cc",
+    "text_input_model.cc",
+  ]
 
   configs += [ ":desktop_library_implementation" ]
 
@@ -167,6 +171,7 @@ if (enable_unittests) {
       "geometry_unittests.cc",
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",
+      "text_editing_delta_unittests.cc",
       "text_input_model_unittests.cc",
       "text_range_unittests.cc",
     ]
