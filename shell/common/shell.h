@@ -373,7 +373,7 @@ class Shell final : public PlatformView::Delegate,
   /// @brief      Notifies the display manager of the updates.
   ///
   void OnDisplayUpdates(DisplayUpdateType update_type,
-                        std::vector<Display> displays);
+                        std::vector<std::unique_ptr<Display>> displays);
 
   //----------------------------------------------------------------------------
   /// @brief Queries the `DisplayManager` for the main display refresh rate.

@@ -66,6 +66,7 @@ source_set("common") {
     "canvas_spy.h",
     "context_options.cc",
     "context_options.h",
+    "display.cc",
     "display.h",
     "display_manager.cc",
     "display_manager.h",

@@ -696,6 +696,7 @@ FILE: ../../../flutter/shell/common/canvas_spy_unittests.cc
 FILE: ../../../flutter/shell/common/context_options.cc
 FILE: ../../../flutter/shell/common/context_options.h
 FILE: ../../../flutter/shell/common/dart_native_benchmarks.cc
+FILE: ../../../flutter/shell/common/display.cc
 FILE: ../../../flutter/shell/common/display.h
 FILE: ../../../flutter/shell/common/display_manager.cc
 FILE: ../../../flutter/shell/common/display_manager.h
@@ -775,6 +776,8 @@ FILE: ../../../flutter/shell/platform/android/AndroidManifest.xml
 FILE: ../../../flutter/shell/platform/android/android_context_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_context_gl.h
 FILE: ../../../flutter/shell/platform/android/android_context_gl_unittests.cc
+FILE: ../../../flutter/shell/platform/android/android_display.cc
+FILE: ../../../flutter/shell/platform/android/android_display.h
 FILE: ../../../flutter/shell/platform/android/android_environment_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_environment_gl.h
 FILE: ../../../flutter/shell/platform/android/android_exports.lst
