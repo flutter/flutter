@@ -220,7 +220,7 @@ class Draggable<T extends Object> extends StatefulWidget {
 
   /// The cursor for a mouse pointer when the pointer is over the [feedback].
   ///
-  /// The [feedbackCursor] defaults to [MouseCursor.defer]
+  /// The [feedbackCursor] defaults to [MouseCursor.defer].
   final MouseCursor feedbackCursor;
 
   /// The [Axis] to restrict this draggable's movement, if specified.
