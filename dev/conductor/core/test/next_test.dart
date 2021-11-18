@@ -1072,7 +1072,6 @@ void main() {
 
       final bool response = context.prompt(
         'A prompt that will immediately be agreed to',
-        stdio,
       );
       expect(response, true);
     });
@@ -1098,7 +1097,7 @@ void main() {
       );
 
       expect(
-        () => context.prompt('Asking a question?', stdio),
+        () => context.prompt('Asking a question?'),
         throwsExceptionWith('Unknown user input (expected "y" or "n")'),
       );
     });
@@ -1150,7 +1149,7 @@ class _TestNextContext extends NextContext {
   );
 
   @override
-  bool prompt(String message, Stdio stdio) {
+  bool prompt(String message) {
     // always say yes
     return true;
   }

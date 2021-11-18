@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:meta/meta.dart' show visibleForOverriding;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -208,7 +207,6 @@ class StartCommand extends Command<void> {
       processManager: processManager,
       releaseChannel: releaseChannel,
       stateFile: stateFile,
-      stdio: stdio,
       force: force,
     );
     return context.run();
@@ -232,7 +230,6 @@ class StartContext extends Context {
     required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
-    required this.stdio,
     required Checkouts checkouts,
     required File stateFile,
     this.force = false,
@@ -256,7 +253,6 @@ class StartContext extends Context {
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
-  final Stdio stdio;
 
   /// If validations should be overridden.
   final bool force;
@@ -451,7 +447,18 @@ class StartContext extends Context {
       candidateBranch,
       kFrameworkDefaultBranch,
     );
+    final bool response = prompt(
+      'About to tag the release candidate branch branchpoint of $branchPoint '
+      'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '
+      'Is this correct?',
+    );
+
+    if (!response) {
+      throw ConductorException('Aborting command.');
+    }
+
     stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
+
     await framework.tag(
       branchPoint,
       requestedVersion.toString(),

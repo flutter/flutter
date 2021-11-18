@@ -84,7 +84,6 @@ class NextContext extends Context {
   final bool force;
 
   Future<void> run(pb.ConductorState state) async {
-    final Stdio stdio = checkouts.stdio;
     const List<CherrypickState> finishedStates = <CherrypickState>[
       CherrypickState.COMPLETED,
       CherrypickState.ABANDONED,
@@ -144,9 +143,8 @@ class NextContext extends Context {
         }
         if (autoAccept == false) {
           final bool response = prompt(
-              'Are you ready to push your engine branch to the repository '
-              '${state.engine.mirror.url}?',
-              stdio,
+            'Are you ready to push your engine branch to the repository '
+            '${state.engine.mirror.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -171,8 +169,7 @@ class NextContext extends Context {
         if (autoAccept == false) {
           // TODO(fujino): actually test if binaries have been codesigned on macOS
           final bool response = prompt(
-              'Has CI passed for the engine PR and binaries been codesigned?',
-              stdio,
+            'Has CI passed for the engine PR and binaries been codesigned?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -279,9 +276,8 @@ class NextContext extends Context {
 
         if (autoAccept == false) {
           final bool response = prompt(
-              'Are you ready to push your framework branch to the repository '
-              '${state.framework.mirror.url}?',
-              stdio,
+            'Are you ready to push your framework branch to the repository '
+            '${state.framework.mirror.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -291,10 +287,10 @@ class NextContext extends Context {
         }
 
         await framework.pushRef(
-            fromRef: 'HEAD',
-            // Explicitly create new branch
-            toRef: 'refs/heads/${state.framework.workingBranch}',
-            remote: state.framework.mirror.name,
+          fromRef: 'HEAD',
+          // Explicitly create new branch
+          toRef: 'refs/heads/${state.framework.workingBranch}',
+          remote: state.framework.mirror.name,
         );
         break;
       case pb.ReleasePhase.PUBLISH_VERSION:
@@ -314,9 +310,8 @@ class NextContext extends Context {
         final String headRevision = await framework.reverseParse('HEAD');
         if (autoAccept == false) {
           final bool response = prompt(
-              'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
-              'and push to remote ${state.framework.upstream.url}?',
-              stdio,
+            'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
+            'and push to remote ${state.framework.upstream.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -349,10 +344,7 @@ class NextContext extends Context {
               dryRun: true,
           );
 
-          final bool response = prompt(
-              'Are you ready to publish this release?',
-              stdio,
-          );
+          final bool response = prompt('Are you ready to publish this release?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);
@@ -372,10 +364,7 @@ class NextContext extends Context {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = prompt(
-              'Have all packaging builds finished successfully?',
-              stdio,
-          );
+          final bool response = prompt('Have all packaging builds finished successfully?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);

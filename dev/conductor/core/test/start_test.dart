@@ -306,6 +306,7 @@ void main() {
     });
 
     test('creates state file if provided correct inputs', () async {
+      stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
       const String revision3 = '123abc';
       const String branchPointRevision='deadbeef';

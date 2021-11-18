@@ -18,12 +18,13 @@ abstract class Context {
 
   final Checkouts checkouts;
   final File stateFile;
+  Stdio get stdio => checkouts.stdio;
 
   /// Confirm an action with the user before proceeding.
   ///
   /// The default implementation reads from STDIN. This can be overriden in UI
   /// implementations that capture user interaction differently.
-  bool prompt(String message, Stdio stdio) {
+  bool prompt(String message) {
     stdio.write('${message.trim()} (y/n) ');
     final String response = stdio.readLineSync().trim();
     final String firstChar = response[0].toUpperCase();
