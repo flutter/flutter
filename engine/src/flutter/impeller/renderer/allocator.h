@@ -47,6 +47,9 @@ class Context;
 class DeviceBuffer;
 class Texture;
 
+//------------------------------------------------------------------------------
+/// @brief      An object that allocates device memory.
+///
 class Allocator {
  public:
   virtual ~Allocator();

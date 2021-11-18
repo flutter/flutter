@@ -77,10 +77,7 @@ void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
 }
 
 void Canvas::ClipPath(Path path) {
-  Entity entity;
-  entity.SetTransformation(GetCurrentTransformation());
-  entity.SetPath(std::move(path));
-  GetCurrentPass().PushEntity(std::move(entity));
+  passes_.push_back({});
 }
 
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
