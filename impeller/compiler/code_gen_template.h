@@ -39,12 +39,13 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   struct {{def.name}} {
 {% for member in def.members %}
-    {{member.type}} {{member.name}};
+    {{member.type}} {{member.name}}; // (offset {{member.offset}}, size {{member.byte_length}})
 {% endfor %}
-  }; // struct {{def.name}}
+  }; // struct {{def.name}} (size {{def.byte_length}})
 {% endfor %}
 {% endif %}
 {% if length(uniform_buffers) > 0 %}
+
   // ===========================================================================
   // Stage Uniforms ============================================================
   // ===========================================================================
@@ -52,10 +53,11 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kResource{{camel_case(uniform.name)}} = ShaderUniformSlot<{{uniform.name}}> { // {{uniform.name}}
     "{{uniform.name}}",     // name
-    {{uniform.binding}}u,   // binding
+    {{uniform.msl_res_0}}u,   // binding
   };
 {% endfor %}
 {% endif %}
+
   // ===========================================================================
   // Stage Inputs ==============================================================
   // ===========================================================================
