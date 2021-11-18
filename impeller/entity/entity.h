@@ -23,21 +23,9 @@ class Entity {
 
   void SetTransformation(const Matrix& transformation);
 
-  const Color& GetStrokeColor() const;
-
-  void SetStrokeColor(const Color& strokeColor);
-
-  double GetStrokeSize() const;
-
-  void SetStrokeSize(double strokeSize);
-
   const Path& GetPath() const;
 
   void SetPath(Path path);
-
-  void SetIsClip(bool is_clip);
-
-  bool IsClip() const;
 
   void SetContents(std::shared_ptr<Contents> contents);
 
@@ -47,9 +35,6 @@ class Entity {
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
   Path path_;
-  Color stroke_color_;
-  double stroke_size_ = 1.0;
-  bool is_clip_ = false;
 };
 
 }  // namespace impeller
