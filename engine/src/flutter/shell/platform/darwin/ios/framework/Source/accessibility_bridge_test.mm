@@ -661,6 +661,61 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                  UIAccessibilityLayoutChangedNotification);
 }
 
+- (void)testScrollableSemanticsContainerReturnsCorrectChildren {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  OCMExpect([mockFlutterView
+      setAccessibilityElements:[OCMArg checkWithBlock:^BOOL(NSArray* value) {
+        if ([value count] != 1) {
+          return NO;
+        }
+        SemanticsObjectContainer* container = value[0];
+        SemanticsObject* object = container.semanticsObject;
+        FlutterScrollableSemanticsObject* scrollable =
+            (FlutterScrollableSemanticsObject*)object.children[0];
+        id nativeScrollable = scrollable.nativeAccessibility;
+        SemanticsObjectContainer* scrollableContainer = [nativeScrollable accessibilityContainer];
+        return [scrollableContainer indexOfAccessibilityElement:nativeScrollable] == 1;
+      }]]);
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates nodes;
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.label = "node1";
+  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  nodes[node1.id] = node1;
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  nodes[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+  OCMVerifyAll(mockFlutterView);
+}
+
 - (void)testAnnouncesRouteChangesAndLayoutChangeInOneUpdate {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");

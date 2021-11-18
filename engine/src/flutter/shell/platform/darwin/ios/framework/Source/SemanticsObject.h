@@ -20,7 +20,11 @@ constexpr float kScrollExtentMaxForInf = 1000;
 @class FlutterPlatformViewSemanticsContainer;
 
 /**
- * A node in the iOS semantics tree.
+ * A node in the iOS semantics tree. This object is a wrapper over a native accessibiliy
+ * object, which is stored in the property `nativeAccessibility`. In the most case, the
+ * `nativeAccessibility` directly returns this object. Some subclasses such as the
+ * `FlutterScrollableSemanticsObject` creates a native `UIScrollView` as its `nativeAccessibility`
+ * so that it can interact with iOS.
  */
 @interface SemanticsObject : UIAccessibilityElement
 
