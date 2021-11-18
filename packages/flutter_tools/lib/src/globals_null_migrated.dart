@@ -39,6 +39,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
@@ -233,3 +234,5 @@ FlutterProjectFactory get projectFactory {
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
+
+PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
