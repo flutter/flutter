@@ -73,7 +73,7 @@ class RunTestsStep implements PipelineStep {
   @override
   Future<void> run() async {
     await _prepareTestResultsDirectory();
-    await _browserEnvironment.prepareEnvironment();
+    await _browserEnvironment.prepare();
 
     final SkiaGoldClient? skiaClient = await _createSkiaClient();
 
