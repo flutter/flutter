@@ -2684,7 +2684,7 @@ void main() {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
   });
 
-  testWidgets('Drag feedback change cursor correctly', (WidgetTester tester) async {
+  testWidgets('Drag feedback changes cursor correctly', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: const <Widget>[
