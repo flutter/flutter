@@ -1974,16 +1974,26 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  /// Move the selection's extent to the given [Offset].
-  void selectToPosition({ required SelectionChangedCause cause }) {
+  // TODO(justinmc): Take a look if you can reuse this logic in the actions/intent
+  // system anywhere.
+  // TODO(justinmc): This behavior likely should be pivot on non-Apple plattforms.
+  /// Expand the selection to the last tapped position.
+  ///
+  /// Either base or extent will be moved to the last tapped position, whichever
+  /// is closest. The selection will never shrink or pivot, only grow.
+  void expandSelection({ required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(_lastTapDownPosition != null);
     assert(selection?.baseOffset != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    final TextPosition toPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
+    final TextPosition tappedPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
 
+    final bool baseIsCloser =
+        (tappedPosition.offset - selection!.baseOffset).abs()
+        < (tappedPosition.offset - selection!.extentOffset).abs();
     final TextSelection nextSelection = selection!.copyWith(
-      extentOffset: toPosition.offset,
+      baseOffset: baseIsCloser ? selection!.extentOffset : selection!.baseOffset,
+      extentOffset: tappedPosition.offset,
     );
     _setSelection(nextSelection, cause);
   }

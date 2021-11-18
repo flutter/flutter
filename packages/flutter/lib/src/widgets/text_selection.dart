@@ -993,7 +993,7 @@ class TextSelectionGestureDetectorBuilder {
     // Handle shift + click selection if needed.
     if (editableText.isShiftPressed && renderEditable.selection?.baseOffset != null) {
       _isShiftTapping = true;
-      renderEditable.selectToPosition(cause: SelectionChangedCause.tap);
+      renderEditable.expandSelection(cause: SelectionChangedCause.tap);
     }
   }
 
