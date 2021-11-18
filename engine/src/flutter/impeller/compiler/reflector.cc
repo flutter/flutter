@@ -528,8 +528,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
 
   const auto struct_length = current_byte_offset;
   {
-    const auto padding = struct_length % max_member_alignment;
-    if (padding != 0) {
+    const auto excess = struct_length % max_member_alignment;
+    if (excess != 0) {
+      const auto padding = max_member_alignment - excess;
       result.emplace_back(StructMember{
           .type = TypeNameWithPaddingOfSize(padding),
           .name = "_PADDING_",
