@@ -993,7 +993,18 @@ class TextSelectionGestureDetectorBuilder {
     // Handle shift + click selection if needed.
     if (editableText.isShiftPressed && renderEditable.selection?.baseOffset != null) {
       _isShiftTapping = true;
-      renderEditable.expandSelection(cause: SelectionChangedCause.tap);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          renderEditable.expandSelection(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.extendSelection(cause: SelectionChangedCause.tap);
+          break;
+      }
     }
   }
 

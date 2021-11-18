@@ -1974,13 +1974,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  // TODO(justinmc): Take a look if you can reuse this logic in the actions/intent
-  // system anywhere.
-  // TODO(justinmc): This behavior likely should be pivot on non-Apple plattforms.
   /// Expand the selection to the last tapped position.
   ///
   /// Either base or extent will be moved to the last tapped position, whichever
   /// is closest. The selection will never shrink or pivot, only grow.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelection], which is similar but pivots the selection around
+  ///     the base.
   void expandSelection({ required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(_lastTapDownPosition != null);
@@ -1993,6 +1995,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         < (tappedPosition.offset - selection!.extentOffset).abs();
     final TextSelection nextSelection = selection!.copyWith(
       baseOffset: baseIsCloser ? selection!.extentOffset : selection!.baseOffset,
+      extentOffset: tappedPosition.offset,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
+  /// Extend the selection to the last tapped position.
+  ///
+  /// Holds the base in place and moves the extent.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelection], which is similar but always increases the size of
+  ///     the selection.
+  void extendSelection({ required SelectionChangedCause cause }) {
+    assert(cause != null);
+    assert(_lastTapDownPosition != null);
+    assert(selection?.baseOffset != null);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final TextPosition tappedPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
+
+    final TextSelection nextSelection = selection!.copyWith(
       extentOffset: tappedPosition.offset,
     );
     _setSelection(nextSelection, cause);
