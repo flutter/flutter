@@ -513,7 +513,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
 /// When [animation] is 0, the indicator is not present. As [animation] grows
 /// from 0 to 1, the indicator scales in on the x axis.
 ///
-/// Useful in a [Stack] widget behind the icons in the Material 3 Navigation Bar
+/// Used in a [Stack] widget behind the icons in the Material 3 Navigation Bar
 /// to illuminate the selected destination.
 class NavigationIndicator extends StatelessWidget {
   /// Builds an indicator, usually used in a stack behind the icon of a

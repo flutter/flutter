@@ -574,29 +574,17 @@ class _RailDestination extends StatelessWidget {
 
     final Widget content;
 
-    const double circularIndicatorDiameter = 56;
     switch (labelType) {
       case NavigationRailLabelType.none:
-        final Widget iconWithIndicator = Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            if (useIndicator)
-              NavigationIndicator(
-                animation: destinationAnimation,
-                height: circularIndicatorDiameter,
-                width: circularIndicatorDiameter,
-                borderRadius: BorderRadius.circular(circularIndicatorDiameter / 2),
-                color: indicatorColor,
-              ),
-            themedIcon,
-          ],
-        );
-
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
-          child: Align(
-            child: iconWithIndicator,
+          child: _AddIndicator(
+            addIndicator: useIndicator,
+            indicatorColor: indicatorColor,
+            isCircular: true,
+            indicatorAnimation: destinationAnimation,
+            child: themedIcon,
           ),
         );
         if (extendedTransitionAnimation.value == 0) {
@@ -654,19 +642,6 @@ class _RailDestination extends StatelessWidget {
         final Interval interval = selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = destinationAnimation.drive(CurveTween(curve: interval));
 
-        final Widget iconWithIndicator =  Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            if (useIndicator)
-              NavigationIndicator(
-                animation: destinationAnimation,
-                width: 56,
-                borderRadius: BorderRadius.circular(16),
-                color: indicatorColor,
-              ),
-            themedIcon,
-          ],
-        );
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -679,7 +654,13 @@ class _RailDestination extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(height: verticalPadding),
-                iconWithIndicator,
+                _AddIndicator(
+                  addIndicator: useIndicator,
+                  indicatorColor: indicatorColor,
+                  isCircular: false,
+                  indicatorAnimation: destinationAnimation,
+                  child: themedIcon,
+                ),
                 Align(
                   alignment: Alignment.topCenter,
                   heightFactor: appearingAnimationValue,
@@ -697,19 +678,6 @@ class _RailDestination extends StatelessWidget {
         );
         break;
       case NavigationRailLabelType.all:
-        final Widget iconWithIndicator =  Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            if (useIndicator)
-              NavigationIndicator(
-                animation: destinationAnimation,
-                width: 56,
-                borderRadius: BorderRadius.circular(16),
-                color: indicatorColor,
-              ),
-            themedIcon,
-          ],
-        );
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -719,7 +687,13 @@ class _RailDestination extends StatelessWidget {
           child: Column(
             children: <Widget>[
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
-              iconWithIndicator,
+              _AddIndicator(
+                addIndicator: useIndicator,
+                indicatorColor: indicatorColor,
+                isCircular: false,
+                indicatorAnimation: destinationAnimation,
+                child: themedIcon,
+              ),
               styledLabel,
               const SizedBox(height: _verticalDestinationPaddingWithLabel),
             ],
@@ -755,6 +729,62 @@ class _RailDestination extends StatelessWidget {
     );
   }
 }
+
+/// When [addIndicator] is `true`, puts [child] center aligned in a [Stack] with
+/// a [NavigationIndicator] behind it, otherwise returns [child].
+///
+/// When [isCircular] is true, the indicator will be a circle, otherwise the
+/// indicator will be a stadium shape.
+class _AddIndicator extends StatelessWidget {
+  const _AddIndicator({
+    Key? key,
+    required this.addIndicator,
+    required this.isCircular,
+    required this.indicatorColor,
+    required this.indicatorAnimation,
+    required this.child,
+  }) : super(key: key);
+
+  final bool addIndicator;
+  final bool isCircular;
+  final Color? indicatorColor;
+  final Animation<double> indicatorAnimation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!addIndicator) {
+      return child;
+    }
+    late final Widget indicator;
+    if (isCircular) {
+      const double circularIndicatorDiameter = 56;
+      indicator = NavigationIndicator(
+        animation: indicatorAnimation,
+        height: circularIndicatorDiameter,
+        width: circularIndicatorDiameter,
+        borderRadius: BorderRadius.circular(circularIndicatorDiameter / 2),
+        color: indicatorColor,
+      );
+    } else {
+      indicator = NavigationIndicator(
+        animation: indicatorAnimation,
+        width: 56,
+        borderRadius: BorderRadius.circular(16),
+        color: indicatorColor,
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        indicator,
+        child,
+      ],
+    );
+  }
+}
+
 
 /// Defines the behavior of the labels of a [NavigationRail].
 ///
