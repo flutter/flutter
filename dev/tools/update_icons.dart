@@ -449,8 +449,7 @@ class _Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) =>
-      '''
+  static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
