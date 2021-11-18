@@ -4,6 +4,8 @@
 
 #include <Metal/Metal.h>
 
+#include <set>
+
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/metal/backend_cast.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -28,8 +30,15 @@ class VertexDescriptorMTL {
 
     StageInput(size_t p_location, MTLVertexFormat p_format, size_t p_length)
         : location(p_location), format(p_format), length(p_length) {}
+
+    struct Compare {
+      constexpr bool operator()(const StageInput& lhs,
+                                const StageInput& rhs) const {
+        return lhs.location < rhs.location;
+      }
+    };
   };
-  std::vector<StageInput> stage_inputs_;
+  std::set<StageInput, StageInput::Compare> stage_inputs_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptorMTL);
 };
