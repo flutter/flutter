@@ -186,9 +186,15 @@ public class FlutterJNI {
   // END methods related to FlutterLoader
 
   @Nullable private static AsyncWaitForVsyncDelegate asyncWaitForVsyncDelegate;
-  // This should also be updated by FlutterView when it is attached to a Display.
-  // The initial value of 0.0 indicates unknown refresh rate.
-  private static float refreshRateFPS = 0.0f;
+
+  /**
+   * This value is updated by the VsyncWaiter when it is initialized.
+   *
+   * <p>On API 17+, it is updated whenever the default display refresh rate changes.
+   *
+   * <p>It is defaulted to 60.
+   */
+  private static float refreshRateFPS = 60.0f;
 
   // This is set from native code via JNI.
   @Nullable private static String observatoryUri;
@@ -216,19 +222,34 @@ public class FlutterJNI {
     return observatoryUri;
   }
 
-  public static void setRefreshRateFPS(float refreshRateFPS) {
-    if (FlutterJNI.setRefreshRateFPSCalled) {
-      Log.w(TAG, "FlutterJNI.setRefreshRateFPS called more than once");
-    }
-
+  /**
+   * Notifies the engine about the refresh rate of the display when the API level is below 30.
+   *
+   * <p>For API 30 and above, this value is ignored.
+   *
+   * <p>Calling this method multiple times will update the refresh rate for the next vsync period.
+   * However, callers should avoid calling {@link android.view.Display#getRefreshRate} frequently,
+   * since it is expensive on some vendor implementations.
+   *
+   * @param refreshRateFPS The refresh rate in nanoseconds.
+   */
+  public void setRefreshRateFPS(float refreshRateFPS) {
+    // This is ok because it only ever tracks the refresh rate of the main
+    // display. If we ever need to support the refresh rate of other displays
+    // on Android we will need to refactor this. Static lookup makes things a
+    // bit easier on the C++ side.
     FlutterJNI.refreshRateFPS = refreshRateFPS;
-    FlutterJNI.setRefreshRateFPSCalled = true;
   }
 
-  private static boolean setRefreshRateFPSCalled = false;
-
-  // TODO(mattcarroll): add javadocs
-  public static void setAsyncWaitForVsyncDelegate(@Nullable AsyncWaitForVsyncDelegate delegate) {
+  /**
+   * The Android vsync waiter implementation in C++ needs to know when a vsync signal arrives, which
+   * is obtained via Java API. The delegate set here is called on the C++ side when the engine is
+   * ready to wait for the next vsync signal. The delegate is expected to add a postFrameCallback to
+   * the {@link android.view.Choreographer}, and call {@link nativeOnVsync} to notify the engine.
+   *
+   * @param delegate The delegate that will call the engine back on the next vsync signal.
+   */
+  public void setAsyncWaitForVsyncDelegate(@Nullable AsyncWaitForVsyncDelegate delegate) {
     asyncWaitForVsyncDelegate = delegate;
   }
 
@@ -243,9 +264,15 @@ public class FlutterJNI {
     }
   }
 
-  // TODO(mattcarroll): add javadocs
-  public static native void nativeOnVsync(
-      long frameDelayNanos, long refreshPeriodNanos, long cookie);
+  /**
+   * Notifies the engine that the Choreographer has signaled a vsync.
+   *
+   * @param frameDelayNanos The time in nanoseconds when the frame started being rendered,
+   *     subtracted from the {@link System#nanoTime} timebase.
+   * @param refreshPeriodNanos The display refresh period in nanoseconds.
+   * @param cookie An opaque handle to the C++ VSyncWaiter object.
+   */
+  public native void nativeOnVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie);
 
   // TODO(mattcarroll): add javadocs
   @NonNull
@@ -337,8 +364,7 @@ public class FlutterJNI {
    * #attachToNative()}.
    *
    * <p>Static methods that should be only called once such as {@link #init(Context, String[],
-   * String, String, String, long)} or {@link #setRefreshRateFPS(float)} shouldn't be called again
-   * on the spawned FlutterJNI instance.
+   * String, String, String, long)} shouldn't be called again on the spawned FlutterJNI instance.
    */
   @UiThread
   @NonNull

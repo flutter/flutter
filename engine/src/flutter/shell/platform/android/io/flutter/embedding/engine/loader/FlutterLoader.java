@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.view.Display;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -148,18 +147,19 @@ public class FlutterLoader {
       initStartTimestampMillis = SystemClock.uptimeMillis();
       flutterApplicationInfo = ApplicationInfoLoader.load(appContext);
 
-      float fps;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        final DisplayManager dm = appContext.getSystemService(DisplayManager.class);
-        final Display primaryDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
-        fps = primaryDisplay.getRefreshRate();
+      VsyncWaiter waiter;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 /* 17 */) {
+        final DisplayManager dm =
+            (DisplayManager) appContext.getSystemService(Context.DISPLAY_SERVICE);
+        waiter = VsyncWaiter.getInstance(dm, flutterJNI);
       } else {
-        fps =
+        float fps =
             ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay()
                 .getRefreshRate();
+        waiter = VsyncWaiter.getInstance(fps, flutterJNI);
       }
-      VsyncWaiter.getInstance(fps).init();
+      waiter.init();
 
       // Use a background thread for initialization tasks that require disk access.
       Callable<InitResult> initTask =

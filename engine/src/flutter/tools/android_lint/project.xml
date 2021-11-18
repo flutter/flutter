@@ -56,6 +56,7 @@
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/editing/InputConnectionAdaptorTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugin/localization/LocalizationPluginTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/view/AccessibilityBridgeTest.java" />
+    <src file="../../../flutter/shell/platform/android/test/io/flutter/view/VsyncWaiterTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/FlutterInjectorTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/external/FlutterLaunchTests.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java" />

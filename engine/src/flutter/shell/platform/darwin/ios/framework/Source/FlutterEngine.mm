@@ -689,8 +689,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)initializeDisplays {
   double refresh_rate = [DisplayLinkManager displayRefreshRate];
-  auto display = flutter::Display(refresh_rate);
-  _shell->OnDisplayUpdates(flutter::DisplayUpdateType::kStartup, {display});
+  std::vector<std::unique_ptr<flutter::Display>> displays;
+  displays.push_back(std::make_unique<flutter::Display>(refresh_rate));
+  _shell->OnDisplayUpdates(flutter::DisplayUpdateType::kStartup, std::move(displays));
 }
 
 - (BOOL)run {

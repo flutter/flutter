@@ -64,6 +64,8 @@ source_set("flutter_shell_native_src") {
     "$root_build_dir/flutter_icu/icudtl.o",
     "android_context_gl.cc",
     "android_context_gl.h",
+    "android_display.cc",
+    "android_display.h",
     "android_environment_gl.cc",
     "android_environment_gl.h",
     "android_external_texture_gl.cc",

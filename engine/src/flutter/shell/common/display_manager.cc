@@ -18,18 +18,19 @@ double DisplayManager::GetMainDisplayRefreshRate() const {
   if (displays_.empty()) {
     return kUnknownDisplayRefreshRate;
   } else {
-    return displays_[0].GetRefreshRate();
+    return displays_[0]->GetRefreshRate();
   }
 }
 
-void DisplayManager::HandleDisplayUpdates(DisplayUpdateType update_type,
-                                          std::vector<Display> displays) {
+void DisplayManager::HandleDisplayUpdates(
+    DisplayUpdateType update_type,
+    std::vector<std::unique_ptr<Display>> displays) {
   std::scoped_lock lock(displays_mutex_);
   CheckDisplayConfiguration(displays);
   switch (update_type) {
     case DisplayUpdateType::kStartup:
       FML_CHECK(displays_.empty());
-      displays_ = displays;
+      displays_ = std::move(displays);
       return;
     default:
       FML_CHECK(false) << "Unknown DisplayUpdateType.";
@@ -37,11 +38,11 @@ void DisplayManager::HandleDisplayUpdates(DisplayUpdateType update_type,
 }
 
 void DisplayManager::CheckDisplayConfiguration(
-    std::vector<Display> displays) const {
+    const std::vector<std::unique_ptr<Display>>& displays) const {
   FML_CHECK(!displays.empty());
   if (displays.size() > 1) {
     for (auto& display : displays) {
-      FML_CHECK(display.GetDisplayId().has_value());
+      FML_CHECK(display->GetDisplayId().has_value());
     }
   }
 }
