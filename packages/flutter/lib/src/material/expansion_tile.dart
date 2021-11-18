@@ -67,6 +67,7 @@ class ExpansionTile extends StatefulWidget {
     this.iconColor,
     this.collapsedIconColor,
     this.controlAffinity,
+    this.isExpanded,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -201,6 +202,13 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
+  /// Specifies if the list tile is expanded (true) or collapsed (false, the default).
+  ///
+  /// If both [isExpanded] and [initiallyExpanded] will be provided,
+  /// the value of [isExpanded] will be considered.
+  /// Typically used for programmatically control the expansion of the tile.
+  final bool? isExpanded;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -236,7 +244,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    _isExpanded = PageStorage.of(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
+    _isExpanded = widget.isExpanded ?? PageStorage.of(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
     if (_isExpanded)
       _controller.value = 1.0;
   }
@@ -245,6 +253,21 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(ExpansionTile oldWidget) {
+    if (oldWidget.isExpanded != widget.isExpanded &&
+        (_controller.status != AnimationStatus.forward ||
+            _controller.status != AnimationStatus.reverse) && widget.isExpanded != null) {
+      _isExpanded = widget.isExpanded!;
+      if (_isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   void _handleTap() {
