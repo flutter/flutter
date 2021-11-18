@@ -16,7 +16,7 @@ class VulkanCommandBuffer;
 
 class VulkanImage {
  public:
-  VulkanImage(VulkanHandle<VkImage> image);
+  explicit VulkanImage(VulkanHandle<VkImage> image);
 
   ~VulkanImage();
 

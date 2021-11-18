@@ -88,7 +88,7 @@ static FlKeyEmbedderCallRecord* fl_key_embedder_call_record_new(
   if (event->character != nullptr) {
     size_t character_length = strlen(event->character);
     char* clone_character = g_new(char, character_length + 1);
-    strcpy(clone_character, event->character);
+    strncpy(clone_character, event->character, character_length + 1);
     clone_event->character = clone_character;
   }
   self->event = clone_event;

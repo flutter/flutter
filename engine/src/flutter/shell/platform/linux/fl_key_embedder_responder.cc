@@ -306,7 +306,7 @@ static uint64_t event_to_logical_key(const FlKeyEvent* event) {
 }
 
 static uint64_t event_to_timestamp(const FlKeyEvent* event) {
-  return kMicrosecondsPerMillisecond * (double)event->time;
+  return kMicrosecondsPerMillisecond * static_cast<double>(event->time);
 }
 
 // Returns a newly accocated UTF-8 string from event->keyval that must be
@@ -316,8 +316,9 @@ static char* event_to_character(const FlKeyEvent* event) {
   glong items_written;
   gchar* result = g_ucs4_to_utf8(&unicodeChar, 1, NULL, &items_written, NULL);
   if (items_written == 0) {
-    if (result != NULL)
+    if (result != NULL) {
       g_free(result);
+    }
     return nullptr;
   }
   return result;

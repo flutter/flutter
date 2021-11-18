@@ -43,7 +43,8 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
 
 class KernelIsolateConfiguration : public IsolateConfiguration {
  public:
-  KernelIsolateConfiguration(std::unique_ptr<const fml::Mapping> kernel)
+  explicit KernelIsolateConfiguration(
+      std::unique_ptr<const fml::Mapping> kernel)
       : kernel_(std::move(kernel)) {}
 
   // |IsolateConfiguration|
@@ -69,7 +70,7 @@ class KernelIsolateConfiguration : public IsolateConfiguration {
 
 class KernelListIsolateConfiguration final : public IsolateConfiguration {
  public:
-  KernelListIsolateConfiguration(
+  explicit KernelListIsolateConfiguration(
       std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
           kernel_pieces)
       : kernel_piece_futures_(std::move(kernel_pieces)) {

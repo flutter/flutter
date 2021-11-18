@@ -209,9 +209,10 @@ VulkanDebugReport::VulkanDebugReport(
     return;
   }
 
-  handle_ = {handle, [this](VkDebugReportCallbackEXT handle) {
-               vk.DestroyDebugReportCallbackEXT(application_, handle, nullptr);
-             }};
+  handle_ = VulkanHandle<VkDebugReportCallbackEXT>{
+      handle, [this](VkDebugReportCallbackEXT handle) {
+        vk.DestroyDebugReportCallbackEXT(application_, handle, nullptr);
+      }};
 
   valid_ = true;
 }

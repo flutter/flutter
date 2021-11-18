@@ -214,7 +214,7 @@ void ClipBoundsDispatchHelper::restore() {
   }
 }
 void ClipBoundsDispatchHelper::reset(const SkRect* cull_rect) {
-  if ((has_clip_ = ((bool)cull_rect)) && !cull_rect->isEmpty()) {
+  if ((has_clip_ = cull_rect != nullptr) && !cull_rect->isEmpty()) {
     bounds_ = *cull_rect;
   } else {
     bounds_.setEmpty();

@@ -23,13 +23,15 @@ static gboolean fl_renderer_gl_create_contexts(FlRenderer* renderer,
 
   *visible = gdk_window_create_gl_context(window, error);
 
-  if (*error != nullptr)
+  if (*error != nullptr) {
     return FALSE;
+  }
 
   *resource = gdk_window_create_gl_context(window, error);
 
-  if (*error != nullptr)
+  if (*error != nullptr) {
     return FALSE;
+  }
   return TRUE;
 }
 
@@ -93,8 +95,9 @@ static gboolean fl_renderer_gl_present_layers(FlRenderer* renderer,
                                               size_t layers_count) {
   FlView* view = fl_renderer_get_view(renderer);
   GdkGLContext* context = fl_renderer_get_context(renderer);
-  if (!view || !context)
+  if (!view || !context) {
     return FALSE;
+  }
   fl_view_begin_frame(view);
 
   for (size_t i = 0; i < layers_count; ++i) {

@@ -1105,7 +1105,7 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
     size_t ui_threads_count = 0;
     size_t worker_threads_count = 0;
 
-    Captures(size_t count) : latch(count) {}
+    explicit Captures(size_t count) : latch(count) {}
   };
 
   Captures captures(engine_threads_count);

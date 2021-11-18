@@ -70,8 +70,9 @@ gboolean fl_renderer_start(FlRenderer* self, FlView* view, GError** error) {
     gdk_gl_context_realize(priv->resource_context, error);
   }
 
-  if (*error != nullptr)
+  if (*error != nullptr) {
     return FALSE;
+  }
   return TRUE;
 }
 

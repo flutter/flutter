@@ -107,6 +107,7 @@ class PlatformSemaphore {
   ~PlatformSemaphore() {
     if (valid_) {
       int result = ::sem_destroy(&sem_);
+      (void)result;
       // Can only be EINVAL which should not be possible since we checked for
       // validity.
       FML_DCHECK(result == 0);

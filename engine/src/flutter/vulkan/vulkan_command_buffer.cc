@@ -33,7 +33,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(
     vk.FreeCommandBuffers(device_, pool_, 1, &buffer);
   };
 
-  handle_ = {buffer, buffer_collect};
+  handle_ = VulkanHandle<VkCommandBuffer>{buffer, buffer_collect};
 
   valid_ = true;
 }

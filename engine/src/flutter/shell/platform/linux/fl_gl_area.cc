@@ -55,8 +55,9 @@ static void fl_gl_area_unrealize(GtkWidget* widget) {
   g_clear_object(&self->texture);
 
   /* Make sure to unset the context if current */
-  if (self->context == gdk_gl_context_get_current())
+  if (self->context == gdk_gl_context_get_current()) {
     gdk_gl_context_clear_current();
+  }
 
   GTK_WIDGET_CLASS(fl_gl_area_parent_class)->unrealize(widget);
 }
@@ -67,10 +68,11 @@ static void fl_gl_area_size_allocate(GtkWidget* widget,
   gtk_widget_set_allocation(widget, allocation);
 
   if (gtk_widget_get_has_window(widget)) {
-    if (gtk_widget_get_realized(widget))
+    if (gtk_widget_get_realized(widget)) {
       gdk_window_move_resize(gtk_widget_get_window(widget), allocation->x,
                              allocation->y, allocation->width,
                              allocation->height);
+    }
   }
 }
 
