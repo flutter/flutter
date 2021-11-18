@@ -1367,6 +1367,17 @@ class IntentTextInputConnection extends TextInputConnection {
         final TextEditingValue newEditingValue = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         yield UpdateTextEditingValueIntent.withNewValue(newEditingValue);
         return;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+        yield UpdateTextEditingValueIntent.withDeltas(deltas);
+        return;
       case 'TextInputClient.performAction':
         yield PerformIMEActionIntent(_toTextInputAction(args[1] as String));
         return;

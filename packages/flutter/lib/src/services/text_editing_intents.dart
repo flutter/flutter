@@ -253,11 +253,19 @@ class UpdateTextEditingValueIntent extends Intent {
     SelectionChangedCause cause = SelectionChangedCause.keyboard,
   }) : this.apply(_constValue(newTextEditingValue), cause: cause);
 
+  UpdateTextEditingValueIntent.withDeltas(Iterable<TextEditingDelta> deltas, {
+    SelectionChangedCause cause = SelectionChangedCause.keyboard,
+  }) : this.apply(_withDeltas(deltas), cause: cause);
+
   final TextEditingValue Function(TextEditingValue) modify;
   final SelectionChangedCause cause;
 
   static TextEditingValue Function(TextEditingValue) _constValue(TextEditingValue newTextEditingValue) {
     return (TextEditingValue oldValue) => newTextEditingValue;
+  }
+
+  static TextEditingValue Function(TextEditingValue) _withDeltas(Iterable<TextEditingDelta> deltas) {
+    return (TextEditingValue oldValue) => deltas.fold(oldValue, (TextEditingValue value, TextEditingDelta delta) => delta.apply(value));
   }
 }
 
