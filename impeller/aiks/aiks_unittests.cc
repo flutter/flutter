@@ -97,5 +97,15 @@ TEST_F(AiksTest, CanRenderCurvedStrokes) {
   // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanRenderClips) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Fuchsia();
+  canvas.ClipPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 100, 100)).CreatePath());
+  canvas.DrawPath(PathBuilder{}.AddCircle({100, 100}, 50).CreatePath(), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
