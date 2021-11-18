@@ -2267,18 +2267,19 @@ FlutterEngineResult FlutterEngineNotifyDisplayUpdate(
 
   switch (update_type) {
     case kFlutterEngineDisplaysUpdateTypeStartup: {
-      std::vector<flutter::Display> displays;
+      std::vector<std::unique_ptr<flutter::Display>> displays;
       for (size_t i = 0; i < display_count; i++) {
-        flutter::Display display =
-            flutter::Display(embedder_displays[i].refresh_rate);
-        if (!embedder_displays[i].single_display) {
-          display = flutter::Display(embedder_displays[i].display_id,
-                                     embedder_displays[i].refresh_rate);
+        if (embedder_displays[i].single_display) {
+          displays.push_back(std::make_unique<flutter::Display>(
+              embedder_displays[i].refresh_rate));
+        } else {
+          displays.push_back(std::make_unique<flutter::Display>(
+              embedder_displays[i].display_id,
+              embedder_displays[i].refresh_rate));
         }
-        displays.push_back(display);
       }
       engine->GetShell().OnDisplayUpdates(flutter::DisplayUpdateType::kStartup,
-                                          displays);
+                                          std::move(displays));
       return kSuccess;
     }
     default:

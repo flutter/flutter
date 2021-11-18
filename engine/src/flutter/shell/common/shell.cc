@@ -1867,8 +1867,8 @@ void Shell::SetGpuAvailability(GpuAvailability availability) {
 }
 
 void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
-                             std::vector<Display> displays) {
-  display_manager_->HandleDisplayUpdates(update_type, displays);
+                             std::vector<std::unique_ptr<Display>> displays) {
+  display_manager_->HandleDisplayUpdates(update_type, std::move(displays));
 }
 
 fml::TimePoint Shell::GetCurrentTimePoint() {
