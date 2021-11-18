@@ -393,7 +393,7 @@ void main() {
         RawKeyboard.instance.keysPressed,
         equals(
           <LogicalKeyboardKey>{
-            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.altRight,
           },
         ),
       );

@@ -781,7 +781,7 @@ class RawKeyboard {
         thisKeyModifier = key;
       }
       if (modifiersPressed[key] == KeyboardSide.any) {
-        anySideKeys.addAll(thisModifierKeys!);
+        anySideKeys.addAll(thisModifierKeys);
         if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;
         }
