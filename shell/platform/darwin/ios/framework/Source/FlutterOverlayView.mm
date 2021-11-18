@@ -22,15 +22,13 @@
 @implementation FlutterOverlayView
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  @throw([NSException exceptionWithName:@"FlutterOverlayView must init or initWithContentsScale"
-                                 reason:nil
-                               userInfo:nil]);
+  NSAssert(NO, @"FlutterOverlayView must init or initWithContentsScale");
+  return nil;
 }
 
 - (instancetype)initWithCoder:(NSCoder*)aDecoder {
-  @throw([NSException exceptionWithName:@"FlutterOverlayView must init or initWithContentsScale"
-                                 reason:nil
-                               userInfo:nil]);
+  NSAssert(NO, @"FlutterOverlayView must init or initWithContentsScale");
+  return nil;
 }
 
 - (instancetype)init {

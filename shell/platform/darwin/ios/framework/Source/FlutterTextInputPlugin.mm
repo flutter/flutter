@@ -72,7 +72,7 @@ static NSString* const kAutocorrectionType = @"autocorrect";
 // used when there's an in-app virtual keyboard. If
 // "TextInputType.none" is specified, disable the system
 // keyboard.
-static BOOL shouldShowSystemKeyboard(NSDictionary* type) {
+static BOOL ShouldShowSystemKeyboard(NSDictionary* type) {
   NSString* inputType = type[@"name"];
   return ![inputType isEqualToString:@"TextInputType.none"];
 }
@@ -299,7 +299,7 @@ static UITextContentType ToUITextContentType(NSArray<NSString*>* hints) {
 
 // Retrieves the autofillId from an input field's configuration. Returns
 // nil if the field is nil and the input field is not a password field.
-static NSString* autofillIdFromDictionary(NSDictionary* dictionary) {
+static NSString* AutofillIdFromDictionary(NSDictionary* dictionary) {
   NSDictionary* autofill = dictionary[kAutofillProperties];
   if (autofill) {
     return autofill[kAutofillId];
@@ -368,10 +368,10 @@ typedef NS_ENUM(NSInteger, FlutterAutofillType) {
   FlutterAutofillTypePassword,
 };
 
-static BOOL isFieldPasswordRelated(NSDictionary* configuration) {
+static BOOL IsFieldPasswordRelated(NSDictionary* configuration) {
   if (@available(iOS 10.0, *)) {
     // Autofill is explicitly disabled if the id isn't present.
-    if (!autofillIdFromDictionary(configuration)) {
+    if (!AutofillIdFromDictionary(configuration)) {
       return NO;
     }
 
@@ -399,14 +399,14 @@ static BOOL isFieldPasswordRelated(NSDictionary* configuration) {
   return NO;
 }
 
-static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
+static FlutterAutofillType AutofillTypeOf(NSDictionary* configuration) {
   for (NSDictionary* field in configuration[kAssociatedAutofillFields]) {
-    if (isFieldPasswordRelated(field)) {
+    if (IsFieldPasswordRelated(field)) {
       return FlutterAutofillTypePassword;
     }
   }
 
-  if (isFieldPasswordRelated(configuration)) {
+  if (IsFieldPasswordRelated(configuration)) {
     return FlutterAutofillTypePassword;
   }
 
@@ -420,7 +420,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   return FlutterAutofillTypeNone;
 }
 
-static BOOL isApproximatelyEqual(float x, float y, float delta) {
+static BOOL IsApproximatelyEqual(float x, float y, float delta) {
   return fabsf(x - y) <= delta;
 }
 
@@ -435,7 +435,7 @@ static BOOL isApproximatelyEqual(float x, float y, float delta) {
 // First, the closer vertical distance is determined. Within the closest y distance, if the point is
 // above the bottom of the closest rect, the x distance will be minimized; however, if the point is
 // below the bottom of the rect, the x value will be maximized.
-static BOOL isSelectionRectCloserToPoint(CGPoint point,
+static BOOL IsSelectionRectCloserToPoint(CGPoint point,
                                          CGRect selectionRect,
                                          CGRect otherSelectionRect,
                                          BOOL checkRightBoundary) {
@@ -451,11 +451,11 @@ static BOOL isSelectionRectCloserToPoint(CGPoint point,
   float yDistOther = fabs(pointForOtherSelectionRect.y - point.y);
   float xDistOther = fabs(pointForOtherSelectionRect.x - point.x);
 
-  // This serves a similar purpose to isApproximatelyEqual, allowing a little buffer before
+  // This serves a similar purpose to IsApproximatelyEqual, allowing a little buffer before
   // declaring something closer vertically to account for the small variations in size and position
   // of SelectionRects, especially when dealing with emoji.
   BOOL isCloserVertically = yDist < yDistOther - 1;
-  BOOL isEqualVertically = isApproximatelyEqual(yDist, yDistOther, 1);
+  BOOL isEqualVertically = IsApproximatelyEqual(yDist, yDistOther, 1);
   BOOL isAboveBottomOfLine = point.y <= selectionRect.origin.y + selectionRect.size.height;
   BOOL isCloserHorizontally = xDist <= xDistOther;
   BOOL isBelowBottomOfLine = point.y > selectionRect.origin.y + selectionRect.size.height;
@@ -469,7 +469,7 @@ static BOOL isSelectionRectCloserToPoint(CGPoint point,
 
 // Checks whether Scribble features are possibly available – meaning this is an iPad running iOS
 // 14 or higher.
-static BOOL isScribbleAvailable() {
+static BOOL IsScribbleAvailable() {
   if (@available(iOS 14.0, *)) {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
       return YES;
@@ -796,7 +796,7 @@ static BOOL isScribbleAvailable() {
   self.secureTextEntry = [configuration[kSecureTextEntry] boolValue];
   self.enableDeltaModel = [configuration[kEnableDeltaModel] boolValue];
 
-  _isSystemKeyboardEnabled = shouldShowSystemKeyboard(inputType);
+  _isSystemKeyboardEnabled = ShouldShowSystemKeyboard(inputType);
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
@@ -825,7 +825,7 @@ static BOOL isScribbleAvailable() {
                                 ? UITextAutocorrectionTypeNo
                                 : UITextAutocorrectionTypeDefault;
   if (@available(iOS 10.0, *)) {
-    self.autofillId = autofillIdFromDictionary(configuration);
+    self.autofillId = AutofillIdFromDictionary(configuration);
     if (autofill == nil) {
       self.textContentType = @"";
     } else {
@@ -864,7 +864,7 @@ static BOOL isScribbleAvailable() {
   }
 
   if (!_inputViewController) {
-    _inputViewController = [UIInputViewController new];
+    _inputViewController = [[UIInputViewController alloc] init];
   }
   return _inputViewController;
 }
@@ -1041,7 +1041,7 @@ static BOOL isScribbleAvailable() {
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   // When scribble is available, the FlutterTextInputView will display the native toolbar unless
   // these text editing actions are disabled.
-  if (isScribbleAvailable()) {
+  if (IsScribbleAvailable()) {
     return NO;
   }
   if (action == @selector(paste:)) {
@@ -1624,7 +1624,7 @@ static BOOL isScribbleAvailable() {
     NSUInteger position = _selectionRects[i].position;
     if (position >= start && position <= end) {
       BOOL isFirst = _closestIndex == 0;
-      if (isFirst || isSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
+      if (isFirst || IsSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
                                                   /*checkRightBoundary=*/NO)) {
         _closestIndex = i;
         _closestRect = _selectionRects[i].rect;
@@ -1640,7 +1640,7 @@ static BOOL isScribbleAvailable() {
     NSUInteger i = [_selectionRects count] - 1;
     NSUInteger position = _selectionRects[i].position + 1;
     if (position <= end) {
-      if (isSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
+      if (IsSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
                                        /*checkRightBoundary=*/YES)) {
         _closestIndex = [_selectionRects count];
         _closestPosition = position;
@@ -2044,7 +2044,7 @@ static BOOL isScribbleAvailable() {
 
 - (void)setEditableSizeAndTransform:(NSDictionary*)dictionary {
   [_activeView setEditableTransform:dictionary[@"transform"]];
-  if (isScribbleAvailable()) {
+  if (IsScribbleAvailable()) {
     // This is necessary to set up where the scribble interactable element will be.
     int leftIndex = 12;
     int topIndex = 13;
@@ -2143,7 +2143,7 @@ static BOOL isScribbleAvailable() {
   [self changeInputViewsAutofillVisibility:NO];
 
   // Update the current active view.
-  switch (autofillTypeOf(configuration)) {
+  switch (AutofillTypeOf(configuration)) {
     case FlutterAutofillTypeNone:
       self.activeView = [self createInputViewWith:configuration];
       break;
@@ -2182,7 +2182,7 @@ static BOOL isScribbleAvailable() {
 // views) to decide whether the IME's internal states should be reset. See:
 // https://github.com/flutter/flutter/issues/79031 .
 - (FlutterTextInputView*)createInputViewWith:(NSDictionary*)configuration {
-  NSString* autofillId = autofillIdFromDictionary(configuration);
+  NSString* autofillId = AutofillIdFromDictionary(configuration);
   if (autofillId) {
     [_autofillContext removeObjectForKey:autofillId];
   }
@@ -2192,8 +2192,8 @@ static BOOL isScribbleAvailable() {
   newView.textInputDelegate = _textInputDelegate;
 
   for (NSDictionary* field in configuration[kAssociatedAutofillFields]) {
-    NSString* autofillId = autofillIdFromDictionary(field);
-    if (autofillId && autofillTypeOf(field) == FlutterAutofillTypeNone) {
+    NSString* autofillId = AutofillIdFromDictionary(field);
+    if (autofillId && AutofillTypeOf(field) == FlutterAutofillTypeNone) {
       [_autofillContext removeObjectForKey:autofillId];
     }
   }
@@ -2204,7 +2204,7 @@ static BOOL isScribbleAvailable() {
                                        focusedField:(NSDictionary*)focusedField
                                   isPasswordRelated:(BOOL)isPassword {
   FlutterTextInputView* focused = nil;
-  NSString* focusedId = autofillIdFromDictionary(focusedField);
+  NSString* focusedId = AutofillIdFromDictionary(focusedField);
   NSAssert(focusedId, @"autofillId must not be null for the focused field: %@", focusedField);
 
   if (!fields) {
@@ -2215,10 +2215,10 @@ static BOOL isScribbleAvailable() {
   }
 
   for (NSDictionary* field in fields) {
-    NSString* autofillId = autofillIdFromDictionary(field);
+    NSString* autofillId = AutofillIdFromDictionary(field);
     NSAssert(autofillId, @"autofillId must not be null for field: %@", field);
 
-    BOOL hasHints = autofillTypeOf(field) != FlutterAutofillTypeNone;
+    BOOL hasHints = AutofillTypeOf(field) != FlutterAutofillTypeNone;
     BOOL isFocused = [focusedId isEqualToString:autofillId];
 
     if (isFocused) {
@@ -2247,7 +2247,7 @@ static BOOL isScribbleAvailable() {
 // for autofill purposes so they should not be reused for a different type of views).
 - (FlutterTextInputView*)getOrCreateAutofillableView:(NSDictionary*)field
                                   isPasswordAutofill:(BOOL)needsPasswordAutofill {
-  NSString* autofillId = autofillIdFromDictionary(field);
+  NSString* autofillId = AutofillIdFromDictionary(field);
   FlutterTextInputView* inputView = _autofillContext[autofillId];
   if (!inputView) {
     inputView =
