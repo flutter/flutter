@@ -487,29 +487,23 @@ enum FloatingLabelBehavior {
 ///  * [FloatingLabelBehavior] which defines the behaviour of the floating label.
 @immutable
 class FloatingLabelAlignment {
-  const FloatingLabelAlignment._({
-    required this.x,
-  }) : assert(x != null),
-       assert(x >= -1.0 && x <= 1.0);
+  const FloatingLabelAlignment._(this._x) : assert(_x != null),
+       assert(_x >= -1.0 && _x <= 1.0);
 
-  /// A value ranging from -1.0 to 1.0 inclusive, where -1.0 represents the
-  /// leftmost possible position, 1.0 represents the rightmost possible
-  /// position, and 0.0 represents the center position.
-  final double x;
+  // -1 denotes start, 0 denotes center, and 1 denotes end.
+  final double _x;
 
-  /// Aligns a floating label to the leftmost possible position in an
-  /// [InputDecorator].
-  static const FloatingLabelAlignment start = FloatingLabelAlignment._(x: -1.0);
-  /// Aligns a floating label to the center position on top of an [InputDecorator].
-  static const FloatingLabelAlignment center = FloatingLabelAlignment._(x: 0.0);
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'FloatingLabelAlignment')}(x: ${x.toStringAsFixed(1)})';
-  }
+  /// Align the floating label on the leading edge of the [InputDecorator].
+  ///
+  /// For left-to-right text ([TextDirection.ltr]), this is the left edge.
+  ///
+  /// For right-to-left text ([TextDirection.rtl]), this is the right edge.
+  static const FloatingLabelAlignment start = FloatingLabelAlignment._(-1.0);
+  /// Aligns the floating label to the center of an [InputDecorator].
+  static const FloatingLabelAlignment center = FloatingLabelAlignment._(0.0);
 
   @override
-  int get hashCode => x.hashCode;
+  int get hashCode => _x.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -518,8 +512,19 @@ class FloatingLabelAlignment {
     if (other.runtimeType != runtimeType)
       return false;
     return other is FloatingLabelAlignment
-            && x == other.x;
+            && _x == other._x;
   }
+
+  static String _stringify(double x) {
+    if (x == -1.0)
+      return 'FloatingLabelAlignment.start';
+    if (x == 0.0)
+      return 'FloatingLabelAlignment.center';
+    return 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})';
+  }
+
+  @override
+  String toString() => _stringify(_x);
 }
 
 // Identifies the children of a _RenderDecorationElement.
@@ -1520,8 +1525,8 @@ class _RenderDecoration extends RenderBox {
 
     if (label != null) {
       final double labelX = _boxParentData(label!).offset.dx;
-      // the +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0)
-      final double floatAlign = decoration.floatingLabelAlignment.x + 1;
+      // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
+      final double floatAlign = decoration.floatingLabelAlignment._x + 1;
       final double floatWidth = _boxSize(label).width * _kFinalLabelScale;
       // When floating label is centered, its x is relative to
       // _BorderContainer's x and is independent of label's x.
@@ -1568,8 +1573,8 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label!).offset;
       final double labelHeight = _boxSize(label).height;
       final double labelWidth = _boxSize(label).width;
-      // the +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0)
-      final double floatAlign = decoration.floatingLabelAlignment.x + 1;
+      // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
+      final double floatAlign = decoration.floatingLabelAlignment._x + 1;
       final double floatWidth = labelWidth * _kFinalLabelScale;
       final double borderWeight = decoration.border!.borderSide.width;
       final double t = decoration.floatingLabelProgress;
