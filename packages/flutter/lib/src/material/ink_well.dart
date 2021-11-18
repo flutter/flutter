@@ -295,6 +295,7 @@ class InkResponse extends StatelessWidget {
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -336,6 +337,9 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user taps down this part of the material.
   final GestureTapDownCallback? onTapDown;
+
+  /// Called when the user releases and before [onTap].
+  final GestureTapUpCallback? onTapUp;
 
   /// Called when the user cancels a tap that was started on this part of the
   /// material.
@@ -582,6 +586,7 @@ class InkResponse extends StatelessWidget {
     return _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
+      onTapUp: onTapUp,
       onTapCancel: onTapCancel,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
@@ -632,6 +637,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -668,6 +674,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final Widget? child;
   final GestureTapCallback? onTap;
   final GestureTapDownCallback? onTapDown;
+  final GestureTapUpCallback? onTapUp;
   final GestureTapCallback? onTapCancel;
   final GestureTapCallback? onDoubleTap;
   final GestureLongPressCallback? onLongPress;
@@ -706,6 +713,7 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onDoubleTap != null) 'double tap',
       if (onLongPress != null) 'long press',
       if (onTapDown != null) 'tap down',
+      if (onTapUp != null) 'tap up',
       if (onTapCancel != null) 'tap cancel',
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
@@ -960,6 +968,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onTapDown?.call(details);
   }
 
+  void _handleTapUp(TapUpDetails details) {
+    widget.onTapUp?.call(details);
+  }
+
   void _startSplash({TapDownDetails? details, BuildContext? context}) {
     assert(details != null || context != null);
 
@@ -1102,6 +1114,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : _simulateLongPress,
               child: GestureDetector(
                 onTapDown: enabled ? _handleTapDown : null,
+                onTapUp: enabled ? _handleTapUp : null,
                 onTap: enabled ? _handleTap : null,
                 onTapCancel: enabled ? _handleTapCancel : null,
                 onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
@@ -1198,6 +1211,7 @@ class InkWell extends InkResponse {
     GestureTapCallback? onDoubleTap,
     GestureLongPressCallback? onLongPress,
     GestureTapDownCallback? onTapDown,
+    GestureTapUpCallback? onTapUp,
     GestureTapCancelCallback? onTapCancel,
     ValueChanged<bool>? onHighlightChanged,
     ValueChanged<bool>? onHover,
@@ -1224,6 +1238,7 @@ class InkWell extends InkResponse {
     onDoubleTap: onDoubleTap,
     onLongPress: onLongPress,
     onTapDown: onTapDown,
+    onTapUp: onTapUp,
     onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     onHover: onHover,
