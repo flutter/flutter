@@ -816,11 +816,18 @@ class RawKeyboard {
       _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
+    // In rare cases, the event presses a modifier key but the key does not
+    // exist in the modifier list. Enforce the pressing state.
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
-      if (logicalKey != null) {
-        _keysPressed[event.physicalKey] = logicalKey;
+      // So far this inconsistancy is only found on Linux GTK for AltRight in a
+      // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
+      // other cases, this inconsistancy will be caught by an assertion later.
+      if (event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
+        if (logicalKey != null) {
+          _keysPressed[event.physicalKey] = logicalKey;
+        }
       }
     }
   }
