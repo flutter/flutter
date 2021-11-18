@@ -81,6 +81,18 @@ TEST_F(AiksTest, CanRenderStrokes) {
   Paint paint;
   paint.color = Color::Red();
   paint.stroke_width = 20.0;
+  paint.style = Paint::Style::kStroke;
+  canvas.DrawPath(PathBuilder{}.AddLine({200, 100}, {800, 100}).CreatePath(),
+                  paint);
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderCurvedStrokes) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Blue();
+  paint.stroke_width = 25.0;
+  paint.style = Paint::Style::kStroke;
   canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }

@@ -54,6 +54,8 @@ class PathBuilder {
 
   PathBuilder& AddOval(const Rect& rect);
 
+  PathBuilder& AddLine(const Point& p1, const Point& p2);
+
   struct RoundingRadii {
     Scalar topLeft = 0.0;
     Scalar bottomLeft = 0.0;

@@ -15,6 +15,7 @@ ContentRenderer::ContentRenderer(std::shared_ptr<Context> context)
   gradient_fill_pipeline_ = std::make_unique<GradientFillPipeline>(*context_);
   solid_fill_pipeline_ = std::make_unique<SolidFillPipeline>(*context_);
   texture_pipeline_ = std::make_unique<TexturePipeline>(*context_);
+  solid_stroke_pipeline_ = std::make_unique<SolidStrokePipeline>(*context_);
 
   is_valid_ = true;
 }
@@ -50,6 +51,14 @@ std::shared_ptr<Pipeline> ContentRenderer::GetTexturePipeline() const {
   }
 
   return texture_pipeline_->WaitAndGet();
+}
+
+std::shared_ptr<Pipeline> ContentRenderer::GetSolidStrokePipeline() const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+
+  return solid_stroke_pipeline_->WaitAndGet();
 }
 
 }  // namespace impeller

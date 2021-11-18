@@ -11,6 +11,8 @@
 #include "flutter/impeller/entity/gradient_fill.vert.h"
 #include "flutter/impeller/entity/solid_fill.frag.h"
 #include "flutter/impeller/entity/solid_fill.vert.h"
+#include "flutter/impeller/entity/solid_stroke.frag.h"
+#include "flutter/impeller/entity/solid_stroke.vert.h"
 #include "flutter/impeller/entity/texture_fill.frag.h"
 #include "flutter/impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/pipeline.h"
@@ -23,6 +25,8 @@ using SolidFillPipeline =
     PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
+using SolidStrokePipeline =
+    PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 
 class ContentRenderer {
  public:
@@ -38,6 +42,8 @@ class ContentRenderer {
 
   std::shared_ptr<Pipeline> GetTexturePipeline() const;
 
+  std::shared_ptr<Pipeline> GetSolidStrokePipeline() const;
+
   std::shared_ptr<Context> GetContext() const;
 
  private:
@@ -45,6 +51,7 @@ class ContentRenderer {
   std::unique_ptr<GradientFillPipeline> gradient_fill_pipeline_;
   std::unique_ptr<SolidFillPipeline> solid_fill_pipeline_;
   std::unique_ptr<TexturePipeline> texture_pipeline_;
+  std::unique_ptr<SolidStrokePipeline> solid_stroke_pipeline_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentRenderer);
