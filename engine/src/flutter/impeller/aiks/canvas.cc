@@ -80,7 +80,6 @@ void Canvas::ClipPath(Path path) {
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
-  entity.SetIsClip(true);
   GetCurrentPass().PushEntity(std::move(entity));
 }
 
