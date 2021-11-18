@@ -69,8 +69,8 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       ..addOption(
         'browser',
         defaultsTo: 'chrome',
-        help: 'An option to choose a browser to run the tests. Tests only work '
-            ' on Chrome for now.',
+        help: 'An option to choose a browser to run the tests. By default '
+              'tests run in Chrome.',
       )
       ..addFlag(
         'fail-early',
@@ -80,6 +80,12 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               'failure. If not set, the test runner will continue running '
               'test despite failures and will report them after all tests '
               'finish.',
+      )
+      ..addOption(
+        'canvaskit-path',
+        help: 'Optional. The path to a local build of CanvasKit to use in '
+              'tests. If omitted, the test runner uses the default CanvasKit '
+              'build.',
       );
   }
 
@@ -118,6 +124,9 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// Whether to fetch the goldens repo prior to running tests.
   bool get skipGoldensRepoFetch => boolArg('skip-goldens-repo-fetch');
 
+  /// Path to a CanvasKit build. Overrides the default CanvasKit.
+  String? get overridePathToCanvasKit => argResults!['canvaskit-path'] as String?;
+
   @override
   Future<bool> run() async {
     final List<FilePath> testFiles = runAllTests
@@ -135,6 +144,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         testFiles: testFiles,
         isDebug: isDebug,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+        overridePathToCanvasKit: overridePathToCanvasKit,
       ),
     ]);
     await testPipeline.run();

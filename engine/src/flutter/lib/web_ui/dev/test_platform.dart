@@ -53,6 +53,7 @@ class BrowserPlatform extends PlatformPlugin {
     required BrowserEnvironment browserEnvironment,
     required bool doUpdateScreenshotGoldens,
     required SkiaGoldClient? skiaClient,
+    required String? overridePathToCanvasKit,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
@@ -62,6 +63,7 @@ class BrowserPlatform extends PlatformPlugin {
       doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
       packageConfig: await loadPackageConfigUri((await Isolate.packageConfig)!),
       skiaClient: skiaClient,
+      overridePathToCanvasKit: overridePathToCanvasKit,
     );
   }
 
@@ -105,6 +107,8 @@ class BrowserPlatform extends PlatformPlugin {
   /// and update images.
   final SkiaGoldClient? skiaClient;
 
+  final String? overridePathToCanvasKit;
+
   BrowserPlatform._({
     required this.browserEnvironment,
     required this.server,
@@ -112,6 +116,7 @@ class BrowserPlatform extends PlatformPlugin {
     required this.doUpdateScreenshotGoldens,
     required this.packageConfig,
     required this.skiaClient,
+    required this.overridePathToCanvasKit,
   }) : _screenshotManager = browserEnvironment.getScreenshotManager() {
     // The cascade of request handlers.
     final shelf.Cascade cascade = shelf.Cascade()
@@ -128,8 +133,12 @@ class BrowserPlatform extends PlatformPlugin {
         //  * Assets that are part of the engine sources, such as Ahem.ttf
         .add(_packageUrlHandler)
 
+        .add(_canvasKitOverrideHandler)
+
         // Serves files from the web_ui/build/ directory at the root (/) URL path.
         .add(buildDirectoryHandler)
+
+        .add(_testImageListingHandler)
 
         // Serves the initial HTML for the test.
         .add(_testBootstrapHandler)
@@ -151,6 +160,76 @@ class BrowserPlatform extends PlatformPlugin {
         .add(_fileNotFoundCatcher);
 
     server.mount(cascade.handler);
+  }
+
+  /// If a path to a custom local build of CanvasKit was specified, serve from
+  /// there instead of serving the default CanvasKit in the build/ directory.
+  Future<shelf.Response> _canvasKitOverrideHandler(shelf.Request request) async {
+    final String? pathOverride = overridePathToCanvasKit;
+
+    if (pathOverride == null || !request.url.path.startsWith('canvaskit/')) {
+      return shelf.Response.notFound('Not a request for CanvasKit.');
+    }
+
+    final File file = File(p.joinAll(<String>[
+      pathOverride,
+      ...p.split(request.url.path).skip(1),
+    ]));
+
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('File not found: ${request.url.path}');
+    }
+
+    final String extension = p.extension(file.path);
+    final String? contentType = contentTypes[extension];
+
+    if (contentType == null) {
+      final String error = 'Failed to determine Content-Type for "${request.url.path}".';
+      stderr.writeln(error);
+      return shelf.Response.internalServerError(body: error);
+    }
+
+    return shelf.Response.ok(
+      file.readAsBytesSync(),
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+      },
+    );
+  }
+
+  /// Lists available test images under `web_ui/build/test_images`.
+  Future<shelf.Response> _testImageListingHandler(shelf.Request request) async {
+    const Map<String, String> supportedImageTypes = <String, String>{
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.bmp': 'image/bmp',
+    };
+
+    if (request.url.path != 'test_images/') {
+      return shelf.Response.notFound('Not found.');
+    }
+
+    final Directory testImageDirectory = Directory(p.join(
+      env.environment.webUiBuildDir.path,
+      'test_images',
+    ));
+
+    final List<String> testImageFiles = testImageDirectory
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map<String>((File file) => p.relative(file.path, from: testImageDirectory.path))
+      .where((String path) => supportedImageTypes.containsKey(p.extension(path)))
+      .toList();
+
+    return shelf.Response.ok(
+      json.encode(testImageFiles),
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
+    );
   }
 
   Future<shelf.Response> _fileNotFoundCatcher(shelf.Request request) async {
