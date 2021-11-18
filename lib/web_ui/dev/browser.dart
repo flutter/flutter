@@ -26,12 +26,12 @@ abstract class BrowserEnvironment {
 
   /// Prepares the OS environment to run tests for this browser.
   ///
-  /// This may include things like staring web drivers, iOS Simulators, and/or
-  /// Android emulators.
+  /// This may include things like installing browsers, and starting web drivers,
+  /// iOS Simulators, and/or Android emulators.
   ///
   /// Typically the browser environment is prepared once and supports multiple
   /// browser instances.
-  Future<void> prepareEnvironment();
+  Future<void> prepare();
 
   /// Launches a browser instance.
   ///

@@ -23,7 +23,7 @@ class SafariMacOsEnvironment implements BrowserEnvironment {
   Runtime get packageTestRuntime => Runtime.safari;
 
   @override
-  Future<void> prepareEnvironment() async {
+  Future<void> prepare() async {
     // Nothing extra to prepare for desktop Safari.
   }
 
