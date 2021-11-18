@@ -880,6 +880,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   @override
