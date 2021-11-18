@@ -16,6 +16,13 @@
 namespace impeller {
 namespace compiler {
 
+struct StructMember {
+  std::string type;
+  std::string name;
+  size_t offset = 0u;
+  size_t byte_length = 0u;
+};
+
 class Reflector {
  public:
   struct Options {
@@ -38,13 +45,6 @@ class Reflector {
   std::shared_ptr<fml::Mapping> GetReflectionCC() const;
 
  private:
-  struct StructMember {
-    std::string type;
-    std::string name;
-    size_t offset = 0u;
-    size_t byte_length = 0u;
-  };
-
   struct StructDefinition {
     std::string name;
     size_t byte_length = 0u;
