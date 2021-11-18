@@ -260,4 +260,3 @@ FlutterProjectFactory get projectFactory {
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
->>>>>>> e8ec8a0dfb ([flutter_tools] Catch lack of flutter tools source missing (#93168))
