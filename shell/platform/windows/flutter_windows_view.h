@@ -316,7 +316,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   std::unique_ptr<FlutterWindowsEngine> engine_;
 
   // Keeps track of pointer states in relation to the window.
-  std::map<int32_t, std::unique_ptr<PointerState>> pointer_states_;
+  std::unordered_map<int32_t, std::unique_ptr<PointerState>> pointer_states_;
 
   // The plugin registrar managing internal plugins.
   std::unique_ptr<flutter::PluginRegistrar> internal_plugin_registrar_;
