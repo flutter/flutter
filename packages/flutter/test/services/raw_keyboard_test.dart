@@ -382,10 +382,10 @@ void main() {
 
       RawKeyboard.instance.addListener(print);
 
-      await simulate(true, 0x6c, 0xffea, 0x2000000);
-      await simulate(true, 0x32, 0xfe08, 0x2000008);
-      await simulate(false, 0x6c, 0xfe03, 0x2002008);
-      await simulate(true, 0x6c, 0xfe03, 0x2002000);
+      await simulate(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
+      await simulate(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
+      await simulate(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
+      await simulate(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
       // expect(
       //   RawKeyboard.instance.keysPressed,
       //   equals(
