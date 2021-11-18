@@ -818,13 +818,9 @@ class RawKeyboard {
     _keysPressed.addAll(modifierKeys);
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      final Set<PhysicalKeyboardKey> physicalKeys = _modifierKeyMap[_ModifierSidePair(thisKeyModifier, KeyboardSide.any)]
-          ?? <PhysicalKeyboardKey>{};
-      for (final PhysicalKeyboardKey physicalKey in physicalKeys) {
-        final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[physicalKey];
-        if (logicalKey != null) {
-          _keysPressed[physicalKey] = logicalKey;
-        }
+      final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
+      if (logicalKey != null) {
+        _keysPressed[event.physicalKey] = logicalKey;
       }
     }
   }
