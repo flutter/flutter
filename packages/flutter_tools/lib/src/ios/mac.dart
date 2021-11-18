@@ -29,6 +29,7 @@ import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/project_object_version_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/storyboard_version_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
@@ -122,6 +123,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     ProjectBuildLocationMigration(app.project, globals.logger),
     DeploymentTargetMigration(app.project, globals.logger),
     ProjectObjectVersionMigration(app.project, globals.logger),
+    StoryboardVersionMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
