@@ -10,6 +10,7 @@
 #include "impeller/entity/content_renderer.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
@@ -236,13 +237,11 @@ bool TextureContents::Render(const ContentRenderer& renderer,
   frame_info.mvp =
       Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
 
-  auto frame_info_view = host_buffer.EmplaceUniform(frame_info);
-
   Command cmd;
   cmd.label = "TextureFill";
   cmd.pipeline = renderer.GetTexturePipeline();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
-  VS::BindFrameInfo(cmd, frame_info_view);
+  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindTextureSampler(
       cmd, texture_,
       renderer.GetContext()->GetSamplerLibrary()->GetSampler({}));
@@ -275,6 +274,45 @@ const Color& SolidStrokeContents::GetColor() const {
   return color_;
 }
 
+static VertexBuffer CreateSolidStrokeVertices(const Path& path,
+                                              HostBuffer& buffer) {
+  using VS = SolidStrokeVertexShader;
+
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  auto polyline = path.CreatePolyline();
+
+  for (size_t i = 0, polyline_size = polyline.size(); i < polyline_size; i++) {
+    const auto is_last_point = i == polyline_size - 1;
+
+    const auto& p1 = polyline[i];
+    const auto& p2 = is_last_point ? polyline[i - 1] : polyline[i + 1];
+
+    const auto diff = p2 - p1;
+
+    const Scalar direction = is_last_point ? -1.0 : 1.0;
+
+    const auto normal =
+        Point{-diff.y * direction, diff.x * direction}.Normalize();
+
+    VS::PerVertexData vtx;
+    vtx.vertex_position = p1;
+
+    if (i == 0) {
+      vtx.vertex_normal = -normal;
+      vtx_builder.AppendVertex(vtx);
+      vtx.vertex_normal = normal;
+      vtx_builder.AppendVertex(vtx);
+    }
+
+    vtx.vertex_normal = normal;
+    vtx_builder.AppendVertex(vtx);
+    vtx.vertex_normal = -normal;
+    vtx_builder.AppendVertex(vtx);
+  }
+
+  return vtx_builder.CreateVertexBuffer(buffer);
+}
+
 bool SolidStrokeContents::Render(const ContentRenderer& renderer,
                                  const Entity& entity,
                                  const Surface& surface,
@@ -283,7 +321,29 @@ bool SolidStrokeContents::Render(const ContentRenderer& renderer,
     return true;
   }
 
-  return false;
+  using VS = SolidStrokeVertexShader;
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp =
+      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+
+  VS::StrokeInfo stroke_info;
+  stroke_info.color = color_;
+  stroke_info.size = stroke_size_;
+
+  Command cmd;
+  cmd.primitive_type = PrimitiveType::kTriangleStrip;
+  cmd.label = "SolidStroke";
+  cmd.pipeline = renderer.GetSolidStrokePipeline();
+  cmd.BindVertices(
+      CreateSolidStrokeVertices(entity.GetPath(), pass.GetTransientsBuffer()));
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindStrokeInfo(cmd,
+                     pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
+
+  pass.AddCommand(std::move(cmd));
+
+  return true;
 }
 
 void SolidStrokeContents::SetStrokeSize(Scalar size) {

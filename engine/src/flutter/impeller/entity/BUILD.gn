@@ -12,6 +12,8 @@ impeller_shaders("entity_shaders") {
     "shaders/gradient_fill.vert",
     "shaders/solid_fill.frag",
     "shaders/solid_fill.vert",
+    "shaders/solid_stroke.frag",
+    "shaders/solid_stroke.vert",
     "shaders/texture_fill.frag",
     "shaders/texture_fill.vert",
   ]

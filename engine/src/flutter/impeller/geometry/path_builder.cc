@@ -298,6 +298,11 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   return *this;
 }
 
+PathBuilder& PathBuilder::AddLine(const Point& p1, const Point& p2) {
+  prototype_.AddLinearComponent(p1, p2);
+  return *this;
+}
+
 const Path& PathBuilder::GetCurrentPath() const {
   return prototype_;
 }

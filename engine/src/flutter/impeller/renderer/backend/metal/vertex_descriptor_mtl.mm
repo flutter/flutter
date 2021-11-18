@@ -179,8 +179,9 @@ bool VertexDescriptorMTL::SetStageInputs(
       FML_LOG(ERROR) << "Format for input " << input.name << " not supported.";
       return false;
     }
-    stage_inputs_.emplace_back(StageInput{
-        input.location, vertex_format, (input.bit_width * input.vec_size) / 8});
+
+    stage_inputs_.insert(StageInput{input.location, vertex_format,
+                                    (input.bit_width * input.vec_size) / 8});
   }
 
   return true;

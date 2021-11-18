@@ -50,6 +50,8 @@ struct ShaderUniformSlot {
 
 struct ShaderStageIOSlot {
   // Statically allocated const string containing advisory debug description.
+  // This may be absent in release modes and the runtime may not use this string
+  // for normal operation.
   const char* name;
   size_t location;
   size_t set;

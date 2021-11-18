@@ -86,6 +86,18 @@ struct TPoint {
   constexpr Type GetDistance(const TPoint& p) const {
     return sqrt(GetDistanceSquared(p));
   }
+
+  constexpr Type GetLengthSquared() const { return GetDistanceSquared({}); }
+
+  constexpr Type GetLength() const { return GetDistance({}); }
+
+  constexpr TPoint Normalize() const {
+    const auto length = GetLength();
+    if (length == 0) {
+      return {};
+    }
+    return {x / length, y / length};
+  }
 };
 
 using Point = TPoint<Scalar>;

@@ -35,6 +35,8 @@ class VertexBufferBuilder {
 
   bool HasVertices() const { return !vertices_.empty(); }
 
+  size_t GetVertexCount() const { return vertices_.size(); }
+
   VertexBufferBuilder& AppendVertex(VertexType_ vertex) {
     vertices_.emplace_back(std::move(vertex));
     return *this;
