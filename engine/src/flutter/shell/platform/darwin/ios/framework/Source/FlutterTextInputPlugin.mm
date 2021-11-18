@@ -1111,7 +1111,7 @@ static BOOL IsScribbleAvailable() {
   [self setSelectedTextRangeLocal:selectedTextRange];
 
   if (_enableDeltaModel) {
-    [self updateEditingStateWithDelta:[FlutterTextEditingDelta deltaWithNonText:self.text]];
+    [self updateEditingStateWithDelta:flutter::TextEditingDelta([self.text UTF8String])];
   } else {
     [self updateEditingState];
   }
@@ -1180,11 +1180,13 @@ static BOOL IsScribbleAvailable() {
   NSRange replaceRange = ((FlutterTextRange*)range).range;
   [self replaceRangeLocal:replaceRange withText:text];
   if (_enableDeltaModel) {
-    [self updateEditingStateWithDelta:[FlutterTextEditingDelta
-                                          textEditingDelta:textBeforeChange
-                                             replacedRange:[self clampSelection:replaceRange
-                                                                        forText:textBeforeChange]
-                                               updatedText:text]];
+    NSRange nextReplaceRange = [self clampSelection:replaceRange forText:textBeforeChange];
+    [self updateEditingStateWithDelta:flutter::TextEditingDelta(
+                                          [textBeforeChange UTF8String],
+                                          flutter::TextRange(
+                                              nextReplaceRange.location,
+                                              nextReplaceRange.location + nextReplaceRange.length),
+                                          [text UTF8String])];
   } else {
     [self updateEditingState];
   }
@@ -1280,11 +1282,13 @@ static BOOL IsScribbleAvailable() {
                                       rangeWithNSRange:[self clampSelection:selectedRange
                                                                     forText:self.text]]];
   if (_enableDeltaModel) {
-    [self updateEditingStateWithDelta:[FlutterTextEditingDelta
-                                          textEditingDelta:textBeforeChange
-                                             replacedRange:[self clampSelection:actualReplacedRange
-                                                                        forText:textBeforeChange]
-                                               updatedText:markedText]];
+    NSRange nextReplaceRange = [self clampSelection:actualReplacedRange forText:textBeforeChange];
+    [self updateEditingStateWithDelta:flutter::TextEditingDelta(
+                                          [textBeforeChange UTF8String],
+                                          flutter::TextRange(
+                                              nextReplaceRange.location,
+                                              nextReplaceRange.location + nextReplaceRange.length),
+                                          [markedText UTF8String])];
   } else {
     [self updateEditingState];
   }
@@ -1296,7 +1300,7 @@ static BOOL IsScribbleAvailable() {
   }
   self.markedTextRange = nil;
   if (_enableDeltaModel) {
-    [self updateEditingStateWithDelta:[FlutterTextEditingDelta deltaWithNonText:self.text]];
+    [self updateEditingStateWithDelta:flutter::TextEditingDelta([self.text UTF8String])];
   } else {
     [self updateEditingState];
   }
@@ -1753,7 +1757,7 @@ static BOOL IsScribbleAvailable() {
   }
 }
 
-- (void)updateEditingStateWithDelta:(FlutterTextEditingDelta*)delta {
+- (void)updateEditingStateWithDelta:(flutter::TextEditingDelta)delta {
   NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
   NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
 
@@ -1766,10 +1770,10 @@ static BOOL IsScribbleAvailable() {
   }
 
   NSDictionary* deltaToFramework = @{
-    @"oldText" : delta.oldText,
-    @"deltaText" : delta.deltaText,
-    @"deltaStart" : @(delta.deltaStart),
-    @"deltaEnd" : @(delta.deltaEnd),
+    @"oldText" : @(delta.old_text().c_str()),
+    @"deltaText" : @(delta.delta_text().c_str()),
+    @"deltaStart" : @(delta.delta_start()),
+    @"deltaEnd" : @(delta.delta_end()),
     @"selectionBase" : @(selectionBase),
     @"selectionExtent" : @(selectionExtent),
     @"selectionAffinity" : @(_selectionAffinity),

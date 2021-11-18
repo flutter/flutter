@@ -1027,6 +1027,9 @@ FILE: ../../../flutter/shell/platform/common/public/flutter_plugin_registrar.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_texture_registrar.h
 FILE: ../../../flutter/shell/platform/common/test_accessibility_bridge.cc
 FILE: ../../../flutter/shell/platform/common/test_accessibility_bridge.h
+FILE: ../../../flutter/shell/platform/common/text_editing_delta.cc
+FILE: ../../../flutter/shell/platform/common/text_editing_delta.h
+FILE: ../../../flutter/shell/platform/common/text_editing_delta_unittests.cc
 FILE: ../../../flutter/shell/platform/common/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/text_input_model_unittests.cc
@@ -1118,9 +1121,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterRestora
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPluginTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextEditingDelta.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextEditingDelta.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextEditingDeltaTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.mm

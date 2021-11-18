@@ -176,6 +176,179 @@
   return NSEqualRects(rect, NSMakeRect(38, 20, 2, 19));
 }
 
+- (bool)testSetEditingStateWithTextEditingDelta {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"enableDeltaModel" : @"true",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"Text",
+                                                                @"selectionBase" : @(0),
+                                                                @"selectionExtent" : @(0),
+                                                                @"composingBase" : @(-1),
+                                                                @"composingExtent" : @(-1),
+                                                              }];
+
+  [plugin handleMethodCall:call
+                    result:^(id){
+                    }];
+
+  // The setEditingState call is ACKed back to the framework.
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock
+            sendOnChannel:@"flutter/textinput"
+                  message:[OCMArg checkWithBlock:^BOOL(NSData* callData) {
+                    FlutterMethodCall* call =
+                        [[FlutterJSONMethodCodec sharedInstance] decodeMethodCall:callData];
+                    return [[call method]
+                        isEqualToString:@"TextInputClient.updateEditingStateWithDeltas"];
+                  }]]);
+  } @catch (...) {
+    return false;
+  }
+  return true;
+}
+
+- (bool)testOperationsThatTriggerDelta {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  [plugin handleMethodCall:[FlutterMethodCall
+                               methodCallWithMethodName:@"TextInput.setClient"
+                                              arguments:@[
+                                                @(1), @{
+                                                  @"inputAction" : @"action",
+                                                  @"enableDeltaModel" : @"true",
+                                                  @"inputType" : @{@"name" : @"inputName"},
+                                                }
+                                              ]]
+                    result:^(id){
+                    }];
+  [plugin insertText:@"text to insert"];
+
+  NSDictionary* deltaToFramework = @{
+    @"oldText" : @"",
+    @"deltaText" : @"text to insert",
+    @"deltaStart" : @(0),
+    @"deltaEnd" : @(0),
+    @"selectionBase" : @(14),
+    @"selectionExtent" : @(14),
+    @"selectionAffinity" : @"TextAffinity.upstream",
+    @"selectionIsDirectional" : @(false),
+    @"composingBase" : @(-1),
+    @"composingExtent" : @(-1),
+  };
+  NSDictionary* expectedState = @{
+    @"deltas" : @[ deltaToFramework ],
+  };
+
+  NSData* updateCall = [[FlutterJSONMethodCodec sharedInstance]
+      encodeMethodCall:[FlutterMethodCall
+                           methodCallWithMethodName:@"TextInputClient.updateEditingStateWithDeltas"
+                                          arguments:@[ @(1), expectedState ]]];
+
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+  } @catch (...) {
+    return false;
+  }
+
+  [plugin setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
+
+  deltaToFramework = @{
+    @"oldText" : @"text to insert",
+    @"deltaText" : @"marked text",
+    @"deltaStart" : @(14),
+    @"deltaEnd" : @(25),
+    @"selectionBase" : @(25),
+    @"selectionExtent" : @(25),
+    @"selectionAffinity" : @"TextAffinity.upstream",
+    @"selectionIsDirectional" : @(false),
+    @"composingBase" : @(14),
+    @"composingExtent" : @(25),
+  };
+  expectedState = @{
+    @"deltas" : @[ deltaToFramework ],
+  };
+
+  updateCall = [[FlutterJSONMethodCodec sharedInstance]
+      encodeMethodCall:[FlutterMethodCall
+                           methodCallWithMethodName:@"TextInputClient.updateEditingStateWithDeltas"
+                                          arguments:@[ @(1), expectedState ]]];
+
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+  } @catch (...) {
+    return false;
+  }
+
+  [plugin unmarkText];
+
+  deltaToFramework = @{
+    @"oldText" : @"text to insertmarked text",
+    @"deltaText" : @"",
+    @"deltaStart" : @(-1),
+    @"deltaEnd" : @(-1),
+    @"selectionBase" : @(25),
+    @"selectionExtent" : @(25),
+    @"selectionAffinity" : @"TextAffinity.upstream",
+    @"selectionIsDirectional" : @(false),
+    @"composingBase" : @(-1),
+    @"composingExtent" : @(-1),
+  };
+  expectedState = @{
+    @"deltas" : @[ deltaToFramework ],
+  };
+
+  updateCall = [[FlutterJSONMethodCodec sharedInstance]
+      encodeMethodCall:[FlutterMethodCall
+                           methodCallWithMethodName:@"TextInputClient.updateEditingStateWithDeltas"
+                                          arguments:@[ @(1), expectedState ]]];
+
+  @try {
+    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+  } @catch (...) {
+    return false;
+  }
+  return true;
+}
+
 @end
 
 namespace flutter::testing {
@@ -197,6 +370,14 @@ TEST(FlutterTextInputPluginTest, TestEmptyCompositionRange) {
 
 TEST(FlutterTextInputPluginTest, TestFirstRectForCharacterRange) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testFirstRectForCharacterRange]);
+}
+
+TEST(FlutterTextInputPluginTest, TestSetEditingStateWithTextEditingDelta) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSetEditingStateWithTextEditingDelta]);
+}
+
+TEST(FlutterTextInputPluginTest, TestOperationsThatTriggerDelta) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testOperationsThatTriggerDelta]);
 }
 
 TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
