@@ -964,8 +964,11 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
+  // The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
+
+  // True iff a tap + shift has been detected but the tap has not yet come up.
+  bool _isShiftTapping = false;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -986,6 +989,12 @@ class TextSelectionGestureDetectorBuilder {
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
+
+    // Handle shift + click selection if needed.
+    if (editableText.isShiftPressed && renderEditable.selection?.baseOffset != null) {
+      _isShiftTapping = true;
+      renderEditable.selectToPosition(cause: SelectionChangedCause.tap);
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressStart].
@@ -1043,6 +1052,11 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
+    if (_isShiftTapping) {
+      _isShiftTapping = false;
+      return;
+    }
+
     if (delegate.selectionEnabled) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:

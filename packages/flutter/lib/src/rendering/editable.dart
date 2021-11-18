@@ -1974,6 +1974,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
+  /// Move the selection's extent to the given [Offset].
+  void selectToPosition({ required SelectionChangedCause cause }) {
+    assert(cause != null);
+    assert(_lastTapDownPosition != null);
+    assert(selection?.baseOffset != null);
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final TextPosition toPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
+
+    final TextSelection nextSelection = selection!.copyWith(
+      extentOffset: toPosition.offset,
+    );
+    _setSelection(nextSelection, cause);
+  }
+
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}

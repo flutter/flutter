@@ -1586,6 +1586,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
+  /// True iff the shift key on a physical keyboard is currently pressed down.
+  ///
+  /// Used for shift + tap gestures.
+  bool isShiftPressed = false;
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event.isShiftPressed == isShiftPressed) {
+      return;
+    }
+    isShiftPressed = event.isShiftPressed;
+  }
+
   TextEditingValue get _textEditingValueforTextLayoutMetrics {
     final Widget? editableWidget =_editableKey.currentContext?.widget;
     if (editableWidget is! _Editable) {
@@ -1693,6 +1704,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
+     RawKeyboard.instance.addListener(_handleKeyEvent);
     _cursorBlinkOpacityController = AnimationController(
       vsync: this,
       duration: _fadeDuration,
@@ -1804,6 +1816,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+     RawKeyboard.instance.removeListener(_handleKeyEvent);
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
