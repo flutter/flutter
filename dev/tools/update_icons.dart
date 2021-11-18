@@ -200,15 +200,15 @@ void main(List<String> args) {
   if ((!isSuperset || !isStable) && argResults[_enforceSafetyChecks] as bool) {
     exit(1);
   }
-  final String iconsTemplate = iconsTemplateFile.readAsStringSync();
+  final String iconsTemplateContents = iconsTemplateFile.readAsStringSync();
 
   stderr.writeln("Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
-  final String newIconsFileData = _regenerateIconsFile(iconsTemplate, newTokenPairMap);
+  final String newIconsContents = _regenerateIconsFile(iconsTemplateContents, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
-    stdout.write(newIconsFileData);
+    stdout.write(newIconsContents);
   } else {
-    iconsFile.writeAsStringSync(newIconsFileData);
+    iconsFile.writeAsStringSync(newIconsContents);
     _regenerateCodepointsFile(oldCodepointsFile, newTokenPairMap);
   }
 }
@@ -259,7 +259,7 @@ Map<String, String> _stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
+String _regenerateIconsFile(String templateFileContents, Map<String, String> tokenPairMap) {
   final List<_Icon> newIcons = tokenPairMap.entries
       .map((MapEntry<String, String> entry) => _Icon(entry))
       .toList();
@@ -268,7 +268,7 @@ String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
 
-  for (final String line in LineSplitter.split(iconData)) {
+  for (final String line in LineSplitter.split(templateFileContents)) {
     if (!generating) {
       buf.writeln(line);
     }
