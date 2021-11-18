@@ -12,8 +12,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'package:web_engine_tester/golden_tester.dart';
-
 import 'common.dart';
 
 void main() {
@@ -21,18 +19,6 @@ void main() {
 }
 
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 50);
-
-Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
-    {ui.Rect region = kDefaultRegion, bool write = false}) async {
-  final EnginePlatformDispatcher dispatcher =
-      ui.window.platformDispatcher as EnginePlatformDispatcher;
-  final LayerSceneBuilder sb = LayerSceneBuilder();
-  sb.pushOffset(0, 0);
-  sb.addPicture(ui.Offset.zero, picture);
-  dispatcher.rasterizer!.draw(sb.build().layerTree);
-  await matchGoldenFile(goldenFile,
-      region: region, maxDiffRatePercent: 0.0, write: write);
-}
 
 void testMain() {
   group('Font fallbacks', () {
@@ -101,7 +87,10 @@ void testMain() {
       canvas.drawParagraph(paragraph, const ui.Offset(0, 0));
 
       await matchPictureGolden(
-          'canvaskit_font_fallback_arabic.png', recorder.endRecording());
+        'canvaskit_font_fallback_arabic.png',
+        recorder.endRecording(),
+        region: kDefaultRegion,
+      );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isIosSafari || isFirefox);
@@ -208,7 +197,10 @@ void testMain() {
       canvas.drawParagraph(paragraph, const ui.Offset(0, 0));
 
       await matchPictureGolden(
-          'canvaskit_font_fallback_emoji.png', recorder.endRecording());
+        'canvaskit_font_fallback_emoji.png',
+        recorder.endRecording(),
+        region: kDefaultRegion,
+      );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isIosSafari || isFirefox);

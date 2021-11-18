@@ -11,12 +11,25 @@ import 'package:ui/ui.dart' as ui;
 import '../html_image_codec.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
+import 'image_wasm_codecs.dart';
+import 'image_web_codecs.dart';
 import 'skia_object_cache.dart';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
-ui.Codec skiaInstantiateImageCodec(Uint8List list,
-    [int? width, int? height, int? format, int? rowBytes]) {
-  return CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes');
+// TODO(yjbanov): Implement targetWidth and targetHeight support.
+//                https://github.com/flutter/flutter/issues/34075
+FutureOr<ui.Codec> skiaInstantiateImageCodec(Uint8List list,
+    [int? targetWidth, int? targetHeight]) {
+  if (browserSupportsImageDecoder) {
+    return CkBrowserImageDecoder.create(
+      data: list,
+      debugSource: 'encoded image bytes',
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+  } else {
+    return CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes');
+  }
 }
 
 // TODO(yjbanov): add support for targetWidth/targetHeight (https://github.com/flutter/flutter/issues/34075)
@@ -34,7 +47,7 @@ void skiaDecodeImageFromPixels(
   // Run in a timer to avoid janking the current frame by moving the decoding
   // work outside the frame event.
   Timer.run(() {
-    final SkImage skImage = canvasKit.MakeImage(
+    final SkImage? skImage = canvasKit.MakeImage(
       SkImageInfo(
         width: width,
         height: height,
@@ -45,6 +58,12 @@ void skiaDecodeImageFromPixels(
       pixels,
       rowBytes ?? 4 * width,
     );
+
+    if (skImage == null) {
+      html.window.console.warn('Failed to create image from pixels.');
+      return;
+    }
+
     return callback(CkImage(skImage));
   });
 }
@@ -72,8 +91,19 @@ void debugRestoreHttpRequestFactory() {
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
 /// requesting from URI.
 Future<ui.Codec> skiaInstantiateWebImageCodec(
+    String url, WebOnlyImageCodecChunkCallback? chunkCallback) async {
+  final Uint8List list = await fetchImage(url, chunkCallback);
+  if (browserSupportsImageDecoder) {
+    return CkBrowserImageDecoder.create(data: list, debugSource: url.toString());
+  } else {
+    return CkAnimatedImage.decodeFromBytes(list, url);
+  }
+}
+
+/// Sends a request to fetch image data.
+Future<Uint8List> fetchImage(
     String url, WebOnlyImageCodecChunkCallback? chunkCallback) {
-  final Completer<ui.Codec> completer = Completer<ui.Codec>();
+  final Completer<Uint8List> completer = Completer<Uint8List>();
 
   final html.HttpRequest request = httpRequestFactory();
   request.open('GET', url, async: true);
@@ -108,108 +138,11 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
       return;
     }
 
-    try {
-      final Uint8List list =
-          Uint8List.view(request.response as ByteBuffer);
-      final CkAnimatedImage codec = CkAnimatedImage.decodeFromBytes(list, url);
-      completer.complete(codec);
-    } catch (error, stackTrace) {
-      completer.completeError(error, stackTrace);
-    }
+    completer.complete(Uint8List.view(request.response as ByteBuffer));
   });
 
   request.send();
   return completer.future;
-}
-
-/// The CanvasKit implementation of [ui.Codec].
-///
-/// Wraps `SkAnimatedImage`.
-class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
-    implements ui.Codec {
-  /// Decodes an image from a list of encoded bytes.
-  CkAnimatedImage.decodeFromBytes(this._bytes, this.src);
-
-  final String src;
-  final Uint8List _bytes;
-  int _frameCount = 0;
-  int _repetitionCount = -1;
-
-  /// The index to the next frame to be decoded.
-  int _nextFrameIndex = 0;
-
-  @override
-  SkAnimatedImage createDefault() {
-    final SkAnimatedImage? animatedImage =
-        canvasKit.MakeAnimatedImageFromEncoded(_bytes);
-    if (animatedImage == null) {
-      throw ImageCodecException(
-        'Failed to decode image data.\n'
-        'Image source: $src',
-      );
-    }
-
-    _frameCount = animatedImage.getFrameCount();
-    _repetitionCount = animatedImage.getRepetitionCount();
-
-    // If the object has been deleted then resurrected, it may already have
-    // iterated over some frames. We need to skip over them.
-    for (int i = 0; i < _nextFrameIndex; i++) {
-      animatedImage.decodeNextFrame();
-    }
-    return animatedImage;
-  }
-
-  @override
-  SkAnimatedImage resurrect() => createDefault();
-
-  @override
-  bool get isResurrectionExpensive => true;
-
-  @override
-  void delete() {
-    rawSkiaObject?.delete();
-  }
-
-  bool _disposed = false;
-  bool get debugDisposed => _disposed;
-
-  bool _debugCheckIsNotDisposed() {
-    assert(!_disposed, 'This image has been disposed.');
-    return true;
-  }
-
-  @override
-  void dispose() {
-    assert(
-      !_disposed,
-      'Cannot dispose a codec that has already been disposed.',
-    );
-    _disposed = true;
-    delete();
-  }
-
-  @override
-  int get frameCount {
-    assert(_debugCheckIsNotDisposed());
-    return _frameCount;
-  }
-
-  @override
-  int get repetitionCount {
-    assert(_debugCheckIsNotDisposed());
-    return _repetitionCount;
-  }
-
-  @override
-  Future<ui.FrameInfo> getNextFrame() {
-    assert(_debugCheckIsNotDisposed());
-    final int durationMillis = skiaObject.decodeNextFrame();
-    final Duration duration = Duration(milliseconds: durationMillis);
-    final CkImage image = CkImage(skiaObject.makeImageAtCurrentFrame());
-    _nextFrameIndex = (_nextFrameIndex + 1) % _frameCount;
-    return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
-  }
 }
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
@@ -244,16 +177,23 @@ class CkImage implements ui.Image, StackTraceDebugger {
       final int originalWidth = skImage.width();
       final int originalHeight = skImage.height();
       box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
-        return canvasKit.MakeImage(
-            SkImageInfo(
-              alphaType: canvasKit.AlphaType.Premul,
-              colorType: canvasKit.ColorType.RGBA_8888,
-              colorSpace: SkColorSpaceSRGB,
-              width: originalWidth,
-              height: originalHeight,
-            ),
-            originalBytes.buffer.asUint8List(),
-            4 * originalWidth);
+        final SkImage? skImage = canvasKit.MakeImage(
+          SkImageInfo(
+            alphaType: canvasKit.AlphaType.Premul,
+            colorType: canvasKit.ColorType.RGBA_8888,
+            colorSpace: SkColorSpaceSRGB,
+            width: originalWidth,
+            height: originalHeight,
+          ),
+          originalBytes.buffer.asUint8List(),
+          4 * originalWidth,
+        );
+        if (skImage == null) {
+          throw ImageCodecException(
+            'Failed to resurrect image from pixels.'
+          );
+        }
+        return skImage;
       });
     }
   }

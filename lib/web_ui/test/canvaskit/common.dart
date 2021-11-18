@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
 export '../common.dart';
 
@@ -14,6 +17,8 @@ export '../common.dart';
 ///
 /// See [TestCollector] for usage.
 late TestCollector testCollector;
+
+const MethodCodec codec = StandardMethodCodec();
 
 /// Common test setup for all CanvasKit unit-tests.
 void setUpCanvasKitTest() {
@@ -169,4 +174,74 @@ class TestCollector implements Collector {
     _pendingCollections.clear();
     _completedCollections.clear();
   }
+}
+
+/// Checks that a [picture] matches the [goldenFile].
+///
+/// The picture is drawn onto the UI at [ui.Offset.zero] with no additional
+/// layers.
+Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
+    {required ui.Rect region, bool write = false}) async {
+  final EnginePlatformDispatcher dispatcher =
+      ui.window.platformDispatcher as EnginePlatformDispatcher;
+  final LayerSceneBuilder sb = LayerSceneBuilder();
+  sb.pushOffset(0, 0);
+  sb.addPicture(ui.Offset.zero, picture);
+  dispatcher.rasterizer!.draw(sb.build().layerTree);
+  await matchGoldenFile(goldenFile,
+      region: region, maxDiffRatePercent: 0.0, write: write);
+}
+
+/// Sends a platform message to create a Platform View with the given id and viewType.
+Future<void> createPlatformView(int id, String viewType) {
+  final Completer<void> completer = Completer<void>();
+  window.sendPlatformMessage(
+    'flutter/platform_views',
+    codec.encodeMethodCall(MethodCall(
+      'create',
+      <String, dynamic>{
+        'id': id,
+        'viewType': viewType,
+      },
+    )),
+    (dynamic _) => completer.complete(),
+  );
+  return completer.future;
+}
+
+/// Disposes of the platform view with the given [id].
+Future<void> disposePlatformView(int id) {
+  final Completer<void> completer = Completer<void>();
+  window.sendPlatformMessage(
+    'flutter/platform_views',
+    codec.encodeMethodCall(MethodCall('dispose', id)),
+    (dynamic _) => completer.complete(),
+  );
+  return completer.future;
+}
+
+/// Creates a pre-laid out one-line paragraph of text.
+///
+/// Useful in tests that need a simple label to annotate goldens.
+CkParagraph makeSimpleText(String text, {
+  String? fontFamily,
+  double? fontSize,
+  ui.FontStyle? fontStyle,
+  ui.FontWeight? fontWeight,
+  ui.Color? color,
+}) {
+  final CkParagraphBuilder builder = CkParagraphBuilder(CkParagraphStyle(
+    fontFamily: fontFamily ?? 'Roboto',
+    fontSize: fontSize ?? 14,
+    fontStyle: fontStyle ?? ui.FontStyle.normal,
+    fontWeight: fontWeight ?? ui.FontWeight.normal,
+  ));
+  builder.pushStyle(CkTextStyle(
+    color: color ?? const ui.Color(0xFF000000),
+  ));
+  builder.addText(text);
+  builder.pop();
+  final CkParagraph paragraph = builder.build();
+  paragraph.layout(const ui.ParagraphConstraints(width: 10000));
+  return paragraph;
 }

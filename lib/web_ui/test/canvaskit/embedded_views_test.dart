@@ -12,8 +12,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
 
-const MethodCodec codec = StandardMethodCodec();
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -31,7 +29,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -67,7 +65,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -105,7 +103,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -150,7 +148,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -177,7 +175,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -218,7 +216,7 @@ void testMain() {
           'test-platform-view',
           (int viewId) => html.DivElement()..id = 'view-$i',
         );
-        await _createPlatformView(i, 'test-platform-view');
+        await createPlatformView(i, 'test-platform-view');
         platformViewIds.add(i);
       }
 
@@ -303,7 +301,7 @@ void testMain() {
       // Frame 7:
       //   Render: a platform view after error.
       //   Expect: success. Just checking the system is not left in a corrupted state.
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
       renderTestScene(viewCount: 0);
       // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
     }, skip: isSafari);
@@ -321,7 +319,7 @@ void testMain() {
           'test-platform-view',
           (int viewId) => html.DivElement()..id = 'view-$i',
         );
-        await _createPlatformView(i, 'test-platform-view');
+        await createPlatformView(i, 'test-platform-view');
         platformViewIds.add(i);
       }
 
@@ -370,7 +368,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -389,7 +387,7 @@ void testMain() {
         isNotNull,
       );
 
-      await _disposePlatformView(0);
+      await disposePlatformView(0);
 
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
@@ -410,7 +408,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -430,7 +428,7 @@ void testMain() {
       );
 
       // Render a frame with a different platform view.
-      await _createPlatformView(1, 'test-platform-view');
+      await createPlatformView(1, 'test-platform-view');
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
@@ -468,7 +466,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'test-view',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -561,7 +559,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -585,7 +583,7 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -611,8 +609,8 @@ void testMain() {
         'test-platform-view',
         (int viewId) => html.DivElement()..id = 'view-0',
       );
-      await _createPlatformView(0, 'test-platform-view');
-      await _createPlatformView(1, 'test-platform-view');
+      await createPlatformView(0, 'test-platform-view');
+      await createPlatformView(1, 'test-platform-view');
 
       final EnginePlatformDispatcher dispatcher =
           ui.window.platformDispatcher as EnginePlatformDispatcher;
@@ -645,31 +643,4 @@ void testMain() {
     });
     // TODO(dit): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
-}
-
-// Sends a platform message to create a Platform View with the given id and viewType.
-Future<void> _createPlatformView(int id, String viewType) {
-  final Completer<void> completer = Completer<void>();
-  window.sendPlatformMessage(
-    'flutter/platform_views',
-    codec.encodeMethodCall(MethodCall(
-      'create',
-      <String, dynamic>{
-        'id': id,
-        'viewType': viewType,
-      },
-    )),
-    (dynamic _) => completer.complete(),
-  );
-  return completer.future;
-}
-
-Future<void> _disposePlatformView(int id) {
-  final Completer<void> completer = Completer<void>();
-  window.sendPlatformMessage(
-    'flutter/platform_views',
-    codec.encodeMethodCall(MethodCall('dispose', id)),
-    (dynamic _) => completer.complete(),
-  );
-  return completer.future;
 }

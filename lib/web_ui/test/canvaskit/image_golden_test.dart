@@ -10,6 +10,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
 import '../matchers.dart';
 import 'common.dart';
@@ -20,11 +21,51 @@ void main() {
 }
 
 void testMain() {
-  group('CanvasKit image', () {
+  group('CanvasKit Images', () {
     setUpCanvasKitTest();
 
     tearDown(() {
       debugRestoreHttpRequestFactory();
+    });
+
+    _testForImageCodecs(useBrowserImageDecoder: false);
+
+    if (browserSupportsImageDecoder) {
+      _testForImageCodecs(useBrowserImageDecoder: true);
+    }
+
+    test('isAvif', () {
+      expect(isAvif(Uint8List.fromList(<int>[])), isFalse);
+      expect(isAvif(Uint8List.fromList(<int>[1, 2, 3])), isFalse);
+      expect(
+        isAvif(Uint8List.fromList(<int>[
+          0x00, 0x00, 0x00, 0x1c, 0x66, 0x74, 0x79, 0x70,
+          0x61, 0x76, 0x69, 0x66, 0x00, 0x00, 0x00, 0x00,
+        ])),
+        isTrue,
+      );
+      expect(
+        isAvif(Uint8List.fromList(<int>[
+          0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70,
+          0x61, 0x76, 0x69, 0x66, 0x00, 0x00, 0x00, 0x00,
+        ])),
+        isTrue,
+      );
+    });
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
+}
+
+void _testForImageCodecs({required bool useBrowserImageDecoder}) {
+  final String mode = useBrowserImageDecoder ? 'webcodecs' : 'wasm';
+
+  group('($mode})', () {
+    setUp(() {
+      browserSupportsImageDecoder = useBrowserImageDecoder;
+    });
+
+    tearDown(() {
+      debugResetBrowserSupportsImageDecoder();
     });
 
     test('CkAnimatedImage can be explicitly disposed of', () {
@@ -167,7 +208,7 @@ void testMain() {
         return TestHttpRequest()
           ..status = 200
           ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
-            html.ProgressEvent('test error'),
+            html.ProgressEvent('test progress event'),
           ])
           ..response = kTransparentImage.buffer;
       };
@@ -176,6 +217,38 @@ void testMain() {
       final ui.Image image = (await codec.getNextFrame()).image;
       expect(image.height, 1);
       expect(image.width, 1);
+      testCollector.collectNow();
+    });
+
+    test('instantiateImageCodec respects target image size',
+        () async {
+      const List<List<int>> targetSizes = <List<int>>[
+        <int>[1, 1],
+        <int>[1, 2],
+        <int>[2, 3],
+        <int>[3, 4],
+        <int>[4, 4],
+        <int>[10, 20],
+      ];
+
+      for (final List<int> targetSize in targetSizes) {
+        final int targetWidth = targetSize[0];
+        final int targetHeight = targetSize[1];
+
+        final ui.Codec codec = await ui.instantiateImageCodec(
+          k4x4PngImage,
+          targetWidth: targetWidth,
+          targetHeight: targetHeight,
+        );
+
+        final ui.Image image = (await codec.getNextFrame()).image;
+        // TODO(yjbanov): https://github.com/flutter/flutter/issues/34075
+        // expect(image.width, targetWidth);
+        // expect(image.height, targetHeight);
+        image.dispose();
+        codec.dispose();
+      }
+
       testCollector.collectNow();
     });
 
@@ -224,7 +297,7 @@ void testMain() {
         return TestHttpRequest()
           ..status = 200
           ..onLoad = Stream<html.ProgressEvent>.fromIterable(<html.ProgressEvent>[
-            html.ProgressEvent('test error'),
+            html.ProgressEvent('test progress event'),
           ])
           ..response = Uint8List(0).buffer;
       };
@@ -232,25 +305,124 @@ void testMain() {
         await skiaInstantiateWebImageCodec('http://image-server.com/picture.jpg', null);
         fail('Expected to throw');
       } on ImageCodecException catch (exception) {
-        expect(
-          exception.toString(),
-          'ImageCodecException: Failed to decode image data.\n'
-          'Image source: http://image-server.com/picture.jpg',
-        );
+        if (!browserSupportsImageDecoder) {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to decode image data.\n'
+            'Image source: http://image-server.com/picture.jpg',
+          );
+        } else {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to detect image file format using the file header.\n'
+            'File header was empty.\n'
+            'Image source: http://image-server.com/picture.jpg',
+          );
+        }
       }
       testCollector.collectNow();
     });
 
-    test('Reports error when failing to decode image data', () async {
+    test('Reports error when failing to decode empty image data', () async {
       try {
         await ui.instantiateImageCodec(Uint8List(0));
         fail('Expected to throw');
       } on ImageCodecException catch (exception) {
-        expect(
-          exception.toString(),
-          'ImageCodecException: Failed to decode image data.\n'
-          'Image source: encoded image bytes'
-        );
+        if (!browserSupportsImageDecoder) {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to decode image data.\n'
+            'Image source: encoded image bytes',
+          );
+        } else {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to detect image file format using the file header.\n'
+            'File header was empty.\n'
+            'Image source: encoded image bytes',
+          );
+        }
+      }
+    });
+
+    test('Reports error when failing to decode malformed image data', () async {
+      try {
+        await ui.instantiateImageCodec(Uint8List.fromList(<int>[
+          0xFF, 0xD8, 0xFF, 0xDB, 0x00, 0x00, 0x00,
+        ]));
+        fail('Expected to throw');
+      } on ImageCodecException catch (exception) {
+        if (!browserSupportsImageDecoder) {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to decode image data.\n'
+            'Image source: encoded image bytes'
+          );
+        } else {
+          expect(
+            exception.toString(),
+            // Browser error message is not checked as it can depend on the
+            // browser engine and version.
+            matches(RegExp(
+              r"ImageCodecException: Failed to decode image using the browser's ImageDecoder API.\n"
+              r'Image source: encoded image bytes\n'
+              r'Original browser error: .+'
+            ))
+          );
+        }
+      }
+    });
+
+    test('Includes file header in the error message when fails to detect file type', () async {
+      try {
+        await ui.instantiateImageCodec(Uint8List.fromList(<int>[
+          0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00,
+        ]));
+        fail('Expected to throw');
+      } on ImageCodecException catch (exception) {
+        if (!browserSupportsImageDecoder) {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to decode image data.\n'
+            'Image source: encoded image bytes'
+          );
+        } else {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to detect image file format using the file header.\n'
+            'File header was [0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08 0x09 0x00].\n'
+            'Image source: encoded image bytes'
+          );
+        }
+      }
+    });
+
+    test('Provides readable error message when image type is unsupported', () async {
+      addTearDown(() {
+        debugContentTypeDetector = null;
+      });
+      debugContentTypeDetector = (_) {
+        return 'unsupported/image-type';
+      };
+      try {
+        await ui.instantiateImageCodec(Uint8List.fromList(<int>[
+          0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00,
+        ]));
+        fail('Expected to throw');
+      } on ImageCodecException catch (exception) {
+        if (!browserSupportsImageDecoder) {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Failed to decode image data.\n'
+            'Image source: encoded image bytes'
+          );
+        } else {
+          expect(
+            exception.toString(),
+            'ImageCodecException: Image file format (unsupported/image-type) is not supported by this browser\'s ImageDecoder API.\n'
+            'Image source: encoded image bytes'
+          );
+        }
       }
     });
 
@@ -279,8 +451,88 @@ void testMain() {
       expect(image2.width, 40);
       expect(image2.height, 100);
     });
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
-  }, skip: isIosSafari);
+
+    test('Decode test images', () async {
+      final html.Body listingResponse = await httpFetch('/test_images/');
+      final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+
+      // Sanity-check the test file list. If suddenly test files are moved or
+      // deleted, and the test server returns an empty list, or is missing some
+      // important test files, we want to know.
+      expect(testFiles, isNotEmpty);
+      expect(testFiles, contains(matches(RegExp(r'.*\.jpg'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.png'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.gif'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.webp'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.bmp'))));
+
+      for (final String testFile in testFiles) {
+        final html.Body imageResponse = await httpFetch('/test_images/$testFile');
+        final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+        final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
+        expect(codec.frameCount, greaterThan(0));
+        expect(codec.repetitionCount, isNotNull);
+        for (int i = 0; i < codec.frameCount; i++) {
+          final ui.FrameInfo frame = await codec.getNextFrame();
+          expect(frame.duration, isNotNull);
+          expect(frame.image, isNotNull);
+        }
+        codec.dispose();
+      }
+    });
+
+    // This is a regression test for the issues with transferring textures from
+    // one GL context to another, such as:
+    //
+    //  * https://github.com/flutter/flutter/issues/86809
+    //  * https://github.com/flutter/flutter/issues/91881
+    test('the same image can be rendered on difference surfaces', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      final ui.Codec codec = await ui.instantiateImageCodec(k4x4PngImage);
+      final CkImage image = (await codec.getNextFrame()).image as CkImage;
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(4, 4);
+      {
+        final CkPictureRecorder recorder = CkPictureRecorder();
+        final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+        canvas.save();
+        canvas.scale(16, 16);
+        canvas.drawImage(image, ui.Offset.zero, CkPaint());
+        canvas.restore();
+        canvas.drawParagraph(makeSimpleText('1'), const ui.Offset(4, 4));
+        sb.addPicture(ui.Offset.zero, recorder.endRecording());
+      }
+      sb.addPlatformView(0, width: 100, height: 100);
+      sb.pushOffset(20, 20);
+      {
+        final CkPictureRecorder recorder = CkPictureRecorder();
+        final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+        canvas.save();
+        canvas.scale(16, 16);
+        canvas.drawImage(image, ui.Offset.zero, CkPaint());
+        canvas.restore();
+        canvas.drawParagraph(makeSimpleText('2'), const ui.Offset(2, 2));
+        sb.addPicture(ui.Offset.zero, recorder.endRecording());
+      }
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      await matchGoldenFile(
+        'canvaskit_cross_gl_context_image_$mode.png',
+        region: const ui.Rect.fromLTRB(0, 0, 100, 100),
+        maxDiffRatePercent: 0,
+      );
+
+      await disposePlatformView(0);
+    });
+  });
 }
 
 class TestHttpRequest implements html.HttpRequest {
