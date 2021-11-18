@@ -372,7 +372,28 @@ static std::optional<KnownType> ReadKnownScalarType(
   return std::nullopt;
 }
 
-std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
+//------------------------------------------------------------------------------
+/// @brief      Get the reflected struct size. In the vast majority of the
+///             cases, this is the same as the declared struct size as given by
+///             the compiler. But, additional padding may need to be introduced
+///             after the end of the struct to keep in line with the alignment
+///             requirement of the individual struct members. This method
+///             figures out the actual size of the reflected struct that can be
+///             referenced in native code.
+///
+/// @param[in]  members  The members
+///
+/// @return     The reflected structure size.
+///
+static size_t GetReflectedStructSize(const std::vector<StructMember>& members) {
+  auto struct_size = 0u;
+  for (const auto& member : members) {
+    struct_size += member.byte_length;
+  }
+  return struct_size;
+}
+
+std::vector<StructMember> Reflector::ReadStructMembers(
     const spirv_cross::TypeID& type_id) const {
   const auto& struct_type = compiler_->get_type(type_id);
   FML_CHECK(struct_type.basetype == spirv_cross::SPIRType::BaseType::Struct);
@@ -380,6 +401,7 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
   std::vector<StructMember> result;
 
   size_t current_byte_offset = 0;
+  size_t max_member_alignment = 0;
 
   for (size_t i = 0; i < struct_type.member_types.size(); i++) {
     const auto& member = compiler_->get_type(struct_type.member_types[i]);
@@ -390,13 +412,17 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       const auto alignment_pad = struct_member_offset - current_byte_offset;
       result.emplace_back(StructMember{
           .type = TypeNameWithPaddingOfSize(alignment_pad),
-          .name = SPrintF("_align_%s",
+          .name = SPrintF("_PADDING_%s_",
                           GetMemberNameAtIndex(struct_type, i).c_str()),
           .offset = current_byte_offset,
           .byte_length = alignment_pad,
       });
       current_byte_offset += alignment_pad;
     }
+
+    max_member_alignment =
+        std::max<size_t>(max_member_alignment,
+                         (member.width / 8) * member.columns * member.vecsize);
 
     FML_CHECK(current_byte_offset == struct_member_offset);
 
@@ -499,6 +525,20 @@ std::vector<Reflector::StructMember> Reflector::ReadStructMembers(
       continue;
     }
   }
+
+  const auto struct_length = current_byte_offset;
+  {
+    const auto padding = struct_length % max_member_alignment;
+    if (padding != 0) {
+      result.emplace_back(StructMember{
+          .type = TypeNameWithPaddingOfSize(padding),
+          .name = "_PADDING_",
+          .offset = current_byte_offset,
+          .byte_length = padding,
+      });
+    }
+  }
+
   return result;
 }
 
@@ -514,10 +554,13 @@ std::optional<Reflector::StructDefinition> Reflector::ReflectStructDefinition(
     return std::nullopt;
   }
 
+  auto struct_members = ReadStructMembers(type_id);
+  auto reflected_struct_size = GetReflectedStructSize(struct_members);
+
   StructDefinition struc;
   struc.name = struct_name;
-  struc.byte_length = compiler_->get_declared_struct_size(type);
-  struc.members = ReadStructMembers(type_id);
+  struc.byte_length = reflected_struct_size;
+  struc.members = std::move(struct_members);
   return struc;
 }
 
