@@ -130,6 +130,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
   bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed && !_popFinalized;
+
   bool _popFinalized = false;
 
   /// The animation that drives the route's transition and the previous route's
