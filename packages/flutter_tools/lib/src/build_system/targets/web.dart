@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -22,6 +19,7 @@ import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
 
@@ -64,7 +62,7 @@ const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
 
 /// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyFromString(String value) {
+ServiceWorkerStrategy _serviceWorkerStrategyFromString(String? value) {
   switch (value) {
     case kNoneWorker:
       return ServiceWorkerStrategy.none;
@@ -97,7 +95,7 @@ class WebEntrypointTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String targetFile = environment.defines[kTargetFile];
+    final String? targetFile = environment.defines[kTargetFile];
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(zanderso): support configuration of this file.
@@ -110,7 +108,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -211,16 +209,21 @@ class Dart2JSTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
-    final String librariesSpec = (globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
+    final Artifacts artifacts = globals.artifacts!;
+    final String librariesSpec = (artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
-      globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
-      globals.artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
       '--libraries-spec=$librariesSpec',
-      ...?decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)
@@ -247,7 +250,7 @@ class Dart2JSTarget extends Target {
       throw Exception(_collectOutput(kernelResult));
     }
 
-    final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
@@ -384,12 +387,11 @@ class WebReleaseBundle extends Target {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
-        if (resultString.contains(kBaseHrefPlaceholder) &&
-            environment.defines[kBaseHref] == null) {
+        final String? baseHref = environment.defines[kBaseHref];
+        if (resultString.contains(kBaseHrefPlaceholder) && baseHref == null) {
           resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
-        } else if (resultString.contains(kBaseHrefPlaceholder) &&
-            environment.defines[kBaseHref] != null) {
-          resultString = resultString.replaceAll(kBaseHrefPlaceholder, environment.defines[kBaseHref]);
+        } else if (resultString.contains(kBaseHrefPlaceholder) && baseHref != null) {
+          resultString = resultString.replaceAll(kBaseHrefPlaceholder, baseHref);
         }
         outputFile.writeAsStringSync(resultString);
         continue;
@@ -549,7 +551,7 @@ class WebServiceWorker extends Target {
 String generateServiceWorker(
   Map<String, String> resources,
   List<String> coreBundle, {
-  @required ServiceWorkerStrategy serviceWorkerStrategy,
+  required ServiceWorkerStrategy serviceWorkerStrategy,
 }) {
   if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
     return '';
