@@ -17,6 +17,7 @@ in vec2 vertex_normal;
 out vec4 stroke_color;
 
 void main() {
+  // Push one vertex by the half stroke size along the normal vector.
   vec2 offset = vertex_normal * vec2(stroke_info.size * 0.5);
   gl_Position = frame_info.mvp * vec4(vertex_position + offset, 0.0, 1.0);
   stroke_color = stroke_info.color;
