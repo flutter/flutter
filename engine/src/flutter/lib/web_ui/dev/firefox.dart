@@ -18,17 +18,22 @@ import 'firefox_installer.dart';
 
 /// Provides an environment for the desktop Firefox.
 class FirefoxEnvironment implements BrowserEnvironment {
+  late final BrowserInstallation _installation;
+
   @override
   Browser launchBrowserInstance(Uri url, {bool debug = false}) {
-    return Firefox(url, debug: debug);
+    return Firefox(url, this, debug: debug);
   }
 
   @override
   Runtime get packageTestRuntime => Runtime.firefox;
 
   @override
-  Future<void> prepareEnvironment() async {
-    // Firefox doesn't need any special prep.
+  Future<void> prepare() async {
+    _installation = await getOrInstallFirefox(
+      browserLock.firefoxLock.version,
+      infoLog: isCirrus ? stdout : DevNull(),
+    );
   }
 
   @override
@@ -54,14 +59,10 @@ class Firefox extends Browser {
 
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
-  factory Firefox(Uri url, {bool debug = false}) {
+  factory Firefox(Uri url, FirefoxEnvironment firefoxEnvironment, {bool debug = false}) {
+    final BrowserInstallation installation = firefoxEnvironment._installation;
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(() async {
-      final BrowserInstallation installation = await getOrInstallFirefox(
-        browserLock.firefoxLock.version,
-        infoLog: isCirrus ? stdout : DevNull(),
-      );
-
       // Using a profile on opening will prevent popups related to profiles.
       const String _profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
@@ -79,9 +80,9 @@ user_pref("dom.max_script_run_time", 0);
         temporaryProfileDirectory.deleteSync(recursive: true);
       }
       temporaryProfileDirectory.createSync(recursive: true);
-
       File(path.join(temporaryProfileDirectory.path, 'prefs.js'))
           .writeAsStringSync(_profile);
+
       final bool isMac = Platform.isMacOS;
       final List<String> args = <String>[
         url.toString(),
