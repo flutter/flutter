@@ -397,7 +397,7 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+    }, skip: isBrowser); // [intended] This is a GTK-specific test.
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
