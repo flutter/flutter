@@ -10,6 +10,7 @@ import 'dart:convert' show LineSplitter;
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 const String _iconsPathOption = 'icons';
@@ -194,8 +195,8 @@ void main(List<String> args) {
   final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
 
   stderr.writeln('Performing safety checks');
-  final bool isSuperset = _testIsSuperset(newTokenPairMap, oldTokenPairMap);
-  final bool isStable = _testIsStable(newTokenPairMap, oldTokenPairMap);
+  final bool isSuperset = testIsSuperset(newTokenPairMap, oldTokenPairMap);
+  final bool isStable = testIsStable(newTokenPairMap, oldTokenPairMap);
   if ((!isSuperset || !isStable) && argResults[_enforceSafetyChecks] as bool) {
     exit(1);
   }
@@ -318,12 +319,10 @@ String _regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   return buf.toString();
 }
 
-bool _testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
-  Set<String> newCodepointsSet = newCodepoints.keys.toSet();
+@visibleForTesting
+bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+  final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
-  newCodepointsSet = newCodepointsSet
-      .map((String key) => key.replaceFirst('_baseline', ''))
-      .toSet(); // TODO(plg):remove
 
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
     stderr.writeln(
@@ -340,7 +339,8 @@ bool _testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldC
   }
 }
 
-bool _testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+@visibleForTesting
+bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
   final List<String> unstable = <String>[];
 
