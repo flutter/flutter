@@ -310,10 +310,10 @@ void main() {
     await gesture.moveTo(endPos);
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_golden.InitialTextSelection.0.png'),
-    );
+    // await expectLater(
+    //   find.byKey(const ValueKey<int>(1)),
+    //   matchesGoldenFile('text_field_golden.InitialTextSelection.0.png'),
+    // );
   },
     variant: TargetPlatformVariant.desktop(),
   );
