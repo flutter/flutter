@@ -71,7 +71,7 @@ static const SEL selectorsHandledByPlugins[] = {
   [super dealloc];
 }
 
-static BOOL isPowerOfTwo(NSUInteger x) {
+static BOOL IsPowerOfTwo(NSUInteger x) {
   return x != 0 && (x & (x - 1)) == 0;
 }
 
@@ -98,7 +98,7 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 
 - (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
   [_delegates addPointer:(__bridge void*)delegate];
-  if (isPowerOfTwo([_delegates count])) {
+  if (IsPowerOfTwo([_delegates count])) {
     [_delegates compact];
   }
 }

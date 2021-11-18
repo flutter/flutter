@@ -1,8 +1,12 @@
-Checks: 'google-*'
+# Prefix check with "-" to ignore.
+Checks: "google-*,\
+-google-objc-global-variable-declaration,\
+-google-objc-avoid-throwing-exception"
 
 # Only warnings treated as errors are reported
 # in the "ci/lint.sh" script and pre-push git hook.
 # Add checks when all warnings are fixed
-# to prevent new warnings from being introduced.
+# to prevent new warnings being introduced.
 # https://github.com/flutter/flutter/issues/93279
-WarningsAsErrors: 'clang-analyzer-osx.*'
+WarningsAsErrors: "clang-analyzer-osx.*,\
+google-objc-*"

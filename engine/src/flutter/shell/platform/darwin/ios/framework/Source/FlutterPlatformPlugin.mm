@@ -39,12 +39,6 @@ using namespace flutter;
   fml::WeakPtr<FlutterEngine> _engine;
 }
 
-- (instancetype)init {
-  @throw([NSException exceptionWithName:@"FlutterPlatformPlugin must initWithEngine"
-                                 reason:nil
-                               userInfo:nil]);
-}
-
 - (instancetype)initWithEngine:(fml::WeakPtr<FlutterEngine>)engine {
   FML_DCHECK(engine) << "engine must be set";
   self = [super init];

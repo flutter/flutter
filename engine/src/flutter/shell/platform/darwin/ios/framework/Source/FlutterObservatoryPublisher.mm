@@ -95,7 +95,7 @@
   int err = DNSServiceRegister(&_dnsServiceRef, flags, interfaceIndex,
                                FlutterObservatoryPublisher.serviceName.UTF8String, registrationType,
                                domain, NULL, htons(port), txtData.length, txtData.bytes,
-                               registrationCallback, NULL);
+                               RegistrationCallback, NULL);
 
   if (err != 0) {
     FML_LOG(ERROR) << "Failed to register observatory port with mDNS with error " << err << ".";
@@ -125,7 +125,7 @@ static const DNSServiceErrorType kFlutter_DNSServiceErr_PolicyDenied =
     -65570;
 #endif  // __IPHONE_OS_VERSION_MAX_ALLOWED
 
-static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
+static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
                                            DNSServiceFlags flags,
                                            DNSServiceErrorType errorCode,
                                            const char* name,

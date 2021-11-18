@@ -27,4 +27,4 @@ id CreateMockViewController(NSString* pasteboardString) {
   }
 }
 
-}
+}  // namespace flutter::testing

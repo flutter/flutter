@@ -110,7 +110,7 @@ void VsyncWaiterIOS::AwaitVSync() {
 + (double)displayRefreshRate {
   if (@available(iOS 10.3, *)) {
     fml::scoped_nsobject<CADisplayLink> display_link = fml::scoped_nsobject<CADisplayLink> {
-      [[CADisplayLink displayLinkWithTarget:[[DisplayLinkManager new] autorelease]
+      [[CADisplayLink displayLinkWithTarget:[[[DisplayLinkManager alloc] init] autorelease]
                                    selector:@selector(onDisplayLink:)] retain]
     };
     display_link.get().paused = YES;

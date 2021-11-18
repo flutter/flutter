@@ -173,7 +173,7 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
 }
 @end
 
-NSObject const* FlutterMethodNotImplemented = [NSObject new];
+NSObject const* FlutterMethodNotImplemented = [[NSObject alloc] init];
 
 @implementation FlutterMethodChannel {
   NSObject<FlutterBinaryMessenger>* _messenger;
@@ -267,7 +267,7 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
 
 #pragma mark - Event channel
 
-NSObject const* FlutterEndOfEventStream = [NSObject new];
+NSObject const* FlutterEndOfEventStream = [[NSObject alloc] init];
 
 @implementation FlutterEventChannel {
   NSObject<FlutterBinaryMessenger>* _messenger;
