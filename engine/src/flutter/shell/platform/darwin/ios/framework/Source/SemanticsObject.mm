@@ -855,15 +855,15 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element {
-  if (element == _semanticsObject) {
+  if (element == _semanticsObject.nativeAccessibility) {
     return 0;
   }
 
   NSArray<SemanticsObject*>* children = [_semanticsObject children];
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
-    if ((![child hasChildren] && child == element) ||
-        ([child hasChildren] && [child accessibilityContainer] == element)) {
+    if ((![child hasChildren] && child.nativeAccessibility == element) ||
+        ([child hasChildren] && [child.nativeAccessibility accessibilityContainer] == element)) {
       return i + 1;
     }
   }
