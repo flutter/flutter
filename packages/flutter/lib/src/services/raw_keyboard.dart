@@ -772,15 +772,22 @@ class RawKeyboard {
       ..._keysPressed.keys,
       if (event is RawKeyDownEvent) event.physicalKey,
     };
-    for (final ModifierKey key in modifiersPressed.keys) {
+    ModifierKey? thisKeyModifier;
+    for (final ModifierKey key in ModifierKey.values) {
+      final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+      if (thisModifierKeys == null)
+        continue;
+      if (thisModifierKeys.contains(event.physicalKey)) {
+        thisKeyModifier = key;
+      }
       if (modifiersPressed[key] == KeyboardSide.any) {
-        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
         anySideKeys.addAll(thisModifierKeys!);
         if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;
         }
       }
-      final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null ?
+        <PhysicalKeyboardKey>{} : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(() {
         if (mappedKeys == null) {
           debugPrint(
@@ -809,6 +816,17 @@ class RawKeyboard {
       _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
+    if (event is RawKeyDownEvent && thisKeyModifier != null
+        && !_keysPressed.containsKey(event.physicalKey)) {
+      final Set<PhysicalKeyboardKey> physicalKeys = _modifierKeyMap[_ModifierSidePair(thisKeyModifier, KeyboardSide.any)]
+          ?? <PhysicalKeyboardKey>{};
+      for (final PhysicalKeyboardKey physicalKey in physicalKeys) {
+        final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[physicalKey];
+        if (logicalKey != null) {
+          _keysPressed[physicalKey] = logicalKey;
+        }
+      }
+    }
   }
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
