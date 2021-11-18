@@ -1,4 +1,4 @@
-Signature: c4b64077fcdb433fb46ceb92f74abfbb
+Signature: 747a7f6f73f2fe7197769ca4dc5af49e
 
 UNUSED LICENSES:
 
@@ -3191,7 +3191,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/intern
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/utc.h
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/bits.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/xunion.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/union.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/inspect.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/inspect/inspect.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/inspect/internal/_inspect_impl.dart
