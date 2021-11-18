@@ -19,6 +19,7 @@ import 'input_border.dart';
 ///
 ///  * [MaterialStateProperty], an interface for objects that "resolve" to
 ///    different values depending on a widget's material state.
+/// {@template flutter.material.MaterialStateProperty.implementations}
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
@@ -28,10 +29,19 @@ import 'input_border.dart';
 ///  * [MaterialStateOutlinedBorder], an [OutlinedBorder] that implements
 ///    `MaterialStateProperty` which is used in APIs that need to accept either
 ///    an [OutlinedBorder] or a [MaterialStateProperty<OutlinedBorder>].
+///  * [MaterialStateOutlineInputBorder], an [OutlineInputBorder] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    an [OutlineInputBorder] or a [MaterialStateProperty<OutlineInputBorder>].
+///  * [MaterialStateUnderlineInputBorder], an [UnderlineInputBorder] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    an [UnderlineInputBorder] or a [MaterialStateProperty<UnderlineInputBorder>].
 ///  * [MaterialStateBorderSide], a [BorderSide] that implements
 ///    `MaterialStateProperty` which is used in APIs that need to accept either
 ///    a [BorderSide] or a [MaterialStateProperty<BorderSide>].
-
+///  * [MaterialStateTextStyle], a [TextStyle] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    a [TextStyle] or a [MaterialStateProperty<TextStyle>].
+/// {@endtemplate}
 enum MaterialState {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
@@ -611,12 +621,7 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// See also:
 ///
-///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
-///    which is used in APIs that need to accept either a [Color] or a
-///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
-///    which is used in APIs that need to accept either a [MouseCursor] or a
-///    [MaterialStateProperty<MouseCursor>].
+/// {@macro flutter.material.MaterialStateProperty.implementations}
 abstract class MaterialStateProperty<T> {
 
   /// Returns a value of type `T` that depends on [states].
