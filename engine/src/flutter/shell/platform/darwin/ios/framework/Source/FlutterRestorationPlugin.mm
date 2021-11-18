@@ -20,13 +20,6 @@ FLUTTER_ASSERT_NOT_ARC
   BOOL _restorationEnabled;
 }
 
-- (instancetype)init {
-  @throw([NSException
-      exceptionWithName:@"FlutterRestorationPlugin must initWithChannel:restorationEnabled:"
-                 reason:nil
-               userInfo:nil]);
-}
-
 - (instancetype)initWithChannel:(FlutterMethodChannel*)channel
              restorationEnabled:(BOOL)restorationEnabled {
   FML_DCHECK(channel) << "channel must be set";

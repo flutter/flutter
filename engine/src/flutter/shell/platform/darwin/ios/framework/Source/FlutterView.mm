@@ -22,21 +22,18 @@
 }
 
 - (instancetype)init {
-  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
-                                 reason:nil
-                               userInfo:nil]);
+  NSAssert(NO, @"FlutterView must initWithDelegate");
+  return nil;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
-                                 reason:nil
-                               userInfo:nil]);
+  NSAssert(NO, @"FlutterView must initWithDelegate");
+  return nil;
 }
 
 - (instancetype)initWithCoder:(NSCoder*)aDecoder {
-  @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
-                                 reason:nil
-                               userInfo:nil]);
+  NSAssert(NO, @"FlutterView must initWithDelegate");
+  return nil;
 }
 
 - (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate opaque:(BOOL)opaque {

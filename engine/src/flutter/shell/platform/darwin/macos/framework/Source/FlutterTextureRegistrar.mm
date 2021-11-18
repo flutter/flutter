@@ -15,12 +15,6 @@
   NSMutableDictionary<NSNumber*, id<FlutterMacOSExternalTexture>>* _textures;
 }
 
-- (instancetype)init {
-  @throw([NSException exceptionWithName:@"FlutterTextureRegistrar must initWithDelegate"
-                                 reason:nil
-                               userInfo:nil]);
-}
-
 - (instancetype)initWithDelegate:(id<FlutterTextureRegistrarDelegate>)delegate
                           engine:(FlutterEngine*)engine {
   if (self = [super init]) {
