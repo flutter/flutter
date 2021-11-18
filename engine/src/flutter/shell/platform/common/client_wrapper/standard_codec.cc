@@ -231,11 +231,11 @@ size_t StandardCodecSerializer::ReadSize(ByteStreamReader* stream) const {
   if (byte < 254) {
     return byte;
   } else if (byte == 254) {
-    uint16_t value;
+    uint16_t value = 0;
     stream->ReadBytes(reinterpret_cast<uint8_t*>(&value), 2);
     return value;
   } else {
-    uint32_t value;
+    uint32_t value = 0;
     stream->ReadBytes(reinterpret_cast<uint8_t*>(&value), 4);
     return value;
   }

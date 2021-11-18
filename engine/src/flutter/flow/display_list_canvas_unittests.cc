@@ -244,7 +244,7 @@ static void EmptyDlRenderer(DisplayListBuilder&) {}
 
 class RenderSurface {
  public:
-  RenderSurface(sk_sp<SkSurface> surface) : surface_(surface) {}
+  explicit RenderSurface(sk_sp<SkSurface> surface) : surface_(surface) {}
   ~RenderSurface() { sk_free(addr_); }
 
   SkCanvas* canvas() { return surface_->getCanvas(); }
@@ -311,7 +311,7 @@ class RenderEnvironment {
   const SkPixmap* ref_pixmap() const { return ref_pixmap_; }
 
  private:
-  RenderEnvironment(const SkImageInfo& info)
+  explicit RenderEnvironment(const SkImageInfo& info)
       : info_(info), ref_surface_(MakeSurface()) {}
 
   const SkImageInfo info_;
@@ -609,7 +609,7 @@ class TestParameters {
 
 class CaseParameters {
  public:
-  CaseParameters(std::string info)
+  explicit CaseParameters(std::string info)
       : CaseParameters(info, EmptyCvRenderer, EmptyDlRenderer) {}
 
   CaseParameters(std::string info, CvSetup cv_setup, DlRenderer dl_setup)

@@ -71,7 +71,7 @@ struct DLOp {
   struct Set##name##Op final : DLOp {                        \
     static const auto kType = DisplayListOpType::kSet##name; \
                                                              \
-    Set##name##Op(bool value) : value(value) {}              \
+    explicit Set##name##Op(bool value) : value(value) {}     \
                                                              \
     const bool value;                                        \
                                                              \
@@ -85,17 +85,17 @@ DEFINE_SET_BOOL_OP(InvertColors)
 #undef DEFINE_SET_BOOL_OP
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_ENUM_OP(name)                                   \
-  struct SetStroke##name##Op final : DLOp {                        \
-    static const auto kType = DisplayListOpType::kSetStroke##name; \
-                                                                   \
-    SetStroke##name##Op(SkPaint::name value) : value(value) {}     \
-                                                                   \
-    const SkPaint::name value;                                     \
-                                                                   \
-    void dispatch(Dispatcher& dispatcher) const {                  \
-      dispatcher.setStroke##name(value);                           \
-    }                                                              \
+#define DEFINE_SET_ENUM_OP(name)                                        \
+  struct SetStroke##name##Op final : DLOp {                             \
+    static const auto kType = DisplayListOpType::kSetStroke##name;      \
+                                                                        \
+    explicit SetStroke##name##Op(SkPaint::name value) : value(value) {} \
+                                                                        \
+    const SkPaint::name value;                                          \
+                                                                        \
+    void dispatch(Dispatcher& dispatcher) const {                       \
+      dispatcher.setStroke##name(value);                                \
+    }                                                                   \
   };
 DEFINE_SET_ENUM_OP(Cap)
 DEFINE_SET_ENUM_OP(Join)
@@ -162,26 +162,26 @@ struct SetBlendModeOp final : DLOp {
 // Set: 4 byte header + an sk_sp (ptr) uses 16 bytes due to the
 //      alignment of the ptr.
 //      (4 bytes unused)
-#define DEFINE_SET_CLEAR_SKREF_OP(name, field)                        \
-  struct Clear##name##Op final : DLOp {                               \
-    static const auto kType = DisplayListOpType::kClear##name;        \
-                                                                      \
-    Clear##name##Op() {}                                              \
-                                                                      \
-    void dispatch(Dispatcher& dispatcher) const {                     \
-      dispatcher.set##name(nullptr);                                  \
-    }                                                                 \
-  };                                                                  \
-  struct Set##name##Op final : DLOp {                                 \
-    static const auto kType = DisplayListOpType::kSet##name;          \
-                                                                      \
-    Set##name##Op(sk_sp<Sk##name> field) : field(std::move(field)) {} \
-                                                                      \
-    sk_sp<Sk##name> field;                                            \
-                                                                      \
-    void dispatch(Dispatcher& dispatcher) const {                     \
-      dispatcher.set##name(field);                                    \
-    }                                                                 \
+#define DEFINE_SET_CLEAR_SKREF_OP(name, field)                                 \
+  struct Clear##name##Op final : DLOp {                                        \
+    static const auto kType = DisplayListOpType::kClear##name;                 \
+                                                                               \
+    Clear##name##Op() {}                                                       \
+                                                                               \
+    void dispatch(Dispatcher& dispatcher) const {                              \
+      dispatcher.set##name(nullptr);                                           \
+    }                                                                          \
+  };                                                                           \
+  struct Set##name##Op final : DLOp {                                          \
+    static const auto kType = DisplayListOpType::kSet##name;                   \
+                                                                               \
+    explicit Set##name##Op(sk_sp<Sk##name> field) : field(std::move(field)) {} \
+                                                                               \
+    sk_sp<Sk##name> field;                                                     \
+                                                                               \
+    void dispatch(Dispatcher& dispatcher) const {                              \
+      dispatcher.set##name(field);                                             \
+    }                                                                          \
   };
 DEFINE_SET_CLEAR_SKREF_OP(Blender, blender)
 DEFINE_SET_CLEAR_SKREF_OP(Shader, shader)
@@ -198,7 +198,7 @@ DEFINE_SET_CLEAR_SKREF_OP(PathEffect, effect)
   struct SetMaskBlurFilter##name##Op final : DLOp {                        \
     static const auto kType = DisplayListOpType::kSetMaskBlurFilter##name; \
                                                                            \
-    SetMaskBlurFilter##name##Op(SkScalar sigma) : sigma(sigma) {}          \
+    explicit SetMaskBlurFilter##name##Op(SkScalar sigma) : sigma(sigma) {} \
                                                                            \
     SkScalar sigma;                                                        \
                                                                            \
@@ -432,17 +432,17 @@ struct DrawColorOp final : DLOp {
 //        (4 bytes unused)
 // SkOval is same as SkRect
 // SkRRect is 52 more bytes, which packs efficiently into 56 bytes total
-#define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)         \
-  struct Draw##op_name##Op final : DLOp {                        \
-    static const auto kType = DisplayListOpType::kDraw##op_name; \
-                                                                 \
-    Draw##op_name##Op(arg_type arg_name) : arg_name(arg_name) {} \
-                                                                 \
-    const arg_type arg_name;                                     \
-                                                                 \
-    void dispatch(Dispatcher& dispatcher) const {                \
-      dispatcher.draw##op_name(arg_name);                        \
-    }                                                            \
+#define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)                  \
+  struct Draw##op_name##Op final : DLOp {                                 \
+    static const auto kType = DisplayListOpType::kDraw##op_name;          \
+                                                                          \
+    explicit Draw##op_name##Op(arg_type arg_name) : arg_name(arg_name) {} \
+                                                                          \
+    const arg_type arg_name;                                              \
+                                                                          \
+    void dispatch(Dispatcher& dispatcher) const {                         \
+      dispatcher.draw##op_name(arg_name);                                 \
+    }                                                                     \
   };
 DEFINE_DRAW_1ARG_OP(Rect, SkRect, rect)
 DEFINE_DRAW_1ARG_OP(Oval, SkRect, oval)
@@ -518,7 +518,7 @@ struct DrawArcOp final : DLOp {
   struct Draw##name##Op final : DLOp {                                 \
     static const auto kType = DisplayListOpType::kDraw##name;          \
                                                                        \
-    Draw##name##Op(uint32_t count) : count(count) {}                   \
+    explicit Draw##name##Op(uint32_t count) : count(count) {}          \
                                                                        \
     const uint32_t count;                                              \
                                                                        \
@@ -868,7 +868,7 @@ void DisplayList::Dispatch(Dispatcher& dispatcher,
                            uint8_t* ptr,
                            uint8_t* end) const {
   while (ptr < end) {
-    auto op = (const DLOp*)ptr;
+    auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;
     FML_DCHECK(ptr <= end);
     switch (op->type) {
@@ -890,7 +890,7 @@ void DisplayList::Dispatch(Dispatcher& dispatcher,
 
 static void DisposeOps(uint8_t* ptr, uint8_t* end) {
   while (ptr < end) {
-    auto op = (const DLOp*)ptr;
+    auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;
     FML_DCHECK(ptr <= end);
     switch (op->type) {
@@ -922,8 +922,8 @@ static bool CompareOps(uint8_t* ptrA,
   uint8_t* bulkStartA = ptrA;
   uint8_t* bulkStartB = ptrB;
   while (ptrA < endA && ptrB < endB) {
-    auto opA = (const DLOp*)ptrA;
-    auto opB = (const DLOp*)ptrB;
+    auto opA = reinterpret_cast<const DLOp*>(ptrA);
+    auto opB = reinterpret_cast<const DLOp*>(ptrB);
     if (opA->type != opB->type || opA->size != opB->size) {
       return false;
     }
@@ -1047,7 +1047,7 @@ void* DisplayListBuilder::Push(size_t pod, int op_inc, Args&&... args) {
     memset(storage_.get() + used_, 0, allocated_ - used_);
   }
   FML_DCHECK(used_ + size <= allocated_);
-  auto op = (T*)(storage_.get() + used_);
+  auto op = reinterpret_cast<T*>(storage_.get() + used_);
   used_ += size;
   new (op) T{std::forward<Args>(args)...};
   op->type = T::kType;

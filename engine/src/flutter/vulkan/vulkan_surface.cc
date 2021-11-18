@@ -30,10 +30,10 @@ VulkanSurface::VulkanSurface(
     return;
   }
 
-  surface_ = {surface, [this](VkSurfaceKHR surface) {
-                vk.DestroySurfaceKHR(application_.GetInstance(), surface,
-                                     nullptr);
-              }};
+  surface_ = VulkanHandle<VkSurfaceKHR>{
+      surface, [this](VkSurfaceKHR surface) {
+        vk.DestroySurfaceKHR(application_.GetInstance(), surface, nullptr);
+      }};
 
   valid_ = true;
 }

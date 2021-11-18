@@ -42,8 +42,9 @@ G_DEFINE_TYPE(FlSettingsPlugin, fl_settings_plugin, G_TYPE_OBJECT)
 
 // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>.
 static gdouble linearize_color_component(gdouble component) {
-  if (component <= 0.03928)
+  if (component <= 0.03928) {
     return component / 12.92;
+  }
   return pow((component + 0.055) / 1.055, 2.4);
 }
 
@@ -61,8 +62,9 @@ static Brightness estimate_brightness_for_color(GdkRGBA* color) {
   // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef> and
   // <https://material.io/go/design-theming#color-color-palette>.
   const gdouble kThreshold = 0.15;
-  if ((relative_luminance + 0.05) * (relative_luminance + 0.05) > kThreshold)
+  if ((relative_luminance + 0.05) * (relative_luminance + 0.05) > kThreshold) {
     return Brightness::Light;
+  }
   return Brightness::Dark;
 }
 
@@ -70,8 +72,9 @@ static bool is_dark_theme() {
   // GTK doesn't have a specific flag for dark themes, so we check if the
   // style text color is light or dark
   GList* windows = gtk_window_list_toplevels();
-  if (windows == nullptr)
+  if (windows == nullptr) {
     return false;
+  }
 
   GtkWidget* window = GTK_WIDGET(windows->data);
   g_list_free(windows);

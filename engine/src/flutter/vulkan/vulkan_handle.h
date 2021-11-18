@@ -21,7 +21,7 @@ class VulkanHandle {
 
   VulkanHandle() : handle_(VK_NULL_HANDLE) {}
 
-  VulkanHandle(Handle handle, const Disposer& disposer = nullptr)
+  explicit VulkanHandle(Handle handle, const Disposer& disposer = nullptr)
       : handle_(handle), disposer_(disposer) {}
 
   VulkanHandle(VulkanHandle&& other)
@@ -46,8 +46,9 @@ class VulkanHandle {
     return *this;
   }
 
-  operator bool() const { return handle_ != VK_NULL_HANDLE; }
+  explicit operator bool() const { return handle_ != VK_NULL_HANDLE; }
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator Handle() const { return handle_; }
 
   /// Relinquish responsibility of collecting the underlying handle when this

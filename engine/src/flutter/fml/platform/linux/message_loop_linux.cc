@@ -81,6 +81,7 @@ void MessageLoopLinux::Terminate() {
 // |fml::MessageLoopImpl|
 void MessageLoopLinux::WakeUp(fml::TimePoint time_point) {
   bool result = TimerRearm(timer_fd_.get(), time_point);
+  (void)result;
   FML_DCHECK(result);
 }
 

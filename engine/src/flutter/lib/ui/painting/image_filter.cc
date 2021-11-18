@@ -50,7 +50,8 @@ static const std::array<SkSamplingOptions, 4> filter_qualities = {
 SkSamplingOptions ImageFilter::SamplingFromIndex(int filterQualityIndex) {
   if (filterQualityIndex < 0) {
     return filter_qualities.front();
-  } else if (((size_t)filterQualityIndex) >= filter_qualities.size()) {
+  } else if (static_cast<size_t>(filterQualityIndex) >=
+             filter_qualities.size()) {
     return filter_qualities.back();
   } else {
     return filter_qualities[filterQualityIndex];

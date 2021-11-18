@@ -129,7 +129,7 @@ static SkColorType FirstSupportedColorType(GrDirectContext* context,
 static sk_sp<SkSurface> WrapOnscreenSurface(GrDirectContext* context,
                                             const SkISize& size,
                                             intptr_t fbo) {
-  GrGLenum format;
+  GrGLenum format = kUnknown_SkColorType;
   const SkColorType color_type = FirstSupportedColorType(context, &format);
 
   GrGLFramebufferInfo framebuffer_info = {};

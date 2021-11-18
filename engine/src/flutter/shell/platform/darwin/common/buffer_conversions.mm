@@ -10,7 +10,7 @@ namespace flutter {
 namespace {
 class NSDataMapping : public fml::Mapping {
  public:
-  NSDataMapping(NSData* data) : data_([data retain]) {}
+  explicit NSDataMapping(NSData* data) : data_([data retain]) {}
 
   size_t GetSize() const override { return [data_.get() length]; }
 

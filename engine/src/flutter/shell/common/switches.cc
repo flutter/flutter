@@ -200,7 +200,7 @@ static bool GetSwitchValue(const fml::CommandLine& command_line,
 
 std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix,
                                                std::string native_lib_path) {
-  const uint8_t* mapping;
+  const uint8_t* mapping = nullptr;
   intptr_t size;
 
   auto lookup_symbol = [&mapping, &size, symbol_prefix](

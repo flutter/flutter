@@ -103,8 +103,8 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
     return;
   }
 
-  device_ = {device,
-             [this](VkDevice device) { vk.DestroyDevice(device, nullptr); }};
+  device_ = VulkanHandle<VkDevice>{
+      device, [this](VkDevice device) { vk.DestroyDevice(device, nullptr); }};
 
   if (!vk.SetupDeviceProcAddresses(device_)) {
     FML_DLOG(INFO) << "Could not set up device proc addresses.";
@@ -120,7 +120,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
     return;
   }
 
-  queue_ = queue;
+  queue_ = VulkanHandle<VkQueue>(queue);
 
   const VkCommandPoolCreateInfo command_pool_create_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -137,9 +137,10 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
     return;
   }
 
-  command_pool_ = {command_pool, [this](VkCommandPool pool) {
-                     vk.DestroyCommandPool(device_, pool, nullptr);
-                   }};
+  command_pool_ = VulkanHandle<VkCommandPool>{
+      command_pool, [this](VkCommandPool pool) {
+        vk.DestroyCommandPool(device_, pool, nullptr);
+      }};
 
   valid_ = true;
 }

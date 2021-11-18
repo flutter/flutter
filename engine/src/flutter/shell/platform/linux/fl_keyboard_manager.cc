@@ -213,8 +213,9 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {}
 static void fl_keyboard_manager_dispose(GObject* object) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(object);
 
-  if (self->text_input_plugin != nullptr)
+  if (self->text_input_plugin != nullptr) {
     g_clear_object(&self->text_input_plugin);
+  }
   g_ptr_array_free(self->responder_list, TRUE);
   g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
   g_ptr_array_free(self->pending_responds, TRUE);
@@ -234,8 +235,9 @@ gboolean g_ptr_array_find_with_equal_func1(GPtrArray* haystack,
                                            guint* index_) {
   guint i;
   g_return_val_if_fail(haystack != NULL, FALSE);
-  if (equal_func == NULL)
+  if (equal_func == NULL) {
     equal_func = g_direct_equal;
+  }
   for (i = 0; i < haystack->len; i++) {
     if (equal_func(g_ptr_array_index(haystack, i), needle)) {
       if (index_ != NULL) {

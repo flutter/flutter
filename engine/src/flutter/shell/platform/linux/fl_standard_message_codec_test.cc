@@ -661,10 +661,11 @@ TEST(FlStandardMessageCodecTest, EncodeListNested) {
   g_autoptr(FlValue) even_numbers = fl_value_new_list();
   g_autoptr(FlValue) odd_numbers = fl_value_new_list();
   for (int i = 0; i < 10; i++) {
-    if (i % 2 == 0)
+    if (i % 2 == 0) {
       fl_value_append_take(even_numbers, fl_value_new_int(i));
-    else
+    } else {
       fl_value_append_take(odd_numbers, fl_value_new_int(i));
+    }
   }
   g_autoptr(FlValue) value = fl_value_new_list();
   fl_value_append(value, even_numbers);
@@ -758,8 +759,9 @@ TEST(FlStandardMessageCodecTest, EncodeDecodeLargeList) {
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
 
   g_autoptr(FlValue) value = fl_value_new_list();
-  for (int i = 0; i < 65535; i++)
+  for (int i = 0; i < 65535; i++) {
     fl_value_append_take(value, fl_value_new_int(i));
+  }
 
   g_autoptr(GError) error = nullptr;
   g_autoptr(GBytes) message =

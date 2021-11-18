@@ -65,7 +65,7 @@ bool VulkanBackbuffer::CreateSemaphores() {
       return false;
     }
 
-    semaphores_[i] = {semaphore, semaphore_collect};
+    semaphores_[i] = VulkanHandle<VkSemaphore>{semaphore, semaphore_collect};
   }
 
   return true;
@@ -90,7 +90,7 @@ bool VulkanBackbuffer::CreateFences() {
       return false;
     }
 
-    use_fences_[i] = {fence, fence_collect};
+    use_fences_[i] = VulkanHandle<VkFence>{fence, fence_collect};
   }
 
   return true;

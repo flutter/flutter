@@ -44,7 +44,7 @@ bool TimerRearm(int fd, fml::TimePoint time_point) {
   }
 
   struct itimerspec spec = {};
-  spec.it_value.tv_sec = (time_t)(nano_secs / NSEC_PER_SEC);
+  spec.it_value.tv_sec = static_cast<time_t>(nano_secs / NSEC_PER_SEC);
   spec.it_value.tv_nsec = nano_secs % NSEC_PER_SEC;
   spec.it_interval = spec.it_value;  // single expiry.
 

@@ -520,8 +520,9 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   fl_settings_plugin_start(self->settings_plugin);
 
   result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
-  if (result != kSuccess)
+  if (result != kSuccess) {
     g_warning("Failed to enable accessibility features on Flutter engine");
+  }
 
   return TRUE;
 }

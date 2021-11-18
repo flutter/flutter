@@ -48,7 +48,7 @@ TEST_F(ShellTest, CreateCompatibleReturnsNullptrForInvalidImage) {
 
 class FakeImageGenerator : public ImageGenerator {
  public:
-  FakeImageGenerator(int identifiableFakeWidth)
+  explicit FakeImageGenerator(int identifiableFakeWidth)
       : info_(SkImageInfo::Make(identifiableFakeWidth,
                                 identifiableFakeWidth,
                                 SkColorType::kRGBA_8888_SkColorType,

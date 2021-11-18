@@ -559,7 +559,7 @@ class DisplayListFlags {
 
 class DisplayListFlagsBase : protected DisplayListFlags {
  protected:
-  DisplayListFlagsBase(int flags) : flags_(flags) {}
+  explicit DisplayListFlagsBase(int flags) : flags_(flags) {}
 
   const int flags_;
 
@@ -594,7 +594,8 @@ class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
   bool may_have_acute_joins() const { return has_any(kMayHaveAcuteJoins_); }
 
  private:
-  DisplayListSpecialGeometryFlags(int flags) : DisplayListFlagsBase(flags) {
+  explicit DisplayListSpecialGeometryFlags(int flags)
+      : DisplayListFlagsBase(flags) {
     FML_DCHECK((flags & kAnySpecialGeometryMask_) == flags);
   }
 
@@ -675,7 +676,7 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
   bool is_flood() const { return has_any(kFloodsSurface_); }
 
  private:
-  DisplayListAttributeFlags(int flags)
+  explicit DisplayListAttributeFlags(int flags)
       : DisplayListFlagsBase(flags),
         special_flags_(flags & kAnySpecialGeometryMask_) {
     FML_DCHECK((flags & kIsAnyGeometryMask_) == kIsNonGeometric_ ||
@@ -694,7 +695,7 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
 
   const DisplayListAttributeFlags without(int remove) const {
     FML_DCHECK(has_all(remove));
-    return (flags_ & ~remove);
+    return DisplayListAttributeFlags(flags_ & ~remove);
   }
 
   const DisplayListSpecialGeometryFlags special_flags_;
