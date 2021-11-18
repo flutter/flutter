@@ -8,6 +8,7 @@ import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 import 'package:conductor_core/src/proto/conductor_state.pbenum.dart' show ReleasePhase;
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/state.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
@@ -1054,6 +1055,28 @@ void main() {
   });
 
   group('prompt', () {
+    test('can be overridden for different frontend implementations', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Stdio stdio = _UnimplementedStdio.instance;
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory('/'),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.empty(),
+        stdio: stdio,
+      );
+      final _TestNextContext context = _TestNextContext(
+        checkouts: checkouts,
+        stateFile: fileSystem.file('/statefile.json'),
+      );
+
+      final bool response = context.prompt(
+        'A prompt that will immediately be agreed to',
+        stdio,
+      );
+      expect(response, true);
+    });
+
     test('throws if user inputs character that is not "y" or "n"', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TestStdio stdio = TestStdio(
@@ -1080,6 +1103,57 @@ void main() {
       );
     });
   });
+}
+
+/// A [Stdio] that will throw an exception if any of its methods are called.
+class _UnimplementedStdio implements Stdio {
+  const _UnimplementedStdio();
+
+  static const _UnimplementedStdio _instance = _UnimplementedStdio();
+  static _UnimplementedStdio get instance => _instance;
+
+  Never _throw() => throw Exception('Unimplemented!');
+
+  @override
+  List<String> get logs => _throw();
+
+  @override
+  void printError(String message) => _throw();
+
+  @override
+  void printWarning(String message) => _throw();
+
+  @override
+  void printStatus(String message) => _throw();
+
+  @override
+  void printTrace(String message) => _throw();
+
+  @override
+  void write(String message) => _throw();
+
+  @override
+  String readLineSync() => _throw();
+}
+
+class _TestNextContext extends NextContext {
+  const _TestNextContext({
+    bool autoAccept = false,
+    bool force = false,
+    required File stateFile,
+    required Checkouts checkouts,
+  }) : super(
+    autoAccept: autoAccept,
+    force: force,
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
+
+  @override
+  bool prompt(String message, Stdio stdio) {
+    // always say yes
+    return true;
+  }
 }
 
 void _initializeCiYamlFile(

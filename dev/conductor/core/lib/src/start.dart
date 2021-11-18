@@ -10,14 +10,15 @@ import 'package:meta/meta.dart' show visibleForOverriding;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import './git.dart';
-import './globals.dart';
-import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart' show ReleasePhase;
-import './repository.dart';
-import './state.dart' as state_import;
-import './stdio.dart';
-import './version.dart';
+import 'context.dart';
+import 'git.dart';
+import 'globals.dart';
+import 'proto/conductor_state.pb.dart' as pb;
+import 'proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'repository.dart';
+import 'state.dart' as state_import;
+import 'stdio.dart';
+import 'version.dart';
 
 const String kCandidateOption = 'candidate-branch';
 const String kDartRevisionOption = 'dart-revision';
@@ -217,7 +218,7 @@ class StartCommand extends Command<void> {
 /// Context for starting a new release.
 ///
 /// This is a frontend-agnostic implementation.
-class StartContext {
+class StartContext extends Context {
   StartContext({
     required this.candidateBranch,
     required this.checkouts,

@@ -4,13 +4,15 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show visibleForTesting, visibleForOverriding;
-import './globals.dart';
-import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart';
-import './repository.dart';
-import './state.dart' as state_import;
-import './stdio.dart';
+import 'package:meta/meta.dart' show visibleForOverriding;
+
+import 'context.dart';
+import 'globals.dart';
+import 'proto/conductor_state.pb.dart' as pb;
+import 'proto/conductor_state.pbenum.dart';
+import 'repository.dart';
+import 'state.dart' as state_import;
+import 'stdio.dart';
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
@@ -68,8 +70,8 @@ class NextCommand extends Command<void> {
 ///
 /// Any calls to functions that cause side effects are wrapped in methods to
 /// allow overriding in unit tests.
-class NextContext {
-  NextContext({
+class NextContext extends Context {
+  const NextContext({
     required this.autoAccept,
     required this.force,
     required this.checkouts,
@@ -400,21 +402,5 @@ class NextContext {
   @visibleForOverriding
   void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
     state_import.writeStateToFile(stateFile, state, logs);
-  }
-
-  @visibleForTesting
-  bool prompt(String message, Stdio stdio) {
-    stdio.write('${message.trim()} (y/n) ');
-    final String response = stdio.readLineSync().trim();
-    final String firstChar = response[0].toUpperCase();
-    if (firstChar == 'Y') {
-      return true;
-    }
-    if (firstChar == 'N') {
-      return false;
-    }
-    throw ConductorException(
-      'Unknown user input (expected "y" or "n"): $response',
-    );
   }
 }
