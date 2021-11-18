@@ -47,7 +47,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${FrameworkRepository.defaultBranch}',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -100,7 +100,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${FrameworkRepository.defaultBranch}',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -157,7 +157,7 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${FrameworkRepository.defaultBranch}',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -247,7 +247,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${EngineRepository.defaultBranch}',
+          EngineRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -286,7 +286,7 @@ vars = {
       );
     });
 
-    test('commit() passes correct commit message', () {
+    test('commit() passes correct commit message', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
@@ -304,7 +304,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${EngineRepository.defaultBranch}',
+          EngineRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -336,7 +336,8 @@ vars = {
       );
 
       final EngineRepository repo = EngineRepository(checkouts);
-      repo.commit(message);
+      await repo.commit(message);
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
@@ -413,7 +414,7 @@ enabled_branches:
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${FrameworkRepository.defaultBranch}',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -484,7 +485,7 @@ enabled_branches:
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/${FrameworkRepository.defaultBranch}',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -538,7 +539,7 @@ enabled_branches:
           command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/${FrameworkRepository.defaultBranch}'],
+          command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -584,7 +585,7 @@ enabled_branches:
           onRun: () => createdCandidateBranch = true,
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/${EngineRepository.defaultBranch}'],
+          command: <String>['git', 'checkout', EngineRepository.defaultBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],

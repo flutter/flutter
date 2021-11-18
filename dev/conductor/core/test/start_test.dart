@@ -163,7 +163,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -220,7 +220,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -348,7 +348,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -405,7 +405,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -541,7 +541,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -598,7 +598,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
