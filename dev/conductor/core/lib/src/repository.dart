@@ -124,11 +124,13 @@ abstract class Repository {
           workingDirectory: _checkoutDirectory!.path,
         );
       }
+
       return _checkoutDirectory!;
     }
 
     _checkoutDirectory = parentDirectory.childDirectory(name);
     await lazilyInitialize(_checkoutDirectory!);
+
     return _checkoutDirectory!;
   }
 
@@ -180,7 +182,7 @@ abstract class Repository {
 
     if (initialRef != null) {
       await git.run(
-        <String>['checkout', '${upstreamRemote.name}/$initialRef'],
+        <String>['checkout', initialRef!],
         'Checking out initialRef $initialRef',
         workingDirectory: checkoutDirectory.path,
       );
