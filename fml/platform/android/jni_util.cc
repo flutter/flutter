@@ -125,6 +125,35 @@ std::vector<std::string> StringArrayToVector(JNIEnv* env, jobjectArray array) {
   return out;
 }
 
+std::vector<std::string> StringListToVector(JNIEnv* env, jobject list) {
+  std::vector<std::string> out;
+  if (env == nullptr || list == nullptr) {
+    return out;
+  }
+
+  ScopedJavaLocalRef<jclass> list_clazz(env, env->FindClass("java/util/List"));
+  FML_DCHECK(!list_clazz.is_null());
+
+  jmethodID list_get =
+      env->GetMethodID(list_clazz.obj(), "get", "(I)Ljava/lang/Object;");
+  jmethodID list_size = env->GetMethodID(list_clazz.obj(), "size", "()I");
+
+  jint size = env->CallIntMethod(list, list_size);
+
+  if (size == 0) {
+    return out;
+  }
+
+  out.resize(size);
+  for (jint i = 0; i < size; ++i) {
+    ScopedJavaLocalRef<jstring> java_string(
+        env, static_cast<jstring>(env->CallObjectMethod(list, list_get, i)));
+    out[i] = JavaStringToString(env, java_string.obj());
+  }
+
+  return out;
+}
+
 ScopedJavaLocalRef<jobjectArray> VectorToStringArray(
     JNIEnv* env,
     const std::vector<std::string>& vector) {

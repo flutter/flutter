@@ -820,6 +820,13 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::string& GetLastEntrypointLibrary() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Get the last Entrypoint Arguments that was used in the
+  ///             RunConfiguration when |Engine::Run| was called.This is only
+  ///             valid in debug mode.
+  ///
+  const std::vector<std::string>& GetLastEntrypointArgs() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Getter for the initial route.  This can be set with a platform
   ///             message.
   ///
@@ -955,6 +962,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   std::string last_entry_point_;
   std::string last_entry_point_library_;
+  std::vector<std::string> last_entry_point_args_;
   std::string initial_route_;
   ViewportMetrics viewport_metrics_;
   std::shared_ptr<AssetManager> asset_manager_;

@@ -648,7 +648,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
     // Register internal plugins before starting the engine.
     [self addInternalPlugins];
 
-    [_engine.get() launchEngine:nil libraryURI:nil];
+    [_engine.get() launchEngine:nil libraryURI:nil entrypointArgs:nil];
     [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }

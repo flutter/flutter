@@ -38,6 +38,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -380,13 +381,17 @@ public class FlutterEngine {
    * @param dartEntrypoint specifies the {@link DartEntrypoint} the new engine should run. It
    *     doesn't need to be the same entrypoint as the current engine but must be built in the same
    *     AOT or snapshot.
+   * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
+   *     null, it will default to the "/" route.
+   * @param dartEntrypointArgs Arguments passed as a list of string to Dart's entrypoint function.
    * @return a new {@link io.flutter.embedding.engine.FlutterEngine}.
    */
   @NonNull
   /*package*/ FlutterEngine spawn(
       @NonNull Context context,
       @NonNull DartEntrypoint dartEntrypoint,
-      @Nullable String initialRoute) {
+      @Nullable String initialRoute,
+      @Nullable List<String> dartEntrypointArgs) {
     if (!isAttachedToJni()) {
       throw new IllegalStateException(
           "Spawn can only be called on a fully constructed FlutterEngine");
@@ -396,7 +401,8 @@ public class FlutterEngine {
         flutterJNI.spawn(
             dartEntrypoint.dartEntrypointFunctionName,
             dartEntrypoint.dartEntrypointLibrary,
-            initialRoute);
+            initialRoute,
+            dartEntrypointArgs);
     return new FlutterEngine(
         context, // Context.
         null, // FlutterLoader. A null value passed here causes the constructor to get it from the

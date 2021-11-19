@@ -127,6 +127,8 @@ struct Settings {
   std::string temp_directory_path;
   std::vector<std::string> dart_flags;
   // Arguments passed as a List<String> to Dart's entrypoint function.
+  // TODO(93459): Remove it when it is no longer used.
+  // https://github.com/flutter/flutter/issues/93459
   std::vector<std::string> dart_entrypoint_args;
 
   // Isolate settings

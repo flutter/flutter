@@ -50,7 +50,9 @@ extern NSString* _Nonnull const FlutterEngineWillDealloc;
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
 - (nonnull FlutterTextInputPlugin*)textInputPlugin;
 - (nonnull FlutterRestorationPlugin*)restorationPlugin;
-- (void)launchEngine:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)libraryOrNil;
+- (void)launchEngine:(nullable NSString*)entrypoint
+          libraryURI:(nullable NSString*)libraryOrNil
+      entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
        initialRoute:(nullable NSString*)initialRoute;
@@ -69,7 +71,8 @@ extern NSString* _Nonnull const FlutterEngineWillDealloc;
  */
 - (nonnull FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
                                    libraryURI:(nullable NSString*)libraryURI
-                                 initialRoute:(nullable NSString*)initialRoute;
+                                 initialRoute:(nullable NSString*)initialRoute
+                               entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
 
 /**
  * Dispatches the given key event data to the framework through the engine.

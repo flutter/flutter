@@ -344,6 +344,7 @@ bool RuntimeController::LaunchRootIsolate(
     fml::closure root_isolate_create_callback,
     std::optional<std::string> dart_entrypoint,
     std::optional<std::string> dart_entrypoint_library,
+    const std::vector<std::string>& dart_entrypoint_args,
     std::unique_ptr<IsolateConfiguration> isolate_configuration) {
   if (root_isolate_.lock()) {
     FML_LOG(ERROR) << "Root isolate was already running.";
@@ -361,6 +362,7 @@ bool RuntimeController::LaunchRootIsolate(
           isolate_shutdown_callback_,                     //
           dart_entrypoint,                                //
           dart_entrypoint_library,                        //
+          dart_entrypoint_args,                           //
           std::move(isolate_configuration),               //
           context_,                                       //
           spawning_isolate_.lock().get())                 //
