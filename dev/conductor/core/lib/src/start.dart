@@ -445,7 +445,7 @@ class StartContext extends Context {
     }
     final String branchPoint = await framework.branchPoint(
       candidateBranch,
-      kFrameworkDefaultBranch,
+      FrameworkRepository.defaultBranch,
     );
     final bool response = prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
