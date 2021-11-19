@@ -309,6 +309,7 @@ String _regenerateIconsFile(
               // Throw an error for baseline icons.
               stderr.writeln("❌ Platform adaptive icon '$e' not found.");
               if (enforceSafetyChecks) {
+                stderr.writeln('Safety checks failed');
                 exit(1);
               }
             } else {
