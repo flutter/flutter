@@ -2043,20 +2043,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         .merge(decoration!.floatingLabelStyle ?? decoration!.labelStyle);
     }
 
-    final TextStyle? floatingLabelStyle = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration!.floatingLabelStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.floatingLabelStyle, materialState);
 
-    TextStyle style =  themeData.textTheme.subtitle1!
+    return themeData.textTheme.subtitle1!
       .merge(widget.baseStyle)
       .copyWith(height: 1)
       .merge(getFallbackTextStyle())
-      .merge(floatingLabelStyle);
-
-    if (decoration!.errorText != null) {
-      style = style.copyWith(color: decoration!.errorStyle?.color ?? themeData.errorColor);
-    }
-
-    return style;
+      .merge(style);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
