@@ -67,6 +67,7 @@ class ScopedBlock {
 
   bool operator!=(B that) const { return block_ != that; }
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator B() const { return block_; }
 
   B get() const { return block_; }

@@ -23,9 +23,9 @@ struct TextEditingDelta {
                    TextRange range,
                    const std::string& text);
 
-  TextEditingDelta(const std::u16string& text);
+  explicit TextEditingDelta(const std::u16string& text);
 
-  TextEditingDelta(const std::string& text);
+  explicit TextEditingDelta(const std::string& text);
 
   virtual ~TextEditingDelta() = default;
 
