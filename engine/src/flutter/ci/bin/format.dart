@@ -408,9 +408,14 @@ class ClangFormatChecker extends FormatChecker {
       } else {
         error('Found ${failed.length} C++/ObjC file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+        stdout.writeln('To fix, run:');
+        stdout.writeln();
+        stdout.writeln('patch -p0 <<DONE');
         for (final WorkerJob job in failed) {
           stdout.write(job.result.stdout);
         }
+        stdout.writeln('DONE');
+        stdout.writeln();
       }
     } else {
       message('Completed checking ${diffJobs.length} C++/ObjC files with no formatting problems.');
@@ -551,9 +556,14 @@ class JavaFormatChecker extends FormatChecker {
       } else {
         error('Found ${failed.length} Java file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+        stdout.writeln('To fix, run:');
+        stdout.writeln();
+        stdout.writeln('patch -p0 <<DONE');
         for (final WorkerJob job in failed) {
           stdout.write(job.result.stdout);
         }
+        stdout.writeln('DONE');
+        stdout.writeln();
       }
     } else {
       message('Completed checking ${diffJobs.length} Java files with no formatting problems.');
