@@ -34,6 +34,23 @@ static uint64_t lookup_hash_table(GHashTable* table, uint64_t key) {
       g_hash_table_lookup(table, uint64_to_gpointer(key)));
 }
 
+static gboolean hash_table_find_equal_value(gpointer key,
+                                            gpointer value,
+                                            gpointer user_data) {
+  return gpointer_to_uint64(value) == gpointer_to_uint64(user_data);
+}
+
+// Look up a hash table that maps a uint64_t to a uint64_t; given its key,
+// find its value.
+//
+// Returns 0 if not found.
+//
+// Both key and value should be directly hashed.
+static uint64_t reverse_lookup_hash_table(GHashTable* table, uint64_t value) {
+  return gpointer_to_uint64(g_hash_table_find(
+      table, hash_table_find_equal_value, uint64_to_gpointer(value)));
+}
+
 static uint64_t to_lower(uint64_t n) {
   constexpr uint64_t lower_a = 0x61;
   constexpr uint64_t upper_a = 0x41;
@@ -428,48 +445,59 @@ static void synchronize_pressed_states_loop_body(gpointer key,
 
   const guint modifier_bit = GPOINTER_TO_INT(key);
   FlKeyEmbedderResponder* self = context->self;
+  // Each TestKey contains up to two logical keys, typically the left modifier
+  // and the right modifier, that correspond to the same modifier_bit. We'd
+  // like to infer whether to synthesize a down or up event for each key.
+  //
+  // The hard part is that, if we want to synthesize a down event, we don't know
+  // which physical key to use. Here we assume the keyboard layout do not change
+  // frequently and use the last physical-logical relationship, recorded in
+  // #mapping_records.
   const uint64_t logical_keys[] = {
       checked_key->primary_logical_key,
       checked_key->secondary_logical_key,
   };
   const guint length = checked_key->secondary_logical_key == 0 ? 1 : 2;
 
-  const bool pressed_by_state = (context->state & modifier_bit) != 0;
+  const bool any_pressed_by_state = (context->state & modifier_bit) != 0;
 
-  bool pressed_by_record = false;
+  bool any_pressed_by_record = false;
 
   // Traverse each logical key of this modifier bit for 2 purposes:
   //
-  //  1. Find if this logical key is pressed before the event,
-  //     and synthesize a release event if needed.
-  //  2. Find if any logical key of this modifier is pressed
-  //     before the event (#pressed_by_record), so that we can decide
-  //     whether to synthesize a press event later.
+  //  1. Perform the synthesization of release events: If the modifier bit is 0
+  //     and the key is pressed, synthesize a release event.
+  //  2. Prepare for the synthesization of press events: If the modifier bit is
+  //     1, and no keys are pressed (discovered here), synthesize a press event
+  //     later.
   for (guint logical_key_idx = 0; logical_key_idx < length; logical_key_idx++) {
     const uint64_t logical_key = logical_keys[logical_key_idx];
-    const uint64_t recorded_physical_key =
-        lookup_hash_table(self->mapping_records, logical_key);
-    const uint64_t pressed_logical_key_before_event =
-        recorded_physical_key == 0
-            ? 0
-            : lookup_hash_table(self->pressing_records, recorded_physical_key);
-    const bool this_key_pressed_before_event =
-        pressed_logical_key_before_event != 0;
+    g_return_if_fail(logical_key != 0);
+    const uint64_t pressing_physical_key =
+        reverse_lookup_hash_table(self->pressing_records, logical_key);
+    const bool this_key_pressed_before_event = pressing_physical_key != 0;
 
-    g_return_if_fail(pressed_logical_key_before_event == 0 ||
-                     pressed_logical_key_before_event == logical_key);
+    any_pressed_by_record =
+        any_pressed_by_record || this_key_pressed_before_event;
 
-    pressed_by_record = pressed_by_record || this_key_pressed_before_event;
-
-    if (this_key_pressed_before_event && !pressed_by_state) {
+    if (this_key_pressed_before_event && !any_pressed_by_state) {
+      const uint64_t recorded_physical_key =
+          lookup_hash_table(self->mapping_records, logical_key);
+      // Since this key has been pressed before, there must have been a recorded
+      // physical key.
+      g_return_if_fail(recorded_physical_key != 0);
+      // In rare cases #recorded_logical_key is different from #logical_key.
+      const uint64_t recorded_logical_key =
+          lookup_hash_table(self->pressing_records, recorded_physical_key);
       synthesize_simple_event(self, kFlutterKeyEventTypeUp,
-                              recorded_physical_key, logical_key,
+                              recorded_physical_key, recorded_logical_key,
                               context->timestamp);
       update_pressing_state(self, recorded_physical_key, 0);
     }
   }
-  // If the modifier should be pressed, press its primary key.
-  if (pressed_by_state && !pressed_by_record) {
+  // If the modifier should be pressed, synthesize a down event for its primary
+  // key.
+  if (any_pressed_by_state && !any_pressed_by_record) {
     const uint64_t logical_key = checked_key->primary_logical_key;
     const uint64_t recorded_physical_key =
         lookup_hash_table(self->mapping_records, logical_key);

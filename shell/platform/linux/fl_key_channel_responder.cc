@@ -132,7 +132,7 @@ static void handle_response(GObject* object,
                             gpointer user_data) {
   g_autoptr(FlKeyChannelUserData) data = FL_KEY_CHANNEL_USER_DATA(user_data);
 
-  // Will also return if the weak pointer has been destroyed.
+  // This is true if the weak pointer has been destroyed.
   if (data->responder == nullptr) {
     return;
   }
@@ -146,12 +146,14 @@ static void handle_response(GObject* object,
   if (self->mock != nullptr && self->mock->value_converter != nullptr) {
     message = self->mock->value_converter(message);
   }
+  bool handled = false;
   if (error != nullptr) {
     g_warning("Unable to retrieve framework response: %s", error->message);
-    return;
+  } else {
+    g_autoptr(FlValue) handled_value =
+        fl_value_lookup_string(message, "handled");
+    handled = fl_value_get_bool(handled_value);
   }
-  g_autoptr(FlValue) handled_value = fl_value_lookup_string(message, "handled");
-  bool handled = fl_value_get_bool(handled_value);
 
   data->callback(handled, data->user_data);
 }
