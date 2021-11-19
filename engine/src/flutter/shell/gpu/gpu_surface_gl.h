@@ -60,7 +60,7 @@ class GPUSurfaceGL : public Surface {
       const SkISize& untransformed_size,
       const SkMatrix& root_surface_transformation);
 
-  bool PresentSurface(SkCanvas* canvas);
+  bool PresentSurface(fml::TimePoint target_time, SkCanvas* canvas);
 
   GPUSurfaceGLDelegate* delegate_;
   sk_sp<GrDirectContext> context_;
@@ -77,6 +77,7 @@ class GPUSurfaceGL : public Surface {
 
   // WeakPtrFactory must be the last member.
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGL> weak_factory_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };
 
