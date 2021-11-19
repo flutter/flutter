@@ -991,7 +991,12 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    if (editableText.isShiftPressed && renderEditable.selection?.baseOffset != null) {
+    final bool isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
+        .any(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.shiftLeft,
+          LogicalKeyboardKey.shiftRight,
+        }.contains);
+    if (isShiftPressed && renderEditable.selection?.baseOffset != null) {
       _isShiftTapping = true;
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
