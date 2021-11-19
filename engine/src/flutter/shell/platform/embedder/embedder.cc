@@ -69,6 +69,26 @@ extern const intptr_t kPlatformStrongDillSize;
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
+// A message channel to send platform-independent FlutterKeyData to the
+// framework.
+//
+// This should be kept in sync with the following variables:
+//
+// - lib/ui/platform_dispatcher.dart, _kFlutterKeyDataChannel
+// - shell/platform/darwin/ios/framework/Source/FlutterEngine.mm,
+//   FlutterKeyDataChannel
+//
+// Not to be confused with "flutter/keyevent", which is used to send raw
+// key event data in a platform-dependent format.
+//
+// ## Format
+//
+// Send: KeyDataPacket.data().
+//
+// Expected reply: Whether the event is handled. Exactly 1 byte long, with value
+// 1 for handled, and 0 for not. Malformed value is considered false.
+const char* kFlutterKeyDataChannel = "flutter/keydata";
+
 static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
                                             const char* reason,
                                             const char* code_name,
@@ -1593,6 +1613,45 @@ static inline flutter::KeyEventType MapKeyEventType(
   return flutter::KeyEventType::kUp;
 }
 
+// Send a platform message to the framework.
+//
+// The `data_callback` will be invoked with `user_data`, and must not be empty.
+static FlutterEngineResult InternalSendPlatformMessage(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const char* channel,
+    const uint8_t* data,
+    size_t size,
+    FlutterDataCallback data_callback,
+    void* user_data) {
+  FlutterEngineResult result;
+
+  FlutterPlatformMessageResponseHandle* response_handle;
+  result = FlutterPlatformMessageCreateResponseHandle(
+      engine, data_callback, user_data, &response_handle);
+  if (result != kSuccess) {
+    return result;
+  }
+
+  const FlutterPlatformMessage message = {
+      sizeof(FlutterPlatformMessage),  // struct_size
+      channel,                         // channel
+      data,                            // message
+      size,                            // message_size
+      response_handle,                 // response_handle
+  };
+
+  result = FlutterEngineSendPlatformMessage(engine, &message);
+  // Whether `SendPlatformMessage` succeeds or not, the response handle must be
+  // released.
+  FlutterEngineResult release_result =
+      FlutterPlatformMessageReleaseResponseHandle(engine, response_handle);
+  if (result != kSuccess) {
+    return result;
+  }
+
+  return release_result;
+}
+
 FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
                                                   engine,
                                               const FlutterKeyEvent* event,
@@ -1619,18 +1678,27 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
 
   auto packet = std::make_unique<flutter::KeyDataPacket>(key_data, character);
 
-  auto response = [callback, user_data](bool handled) {
-    if (callback != nullptr) {
-      callback(handled, user_data);
-    }
+  struct MessageData {
+    FlutterKeyEventCallback callback;
+    void* user_data;
   };
 
-  return reinterpret_cast<flutter::EmbedderEngine*>(engine)
-                 ->DispatchKeyDataPacket(std::move(packet), response)
-             ? kSuccess
-             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
-                                  "Could not dispatch the key event to the "
-                                  "running Flutter application.");
+  MessageData* message_data =
+      new MessageData{.callback = callback, .user_data = user_data};
+
+  return InternalSendPlatformMessage(
+      engine, kFlutterKeyDataChannel, packet->data().data(),
+      packet->data().size(),
+      [](const uint8_t* data, size_t size, void* user_data) {
+        auto message_data = std::unique_ptr<MessageData>(
+            reinterpret_cast<MessageData*>(user_data));
+        bool handled = false;
+        if (size == 1) {
+          handled = *data != 0;
+        }
+        message_data->callback(handled, message_data->user_data);
+      },
+      message_data);
 }
 
 FlutterEngineResult FlutterEngineSendPlatformMessage(

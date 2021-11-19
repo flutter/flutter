@@ -567,6 +567,27 @@ void key_data_echo() async {
   signalNativeTest();
 }
 
+// After platform channel 'test/starts_echo' receives a message, starts echoing
+// the event data with `_echoKeyEvent`, and returns synthesized as handled.
+@pragma('vm:entry-point')
+void key_data_late_echo() async {
+  channelBuffers.setListener('test/starts_echo', (ByteData? data, PlatformMessageResponseCallback callback) {
+    PlatformDispatcher.instance.onKeyData = (KeyData data) {
+      _echoKeyEvent(
+        _serializeKeyEventType(data.type),
+        data.timeStamp.inMicroseconds,
+        data.physical,
+        data.logical,
+        data.character == null ? 0 : data.character!.codeUnitAt(0),
+        data.synthesized,
+      );
+      return data.synthesized;
+    };
+    callback(null);
+  });
+  signalNativeTest();
+}
+
 @pragma('vm:entry-point')
 void render_gradient() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {

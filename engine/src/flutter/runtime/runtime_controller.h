@@ -386,20 +386,6 @@ class RuntimeController : public PlatformConfigurationClient {
   bool DispatchPointerDataPacket(const PointerDataPacket& packet);
 
   //----------------------------------------------------------------------------
-  /// @brief      Dispatch the specified pointer data message to the running
-  ///             root isolate.
-  ///
-  /// @param[in]  packet    The key data message to dispatch to the isolate.
-  /// @param[in]  callback  Called when the framework has decided whether
-  ///                       to handle this key data.
-  ///
-  /// @return     If the key data message was dispatched. This may fail is
-  ///             an isolate is not running.
-  ///
-  bool DispatchKeyDataPacket(const KeyDataPacket& packet,
-                             KeyDataResponse callback);
-
-  //----------------------------------------------------------------------------
   /// @brief      Dispatch the semantics action to the specified accessibility
   ///             node.
   ///
