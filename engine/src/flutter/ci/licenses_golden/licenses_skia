@@ -1,4 +1,4 @@
-Signature: ace178a43d63b9d3acfb38736c07c8a2
+Signature: 28e114cbd4e6a634ba25d34bb50feeca
 
 UNUSED LICENSES:
 
@@ -687,6 +687,7 @@ FILE: ../../../third_party/skia/animations/paths#1.xml
 FILE: ../../../third_party/skia/animations/redcross#1.jpg
 FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bazel/BUILD.bazel
+FILE: ../../../third_party/skia/bazel/cc_binary_with_flags.bzl
 FILE: ../../../third_party/skia/bazel/common_config_settings/BUILD.bazel
 FILE: ../../../third_party/skia/bazel/common_config_settings/defs.bzl
 FILE: ../../../third_party/skia/bazel/macros.bzl
