@@ -1204,6 +1204,62 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Bottom sheet onRemove LocalHistoryEntry only added for current bottom sheet', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/93717
+    PersistentBottomSheetController<void>? sheetController1;
+    PersistentBottomSheetController<void>? sheetController2;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(builder: (BuildContext context) {
+          return Center(
+            child: Column(
+              children: [
+                ElevatedButton(
+                  child: const Text('show 1'),
+                  onPressed: () {
+                    if (sheetController1 != null) {
+                      sheetController1!.close();
+                      sheetController1 = null;
+                    }
+                    sheetController1 = Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 1'),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('show 2'),
+                  onPressed: () {
+                    if (sheetController2 != null) {
+                      sheetController2!.close();
+                      sheetController2 = null;
+                    }
+                    sheetController2 = Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 2'),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('show 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 1'), findsOneWidget);
+
+
+    await tester.tap(find.text('show 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 2'), findsOneWidget);
+
+    // This will throw an assertion if regressed.
+    await tester.tap(find.text('show 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 1'), findsOneWidget);
+  });
+
   group('constraints', () {
 
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
