@@ -31,14 +31,6 @@ class Window final {
   // Dispatch a packet to the framework that indicates one or a few pointer
   // events.
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
-  // Dispatch a packet to the framework that indicates a key event.
-  //
-  // The `response_id` is used to label the response of whether the key event
-  // is handled by the framework, typically the return value of
-  // PlatformConfiguration::RegisterKeyDataResponse.
-  // It should be used later in
-  // PlatformConfiguration::CompleteKeyDataResponse.
-  void DispatchKeyDataPacket(const KeyDataPacket& packet, uint64_t response_id);
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
 
  private:

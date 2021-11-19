@@ -36,6 +36,7 @@
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
 NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
+NSString* const FlutterKeyDataChannel = @"flutter/keydata";
 static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
@@ -301,13 +302,20 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   key_data.synthesized = event.synthesized;
 
   auto packet = std::make_unique<flutter::KeyDataPacket>(key_data, character);
+  NSData* message = [NSData dataWithBytes:packet->data().data() length:packet->data().size()];
 
-  auto response = [callback, userData](bool handled) {
-    if (callback != nullptr) {
-      callback(handled, userData);
+  auto response = ^(NSData* reply) {
+    if (callback == nullptr) {
+      return;
     }
+    BOOL handled = FALSE;
+    if (reply.length == 1 && *reinterpret_cast<const uint8_t*>(reply.bytes) == 1) {
+      handled = TRUE;
+    }
+    callback(handled, userData);
   };
-  self.platformView->DispatchKeyDataPacket(std::move(packet), std::move(response));
+
+  [self sendOnChannel:FlutterKeyDataChannel message:message binaryReply:response];
 }
 
 - (void)ensureSemanticsEnabled {
