@@ -1,0 +1,9 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # The target API level for this repository. A value of -1
+  # means that no API level will be passed to the tools that consume it.
+  fuchsia_target_api_level = -1
+}

@@ -16,6 +16,7 @@ if (is_win) {
 import("//build/config/c++/c++.gni")
 import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
+import("//build/fuchsia/config.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/wasm.gni")
@@ -415,6 +416,14 @@ config("compiler") {
         cflags += [ "--target=x86_64-linux-androideabi" ]
         ldflags += [ "--target=x86_64-linux-androideabi" ]
       }
+    }
+  }
+
+  # Fuchsia-specific flags setup.
+  # -----------------------------
+  if (is_fuchsia) {
+    if (fuchsia_target_api_level != -1) {
+      cflags +=[ "-ffuchsia-api-level=${fuchsia_target_api_level}" ]
     }
   }
 
