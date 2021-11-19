@@ -2161,7 +2161,7 @@ void main() {
     expect(thirdItem.padding, thirdItemPadding);
   });
 
-  testWidgets('NavigationRailDestination adds indicator when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('NavigationRailDestination adds indicator by default when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       theme: ThemeData(useMaterial3: true),
