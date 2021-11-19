@@ -312,9 +312,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_golden.text_selection_color.0.png'),
     );
-  },
-    variant: TargetPlatformVariant.desktop(),
-  );
+  });
 
   testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
