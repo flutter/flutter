@@ -205,7 +205,12 @@ void main(List<String> args) {
   final String iconsTemplateContents = iconsTemplateFile.readAsStringSync();
 
   stderr.writeln("Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
-  final String newIconsContents = _regenerateIconsFile(iconsTemplateContents, newTokenPairMap, argResults[_fontFamilyOption] as String);
+  final String newIconsContents = _regenerateIconsFile(
+    iconsTemplateContents, 
+    newTokenPairMap, 
+    argResults[_fontFamilyOption] as String,
+    argResults[_enforceSafetyChecks] as bool,
+  );
 
   if (argResults[_dryRunOption] as bool) {
     stdout.write(newIconsContents);
@@ -268,6 +273,7 @@ String _regenerateIconsFile(
     String templateFileContents, 
     Map<String, String> tokenPairMap, 
     String fontFamily,
+    bool enforceSafetyChecks,
   ) {
   final List<_Icon> newIcons = tokenPairMap.entries
       .map((MapEntry<String, String> entry) => _Icon(entry, fontFamily))
@@ -301,8 +307,10 @@ String _regenerateIconsFile(
           } catch (e) {
             if (style == '') {
               // Throw an error for baseline icons.
-              stderr.writeln("Error while generating platformAdaptiveDeclarations: Icon '$e' not found.");
-              exit(1);
+              stderr.writeln("❌ Platform adaptive icon '$e' not found.");
+              if (enforceSafetyChecks) {
+                exit(1);
+              }
             } else {
               // Ignore errors for styled icons since some don't exist.
             }
@@ -362,7 +370,7 @@ bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCode
   });
 
   if (unstable.isNotEmpty) {
-    stderr.writeln('❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable\n');
+    stderr.writeln('❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable');
     return false;
   } else {
     stderr.writeln('✅ all existing $oldCodepointsCount codepoints are stable');
