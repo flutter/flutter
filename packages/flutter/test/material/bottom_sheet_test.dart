@@ -1213,7 +1213,7 @@ void main() {
         body: Builder(builder: (BuildContext context) {
           return Center(
             child: Column(
-              children: [
+              children: <Widget>[
                 ElevatedButton(
                   child: const Text('show 1'),
                   onPressed: () {
