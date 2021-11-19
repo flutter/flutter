@@ -53,8 +53,7 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help:
-          'Configurable Framework repo upstream remote. Primarily for testing.',
+      help: 'Configurable Framework repo upstream remote. Primarily for testing.',
       hide: true,
     );
     argParser.addOption(
@@ -257,10 +256,18 @@ class StartContext extends Context {
   /// If validations should be overridden.
   final bool force;
 
+  late final EngineRepository engine;
+  late final FrameworkRepository framework;
+
+  /// Should be called after [run] to obtain the engine checkout directory.
+  Future<Directory> get engineCheckoutDirectory => engine.checkoutDirectory;
+
+  /// Should be called after [run] to obtain the framework checkout directory.
+  Future<Directory> get frameworkCheckoutDirectory => framework.checkoutDirectory;
+
   Future<void> run() async {
     if (stateFile.existsSync()) {
-      throw ConductorException(
-          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
+      throw ConductorException('Error! A persistent state file already found at ${stateFile.path}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
@@ -278,7 +285,7 @@ class StartContext extends Context {
     state.lastUpdatedDate = unixDate;
     state.incrementLevel = incrementLetter;
 
-    final EngineRepository engine = EngineRepository(
+    engine = EngineRepository(
       checkouts,
       initialRef: candidateBranch,
       upstreamRemote: Remote(
@@ -305,10 +312,12 @@ class StartContext extends Context {
       cherrypicks: engineCherrypickRevisions,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in engineCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -335,7 +344,7 @@ class StartContext extends Context {
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
-    final FrameworkRepository framework = FrameworkRepository(
+    framework = FrameworkRepository(
       checkouts,
       initialRef: candidateBranch,
       upstreamRemote: Remote(
@@ -353,10 +362,12 @@ class StartContext extends Context {
       cherrypicks: frameworkCherrypickRevisions,
       upstreamRef: FrameworkRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -374,8 +385,9 @@ class StartContext extends Context {
 
     // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
-        framework.upstreamRemote.name, candidateBranch,
-        exact: false,
+      framework.upstreamRemote.name,
+      candidateBranch,
+      exact: false,
     ));
     // [force] means we know this would fail but need to publish anyway
     if (!force) {
@@ -421,10 +433,10 @@ class StartContext extends Context {
       }
       // This is the first stable release, so hardcode the z as 0
       return Version(
-          x: lastVersion.x,
-          y: lastVersion.y,
-          z: 0,
-          type: VersionType.stable,
+        x: lastVersion.x,
+        y: lastVersion.y,
+        z: 0,
+        type: VersionType.stable,
       );
     }
     return Version.increment(lastVersion, incrementLetter);
@@ -505,7 +517,9 @@ class StartContext extends Context {
     final List<String> upstreamRevlist = (await repository.revList(<String>[
       '--ancestry-path',
       '$branchPoint..$upstreamRef',
-    ])).reversed.toList();
+    ]))
+        .reversed
+        .toList();
 
     stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
     stdio.printStatus('validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
