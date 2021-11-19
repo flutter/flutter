@@ -43,22 +43,12 @@ void main() {
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
-  test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
-    const TextTheme noBodyText1TextTheme = TextTheme();
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.bodyText1!.color!.withAlpha(0xde)));
-    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.bodyText1!.color!.withAlpha(0xde)));
   });
 
   test('Default icon theme contrasts with brightness', () {
@@ -71,8 +61,8 @@ void main() {
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
@@ -308,6 +298,7 @@ void main() {
       highlightColor: Colors.black,
       splashColor: Colors.black,
       splashFactory: InkRipple.splashFactory,
+      useMaterial3: false,
       selectedRowColor: Colors.black,
       unselectedWidgetColor: Colors.black,
       disabledColor: Colors.black,
@@ -406,6 +397,7 @@ void main() {
       highlightColor: Colors.white,
       splashColor: Colors.white,
       splashFactory: InkRipple.splashFactory,
+      useMaterial3: true,
       selectedRowColor: Colors.white,
       unselectedWidgetColor: Colors.white,
       disabledColor: Colors.white,
@@ -488,6 +480,7 @@ void main() {
       highlightColor: otherTheme.highlightColor,
       splashColor: otherTheme.splashColor,
       splashFactory: otherTheme.splashFactory,
+      useMaterial3: otherTheme.useMaterial3,
       selectedRowColor: otherTheme.selectedRowColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
       disabledColor: otherTheme.disabledColor,
@@ -566,6 +559,7 @@ void main() {
     expect(themeDataCopy.highlightColor, equals(otherTheme.highlightColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.splashFactory, equals(otherTheme.splashFactory));
+    expect(themeDataCopy.useMaterial3, equals(otherTheme.useMaterial3));
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
     expect(themeDataCopy.disabledColor, equals(otherTheme.disabledColor));
@@ -677,10 +671,10 @@ void main() {
       'scrollbarTheme',
       'splashFactory',
       'visualDensity',
+      'useMaterial3',
       // COLOR
       'colorScheme',
       'primaryColor',
-      'primaryColorBrightness',
       'primaryColorLight',
       'primaryColorDark',
       'focusColor',
@@ -753,6 +747,7 @@ void main() {
       'accentIconTheme',
       'buttonColor',
       'fixTextFieldOutlineLabel',
+      'primaryColorBrightness',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

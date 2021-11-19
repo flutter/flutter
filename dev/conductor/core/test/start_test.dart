@@ -5,6 +5,7 @@
 import 'dart:convert' show jsonDecode;
 
 import 'package:args/command_runner.dart';
+import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 import 'package:conductor_core/src/proto/conductor_state.pbenum.dart' show ReleasePhase;
 import 'package:conductor_core/src/repository.dart';
@@ -120,6 +121,188 @@ void main() {
           'Expected either the CLI arg --$kFrameworkMirrorOption or the environment variable FRAMEWORK_MIRROR to be provided',
         ),
       );
+    });
+
+    test('does not fail if version wrong but --force provided', () async {
+      const String revision2 = 'def789';
+      const String revision3 = '123abc';
+      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String previousVersion = '1.2.0-1.0.pre';
+      // This is what this release will be
+      const String nextVersion = '1.2.0-1.1.pre';
+      const String incrementLevel = 'n';
+
+      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+          .childDirectory('flutter_conductor_checkouts')
+          .childDirectory('engine');
+
+      final File depsFile = engine.childFile('DEPS');
+
+      final List<FakeCommand> engineCommands = <FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            EngineRepository.defaultUpstream,
+            engine.path,
+          ],
+          onRun: () {
+            // Create the DEPS file which the tool will update
+            engine.createSync(recursive: true);
+            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+          }
+        ),
+        const FakeCommand(
+          command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'fetch', 'mirror'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'checkout',
+            '-b',
+            'cherrypicks-$candidateBranch',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/DEPS',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'add', '--all'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+      ];
+
+      final List<FakeCommand> frameworkCommands = <FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            FrameworkRepository.defaultUpstream,
+            fileSystem.path.join(
+              checkoutsParentDirectory,
+              'flutter_conductor_checkouts',
+              'framework',
+            ),
+          ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'fetch', 'mirror'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision3,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'checkout',
+            '-b',
+            'cherrypicks-$candidateBranch',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'describe',
+            '--match',
+            '*.*.*',
+            '--tags',
+            'refs/remotes/upstream/$candidateBranch',
+          ],
+          stdout: '$previousVersion-42-gabc123',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision3,
+        ),
+      ];
+
+      final CommandRunner<void> runner = createRunner(
+        commands: <FakeCommand>[
+          ...engineCommands,
+          ...frameworkCommands,
+        ],
+      );
+
+      final String stateFilePath = fileSystem.path.join(
+        platform.environment['HOME']!,
+        kStateFileName,
+      );
+
+      await runner.run(<String>[
+        'start',
+        '--$kFrameworkMirrorOption',
+        frameworkMirror,
+        '--$kEngineMirrorOption',
+        engineMirror,
+        '--$kCandidateOption',
+        candidateBranch,
+        '--$kReleaseOption',
+        releaseChannel,
+        '--$kStateOption',
+        stateFilePath,
+        '--$kDartRevisionOption',
+        nextDartRevision,
+        '--$kIncrementOption',
+        incrementLevel,
+        '--$kForceFlag',
+      ]);
+
+      final File stateFile = fileSystem.file(stateFilePath);
+
+      final pb.ConductorState state = pb.ConductorState();
+      state.mergeFromProto3Json(
+        jsonDecode(stateFile.readAsStringSync()),
+      );
+
+      expect(processManager.hasRemainingExpectations, false);
+      expect(state.isInitialized(), true);
+      expect(state.releaseChannel, releaseChannel);
+      expect(state.releaseVersion, nextVersion);
+      expect(state.engine.candidateBranch, candidateBranch);
+      expect(state.engine.startingGitHead, revision2);
+      expect(state.engine.dartRevision, nextDartRevision);
+      expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
+      expect(state.framework.candidateBranch, candidateBranch);
+      expect(state.framework.startingGitHead, revision3);
+      expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
+      expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+      expect(state.conductorVersion, conductorVersion);
+      expect(state.incrementLevel, incrementLevel);
     });
 
     test('creates state file if provided correct inputs', () async {

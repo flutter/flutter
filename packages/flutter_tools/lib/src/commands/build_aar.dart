@@ -44,6 +44,7 @@ class BuildAarCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);

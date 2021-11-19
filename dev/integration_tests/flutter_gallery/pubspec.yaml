@@ -12,7 +12,7 @@ dependencies:
   connectivity: 3.0.6
   string_scanner: 1.1.0
   url_launcher: 6.0.12
-  cupertino_icons: 1.0.3
+  cupertino_icons: 1.0.4
   video_player: 2.1.1
   scoped_model:
     git:
@@ -273,4 +273,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-# PUBSPEC CHECKSUM: 0d9c
+# PUBSPEC CHECKSUM: a09d
