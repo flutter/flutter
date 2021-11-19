@@ -11,7 +11,6 @@ import 'proto/conductor_state.pb.dart' as pb;
 import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
-import 'stdio.dart';
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
