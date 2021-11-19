@@ -38,7 +38,10 @@ FLUTTER_ASSERT_NOT_ARC
 - (void)testSpawnsShareGpuContext {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
-  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil libraryURI:nil initialRoute:nil];
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
+                                          libraryURI:nil
+                                        initialRoute:nil
+                                      entrypointArgs:nil];
   XCTAssertNotNil(spawn);
   XCTAssertTrue([engine iosPlatformView] != nullptr);
   XCTAssertTrue([spawn iosPlatformView] != nullptr);
@@ -50,7 +53,6 @@ FLUTTER_ASSERT_NOT_ARC
   XCTAssertTrue(engine_context->GetMainContext() != nullptr);
   XCTAssertEqual(engine_context->GetMainContext(), spawn_context->GetMainContext());
   [engine release];
-  [spawn release];
 }
 
 - (void)testEnableSemanticsWhenFlutterViewAccessibilityDidCall {

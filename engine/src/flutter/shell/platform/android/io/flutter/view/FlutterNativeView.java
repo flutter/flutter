@@ -111,7 +111,11 @@ public class FlutterNativeView implements BinaryMessenger {
     if (applicationIsRunning)
       throw new AssertionError("This Flutter engine instance is already running an application");
     mFlutterJNI.runBundleAndSnapshotFromLibrary(
-        args.bundlePath, args.entrypoint, args.libraryPath, mContext.getResources().getAssets());
+        args.bundlePath,
+        args.entrypoint,
+        args.libraryPath,
+        mContext.getResources().getAssets(),
+        null);
 
     applicationIsRunning = true;
   }

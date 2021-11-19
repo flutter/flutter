@@ -77,6 +77,11 @@ void RunConfiguration::SetEntrypointAndLibrary(std::string entrypoint,
   entrypoint_library_ = std::move(library);
 }
 
+void RunConfiguration::SetEntrypointArgs(
+    const std::vector<std::string>& entrypoint_args) {
+  entrypoint_args_ = entrypoint_args;
+}
+
 std::shared_ptr<AssetManager> RunConfiguration::GetAssetManager() const {
   return asset_manager_;
 }
@@ -87,6 +92,10 @@ const std::string& RunConfiguration::GetEntrypoint() const {
 
 const std::string& RunConfiguration::GetEntrypointLibrary() const {
   return entrypoint_library_;
+}
+
+const std::vector<std::string>& RunConfiguration::GetEntrypointArgs() const {
+  return entrypoint_args_;
 }
 
 std::unique_ptr<IsolateConfiguration>

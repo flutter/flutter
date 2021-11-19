@@ -178,7 +178,8 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const std::string& entrypoint,
     const std::string& libraryUrl,
-    const std::string& initial_route) const {
+    const std::string& initial_route,
+    const std::vector<std::string>& entrypoint_args) const {
   FML_DCHECK(shell_ && shell_->IsSetup())
       << "A new Shell can only be spawned "
          "if the current Shell is properly constructed";
@@ -225,7 +226,8 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   // TODO(xster): could be worth tracing this to investigate whether
   // the IsolateConfiguration could be cached somewhere.
-  auto config = BuildRunConfiguration(asset_manager_, entrypoint, libraryUrl);
+  auto config = BuildRunConfiguration(asset_manager_, entrypoint, libraryUrl,
+                                      entrypoint_args);
   if (!config) {
     // If the RunConfiguration was null, the kernel blob wasn't readable.
     // Fail the whole thing.
@@ -241,15 +243,18 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
                              std::move(shell), weak_platform_view));
 }
 
-void AndroidShellHolder::Launch(std::shared_ptr<AssetManager> asset_manager,
-                                const std::string& entrypoint,
-                                const std::string& libraryUrl) {
+void AndroidShellHolder::Launch(
+    std::shared_ptr<AssetManager> asset_manager,
+    const std::string& entrypoint,
+    const std::string& libraryUrl,
+    const std::vector<std::string>& entrypoint_args) {
   if (!IsValid()) {
     return;
   }
 
   asset_manager_ = asset_manager;
-  auto config = BuildRunConfiguration(asset_manager, entrypoint, libraryUrl);
+  auto config = BuildRunConfiguration(asset_manager, entrypoint, libraryUrl,
+                                      entrypoint_args);
   if (!config) {
     return;
   }
@@ -278,7 +283,8 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
 std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     std::shared_ptr<flutter::AssetManager> asset_manager,
     const std::string& entrypoint,
-    const std::string& libraryUrl) const {
+    const std::string& libraryUrl,
+    const std::vector<std::string>& entrypoint_args) const {
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
     isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
@@ -303,6 +309,9 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
                                      std::move(libraryUrl));
     } else if (entrypoint.size() > 0) {
       config.SetEntrypoint(std::move(entrypoint));
+    }
+    if (entrypoint_args.size() > 0) {
+      config.SetEntrypointArgs(entrypoint_args);
     }
   }
   return config;

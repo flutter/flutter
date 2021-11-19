@@ -170,6 +170,8 @@ class DartIsolate : public UIDartState {
   ///                                         function to invoke.
   /// @param[in]  dart_entrypoint_library     The name of the dart library
   ///                                         containing the entrypoint.
+  /// @param[in]  dart_entrypoint_args        Arguments passed as a List<String>
+  ///                                         to Dart's entrypoint function.
   /// @param[in]  isolate_configuration       The isolate configuration used to
   ///                                         configure the isolate before
   ///                                         invoking the entrypoint.
@@ -215,6 +217,7 @@ class DartIsolate : public UIDartState {
       const fml::closure& isolate_shutdown_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
+      const std::vector<std::string>& dart_entrypoint_args,
       std::unique_ptr<IsolateConfiguration> isolate_configuration,
       const UIDartState::Context& context,
       const DartIsolate* spawning_isolate = nullptr);
@@ -245,6 +248,7 @@ class DartIsolate : public UIDartState {
       const fml::closure& isolate_shutdown_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
+      const std::vector<std::string>& dart_entrypoint_args,
       std::unique_ptr<IsolateConfiguration> isolate_configuration) const;
 
   // |UIDartState|

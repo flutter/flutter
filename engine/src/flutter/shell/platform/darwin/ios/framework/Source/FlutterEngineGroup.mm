@@ -5,6 +5,18 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 
+@implementation FlutterEngineGroupOptions
+
+- (void)dealloc {
+  [_entrypoint release];
+  [_libraryURI release];
+  [_initialRoute release];
+  [_entrypointArgs release];
+  [super dealloc];
+}
+
+@end
+
 @interface FlutterEngineGroup ()
 @property(nonatomic, copy) NSString* name;
 @property(nonatomic, retain) NSMutableArray<NSValue*>* engines;
@@ -42,16 +54,32 @@
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
                                 libraryURI:(nullable NSString*)libraryURI
                               initialRoute:(nullable NSString*)initialRoute {
-  NSString* engineName = [NSString stringWithFormat:@"%@.%d", self.name, ++_enginesCreatedCount];
+  FlutterEngineGroupOptions* options = [[[FlutterEngineGroupOptions alloc] init] autorelease];
+  options.entrypoint = entrypoint;
+  options.libraryURI = libraryURI;
+  options.initialRoute = initialRoute;
+  return [self makeEngineWithOptions:options];
+}
+
+- (FlutterEngine*)makeEngineWithOptions:(nullable FlutterEngineGroupOptions*)options {
+  NSString* entrypoint = options.entrypoint;
+  NSString* libraryURI = options.libraryURI;
+  NSString* initialRoute = options.initialRoute;
+  NSArray<NSString*>* entrypointArgs = options.entrypointArgs;
+
   FlutterEngine* engine;
   if (self.engines.count <= 0) {
-    engine = [[FlutterEngine alloc] initWithName:engineName project:self.project];
-    [engine runWithEntrypoint:entrypoint libraryURI:libraryURI initialRoute:initialRoute];
+    engine = [self makeEngine];
+    [engine runWithEntrypoint:entrypoint
+                   libraryURI:libraryURI
+                 initialRoute:initialRoute
+               entrypointArgs:entrypointArgs];
   } else {
     FlutterEngine* spawner = (FlutterEngine*)[self.engines[0] pointerValue];
     engine = [spawner spawnWithEntrypoint:entrypoint
                                libraryURI:libraryURI
-                             initialRoute:initialRoute];
+                             initialRoute:initialRoute
+                           entrypointArgs:entrypointArgs];
   }
   [_engines addObject:[NSValue valueWithPointer:engine]];
 
@@ -61,7 +89,13 @@
                  name:FlutterEngineWillDealloc
                object:engine];
 
-  return [engine autorelease];
+  return engine;
+}
+
+- (FlutterEngine*)makeEngine {
+  NSString* engineName = [NSString stringWithFormat:@"%@.%d", self.name, ++_enginesCreatedCount];
+  FlutterEngine* result = [[FlutterEngine alloc] initWithName:engineName project:self.project];
+  return [result autorelease];
 }
 
 - (void)onEngineWillBeDealloced:(NSNotification*)notification {

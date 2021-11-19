@@ -135,6 +135,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
           settings.isolate_shutdown_callback,  // isolate shutdown callback
           entrypoint,                          // entrypoint
           std::nullopt,                        // library
+          {},                                  // args
           std::move(isolate_configuration),    // isolate configuration
           context                              // engine context
           )

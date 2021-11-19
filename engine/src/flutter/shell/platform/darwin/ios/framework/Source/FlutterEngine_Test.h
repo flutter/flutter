@@ -20,6 +20,7 @@ class ThreadHost;
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
-                         initialRoute:(/*nullable*/ NSString*)initialRoute;
+                         initialRoute:(/*nullable*/ NSString*)initialRoute
+                       entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs;
 - (const flutter::ThreadHost&)threadHost;
 @end

@@ -80,11 +80,13 @@ class AndroidShellHolder {
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       const std::string& entrypoint,
       const std::string& libraryUrl,
-      const std::string& initial_route) const;
+      const std::string& initial_route,
+      const std::vector<std::string>& entrypoint_args) const;
 
   void Launch(std::shared_ptr<AssetManager> asset_manager,
               const std::string& entrypoint,
-              const std::string& libraryUrl);
+              const std::string& libraryUrl,
+              const std::vector<std::string>& entrypoint_args);
 
   const flutter::Settings& GetSettings() const;
 
@@ -132,7 +134,8 @@ class AndroidShellHolder {
   std::optional<RunConfiguration> BuildRunConfiguration(
       std::shared_ptr<flutter::AssetManager> asset_manager,
       const std::string& entrypoint,
-      const std::string& libraryUrl) const;
+      const std::string& libraryUrl,
+      const std::vector<std::string>& entrypoint_args) const;
 
   bool IsNDKImageDecoderAvailable();
 

@@ -60,6 +60,7 @@ FlutterCallbackInformation.html
 FlutterDartProject.html
 FlutterEngine.html
 FlutterEngineGroup.html
+FlutterEngineGroupOptions.html
 FlutterError.html
 FlutterEventChannel.html
 FlutterHeadlessDartRunner.html

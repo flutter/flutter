@@ -199,6 +199,10 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
 
   last_entry_point_ = configuration.GetEntrypoint();
   last_entry_point_library_ = configuration.GetEntrypointLibrary();
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
+  // This is only used to support restart.
+  last_entry_point_args_ = configuration.GetEntrypointArgs();
+#endif
 
   UpdateAssetManager(configuration.GetAssetManager());
 
@@ -220,6 +224,7 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
           root_isolate_create_callback,              //
           configuration.GetEntrypoint(),             //
           configuration.GetEntrypointLibrary(),      //
+          configuration.GetEntrypointArgs(),         //
           configuration.TakeIsolateConfiguration())  //
   ) {
     return RunStatus::Failure;
@@ -560,6 +565,10 @@ const std::string& Engine::GetLastEntrypoint() const {
 
 const std::string& Engine::GetLastEntrypointLibrary() const {
   return last_entry_point_library_;
+}
+
+const std::vector<std::string>& Engine::GetLastEntrypointArgs() const {
+  return last_entry_point_args_;
 }
 
 // |RuntimeDelegate|

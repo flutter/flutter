@@ -27,6 +27,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle = nil);
 - (flutter::RunConfiguration)runConfigurationForEntrypoint:(nullable NSString*)entrypointOrNil;
 - (flutter::RunConfiguration)runConfigurationForEntrypoint:(nullable NSString*)entrypointOrNil
                                               libraryOrNil:(nullable NSString*)dartLibraryOrNil;
+- (flutter::RunConfiguration)runConfigurationForEntrypoint:(nullable NSString*)entrypointOrNil
+                                              libraryOrNil:(nullable NSString*)dartLibraryOrNil
+                                            entrypointArgs:
+                                                (nullable NSArray<NSString*>*)entrypointArgs;
 
 + (NSString*)flutterAssetsName:(NSBundle*)bundle;
 + (NSString*)domainNetworkPolicy:(NSDictionary*)appTransportSecurity;
@@ -35,7 +39,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle = nil);
 /**
  * The embedder can specify data that the isolate can request synchronously on launch. Engines
  * launched using this configuration can access the persistent isolate data via the
- * `Window.getPersistentIsolateData` accessor.
+ * `PlatformDispatcher.getPersistentIsolateData` accessor.
  *
  * @param data The persistent isolate data. This data is persistent for the duration of the Flutter
  *             application and is available even after isolate restarts. Because of this lifecycle,

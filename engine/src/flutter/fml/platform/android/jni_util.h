@@ -30,6 +30,8 @@ ScopedJavaLocalRef<jstring> StringToJavaString(JNIEnv* env,
 
 std::vector<std::string> StringArrayToVector(JNIEnv* env, jobjectArray jargs);
 
+std::vector<std::string> StringListToVector(JNIEnv* env, jobject list);
+
 ScopedJavaLocalRef<jobjectArray> VectorToStringArray(
     JNIEnv* env,
     const std::vector<std::string>& vector);

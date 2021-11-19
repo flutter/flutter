@@ -247,6 +247,29 @@ FLUTTER_DARWIN_EXPORT
              initialRoute:(nullable NSString*)initialRoute;
 
 /**
+ * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
+ * which may not be the same as the library containing the Dart program's `main()` function.
+ *
+ * The first call to this method will create a new Isolate. Subsequent calls will return
+ * immediately and have no effect.
+ *
+ * @param entrypoint The name of a top-level function from a Dart library.  If this is
+ *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
+ *   main() function, that function must be decorated with `@pragma(vm:entry-point)` to ensure the
+ *   method is not tree-shaken by the Dart compiler.
+ * @param libraryURI The URI of the Dart library which contains the entrypoint method.  IF nil,
+ *   this will default to the same library as the `main()` function in the Dart program.
+ * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
+ *   FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
+ * @param entrypointArgs Arguments passed as a list of string to Dart's entrypoint function.
+ * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ */
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
+               libraryURI:(nullable NSString*)libraryURI
+             initialRoute:(nullable NSString*)initialRoute
+           entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+
+/**
  * Destroy running context for an engine.
  *
  * This method can be used to force the FlutterEngine object to release all resources.

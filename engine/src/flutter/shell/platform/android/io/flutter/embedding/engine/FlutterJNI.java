@@ -371,12 +371,17 @@ public class FlutterJNI {
   public FlutterJNI spawn(
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
-      @Nullable String initialRoute) {
+      @Nullable String initialRoute,
+      @Nullable List<String> entrypointArgs) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     FlutterJNI spawnedJNI =
         nativeSpawn(
-            nativeShellHolderId, entrypointFunctionName, pathToEntrypointFunction, initialRoute);
+            nativeShellHolderId,
+            entrypointFunctionName,
+            pathToEntrypointFunction,
+            initialRoute,
+            entrypointArgs);
     Preconditions.checkState(
         spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId != 0,
         "Failed to spawn new JNI connected shell from existing shell.");
@@ -388,7 +393,8 @@ public class FlutterJNI {
       long nativeSpawningShellId,
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
-      @Nullable String initialRoute);
+      @Nullable String initialRoute,
+      @Nullable List<String> entrypointArgs);
 
   /**
    * Detaches this {@code FlutterJNI} instance from Flutter's native engine, which precludes any
@@ -397,8 +403,8 @@ public class FlutterJNI {
    * <p>This method must not be invoked if {@code FlutterJNI} is not already attached to native.
    *
    * <p>Invoking this method will result in the release of all native-side resources that were set
-   * up during {@link #attachToNative()} or {@link #spawn(String, String, String)}, or accumulated
-   * thereafter.
+   * up during {@link #attachToNative()} or {@link #spawn(String, String, String, List)}, or
+   * accumulated thereafter.
    *
    * <p>It is permissible to re-attach this instance to native after detaching it from native.
    */
@@ -850,7 +856,8 @@ public class FlutterJNI {
       @NonNull String bundlePath,
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
-      @NonNull AssetManager assetManager) {
+      @NonNull AssetManager assetManager,
+      @Nullable List<String> entrypointArgs) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
@@ -858,7 +865,8 @@ public class FlutterJNI {
         bundlePath,
         entrypointFunctionName,
         pathToEntrypointFunction,
-        assetManager);
+        assetManager,
+        entrypointArgs);
   }
 
   private native void nativeRunBundleAndSnapshotFromLibrary(
@@ -866,7 +874,8 @@ public class FlutterJNI {
       @NonNull String bundlePath,
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
-      @NonNull AssetManager manager);
+      @NonNull AssetManager manager,
+      @Nullable List<String> entrypointArgs);
   // ------ End Dart Execution Support -------
 
   // --------- Start Platform Message Support ------
