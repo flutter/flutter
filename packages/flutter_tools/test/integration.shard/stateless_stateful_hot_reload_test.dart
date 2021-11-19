@@ -50,5 +50,5 @@ void main() {
     expect(logs, contains('STATELESS'));
     expect(logs, contains('STATEFUL'));
     await subscription.cancel();
-  });
+  }, skip: true); // test is flaky https://github.com/flutter/flutter/issues/93663
 }
