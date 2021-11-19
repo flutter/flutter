@@ -1205,7 +1205,7 @@ void main() {
   });
 
   testWidgets('Bottom sheet onRemove LocalHistoryEntry only added for current bottom sheet', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/93717
+    // Regression test for https://github.com/flutter/flutter/issues/93717
     PersistentBottomSheetController<void>? sheetController1;
     PersistentBottomSheetController<void>? sheetController2;
     await tester.pumpWidget(MaterialApp(
@@ -1254,7 +1254,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet 2'), findsOneWidget);
 
-    // This will throw an assertion if regressed.
+    // This will throw an assertion due to multiple onRemove entries if regressed.
     await tester.tap(find.text('show 1'));
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet 1'), findsOneWidget);
