@@ -300,7 +300,7 @@ String _regenerateIconsFile(
             );
           } catch (e) {
             if (style == '') {
-              // Throw an error for unstyled icons.
+              // Throw an error for baseline icons.
               stderr.writeln("Error while generating platformAdaptiveDeclarations: Icon '$e' not found.");
               exit(1);
             } else {
