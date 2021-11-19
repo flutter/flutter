@@ -302,7 +302,7 @@ void main() {
         ),
       ),
     );
-    
+
     controller.selection = const TextSelection(baseOffset: 0, extentOffset: 11);
     focusNode.requestFocus();
     await tester.pump();
