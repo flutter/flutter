@@ -16,7 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -153,6 +153,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -249,6 +250,8 @@ class RunCommand extends RunCommandBase {
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
+    addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser
       ..addFlag('enable-software-rendering',
         negatable: false,
@@ -339,6 +342,10 @@ class RunCommand extends RunCommandBase {
 
   @override
   final String name = 'run';
+
+  @override
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
+  DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
 
   @override
   final String description = 'Run your Flutter app on an attached device.';
@@ -473,6 +480,10 @@ class RunCommand extends RunCommandBase {
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
     }
+
+    if (devices.any((Device device) => device is AndroidDevice)) {
+      _deviceDeprecationBehavior = DeprecationBehavior.exit;
+    }
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     webMode = featureFlags.isWebEnabled &&
@@ -500,6 +511,7 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6,
+        multidexEnabled: boolArg('multidex'),
       );
     } else if (webMode) {
       return webRunnerFactory.createWebRunner(
@@ -527,6 +539,7 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6,
       stayResident: stayResident,
+      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -584,7 +597,7 @@ class RunCommand extends RunCommandBase {
     for (final Device device in devices) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
-          '${toTitleCase(getFriendlyModeName(buildMode))} '
+          '${sentenceCase(getFriendlyModeName(buildMode))} '
           'mode is not supported by ${device.name}.',
         );
       }

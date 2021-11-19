@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:metrics_center/metrics_center.dart';
 
 /// Authenticate and connect to gcloud storage.
@@ -28,7 +29,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
   );
 }
 
-/// Parse results into Metric Points.
+/// Parse results and append additional benchmark tags into Metric Points.
 ///
 /// An example of `resultsJson`:
 ///   {
@@ -44,27 +45,40 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///       "90th_percentile_frame_build_time_millis"
 ///     ]
 ///   }
-List<MetricPoint> parse(Map<String, dynamic> resultsJson) {
+///
+/// An example of `benchmarkTags`:
+///   {
+///     "arch": "intel",
+///     "device_type": "Moto G Play",
+///     "device_version": "android-25",
+///     "host_type": "linux",
+///     "host_version": "debian-10.11"
+///   }
+List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags, String taskName) {
   print('Results to upload to skia perf: $resultsJson');
+  print('Benchmark tags to upload to skia perf: $benchmarkTags');
   final List<String> scoreKeys =
       (resultsJson['BenchmarkScoreKeys'] as List<dynamic>?)?.cast<String>() ?? const <String>[];
   final Map<String, dynamic> resultData =
       resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final String builderName = (resultsJson['BuilderName'] as String).trim();
   final List<MetricPoint> metricPoints = <MetricPoint>[];
   for (final String scoreKey in scoreKeys) {
+    Map<String, String> tags = <String, String>{
+      kGithubRepoKey: kFlutterFrameworkRepo,
+      kGitRevisionKey: gitSha,
+      'branch': gitBranch,
+      kNameKey: taskName,
+      kSubResultKey: scoreKey,
+    };
+    // Append additional benchmark tags, which will surface in Skia Perf dashboards.
+    tags = mergeMaps<String, String>(
+        tags, benchmarkTags.map((String key, dynamic value) => MapEntry<String, String>(key, value.toString())));
     metricPoints.add(
       MetricPoint(
         (resultData[scoreKey] as num).toDouble(),
-        <String, String>{
-          kGithubRepoKey: kFlutterFrameworkRepo,
-          kGitRevisionKey: gitSha,
-          'branch': gitBranch,
-          kNameKey: builderName,
-          kSubResultKey: scoreKey,
-        },
+        tags,
       ),
     );
   }
@@ -84,7 +98,7 @@ Future<void> upload(
   FlutterDestination metricsDestination,
   List<MetricPoint> metricPoints,
   int commitTimeSinceEpoch,
-  String? taskName,
+  String taskName,
 ) async {
   await metricsDestination.update(
     metricPoints,
@@ -92,7 +106,7 @@ Future<void> upload(
       commitTimeSinceEpoch,
       isUtc: true,
     ),
-    taskName ?? 'default',
+    taskName,
   );
 }
 
@@ -102,7 +116,7 @@ Future<void> upload(
 /// 1. Run DeviceLab test, writing results to a known path
 /// 2. Request service account token from luci auth (valid for at least 3 minutes)
 /// 3. Upload results from (1) to skia perf.
-Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? taskName) async {
+Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? taskName, String? benchmarkTags) async {
   int commitTimeSinceEpoch;
   if (resultsPath == null) {
     return;
@@ -112,10 +126,12 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
+  taskName = taskName ?? 'default';
+  final Map<String, dynamic> benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-  final List<MetricPoint> metricPoints = parse(resultsJson);
+  final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap, taskName);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
   await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }

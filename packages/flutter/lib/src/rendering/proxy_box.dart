@@ -5287,7 +5287,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     // Disables the hit testing if this render object is hidden.
-    if (link.leader == null && !showWhenUnlinked)
+    if (!link.leaderConnected && !showWhenUnlinked)
       return false;
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
@@ -5311,8 +5311,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
-      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
+      link.leaderSize != null || (!link.leaderConnected || leaderAnchor == Alignment.topLeft),
+      '$link: layer is linked to ${link.debugLeader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );

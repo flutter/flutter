@@ -75,6 +75,7 @@ void _setTestMode(_TestMode? mode) {
       // Keep as null.
       break;
   }
+  // ignore: implicit_dynamic_function
   js_util.callMethod(
     html.window,
     '_flutter_internal_update_experiment',

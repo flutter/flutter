@@ -12,7 +12,6 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'default_text_editing_actions.dart';
 import 'default_text_editing_shortcuts.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -25,6 +24,7 @@ import 'restoration.dart';
 import 'router.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
+import 'shared_app_data.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
@@ -1053,9 +1053,6 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
-  ///
-  /// Passing this will not replace [DefaultTextEditingActions]. These can be
-  /// overridden by placing an [Actions] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1634,7 +1631,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
-            color: widget.color,
+            color: widget.color.withOpacity(1.0),
             child: result,
           );
         },
@@ -1642,7 +1639,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       title = Title(
         title: widget.title,
-        color: widget.color,
+        color: widget.color.withOpacity(1.0),
         child: result,
       );
     }
@@ -1668,15 +1665,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-        // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-        // fall through to the defaultShortcuts.
-        child: DefaultTextEditingShortcuts(
-          child: Actions(
-            actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: DefaultTextEditingActions(
+      child: SharedAppData(
+        child: Shortcuts(
+          debugLabel: '<Default WidgetsApp Shortcuts>',
+          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+          // fall through to the defaultShortcuts.
+          child: DefaultTextEditingShortcuts(
+            child: Actions(
+              actions: widget.actions ?? WidgetsApp.defaultActions,
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
                 child: child,

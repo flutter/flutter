@@ -16,7 +16,7 @@ import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';

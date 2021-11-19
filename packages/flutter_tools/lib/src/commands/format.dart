@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
-import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
-  FormatCommand({@required this.verboseHelp});
+  FormatCommand({required this.verboseHelp});
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -33,23 +30,24 @@ class FormatCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  String get invocation => '${runner.executableName} $name <one or more paths>';
+  String get invocation => '${runner?.executableName} $name <one or more paths>';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String dartBinary = globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[
       dartBinary,
       'format',
     ];
-    if (argResults.rest.isEmpty) {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.isEmpty) {
       globals.printError(
         'No files specified to be formatted.'
       );
       command.add('-h');
     } else {
       command.addAll(<String>[
-        for (String arg in argResults.rest)
+        for (String arg in rest)
           if (arg == '--dry-run' || arg == '-n')
             '--output=none'
           else

@@ -334,6 +334,7 @@ class ListTileTheme extends InheritedTheme {
   /// The configuration of this theme.
   ListTileThemeData get data {
     return _data ?? ListTileThemeData(
+      dense: _dense,
       shape: _shape,
       style: _style,
       selectedColor: _selectedColor,

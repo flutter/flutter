@@ -36,7 +36,7 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     // If the scrollable extent is too small, the benchmark may end up
     // scrolling the picture out of the clip area entirely, resulting in
     // bogus metric values.
-    const double maxScrollExtent = kTotalSampleCount * kScrollDelta;
+    const double maxScrollExtent = kDefaultTotalSampleCount * kScrollDelta;
     const double pictureHeight = kRows * kRowHeight;
     if (maxScrollExtent > pictureHeight) {
       throw Exception(

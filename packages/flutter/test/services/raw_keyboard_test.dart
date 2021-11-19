@@ -753,6 +753,46 @@ void main() {
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
+      void throwingListener(RawKeyEvent event) {
+        throw 1;
+      }
+
+      // When the listener throws an error...
+      RawKeyboard.instance.addListener(throwingListener);
+
+      // Simulate a key down event.
+      FlutterErrorDetails? record;
+      await _runWhileOverridingOnError(
+        () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+          record = details;
+        }
+      );
+
+      // ... the error should be caught.
+      expect(record, isNotNull);
+      expect(record!.exception, 1);
+      final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+      expect(infos['Event'], isA<DiagnosticsProperty<RawKeyEvent>>());
+
+      // But the exception should not interrupt recording the state.
+      // Now the key handler no longer throws an error.
+      RawKeyboard.instance.removeListener(throwingListener);
+      record = null;
+
+      // Simulate a key up event.
+      await _runWhileOverridingOnError(
+        () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        onError: (FlutterErrorDetails details) {
+          record = details;
+        }
+      );
+      // If the previous state (key down) wasn't recorded, this key up event will
+      // trigger assertions.
+      expect(record, isNull);
+    });
   });
 
   group('RawKeyEventDataAndroid', () {
@@ -2503,4 +2543,22 @@ void main() {
       }).data, isNot(equals(const RawKeyEventDataWeb(code: 'KeyA', key: 'a'))));
     });
   });
+}
+
+Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+  final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
+  FlutterError.onError = onError;
+
+  try {
+    await body();
+  } finally {
+    FlutterError.onError = oldFlutterErrorOnError;
+  }
+}
+
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+  return Map<String, DiagnosticsNode>.fromIterable(
+    infos,
+    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+  );
 }

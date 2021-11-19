@@ -6,15 +6,20 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io show ProcessSignal, Process;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -470,6 +475,109 @@ void main() {
     expect(report.compileDuration, const Duration(seconds: 3));
     expect(report.transferDuration, const Duration(seconds: 5));
   });
+
+
+  testUsingContext('DevFS actually starts compile before processing bundle', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
+    );
+
+    final LoggingLogger logger = LoggingLogger();
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: FakeOperatingSystemUtils(),
+      httpClient: FakeHttpClient.any(),
+    );
+
+    await devFS.create();
+
+    final MemoryIOSink frontendServerStdIn = MemoryIOSink();
+    Stream<List<int>> frontendServerStdOut() async* {
+      int processed = 0;
+      while(true) {
+        while(frontendServerStdIn.writes.length == processed) {
+          await Future<dynamic>.delayed(const Duration(milliseconds: 5));
+        }
+
+        String boundaryKey;
+        while(processed < frontendServerStdIn.writes.length) {
+          final List<int> data = frontendServerStdIn.writes[processed];
+          final String stringData = utf8.decode(data);
+          if (stringData.startsWith('compile ')) {
+            yield utf8.encode('result abc1\nline1\nline2\nabc1\nabc1 lib/foo.txt.dill 0\n');
+          } else if (stringData.startsWith('recompile ')) {
+            final String line = stringData.split('\n').first;
+            final int spaceDelim = line.lastIndexOf(' ');
+            boundaryKey = line.substring(spaceDelim + 1);
+          } else if (boundaryKey != null && stringData.startsWith(boundaryKey)) {
+            yield utf8.encode('result abc2\nline1\nline2\nabc2\nabc2 lib/foo.txt.dill 0\n');
+          } else {
+            throw 'Saw $data ($stringData)';
+          }
+          processed++;
+        }
+      }
+    }
+    Stream<List<int>> frontendServerStdErr() async* {
+      // Output nothing on stderr.
+    }
+
+    final AnsweringFakeProcessManager fakeProcessManager = AnsweringFakeProcessManager(frontendServerStdOut(), frontendServerStdErr(), frontendServerStdIn);
+    final StdoutHandler generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: fileSystem);
+
+    final DefaultResidentCompiler residentCompiler = DefaultResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      logger: logger,
+      processManager: fakeProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      stdoutHandler: generatorStdoutHandler,
+    );
+
+    fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
+
+    final UpdateFSReport report1 = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+      bundle: FakeBundle(),
+    );
+    expect(report1.success, true);
+    logger.messages.clear();
+
+    final UpdateFSReport report2 = await devFS.update(
+      mainUri: Uri.parse('lib/main.dart'),
+      generator: residentCompiler,
+      dillOutputPath: 'lib/foo.dill',
+      pathToReload: 'lib/foo.txt.dill',
+      trackWidgetCreation: false,
+      invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
+      bundle: FakeBundle(),
+    );
+    expect(report2.success, true);
+
+    final int processingBundleIndex = logger.messages.indexOf('Processing bundle.');
+    final int bundleProcessingDoneIndex = logger.messages.indexOf('Bundle processing done.');
+    final int compileLibMainIndex = logger.messages.indexWhere((String element) => element.startsWith('<- recompile lib/main.dart '));
+    expect(processingBundleIndex, greaterThanOrEqualTo(0));
+    expect(bundleProcessingDoneIndex, greaterThanOrEqualTo(0));
+    expect(compileLibMainIndex, greaterThanOrEqualTo(0));
+    expect(bundleProcessingDoneIndex, greaterThan(compileLibMainIndex));
+  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -489,4 +597,109 @@ class FakeDevFSWriter implements DevFSWriter {
   Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
     written = true;
   }
+}
+
+class LoggingLogger extends BufferLogger {
+  LoggingLogger() : super.test();
+
+  List<String> messages = <String>[];
+
+  @override
+  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+    messages.add(message);
+  }
+
+  @override
+  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+    messages.add(message);
+  }
+
+  @override
+  void printTrace(String message) {
+    messages.add(message);
+  }
+}
+
+class FakeBundle extends AssetBundle {
+  @override
+  List<File> get additionalDependencies => <File>[];
+
+  @override
+  Future<int> build({String manifestPath = defaultManifestPath, String assetDirPath, String packagesPath, bool deferredComponentsEnabled = false, TargetPlatform targetPlatform}) async {
+    return 0;
+  }
+
+  @override
+  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries => <String, Map<String, DevFSContent>>{};
+
+  @override
+  Map<String, DevFSContent> get entries => <String, DevFSContent>{};
+
+  @override
+  List<File> get inputFiles => <File>[];
+
+  @override
+  bool needsBuild({String manifestPath = defaultManifestPath}) {
+    return true;
+  }
+
+  @override
+  bool wasBuiltOnce() {
+    return false;
+  }
+}
+
+class AnsweringFakeProcessManager implements ProcessManager {
+  AnsweringFakeProcessManager(this.stdout, this.stderr, this.stdin);
+
+  final Stream<List<int>> stdout;
+  final Stream<List<int>> stderr;
+  final IOSink stdin;
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    return true;
+  }
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return true;
+  }
+
+  @override
+  Future<ProcessResult> run(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  ProcessResult runSync(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Process> start(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+    return AnsweringFakeProcess(stdout, stderr, stdin);
+  }
+}
+
+class AnsweringFakeProcess implements io.Process {
+  AnsweringFakeProcess(this.stdout,this.stderr, this.stdin);
+
+  @override
+  final Stream<List<int>> stdout;
+  @override
+  final Stream<List<int>> stderr;
+  @override
+  final IOSink stdin;
+
+  @override
+  Future<int> get exitCode async => 0;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return true;
+  }
+
+  @override
+  int get pid => 42;
 }

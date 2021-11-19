@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
@@ -162,6 +162,7 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
     skip: skip,
@@ -190,7 +191,7 @@ void testWithoutContext(String description, FutureOr<void> Function() body, {
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
-  }) {
+}) {
   return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{

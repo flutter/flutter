@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -141,6 +141,16 @@ void main() {
     });
 
     testUsingContext('create local report', () async {
+      // Since crash reporting calls the doctor, which checks for the devtools
+      // version file in the cache, write a version file to the memory fs.
+      Cache.flutterRoot = '/path/to/flutter';
+      final Directory devtoolsDir = globals.fs.directory(
+        '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+      )..createSync(recursive: true);
+      devtoolsDir.childFile('version.json').writeAsStringSync(
+        '{"version": "1.2.3"}',
+      );
+
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.

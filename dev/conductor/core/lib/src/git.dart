@@ -10,7 +10,7 @@ import './globals.dart';
 
 /// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
-  Git(this.processManager) : assert(processManager != null);
+  const Git(this.processManager);
 
   final ProcessManager processManager;
 

@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -91,18 +88,18 @@ List<String> getLocalEngineArguments() {
 }
 
 Future<void> pollForServiceExtensionValue<T>({
-  @required FlutterTestDriver testDriver,
-  @required String extension,
-  @required T continuePollingValue,
-  @required Matcher matches,
+  required FlutterTestDriver testDriver,
+  required String extension,
+  required T continuePollingValue,
+  required Matcher matches,
   String valueKey = 'value',
 }) async {
   for (int i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
-    if (response.json[valueKey] as T == continuePollingValue) {
+    if (response.json?[valueKey] as T == continuePollingValue) {
       await Future<void>.delayed(const Duration(seconds: 1));
     } else {
-      expect(response.json[valueKey] as T, matches);
+      expect(response.json?[valueKey] as T, matches);
       return;
     }
   }

@@ -18,7 +18,7 @@ import 'base/process.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -196,6 +196,14 @@ class FlutterWebSdk extends CachedArtifact {
         entity.copySync(newPath);
       }
     }
+
+    final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
+    final String canvasKitUrl = '$_cipdBaseUrl/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
+    return artifactUpdater.downloadZipArchive(
+      'Downloading CanvasKit...',
+      Uri.parse(canvasKitUrl),
+      location,
+    );
   }
 }
 

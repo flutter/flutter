@@ -19,7 +19,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
@@ -346,6 +346,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   @override
+  // ignore: override_on_non_overriding_member
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.

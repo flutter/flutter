@@ -8,7 +8,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia

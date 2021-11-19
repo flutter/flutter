@@ -46,7 +46,7 @@ class Calculator {
       final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
       final int n = result.length;
       onResultListener('Decoded $n results');
-    } catch (e, stack) {
+    } on FormatException catch (e, stack) {
       debugPrint('Invalid JSON file: $e');
       debugPrint('$stack');
     }

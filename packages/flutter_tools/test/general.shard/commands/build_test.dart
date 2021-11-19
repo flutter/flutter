@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -83,6 +83,8 @@ void main() {
 }
 
 class FakeBuildSubCommand extends BuildSubCommand {
+  FakeBuildSubCommand() : super(verboseHelp: false);
+
   @override
   String get description => throw UnimplementedError();
 

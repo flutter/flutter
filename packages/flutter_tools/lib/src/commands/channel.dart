@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/common.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -16,7 +14,6 @@ class ChannelCommand extends FlutterCommand {
       'all',
       abbr: 'a',
       help: 'Include all the available branches (including local branches) when listing channels.',
-      defaultsTo: false,
       hide: !verboseHelp,
     );
   }
@@ -31,29 +28,30 @@ class ChannelCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.sdk;
 
   @override
-  String get invocation => '${runner.executableName} $name [<channel-name>]';
+  String get invocation => '${runner?.executableName} $name [<channel-name>]';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    switch (argResults.rest.length) {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    switch (rest.length) {
       case 0:
         await _listChannels(
           showAll: boolArg('all'),
-          verbose: globalResults['verbose'] as bool,
+          verbose: globalResults?['verbose'] == true,
         );
         return FlutterCommandResult.success();
       case 1:
-        await _switchChannel(argResults.rest[0]);
+        await _switchChannel(rest[0]);
         return FlutterCommandResult.success();
       default:
         throw ToolExit('Too many arguments.\n$usage');
     }
   }
 
-  Future<void> _listChannels({ bool showAll, bool verbose }) async {
+  Future<void> _listChannels({ required bool showAll, required bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = globals.flutterVersion.channel;
     final String currentBranch = globals.flutterVersion.getBranchName();

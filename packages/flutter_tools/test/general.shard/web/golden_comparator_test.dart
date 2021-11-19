@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -45,7 +46,12 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ], stdout: '${jsonEncode(expectedResponse)}\n',
+        ],
+        stdout: '${jsonEncode(expectedResponse)}\n',
+        environment: const <String, String>{
+          'FLUTTER_TEST_BROWSER': 'chrome',
+          'FLUTTER_WEB_RENDERER': 'html',
+        },
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -54,6 +60,7 @@ void main() {
         processManager: processManager,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        webRenderer: WebRendererMode.html,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -82,6 +89,7 @@ void main() {
         processManager: processManager,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        webRenderer: WebRendererMode.canvaskit,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -114,6 +122,7 @@ void main() {
         processManager: processManager,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        webRenderer: WebRendererMode.html,
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -158,6 +167,7 @@ void main() {
         processManager: processManager,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        webRenderer: WebRendererMode.canvaskit,
       );
 
       final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
@@ -192,6 +202,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        webRenderer: WebRendererMode.html,
       );
 
       final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);

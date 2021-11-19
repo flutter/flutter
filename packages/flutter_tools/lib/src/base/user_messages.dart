@@ -24,6 +24,7 @@ class UserMessages {
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String devToolsVersion(String version) => 'DevTools version $version';
   String pubMirrorURL(String url) => 'Pub download mirror $url';
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
