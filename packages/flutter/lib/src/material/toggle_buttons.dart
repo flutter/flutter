@@ -1575,7 +1575,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
 /// A widget to pad the area around a [ToggleButtons]'s children.
 ///
-/// This widget is based on a similar one using in [ButtonStyleButton] but it
+/// This widget is based on a similar one used in [ButtonStyleButton] but it
 /// only redirects taps along one axis to ensure the correct button is tapped
 /// within the [ToggleButtons].
 ///
@@ -1591,7 +1591,6 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   final Size minSize;
-
   final Axis direction;
 
   @override
@@ -1602,6 +1601,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
     renderObject.minSize = minSize;
+    renderObject.direction = direction;
   }
 }
 
