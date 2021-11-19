@@ -290,7 +290,7 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRailLabelType.all] or [NavigationRailLabelType.selected].
   ///
   /// If `null`, defaults to [NavigationRailThemeData.useIndicator]. If that is
-  /// `null`, defaults to false.
+  /// `null`, defaults to [ThemeData.useMaterial3].
   final bool? useIndicator;
 
   /// Overrides the default value of [NavigationRail]'s selection indicator color,
@@ -431,7 +431,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           iconTheme: widget.selectedIndex == i ? selectedIconTheme : unselectedIconTheme,
                           labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                           padding: widget.destinations[i].padding,
-                          useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? false,
+                          useIndicator: widget.useIndicator ?? navigationRailTheme.useIndicator ?? theme.useMaterial3,
                           indicatorColor: widget.indicatorColor ?? navigationRailTheme.indicatorColor,
                           onTap: () {
                             if (widget.onDestinationSelected != null)

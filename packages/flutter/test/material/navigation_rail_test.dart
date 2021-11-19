@@ -2161,6 +2161,36 @@ void main() {
     expect(thirdItem.padding, thirdItemPadding);
   });
 
+  testWidgets('NavigationRailDestination adds indicator when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      theme: ThemeData(useMaterial3: true),
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.byType(NavigationIndicator), findsWidgets);
+  });
+
   testWidgets('NavigationRailDestination adds indicator when useIndicator is true', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
@@ -2402,9 +2432,11 @@ Future<void> _pumpNavigationRail(
   WidgetTester tester, {
   double textScaleFactor = 1.0,
   required NavigationRail navigationRail,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: theme,
       home: Builder(
         builder: (BuildContext context) {
           return MediaQuery(
