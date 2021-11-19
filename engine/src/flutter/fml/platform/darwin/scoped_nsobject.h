@@ -45,6 +45,7 @@ class scoped_nsprotocol {
   scoped_nsprotocol(const scoped_nsprotocol<NST>& that) : object_([that.object_ retain]) {}
 
   template <typename NSU>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   scoped_nsprotocol(const scoped_nsprotocol<NSU>& that) : object_([that.get() retain]) {}
 
   ~scoped_nsprotocol() { [object_ release]; }
@@ -66,7 +67,7 @@ class scoped_nsprotocol {
   bool operator==(NST that) const { return object_ == that; }
   bool operator!=(NST that) const { return object_ != that; }
 
-  operator NST() const { return object_; }
+  operator NST() const { return object_; }  // NOLINT(google-explicit-constructor)
 
   NST get() const { return object_; }
 
@@ -116,6 +117,7 @@ class scoped_nsobject : public scoped_nsprotocol<NST*> {
   scoped_nsobject(const scoped_nsobject<NST>& that) : scoped_nsprotocol<NST*>(that) {}
 
   template <typename NSU>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<NST*>(that) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<NST>& that) {
@@ -133,6 +135,7 @@ class scoped_nsobject<id> : public scoped_nsprotocol<id> {
   scoped_nsobject(const scoped_nsobject<id>& that) : scoped_nsprotocol<id>(that) {}
 
   template <typename NSU>
+  // NOLINTNEXTLINE(google-explicit-constructor)
   scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<id>(that) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<id>& that) {

@@ -26,7 +26,7 @@ namespace flutter {
 /// |GLContextSwitch| and should be destroyed when The |GLContectSwitch| destroys.
 class IOSSwitchableGLContext final : public SwitchableGLContext {
  public:
-  IOSSwitchableGLContext(EAGLContext* context);
+  explicit IOSSwitchableGLContext(EAGLContext* context);
 
   bool SetCurrent() override;
 

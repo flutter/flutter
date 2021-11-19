@@ -19,7 +19,7 @@ namespace flutter {
 // Platform views are not yet supported.
 class FlutterCompositor {
  public:
-  FlutterCompositor(FlutterViewController* view_controller);
+  explicit FlutterCompositor(FlutterViewController* view_controller);
 
   virtual ~FlutterCompositor() = default;
 

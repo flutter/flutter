@@ -40,7 +40,7 @@ namespace flutter {
 
 class VsyncWaiterIOS final : public VsyncWaiter {
  public:
-  VsyncWaiterIOS(flutter::TaskRunners task_runners);
+  explicit VsyncWaiterIOS(flutter::TaskRunners task_runners);
 
   ~VsyncWaiterIOS() override;
 
