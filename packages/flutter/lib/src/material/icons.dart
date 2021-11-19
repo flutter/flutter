@@ -97,7 +97,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///
 /// Use with the [Icon] class to show specific icons.
 ///
-/// Icons are identified by their name as listed below, e.g. [Icons.airplane].
+/// Icons are identified by their name as listed below, e.g. [Icons.airplanemode_on].
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
