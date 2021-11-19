@@ -1697,7 +1697,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if(_hasInputConnection){
       _textInputConnection!.startCapturingTextFromCamera();
     }
-    super.captureTextFromCamera(cause);
     if(cause == SelectionChangedCause.toolbar){
       hideToolbar();
     }
