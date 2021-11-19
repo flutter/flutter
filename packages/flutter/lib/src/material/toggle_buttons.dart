@@ -238,7 +238,7 @@ class ToggleButtons extends StatelessWidget {
   /// If the [tapTargetSize] is larger than [constraints], the buttons will
   /// include a transparent margin that responds to taps.
   ///
-  /// Always defaults to [ThemeData.materialTapTargetSize].
+  /// Defaults to [ThemeData.materialTapTargetSize].
   final MaterialTapTargetSize? tapTargetSize;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
@@ -1577,8 +1577,11 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 ///
 /// This widget is based on a similar one using in [ButtonStyleButton] but it
 /// only redirects taps along one axis to ensure the correct button is tapped
-/// within the [ToggleButtons]. This increases the size of the widget and it's
-/// "tap target", but not its material or its ink splashes.
+/// within the [ToggleButtons].
+///
+/// This ensures that a widget takes up at least as much space as the minSize
+/// parameter to ensure adequate tap target size, while keeping the widget
+/// visually smaller to the user.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
     Key? key,
