@@ -310,6 +310,9 @@ public class DartExecutor implements BinaryMessenger {
    *
    * <p>This does not notify a Flutter application about memory pressure. For that, use the {@link
    * io.flutter.embedding.engine.systemchannels.SystemChannel#sendMemoryPressureWarning}.
+   *
+   * <p>Calling this method may cause jank or latency in the application. Avoid calling it during
+   * critical periods like application startup or periods of animation.
    */
   public void notifyLowMemoryWarning() {
     if (flutterJNI.isAttached()) {

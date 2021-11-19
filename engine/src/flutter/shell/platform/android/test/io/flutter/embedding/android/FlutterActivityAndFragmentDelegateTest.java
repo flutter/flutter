@@ -729,8 +729,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
     delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
     delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
-    verify(mockFlutterEngine.getDartExecutor(), times(5)).notifyLowMemoryWarning();
-    verify(mockFlutterEngine.getSystemChannel(), times(5)).sendMemoryPressureWarning();
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
 
     verify(mockHost, times(0)).onFlutterUiDisplayed();
 
@@ -745,8 +745,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockHost, times(1)).onFlutterUiDisplayed();
 
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
-    verify(mockFlutterEngine.getDartExecutor(), times(5)).notifyLowMemoryWarning();
-    verify(mockFlutterEngine.getSystemChannel(), times(5)).sendMemoryPressureWarning();
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
 
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
@@ -754,8 +754,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
     delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
     delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
-    verify(mockFlutterEngine.getDartExecutor(), times(11)).notifyLowMemoryWarning();
-    verify(mockFlutterEngine.getSystemChannel(), times(11)).sendMemoryPressureWarning();
+    verify(mockFlutterEngine.getDartExecutor(), times(6)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(6)).sendMemoryPressureWarning();
   }
 
   @Test

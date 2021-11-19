@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_INITIAL_ROUTE;
 
@@ -796,10 +795,7 @@ import java.util.Arrays;
       // Avoid being too aggressive before the first frame is rendered. If it is
       // not at least running critical, we should avoid delaying the frame for
       // an overly aggressive GC.
-      boolean trim =
-          isFirstFrameRendered
-              ? level >= TRIM_MEMORY_RUNNING_LOW
-              : level >= TRIM_MEMORY_RUNNING_CRITICAL;
+      boolean trim = isFirstFrameRendered && level >= TRIM_MEMORY_RUNNING_LOW;
       if (trim) {
         flutterEngine.getDartExecutor().notifyLowMemoryWarning();
         flutterEngine.getSystemChannel().sendMemoryPressureWarning();
