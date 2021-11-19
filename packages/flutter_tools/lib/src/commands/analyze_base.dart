@@ -81,7 +81,7 @@ abstract class AnalyzeBase {
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
     final String? dartSdk = argResults['dart-sdk'] as String?;
-    if (dartSdk != null) {
+    if (dartSdk is String) {
       return dartSdk;
     }
     return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
@@ -138,7 +138,7 @@ class PackageDependency {
     for (final List<String> targetSources in values.values) {
       for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
-        if (flutterRoot != null && globals.fs.path.isWithin(flutterRoot, source)) {
+        if (globals.fs.path.isWithin(flutterRoot!, source)) {
           return true;
         }
       }
