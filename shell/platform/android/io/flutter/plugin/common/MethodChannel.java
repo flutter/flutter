@@ -165,8 +165,8 @@ public class MethodChannel {
      *
      * <p>Handler implementations must submit a result for all incoming calls, by making a single
      * call on the given {@link Result} callback. Failure to do so will result in lingering Flutter
-     * result handlers. The result may be submitted asynchronously. Calls to unknown or
-     * unimplemented methods should be handled using {@link Result#notImplemented()}.
+     * result handlers. The result may be submitted asynchronously and on any thread. Calls to
+     * unknown or unimplemented methods should be handled using {@link Result#notImplemented()}.
      *
      * <p>Any uncaught exception thrown by this method will be caught by the channel implementation
      * and logged, and an error result will be sent back to Flutter.
