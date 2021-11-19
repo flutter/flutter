@@ -200,7 +200,7 @@ Matcher<FakeGraph> IsFlutterGraph(
       Pointee(FieldsAre(
           /*id*/ _, FakeTransform::kDefaultTranslation,
           FakeTransform::kDefaultClipBounds, FakeTransform::kDefaultOrientation,
-          FakeTransform::kDefaultOpacity, ElementsAreArray(layer_matchers),
+          /*children*/ ElementsAreArray(layer_matchers),
           /*content*/ Eq(nullptr))),
       Eq(FakeView{
           .view_token = viewport_token_koids.second,
@@ -219,10 +219,12 @@ Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
   return Pointee(FieldsAre(
       /*id*/ _, FakeTransform::kDefaultTranslation,
       FakeTransform::kDefaultClipBounds, FakeTransform::kDefaultOrientation,
-      FakeTransform::kDefaultOpacity, IsEmpty(),
+      /*children*/ IsEmpty(),
+      /*content*/
       Pointee(VariantWith<FakeImage>(FieldsAre(
           /*id*/ _, IsImageProperties(layer_size),
           FakeImage::kDefaultSampleRegion, layer_size,
+          FakeImage::kDefaultOpacity,
           /*buffer_import_token*/ _, /*vmo_index*/ 0)))));
 }
 
@@ -233,7 +235,8 @@ Matcher<std::shared_ptr<FakeTransform>> IsViewportLayer(
   return Pointee(
       FieldsAre(_ /* id */, view_transform, FakeTransform::kDefaultClipBounds,
                 FakeTransform::kDefaultOrientation,
-                FakeTransform::kDefaultOpacity, IsEmpty(),
+                /*children*/ IsEmpty(),
+                /*content*/
                 Pointee(VariantWith<FakeViewport>(FieldsAre(
                     /* id */ _, IsViewportProperties(view_logical_size),
                     /* viewport_token */ GetKoids(view_token).second,

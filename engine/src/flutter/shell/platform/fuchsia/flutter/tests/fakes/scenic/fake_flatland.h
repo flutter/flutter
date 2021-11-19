@@ -230,9 +230,10 @@ class FakeFlatland
   void SetClipBounds(fuchsia::ui::composition::TransformId transform_id,
                      fuchsia::math::Rect clip_bounds) override;
 
-  // |fuchsia::ui::composition::Flatland|
-  void SetOpacity(fuchsia::ui::composition::TransformId transform_id,
-                  float opacity) override;
+  // TODO(fxbug.dev/89111): Re-enable once SDK rolls.
+  //   // |fuchsia::ui::composition::Flatland|
+  //   void SetImageOpacity(fuchsia::ui::composition::ContentId image_id,
+  //                        float opacity) override;
 
   // |fuchsia::ui::composition::Flatland|
   void AddChild(
