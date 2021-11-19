@@ -333,19 +333,19 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
   final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
+  final int diff = newCodepointsSet.length - oldCodepointsSet.length;
+  if (diff > 0) {
+    stderr.writeln('🆕 $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
+  }
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
     stderr.writeln(
-        '❌ new codepoints file does not contain all ${oldCodepointsSet.length}'
+        '❌ new codepoints file does not contain all ${oldCodepointsSet.length} '
         'existing codepoints. Missing: ${oldCodepointsSet.difference(newCodepointsSet)}');
     return false;
   } else {
-    final int diff = newCodepointsSet.length - oldCodepointsSet.length;
     stderr.writeln('✅ new codepoints file contains all ${oldCodepointsSet.length} existing codepoints');
-    if (diff > 0) {
-      stderr.writeln('🆕 it also contains $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
-    }
-    return true;
   }
+  return true;
 }
 
 @visibleForTesting
