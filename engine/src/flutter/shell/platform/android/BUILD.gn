@@ -46,6 +46,7 @@ executable("flutter_shell_native_unittests") {
   public_configs = [ "//flutter:config" ]
   deps = [
     ":flutter_shell_native_src",
+    "//flutter/fml",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest",
   ]

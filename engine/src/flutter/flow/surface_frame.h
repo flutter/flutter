@@ -10,6 +10,7 @@
 
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_point.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -66,6 +67,12 @@ class SurfaceFrame {
     //
     // Corresponds to EGL_KHR_partial_update
     std::optional<SkIRect> buffer_damage;
+
+    // The vsync target time.
+    //
+    // Backends may use this information to avoid overloading the GPU with
+    // multiple frames per vsync.
+    fml::TimePoint target_time;
   };
 
   bool Submit();
