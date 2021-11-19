@@ -32,8 +32,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
   /// The [value] argument can either be null for an indeterminate
-  /// progress indicator, or non-null for a determinate progress
-  /// indicator.
+  /// progress indicator, or a non-null value between 0.0 and 1.0 for a
+  /// determinate progress indicator.
   ///
   /// ## Accessibility
   ///
@@ -54,6 +54,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If non-null, the value of this progress indicator.
   ///
   /// A value of 0.0 means no progress and 1.0 means that progress is complete.
+  /// The value will be clamped to be in the range 0.0-1.0.
   ///
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
@@ -593,7 +594,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
-    return CupertinoActivityIndicator(key: widget.key);
+    final Color? tickColor = widget.backgroundColor;
+    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {

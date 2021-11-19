@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,9 +39,53 @@ void main() {
       ),
     );
 
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
 
-    expect(tester.takeException(), isNotNull);
+    expect(error, isNotNull);
+    FlutterError.onError = handler;
+  });
+
+  testWidgets('Disposing app while bottom sheet is disappearing does not crash', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    // Bring up bottom sheet.
+    bool showBottomSheetThenCalled = false;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    ).then<void>((void value) {
+      showBottomSheetThenCalled = true;
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+
+    // Start closing animation of Bottom sheet.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+
+    // Dispose app by replacing it with a container. This shouldn't crash.
+    await tester.pumpWidget(Container());
   });
 
 

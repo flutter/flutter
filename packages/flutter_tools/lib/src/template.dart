@@ -38,15 +38,15 @@ const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  factory Template(Directory templateSource, Directory imageSourceDir, {
+  factory Template(Directory templateSource, Directory? imageSourceDir, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
-    required Set<Uri>? templateManifest,
+    Set<Uri>? templateManifest,
   }) {
     return Template._(
       <Directory>[templateSource],
-      <Directory>[imageSourceDir],
+      imageSourceDir != null ? <Directory>[imageSourceDir] : <Directory>[],
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,

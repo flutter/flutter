@@ -8,7 +8,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import 'binding.dart';
+import 'test_async_utils.dart';
+import 'widget_tester.dart';
 
 // A tuple of `key` and `location` from Web's `KeyboardEvent` class.
 //

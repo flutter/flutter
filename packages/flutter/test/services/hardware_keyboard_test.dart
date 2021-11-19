@@ -75,6 +75,7 @@ void main() {
       return false;
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
+    // ignore: prefer_const_declarations
     final Map<String, dynamic> rawMessage = kIsWeb ? (
       KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
@@ -249,4 +250,107 @@ void main() {
     expect(events.length, 1);
     expect(rawEvents.length, 2);
   });
+
+  testWidgets('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
+    final KeyMessageHandler? oldKeyMessageHandler = tester.binding.keyEventManager.keyMessageHandler;
+    addTearDown(() {
+      tester.binding.keyEventManager.keyMessageHandler = oldKeyMessageHandler;
+    });
+
+    // When keyMessageHandler throws an error...
+    tester.binding.keyEventManager.keyMessageHandler = (KeyMessage message) {
+      throw 1;
+    };
+
+    // Simulate a key down event.
+    FlutterErrorDetails? record;
+    await _runWhileOverridingOnError(
+      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+
+    // ... the error should be caught.
+    expect(record, isNotNull);
+    expect(record!.exception, 1);
+    final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+    expect(infos['KeyMessage'], isA<DiagnosticsProperty<KeyMessage>>());
+
+    // But the exception should not interrupt recording the state.
+    // Now the keyMessageHandler no longer throws an error.
+    tester.binding.keyEventManager.keyMessageHandler = null;
+    record = null;
+
+    // Simulate a key up event.
+    await _runWhileOverridingOnError(
+      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+    // If the previous state (key down) wasn't recorded, this key up event will
+    // trigger assertions.
+    expect(record, isNull);
+  });
+
+  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
+    bool throwingCallback(KeyEvent event) {
+      throw 1;
+    }
+
+    // When the handler throws an error...
+    HardwareKeyboard.instance.addHandler(throwingCallback);
+
+    // Simulate a key down event.
+    FlutterErrorDetails? record;
+    await _runWhileOverridingOnError(
+      () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+
+    // ... the error should be caught.
+    expect(record, isNotNull);
+    expect(record!.exception, 1);
+    final Map<String, DiagnosticsNode> infos = _groupDiagnosticsByName(record!.informationCollector!());
+    expect(infos['Event'], isA<DiagnosticsProperty<KeyEvent>>());
+
+    // But the exception should not interrupt recording the state.
+    // Now the key handler no longer throws an error.
+    HardwareKeyboard.instance.removeHandler(throwingCallback);
+    record = null;
+
+    // Simulate a key up event.
+    await _runWhileOverridingOnError(
+      () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+      onError: (FlutterErrorDetails details) {
+        record = details;
+      }
+    );
+    // If the previous state (key down) wasn't recorded, this key up event will
+    // trigger assertions.
+    expect(record, isNull);
+  }, variant: KeySimulatorTransitModeVariant.all());
+}
+
+
+
+Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+  final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
+  FlutterError.onError = onError;
+
+  try {
+    await body();
+  } finally {
+    FlutterError.onError = oldFlutterErrorOnError;
+  }
+}
+
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+  return Map<String, DiagnosticsNode>.fromIterable(
+    infos,
+    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+  );
 }

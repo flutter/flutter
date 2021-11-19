@@ -30,6 +30,11 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
+/// Signature used by [Dismissible] to indicate that the dismissible has been dragged.
+///
+/// Used by [Dismissible.onUpdate].
+typedef DismissUpdateCallback = void Function(DismissUpdateDetails details);
+
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
   /// The [Dismissible] can be dismissed by dragging either up or down.
@@ -98,6 +103,7 @@ class Dismissible extends StatefulWidget {
     this.secondaryBackground,
     this.confirmDismiss,
     this.onResize,
+    this.onUpdate,
     this.onDismissed,
     this.direction = DismissDirection.horizontal,
     this.resizeDuration = const Duration(milliseconds: 300),
@@ -205,8 +211,42 @@ class Dismissible extends StatefulWidget {
   /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior behavior;
 
+  /// Called when the dismissible widget has been dragged.
+  ///
+  /// If [onUpdate] is not null, then it will be invoked for every pointer event
+  /// to dispatch the latest state of the drag. For example, this callback
+  /// can be used to for example change the color of the background widget
+  /// depending on whether the dismiss threshold is currently reached.
+  final DismissUpdateCallback? onUpdate;
+
   @override
   State<Dismissible> createState() => _DismissibleState();
+}
+
+/// Details for [DismissUpdateCallback].
+///
+/// See also:
+///
+///   * [Dismissible.onUpdate], which receives this information.
+class DismissUpdateDetails {
+  /// Create a new instance of [DismissUpdateDetails].
+  DismissUpdateDetails({
+    this.direction = DismissDirection.horizontal,
+    this.reached = false,
+    this.previousReached = false
+  });
+
+  /// The direction that the dismissible is being dragged.
+  final DismissDirection direction;
+
+  /// Whether the dismiss threshold is currently reached.
+  final bool reached;
+
+  /// Whether the dismiss threshold was reached the last time this callback was invoked.
+  ///
+  /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
+  /// that the [Dismissible] is dragged across the threshold.
+  final bool previousReached;
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
@@ -254,7 +294,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _moveController = AnimationController(duration: widget.movementDuration, vsync: this)
-      ..addStatusListener(_handleDismissStatusChanged);
+      ..addStatusListener(_handleDismissStatusChanged)
+      ..addListener(_handleDismissUpdateValueChanged);
     _updateMoveAnimation();
   }
 
@@ -268,6 +309,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   bool _confirming = false;
   bool _dragUnderway = false;
   Size? _sizePriorToCollapse;
+  bool _dismissThresholdReached = false;
 
   @override
   bool get wantKeepAlive => _moveController?.isAnimating == true || _resizeController?.isAnimating == true;
@@ -385,6 +427,19 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
     if (!_moveController!.isAnimating) {
       _moveController!.value = _dragExtent.abs() / _overallDragAxisExtent;
+    }
+  }
+
+  void _handleDismissUpdateValueChanged() {
+    if(widget.onUpdate != null) {
+      final bool oldDismissThresholdReached = _dismissThresholdReached;
+      _dismissThresholdReached = _moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold);
+      final DismissUpdateDetails details = DismissUpdateDetails(
+          direction: _dismissDirection,
+          reached: _dismissThresholdReached,
+          previousReached: oldDismissThresholdReached,
+      );
+      widget.onUpdate!(details);
     }
   }
 

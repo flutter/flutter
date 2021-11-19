@@ -35,9 +35,6 @@ class MyStatelessWidget extends StatelessWidget {
           width: 100,
           height: 100,
           child: CupertinoContextMenu(
-            child: Container(
-              color: Colors.red,
-            ),
             actions: <Widget>[
               CupertinoContextMenuAction(
                 child: const Text('Action one'),
@@ -52,6 +49,9 @@ class MyStatelessWidget extends StatelessWidget {
                 },
               ),
             ],
+            child: Container(
+              color: Colors.red,
+            ),
           ),
         ),
       ),

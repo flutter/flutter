@@ -90,7 +90,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
           case Thumb.end:
             thumbPath = _leftTriangle(size, center);
             break;
-          default:
+          case null:
             break;
         }
         break;
@@ -102,11 +102,11 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
           case Thumb.end:
             thumbPath = _rightTriangle(size, center);
             break;
-          default:
+          case null:
             break;
         }
         break;
-      default:
+      case null:
         break;
     }
     canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);

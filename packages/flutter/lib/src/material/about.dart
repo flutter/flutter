@@ -125,7 +125,7 @@ class AboutListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null, then its value is based on [ListTileTheme.dense].
+  /// If this property is null, then its value is based on [ListTileThemeData.dense].
   ///
   /// Dense list tiles default to a smaller height.
   final bool? dense;
@@ -566,7 +566,9 @@ class _PackagesViewState extends State<_PackagesView> {
                     );
                   },
                 );
-              default:
+              case ConnectionState.none:
+              case ConnectionState.active:
+              case ConnectionState.waiting:
                 return Material(
                     color: Theme.of(context).cardColor,
                     child: Column(

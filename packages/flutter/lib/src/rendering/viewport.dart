@@ -1919,7 +1919,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     assert(correctedOffset.isFinite);
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
-    _hasVisualOverflow = false;
+    // Since the viewport is shrinkwrapped, we know that any negative overscroll
+    // into the potentially infinite mainAxisExtent will overflow the end of
+    // the viewport.
+    _hasVisualOverflow = correctedOffset < 0.0;
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
@@ -1928,6 +1931,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
         _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
         break;
     }
+
     return layoutChildSequence(
       child: firstChild,
       scrollOffset: math.max(0.0, correctedOffset),

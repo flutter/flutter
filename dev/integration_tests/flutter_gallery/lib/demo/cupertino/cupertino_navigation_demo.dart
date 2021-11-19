@@ -608,7 +608,7 @@ class Tab2ConversationBubble extends StatelessWidget {
         backgroundColor = CupertinoTheme.of(context).primaryColor;
         foregroundColor = CupertinoColors.white;
         break;
-      default:
+      case null:
         break;
     }
 

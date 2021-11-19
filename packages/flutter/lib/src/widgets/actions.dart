@@ -142,8 +142,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// {@tool dartpad}
   /// This sample implements a custom text input field that handles the
-  /// [DeleteTextIntent] intent, as well as a US telephone number input widget
-  /// that consists of multiple text fields for area code, prefix and line
+  /// [DeleteCharacterIntent] intent, as well as a US telephone number input
+  /// widget that consists of multiple text fields for area code, prefix and line
   /// number. When the backspace key is pressed, the phone number input widget
   /// sends the focus to the preceding text field when the currently focused
   /// field becomes empty.
@@ -160,6 +160,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   Action<T>? _currentCallingAction;
+  // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
   void _updateCallingAction(Action<T>? value) {
     _currentCallingAction = value;
   }

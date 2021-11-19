@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -84,7 +84,8 @@ void main() {
       androidProject
         ..pluginRegistrantHost = androidDirectory.childDirectory('app')
         ..hostAppGradleRoot = androidDirectory
-        ..exists = false;
+        ..exists = false
+        ..embeddingVersion = AndroidEmbeddingVersion.v2;
 
       webProject = FakeWebProject();
       flutterProject.web = webProject;
@@ -169,7 +170,7 @@ void main() {
             mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
-            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', toTitleCase(camelCase(name))));
+            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', sentenceCase(camelCase(name))));
         directories.add(pluginDirectory);
       }
       return directories;
@@ -746,7 +747,7 @@ dependencies:
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugin `plugin3` uses a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if this plugin supports the Android V2 embedding. '
           'Otherwise, consider removing it since a future release of Flutter will remove these deprecated APIs.\n'
@@ -826,7 +827,7 @@ dependencies:
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'This app is using a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to migrate this app to the V2 embedding.\n'
           'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects\n'
@@ -853,7 +854,7 @@ dependencies:
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
         expect(registrant.readAsStringSync(),
           contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
           'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
@@ -881,7 +882,7 @@ dependencies:
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
         expect(registrant.readAsStringSync(),
           contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
           'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
@@ -922,7 +923,6 @@ dependencies:
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
         final File manifest = fs.file('AndroidManifest.xml');
         androidProject.appManifestFile = manifest;
-
         await injectPlugins(flutterProject, androidPlatform: true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

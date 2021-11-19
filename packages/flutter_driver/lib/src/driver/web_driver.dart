@@ -115,9 +115,10 @@ class WebFlutterDriver extends FlutterDriver {
       response = data != null ? (json.decode(data as String) as Map<String, dynamic>?)! : <String, dynamic>{};
       _logCommunication('<<< $response');
     } catch (error, stackTrace) {
-      throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
-          error,
-          stackTrace
+      throw DriverError(
+        "Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
+        error,
+        stackTrace
       );
     }
     if (response['isError'] == true)
@@ -261,8 +262,10 @@ class FlutterWebConnection {
     dynamic result;
     try {
       await _driver.execute(script, <void>[]);
-    } catch (_) {
-      // In case there is an exception, do nothing
+    } catch (error) {
+      // We should not just arbitrarily throw all exceptions on the ground.
+      // This is probably hiding real errors.
+      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
     }
 
     try {
@@ -271,7 +274,10 @@ class FlutterWebConnection {
         matcher: isNotNull,
         timeout: duration ?? const Duration(days: 30),
       );
-    } catch (_) {
+    } catch (error) {
+      // We should not just arbitrarily throw all exceptions on the ground.
+      // This is probably hiding real errors.
+      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
       // Returns null if exception thrown.
       return null;
     } finally {

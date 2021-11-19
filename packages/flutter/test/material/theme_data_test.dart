@@ -43,22 +43,12 @@ void main() {
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
-  });
-
-  test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
-    const TextTheme noBodyText1TextTheme = TextTheme();
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
-    final Typography typography = Typography.material2018(platform: lightTheme.platform);
-
-    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.bodyText1!.color!.withAlpha(0xde)));
-    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.bodyText1!.color!.withAlpha(0xde)));
   });
 
   test('Default icon theme contrasts with brightness', () {
@@ -71,8 +61,8 @@ void main() {
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.headline6!.color, typography.black.headline6!.color);
@@ -245,8 +235,30 @@ void main() {
     expect(expanded.maxHeight, equals(double.infinity));
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
+  test('copyWith, ==, hashCode basics', () {
+    expect(ThemeData(), ThemeData().copyWith());
+    expect(ThemeData().hashCode, ThemeData().copyWith().hashCode);
+  });
 
+  test('== and hashCode include focusColor and hoverColor', () {
+    // regression test for https://github.com/flutter/flutter/issues/91587
+
+    // Focus color and hover color are used in the default button theme, so
+    // use an empty one to ensure that just focus and hover colors are tested.
+    const ButtonThemeData buttonTheme = ButtonThemeData();
+
+    final ThemeData focusColorBlack = ThemeData(focusColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData focusColorWhite = ThemeData(focusColor: Colors.white, buttonTheme: buttonTheme);
+    expect(focusColorBlack != focusColorWhite, true);
+    expect(focusColorBlack.hashCode != focusColorWhite.hashCode, true);
+
+    final ThemeData hoverColorBlack = ThemeData(hoverColor: Colors.black, buttonTheme: buttonTheme);
+    final ThemeData hoverColorWhite = ThemeData(hoverColor: Colors.white, buttonTheme: buttonTheme);
+    expect(hoverColorBlack != hoverColorWhite, true);
+    expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
+  });
+
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -286,6 +298,7 @@ void main() {
       highlightColor: Colors.black,
       splashColor: Colors.black,
       splashFactory: InkRipple.splashFactory,
+      useMaterial3: false,
       selectedRowColor: Colors.black,
       unselectedWidgetColor: Colors.black,
       disabledColor: Colors.black,
@@ -346,6 +359,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
       androidOverscrollIndicator: null,
@@ -383,6 +397,7 @@ void main() {
       highlightColor: Colors.white,
       splashColor: Colors.white,
       splashFactory: InkRipple.splashFactory,
+      useMaterial3: true,
       selectedRowColor: Colors.white,
       unselectedWidgetColor: Colors.white,
       disabledColor: Colors.white,
@@ -443,6 +458,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       drawerTheme: const DrawerThemeData(),
+      listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -464,6 +480,7 @@ void main() {
       highlightColor: otherTheme.highlightColor,
       splashColor: otherTheme.splashColor,
       splashFactory: otherTheme.splashFactory,
+      useMaterial3: otherTheme.useMaterial3,
       selectedRowColor: otherTheme.selectedRowColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
       disabledColor: otherTheme.disabledColor,
@@ -521,6 +538,7 @@ void main() {
       switchTheme: otherTheme.switchTheme,
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       drawerTheme: otherTheme.drawerTheme,
+      listTileTheme: otherTheme.listTileTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
     );
 
@@ -541,6 +559,7 @@ void main() {
     expect(themeDataCopy.highlightColor, equals(otherTheme.highlightColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.splashFactory, equals(otherTheme.splashFactory));
+    expect(themeDataCopy.useMaterial3, equals(otherTheme.useMaterial3));
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
     expect(themeDataCopy.disabledColor, equals(otherTheme.disabledColor));
@@ -596,6 +615,7 @@ void main() {
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
+    expect(themeDataCopy.listTileTheme, equals(otherTheme.listTileTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
   });
 
@@ -635,5 +655,113 @@ void main() {
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
     expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
+  });
+
+  test('ThemeData diagnostics include all properties', () {
+    // List of properties must match the properties in ThemeData.hashCode()
+    final Set<String> expectedPropertyNames = <String>{
+      // GENERAL CONFIGURATION
+      'androidOverscrollIndicator',
+      'applyElevationOverlayColor',
+      'cupertinoOverrideTheme',
+      'inputDecorationTheme',
+      'materialTapTargetSize',
+      'pageTransitionsTheme',
+      'platform',
+      'scrollbarTheme',
+      'splashFactory',
+      'visualDensity',
+      'useMaterial3',
+      // COLOR
+      'colorScheme',
+      'primaryColor',
+      'primaryColorLight',
+      'primaryColorDark',
+      'focusColor',
+      'hoverColor',
+      'shadowColor',
+      'canvasColor',
+      'scaffoldBackgroundColor',
+      'bottomAppBarColor',
+      'cardColor',
+      'dividerColor',
+      'highlightColor',
+      'splashColor',
+      'selectedRowColor',
+      'unselectedWidgetColor',
+      'disabledColor',
+      'secondaryHeaderColor',
+      'backgroundColor',
+      'dialogBackgroundColor',
+      'indicatorColor',
+      'hintColor',
+      'errorColor',
+      'toggleableActiveColor',
+      // TYPOGRAPHY & ICONOGRAPHY
+      'typography',
+      'textTheme',
+      'primaryTextTheme',
+      'iconTheme',
+      'primaryIconTheme',
+      // COMPONENT THEMES
+      'appBarTheme',
+      'bannerTheme',
+      'bottomAppBarTheme',
+      'bottomNavigationBarTheme',
+      'bottomSheetTheme',
+      'buttonBarTheme',
+      'buttonTheme',
+      'cardTheme',
+      'checkboxTheme',
+      'chipTheme',
+      'dataTableTheme',
+      'dialogTheme',
+      'dividerTheme',
+      'drawerTheme',
+      'elevatedButtonTheme',
+      'floatingActionButtonTheme',
+      'listTileTheme',
+      'navigationBarTheme',
+      'navigationRailTheme',
+      'outlinedButtonTheme',
+      'popupMenuTheme',
+      'progressIndicatorTheme',
+      'radioTheme',
+      'sliderTheme',
+      'snackBarTheme',
+      'switchTheme',
+      'tabBarTheme',
+      'textButtonTheme',
+      'textSelectionTheme',
+      'timePickerTheme',
+      'toggleButtonsTheme',
+      'tooltipTheme',
+      // DEPRECATED (newest deprecations at the bottom)
+      'useTextSelectionTheme',
+      'textSelectionColor',
+      'cursorColor',
+      'textSelectionHandleColor',
+      'accentColor',
+      'accentColorBrightness',
+      'accentTextTheme',
+      'accentIconTheme',
+      'buttonColor',
+      'fixTextFieldOutlineLabel',
+      'primaryColorBrightness',
+    };
+
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    ThemeData.light().debugFillProperties(properties);
+    final List<String> propertyNameList = properties.properties
+      .map((final DiagnosticsNode node) => node.name)
+      .whereType<String>()
+      .toList();
+    final Set<String> propertyNames = propertyNameList.toSet();
+
+    // Ensure there are no duplicates.
+    expect(propertyNameList.length, propertyNames.length);
+
+    // Ensure they are all there.
+    expect(propertyNames, expectedPropertyNames);
   });
 }

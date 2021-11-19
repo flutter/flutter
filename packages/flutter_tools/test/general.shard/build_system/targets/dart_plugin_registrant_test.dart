@@ -243,6 +243,9 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
+          '// When `package:path_provider_example/main.dart` defines `main`, that definition is shadowed by the definition below.\n'
+          "export 'package:path_provider_example/main.dart';\n"
+          '\n'
           "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
@@ -381,6 +384,9 @@ void main() {
           '//\n'
           '\n'
           '// @dart = 2.12\n'
+          '\n'
+          '// When `file:///root/external.dart` defines `main`, that definition is shadowed by the definition below.\n'
+          "export 'file:///root/external.dart';\n"
           '\n'
           "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"

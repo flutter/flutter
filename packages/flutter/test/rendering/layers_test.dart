@@ -153,7 +153,7 @@ void main() {
     }
   });
 
-  test('leader and follower layers are always dirty', () {
+  test('follower layers are always dirty', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
     final FollowerLayer followerLayer = FollowerLayer(link: link);
@@ -161,8 +161,61 @@ void main() {
     followerLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     followerLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
+  });
+
+  test('leader layers are always dirty when connected to follower layer', () {
+    final ContainerLayer root = ContainerLayer()..attach(Object());
+
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final FollowerLayer followerLayer = FollowerLayer(link: link);
+
+    root.append(leaderLayer);
+    root.append(followerLayer);
+
+    leaderLayer.debugMarkClean();
+    followerLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    followerLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+  });
+
+  test('leader layers are not dirty when all followers disconnects', () {
+    final ContainerLayer root = ContainerLayer()..attach(Object());
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    root.append(leaderLayer);
+
+    // Does not need add to scene when nothing is connected to link.
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+
+    // Connecting a follower requires adding to scene.
+    final FollowerLayer follower1 = FollowerLayer(link: link);
+    root.append(follower1);
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+
+    final FollowerLayer follower2 = FollowerLayer(link: link);
+    root.append(follower2);
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+
+    // Disconnecting one follower, still needs add to scene.
+    follower2.remove();
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+
+    // Disconnecting all followers goes back to not requiring add to scene.
+    follower1.remove();
+    leaderLayer.debugMarkClean();
+    leaderLayer.updateSubtreeNeedsAddToScene();
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
   });
 
   test('depthFirstIterateChildren', () {
@@ -608,7 +661,7 @@ class FakePicture extends Fake implements Picture {
 
 class ConcreteLayer extends Layer {
   @override
-  void addToScene(SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {}
+  void addToScene(SceneBuilder builder) {}
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {

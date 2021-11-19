@@ -597,34 +597,27 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      Object? caughtException;
-      StackTrace? caughtStack;
       late Map<String, dynamic> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
-        caughtException = exception;
-        caughtStack = stack;
-      }
-      if (caughtException == null) {
-        result['type'] = '_extensionType';
-        result['method'] = method;
-        return developer.ServiceExtensionResponse.result(json.encode(result));
-      } else {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: caughtException,
-          stack: caughtStack,
+          exception: exception,
+          stack: stack,
           context: ErrorDescription('during a service extension callback for "$method"'),
         ));
         return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
           json.encode(<String, String>{
-            'exception': caughtException.toString(),
-            'stack': caughtStack.toString(),
+            'exception': exception.toString(),
+            'stack': stack.toString(),
             'method': method,
           }),
         );
       }
+      result['type'] = '_extensionType';
+      result['method'] = method;
+      return developer.ServiceExtensionResponse.result(json.encode(result));
     });
   }
 

@@ -69,7 +69,7 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
       case KeyEventResult.skipRemainingHandlers:
         hasSkipRemainingHandlers = true;
         break;
-      default:
+      case KeyEventResult.ignored:
         break;
     }
   }

@@ -1961,17 +1961,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _drawerOpened.value = isOpened;
-    });
-    widget.onDrawerChanged?.call(isOpened);
+    if (_drawerOpened.value != isOpened) {
+      setState(() {
+        _drawerOpened.value = isOpened;
+      });
+      widget.onDrawerChanged?.call(isOpened);
+    }
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _endDrawerOpened.value = isOpened;
-    });
-    widget.onEndDrawerChanged?.call(isOpened);
+    if (_endDrawerOpened.value != isOpened) {
+      setState(() {
+        _endDrawerOpened.value = isOpened;
+      });
+      widget.onEndDrawerChanged?.call(isOpened);
+    }
   }
 
   /// Opens the [Drawer] (if any).
@@ -2982,7 +2986,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: false,
+        removeBottomPadding: widget.bottomNavigationBar != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }

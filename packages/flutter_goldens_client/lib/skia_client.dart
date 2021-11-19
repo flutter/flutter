@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
+const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -176,17 +177,28 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      '--passfail',
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
     if (result.exitCode != 0) {
-      // We do not want to throw for non-zero exit codes here, as an intentional
-      // change or new golden file test expect non-zero exit codes. Logging here
-      // is meant to help debugging in CI when an unexpected result occurs.
-      // See also: https://github.com/flutter/flutter/issues/91285
-      print('goldctl imgtest add stdout: ${result.stdout}'); // ignore: avoid_print
-      print('goldctl imgtest add stderr: ${result.stderr}'); // ignore: avoid_print
+      // If an unapproved image has made it to post-submit, throw to close the
+      // tree.
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold received an unapproved image in post-submit ')
+        ..writeln('testing. Golden file images in flutter/flutter are triaged ')
+        ..writeln('in pre-submit during code review for the given PR.')
+        ..writeln()
+        ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
+        ..writeln('the image(s), or revert the associated change. For more ')
+        ..writeln('information, visit the wiki: ')
+        ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw Exception(buf.toString());
     }
 
     return true;
@@ -329,15 +341,9 @@ class SkiaGoldClient {
       final Uri requestForImage = Uri.parse(
         'https://flutter-gold.skia.org/img/images/$imageHash.png',
       );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
-        final io.HttpClientResponse response = await request.close();
-        await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
-
-      } catch(e) {
-        rethrow;
-      }
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+      final io.HttpClientResponse response = await request.close();
+      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
     },
       SkiaGoldHttpOverrides(),
     );
@@ -374,6 +380,9 @@ class SkiaGoldClient {
     if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
       keys['Platform'] = '${keys['Platform']}-browser';
+      if (platform.environment[_kWebRendererKey] == 'canvaskit') {
+        keys['WebRenderer'] = 'canvaskit';
+      }
     }
     return json.encode(keys);
   }
@@ -419,7 +428,10 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final Map<String, dynamic> keys = <String, dynamic>{
-      if (platform.environment[_kTestBrowserKey] != null) 'Browser' : platform.environment[_kTestBrowserKey],
+      if (platform.environment[_kTestBrowserKey] != null)
+        'Browser' : platform.environment[_kTestBrowserKey],
+      if (platform.environment[_kTestBrowserKey] != null && platform.environment[_kWebRendererKey] == 'canvaskit')
+        'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       'name' : testName,

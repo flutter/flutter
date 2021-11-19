@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 
 import 'test_device.dart';

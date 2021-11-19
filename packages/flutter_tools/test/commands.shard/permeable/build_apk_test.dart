@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -157,6 +157,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -186,6 +187,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Psplit-debug-info=${tempDir.path}',
           '-Ptrack-widget-creation=true',
@@ -216,6 +218,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Pextra-front-end-options=foo,bar',
           '-Ptrack-widget-creation=true',
@@ -246,6 +249,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -281,6 +285,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -335,6 +340,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -381,6 +387,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',

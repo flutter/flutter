@@ -4453,8 +4453,10 @@ class ErrorWidget extends LeafRenderObjectWidget {
   static String _stringify(Object? exception) {
     try {
       return exception.toString();
-    } catch (e) {
-      // intentionally left empty.
+    } catch (error) {
+      // If we get here, it means things have really gone off the rails, and we're better
+      // off just returning a simple string and letting the developer find out what the
+      // root cause of all their problems are by looking at the console logs.
     }
     return 'Error';
   }
@@ -5426,6 +5428,9 @@ abstract class RenderObjectElement extends Element {
       if (badAncestors.isNotEmpty) {
         badAncestors.insert(0, result);
         try {
+          // We explicitly throw here (even though we immediately redirect the
+          // exception elsewhere) so that debuggers will notice it when they
+          // have "break on exception" enabled.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
@@ -5763,9 +5768,10 @@ abstract class RenderObjectElement extends Element {
           ]);
         }
       } on FlutterError catch (e) {
-        // Catching the exception directly to avoid activating the ErrorWidget.
-        // Since the tree is in a broken state, adding the ErrorWidget would
-        // cause more exceptions.
+        // We catch the exception directly to avoid activating the ErrorWidget,
+        // while still allowing debuggers to break on exception. Since the tree
+        // is in a broken state, adding the ErrorWidget would likely cause more
+        // exceptions, which is not good for the debugging experience.
         _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
       }
       return true;
@@ -6036,6 +6042,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   /// to [runApp]. The binding is responsible for driving the build pipeline by
   /// calling the build owner's [BuildOwner.buildScope] method. See
   /// [WidgetsBinding.drawFrame].
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void assignOwner(BuildOwner owner) {
     _owner = owner;
   }

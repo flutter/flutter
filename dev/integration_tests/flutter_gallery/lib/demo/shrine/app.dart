@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gallery/demo/shrine/backdrop.dart';
-import 'package:flutter_gallery/demo/shrine/category_menu_page.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/home.dart';
-import 'package:flutter_gallery/demo/shrine/login.dart';
-import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
+import 'backdrop.dart';
+import 'category_menu_page.dart';
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'home.dart';
+import 'login.dart';
+import 'supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
   const ShrineApp({Key? key}) : super(key: key);

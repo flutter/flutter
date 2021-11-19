@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
+import 'tooltip_visibility.dart';
 
 /// A material design tooltip.
 ///
@@ -69,6 +70,7 @@ import 'tooltip_theme.dart';
 ///
 ///  * <https://material.io/design/components/tooltips.html>
 ///  * [TooltipTheme] or [ThemeData.tooltipTheme]
+///  * [TooltipVisibility]
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
@@ -327,6 +329,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool enableFeedback;
   late bool _isConcealed;
   late bool _forceRemoval;
+  late bool _visible;
 
   /// The plain text message for this tooltip.
   ///
@@ -352,6 +355,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _visible = TooltipVisibility.of(context);
+  }
+
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
     final ThemeData theme = Theme.of(context);
@@ -360,7 +369,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 24.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 32.0;
     }
   }
@@ -372,7 +383,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return const EdgeInsets.symmetric(horizontal: 8.0);
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return const EdgeInsets.symmetric(horizontal: 16.0);
     }
   }
@@ -384,7 +397,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return 10.0;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
         return 14.0;
     }
   }
@@ -477,8 +492,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// Shows the tooltip if it is not already visible.
   ///
-  /// Returns `false` when the tooltip was already visible.
+  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
+  /// was already visible.
   bool ensureTooltipVisible() {
+    if (!_visible)
+      return false;
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -665,27 +683,31 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
     enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
-    Widget result = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
-      onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
-      excludeFromSemantics: true,
-      child: Semantics(
-        label: excludeFromSemantics
-            ? null
-            : _tooltipMessage,
-        child: widget.child,
-      ),
+    Widget result = Semantics(
+      label: excludeFromSemantics
+          ? null
+          : _tooltipMessage,
+      child: widget.child,
     );
 
-    // Only check for hovering if there is a mouse connected.
-    if (_mouseIsConnected) {
-      result = MouseRegion(
-        onEnter: (_) => _handleMouseEnter(),
-        onExit: (_) => _handleMouseExit(),
+    // Only check for gestures if tooltip should be visible.
+    if (_visible) {
+      result = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: (triggerMode == TooltipTriggerMode.longPress) ?
+        _handlePress : null,
+        onTap: (triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
+        excludeFromSemantics: true,
         child: result,
       );
+      // Only check for hovering if there is a mouse connected.
+      if (_mouseIsConnected) {
+        result = MouseRegion(
+          onEnter: (_) => _handleMouseEnter(),
+          onExit: (_) => _handleMouseExit(),
+          child: result,
+        );
+      }
     }
 
     return result;

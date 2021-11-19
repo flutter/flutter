@@ -7,9 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:path/path.dart' as path;
 
+import '../common.dart';
 import 'utils.dart';
 
 const String DeviceIdEnvName = 'FLUTTER_DEVICELAB_DEVICEID';
@@ -74,8 +74,6 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fake:
         print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
-      default:
-        throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
   }
 
@@ -796,7 +794,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     }
 
     if (deviceIds.isEmpty) {
-      throw const DeviceException('No connected iOS devices found.');
+      throw const DeviceException('No connected physical iOS devices found.');
     }
     return deviceIds;
   }

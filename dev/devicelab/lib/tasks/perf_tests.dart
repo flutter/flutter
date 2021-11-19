@@ -7,15 +7,15 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/framework/devices.dart';
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/host_agent.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../common.dart';
+import '../framework/devices.dart';
+import '../framework/framework.dart';
+import '../framework/host_agent.dart';
+import '../framework/task_result.dart';
+import '../framework/utils.dart';
 
 /// Must match flutter_driver/lib/src/common.dart.
 ///
@@ -814,6 +814,10 @@ class PerfTest {
       final String deviceId = device.deviceId;
 
       await flutter('drive', options: <String>[
+        if (localEngine != null)
+          ...<String>['--local-engine', localEngine!],
+        if (localEngineSrcPath != null)
+          ...<String>['--local-engine-src-path', localEngineSrcPath!],
         '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
@@ -994,6 +998,10 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
+        if (localEngine != null)
+          ...<String>['--local-engine', localEngine!],
+        if (localEngineSrcPath != null)
+          ...<String>['--local-engine-src-path', localEngineSrcPath!],
         '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[

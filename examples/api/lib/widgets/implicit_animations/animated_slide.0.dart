@@ -49,12 +49,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ElevatedButton(
-          child: const Text('Slide up'),
           onPressed: _slideUp,
+          child: const Text('Slide up'),
         ),
         ElevatedButton(
-          child: const Text('Slide down'),
           onPressed: _slideDown,
+          child: const Text('Slide down'),
         ),
         Padding(
           padding: const EdgeInsets.all(50),

@@ -25,9 +25,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -70,9 +70,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),

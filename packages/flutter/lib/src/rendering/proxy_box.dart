@@ -2466,7 +2466,12 @@ class RenderFittedBox extends RenderProxyBox {
     switch (fit) {
       case BoxFit.scaleDown:
         return true;
-      default:
+      case BoxFit.contain:
+      case BoxFit.cover:
+      case BoxFit.fill:
+      case BoxFit.fitHeight:
+      case BoxFit.fitWidth:
+      case BoxFit.none:
         return false;
     }
   }
@@ -2551,7 +2556,12 @@ class RenderFittedBox extends RenderProxyBox {
           final BoxConstraints sizeConstraints = constraints.loosen();
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
           return constraints.constrain(unconstrainedSize);
-        default:
+        case BoxFit.contain:
+        case BoxFit.cover:
+        case BoxFit.fill:
+        case BoxFit.fitHeight:
+        case BoxFit.fitWidth:
+        case BoxFit.none:
           return constraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
       }
     } else {
@@ -2569,7 +2579,12 @@ class RenderFittedBox extends RenderProxyBox {
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           size = constraints.constrain(unconstrainedSize);
           break;
-        default:
+        case BoxFit.contain:
+        case BoxFit.cover:
+        case BoxFit.fill:
+        case BoxFit.fitHeight:
+        case BoxFit.fitWidth:
+        case BoxFit.none:
           size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           break;
       }
@@ -5272,7 +5287,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     // Disables the hit testing if this render object is hidden.
-    if (link.leader == null && !showWhenUnlinked)
+    if (!link.leaderConnected && !showWhenUnlinked)
       return false;
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
@@ -5296,8 +5311,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
-      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
+      link.leaderSize != null || (!link.leaderConnected || leaderAnchor == Alignment.topLeft),
+      '$link: layer is linked to ${link.debugLeader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );

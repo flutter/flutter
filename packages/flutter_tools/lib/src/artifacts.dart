@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'base/common.dart';
@@ -13,7 +12,7 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
@@ -282,7 +281,6 @@ abstract class Artifacts {
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
   ///
   /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
-  @visibleForTesting
   factory Artifacts.test({String? localEngine, FileSystem? fileSystem}) {
     fileSystem ??= MemoryFileSystem.test();
     if (localEngine != null) {
@@ -420,10 +418,12 @@ class CachedArtifacts implements Artifacts {
   }) {
     platform = _mapTargetPlatform(platform);
     switch (platform) {
+      case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform!, mode, environmentType);
@@ -438,7 +438,7 @@ class CachedArtifacts implements Artifacts {
         return _getFuchsiaArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      default: // could be null, but that can't be specified as a case.
+      case null:
         return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
     }
   }
@@ -468,7 +468,29 @@ class CachedArtifacts implements Artifacts {
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterFramework:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterPatchedSdkPath:
+      case Artifact.flutterTester:
+      case Artifact.flutterXcframework:
+      case Artifact.fontSubset:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformKernelDill:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -484,7 +506,27 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterFramework:
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem);
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterPatchedSdkPath:
+      case Artifact.flutterTester:
+      case Artifact.fontSubset:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformKernelDill:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -513,7 +555,26 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
         final String artifactFileName = _artifactToFileName(artifact, platform, mode)!;
         return _fileSystem.path.join(root, runtime, artifactFileName);
-      default:
+      case Artifact.constFinder:
+      case Artifact.flutterFramework:
+      case Artifact.flutterMacOSFramework:
+      case Artifact.flutterMacOSPodspec:
+      case Artifact.flutterTester:
+      case Artifact.flutterXcframework:
+      case Artifact.fontSubset:
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
+      case Artifact.icuData:
+      case Artifact.isolateSnapshotData:
+      case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
+      case Artifact.platformLibrariesJson:
+      case Artifact.skyEnginePath:
+      case Artifact.uwptool:
+      case Artifact.vmSnapshotData:
+      case Artifact.windowsCppClientWrapper:
+      case Artifact.windowsDesktopPath:
+      case Artifact.windowsUwpCppClientWrapper:
+      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -586,7 +647,10 @@ class CachedArtifacts implements Artifacts {
                      .childDirectory('windows-uwp-x64-${getNameForBuildMode(mode ?? BuildMode.debug)}')
                      .childFile(_artifactToFileName(artifact, platform, mode)!)
                      .path;
-      default:
+      case Artifact.flutterFramework:
+      case Artifact.flutterXcframework:
+      case Artifact.fuchsiaFlutterRunner:
+      case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
     }
   }
