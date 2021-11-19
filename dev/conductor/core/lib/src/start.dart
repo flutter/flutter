@@ -312,12 +312,10 @@ class StartContext extends Context {
       cherrypicks: engineCherrypickRevisions,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
-    ))
-        .map((String revision) => pb.Cherrypick(
-              trunkRevision: revision,
-              state: pb.CherrypickState.PENDING,
-            ))
-        .toList();
+    )).map((String revision) => pb.Cherrypick(
+      trunkRevision: revision,
+      state: pb.CherrypickState.PENDING,
+    )).toList();
 
     for (final pb.Cherrypick cherrypick in engineCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -362,12 +360,10 @@ class StartContext extends Context {
       cherrypicks: frameworkCherrypickRevisions,
       upstreamRef: FrameworkRepository.defaultBranch,
       releaseRef: candidateBranch,
-    ))
-        .map((String revision) => pb.Cherrypick(
-              trunkRevision: revision,
-              state: pb.CherrypickState.PENDING,
-            ))
-        .toList();
+    )).map((String revision) => pb.Cherrypick(
+      trunkRevision: revision,
+      state: pb.CherrypickState.PENDING,
+    )).toList();
 
     for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -517,9 +513,7 @@ class StartContext extends Context {
     final List<String> upstreamRevlist = (await repository.revList(<String>[
       '--ancestry-path',
       '$branchPoint..$upstreamRef',
-    ]))
-        .reversed
-        .toList();
+    ])).reversed.toList();
 
     stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
     stdio.printStatus('validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
