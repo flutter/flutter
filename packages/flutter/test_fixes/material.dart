@@ -500,4 +500,11 @@ void main() {
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.color;
+
+  // Changes made in https://github.com/flutter/flutter/pull/93396
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(primaryColorBrightness: Brightness.dark);
+  themeData = ThemeData.raw(primaryColorBrightness: Brightness.dark);
+  themeData = themeData.copyWith(primaryColorBrightness: Brightness.dark);
+  themeData.primaryColorBrightness; // Removing field reference not supported.
 }

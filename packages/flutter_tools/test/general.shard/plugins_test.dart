@@ -747,7 +747,7 @@ dependencies:
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugin `plugin3` uses a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if this plugin supports the Android V2 embedding. '
           'Otherwise, consider removing it since a future release of Flutter will remove these deprecated APIs.\n'
@@ -827,7 +827,7 @@ dependencies:
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'This app is using a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to migrate this app to the V2 embedding.\n'
           'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects\n'
@@ -854,7 +854,7 @@ dependencies:
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
         expect(registrant.readAsStringSync(),
           contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
           'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
@@ -882,7 +882,7 @@ dependencies:
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
         expect(registrant.readAsStringSync(),
           contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.errorText, equals(
+        expect(testLogger.warningText, equals(
           'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
           'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'

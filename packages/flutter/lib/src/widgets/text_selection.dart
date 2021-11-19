@@ -1529,11 +1529,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onDragSelectionStart != null ||
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
-      // TODO(mdebbar): Support dragging in any direction (for multiline text).
-      // https://github.com/flutter/flutter/issues/28676
-      gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-        () => HorizontalDragGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.mouse),
-        (HorizontalDragGestureRecognizer instance) {
+      gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+        () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+        (PanGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
             // down event.

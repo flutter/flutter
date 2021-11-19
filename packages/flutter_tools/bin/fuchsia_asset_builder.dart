@@ -6,6 +6,7 @@
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
@@ -70,8 +71,7 @@ Future<void> run(List<String> args) async {
   );
 
   if (assets == null) {
-    print('Unable to find assets.');
-    exit(1);
+    throwToolExit('Unable to find assets.', exitCode: 1);
   }
 
   final List<Future<void>> calls = <Future<void>>[];

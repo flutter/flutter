@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
+import 'common.dart';
 import 'io.dart';
 import 'terminal.dart' show Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
@@ -28,22 +29,41 @@ class StopwatchFactory {
 typedef VoidCallback = void Function();
 
 abstract class Logger {
+  /// Whether or not this logger should print [printTrace] messages.
   bool get isVerbose => false;
 
+  /// If true, silences the logger output.
   bool quiet = false;
 
+  /// If true, this logger supports color output.
   bool get supportsColor;
 
+  /// If true, this logger is connected to a terminal.
   bool get hasTerminal;
 
+  /// If true, then [printError] has been called at least once for this logger
+  /// since the last time it was set to false.
+  bool hadErrorOutput = false;
+
+  /// If true, then [printWarning] has been called at least once for this logger
+  /// since the last time it was reset to false.
+  bool hadWarningOutput = false;
+
+  /// Causes [checkForFatalLogs] to call [throwToolExit] when it is called if
+  /// [hadWarningOutput] is true.
+  bool fatalWarnings = false;
+
+  /// Returns the terminal attached to this logger.
   Terminal get terminal;
 
   OutputPreferences get _outputPreferences;
 
   /// Display an error `message` to the user. Commands should use this if they
-  /// fail in some way.
+  /// fail in some way. Errors are typically followed shortly by a call to
+  /// [throwToolExit] to terminate the run.
   ///
-  /// The `message` argument is printed to the stderr in red by default.
+  /// The `message` argument is printed to the stderr in [TerminalColor.red] by
+  /// default.
   ///
   /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
@@ -74,10 +94,41 @@ abstract class Logger {
     bool? wrap,
   });
 
+  /// Display a warning `message` to the user. Commands should use this if they
+  /// important information to convey to the user that is not fatal.
+  ///
+  /// The `message` argument is printed to the stderr in [TerminalColor.cyan] by
+  /// default.
+  ///
+  /// The `emphasis` argument will cause the output message be printed in bold text.
+  ///
+  /// The `color` argument will print the message in the supplied color instead
+  /// of the default of cyan. Colors will not be printed if the output terminal
+  /// doesn't support them.
+  ///
+  /// The `indent` argument specifies the number of spaces to indent the overall
+  /// message. If wrapping is enabled in [outputPreferences], then the wrapped
+  /// lines will be indented as well.
+  ///
+  /// If `hangingIndent` is specified, then any wrapped lines will be indented
+  /// by this much more than the first line, if wrapping is enabled in
+  /// [outputPreferences].
+  ///
+  /// If `wrap` is specified, then it overrides the
+  /// `outputPreferences.wrapText` setting.
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  });
+
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   ///
-  /// The `message` argument is printed to the stderr in red by default.
+  /// The `message` argument is printed to the stdout.
   ///
   /// The `stackTrace` argument is the stack trace that will be printed if
   /// supplied.
@@ -144,9 +195,21 @@ abstract class Logger {
 
   /// Clears all output.
   void clear();
+
+  /// If [fatalWarnings] is set, causes the logger to check if
+  /// [hadWarningOutput] is true, and then to call [throwToolExit] if so.
+  ///
+  /// The [fatalWarnings] flag can be set from the command line with the
+  /// "--fatal-warnings" option on commands that support it.
+  void checkForFatalLogs() {
+    if (fatalWarnings && (hadWarningOutput || hadErrorOutput)) {
+      throwToolExit('Logger received ${hadErrorOutput ? 'error' : 'warning'} output '
+          'during the run, and "--fatal-warnings" is enabled.');
+    }
+  }
 }
 
-/// A [Logger] that forwards all methods to another one.
+/// A [Logger] that forwards all methods to another logger.
 ///
 /// Classes can derive from this to add functionality to an existing [Logger].
 class DelegatingLogger implements Logger {
@@ -175,6 +238,24 @@ class DelegatingLogger implements Logger {
   bool get isVerbose => _delegate.isVerbose;
 
   @override
+  bool get hadErrorOutput => _delegate.hadErrorOutput;
+
+  @override
+  set hadErrorOutput(bool value) => _delegate.hadErrorOutput = value;
+
+  @override
+  bool get hadWarningOutput => _delegate.hadWarningOutput;
+
+  @override
+  set hadWarningOutput(bool value) => _delegate.hadWarningOutput = value;
+
+  @override
+  bool get fatalWarnings => _delegate.fatalWarnings;
+
+  @override
+  set fatalWarnings(bool value) => _delegate.fatalWarnings = value;
+
+  @override
   void printError(String message, {
     StackTrace? stackTrace,
     bool? emphasis,
@@ -186,6 +267,24 @@ class DelegatingLogger implements Logger {
     _delegate.printError(
       message,
       stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printWarning(String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    _delegate.printWarning(
+      message,
       emphasis: emphasis,
       color: color,
       indent: indent,
@@ -244,6 +343,9 @@ class DelegatingLogger implements Logger {
 
   @override
   void clear() => _delegate.clear();
+
+  @override
+  void checkForFatalLogs() => _delegate.checkForFatalLogs();
 }
 
 /// If [logger] is a [DelegatingLogger], walks the delegate chain and returns
@@ -303,6 +405,7 @@ class StdoutLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -318,6 +421,31 @@ class StdoutLogger extends Logger {
     if (stackTrace != null) {
       writeToStdErr('$stackTrace\n');
     }
+    _status?.resume();
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    hadWarningOutput = true;
+    _status?.pause();
+    message = wrapText(message,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      shouldWrap: wrap ?? _outputPreferences.wrapText,
+      columnWidth: _outputPreferences.wrapColumn,
+    );
+    if (emphasis == true) {
+      message = terminal.bolden(message);
+    }
+    message = terminal.color(message, color ?? TerminalColor.cyan);
+    writeToStdErr('$message\n');
     _status?.resume();
   }
 
@@ -482,7 +610,6 @@ class BufferLogger extends Logger {
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        _stopwatchFactory = const StopwatchFactory();
 
-
   @override
   final OutputPreferences _outputPreferences;
 
@@ -498,11 +625,13 @@ class BufferLogger extends Logger {
   bool get supportsColor => terminal.supportsColor;
 
   final StringBuffer _error = StringBuffer();
+  final StringBuffer _warning = StringBuffer();
   final StringBuffer _status = StringBuffer();
   final StringBuffer _trace = StringBuffer();
   final StringBuffer _events = StringBuffer();
 
   String get errorText => _error.toString();
+  String get warningText => _warning.toString();
   String get statusText => _status.toString();
   String get traceText => _trace.toString();
   String get eventText => _events.toString();
@@ -520,6 +649,7 @@ class BufferLogger extends Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     _error.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -528,6 +658,27 @@ class BufferLogger extends Logger {
         columnWidth: _outputPreferences.wrapColumn,
       ),
       color ?? TerminalColor.red,
+    ));
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    hadWarningOutput = true;
+    _warning.writeln(terminal.color(
+      wrapText(message,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        shouldWrap: wrap ?? _outputPreferences.wrapText,
+        columnWidth: _outputPreferences.wrapColumn,
+      ),
+      color ?? TerminalColor.cyan,
     ));
   }
 
@@ -625,8 +776,32 @@ class VerboseLogger extends DelegatingLogger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     _emit(
       _LogType.error,
+      wrapText(message,
+        indent: indent,
+        hangingIndent: hangingIndent,
+        shouldWrap: wrap ?? _outputPreferences.wrapText,
+        columnWidth: _outputPreferences.wrapColumn,
+      ),
+      stackTrace,
+    );
+  }
+
+  @override
+  void printWarning(
+      String message, {
+        StackTrace? stackTrace,
+        bool? emphasis,
+        TerminalColor? color,
+        int? indent,
+        int? hangingIndent,
+        bool? wrap,
+      }) {
+    hadWarningOutput = true;
+    _emit(
+      _LogType.warning,
       wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
@@ -707,15 +882,25 @@ class VerboseLogger extends DelegatingLogger {
     final String indent = ''.padLeft(prefix.length);
     final String indentMessage = message.replaceAll('\n', '\n$indent');
 
-    if (type == _LogType.error) {
-      super.printError(prefix + terminal.bolden(indentMessage));
-      if (stackTrace != null) {
-        super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
-      }
-    } else if (type == _LogType.status) {
-      super.printStatus(prefix + terminal.bolden(indentMessage));
-    } else {
-      super.printStatus(prefix + indentMessage);
+    switch (type) {
+      case _LogType.error:
+        super.printError(prefix + terminal.bolden(indentMessage));
+        if (stackTrace != null) {
+          super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+        }
+        break;
+      case _LogType.warning:
+        super.printWarning(prefix + terminal.bolden(indentMessage));
+        break;
+      case _LogType.status:
+        super.printStatus(prefix + terminal.bolden(indentMessage));
+        break;
+      case _LogType.trace:
+        // This seems wrong, since there is a 'printTrace' to call on the
+        // superclass, but it's actually the entire point of this logger: to
+        // make things more verbose than they normally would be.
+        super.printStatus(prefix + indentMessage);
+        break;
     }
   }
 
@@ -736,6 +921,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
     int? hangingIndent,
     bool? wrap,
   }) {
+    hadErrorOutput = true;
     if (message.trim().isNotEmpty == true) {
       message = 'ERROR: $message';
     }
@@ -751,7 +937,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
   }
 }
 
-enum _LogType { error, status, trace }
+enum _LogType { error, warning, status, trace }
 
 typedef SlowWarningCallback = String Function();
 
@@ -820,7 +1006,7 @@ abstract class Status {
   }
 }
 
-/// A [SilentStatus] shows nothing.
+/// A [Status] that shows nothing.
 class SilentStatus extends Status {
   SilentStatus({
     required Stopwatch stopwatch,

@@ -57,7 +57,12 @@ void main() {
   final TextEditingController controller = TextEditingController(text: testText);
 
   final FocusNode focusNode = FocusNode();
-  Widget buildEditableText({ TextAlign textAlign = TextAlign.left, bool readOnly = false, bool obscured = false }) {
+  Widget buildEditableText({
+    TextAlign textAlign = TextAlign.left,
+    bool readOnly = false,
+    bool obscured = false,
+    TextStyle style = const TextStyle(fontSize: 10.0),
+  }) {
     return MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -69,7 +74,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: const TextStyle(fontSize: 10),
+            style: style,
             textScaleFactor: 1,
             // Avoid the cursor from taking up width.
             cursorWidth: 0,
@@ -1592,6 +1597,32 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 3,   // Would have been 4 if the run wasn't interrupted.
             ));
+          }, variant: TargetPlatformVariant.all());
+
+          testWidgets('long run with fractional text height', (WidgetTester tester) async {
+            controller.text = "${'źdźbło\n' * 49}źdźbło";
+            controller.selection = const TextSelection.collapsed(offset: 2);
+            await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)));
+
+            for (int i = 1; i <= 49; i++) {
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+              await tester.pump();
+              expect(
+                controller.selection,
+                TextSelection.collapsed(offset: 2 + i * 7),
+                reason: 'line $i',
+              );
+            }
+
+            for (int i = 49; i >= 1; i--) {
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
+              await tester.pump();
+              expect(
+                controller.selection,
+                TextSelection.collapsed(offset: 2 + (i - 1) * 7),
+                reason: 'line $i',
+              );
+            }
           }, variant: TargetPlatformVariant.all());
         });
       });

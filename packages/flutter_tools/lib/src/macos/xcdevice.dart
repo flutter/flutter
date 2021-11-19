@@ -415,7 +415,7 @@ class XCDevice {
         } else {
           cpuArchitecture = DarwinArch.arm64;
         }
-        _logger.printError(
+        _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
           '${getNameForDarwinArch(cpuArchitecture)}',
         );

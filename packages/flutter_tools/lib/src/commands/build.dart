@@ -65,8 +65,9 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand() {
+  BuildSubCommand({@required bool verboseHelp}) {
     requiresPubspecYaml();
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   @override

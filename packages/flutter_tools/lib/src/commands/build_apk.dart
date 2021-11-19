@@ -16,7 +16,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false}) {
+  BuildApkCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -36,6 +36,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addMultidexOption();
+    addIgnoreDeprecationOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
@@ -53,6 +54,9 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String name = 'apk';
+
+  @override
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
