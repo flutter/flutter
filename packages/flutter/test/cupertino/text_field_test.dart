@@ -308,7 +308,7 @@ void main() {
     await tester.pump();
 
     expect(focusNode.hasFocus, true);
-    expect(
+    expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_golden.text_selection_color.0.png'),
     );
