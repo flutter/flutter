@@ -17,12 +17,14 @@ const String _iconsPathOption = 'icons';
 const String _iconsTemplatePathOption = 'icons-template';
 const String _newCodepointsPathOption = 'new-codepoints';
 const String _oldCodepointsPathOption = 'old-codepoints';
-const String _dryRunOption = 'dry-run';
+const String _fontFamilyOption = 'font-family';
 const String _enforceSafetyChecks = 'enforce-safety-checks';
+const String _dryRunOption = 'dry-run';
 
 const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
 const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
+const String _defaultFontFamily = 'MaterialIcons';
 
 const String _beginGeneratedMark = '// BEGIN GENERATED ICONS';
 const String _endGeneratedMark = '// END GENERATED ICONS';
@@ -203,7 +205,7 @@ void main(List<String> args) {
   final String iconsTemplateContents = iconsTemplateFile.readAsStringSync();
 
   stderr.writeln("Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
-  final String newIconsContents = _regenerateIconsFile(iconsTemplateContents, newTokenPairMap);
+  final String newIconsContents = _regenerateIconsFile(iconsTemplateContents, newTokenPairMap, argResults[_fontFamilyOption] as String);
 
   if (argResults[_dryRunOption] as bool) {
     stdout.write(newIconsContents);
@@ -228,10 +230,13 @@ ArgResults _handleArguments(List<String> args) {
     ..addOption(_oldCodepointsPathOption,
         defaultsTo: _defaultOldCodepointsPath,
         help: 'Location of the existing codepoints directory')
-    ..addFlag(_dryRunOption)
+    ..addOption(_fontFamilyOption,
+        defaultsTo: _defaultFontFamily,
+        help: 'The font family to use for the IconData constants')
     ..addFlag(_enforceSafetyChecks,
         defaultsTo: true,
-        help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable');
+        help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
+    ..addFlag(_dryRunOption);
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
       print(argParser.usage);
@@ -259,9 +264,13 @@ Map<String, String> _stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-String _regenerateIconsFile(String templateFileContents, Map<String, String> tokenPairMap) {
+String _regenerateIconsFile(
+    String templateFileContents, 
+    Map<String, String> tokenPairMap, 
+    String fontFamily,
+  ) {
   final List<_Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) => _Icon(entry))
+      .map((MapEntry<String, String> entry) => _Icon(entry, fontFamily))
       .toList();
   newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
 
@@ -372,7 +381,7 @@ void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTo
 
 class _Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  _Icon(MapEntry<String, String> tokenPair) {
+  _Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
@@ -422,7 +431,8 @@ class _Icon {
   late String flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
   late String family; // e.g. material
   late String hexCodepoint; // e.g. e547
-  late String htmlSuffix; // The suffix for the 'material-icons' HTML class.
+  late String htmlSuffix = ''; // The suffix for the 'material-icons' HTML class.
+  String fontFamily; // The IconData font family.
 
   String get name => shortId.replaceAll('_', ' ').trim();
 
@@ -436,7 +446,7 @@ class _Icon {
       : '';
 
   String get declaration =>
-      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
+      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'$mirroredInRTL);";
 
   String get fullDeclaration => '''
 
