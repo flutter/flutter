@@ -130,6 +130,29 @@ void main() {
       Logger: () => notifyingLogger,
     });
 
+    testUsingContext('printWarning should send daemon.logMessage event', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      globals.printWarning('daemon.logMessage test');
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
+        return map['event'] == 'daemon.logMessage' && (map['params'] as Map<String, dynamic>)['level'] == 'warning';
+      });
+      expect(response['id'], isNull);
+      expect(response['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
+      expect(logMessage['level'], 'warning');
+      expect(logMessage['message'], 'daemon.logMessage test');
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
+    });
+
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();

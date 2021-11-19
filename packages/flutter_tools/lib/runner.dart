@@ -39,7 +39,7 @@ Future<int> run(
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {

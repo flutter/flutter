@@ -14,7 +14,6 @@ import './stdio.dart';
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
-const String kForceFlag = 'force';
 
 /// Command to proceed from one [pb.ReleasePhase] to the next.
 class NextCommand extends Command<void> {

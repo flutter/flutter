@@ -23,7 +23,8 @@ class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     @required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils {
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform =
         (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?

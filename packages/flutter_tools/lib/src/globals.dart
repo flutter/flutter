@@ -39,6 +39,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
@@ -150,6 +151,30 @@ void printError(
   );
 }
 
+/// Display a warning level message to the user. Commands should use this if they
+/// have important warnings to convey that aren't fatal.
+///
+/// Set [emphasis] to true to make the output bold if it's supported.
+/// Set [color] to a [TerminalColor] to color the output, if the logger
+/// supports it. The [color] defaults to [TerminalColor.cyan].
+void printWarning(
+    String message, {
+      bool? emphasis,
+      TerminalColor? color,
+      int? indent,
+      int? hangingIndent,
+      bool? wrap,
+    }) {
+  logger.printWarning(
+    message,
+    emphasis: emphasis ?? false,
+    color: color,
+    indent: indent,
+    hangingIndent: hangingIndent,
+    wrap: wrap,
+  );
+}
+
 /// Display normal output of the command. This should be used for things like
 /// progress messages, success messages, or just normal command output.
 ///
@@ -233,3 +258,5 @@ FlutterProjectFactory get projectFactory {
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
+
+PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();

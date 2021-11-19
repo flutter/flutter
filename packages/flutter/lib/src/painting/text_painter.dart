@@ -780,7 +780,7 @@ class TextPainter {
 
       final double caretEnd = box.end;
       final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top, min(dx, _paragraph!.width), box.bottom);
+      return Rect.fromLTRB(dx.clamp(0, _paragraph!.width), box.top, dx.clamp(0, _paragraph!.width), box.bottom);
     }
     return null;
   }
@@ -822,7 +822,7 @@ class TextPainter {
       final TextBox box = boxes.last;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Rect.fromLTRB(min(dx, _paragraph!.width), box.top, min(dx, _paragraph!.width), box.bottom);
+      return Rect.fromLTRB(dx.clamp(0, _paragraph!.width), box.top, dx.clamp(0, _paragraph!.width), box.bottom);
     }
     return null;
   }

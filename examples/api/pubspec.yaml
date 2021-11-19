@@ -9,7 +9,7 @@ environment:
   flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
 
 dependencies:
-  cupertino_icons: 1.0.3
+  cupertino_icons: 1.0.4
   flutter:
     sdk: flutter
 
@@ -80,4 +80,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 5aec
+# PUBSPEC CHECKSUM: d4ed
