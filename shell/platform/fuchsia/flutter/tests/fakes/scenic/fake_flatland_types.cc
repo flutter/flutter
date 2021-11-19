@@ -39,6 +39,7 @@ std::shared_ptr<FakeContent> CloneFakeContent(
         .image_properties = fidl::Clone(image->image_properties),
         .sample_region = image->sample_region,
         .destination_size = image->destination_size,
+        .opacity = image->opacity,
         .import_token = image->import_token,
         .vmo_index = image->vmo_index,
     });
@@ -65,7 +66,6 @@ std::shared_ptr<FakeTransform> CloneFakeTransform(
                            .translation = transform->translation,
                            .clip_bounds = transform->clip_bounds,
                            .orientation = transform->orientation,
-                           .opacity = transform->opacity,
                            .children = CloneFakeTransformVector(
                                transform->children, transform_cache),
                            .content = CloneFakeContent(transform->content),
@@ -124,14 +124,14 @@ bool FakeImage::operator==(const FakeImage& other) const {
   return id == other.id && image_properties == other.image_properties &&
          sample_region == other.sample_region &&
          destination_size == other.destination_size &&
-         import_token == other.import_token && vmo_index == other.vmo_index;
+         opacity == other.opacity && import_token == other.import_token &&
+         vmo_index == other.vmo_index;
 }
 
 bool FakeTransform::operator==(const FakeTransform& other) const {
   return id == other.id && translation == other.translation &&
          clip_bounds == other.clip_bounds && orientation == other.orientation &&
-         opacity == other.opacity && children == other.children &&
-         content == other.content;
+         children == other.children && content == other.content;
 }
 
 bool FakeGraph::operator==(const FakeGraph& other) const {

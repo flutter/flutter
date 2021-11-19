@@ -143,12 +143,14 @@ struct FakeImage {
   constexpr static fuchsia::math::SizeU kDefaultImageSize{};
   constexpr static fuchsia::math::RectF kDefaultSampleRegion{};
   constexpr static fuchsia::math::SizeU kDefaultDestinationSize{};
+  constexpr static float kDefaultOpacity{1.f};
 
   fuchsia::ui::composition::ContentId id{kInvalidContentId};
 
   fuchsia::ui::composition::ImageProperties image_properties{};
   fuchsia::math::RectF sample_region{kDefaultSampleRegion};
   fuchsia::math::SizeU destination_size{kDefaultDestinationSize};
+  float opacity{kDefaultOpacity};
 
   zx_koid_t import_token{};
   uint32_t vmo_index{0};
@@ -166,14 +168,12 @@ struct FakeTransform {
                                                           .height = 0};
   constexpr static fuchsia::ui::composition::Orientation kDefaultOrientation{
       fuchsia::ui::composition::Orientation::CCW_0_DEGREES};
-  constexpr static float kDefaultOpacity{1.f};
 
   fuchsia::ui::composition::TransformId id{kInvalidTransformId};
 
   fuchsia::math::Vec translation{kDefaultTranslation};
   fuchsia::math::Rect clip_bounds{kDefaultClipBounds};
   fuchsia::ui::composition::Orientation orientation{kDefaultOrientation};
-  float opacity{kDefaultOpacity};
 
   std::vector<std::shared_ptr<FakeTransform>> children;
   std::shared_ptr<FakeContent> content;
