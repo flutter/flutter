@@ -18,4 +18,12 @@ const std::vector<Entity>& CanvasPass::GetPassEntities() const {
   return ops_;
 }
 
+void CanvasPass::SetPostProcessingEntity(Entity entity) {
+  post_processing_entity_ = std::move(entity);
+}
+
+const Entity& CanvasPass::GetPostProcessingEntity() const {
+  return post_processing_entity_;
+}
+
 }  // namespace impeller

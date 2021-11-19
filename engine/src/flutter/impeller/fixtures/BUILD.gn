@@ -12,6 +12,8 @@ impeller_shaders("shader_fixtures") {
   shaders = [
     "box_fade.vert",
     "box_fade.frag",
+    "test_texture.vert",
+    "test_texture.frag",
   ]
 }
 

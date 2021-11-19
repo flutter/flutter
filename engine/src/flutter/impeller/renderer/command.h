@@ -17,6 +17,7 @@
 #include "impeller/renderer/shader_types.h"
 #include "impeller/renderer/texture.h"
 #include "impeller/renderer/vertex_buffer.h"
+#include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 
@@ -92,6 +93,43 @@ struct Command {
                     std::shared_ptr<const Sampler> sampler);
 
   constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
+};
+
+template <class VertexShader_, class FragmentShader_>
+struct CommandT {
+  using VertexShader = VertexShader_;
+  using FragmentShader = FragmentShader_;
+  using VertexBufferBuilder =
+      VertexBufferBuilder<typename VertexShader_::PerVertexData>;
+  using Pipeline = PipelineT<VertexShader_, FragmentShader_>;
+
+  CommandT(PipelineT<VertexShader, FragmentShader>& pipeline) {
+    command_.label = VertexShader::kLabel;
+
+    // This could be moved to the accessor to delay the wait.
+    command_.pipeline = pipeline.WaitAndGet();
+  }
+
+  static VertexBufferBuilder CreateVertexBuilder() {
+    VertexBufferBuilder builder;
+    builder.SetLabel(std::string{VertexShader::kLabel});
+    return builder;
+  }
+
+  Command& Get() { return command_; }
+
+  operator Command&() { return Get(); }
+
+  bool BindVertices(VertexBufferBuilder builder, HostBuffer& buffer) {
+    return command_.BindVertices(builder.CreateVertexBuffer(buffer));
+  }
+
+  bool BindVerticesDynamic(const VertexBuffer& buffer) {
+    return command_.BindVertices(buffer);
+  }
+
+ private:
+  Command command_;
 };
 
 }  // namespace impeller
