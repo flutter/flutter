@@ -242,7 +242,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
   SurfaceFrame::SubmitCallback submit_callback =
       [weak = weak_factory_.GetWeakPtr()](const SurfaceFrame& surface_frame,
                                           SkCanvas* canvas) {
-        return weak ? weak->PresentSurface(canvas) : false;
+        return weak ? weak->PresentSurface(
+                          surface_frame.submit_info().target_time, canvas)
+                    : false;
       };
 
   framebuffer_info = delegate_->GLContextFramebufferInfo();
@@ -251,7 +253,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
                                         std::move(context_switch));
 }
 
-bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
+bool GPUSurfaceGL::PresentSurface(fml::TimePoint target_time,
+                                  SkCanvas* canvas) {
   if (delegate_ == nullptr || canvas == nullptr || context_ == nullptr) {
     return false;
   }
@@ -261,7 +264,7 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     onscreen_surface_->getCanvas()->flush();
   }
 
-  if (!delegate_->GLContextPresent(fbo_id_)) {
+  if (!delegate_->GLContextPresent(target_time, fbo_id_)) {
     return false;
   }
 
