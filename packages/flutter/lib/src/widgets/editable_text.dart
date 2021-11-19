@@ -1510,7 +1510,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate implements AutofillClient {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1927,6 +1927,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  Future<dynamic> _dispatchPlatformIntents(Iterable<Intent> intents) {
+    assert(widget.focusNode.hasFocus);
+    final BuildContext? currentFocus = primaryFocus?.context;
+    if (currentFocus == null) {
+      return Future<dynamic>.value();
+    }
+
+    for (final Intent intent in intents) {
+      // TODO
+      final Action<Intent>? action = Actions.maybeFind(currentFocus, intent: intent);
+      if (action != null) {
+        return Future<dynamic>.value(Actions.invoke(currentFocus, intent));
+      }
+    }
+    return Future<dynamic>.value();
+  }
+
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand!(action, data);
@@ -2203,9 +2220,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // _needsAutofill changes to false from true, the platform needs to be
       // notified to exclude this field from the autofill context. So we need to
       // provide the autofillId.
-      _textInputConnection = _needsAutofill && currentAutofillScope != null
-        ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
-        : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+      final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
+      final TextInputConfiguration configuration = currentAutofillScope?.createAutofillConfiguration(_effectiveAutofillClient.textInputConfiguration)
+        ?? _effectiveAutofillClient.textInputConfiguration;
+      final TextInputConnection newConnection = TextInput.attachConnection(
+        IntentTextInputConnection(_dispatchPlatformIntents),
+        configuration,
+      );
+      _textInputConnection = newConnection;
+
       _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
@@ -2272,8 +2295,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastKnownRemoteTextEditingValue = null;
 
     final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
-    final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
-      ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+    final TextInputConfiguration configuration = currentAutofillScope?.createAutofillConfiguration(_effectiveAutofillClient.textInputConfiguration)
+    ?? _effectiveAutofillClient.textInputConfiguration;
+    final TextInputConnection newConnection = TextInput.attachConnection(
+      IntentTextInputConnection(_dispatchPlatformIntents),
+      configuration,
+    );
     _textInputConnection = newConnection;
 
     final TextStyle style = widget.style;
@@ -2918,15 +2945,39 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
   void _updateText(UpdateTextEditingValueIntent intent) {
-    userUpdateTextEditingValue(
-      intent.modify(_value),
-      intent.cause,
-    );
+    if (intent.cause == SelectionChangedCause.keyboard) {
+      updateEditingValue(intent.modify(_value));
+    } else {
+      userUpdateTextEditingValue(
+        intent.modify(_value),
+        intent.cause,
+      );
+    }
   }
 
   void _controlConnection(TextInputConnectionControlIntent intent) {
-    switch (intent) {
+    final TextInputConnection? currentConnection = _textInputConnection;
+    if (currentConnection == null) {
+      return;
     }
+    switch (intent) {
+      case TextInputConnectionControlIntent.reconnect:
+        _lastKnownRemoteTextEditingValue = null;
+        final AutofillScope? currentAutofillScope = _needsAutofill ? this.currentAutofillScope : null;
+        final TextInputConfiguration configuration = currentAutofillScope?.createAutofillConfiguration(_effectiveAutofillClient.textInputConfiguration)
+          ?? _effectiveAutofillClient.textInputConfiguration;
+        _textInputConnection = TextInput.attachConnection(currentConnection, configuration)
+          ..setEditingState(_value);
+        _lastKnownRemoteTextEditingValue = _value;
+        return;
+      case TextInputConnectionControlIntent.close:
+        currentConnection.connectionClosedReceived();
+        _textInputConnection = null;
+        _lastKnownRemoteTextEditingValue = null;
+        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
+        return;
+    }
+    assert(false, 'Unrecognized connection control intent: $intent');
   }
 
   void _updateSelection(UpdateSelectionIntent intent) {

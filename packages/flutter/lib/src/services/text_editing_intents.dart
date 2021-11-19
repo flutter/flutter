@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'text_editing.dart';
@@ -275,6 +276,15 @@ class TextInputConnectionControlIntent extends Intent {
 
   static const TextInputConnectionControlIntent close = TextInputConnectionControlIntent._(0);
   static const TextInputConnectionControlIntent reconnect = TextInputConnectionControlIntent._(1);
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    switch (_controlCode) {
+      case 0: return 'close connection';
+      case 1: return 'reconnect';
+    }
+    return 'unknown control ($_controlCode)';
+  }
 }
 
 class UpdateFloatingCursorIntent extends Intent {

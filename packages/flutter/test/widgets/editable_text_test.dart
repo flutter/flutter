@@ -1118,22 +1118,24 @@ void main() {
   });
 
   testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
+    final FocusNode nameFocusNode = FocusNode(debugLabel: 'testNameField');
     final EditableText testNameField =
       EditableText(
         backgroundCursorColor: Colors.grey,
         controller: controller,
-        focusNode: focusNode,
+        focusNode: nameFocusNode,
         maxLines: null,
         keyboardType: TextInputType.text,
         style: textStyle,
         cursorColor: cursorColor,
       );
 
+    final FocusNode phoneFocusNode = FocusNode(debugLabel: 'testPhoneField');
     final EditableText testPhoneField =
       EditableText(
         backgroundCursorColor: Colors.grey,
         controller: controller,
-        focusNode: focusNode,
+        focusNode: phoneFocusNode,
         keyboardType: TextInputType.phone,
         maxLines: 3,
         style: textStyle,
@@ -1168,7 +1170,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('test'));
     final EditableTextState state =
         tester.state<EditableTextState>(find.byWidget(testNameField));
-    expect(state.wantKeepAlive, true);
+    expect(nameFocusNode.hasFocus, true);
 
     tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
@@ -1189,7 +1191,7 @@ void main() {
     await tester.idle();
     expect(tester.testTextInput.editingState!['text'], equals('650123123'));
     // Widget regained the focus.
-    expect(state.wantKeepAlive, true);
+    expect(phoneFocusNode.hasFocus, true);
   });
 
   testWidgets(

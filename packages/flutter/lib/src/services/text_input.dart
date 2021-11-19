@@ -1136,8 +1136,8 @@ abstract class TextInputClient {
 /// loses focus), or the platform (for example, the user switches to a different
 /// tab on the web).
 ///
-/// This class is extended by the [TextInputConnection] class and the [] class
-/// in the flutter framework.
+/// This class is extended by the [IntentTextInputConnection] class in the
+/// flutter framework.
 abstract class TextInputConnection {
   TextInputConnection._() : _id = _nextId++;
 
@@ -1397,6 +1397,50 @@ class IntentTextInputConnection extends TextInputConnection {
       case 'TextInputClient.showAutocorrectionPromptRect':
         yield HighlightAutocorrectTextRangeIntent(
           TextRange(start: args[1] as int, end: args[2] as int),
+        );
+        return;
+      case 'TextInputClient.DeleteCharacterIntent':
+        yield DeleteCharacterIntent(forward: args[1] as bool);
+        return;
+      case 'TextInputClient.DeleteToNextWordBoundaryIntent':
+        yield DeleteToNextWordBoundaryIntent(forward: args[1] as bool);
+        return;
+      case 'TextInputClient.DeleteToLineBreakIntent':
+        yield DeleteToLineBreakIntent(forward: args[1] as bool);
+        return;
+      case 'TextInputClient.ExtendSelectionByCharacterIntent':
+        yield ExtendSelectionByCharacterIntent(
+          forward: args[1] as bool,
+          collapseSelection: args[2] as bool,
+        );
+        return;
+      case 'TextInputClient.ExtendSelectionToNextWordBoundaryIntent':
+        yield ExtendSelectionToNextWordBoundaryIntent(
+          forward: args[1] as bool,
+          collapseSelection: args[2] as bool,
+        );
+        return;
+      case 'TextInputClient.ExtendSelectionToNextWordBoundaryOrCaretLocationIntent':
+        yield ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(
+          forward: args[1] as bool,
+        );
+        return;
+      case 'TextInputClient.ExtendSelectionToLineBreakIntent':
+        yield ExtendSelectionToLineBreakIntent(
+          forward: args[1] as bool,
+          collapseSelection: args[2] as bool,
+        );
+        return;
+      case 'TextInputClient.ExtendSelectionVerticallyToAdjacentLineIntent':
+        yield ExtendSelectionVerticallyToAdjacentLineIntent(
+          forward: args[1] as bool,
+          collapseSelection: args[2] as bool,
+        );
+        return;
+      case 'TextInputClient.ExtendSelectionToDocumentBoundaryIntent':
+        yield ExtendSelectionToDocumentBoundaryIntent(
+          forward: args[1] as bool,
+          collapseSelection: args[2] as bool,
         );
         return;
     }
@@ -1668,7 +1712,13 @@ class TextInput {
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(configuration != null);
     final TextInputConnection connection = _TextInputConnection._(client, configuration);
-    _instance._attach(connection, configuration);
+    TextInput._instance._attach(connection, configuration);
+    return connection;
+  }
+
+  static TextInputConnection attachConnection(TextInputConnection connection, TextInputConfiguration configuration) {
+    assert(configuration != null);
+    TextInput._instance._attach(connection, configuration);
     return connection;
   }
 

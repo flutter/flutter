@@ -783,10 +783,10 @@ abstract class AutofillClient {
 /// [TextInputClient].
 /// {@endtemplate}
 abstract class AutofillScope {
-  /// Gets the [AutofillScope] associated with the given [autofillId], in
+  /// Gets the [AutofillClient] associated with the given [autofillId], in
   /// this [AutofillScope].
   ///
-  /// Returns null if there's no matching [AutofillClient].
+  /// Returns null if there's no matching [AutofillClient] found in the scope.
   AutofillClient? getAutofillClient(String autofillId);
 
   /// The collection of [AutofillClient]s currently tied to this [AutofillScope].
@@ -796,10 +796,14 @@ abstract class AutofillScope {
   /// [AutofillConfiguration].)
   Iterable<AutofillClient> get autofillClients;
 
-  /// Allows a [TextInputClient] to attach to this scope. This method should be
-  /// called in lieu of [TextInput.attach], when the [TextInputClient] wishes to
-  /// participate in autofill.
+  /// Attaches a [TextInputClient] to this scope, as well as the system's text
+  /// input control.
+  ///
+  /// This method should be called in lieu of [TextInput.attach], when the
+  /// [TextInputClient] wishes to participate in autofill.
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration);
+
+  TextInputConfiguration createAutofillConfiguration(TextInputConfiguration configuration);
 }
 
 @immutable
@@ -839,17 +843,20 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 /// The mixin provides a default implementation for [AutofillScope.attach].
 mixin AutofillScopeMixin implements AutofillScope {
   @override
+  TextInputConfiguration createAutofillConfiguration(TextInputConfiguration configuration) {
+    return _AutofillScopeTextInputConfiguration(
+      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      currentClientConfiguration: configuration,
+    );
+  }
+
+  @override
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
     assert(trigger != null);
     assert(
       !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
-
-    final TextInputConfiguration inputConfiguration = _AutofillScopeTextInputConfiguration(
-      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
-      currentClientConfiguration: configuration,
-    );
-    return TextInput.attach(trigger, inputConfiguration);
+    return TextInput.attach(trigger, createAutofillConfiguration(configuration));
   }
 }
