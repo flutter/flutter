@@ -30,7 +30,7 @@ bool EntityRenderer::IsValid() const {
 }
 
 bool EntityRenderer::RenderEntities(const Surface& surface,
-                                    RenderPass& onscreen_pass,
+                                    RenderPass& parent_pass,
                                     const std::vector<Entity>& entities) {
   if (!IsValid()) {
     return false;
@@ -38,8 +38,7 @@ bool EntityRenderer::RenderEntities(const Surface& surface,
 
   for (const auto& entity : entities) {
     if (auto contents = entity.GetContents()) {
-      if (!contents->Render(*content_renderer_, entity, surface,
-                            onscreen_pass)) {
+      if (!contents->Render(*content_renderer_, entity, surface, parent_pass)) {
         return false;
       }
     }
