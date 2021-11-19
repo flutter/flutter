@@ -106,7 +106,8 @@ class AccessibilityBridge
   /// @param[in]  user_data           A custom pointer to the data of your
   ///                                 choice. This pointer can be retrieve later
   ///                                 through GetUserData().
-  AccessibilityBridge(std::unique_ptr<AccessibilityBridgeDelegate> delegate);
+  explicit AccessibilityBridge(
+      std::unique_ptr<AccessibilityBridgeDelegate> delegate);
   ~AccessibilityBridge();
 
   //------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ class CFRef {
  public:
   CFRef() : instance_(nullptr) {}
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   CFRef(T instance) : instance_(instance) {}
 
   CFRef(const CFRef& other) : instance_(other.instance_) {
@@ -54,9 +55,10 @@ class CFRef {
     return instance;
   }
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator T() const { return instance_; }
 
-  operator bool() const { return instance_ != nullptr; }
+  explicit operator bool() const { return instance_ != nullptr; }
 
  private:
   T instance_;
