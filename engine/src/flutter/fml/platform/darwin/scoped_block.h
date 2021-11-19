@@ -30,18 +30,21 @@ class ScopedBlock {
   explicit ScopedBlock(B block = nullptr,
                        OwnershipPolicy policy = OwnershipPolicy::Assume)
       : block_(block) {
-    if (block_ && policy == OwnershipPolicy::Retain)
+    if (block_ && policy == OwnershipPolicy::Retain) {
       block_ = Block_copy(block);
+    }
   }
 
   ScopedBlock(const ScopedBlock<B>& that) : block_(that.block_) {
-    if (block_)
+    if (block_) {
       block_ = Block_copy(block_);
+    }
   }
 
   ~ScopedBlock() {
-    if (block_)
+    if (block_) {
       Block_release(block_);
+    }
   }
 
   ScopedBlock& operator=(const ScopedBlock<B>& that) {
@@ -51,10 +54,12 @@ class ScopedBlock {
 
   void reset(B block = nullptr,
              OwnershipPolicy policy = OwnershipPolicy::Assume) {
-    if (block && policy == OwnershipPolicy::Retain)
+    if (block && policy == OwnershipPolicy::Retain) {
       block = Block_copy(block);
-    if (block_)
+    }
+    if (block_) {
       Block_release(block_);
+    }
     block_ = block;
   }
 

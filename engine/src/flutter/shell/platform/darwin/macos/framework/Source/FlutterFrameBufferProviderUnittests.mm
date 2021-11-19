@@ -38,4 +38,4 @@ TEST(FlutterFrameBufferProviderTest, TestCreate) {
   EXPECT_TRUE(status == GL_FRAMEBUFFER_COMPLETE);
 }
 
-}  // flutter::testing
+}  // namespace flutter::testing

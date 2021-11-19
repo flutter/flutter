@@ -69,8 +69,9 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   // Releases a reference to this object. This will destroy this object once the
   // last reference is released.
   void Release() const {
-    if (internal::RefCountedThreadSafeBase::Release())
+    if (internal::RefCountedThreadSafeBase::Release()) {
       delete static_cast<const T*>(this);
+    }
   }
 
   // Returns true if there is exactly one reference to this object. Use of this

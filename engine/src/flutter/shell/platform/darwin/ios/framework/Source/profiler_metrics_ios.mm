@@ -29,7 +29,7 @@ class MachThreads {
   FML_DISALLOW_COPY_AND_ASSIGN(MachThreads);
 };
 
-}
+}  // namespace
 
 namespace flutter {
 namespace {

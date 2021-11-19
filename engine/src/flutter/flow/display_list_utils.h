@@ -229,14 +229,18 @@ class BoundsAccumulator {
  public:
   void accumulate(const SkPoint& p) { accumulate(p.fX, p.fY); }
   void accumulate(SkScalar x, SkScalar y) {
-    if (min_x_ > x)
+    if (min_x_ > x) {
       min_x_ = x;
-    if (min_y_ > y)
+    }
+    if (min_y_ > y) {
       min_y_ = y;
-    if (max_x_ < x)
+    }
+    if (max_x_ < x) {
       max_x_ = x;
-    if (max_y_ < y)
+    }
+    if (max_y_ < y) {
       max_y_ = y;
+    }
   }
   void accumulate(const SkRect& r) {
     if (r.fLeft <= r.fRight && r.fTop <= r.fBottom) {
