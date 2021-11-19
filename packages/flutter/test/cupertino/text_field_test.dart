@@ -285,6 +285,7 @@ void main() {
   );
 
   testWidgets('can get text selection color initially on desktop', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -295,25 +296,22 @@ void main() {
             child: CupertinoTextField(
               key: const ValueKey<int>(1),
               controller: controller,
+              focusNode: focusNode,
             ),
           ),
         ),
       ),
     );
-
-    final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
-    final Offset endPos = textOffsetToPosition(tester, 5); // Index of 'blah1'.
-
-    final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
+    
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 11);
+    focusNode.requestFocus();
     await tester.pump();
-    await gesture.moveTo(endPos);
-    await tester.pumpAndSettle();
 
-    // await expectLater(
-    //   find.byKey(const ValueKey<int>(1)),
-    //   matchesGoldenFile('text_field_golden.InitialTextSelection.0.png'),
-    // );
+    expect(focusNode.hasFocus, true);
+    expect(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_golden.text_selection_color.0.png'),
+    );
   },
     variant: TargetPlatformVariant.desktop(),
   );
