@@ -24,6 +24,8 @@ import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -121,7 +123,11 @@ public class FlutterEngineGroupComponentTest {
 
     doReturn(mock(FlutterEngine.class))
         .when(firstEngine)
-        .spawn(any(Context.class), any(DartEntrypoint.class), nullable(String.class));
+        .spawn(
+            any(Context.class),
+            any(DartEntrypoint.class),
+            nullable(String.class),
+            nullable(List.class));
 
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(
@@ -133,7 +139,11 @@ public class FlutterEngineGroupComponentTest {
 
     // Now the second spawned engine is the only one left and it will be called to spawn the next
     // engine in the chain.
-    when(secondEngine.spawn(any(Context.class), any(DartEntrypoint.class), nullable(String.class)))
+    when(secondEngine.spawn(
+            any(Context.class),
+            any(DartEntrypoint.class),
+            nullable(String.class),
+            nullable(List.class)))
         .thenReturn(mock(FlutterEngine.class));
 
     FlutterEngine thirdEngine =
@@ -156,7 +166,8 @@ public class FlutterEngineGroupComponentTest {
             eq("some/path/to/flutter_assets"),
             eq("other entrypoint"),
             isNull(String.class),
-            any(AssetManager.class));
+            any(AssetManager.class),
+            nullable(List.class));
   }
 
   @Test
@@ -176,7 +187,11 @@ public class FlutterEngineGroupComponentTest {
     doAnswer(invocation -> jniAttached = true).when(secondMockflutterJNI).attachToNative();
     doReturn(secondMockflutterJNI)
         .when(mockflutterJNI)
-        .spawn(nullable(String.class), nullable(String.class), nullable(String.class));
+        .spawn(
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(List.class));
 
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(
@@ -184,6 +199,51 @@ public class FlutterEngineGroupComponentTest {
 
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
     verify(mockflutterJNI, times(1))
-        .spawn(nullable(String.class), nullable(String.class), eq("/bar"));
+        .spawn(nullable(String.class), nullable(String.class), eq("/bar"), nullable(List.class));
+  }
+
+  @Test
+  public void canCreateAndRunWithCustomEntrypointArgs() {
+    List<String> firstDartEntrypointArgs = new ArrayList<String>();
+    FlutterEngine firstEngine =
+        engineGroupUnderTest.createAndRunEngine(
+            new FlutterEngineGroup.Options(RuntimeEnvironment.application)
+                .setDartEntrypoint(mock(DartEntrypoint.class))
+                .setDartEntrypointArgs(firstDartEntrypointArgs));
+    assertEquals(1, engineGroupUnderTest.activeEngines.size());
+    verify(mockflutterJNI, times(1))
+        .runBundleAndSnapshotFromLibrary(
+            nullable(String.class),
+            nullable(String.class),
+            isNull(String.class),
+            any(AssetManager.class),
+            eq(firstDartEntrypointArgs));
+
+    when(mockflutterJNI.isAttached()).thenReturn(true);
+    jniAttached = false;
+    FlutterJNI secondMockflutterJNI = mock(FlutterJNI.class);
+    when(secondMockflutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(secondMockflutterJNI).attachToNative();
+    doReturn(secondMockflutterJNI)
+        .when(mockflutterJNI)
+        .spawn(
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            nullable(List.class));
+    List<String> secondDartEntrypointArgs = new ArrayList<String>();
+    FlutterEngine secondEngine =
+        engineGroupUnderTest.createAndRunEngine(
+            new FlutterEngineGroup.Options(RuntimeEnvironment.application)
+                .setDartEntrypoint(mock(DartEntrypoint.class))
+                .setDartEntrypointArgs(secondDartEntrypointArgs));
+
+    assertEquals(2, engineGroupUnderTest.activeEngines.size());
+    verify(mockflutterJNI, times(1))
+        .spawn(
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            eq(secondDartEntrypointArgs));
   }
 }

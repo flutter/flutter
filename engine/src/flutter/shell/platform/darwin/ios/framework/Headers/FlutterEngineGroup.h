@@ -8,6 +8,36 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/** Options that control how a FlutterEngine should be created. */
+FLUTTER_DARWIN_EXPORT
+@interface FlutterEngineGroupOptions : NSObject
+
+/**
+ * The name of a top-level function from a Dart library.  If this is FlutterDefaultDartEntrypoint
+ * (or nil); this will default to `main()`.  If it is not the app's main() function, that function
+ * must be decorated with `@pragma(vm:entry-point)` to ensure themethod is not tree-shaken by the
+ * Dart compiler.
+ */
+@property(nonatomic, copy, nullable) NSString* entrypoint;
+
+/**
+ * The URI of the Dart library which contains the entrypoint method.  If nil, this will default to
+ * the same library as the `main()` function in the Dart program.
+ */
+@property(nonatomic, copy, nullable) NSString* libraryURI;
+
+/**
+ * The name of the initial Flutter `Navigator` `Route` to load. If this is
+ * FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
+ */
+@property(nonatomic, copy, nullable) NSString* initialRoute;
+
+/**
+ * Arguments passed as a list of string to Dart's entrypoint function.
+ */
+@property(nonatomic, retain, nullable) NSArray<NSString*>* entrypointArgs;
+@end
+
 /**
  * Represents a collection of FlutterEngines who share resources which allows
  * them to be created with less time const and occupy less memory than just
@@ -66,6 +96,15 @@ FLUTTER_DARWIN_EXPORT
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
                                 libraryURI:(nullable NSString*)libraryURI
                               initialRoute:(nullable NSString*)initialRoute;
+
+/**
+ * Creates a running `FlutterEngine` that shares components with this group.
+ *
+ * @param options Options that control how a FlutterEngine should be created.
+ *
+ * @see FlutterEngineGroupOptions
+ */
+- (FlutterEngine*)makeEngineWithOptions:(nullable FlutterEngineGroupOptions*)options;
 @end
 
 NS_ASSUME_NONNULL_END

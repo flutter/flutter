@@ -132,6 +132,8 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @param[in]  dart_entrypoint_library  The dart entrypoint library. If
   ///                                      `std::nullopt` or empty, the core
   ///                                      library will be attempted.
+  /// @param[in]  dart_entrypoint_args     Arguments passed as a List<String>
+  ///                                      to Dart's entrypoint function.
   /// @param[in]  isolate_configuration    The isolate configuration
   ///
   /// @return     If the isolate could be launched and guided to the
@@ -142,6 +144,7 @@ class RuntimeController : public PlatformConfigurationClient {
       fml::closure root_isolate_create_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
+      const std::vector<std::string>& dart_entrypoint_args,
       std::unique_ptr<IsolateConfiguration> isolate_configuration);
 
   //----------------------------------------------------------------------------

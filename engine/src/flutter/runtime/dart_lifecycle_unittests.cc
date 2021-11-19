@@ -69,6 +69,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
           settings.isolate_shutdown_callback,  // isolate shutdown callback,
           entrypoint,                          // dart entrypoint
           std::nullopt,                        // dart entrypoint library
+          {},                                  // dart entrypoint arguments
           std::move(isolate_configuration),    // isolate configuration
           std::move(context)                   // engine context
           )
