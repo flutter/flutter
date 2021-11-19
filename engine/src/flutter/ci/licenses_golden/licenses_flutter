@@ -1157,8 +1157,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_col
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h
@@ -1190,6 +1188,9 @@ FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_switchable_gl_context.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/platform_message_handler_ios.h
+FILE: ../../../flutter/shell/platform/darwin/ios/platform_message_handler_ios.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/platform_message_handler_ios_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/rendering_api_selection.h
