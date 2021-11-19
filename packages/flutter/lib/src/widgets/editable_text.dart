@@ -2917,6 +2917,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
+  void _updateText(UpdateTextEditingValueIntent intent) {
+    userUpdateTextEditingValue(
+      intent.modify(_value),
+      intent.cause,
+    );
+  }
+
+  void _controlConnection(TextInputConnectionControlIntent intent) {
+    switch (intent) {
+    }
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
     userUpdateTextEditingValue(
       intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
@@ -2950,6 +2962,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
+
+    PerformIMEActionIntent: _makeOverridable(CallbackAction<PerformIMEActionIntent>(
+      onInvoke: (PerformIMEActionIntent intent) => performAction(intent.textInputAction),
+    )),
+
+    UpdateTextEditingValueIntent: _makeOverridable(CallbackAction<UpdateTextEditingValueIntent>(onInvoke: _updateText)),
+    TextInputConnectionControlIntent: _makeOverridable(CallbackAction<TextInputConnectionControlIntent>(onInvoke: _controlConnection)),
   };
 
   @override
