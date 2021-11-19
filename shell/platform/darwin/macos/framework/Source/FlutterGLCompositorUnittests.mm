@@ -26,4 +26,4 @@ TEST(FlutterGLCompositorTest, TestPresent) {
   ASSERT_TRUE(flag);
 }
 
-}  // flutter::testing
+}  // namespace flutter::testing
