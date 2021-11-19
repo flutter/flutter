@@ -206,8 +206,8 @@ void main(List<String> args) {
 
   stderr.writeln("Generating icons ${argResults[_dryRunOption] as bool ? '' : 'to ${iconsFile.path}'}");
   final String newIconsContents = _regenerateIconsFile(
-    iconsTemplateContents, 
-    newTokenPairMap, 
+    iconsTemplateContents,
+    newTokenPairMap,
     argResults[_fontFamilyOption] as String,
     argResults[_enforceSafetyChecks] as bool,
   );
@@ -270,8 +270,8 @@ Map<String, String> _stringToTokenPairMap(String codepointData) {
 }
 
 String _regenerateIconsFile(
-    String templateFileContents, 
-    Map<String, String> tokenPairMap, 
+    String templateFileContents,
+    Map<String, String> tokenPairMap,
     String fontFamily,
     bool enforceSafetyChecks,
   ) {
