@@ -164,6 +164,7 @@ class ScopedJavaGlobalRef : public JavaRef<T> {
  public:
   ScopedJavaGlobalRef() {}
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   explicit ScopedJavaGlobalRef(const ScopedJavaGlobalRef<T>& other) {
     this->Reset(other);
   }

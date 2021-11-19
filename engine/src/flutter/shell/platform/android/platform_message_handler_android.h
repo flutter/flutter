@@ -17,7 +17,7 @@
 namespace flutter {
 class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
  public:
-  PlatformMessageHandlerAndroid(
+  explicit PlatformMessageHandlerAndroid(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
   void InvokePlatformMessageResponseCallback(

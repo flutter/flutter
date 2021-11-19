@@ -38,7 +38,7 @@ AssetResolver::AssetResolverType APKAssetProvider::GetType() const {
 
 class APKAssetMapping : public fml::Mapping {
  public:
-  APKAssetMapping(AAsset* asset) : asset_(asset) {}
+  explicit APKAssetMapping(AAsset* asset) : asset_(asset) {}
 
   ~APKAssetMapping() override { AAsset_close(asset_); }
 

@@ -16,7 +16,7 @@ namespace flutter {
 
 class AndroidImageGenerator : public ImageGenerator {
  private:
-  AndroidImageGenerator(sk_sp<SkData> buffer);
+  explicit AndroidImageGenerator(sk_sp<SkData> buffer);
 
  public:
   ~AndroidImageGenerator();

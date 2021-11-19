@@ -16,7 +16,8 @@ namespace flutter {
 ///
 class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  public:
-  PlatformViewAndroidJNIImpl(fml::jni::JavaObjectWeakGlobalRef java_object);
+  explicit PlatformViewAndroidJNIImpl(
+      fml::jni::JavaObjectWeakGlobalRef java_object);
 
   ~PlatformViewAndroidJNIImpl() override;
 
