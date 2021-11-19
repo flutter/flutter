@@ -822,12 +822,9 @@ void main() {
         ),
       ];
 
-      Map<String, String>? environment;
-      String? operatingSystem;
-
-      operatingSystem ??= const LocalPlatform().operatingSystem;
+      final String operatingSystem = const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
-      environment ??= <String, String>{
+      final Map<String, String> environment = <String, String>{
         'HOME': '/path/to/user/home',
       };
       final Directory homeDir = fileSystem.directory(
