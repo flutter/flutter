@@ -56,6 +56,10 @@ class DapTestClient {
   Stream<OutputEventBody> get outputEvents => events('output')
       .map((Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
 
+  /// Returns a stream of [StoppedEventBody] events.
+  Stream<StoppedEventBody> get stoppedEvents => events('stopped')
+      .map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
+
   /// Returns a stream of the string output from [OutputEventBody] events.
   Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
 
@@ -172,10 +176,11 @@ class DapTestClient {
   Future<void> start({
     String? program,
     String? cwd,
+    String exceptionPauseMode = 'None',
     Future<Object?> Function()? launch,
   }) {
     return Future.wait(<Future<Object?>>[
-      initialize(),
+      initialize(exceptionPauseMode: exceptionPauseMode),
       launch?.call() ?? this.launch(program: program, cwd: cwd),
     ], eagerError: true);
   }
@@ -201,7 +206,7 @@ class DapTestClient {
       } else {
         completer.completeError(message);
       }
-    } else if (message is Event) {
+    } else if (message is Event && !_eventController.isClosed) {
       _eventController.add(message);
 
       // When we see a terminated event, close the event stream so if any
