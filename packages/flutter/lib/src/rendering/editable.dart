@@ -1974,53 +1974,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  /// Expand the selection to the last tapped position.
-  ///
-  /// Either base or extent will be moved to the last tapped position, whichever
-  /// is closest. The selection will never shrink or pivot, only grow.
-  ///
-  /// See also:
-  ///
-  ///   * [extendSelection], which is similar but pivots the selection around
-  ///     the base.
-  void expandSelection({ required SelectionChangedCause cause }) {
-    assert(cause != null);
-    assert(_lastTapDownPosition != null);
-    assert(selection?.baseOffset != null);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    final TextPosition tappedPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
-
-    final bool baseIsCloser =
-        (tappedPosition.offset - selection!.baseOffset).abs()
-        < (tappedPosition.offset - selection!.extentOffset).abs();
-    final TextSelection nextSelection = selection!.copyWith(
-      baseOffset: baseIsCloser ? selection!.extentOffset : selection!.baseOffset,
-      extentOffset: tappedPosition.offset,
-    );
-    _setSelection(nextSelection, cause);
-  }
-
-  /// Extend the selection to the last tapped position.
-  ///
-  /// Holds the base in place and moves the extent.
-  ///
-  /// See also:
-  ///
-  ///   * [expandSelection], which is similar but always increases the size of
-  ///     the selection.
-  void extendSelection({ required SelectionChangedCause cause }) {
-    assert(cause != null);
-    assert(_lastTapDownPosition != null);
-    assert(selection?.baseOffset != null);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    final TextPosition tappedPosition = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
-
-    final TextSelection nextSelection = selection!.copyWith(
-      extentOffset: tappedPosition.offset,
-    );
-    _setSelection(nextSelection, cause);
-  }
-
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}

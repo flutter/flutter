@@ -946,6 +946,65 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
+  // Expand the selection to the given global position.
+  //
+  // Either base or extent will be moved to the last tapped position, whichever
+  // is closest. The selection will never shrink or pivot, only grow.
+  //
+  // See also:
+  //
+  //   * [_extendSelection], which is similar but pivots the selection around
+  //     the base.
+  void _expandSelection(Offset offset, SelectionChangedCause cause) {
+    assert(cause != null);
+    assert(offset != null);
+    assert(renderEditable.selection?.baseOffset != null);
+
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
+    final TextSelection selection = renderEditable.selection!;
+    final bool baseIsCloser =
+        (tappedPosition.offset - selection.baseOffset).abs()
+        < (tappedPosition.offset - selection.extentOffset).abs();
+    final TextSelection nextSelection = selection.copyWith(
+      baseOffset: baseIsCloser ? selection.extentOffset : selection.baseOffset,
+      extentOffset: tappedPosition.offset,
+    );
+
+    editableText.userUpdateTextEditingValue(
+      editableText.textEditingValue.copyWith(
+        selection: nextSelection,
+      ),
+      cause,
+    );
+  }
+
+  // Extend the selection to the given global position.
+  //
+  // Holds the base in place and moves the extent.
+  //
+  // See also:
+  //
+  //   * [_expandSelection], which is similar but always increases the size of
+  //     the selection.
+  void _extendSelection(Offset offset, SelectionChangedCause cause) {
+    assert(cause != null);
+    assert(offset != null);
+    assert(renderEditable.selection?.baseOffset != null);
+
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
+    final TextSelection selection = renderEditable.selection!;
+    final TextSelection nextSelection = selection.copyWith(
+      extentOffset: tappedPosition.offset,
+    );
+
+    editableText.userUpdateTextEditingValue(
+      editableText.textEditingValue.copyWith(
+        selection: nextSelection,
+      ),
+      cause,
+    );
+  }
+
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1001,13 +1060,13 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.expandSelection(cause: SelectionChangedCause.tap);
+          _expandSelection(details.globalPosition, SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          renderEditable.extendSelection(cause: SelectionChangedCause.tap);
+          _extendSelection(details.globalPosition, SelectionChangedCause.tap);
           break;
       }
     }
