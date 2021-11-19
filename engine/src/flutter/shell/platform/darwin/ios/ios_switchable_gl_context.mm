@@ -22,4 +22,4 @@ bool IOSSwitchableGLContext::RemoveCurrent() {
   FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker);
   return [EAGLContext setCurrentContext:previous_context_];
 };
-}
+}  // namespace flutter

@@ -68,4 +68,4 @@ TEST(FlutterMetalCompositorTest, TestCompositing) {
   ASSERT_EQ(texture.height, 600u);
 }
 
-}  // flutter::testing
+}  // namespace flutter::testing
