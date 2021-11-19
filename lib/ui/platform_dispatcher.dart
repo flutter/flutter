@@ -28,9 +28,6 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 /// Signature for [PlatformDispatcher.onPointerDataPacket].
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 
-// Signature for the response to KeyDataCallback.
-typedef _KeyDataResponseCallback = void Function(int responseId, bool handled);
-
 /// Signature for [PlatformDispatcher.onKeyData].
 ///
 /// The callback should return true if the key event has been handled by the
@@ -58,6 +55,11 @@ typedef PlatformConfigurationChangedCallback = void Function(PlatformConfigurati
 
 // A gesture setting value that indicates it has not been set by the engine.
 const double _kUnsetGestureSetting = -1.0;
+
+// A message channel to receive KeyData from the platform.
+//
+// See embedder.cc::kFlutterKeyDataChannel for more information.
+const String _kFlutterKeyDataChannel = 'flutter/keydata';
 
 /// Platform event dispatcher singleton.
 ///
@@ -349,9 +351,19 @@ class PlatformDispatcher {
     return PointerDataPacket(data: data);
   }
 
-  /// Called by [_dispatchKeyData].
-  void _respondToKeyData(int responseId, bool handled)
-      native 'PlatformConfiguration_respondToKeyData';
+  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) =>
+    (ByteData? packet, PlatformMessageResponseCallback callback) {
+      _invoke1<KeyData>(
+        (KeyData keyData) {
+          final bool handled = onKeyData(keyData);
+          final Uint8List response = Uint8List(1);
+          response[0] = handled ? 1 : 0;
+          callback(response.buffer.asByteData());
+        },
+        zone,
+        _unpackKeyData(packet!),
+      );
+    };
 
   /// A callback that is invoked when key data is available.
   ///
@@ -362,22 +374,13 @@ class PlatformDispatcher {
   /// framework and should not be propagated further.
   KeyDataCallback? get onKeyData => _onKeyData;
   KeyDataCallback? _onKeyData;
-  Zone _onKeyDataZone = Zone.root;
   set onKeyData(KeyDataCallback? callback) {
     _onKeyData = callback;
-    _onKeyDataZone = Zone.current;
-  }
-
-  // Called from the engine, via hooks.dart
-  void _dispatchKeyData(ByteData packet, int responseId) {
-    _invoke2<KeyData, _KeyDataResponseCallback>(
-      (KeyData data, _KeyDataResponseCallback callback) {
-        callback(responseId, onKeyData != null && onKeyData!(data));
-      },
-      _onKeyDataZone,
-      _unpackKeyData(packet),
-      _respondToKeyData,
-    );
+    if (callback != null) {
+      channelBuffers.setListener(_kFlutterKeyDataChannel, _keyDataListener(callback, Zone.current));
+    } else {
+      channelBuffers.clearListener(_kFlutterKeyDataChannel);
+    }
   }
 
   // If this value changes, update the encoding code in the following files:

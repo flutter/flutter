@@ -102,10 +102,6 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     pointer_packets_.push_back(std::move(packet));
   }
   // |flutter::PlatformView::Delegate|
-  void OnPlatformViewDispatchKeyDataPacket(
-      std::unique_ptr<flutter::KeyDataPacket> packet,
-      std::function<void(bool)> callback) {}
-  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(int32_t id,
                                              flutter::SemanticsAction action,
                                              fml::MallocMapping args) {}
