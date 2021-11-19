@@ -716,13 +716,10 @@ class ToggleButtons extends StatelessWidget {
     final MaterialTapTargetSize resolvedTapTargetSize = tapTargetSize ?? theme.materialTapTargetSize;
     switch (resolvedTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        return ConstrainedBox(
-          constraints: const BoxConstraints(),
-          child: _InputPadding(
-            minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
-            direction: direction,
-            child: result,
-          ),
+        return _InputPadding(
+          minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+          direction: direction,
+          child: result,
         );
       case MaterialTapTargetSize.shrinkWrap:
         return result;
@@ -1686,8 +1683,11 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
-    if (super.hitTest(result, position: position)) {
-      return true;
+    // The super.hitTest() method also checks hitTestChildren(). We don't
+    // want that in this case because we've padded around the children per
+    // tapTargetSize.
+    if (!size.contains(position)) {
+      return false;
     }
 
     // Only adjust one axis to ensure the correct button is tapped.
