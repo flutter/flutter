@@ -139,4 +139,20 @@ class SolidStrokeContents final : public Contents {
   FML_DISALLOW_COPY_AND_ASSIGN(SolidStrokeContents);
 };
 
+class ClipContents final : public Contents {
+ public:
+  ClipContents();
+
+  ~ClipContents();
+
+  // |Contents|
+  bool Render(const ContentRenderer& renderer,
+              const Entity& entity,
+              const Surface& surface,
+              RenderPass& pass) const override;
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(ClipContents);
+};
+
 }  // namespace impeller

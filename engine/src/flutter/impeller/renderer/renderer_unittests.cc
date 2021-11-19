@@ -5,6 +5,8 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/impeller/fixtures/box_fade.frag.h"
 #include "flutter/impeller/fixtures/box_fade.vert.h"
+#include "flutter/impeller/fixtures/test_texture.frag.h"
+#include "flutter/impeller/fixtures/test_texture.vert.h"
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/image/compressed_image.h"
@@ -321,6 +323,50 @@ TEST_F(RendererTest, CanRenderPath) {
     return true;
   };
   // OpenPlaygroundHere(callback);
+}
+
+TEST_F(RendererTest, CanPerformStencilOperations) {
+  using VS = TestTextureVertexShader;
+  using FS = TestTextureFragmentShader;
+  using TestTextureCommand = CommandT<VS, FS>;
+
+  auto pipeline = std::make_unique<TestTextureCommand::Pipeline>(*GetContext());
+
+  auto buffer = HostBuffer::Create();
+
+  auto circle_vtx_builder = TestTextureCommand::CreateVertexBuilder();
+  Tessellator{}.Tessellate(
+      PathBuilder{}.AddCircle({500, 500}, 250).CreatePath().CreatePolyline(),
+      [&circle_vtx_builder](Point vtx) {
+        VS::PerVertexData data;
+        data.vtx = vtx;
+        circle_vtx_builder.AppendVertex(data);
+      });
+  auto cicle_vertices = circle_vtx_builder.CreateVertexBuffer(*buffer);
+
+  auto square_vtx_builder = TestTextureCommand::CreateVertexBuilder();
+  Tessellator{}.Tessellate(
+      PathBuilder{}.AddRect({0, 0, 250, 250}).CreatePath().CreatePolyline(),
+      [&square_vtx_builder](Point vtx) {
+        VS::PerVertexData data;
+        data.vtx = vtx;
+        square_vtx_builder.AppendVertex(data);
+      });
+  auto square_vertices = square_vtx_builder.CreateVertexBuffer(*buffer);
+
+  OpenPlaygroundHere([&](const Surface& surface, RenderPass& pass) -> bool {
+    TestTextureCommand command(*pipeline.get());
+
+    command.BindVerticesDynamic(cicle_vertices);
+
+    VS::FrameInfo info;
+    info.mvp = Matrix::MakeOrthographic(surface.GetSize());
+
+    VS::BindFrameInfo(command, pass.GetTransientsBuffer().EmplaceUniform(info));
+
+    pass.AddCommand(command);
+    return true;
+  });
 }
 
 }  // namespace testing

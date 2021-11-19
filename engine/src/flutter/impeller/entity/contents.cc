@@ -354,4 +354,19 @@ Scalar SolidStrokeContents::GetStrokeSize() const {
   return stroke_size_;
 }
 
+/*******************************************************************************
+ ******* ClipContents
+ ******************************************************************************/
+
+ClipContents::ClipContents() = default;
+
+ClipContents::~ClipContents() = default;
+
+bool ClipContents::Render(const ContentRenderer& renderer,
+                          const Entity& entity,
+                          const Surface& surface,
+                          RenderPass& pass) const {
+  return true;
+}
+
 }  // namespace impeller
