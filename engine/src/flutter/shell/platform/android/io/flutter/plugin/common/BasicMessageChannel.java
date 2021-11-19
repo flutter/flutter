@@ -159,7 +159,7 @@ public final class BasicMessageChannel<T> {
      *
      * <p>Handler implementations must reply to all incoming messages, by submitting a single reply
      * message to the given {@link Reply}. Failure to do so will result in lingering Flutter reply
-     * handlers. The reply may be submitted asynchronously.
+     * handlers. The reply may be submitted asynchronously and invoked on any thread.
      *
      * <p>Any uncaught exception thrown by this method, or the preceding message decoding, will be
      * caught by the channel implementation and logged, and a null reply message will be sent back
