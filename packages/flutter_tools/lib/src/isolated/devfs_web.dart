@@ -198,13 +198,13 @@ class WebAssetServer implements AssetReader {
       address = (await InternetAddress.lookup(hostname)).first;
     }
     HttpServer httpServer;
-    const int kMaxAttempts = 4;
-    for (int i = 0; i <= kMaxAttempts; i += 1) {
+    const int kMaxRetries = 4;
+    for (int i = 0; i <= kMaxRetries; i++) {
       try {
         httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
         break;
       } on SocketException catch (e, s) {
-        if (i == kMaxAttempts) {
+        if (i >= kMaxRetries) {
           globals.printError('Failed to bind web development server:\n$e', stackTrace: s);
           throwToolExit('Failed to bind web development server:\n$e');
         }
@@ -271,14 +271,7 @@ class WebAssetServer implements AssetReader {
     }
 
     logging.Logger.root.level = logging.Level.ALL;
-    logging.Logger.root.onRecord.listen((logging.LogRecord event) {
-      if (event.level > logging.Level.INFO) {
-        final String error = event.error == null? ', ${event.error}':'';
-        globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
-      } else {
-        globals.printTrace('${event.loggerName}: ${event.message}');
-      }
-    });
+    logging.Logger.root.onRecord.listen(_log);
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -1006,6 +999,17 @@ class ReleaseAssetServer {
     return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
       'Content-Type': 'text/html',
     });
+  }
+}
+
+void _log(logging.LogRecord event) {
+  final String error = event.error == null? '': 'Error: ${event.error}';
+  if (event.level >= logging.Level.SEVERE) {
+    globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
+  } else if (event.level == logging.Level.WARNING) {
+    globals.printWarning('${event.loggerName}: ${event.message}$error');
+  } else  {
+    globals.printTrace('${event.loggerName}: ${event.message}$error');
   }
 }
 
