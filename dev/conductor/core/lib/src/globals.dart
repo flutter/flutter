@@ -5,16 +5,18 @@
 import 'package:args/args.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
+import 'repository.dart';
 
 const String gsutilBinary = 'gsutil.py';
 
 const String kFrameworkDefaultBranch = 'master';
+const String kForceFlag = 'force';
 
 const List<String> kReleaseChannels = <String>[
   'stable',
   'beta',
   'dev',
-  'master',
+  FrameworkRepository.defaultBranch,
 ];
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
@@ -79,6 +81,18 @@ String? getValueFromEnvOrArgs(
   throw ConductorException(
     'Expected either the CLI arg --$name or the environment variable $envName '
     'to be provided!');
+}
+
+bool getBoolFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null) {
+    return (env[envName]?.toUpperCase()) == 'TRUE';
+  }
+  return argResults[name] as bool;
 }
 
 /// Return multiple values from the environment or fall back to [argResults].

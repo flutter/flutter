@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 
@@ -129,4 +130,69 @@ void main() {
       );
     });
   });
+
+  group('getBoolFromEnvOrArgs', () {
+    const String flagName = 'a-cli-flag';
+
+    test('prefers env over argResults', () {
+      final ArgResults argResults = FakeArgs(results: <String, Object>{
+        flagName: false,
+      });
+      final Map<String, String> env = <String, String>{'A_CLI_FLAG': 'TRUE'};
+      final bool result = getBoolFromEnvOrArgs(
+        flagName,
+        argResults,
+        env,
+      );
+      expect(result, true);
+    });
+
+    test('falls back to argResults if env is empty', () {
+      final ArgResults argResults = FakeArgs(results: <String, Object>{
+        flagName: false,
+      });
+      final Map<String, String> env = <String, String>{};
+      final bool result = getBoolFromEnvOrArgs(
+        flagName,
+        argResults,
+        env,
+      );
+      expect(result, false);
+    });
+  });
+}
+
+class FakeArgs implements ArgResults {
+  FakeArgs({
+    this.arguments = const <String>[],
+    this.name = 'fake-command',
+    this.results = const <String, Object>{},
+  });
+
+  final Map<String, Object> results;
+
+  @override
+  final List<String> arguments;
+
+  @override
+  final String name;
+
+  @override
+  ArgResults? get command => throw Exception('Unimplemented');
+
+  @override
+  List<String> get rest => throw Exception('Unimplemented');
+
+  @override
+  Iterable<String> get options => throw Exception('Unimplemented');
+
+  @override
+  bool wasParsed(String name) {
+    return results[name] != null;
+  }
+
+  @override
+  Object? operator[](String name) {
+    return results[name];
+  }
 }

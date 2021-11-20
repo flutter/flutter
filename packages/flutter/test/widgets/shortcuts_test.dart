@@ -1126,12 +1126,16 @@ void main() {
 
   group('CallbackShortcuts', () {
     testWidgets('trigger on key events', (WidgetTester tester) async {
-      int invoked = 0;
+      int invokedA = 0;
+      int invokedB = 0;
       await tester.pumpWidget(
         CallbackShortcuts(
           bindings: <ShortcutActivator, VoidCallback>{
             const SingleActivator(LogicalKeyboardKey.keyA): () {
-              invoked += 1;
+              invokedA += 1;
+            },
+            const SingleActivator(LogicalKeyboardKey.keyB): () {
+              invokedB += 1;
             },
           },
           child: const Focus(
@@ -1143,9 +1147,20 @@ void main() {
       await tester.pump();
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(invoked, equals(1));
+      await tester.pump();
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(invoked, equals(1));
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      invokedA = 0;
+      invokedB = 0;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
     });
 
     testWidgets('nested CallbackShortcuts stop propagation', (WidgetTester tester) async {

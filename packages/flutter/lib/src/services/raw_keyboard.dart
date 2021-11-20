@@ -772,15 +772,22 @@ class RawKeyboard {
       ..._keysPressed.keys,
       if (event is RawKeyDownEvent) event.physicalKey,
     };
-    for (final ModifierKey key in modifiersPressed.keys) {
+    ModifierKey? thisKeyModifier;
+    for (final ModifierKey key in ModifierKey.values) {
+      final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+      if (thisModifierKeys == null)
+        continue;
+      if (thisModifierKeys.contains(event.physicalKey)) {
+        thisKeyModifier = key;
+      }
       if (modifiersPressed[key] == KeyboardSide.any) {
-        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
-        anySideKeys.addAll(thisModifierKeys!);
+        anySideKeys.addAll(thisModifierKeys);
         if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;
         }
       }
-      final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null ?
+        <PhysicalKeyboardKey>{} : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(() {
         if (mappedKeys == null) {
           debugPrint(
@@ -809,6 +816,20 @@ class RawKeyboard {
       _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
+    // In rare cases, the event presses a modifier key but the key does not
+    // exist in the modifier list. Enforce the pressing state.
+    if (event is RawKeyDownEvent && thisKeyModifier != null
+        && !_keysPressed.containsKey(event.physicalKey)) {
+      // So far this inconsistancy is only found on Linux GTK for AltRight in a
+      // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
+      // other cases, this inconsistancy will be caught by an assertion later.
+      if (event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
+        if (logicalKey != null) {
+          _keysPressed[event.physicalKey] = logicalKey;
+        }
+      }
+    }
   }
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};

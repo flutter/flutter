@@ -33,7 +33,12 @@ class Git {
     bool allowNonZeroExitCode = false,
     required String workingDirectory,
   }) async {
-    final ProcessResult result = await _run(args, workingDirectory);
+    late final ProcessResult result;
+    try {
+      result = await _run(args, workingDirectory);
+    } on ProcessException {
+      _reportFailureAndExit(args, workingDirectory, result, explanation);
+    }
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
       _reportFailureAndExit(args, workingDirectory, result, explanation);
     }

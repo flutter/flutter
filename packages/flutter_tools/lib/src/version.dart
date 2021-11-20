@@ -144,6 +144,8 @@ class FlutterVersion {
   late String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
+  String get devToolsVersion => globals.cache.devToolsVersion;
+
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -159,10 +161,10 @@ class FlutterVersion {
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
-    final String toolsText = 'Tools • Dart $dartSdkVersion';
+    final String toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
 
     // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
-    // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
+    // Framework • revision 340c158f32 (85 minutes ago) • 2018-10-26 11:27:22 -0400
     // Engine • revision 9c46333e14
     // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
@@ -177,6 +179,7 @@ class FlutterVersion {
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
+    'devToolsVersion': devToolsVersion,
   };
 
   String get frameworkDate => frameworkCommitDate;
@@ -277,10 +280,10 @@ class FlutterVersion {
       );
     } on VersionCheckError catch (error) {
       if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.logger.printError('Warning: the Flutter git upstream was overridden '
+        globals.printWarning('Warning: the Flutter git upstream was overridden '
         'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
       }
-      globals.logger.printError(error.toString());
+      globals.printError(error.toString());
       rethrow;
     } finally {
       await _removeVersionCheckRemoteIfExists();

@@ -20,11 +20,6 @@ import '../migrations/cmake_custom_command_migration.dart';
 import 'install_manifest.dart';
 import 'visual_studio.dart';
 
-// From https://cmake.org/cmake/help/v3.14/manual/cmake-generators.7.html#visual-studio-generators
-// This may need to become a getter on VisualStudio in the future to support
-// future major versions of Visual Studio.
-const String _cmakeVisualStudioGeneratorIdentifier = 'Visual Studio 16 2019';
-
 /// Update the string when non-backwards compatible changes are made to the UWP template.
 const int kCurrentUwpTemplateVersion = 0;
 
@@ -61,7 +56,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     processManager: globals.processManager,
   );
   final String? cmakePath = visualStudio.cmakePath;
-  if (cmakePath == null) {
+  final String? cmakeGenerator = visualStudio.cmakeGenerator;
+  if (cmakePath == null || cmakeGenerator == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
@@ -72,7 +68,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     'Building Windows application...',
   );
   try {
-    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runCmakeGeneration(
+      cmakePath: cmakePath,
+      generator: cmakeGenerator,
+      buildDir: buildDirectory,
+      sourceDir: windowsProject.cmakeFile.parent,
+    );
     await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
@@ -152,7 +153,8 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     processManager: globals.processManager,
   );
   final String? cmakePath = visualStudio.cmakePath;
-  if (cmakePath == null) {
+  final String? cmakeGenerator = visualStudio.cmakeGenerator;
+  if (cmakePath == null || cmakeGenerator == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
   }
@@ -165,7 +167,12 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
     // The Cmake re-entrant build does not work for UWP, so the flutter build is
     // run in advance.
     await _runFlutterBuild(buildDirectory, buildInfo, target);
-    await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
+    await _runCmakeGeneration(
+      cmakePath: cmakePath,
+      generator: cmakeGenerator,
+      buildDir: buildDirectory,
+      sourceDir: windowsProject.cmakeFile.parent,
+    );
     await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
   } finally {
     status.cancel();
@@ -232,7 +239,12 @@ Future<void> _runFlutterBuild(Directory buildDirectory, BuildInfo buildInfo, Str
   }
 }
 
-Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory sourceDir) async {
+Future<void> _runCmakeGeneration({
+  required String cmakePath,
+  required String generator,
+  required Directory buildDir,
+  required Directory sourceDir,
+}) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
@@ -246,7 +258,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
         '-B',
         buildDir.path,
         '-G',
-        _cmakeVisualStudioGeneratorIdentifier,
+        generator,
       ],
       trace: true,
     );

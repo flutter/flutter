@@ -568,6 +568,20 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
+    hadErrorOutput = true;
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    hadWarningOutput = true;
     _log('[stderr] $message');
   }
 
