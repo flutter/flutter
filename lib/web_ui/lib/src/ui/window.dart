@@ -14,6 +14,7 @@ abstract class FlutterView {
   WindowPadding get viewPadding => viewConfiguration.viewPadding;
   WindowPadding get systemGestureInsets => viewConfiguration.systemGestureInsets;
   WindowPadding get padding => viewConfiguration.padding;
+  List<DisplayFeature> get displayFeatures => viewConfiguration.displayFeatures;
   void render(Scene scene) => platformDispatcher.render(scene, this);
 }
 
