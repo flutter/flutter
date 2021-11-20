@@ -286,7 +286,28 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint systemGestureInsetRight,
                                jint systemGestureInsetBottom,
                                jint systemGestureInsetLeft,
-                               jint physicalTouchSlop) {
+                               jint physicalTouchSlop,
+                               jintArray javaDisplayFeaturesBounds,
+                               jintArray javaDisplayFeaturesType,
+                               jintArray javaDisplayFeaturesState) {
+  // Convert java->c++. javaDisplayFeaturesBounds, javaDisplayFeaturesType and
+  // javaDisplayFeaturesState cannot be null
+  jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
+  std::vector<int> boundsIntVector(rectSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
+                         &boundsIntVector[0]);
+  std::vector<double> displayFeaturesBounds(boundsIntVector.begin(),
+                                            boundsIntVector.end());
+  jsize typeSize = env->GetArrayLength(javaDisplayFeaturesType);
+  std::vector<int> displayFeaturesType(typeSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
+                         &displayFeaturesType[0]);
+
+  jsize stateSize = env->GetArrayLength(javaDisplayFeaturesState);
+  std::vector<int> displayFeaturesState(stateSize);
+  env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
+                         &displayFeaturesState[0]);
+
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),
       static_cast<double>(physicalWidth),
@@ -304,6 +325,9 @@ static void SetViewportMetrics(JNIEnv* env,
       static_cast<double>(systemGestureInsetBottom),
       static_cast<double>(systemGestureInsetLeft),
       static_cast<double>(physicalTouchSlop),
+      displayFeaturesBounds,
+      displayFeaturesType,
+      displayFeaturesState,
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(metrics);
@@ -706,7 +730,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[I)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
