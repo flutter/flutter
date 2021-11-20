@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
+import 'repository.dart';
 
 const String gsutilBinary = 'gsutil.py';
 
@@ -15,7 +16,7 @@ const List<String> kReleaseChannels = <String>[
   'stable',
   'beta',
   'dev',
-  'master',
+  FrameworkRepository.defaultBranch,
 ];
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
