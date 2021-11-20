@@ -526,17 +526,19 @@ std::vector<StructMember> Reflector::ReadStructMembers(
     }
   }
 
-  const auto struct_length = current_byte_offset;
-  {
-    const auto excess = struct_length % max_member_alignment;
-    if (excess != 0) {
-      const auto padding = max_member_alignment - excess;
-      result.emplace_back(StructMember{
-          .type = TypeNameWithPaddingOfSize(padding),
-          .name = "_PADDING_",
-          .offset = current_byte_offset,
-          .byte_length = padding,
-      });
+  if (max_member_alignment > 0u) {
+    const auto struct_length = current_byte_offset;
+    {
+      const auto excess = struct_length % max_member_alignment;
+      if (excess != 0) {
+        const auto padding = max_member_alignment - excess;
+        result.emplace_back(StructMember{
+            .type = TypeNameWithPaddingOfSize(padding),
+            .name = "_PADDING_",
+            .offset = current_byte_offset,
+            .byte_length = padding,
+        });
+      }
     }
   }
 

@@ -67,6 +67,7 @@ struct Command {
   std::string label;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   WindingOrder winding = WindingOrder::kClockwise;
+  uint32_t stencil_reference = 0u;
 
   bool BindVertices(const VertexBuffer& buffer);
 

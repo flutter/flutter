@@ -70,10 +70,9 @@ TEST_F(AiksTest, DISABLED_CanRenderImageRect) {
   source_rect.size.height /= 2;
   source_rect.origin.x += source_rect.size.width;
   source_rect.origin.y += source_rect.size.height;
-
   canvas.DrawImageRect(image, source_rect, Rect::MakeXYWH(100, 100, 600, 600),
                        paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanRenderStrokes) {
@@ -102,9 +101,9 @@ TEST_F(AiksTest, CanRenderClips) {
   Paint paint;
   paint.color = Color::Fuchsia();
   canvas.ClipPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 100, 100)).CreatePath());
-  canvas.DrawPath(PathBuilder{}.AddCircle({100, 100}, 50).CreatePath(), paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 500, 500)).CreatePath());
+  canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing

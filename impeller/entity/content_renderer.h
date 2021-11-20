@@ -27,6 +27,9 @@ using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
 using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
+// Instead of requiring new shaders for clips,  the solid fill stages are used
+// to redirect writing to the stencil instead of color attachments.
+using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
 class ContentRenderer {
  public:
@@ -44,6 +47,8 @@ class ContentRenderer {
 
   std::shared_ptr<Pipeline> GetSolidStrokePipeline() const;
 
+  std::shared_ptr<Pipeline> GetClipPipeline() const;
+
   std::shared_ptr<Context> GetContext() const;
 
  private:
@@ -52,6 +57,7 @@ class ContentRenderer {
   std::unique_ptr<SolidFillPipeline> solid_fill_pipeline_;
   std::unique_ptr<TexturePipeline> texture_pipeline_;
   std::unique_ptr<SolidStrokePipeline> solid_stroke_pipeline_;
+  std::unique_ptr<ClipPipeline> clip_pipeline_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentRenderer);

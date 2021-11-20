@@ -172,7 +172,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     stencil0.texture = stencil_texture;
     stencil0.clear_stencil = 0;
     stencil0.load_action = LoadAction::kClear;
-    stencil0.store_action = StoreAction::kStore;
+    stencil0.store_action = StoreAction::kDontCare;
 
     RenderTarget desc;
     desc.SetColorAttachment(color0, 0u);

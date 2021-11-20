@@ -241,7 +241,7 @@ enum class StencilOperation {
   /// Reset the stencil value to zero.
   kZero,
   /// Reset the stencil value to the reference value.
-  kSetToReferneceValue,
+  kSetToReferenceValue,
   /// Increment the current stencil value by 1. Clamp it to the maximum.
   kIncrementClamp,
   /// Decrement the current stencil value by 1. Clamp it to zero.
