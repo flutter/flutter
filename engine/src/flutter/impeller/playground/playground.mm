@@ -157,8 +157,26 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 
+    TextureDescriptor stencil_texture_descriptor;
+    stencil_texture_descriptor.format = PixelFormat::kD32FloatS8UNormInt;
+    stencil_texture_descriptor.size = color0_desc.size;
+    stencil_texture_descriptor.usage =
+        static_cast<TextureUsageMask>(TextureUsage::kShaderRead) |
+        static_cast<TextureUsageMask>(TextureUsage::kShaderWrite);
+    auto stencil_texture =
+        renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
+            StorageMode::kDeviceTransient, stencil_texture_descriptor);
+    stencil_texture->SetLabel("PlaygroundMainStencil");
+
+    StencilAttachment stencil0;
+    stencil0.texture = stencil_texture;
+    stencil0.clear_stencil = 0;
+    stencil0.load_action = LoadAction::kClear;
+    stencil0.store_action = StoreAction::kStore;
+
     RenderTarget desc;
     desc.SetColorAttachment(color0, 0u);
+    desc.SetStencilAttachment(stencil0);
 
     Surface surface(desc);
 

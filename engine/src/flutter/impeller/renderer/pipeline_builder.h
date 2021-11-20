@@ -104,6 +104,14 @@ struct PipelineBuilder {
       desc.SetColorAttachmentDescriptor(0u, std::move(color0));
     }
 
+    // Setup default stencil buffer descriptions.
+    {
+      StencilAttachmentDescriptor stencil0;
+      stencil0.depth_stencil_pass = StencilOperation::kIncrementClamp;
+      desc.SetStencilAttachmentDescriptors(stencil0);
+      desc.SetStencilPixelFormat(PixelFormat::kD32FloatS8UNormInt);
+    }
+
     return true;
   }
 };

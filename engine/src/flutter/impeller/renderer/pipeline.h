@@ -68,6 +68,10 @@ class PipelineT {
             context,
             Builder::MakeDefaultPipelineDescriptor(context))) {}
 
+  explicit PipelineT(const Context& context,
+                     std::optional<PipelineDescriptor> desc)
+      : pipeline_future_(CreatePipelineFuture(context, desc)) {}
+
   std::shared_ptr<Pipeline> WaitAndGet() {
     if (did_wait_) {
       return pipeline_;
