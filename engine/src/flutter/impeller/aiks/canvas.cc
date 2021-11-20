@@ -33,11 +33,12 @@ bool Canvas::Restore() {
 }
 
 void Canvas::Concat(const Matrix& xformation) {
-  xformation_stack_.top() = xformation * xformation_stack_.top();
+  const auto current_xformation = xformation_stack_.top().xformation;
+  xformation_stack_.top().xformation = xformation * current_xformation;
 }
 
 const Matrix& Canvas::GetCurrentTransformation() const {
-  return xformation_stack_.top();
+  return xformation_stack_.top().xformation;
 }
 
 void Canvas::Translate(const Vector3& offset) {
@@ -68,6 +69,7 @@ void Canvas::DrawPath(Path path, Paint paint) {
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
+  entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(paint.CreateContentsForEntity());
   GetCurrentPass().PushEntity(std::move(entity));
 }
@@ -77,10 +79,13 @@ void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
 }
 
 void Canvas::ClipPath(Path path) {
+  IncrementStencilDepth();
+
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
   entity.SetContents(std::make_shared<ClipContents>());
+  entity.SetStencilDepth(GetStencilDepth());
   GetCurrentPass().PushEntity(std::move(entity));
 }
 
@@ -147,6 +152,14 @@ Picture Canvas::EndRecordingAsPicture() {
 CanvasPass& Canvas::GetCurrentPass() {
   FML_DCHECK(!passes_.empty());
   return passes_.back();
+}
+
+void Canvas::IncrementStencilDepth() {
+  ++xformation_stack_.top().stencil_depth;
+}
+
+size_t Canvas::GetStencilDepth() const {
+  return xformation_stack_.top().stencil_depth;
 }
 
 }  // namespace impeller

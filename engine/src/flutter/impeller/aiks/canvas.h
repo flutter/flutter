@@ -23,6 +23,11 @@ namespace impeller {
 
 class Entity;
 
+struct CanvasStackEntry {
+  Matrix xformation;
+  size_t stencil_depth = 0u;
+};
+
 class Canvas {
  public:
   Canvas();
@@ -67,10 +72,14 @@ class Canvas {
   Picture EndRecordingAsPicture();
 
  private:
-  std::stack<Matrix> xformation_stack_;
+  std::stack<CanvasStackEntry> xformation_stack_;
   std::vector<CanvasPass> passes_;
 
   CanvasPass& GetCurrentPass();
+
+  void IncrementStencilDepth();
+
+  size_t GetStencilDepth() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

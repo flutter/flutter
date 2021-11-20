@@ -172,6 +172,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
   using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto pipeline_desc =
       BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
   auto box_pipeline = context->GetPipelineLibrary()
                           ->GetRenderPipeline(std::move(pipeline_desc))
                           .get();
@@ -220,8 +221,18 @@ TEST_F(RendererTest, CanRenderToTexture) {
 
     color0.texture->SetLabel("r2t_target");
 
+    StencilAttachment stencil0;
+    stencil0.load_action = LoadAction::kClear;
+    stencil0.store_action = StoreAction::kDontCare;
+    TextureDescriptor stencil_texture_desc;
+    stencil_texture_desc.size = texture_descriptor.size;
+    stencil_texture_desc.format = PixelFormat::kD32FloatS8UNormInt;
+    stencil0.texture = context->GetPermanentsAllocator()->CreateTexture(
+        StorageMode::kDeviceTransient, stencil_texture_desc);
+
     RenderTarget r2t_desc;
     r2t_desc.SetColorAttachment(color0, 0u);
+    r2t_desc.SetStencilAttachment(stencil0);
     auto cmd_buffer = context->CreateRenderCommandBuffer();
     r2t_pass = cmd_buffer->CreateRenderPass(r2t_desc);
     ASSERT_TRUE(r2t_pass && r2t_pass->IsValid());
@@ -323,50 +334,6 @@ TEST_F(RendererTest, CanRenderPath) {
     return true;
   };
   // OpenPlaygroundHere(callback);
-}
-
-TEST_F(RendererTest, CanPerformStencilOperations) {
-  using VS = TestTextureVertexShader;
-  using FS = TestTextureFragmentShader;
-  using TestTextureCommand = CommandT<VS, FS>;
-
-  auto pipeline = std::make_unique<TestTextureCommand::Pipeline>(*GetContext());
-
-  auto buffer = HostBuffer::Create();
-
-  auto circle_vtx_builder = TestTextureCommand::CreateVertexBuilder();
-  Tessellator{}.Tessellate(
-      PathBuilder{}.AddCircle({500, 500}, 250).CreatePath().CreatePolyline(),
-      [&circle_vtx_builder](Point vtx) {
-        VS::PerVertexData data;
-        data.vtx = vtx;
-        circle_vtx_builder.AppendVertex(data);
-      });
-  auto cicle_vertices = circle_vtx_builder.CreateVertexBuffer(*buffer);
-
-  auto square_vtx_builder = TestTextureCommand::CreateVertexBuilder();
-  Tessellator{}.Tessellate(
-      PathBuilder{}.AddRect({0, 0, 250, 250}).CreatePath().CreatePolyline(),
-      [&square_vtx_builder](Point vtx) {
-        VS::PerVertexData data;
-        data.vtx = vtx;
-        square_vtx_builder.AppendVertex(data);
-      });
-  auto square_vertices = square_vtx_builder.CreateVertexBuffer(*buffer);
-
-  OpenPlaygroundHere([&](const Surface& surface, RenderPass& pass) -> bool {
-    TestTextureCommand command(*pipeline.get());
-
-    command.BindVerticesDynamic(cicle_vertices);
-
-    VS::FrameInfo info;
-    info.mvp = Matrix::MakeOrthographic(surface.GetSize());
-
-    VS::BindFrameInfo(command, pass.GetTransientsBuffer().EmplaceUniform(info));
-
-    pass.AddCommand(command);
-    return true;
-  });
 }
 
 }  // namespace testing

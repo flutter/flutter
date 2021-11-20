@@ -51,10 +51,13 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       size_t index,
       ColorAttachmentDescriptor desc);
 
+  PipelineDescriptor& SetColorAttachmentDescriptors(
+      std::map<size_t /* index */, ColorAttachmentDescriptor> descriptors);
+
   const ColorAttachmentDescriptor* GetColorAttachmentDescriptor(
       size_t index) const;
 
-  const std::map<size_t /* index */, ColorAttachmentDescriptor>
+  const std::map<size_t /* index */, ColorAttachmentDescriptor>&
   GetColorAttachmentDescriptors() const;
 
   PipelineDescriptor& SetDepthStencilAttachmentDescriptor(

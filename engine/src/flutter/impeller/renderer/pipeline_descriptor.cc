@@ -94,6 +94,12 @@ PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptor(
   return *this;
 }
 
+PipelineDescriptor& PipelineDescriptor::SetColorAttachmentDescriptors(
+    std::map<size_t /* index */, ColorAttachmentDescriptor> descriptors) {
+  color_attachment_descriptors_ = std::move(descriptors);
+  return *this;
+}
+
 const ColorAttachmentDescriptor*
 PipelineDescriptor::GetColorAttachmentDescriptor(size_t index) const {
   auto found = color_attachment_descriptors_.find(index);
@@ -153,7 +159,7 @@ PipelineDescriptor::GetDepthStencilAttachmentDescriptor() const {
   return depth_attachment_descriptor_;
 }
 
-const std::map<size_t /* index */, ColorAttachmentDescriptor>
+const std::map<size_t /* index */, ColorAttachmentDescriptor>&
 PipelineDescriptor::GetColorAttachmentDescriptors() const {
   return color_attachment_descriptors_;
 }

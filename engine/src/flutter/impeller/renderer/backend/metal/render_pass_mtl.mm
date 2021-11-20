@@ -371,6 +371,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
                                     ? MTLWindingClockwise
                                     : MTLWindingCounterClockwise];
     [pass setCullMode:MTLCullModeNone];
+    [pass setStencilReferenceValue:command.stencil_reference];
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;
     }
