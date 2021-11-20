@@ -2341,9 +2341,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     widget.controller.selection = selection;
 
-    // This will show the keyboard for all selection changes on the
-    // EditableWidget, not just changes triggered by user gestures.
-    requestKeyboard();
     if (widget.selectionControls == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
