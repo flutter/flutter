@@ -6,18 +6,18 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:meta/meta.dart' show visibleForOverriding;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import './git.dart';
-import './globals.dart';
-import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart' show ReleasePhase;
-import './repository.dart';
-import './state.dart' as state_import;
-import './stdio.dart';
-import './version.dart';
+import 'context.dart';
+import 'git.dart';
+import 'globals.dart';
+import 'proto/conductor_state.pb.dart' as pb;
+import 'proto/conductor_state.pbenum.dart' show ReleasePhase;
+import 'repository.dart';
+import 'state.dart' as state_import;
+import 'stdio.dart';
+import 'version.dart';
 
 const String kCandidateOption = 'candidate-branch';
 const String kDartRevisionOption = 'dart-revision';
@@ -207,7 +207,6 @@ class StartCommand extends Command<void> {
       processManager: processManager,
       releaseChannel: releaseChannel,
       stateFile: stateFile,
-      stdio: stdio,
       force: force,
     );
     return context.run();
@@ -217,10 +216,9 @@ class StartCommand extends Command<void> {
 /// Context for starting a new release.
 ///
 /// This is a frontend-agnostic implementation.
-class StartContext {
+class StartContext extends Context {
   StartContext({
     required this.candidateBranch,
-    required this.checkouts,
     required this.dartRevision,
     required this.engineCherrypickRevisions,
     required this.engineMirror,
@@ -232,13 +230,17 @@ class StartContext {
     required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
-    required this.stateFile,
-    required this.stdio,
+    required Checkouts checkouts,
+    required File stateFile,
     this.force = false,
-  }) : git = Git(processManager);
+  }) :
+    git = Git(processManager),
+    super(
+      checkouts: checkouts,
+      stateFile: stateFile,
+    );
 
   final String candidateBranch;
-  final Checkouts checkouts;
   final String? dartRevision;
   final List<String> engineCherrypickRevisions;
   final String engineMirror;
@@ -251,8 +253,6 @@ class StartContext {
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
-  final File stateFile;
-  final Stdio stdio;
 
   /// If validations should be overridden.
   final bool force;
@@ -410,16 +410,6 @@ class StartContext {
     stdio.printStatus(state_import.presentState(state));
   }
 
-  /// Save the release's [state].
-  ///
-  /// This can be overridden by frontends that may not persist the state to
-  /// disk, and/or may need to call additional update hooks each time the state
-  /// is updated.
-  @visibleForOverriding
-  void updateState(pb.ConductorState state, List<String> logs) {
-    state_import.writeStateToFile(stateFile, state, logs);
-  }
-
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
   Version calculateNextVersion(Version lastVersion) {
     if (incrementLetter == 'm') {
@@ -457,7 +447,18 @@ class StartContext {
       candidateBranch,
       FrameworkRepository.defaultBranch,
     );
+    final bool response = prompt(
+      'About to tag the release candidate branch branchpoint of $branchPoint '
+      'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '
+      'Is this correct?',
+    );
+
+    if (!response) {
+      throw ConductorException('Aborting command.');
+    }
+
     stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
+
     await framework.tag(
       branchPoint,
       requestedVersion.toString(),
