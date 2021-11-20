@@ -186,6 +186,8 @@ void main() {
     expect(editableText.enableIMEPersonalizedLearning, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
+    expect(editableText.cursorPadding,1.0);
+    expect(editableText.caretMargin, isNull);
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
   });

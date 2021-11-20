@@ -494,6 +494,8 @@ class EditableText extends StatefulWidget {
     this.mouseCursor,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
+    this.cursorPadding = 1.0,
+    this.caretMargin,
     this.cursorHeight,
     this.cursorRadius,
     this.cursorOpacityAnimates = false,
@@ -1094,10 +1096,37 @@ class EditableText extends StatefulWidget {
   /// The cursor will draw under the text. The cursor width will extend
   /// to the right of the boundary between characters for left-to-right text
   /// and to the left for right-to-left text. This corresponds to extending
-  /// downstream relative to the selected position. Negative values may be used
-  /// to reverse this behavior.
+  /// downstream relative to the selected position.
+  /// 
+  /// See also:
+  /// 
+  ///  [caretMargin], [cursorPadding] for more control of your cursor layout.
+  /// 
+  ///    Flutter.
   /// {@endtemplate}
   final double cursorWidth;
+
+  /// {@template flutter.widgets.editableText.cursorPadding}
+  /// How many pixels between the end of the cursor and the end of the text including caretMargin.
+  /// 
+  /// Defaults to 1.0.
+  /// 
+  /// See also:
+  /// 
+  ///  [cursorWidth], [caretMargin] for more control of your cursor layout.
+  /// 
+  /// {@endtemplate}
+  final double cursorPadding;
+
+  /// {@template flutter.widgets.editableText.caretMargin}
+  /// How many pixels will be added after the last character.
+  /// 
+  /// See also:
+  /// 
+  ///  [cursorWidth], [cursorPadding] for more control of your cursor layout.
+  /// 
+  /// {@endtemplate}
+  final double? caretMargin;
 
   /// {@template flutter.widgets.editableText.cursorHeight}
   /// How tall the cursor will be.
@@ -3023,6 +3052,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     onCaretChanged: _handleCaretChanged,
                     rendererIgnoresPointer: widget.rendererIgnoresPointer,
                     cursorWidth: widget.cursorWidth,
+                    cursorPadding: widget.cursorPadding,
+                    caretMargin: widget.caretMargin,
                     cursorHeight: widget.cursorHeight,
                     cursorRadius: widget.cursorRadius,
                     cursorOffset: widget.cursorOffset ?? Offset.zero,
@@ -3107,6 +3138,8 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
+    required this.cursorPadding,
+    this.caretMargin,
     this.cursorHeight,
     this.cursorRadius,
     required this.cursorOffset,
@@ -3167,6 +3200,8 @@ class _Editable extends MultiChildRenderObjectWidget {
   final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
+  final double cursorPadding;
+  final double? caretMargin;
   final double? cursorHeight;
   final Radius? cursorRadius;
   final Offset cursorOffset;
@@ -3210,6 +3245,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
+      cursorPadding: cursorPadding,
+      caretMargin: caretMargin,
       cursorHeight: cursorHeight,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
@@ -3254,6 +3291,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
+      ..cursorPadding = cursorPadding
+      ..caretMargin = caretMargin
       ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
@@ -3512,7 +3551,7 @@ class _CollapsedSelectionBoundary extends _TextBoundary {
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return isForward
-      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
+        ? innerTextBoundary.getTrailingTextBoundaryAt(position)
       : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
   }
 }

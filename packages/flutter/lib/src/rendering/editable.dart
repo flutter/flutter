@@ -280,6 +280,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     bool obscureText = false,
     Locale? locale,
     double cursorWidth = 1.0,
+    double cursorPadding = 1.0,
+    double? caretMargin,
     double? cursorHeight,
     Radius? cursorRadius,
     bool paintCursorAboveText = false,
@@ -319,7 +321,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        assert(obscuringCharacter != null && obscuringCharacter.characters.length == 1),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
-       assert(cursorWidth != null),
+       assert(cursorWidth != null && cursorWidth >= 0.0),
+       assert(cursorPadding != null && cursorPadding >= 0.0),
+       assert(caretMargin == null || caretMargin >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
        assert(readOnly != null),
        assert(forceLine != null),
@@ -344,6 +348,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _selection = selection,
        _offset = offset,
        _cursorWidth = cursorWidth,
+       _cursorPadding = cursorPadding,
+       _caretMargin = caretMargin,
        _cursorHeight = cursorHeight,
        _paintCursorOnTop = paintCursorAboveText,
        _enableInteractiveSelection = enableInteractiveSelection,
@@ -1070,6 +1076,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     markNeedsLayout();
   }
 
+  /// Space after the last character.
+  double get caretMargin => _caretMargin ?? _cursorWidth + _cursorPadding;
+  double? _caretMargin;
+  set caretMargin(double? value) {
+    if (_caretMargin == value) 
+      return;
+    _caretMargin = value;
+    markNeedsLayout();
+  }
+
+  /// How many pixels between the end of the cursor and the end of the text including caretMargin.
+  double get cursorPadding => _cursorPadding;
+  double _cursorPadding = 1.0;
+  set cursorPadding(double value) {
+    if (_cursorPadding == value) 
+      return;
+    _cursorPadding = value;
+    markNeedsLayout();
+  }
+
+  double get _cursorLeft => caretMargin - _cursorPadding - _cursorWidth;
+
   /// How tall the cursor will be.
   ///
   /// This can be null, in which case the getter will actually return [preferredLineHeight].
@@ -1238,8 +1266,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// [expands] is set to true.
   double get maxScrollExtent => _maxScrollExtent;
   double _maxScrollExtent = 0;
-
-  double get _caretMargin => _kCaretGap + cursorWidth;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -1727,7 +1753,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _computeTextMetricsIfNeeded();
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
+    final Rect rect = Rect.fromLTWH(_cursorLeft, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
     // Add additional cursor offset (generally only if on iOS).
     return rect.shift(_snapToPhysicalPixel(rect.topLeft));
   }
@@ -1741,7 +1767,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   double computeMaxIntrinsicWidth(double height) {
     _layoutText();
-    return _textPainter.maxIntrinsicWidth + math.max(0, _caretMargin);
+    return _textPainter.maxIntrinsicWidth + caretMargin;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
@@ -2167,7 +2193,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(maxWidth != null && minWidth != null);
-    final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
+    final double availableMaxWidth = math.max(0.0, maxWidth - caretMargin);
     final double availableMinWidth = math.min(minWidth, availableMaxWidth);
     final double textMaxWidth = _isMultiline ? availableMaxWidth : double.infinity;
     final double textMinWidth = forceLine ? availableMaxWidth : availableMinWidth;
@@ -2221,13 +2247,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        _caretPrototype = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + 2);
+        _caretPrototype = Rect.fromLTWH(_cursorLeft, 0.0, cursorWidth, cursorHeight + 2);
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
+        _caretPrototype = Rect.fromLTWH(_cursorLeft, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
         break;
     }
   }
@@ -2277,7 +2303,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final double width = forceLine ? constraints.maxWidth : constraints
-        .constrainWidth(_textPainter.size.width + _caretMargin);
+        .constrainWidth(_textPainter.size.width + caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
@@ -2299,9 +2325,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
     final double width = forceLine ? constraints.maxWidth : constraints
-        .constrainWidth(_textPainter.size.width + _caretMargin);
+        .constrainWidth(_textPainter.size.width + caretMargin);
     size = Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = Size(textPainterSize.width + _caretMargin, textPainterSize.height);
+    final Size contentSize = Size(textPainterSize.width + caretMargin, textPainterSize.height);
 
     final BoxConstraints painterConstraints = BoxConstraints.tight(contentSize);
 

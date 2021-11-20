@@ -330,6 +330,8 @@ class TextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
+    this.cursorPadding = 1.0,
+    this.caretMargin,
     this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
@@ -630,6 +632,12 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
+  /// {@macro flutter.widgets.editableText.cursorPadding}
+  final double cursorPadding;
+
+  /// {@macro flutter.widgets.editableText.caretMargin}
+  final double? caretMargin;
+
   /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
 
@@ -821,6 +829,8 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorPadding', cursorPadding, defaultValue: 1.0));
+    properties.add(DoubleProperty('caretMargin', caretMargin, defaultValue: null));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
@@ -1256,6 +1266,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
           cursorWidth: widget.cursorWidth,
+          cursorPadding: widget.cursorPadding,
+          caretMargin: widget.caretMargin,
           cursorHeight: widget.cursorHeight,
           cursorRadius: cursorRadius,
           cursorColor: cursorColor,
