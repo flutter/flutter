@@ -231,6 +231,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
@@ -239,7 +240,6 @@ class ThemeData with Diagnosticable {
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -361,6 +361,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
     // GENERAL CONFIGURATION
     applyElevationOverlayColor ??= false;
@@ -383,6 +388,7 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     splashFactory ??= InkSplash.splashFactory;
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    useMaterial3 ??= false;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
@@ -390,10 +396,10 @@ class ThemeData with Diagnosticable {
     final bool isDark = _brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -504,6 +510,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
+    primaryColorBrightness = _primaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -517,10 +524,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
       visualDensity: visualDensity,
+      useMaterial3: useMaterial3,
       // COLOR
       colorScheme: colorScheme,
       primaryColor: primaryColor,
-      primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
       focusColor: focusColor,
@@ -593,6 +600,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme,
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness,
     );
   }
 
@@ -618,13 +626,13 @@ class ThemeData with Diagnosticable {
     required this.scrollbarTheme,
     required this.splashFactory,
     required this.visualDensity,
+    required this.useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.primaryColor,
-    required this.primaryColorBrightness,
     required this.primaryColorLight,
     required this.primaryColorDark,
     required this.focusColor,
@@ -745,6 +753,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(inputDecorationTheme != null),
@@ -754,10 +767,10 @@ class ThemeData with Diagnosticable {
        assert(scrollbarTheme != null),
        assert(splashFactory != null),
        assert(visualDensity != null),
+       assert(useMaterial3 != null),
         // COLOR
        assert(colorScheme != null),
        assert(primaryColor != null),
-       assert(primaryColorBrightness != null),
        assert(primaryColorLight != null),
        assert(primaryColorDark != null),
        assert(focusColor != null),
@@ -829,7 +842,8 @@ class ThemeData with Diagnosticable {
        assert(accentTextTheme != null),
        assert(accentIconTheme != null),
        assert(buttonColor != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(fixTextFieldOutlineLabel != null),
+       assert(primaryColorBrightness != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1073,6 +1087,31 @@ class ThemeData with Diagnosticable {
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
+  /// A temporary flag used to opt-in to new Material 3 features.
+  ///
+  /// If true, then components that have been migrated to Material 3 will
+  /// start using new colors, typography and other features of Material 3.
+  /// If false, they will use the Material 2 look and feel.
+  ///
+  /// Currently no components have been migrated to support Material 3.
+  /// As they are updated to include Material 3 support this documentation
+  /// will be modified to indicate exactly what widgets this flag will affect.
+  ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app. Some components will be migrated
+  /// before others and typography changes will be coming in stages.
+  ///
+  /// [useMaterial3] defaults to false. After all the migrated components
+  /// have landed on stable, we will change this to be true by default. After
+  /// that change has landed on stable, we will deprecate this flag and remove
+  /// all uses of it. Everything will use the Material 3 look and feel at
+  /// that point.
+  ///
+  /// See also:
+  ///
+  ///   * [Material Design 3](https://m3.material.io/).
+  final bool useMaterial3;
+
   // COLOR
 
   /// A set of twelve colors that can be used to configure the
@@ -1092,10 +1131,6 @@ class ThemeData with Diagnosticable {
   /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
-
-  /// The brightness of the [primaryColor]. Used to determine the color of text and
-  /// icons placed on top of the primary color (e.g. toolbar text).
-  final Brightness primaryColorBrightness;
 
   /// A lighter version of the [primaryColor].
   final Color primaryColorLight;
@@ -1455,6 +1490,21 @@ class ThemeData with Diagnosticable {
   )
   final bool fixTextFieldOutlineLabel;
 
+  /// Obsolete property that was originally used to determine the color
+  /// of text and icons placed on top of the primary color (e.g. toolbar text).
+  ///
+  /// The material library no longer uses this property. The [appBarTheme] can
+  /// be used to configure the appearance of [AppBar]s. The appearance of
+  /// Keyboards for [TextField]s now uses the overall theme's
+  /// [ThemeData.brightness] and can also be customized with
+  /// [TextField.keyboardAppearance]. The brightness of any color can be found
+  /// with [ThemeData.estimateBrightnessForColor].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.6.0-11.0.pre.',
+  )
+  final Brightness primaryColorBrightness;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1470,6 +1520,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
@@ -1477,7 +1528,6 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     Brightness? brightness,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -1598,6 +1648,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1612,10 +1667,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
       visualDensity: visualDensity ?? this.visualDensity,
+      useMaterial3: useMaterial3 ?? this.useMaterial3,
       // COLOR
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       focusColor: focusColor ?? this.focusColor,
@@ -1688,6 +1743,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
     );
   }
 
@@ -1780,10 +1836,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
+      useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       // COLOR
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
-      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
@@ -1856,6 +1912,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
+      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
     );
   }
 
@@ -1878,10 +1935,10 @@ class ThemeData with Diagnosticable {
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
         other.visualDensity == visualDensity &&
+        other.useMaterial3 == useMaterial3 &&
         // COLOR
         other.colorScheme == colorScheme &&
         other.primaryColor == primaryColor &&
-        other.primaryColorBrightness == primaryColorBrightness &&
         other.primaryColorLight == primaryColorLight &&
         other.primaryColorDark == primaryColorDark &&
         other.focusColor == focusColor &&
@@ -1953,7 +2010,8 @@ class ThemeData with Diagnosticable {
         other.accentTextTheme == accentTextTheme &&
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
-        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
+        other.primaryColorBrightness == primaryColorBrightness;
   }
 
   @override
@@ -1973,10 +2031,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme,
       splashFactory,
       visualDensity,
+      useMaterial3,
       // COLOR
       colorScheme,
       primaryColor,
-      primaryColorBrightness,
       primaryColorLight,
       primaryColorDark,
       focusColor,
@@ -2049,6 +2107,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme,
       buttonColor,
       fixTextFieldOutlineLabel,
+      primaryColorBrightness,
     ];
     return hashList(values);
   }
@@ -2068,10 +2127,10 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
@@ -2144,6 +2203,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
   }
 }
 
