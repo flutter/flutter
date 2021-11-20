@@ -34,4 +34,12 @@ const std::shared_ptr<Contents>& Entity::GetContents() const {
   return contents_;
 }
 
+void Entity::SetStencilDepth(uint32_t depth) {
+  stencil_depth_ = depth;
+}
+
+uint32_t Entity::GetStencilDepth() const {
+  return stencil_depth_;
+}
+
 }  // namespace impeller

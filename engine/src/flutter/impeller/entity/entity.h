@@ -31,10 +31,15 @@ class Entity {
 
   const std::shared_ptr<Contents>& GetContents() const;
 
+  void SetStencilDepth(uint32_t stencil_depth);
+
+  uint32_t GetStencilDepth() const;
+
  private:
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
   Path path_;
+  uint32_t stencil_depth_ = 0u;
 };
 
 }  // namespace impeller

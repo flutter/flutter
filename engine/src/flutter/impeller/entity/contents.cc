@@ -87,6 +87,7 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
   Command cmd;
   cmd.label = "LinearGradientFill";
   cmd.pipeline = renderer.GetGradientFillPipeline();
+  cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertices_builder.CreateVertexBuffer(
       *renderer.GetContext()->GetPermanentsAllocator()));
   cmd.primitive_type = PrimitiveType::kTriangle;
@@ -112,6 +113,25 @@ const Color& SolidColorContents::GetColor() const {
   return color_;
 }
 
+static VertexBuffer CreateSolidFillVertices(const Path& path,
+                                            HostBuffer& buffer) {
+  using VS = SolidFillPipeline::VertexShader;
+
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+
+  auto tesselation_result = Tessellator{}.Tessellate(
+      path.CreatePolyline(), [&vtx_builder](auto point) {
+        VS::PerVertexData vtx;
+        vtx.vertices = point;
+        vtx_builder.AppendVertex(vtx);
+      });
+  if (!tesselation_result) {
+    return {};
+  }
+
+  return vtx_builder.CreateVertexBuffer(buffer);
+}
+
 bool SolidColorContents::Render(const ContentRenderer& renderer,
                                 const Entity& entity,
                                 const Surface& surface,
@@ -125,29 +145,9 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
   Command cmd;
   cmd.label = "SolidFill";
   cmd.pipeline = renderer.GetSolidFillPipeline();
-  if (cmd.pipeline == nullptr) {
-    return false;
-  }
-
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  {
-    auto tesselation_result = Tessellator{}.Tessellate(
-        entity.GetPath().CreatePolyline(), [&vtx_builder](auto point) {
-          VS::PerVertexData vtx;
-          vtx.vertices = point;
-          vtx_builder.AppendVertex(vtx);
-        });
-    if (!tesselation_result) {
-      return false;
-    }
-  }
-
-  if (!vtx_builder.HasVertices()) {
-    return true;
-  }
-
-  cmd.BindVertices(vtx_builder.CreateVertexBuffer(
-      *renderer.GetContext()->GetPermanentsAllocator()));
+  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.BindVertices(
+      CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
 
   VS::FrameInfo frame_info;
   frame_info.mvp =
@@ -240,6 +240,7 @@ bool TextureContents::Render(const ContentRenderer& renderer,
   Command cmd;
   cmd.label = "TextureFill";
   cmd.pipeline = renderer.GetTexturePipeline();
+  cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindTextureSampler(
@@ -335,6 +336,7 @@ bool SolidStrokeContents::Render(const ContentRenderer& renderer,
   cmd.primitive_type = PrimitiveType::kTriangleStrip;
   cmd.label = "SolidStroke";
   cmd.pipeline = renderer.GetSolidStrokePipeline();
+  cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       CreateSolidStrokeVertices(entity.GetPath(), pass.GetTransientsBuffer()));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -366,6 +368,23 @@ bool ClipContents::Render(const ContentRenderer& renderer,
                           const Entity& entity,
                           const Surface& surface,
                           RenderPass& pass) const {
+  using VS = ClipPipeline::VertexShader;
+
+  Command cmd;
+  cmd.label = "Clip";
+  cmd.pipeline = renderer.GetClipPipeline();
+  cmd.stencil_reference = entity.GetStencilDepth() + 1u;
+  cmd.BindVertices(
+      CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
+
+  VS::FrameInfo info;
+  // The color really doesn't matter.
+  info.color = Color::SkyBlue();
+  info.mvp = Matrix::MakeOrthographic(surface.GetSize());
+
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+
+  pass.AddCommand(std::move(cmd));
   return true;
 }
 

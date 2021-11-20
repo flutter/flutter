@@ -107,7 +107,7 @@ struct PipelineBuilder {
     // Setup default stencil buffer descriptions.
     {
       StencilAttachmentDescriptor stencil0;
-      stencil0.depth_stencil_pass = StencilOperation::kIncrementClamp;
+      stencil0.stencil_compare = CompareFunction::kLessEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
       desc.SetStencilPixelFormat(PixelFormat::kD32FloatS8UNormInt);
     }
