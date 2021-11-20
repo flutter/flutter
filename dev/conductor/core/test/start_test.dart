@@ -823,7 +823,6 @@ void main() {
       ];
 
       final String operatingSystem = const LocalPlatform().operatingSystem;
-      final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
       final Map<String, String> environment = <String, String>{
         'HOME': '/path/to/user/home',
       };
@@ -835,7 +834,6 @@ void main() {
       platform = FakePlatform(
         environment: environment,
         operatingSystem: operatingSystem,
-        pathSeparator: pathSeparator,
       );
 
       final String stateFilePath = fileSystem.path.join(
@@ -875,8 +873,8 @@ void main() {
 
       await startContext.run();
 
-      expect((await startContext.engineCheckoutDirectory).path, equals(engine.path));
-      expect((await startContext.frameworkCheckoutDirectory).path, equals(framework.path));
+      expect((await startContext.engine.checkoutDirectory).path, equals(engine.path));
+      expect((await startContext.framework.checkoutDirectory).path, equals(framework.path));
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),

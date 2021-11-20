@@ -232,12 +232,34 @@ class StartContext extends Context {
     required Checkouts checkouts,
     required File stateFile,
     this.force = false,
-  }) :
-    git = Git(processManager),
-    super(
-      checkouts: checkouts,
-      stateFile: stateFile,
-    );
+  }) : git = Git(processManager),
+  engine = EngineRepository(
+    checkouts,
+    initialRef: candidateBranch,
+    upstreamRemote: Remote(
+      name: RemoteName.upstream,
+      url: engineUpstream,
+    ),
+    mirrorRemote: Remote(
+      name: RemoteName.mirror,
+      url: engineMirror,
+    ),
+  ), framework = FrameworkRepository(
+    checkouts,
+    initialRef: candidateBranch,
+    upstreamRemote: Remote(
+      name: RemoteName.upstream,
+      url: frameworkUpstream,
+    ),
+    mirrorRemote: Remote(
+      name: RemoteName.mirror,
+      url: frameworkMirror,
+    ),
+  ),
+  super(
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
 
   final String candidateBranch;
   final String? dartRevision;
@@ -256,14 +278,8 @@ class StartContext extends Context {
   /// If validations should be overridden.
   final bool force;
 
-  late final EngineRepository engine;
-  late final FrameworkRepository framework;
-
-  /// Should be called after [run] to obtain the engine checkout directory.
-  Future<Directory> get engineCheckoutDirectory => engine.checkoutDirectory;
-
-  /// Should be called after [run] to obtain the framework checkout directory.
-  Future<Directory> get frameworkCheckoutDirectory => framework.checkoutDirectory;
+  final EngineRepository engine;
+  final FrameworkRepository framework;
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
@@ -284,19 +300,6 @@ class StartContext extends Context {
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
     state.incrementLevel = incrementLetter;
-
-    engine = EngineRepository(
-      checkouts,
-      initialRef: candidateBranch,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: engineUpstream,
-      ),
-      mirrorRemote: Remote(
-        name: RemoteName.mirror,
-        url: engineMirror,
-      ),
-    );
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
@@ -342,18 +345,7 @@ class StartContext extends Context {
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
-    framework = FrameworkRepository(
-      checkouts,
-      initialRef: candidateBranch,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: frameworkUpstream,
-      ),
-      mirrorRemote: Remote(
-        name: RemoteName.mirror,
-        url: frameworkMirror,
-      ),
-    );
+    
     await framework.newBranch(workingBranchName);
     final List<pb.Cherrypick> frameworkCherrypicks = (await _sortCherrypicks(
       repository: framework,
