@@ -20,7 +20,6 @@ import 'object.dart';
 import 'paragraph.dart';
 import 'viewport_offset.dart';
 
-const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype

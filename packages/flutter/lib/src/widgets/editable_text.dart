@@ -3551,7 +3551,7 @@ class _CollapsedSelectionBoundary extends _TextBoundary {
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return isForward
-        ? innerTextBoundary.getTrailingTextBoundaryAt(position)
+      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
       : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
   }
 }
