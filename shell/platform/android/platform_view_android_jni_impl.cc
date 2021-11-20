@@ -1595,13 +1595,14 @@ double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
     return kUnknownDisplayRefreshRate;
   }
 
-  jclass clazz = env->GetObjectClass(java_object.obj());
-  if (clazz == nullptr) {
+  fml::jni::ScopedJavaLocalRef<jclass> clazz(
+      env, env->GetObjectClass(java_object.obj()));
+  if (clazz.is_null()) {
     return kUnknownDisplayRefreshRate;
   }
 
-  jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
-  return static_cast<double>(env->GetStaticFloatField(clazz, fid));
+  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "refreshRateFPS", "F");
+  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
 }
 
 bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
