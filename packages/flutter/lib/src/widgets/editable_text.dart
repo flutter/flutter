@@ -1097,34 +1097,34 @@ class EditableText extends StatefulWidget {
   /// to the right of the boundary between characters for left-to-right text
   /// and to the left for right-to-left text. This corresponds to extending
   /// downstream relative to the selected position.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  [caretMargin], [cursorPadding] for more control of your cursor layout.
-  /// 
+  ///
   ///    Flutter.
   /// {@endtemplate}
   final double cursorWidth;
 
   /// {@template flutter.widgets.editableText.cursorPadding}
   /// How many pixels between the end of the cursor and the end of the text including caretMargin.
-  /// 
+  ///
   /// Defaults to 1.0.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  [cursorWidth], [caretMargin] for more control of your cursor layout.
-  /// 
+  ///
   /// {@endtemplate}
   final double cursorPadding;
 
   /// {@template flutter.widgets.editableText.caretMargin}
   /// How many pixels will be added after the last character.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  [cursorWidth], [cursorPadding] for more control of your cursor layout.
-  /// 
+  ///
   /// {@endtemplate}
   final double? caretMargin;
 

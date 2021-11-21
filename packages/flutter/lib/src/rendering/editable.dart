@@ -1079,7 +1079,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   double get caretMargin => _caretMargin ?? _cursorWidth + _cursorPadding;
   double? _caretMargin;
   set caretMargin(double? value) {
-    if (_caretMargin == value) 
+    if (_caretMargin == value)
       return;
     _caretMargin = value;
     markNeedsLayout();
@@ -1089,7 +1089,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   double get cursorPadding => _cursorPadding;
   double _cursorPadding = 1.0;
   set cursorPadding(double value) {
-    if (_cursorPadding == value) 
+    if (_cursorPadding == value)
       return;
     _cursorPadding = value;
     markNeedsLayout();
