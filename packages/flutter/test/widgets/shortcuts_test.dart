@@ -119,6 +119,41 @@ Widget activatorTester(
   );
 }
 
+int didChangeDependencyCalled = 0;
+class _FocusableWidget extends StatefulWidget {
+  const _FocusableWidget({ Key? key, required this.focusNode }) : super(key: key);
+
+  final FocusNode focusNode;
+  @override
+  State<StatefulWidget> createState() => _FocusableWidgetState();
+}
+
+class _FocusableWidgetState extends State<_FocusableWidget> {
+  late final FocusAttachment _attachment;
+
+  @override
+  void initState() {
+    super.initState();
+    _attachment = widget.focusNode.attach(context);
+  }
+
+  @override
+  void dispose() {
+    _attachment.detach();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _attachment.reparent();
+    didChangeDependencyCalled += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
 void main() {
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
@@ -1081,6 +1116,42 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
+    });
+
+    testWidgets('does not cause the primary focus to rebuild unnecessarily', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'FocusNode of interest');
+      final _FocusableWidget leafWidget = _FocusableWidget(focusNode: focusNode);
+      Widget buildApp(Map<Type, Action<Intent>> actions) {
+        return MaterialApp(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+          },
+          home: Actions(
+            actions: actions,
+            child: leafWidget,
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(<Type, Action<Intent>>{
+        NextFocusIntent : CallbackAction<NextFocusIntent>(onInvoke: (NextFocusIntent intent) {}),
+      }));
+      focusNode.requestFocus();
+      // Wait for the focus manager to update the focus.
+      await tester.pump();
+
+      assert(focusNode.hasFocus);
+      // The Shortcuts widget will try to find the NextFocusIntent handler.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      didChangeDependencyCalled = 0;
+      await tester.pumpWidget(buildApp(<Type, Action<Intent>>{
+        NextFocusIntent : CallbackAction<NextFocusIntent>(onInvoke: (NextFocusIntent intent) {}),
+      }));
+
+      assert(focusNode.hasFocus);
+      expect(didChangeDependencyCalled, 0);
     });
   });
 

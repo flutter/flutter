@@ -712,9 +712,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
         final Action<Intent>? action = Actions.maybeFind<Intent>(
           primaryContext,
           intent: matchedIntent,
+          createsDependency: false,
         );
         if (action != null && action.isEnabled(matchedIntent)) {
-          Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+          Actions.invoke(primaryContext, matchedIntent);
           return action.consumesKey(matchedIntent)
               ? KeyEventResult.handled
               : KeyEventResult.skipRemainingHandlers;

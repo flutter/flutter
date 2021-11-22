@@ -704,9 +704,11 @@ class Actions extends StatefulWidget {
 
   /// Finds the [Action] bound to the given intent type `T` in the given `context`.
   ///
-  /// Creates a dependency on the [Actions] widget that maps the bound action so
-  /// that if the actions change, the context will be rebuilt and find the
-  /// updated action.
+  /// If `createsDependency` is true, this method creates a dependency on the
+  /// [Actions] widget that maps the bound action so that if the actions change,
+  /// the context will be rebuilt and find the updated action. Setting this
+  /// parameter to true (the default) is always correct, but may cause the
+  /// context to rebuild unnecessarily.
   ///
   /// The optional `intent` argument supplies the type of the intent to look for
   /// if the concrete type of the intent sought isn't available. If not
@@ -719,8 +721,11 @@ class Actions extends StatefulWidget {
   ///
   ///  * [maybeFind], which is similar to this function, but will return null if
   ///    no [Actions] ancestor is found.
-  static Action<T> find<T extends Intent>(BuildContext context, { T? intent }) {
-    final Action<T>? action = maybeFind(context, intent: intent);
+  static Action<T> find<T extends Intent>(BuildContext context, {
+    T? intent,
+    bool createsDependency = true,
+  }) {
+    final Action<T>? action = maybeFind(context, intent: intent, createsDependency: createsDependency);
 
     assert(() {
       if (action == null) {
@@ -743,9 +748,11 @@ class Actions extends StatefulWidget {
 
   /// Finds the [Action] bound to the given intent type `T` in the given `context`.
   ///
-  /// Creates a dependency on the [Actions] widget that maps the bound action so
-  /// that if the actions change, the context will be rebuilt and find the
-  /// updated action.
+  /// If `createsDependency` is true, this method creates a dependency on the
+  /// [Actions] widget that maps the bound action so that if the actions change,
+  /// the context will be rebuilt and find the updated action. Setting this
+  /// parameter to true (the default) is always correct, but may cause the
+  /// context to rebuild unnecessarily.
   ///
   /// The optional `intent` argument supplies the type of the intent to look for
   /// if the concrete type of the intent sought isn't available. If not
@@ -758,7 +765,10 @@ class Actions extends StatefulWidget {
   ///
   ///  * [find], which is similar to this function, but will throw if
   ///    no [Actions] ancestor is found.
-  static Action<T>? maybeFind<T extends Intent>(BuildContext context, { T? intent }) {
+  static Action<T>? maybeFind<T extends Intent>(BuildContext context, {
+    T? intent,
+    bool createsDependency = true,
+  }) {
     Action<T>? action;
 
     // Specialize the type if a runtime example instance of the intent is given.
@@ -777,35 +787,9 @@ class Actions extends StatefulWidget {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
-        context.dependOnInheritedElement(element);
-        action = result;
-        return true;
-      }
-      return false;
-    });
-
-    return action;
-  }
-
-  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(BuildContext context, { T? intent }) {
-    Action<T>? action;
-
-    // Specialize the type if a runtime example instance of the intent is given.
-    // This allows this function to be called by code that doesn't know the
-    // concrete type of the intent at compile time.
-    final Type type = intent?.runtimeType ?? T;
-    assert(
-      type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent '
-      'generic type argument or an example intent derived from Intent must be '
-      'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.',
-    );
-
-    _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
-      final Action<T>? result = _castAction(actions, intent: intent);
-      if (result != null) {
+        if (createsDependency) {
+          context.dependOnInheritedElement(element);
+        }
         action = result;
         return true;
       }
@@ -1516,9 +1500,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
 
   Action<T>? getOverrideAction({ bool declareDependency = false }) {
-    final Action<T>? override = declareDependency
-     ? Actions.maybeFind(lookupContext)
-     : Actions._maybeFindWithoutDependingOn(lookupContext);
+    final Action<T>? override = Actions.maybeFind(lookupContext, createsDependency: declareDependency);
     assert(!identical(override, this));
     return override;
   }
