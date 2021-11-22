@@ -548,7 +548,8 @@ void ComponentV1::CreateViewWithViewRef(
       },
       std::move(fdio_ns_),            // FDIO namespace
       std::move(directory_request_),  // outgoing request
-      product_config_                 // product configuration
+      product_config_,                // product configuration
+      true                            // v1 component
       ));
 }
 
@@ -571,7 +572,8 @@ void ComponentV1::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
       scenic::ViewRefPair::New(),                     // view ref pair
       std::move(fdio_ns_),                            // FDIO namespace
       std::move(directory_request_),                  // outgoing request
-      product_config_                                 // product configuration
+      product_config_,                                // product configuration
+      true                                            // v1 component
       ));
 }
 
