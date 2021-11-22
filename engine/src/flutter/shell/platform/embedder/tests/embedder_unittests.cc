@@ -793,7 +793,7 @@ TEST_F(EmbedderTest, CanRunInitializedEngine) {
 //------------------------------------------------------------------------------
 /// Test that an engine can be deinitialized.
 ///
-TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
+TEST_F(EmbedderTest, CanDeinitializeAnEngine) {
   EmbedderConfigBuilder builder(
       GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
   builder.SetSoftwareRendererConfig();
@@ -1396,9 +1396,8 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .character = "A",
       .synthesized = false,
   };
-  FlutterEngineSendKeyEvent(
-      engine.get(), &down_event_upper_a, [](bool handled, void* user_data) {},
-      nullptr);
+  FlutterEngineSendKeyEvent(engine.get(), &down_event_upper_a, nullptr,
+                            nullptr);
   message_latch->Wait();
 
   ExpectKeyEventEq(echoed_event, down_event_upper_a);
@@ -1414,9 +1413,8 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .character = "∆",
       .synthesized = false,
   };
-  FlutterEngineSendKeyEvent(
-      engine.get(), &repeat_event_wide_char,
-      [](bool handled, void* user_data) {}, nullptr);
+  FlutterEngineSendKeyEvent(engine.get(), &repeat_event_wide_char, nullptr,
+                            nullptr);
   message_latch->Wait();
 
   ExpectKeyEventEq(echoed_event, repeat_event_wide_char);
@@ -1432,8 +1430,7 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .character = nullptr,
       .synthesized = true,
   };
-  FlutterEngineSendKeyEvent(
-      engine.get(), &up_event, [](bool handled, void* user_data) {}, nullptr);
+  FlutterEngineSendKeyEvent(engine.get(), &up_event, nullptr, nullptr);
   message_latch->Wait();
 
   ExpectKeyEventEq(echoed_event, up_event);
@@ -1490,9 +1487,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
 
   // Send an event.
   sample_event.timestamp = 1.0l;
-  FlutterEngineSendKeyEvent(
-      engine.get(), &sample_event, [](bool handled, void* user_data) {},
-      nullptr);
+  FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
 
   // Should not receive echos because the callback is not set yet.
   EXPECT_EQ(echoed_events.size(), 0u);
@@ -1524,9 +1519,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
 
   // Send a second event.
   sample_event.timestamp = 10.0l;
-  FlutterEngineSendKeyEvent(
-      engine.get(), &sample_event, [](bool handled, void* user_data) {},
-      nullptr);
+  FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
   message_latch->Wait();
 
   // The event should be echoed, too.
@@ -1581,6 +1574,12 @@ TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
   // Entrypoint `key_data_echo` returns `event.synthesized` as `handled`.
   event.synthesized = true;
   platform_task_runner->PostTask([&]() {
+    // Test when the response callback is empty.
+    // It should not cause a crash.
+    FlutterEngineSendKeyEvent(engine.get(), &event, nullptr, nullptr);
+
+    // Test when the response callback is non-empty.
+    // It should be invoked (so that the latch can be unlocked.)
     FlutterEngineSendKeyEvent(
         engine.get(), &event,
         [](bool handled, void* untyped_user_data) {
@@ -1679,6 +1678,10 @@ TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
   });
   shutdown_latch.Wait();
 }
+
+//------------------------------------------------------------------------------
+// Vsync waiter
+//------------------------------------------------------------------------------
 
 // This test schedules a frame for the future and asserts that vsync waiter
 // posts the event at the right frame start time (which is in the future).
