@@ -1266,7 +1266,7 @@ enum _ListTileSlot {
   trailing,
 }
 
-class _ListTile extends RenderObjectWidget {
+class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ListTileSlot> {
   const _ListTile({
     Key? key,
     this.leading,
@@ -1307,7 +1307,7 @@ class _ListTile extends RenderObjectWidget {
   final double minLeadingWidth;
 
   @override
-  _ListTileElement createElement() => _ListTileElement(this);
+  Iterable<_ListTileSlot> get slots => _ListTileSlot.values;
 
   @override
   _RenderListTile createRenderObject(BuildContext context) {
@@ -1336,110 +1336,6 @@ class _ListTile extends RenderObjectWidget {
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
       ..minVerticalPadding = minVerticalPadding;
-  }
-}
-
-class _ListTileElement extends RenderObjectElement {
-  _ListTileElement(_ListTile widget) : super(widget);
-
-  final Map<_ListTileSlot, Element> slotToChild = <_ListTileSlot, Element>{};
-
-  @override
-  _ListTile get widget => super.widget as _ListTile;
-
-  @override
-  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    slotToChild.values.forEach(visitor);
-  }
-
-  @override
-  void forgetChild(Element child) {
-    assert(slotToChild.containsValue(child));
-    assert(child.slot is _ListTileSlot);
-    assert(slotToChild.containsKey(child.slot));
-    slotToChild.remove(child.slot);
-    super.forgetChild(child);
-  }
-
-  void _mountChild(Widget? widget, _ListTileSlot slot) {
-    final Element? oldChild = slotToChild[slot];
-    final Element? newChild = updateChild(oldChild, widget, slot);
-    if (oldChild != null) {
-      slotToChild.remove(slot);
-    }
-    if (newChild != null) {
-      slotToChild[slot] = newChild;
-    }
-  }
-
-  @override
-  void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot);
-    _mountChild(widget.leading, _ListTileSlot.leading);
-    _mountChild(widget.title, _ListTileSlot.title);
-    _mountChild(widget.subtitle, _ListTileSlot.subtitle);
-    _mountChild(widget.trailing, _ListTileSlot.trailing);
-  }
-
-  void _updateChild(Widget? widget, _ListTileSlot slot) {
-    final Element? oldChild = slotToChild[slot];
-    final Element? newChild = updateChild(oldChild, widget, slot);
-    if (oldChild != null) {
-      slotToChild.remove(slot);
-    }
-    if (newChild != null) {
-      slotToChild[slot] = newChild;
-    }
-  }
-
-  @override
-  void update(_ListTile newWidget) {
-    super.update(newWidget);
-    assert(widget == newWidget);
-    _updateChild(widget.leading, _ListTileSlot.leading);
-    _updateChild(widget.title, _ListTileSlot.title);
-    _updateChild(widget.subtitle, _ListTileSlot.subtitle);
-    _updateChild(widget.trailing, _ListTileSlot.trailing);
-  }
-
-  void _updateRenderObject(RenderBox? child, _ListTileSlot slot) {
-    switch (slot) {
-      case _ListTileSlot.leading:
-        renderObject.leading = child;
-        break;
-      case _ListTileSlot.title:
-        renderObject.title = child;
-        break;
-      case _ListTileSlot.subtitle:
-        renderObject.subtitle = child;
-        break;
-      case _ListTileSlot.trailing:
-        renderObject.trailing = child;
-        break;
-    }
-  }
-
-  @override
-  void insertRenderObjectChild(RenderObject child, _ListTileSlot slot) {
-    assert(child is RenderBox);
-    _updateRenderObject(child as RenderBox, slot);
-    assert(renderObject.children.keys.contains(slot));
-  }
-
-  @override
-  void removeRenderObjectChild(RenderObject child, _ListTileSlot slot) {
-    assert(child is RenderBox);
-    assert(renderObject.children[slot] == child);
-    _updateRenderObject(null, slot);
-    assert(!renderObject.children.keys.contains(slot));
-  }
-
-  @override
-  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
-    assert(false, 'not reachable');
   }
 }
 
