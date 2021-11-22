@@ -2001,7 +2001,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   }
 }
 
-class _ChipRenderWidget extends RenderObjectWidget {
+class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ChipSlot> {
   const _ChipRenderWidget({
     Key? key,
     required this.theme,
@@ -2025,7 +2025,19 @@ class _ChipRenderWidget extends RenderObjectWidget {
   final ShapeBorder? avatarBorder;
 
   @override
-  _RenderChipElement createElement() => _RenderChipElement(this);
+  Iterable<_ChipSlot> get slots => _ChipSlot.values;
+
+  @override
+  Widget? childForSlot(_ChipSlot slot) {
+    switch (slot) {
+      case _ChipSlot.label:
+        return theme.label;
+      case _ChipSlot.avatar:
+        return theme.avatar;
+      case _ChipSlot.deleteIcon:
+        return theme.deleteIcon;
+    }
+  }
 
   @override
   void updateRenderObject(BuildContext context, _RenderChip renderObject) {
@@ -2061,105 +2073,6 @@ enum _ChipSlot {
   label,
   avatar,
   deleteIcon,
-}
-
-class _RenderChipElement extends RenderObjectElement {
-  _RenderChipElement(_ChipRenderWidget chip) : super(chip);
-
-  final Map<_ChipSlot, Element> slotToChild = <_ChipSlot, Element>{};
-
-  @override
-  _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
-
-  @override
-  _RenderChip get renderObject => super.renderObject as _RenderChip;
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    slotToChild.values.forEach(visitor);
-  }
-
-  @override
-  void forgetChild(Element child) {
-    assert(slotToChild.containsValue(child));
-    assert(child.slot is _ChipSlot);
-    assert(slotToChild.containsKey(child.slot));
-    slotToChild.remove(child.slot);
-    super.forgetChild(child);
-  }
-
-  void _mountChild(Widget widget, _ChipSlot slot) {
-    final Element? oldChild = slotToChild[slot];
-    final Element? newChild = updateChild(oldChild, widget, slot);
-    if (oldChild != null) {
-      slotToChild.remove(slot);
-    }
-    if (newChild != null) {
-      slotToChild[slot] = newChild;
-    }
-  }
-
-  @override
-  void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot);
-    _mountChild(widget.theme.avatar, _ChipSlot.avatar);
-    _mountChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
-    _mountChild(widget.theme.label, _ChipSlot.label);
-  }
-
-  void _updateChild(Widget widget, _ChipSlot slot) {
-    final Element? oldChild = slotToChild[slot];
-    final Element? newChild = updateChild(oldChild, widget, slot);
-    if (oldChild != null) {
-      slotToChild.remove(slot);
-    }
-    if (newChild != null) {
-      slotToChild[slot] = newChild;
-    }
-  }
-
-  @override
-  void update(_ChipRenderWidget newWidget) {
-    super.update(newWidget);
-    assert(widget == newWidget);
-    _updateChild(widget.theme.label, _ChipSlot.label);
-    _updateChild(widget.theme.avatar, _ChipSlot.avatar);
-    _updateChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
-  }
-
-  void _updateRenderObject(RenderObject? child, _ChipSlot slot) {
-    switch (slot) {
-      case _ChipSlot.avatar:
-        renderObject.avatar = child as RenderBox?;
-        break;
-      case _ChipSlot.label:
-        renderObject.label = child as RenderBox?;
-        break;
-      case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child as RenderBox?;
-        break;
-    }
-  }
-
-  @override
-  void insertRenderObjectChild(RenderObject child, _ChipSlot slot) {
-    assert(child is RenderBox);
-    _updateRenderObject(child, slot);
-    assert(renderObject.children.keys.contains(slot));
-  }
-
-  @override
-  void removeRenderObjectChild(RenderObject child, _ChipSlot slot) {
-    assert(child is RenderBox);
-    assert(renderObject.children[slot] == child);
-    _updateRenderObject(null, slot);
-    assert(!renderObject.children.keys.contains(slot));
-  }
-
-  @override
-  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
-    assert(false, 'not reachable');
-  }
 }
 
 @immutable
@@ -2228,7 +2141,7 @@ class _ChipRenderTheme {
   }
 }
 
-class _RenderChip extends RenderBox {
+class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
   _RenderChip({
     required _ChipRenderTheme theme,
     required TextDirection textDirection,
@@ -2249,8 +2162,6 @@ class _RenderChip extends RenderBox {
     enableAnimation.addListener(markNeedsPaint);
   }
 
-  final Map<_ChipSlot, RenderBox> children = <_ChipSlot, RenderBox>{};
-
   bool? value;
   bool? isEnabled;
   late Rect _deleteButtonRect;
@@ -2261,35 +2172,9 @@ class _RenderChip extends RenderBox {
   Animation<double> enableAnimation;
   ShapeBorder? avatarBorder;
 
-  RenderBox? _updateChild(RenderBox? oldChild, RenderBox? newChild, _ChipSlot slot) {
-    if (oldChild != null) {
-      dropChild(oldChild);
-      children.remove(slot);
-    }
-    if (newChild != null) {
-      children[slot] = newChild;
-      adoptChild(newChild);
-    }
-    return newChild;
-  }
-
-  RenderBox? _avatar;
-  RenderBox? get avatar => _avatar;
-  set avatar(RenderBox? value) {
-    _avatar = _updateChild(_avatar, value, _ChipSlot.avatar);
-  }
-
-  RenderBox? _deleteIcon;
-  RenderBox? get deleteIcon => _deleteIcon;
-  set deleteIcon(RenderBox? value) {
-    _deleteIcon = _updateChild(_deleteIcon, value, _ChipSlot.deleteIcon);
-  }
-
-  RenderBox? _label;
-  RenderBox? get label => _label;
-  set label(RenderBox? value) {
-    _label = _updateChild(_label, value, _ChipSlot.label);
-  }
+  RenderBox? get avatar => childForSlot(_ChipSlot.avatar);
+  RenderBox? get deleteIcon => childForSlot(_ChipSlot.deleteIcon);
+  RenderBox? get label => childForSlot(_ChipSlot.label);
 
   _ChipRenderTheme get theme => _theme;
   _ChipRenderTheme _theme;
@@ -2311,26 +2196,13 @@ class _RenderChip extends RenderBox {
     markNeedsLayout();
   }
 
-  // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync* {
-    if (avatar != null) {
-      yield avatar!;
-    }
-    if (label != null) {
-      yield label!;
-    }
-    if (deleteIcon != null) {
-      yield deleteIcon!;
-    }
-  }
-
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
   bool get deleteIconShowing => !deleteDrawerAnimation.isDismissed;
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in _children) {
+    for (final RenderBox child in children) {
       child.attach(owner);
     }
   }
@@ -2338,19 +2210,19 @@ class _RenderChip extends RenderBox {
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in _children) {
+    for (final RenderBox child in children) {
       child.detach();
     }
   }
 
   @override
   void redepthChildren() {
-    _children.forEach(redepthChild);
+    children.forEach(redepthChild);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    _children.forEach(visitor);
+    children.forEach(visitor);
   }
 
   @override
