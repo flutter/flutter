@@ -2176,7 +2176,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
     TextStyle getFallbackTextStyle() {
       final Color color = decoration!.errorText != null
-        ? decoration!.errorStyle?.color ?? themeData.errorColor
+        ? decoration!.errorStyle?.color ?? themeData.colorScheme.error
         : _getActiveColor(themeData);
 
       return TextStyle(color: decoration!.enabled ? color : themeData.disabledColor)
@@ -2199,7 +2199,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getErrorStyle(ThemeData themeData) {
-    final Color color = decoration!.enabled ? themeData.errorColor : Colors.transparent;
+    final Color color = decoration!.enabled ? themeData.colorScheme.error : Colors.transparent;
     return themeData.textTheme.caption!.copyWith(color: color).merge(decoration!.errorStyle);
   }
 
@@ -2228,7 +2228,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration!.enabled || isFocused) {
       borderColor = decoration!.errorText == null
         ? _getDefaultBorderColor(themeData)
-        : themeData.errorColor;
+        : themeData.colorScheme.error;
     } else {
       borderColor = (decoration!.filled == true && decoration!.border?.isOutline != true)
         ? Colors.transparent

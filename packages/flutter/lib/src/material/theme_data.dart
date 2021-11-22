@@ -256,11 +256,9 @@ class ThemeData with Diagnosticable {
     Color? unselectedWidgetColor,
     Color? disabledColor,
     Color? secondaryHeaderColor,
-    Color? backgroundColor,
     Color? dialogBackgroundColor,
     Color? indicatorColor,
     Color? hintColor,
-    Color? errorColor,
     Color? toggleableActiveColor,
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
@@ -366,6 +364,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? backgroundColor,
   }) {
     // GENERAL CONFIGURATION
     applyElevationOverlayColor ??= false;
@@ -497,7 +505,7 @@ class ThemeData with Diagnosticable {
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
 
-     // DEPRECATED (newest deprecations at the bottom)
+    // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
@@ -540,11 +548,9 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
       secondaryHeaderColor: secondaryHeaderColor,
-      backgroundColor: backgroundColor,
       dialogBackgroundColor: dialogBackgroundColor,
       indicatorColor: indicatorColor,
       hintColor: hintColor,
-      errorColor: errorColor,
       toggleableActiveColor: toggleableActiveColor,
       // TYPOGRAPHY & ICONOGRAPHY
       typography: typography,
@@ -597,6 +603,8 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
+      errorColor: errorColor,
+      backgroundColor: backgroundColor,
     );
   }
 
@@ -645,11 +653,9 @@ class ThemeData with Diagnosticable {
     required this.unselectedWidgetColor,
     required this.disabledColor,
     required this.secondaryHeaderColor,
-    required this.backgroundColor,
     required this.dialogBackgroundColor,
     required this.indicatorColor,
     required this.hintColor,
-    required this.errorColor,
     required this.toggleableActiveColor,
     // TYPOGRAPHY & ICONOGRAPHY
     required this.typography,
@@ -754,6 +760,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     required this.primaryColorBrightness,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    required this.errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    required this.backgroundColor,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(inputDecorationTheme != null),
@@ -783,11 +799,9 @@ class ThemeData with Diagnosticable {
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
        assert(secondaryHeaderColor != null),
-       assert(backgroundColor != null),
        assert(dialogBackgroundColor != null),
        assert(indicatorColor != null),
        assert(hintColor != null),
-       assert(errorColor != null),
        assert(toggleableActiveColor != null),
         // TYPOGRAPHY & ICONOGRAPHY
        assert(typography != null),
@@ -839,7 +853,9 @@ class ThemeData with Diagnosticable {
        assert(accentIconTheme != null),
        assert(buttonColor != null),
        assert(fixTextFieldOutlineLabel != null),
-       assert(primaryColorBrightness != null);
+       assert(primaryColorBrightness != null),
+       assert(errorColor != null),
+       assert(backgroundColor != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -891,10 +907,8 @@ class ThemeData with Diagnosticable {
       bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
-      backgroundColor: colorScheme.background,
       dialogBackgroundColor: colorScheme.background,
       indicatorColor: onPrimarySurfaceColor,
-      errorColor: colorScheme.error,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
     );
@@ -1202,10 +1216,6 @@ class ThemeData with Diagnosticable {
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
-  /// A color that contrasts with the [primaryColor], e.g. used as the
-  /// remaining part of a progress bar.
-  final Color backgroundColor;
-
   /// The background color of [Dialog] elements.
   final Color dialogBackgroundColor;
 
@@ -1215,9 +1225,6 @@ class ThemeData with Diagnosticable {
   /// The color to use for hint text or placeholder text, e.g. in
   /// [TextField] fields.
   final Color hintColor;
-
-  /// The color to use for input validation errors, e.g. in [TextField] fields.
-  final Color errorColor;
 
   /// The color used to highlight the active states of toggleable widgets like
   /// [Switch], [Radio], and [Checkbox].
@@ -1501,6 +1508,22 @@ class ThemeData with Diagnosticable {
   )
   final Brightness primaryColorBrightness;
 
+  /// Obsolete property that was used for input validation errors, e.g. in
+  /// [TextField] fields. Use [ColorScheme.error] instead.
+  @Deprecated(
+    'Use colorScheme.error instead. '
+    'This feature was deprecated after v2.6.0-11.0.pre.',
+  )
+  final Color errorColor;
+
+  /// Obsolete property that was unused by the framework.
+  /// Use [ColorScheme.background] instead.
+  @Deprecated(
+    'Use colorScheme.background instead. '
+    'This feature was deprecated after v2.6.0-11.0.pre.',
+  )
+  final Color backgroundColor;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1540,11 +1563,9 @@ class ThemeData with Diagnosticable {
     Color? unselectedWidgetColor,
     Color? disabledColor,
     Color? secondaryHeaderColor,
-    Color? backgroundColor,
     Color? dialogBackgroundColor,
     Color? indicatorColor,
     Color? hintColor,
-    Color? errorColor,
     Color? toggleableActiveColor,
     // TYPOGRAPHY & ICONOGRAPHY
     Typography? typography,
@@ -1649,6 +1670,16 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
     Brightness? primaryColorBrightness,
+    @Deprecated(
+      'Use colorScheme.error instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? errorColor,
+    @Deprecated(
+      'Use colorScheme.background instead. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Color? backgroundColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1683,11 +1714,9 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       disabledColor: disabledColor ?? this.disabledColor,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
       dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
       indicatorColor: indicatorColor ?? this.indicatorColor,
       hintColor: hintColor ?? this.hintColor,
-      errorColor: errorColor ?? this.errorColor,
       toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
       // TYPOGRAPHY & ICONOGRAPHY
       typography: typography ?? this.typography,
@@ -1740,6 +1769,8 @@ class ThemeData with Diagnosticable {
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      errorColor: errorColor ?? this.errorColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
     );
   }
 
@@ -1852,11 +1883,9 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t)!,
       hintColor: Color.lerp(a.hintColor, b.hintColor, t)!,
-      errorColor: Color.lerp(a.errorColor, b.errorColor, t)!,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t)!,
       // TYPOGRAPHY & ICONOGRAPHY
       typography: Typography.lerp(a.typography, b.typography, t),
@@ -1909,6 +1938,8 @@ class ThemeData with Diagnosticable {
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
+      errorColor: Color.lerp(a.errorColor, b.errorColor, t)!,
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
     );
   }
 
@@ -1951,11 +1982,9 @@ class ThemeData with Diagnosticable {
         other.unselectedWidgetColor == unselectedWidgetColor &&
         other.disabledColor == disabledColor &&
         other.secondaryHeaderColor == secondaryHeaderColor &&
-        other.backgroundColor == backgroundColor &&
         other.dialogBackgroundColor == dialogBackgroundColor &&
         other.indicatorColor == indicatorColor &&
         other.hintColor == hintColor &&
-        other.errorColor == errorColor &&
         other.toggleableActiveColor == toggleableActiveColor &&
         // TYPOGRAPHY & ICONOGRAPHY
         other.typography == typography &&
@@ -2007,7 +2036,9 @@ class ThemeData with Diagnosticable {
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
-        other.primaryColorBrightness == primaryColorBrightness;
+        other.primaryColorBrightness == primaryColorBrightness &&
+        other.errorColor == errorColor &&
+        other.backgroundColor == backgroundColor;
   }
 
   @override
@@ -2047,11 +2078,9 @@ class ThemeData with Diagnosticable {
       unselectedWidgetColor,
       disabledColor,
       secondaryHeaderColor,
-      backgroundColor,
       dialogBackgroundColor,
       indicatorColor,
       hintColor,
-      errorColor,
       toggleableActiveColor,
       // TYPOGRAPHY & ICONOGRAPHY
       typography,
@@ -2104,6 +2133,8 @@ class ThemeData with Diagnosticable {
       buttonColor,
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
+      errorColor,
+      backgroundColor,
     ];
     return hashList(values);
   }
@@ -2143,11 +2174,9 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     // TYPOGRAPHY & ICONOGRAPHY
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
@@ -2200,6 +2229,8 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
   }
 }
 

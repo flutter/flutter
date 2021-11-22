@@ -930,7 +930,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
         counterStyle: effectiveDecoration.errorStyle
-          ?? themeData.textTheme.caption!.copyWith(color: themeData.errorColor),
+          ?? themeData.textTheme.caption!.copyWith(color: themeData.colorScheme.error),
         counterText: counterText,
         semanticCounterText: semanticCounterText,
       );
