@@ -133,7 +133,8 @@ void main() {
       const String nextVersion = '1.2.0-1.1.pre';
       const String incrementLevel = 'n';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -141,21 +142,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -309,7 +309,7 @@ void main() {
       stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
       const String revision3 = '123abc';
-      const String branchPointRevision='deadbeef';
+      const String branchPointRevision = 'deadbeef';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
@@ -319,7 +319,8 @@ void main() {
       const String nextVersion = '1.2.0-3.1.pre';
       const String incrementLevel = 'm';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -327,21 +328,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -512,7 +512,8 @@ void main() {
       const String nextVersion = '1.2.0';
       const String incrementLevel = 'z';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -520,21 +521,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -868,7 +868,6 @@ void main() {
           incrementLetter: incrementLevel,
           processManager: processManager,
           conductorVersion: conductorVersion,
-          stdio: stdio,
           stateFile: stateFile);
 
       await startContext.run();
