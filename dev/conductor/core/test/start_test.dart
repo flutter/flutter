@@ -163,7 +163,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -220,7 +220,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -306,6 +306,7 @@ void main() {
     });
 
     test('creates state file if provided correct inputs', () async {
+      stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
       const String revision3 = '123abc';
       const String branchPointRevision='deadbeef';
@@ -348,7 +349,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -405,7 +406,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -541,7 +542,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -598,7 +599,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
