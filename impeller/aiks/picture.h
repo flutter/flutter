@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include <deque>
 #include <memory>
-#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas_pass.h"
@@ -14,7 +14,7 @@
 namespace impeller {
 
 struct Picture {
-  std::vector<CanvasPass> passes;
+  std::deque<CanvasStackEntry> entries;
 };
 
 }  // namespace impeller

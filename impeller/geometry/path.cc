@@ -174,8 +174,19 @@ std::vector<Point> Path::CreatePolyline(
 }
 
 Rect Path::GetBoundingBox() const {
-  if (linears_.empty() && quads_.empty() && cubics_.empty()) {
+  auto min_max = GetMinMaxCoveragePoints();
+  if (!min_max.has_value()) {
     return {};
+  }
+  auto min = min_max->first;
+  auto max = min_max->second;
+  const auto difference = max - min;
+  return {min.x, min.y, difference.x, difference.y};
+}
+
+std::optional<std::pair<Point, Point>> Path::GetMinMaxCoveragePoints() const {
+  if (linears_.empty() && quads_.empty() && cubics_.empty()) {
+    return std::nullopt;
   }
 
   std::optional<Point> min, max;
@@ -209,9 +220,7 @@ Rect Path::GetBoundingBox() const {
     clamp(cubic.Extrema());
   }
 
-  const auto difference = *max - *min;
-
-  return {min->x, min->y, difference.x, difference.y};
+  return std::make_pair(min.value(), max.value());
 }
 
 }  // namespace impeller

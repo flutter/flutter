@@ -33,6 +33,8 @@ class Entity {
 
   void SetStencilDepth(uint32_t stencil_depth);
 
+  void IncrementStencilDepth(uint32_t increment);
+
   uint32_t GetStencilDepth() const;
 
  private:
