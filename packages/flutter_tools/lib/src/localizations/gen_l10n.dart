@@ -193,6 +193,23 @@ String _replacePlaceholdersBraces(
   return easyMessage;
 }
 
+/// Replaces message with the interpolated variable name of the given placeholders with the ability to change braces
+/// to something other than {...}.
+///
+/// Examples:
+///
+/// * Replacing `{userName}`.
+/// ```dart
+/// final message = 'Hello my name is {userName}';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders);
+/// // transformed == 'Hello my name is $userName'
+/// ```
+/// * Replacing `#choice#`.
+/// ```dart
+/// final message = 'I would like to have some #choice#';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders, '##');
+/// transformed == 'I would like to have some $choice'
+/// ```
 String _replacePlaceholdersWithVariables(String message, Iterable<Placeholder> placeholders, [String braces = '{}']) {
   assert(braces.length == 2);
   String messageWithValues = message;
