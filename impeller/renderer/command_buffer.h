@@ -54,12 +54,13 @@ class CommandBuffer {
   //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///
-  /// @param[in]  desc  The description of the render pass.
+  /// @param[in]  desc  The description of the render target this pass will
+  ///                   target.
   ///
   /// @return     A valid render pass or null.
   ///
   virtual std::shared_ptr<RenderPass> CreateRenderPass(
-      const RenderTarget& desc) const = 0;
+      RenderTarget render_target) const = 0;
 
  protected:
   CommandBuffer();

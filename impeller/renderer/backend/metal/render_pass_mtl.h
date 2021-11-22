@@ -8,7 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/render_pass_descriptor.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -27,7 +27,7 @@ class RenderPassMTL final : public RenderPass {
   std::string label_;
   bool is_valid_ = false;
 
-  RenderPassMTL(id<MTLCommandBuffer> buffer, const RenderTarget& desc);
+  RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target);
 
   // |RenderPass|
   bool IsValid() const override;

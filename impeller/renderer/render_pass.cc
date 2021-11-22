@@ -6,8 +6,17 @@
 
 namespace impeller {
 
-RenderPass::RenderPass() = default;
+RenderPass::RenderPass(RenderTarget target)
+    : render_target_(std::move(target)) {}
 
 RenderPass::~RenderPass() = default;
+
+const RenderTarget& RenderPass::GetRenderTarget() const {
+  return render_target_;
+}
+
+ISize RenderPass::GetRenderTargetSize() const {
+  return render_target_.GetRenderTargetSize();
+}
 
 }  // namespace impeller
