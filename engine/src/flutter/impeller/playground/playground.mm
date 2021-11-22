@@ -144,28 +144,29 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return false;
     }
 
-    TextureDescriptor color0_desc;
-    color0_desc.format = PixelFormat::kB8G8R8A8UNormInt;
-    color0_desc.size = {
+    TextureDescriptor color0_tex;
+    color0_tex.format = PixelFormat::kB8G8R8A8UNormInt;
+    color0_tex.size = {
         static_cast<ISize::Type>(current_drawable.texture.width),
         static_cast<ISize::Type>(current_drawable.texture.height)};
+    color0_tex.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
     ColorAttachment color0;
     color0.texture =
-        std::make_shared<TextureMTL>(color0_desc, current_drawable.texture);
+        std::make_shared<TextureMTL>(color0_tex, current_drawable.texture);
     color0.clear_color = Color::SkyBlue();
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 
-    TextureDescriptor stencil_texture_descriptor;
-    stencil_texture_descriptor.format = PixelFormat::kD32FloatS8UNormInt;
-    stencil_texture_descriptor.size = color0_desc.size;
-    stencil_texture_descriptor.usage =
+    TextureDescriptor stencil0_tex;
+    stencil0_tex.format = PixelFormat::kD32FloatS8UNormInt;
+    stencil0_tex.size = color0_tex.size;
+    stencil0_tex.usage =
         static_cast<TextureUsageMask>(TextureUsage::kShaderRead) |
         static_cast<TextureUsageMask>(TextureUsage::kShaderWrite);
     auto stencil_texture =
         renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
-            StorageMode::kDeviceTransient, stencil_texture_descriptor);
+            StorageMode::kDeviceTransient, stencil0_tex);
     stencil_texture->SetLabel("PlaygroundMainStencil");
 
     StencilAttachment stencil0;
