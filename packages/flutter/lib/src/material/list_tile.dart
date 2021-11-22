@@ -1310,6 +1310,20 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   Iterable<_ListTileSlot> get slots => _ListTileSlot.values;
 
   @override
+  Widget? childForSlot(_ListTileSlot slot) {
+    switch (slot) {
+      case _ListTileSlot.leading:
+        return leading;
+      case _ListTileSlot.title:
+        return title;
+      case _ListTileSlot.subtitle:
+        return subtitle;
+      case _ListTileSlot.trailing:
+        return trailing;
+    }
+  }
+
+  @override
   _RenderListTile createRenderObject(BuildContext context) {
     return _RenderListTile(
       isThreeLine: isThreeLine,
@@ -1339,7 +1353,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 }
 
-class _RenderListTile extends RenderBox {
+class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot> {
   _RenderListTile({
     required bool isDense,
     required VisualDensity visualDensity,
@@ -1368,55 +1382,11 @@ class _RenderListTile extends RenderBox {
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth;
 
-  final Map<_ListTileSlot, RenderBox> children = <_ListTileSlot, RenderBox>{};
+  RenderBox? get leading => childForSlot(_ListTileSlot.leading);
+  RenderBox? get title => childForSlot(_ListTileSlot.title);
+  RenderBox? get subtitle => childForSlot(_ListTileSlot.subtitle);
+  RenderBox? get trailing => childForSlot(_ListTileSlot.trailing);
 
-  RenderBox? _updateChild(RenderBox? oldChild, RenderBox? newChild, _ListTileSlot slot) {
-    if (oldChild != null) {
-      dropChild(oldChild);
-      children.remove(slot);
-    }
-    if (newChild != null) {
-      children[slot] = newChild;
-      adoptChild(newChild);
-    }
-    return newChild;
-  }
-
-  RenderBox? _leading;
-  RenderBox? get leading => _leading;
-  set leading(RenderBox? value) {
-    _leading = _updateChild(_leading, value, _ListTileSlot.leading);
-  }
-
-  RenderBox? _title;
-  RenderBox? get title => _title;
-  set title(RenderBox? value) {
-    _title = _updateChild(_title, value, _ListTileSlot.title);
-  }
-
-  RenderBox? _subtitle;
-  RenderBox? get subtitle => _subtitle;
-  set subtitle(RenderBox? value) {
-    _subtitle = _updateChild(_subtitle, value, _ListTileSlot.subtitle);
-  }
-
-  RenderBox? _trailing;
-  RenderBox? get trailing => _trailing;
-  set trailing(RenderBox? value) {
-    _trailing = _updateChild(_trailing, value, _ListTileSlot.trailing);
-  }
-
-  // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync* {
-    if (leading != null)
-      yield leading!;
-    if (title != null)
-      yield title!;
-    if (subtitle != null)
-      yield subtitle!;
-    if (trailing != null)
-      yield trailing!;
-  }
 
   bool get isDense => _isDense;
   bool _isDense;
@@ -1514,25 +1484,25 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in _children)
+    for (final RenderBox child in children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in _children)
+    for (final RenderBox child in children)
       child.detach();
   }
 
   @override
   void redepthChildren() {
-    _children.forEach(redepthChild);
+    children.forEach(redepthChild);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    _children.forEach(visitor);
+    children.forEach(visitor);
   }
 
   @override
@@ -1801,7 +1771,7 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in _children) {
+    for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,

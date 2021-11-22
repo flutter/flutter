@@ -96,6 +96,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
   }
 
   @protected
+  Iterable<RenderBox> get children => _slotToChild.values.where((RenderBox? child) => child != null).cast<RenderBox>();
 
   final Map<S, RenderBox?> _slotToChild = <S, RenderBox?>{};
 
