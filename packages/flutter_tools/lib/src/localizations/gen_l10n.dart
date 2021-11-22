@@ -188,13 +188,15 @@ String _replacePlaceholdersBraces(
   String easyMessage = translationForMessage;
   for (final Placeholder placeholder in placeholders) {
     easyMessage = easyMessage.replaceAll(
-      '{${placeholder.name}}', '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}');
+      '{${placeholder.name}}',
+      '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}',
+    );
   }
   return easyMessage;
 }
 
-/// Replaces message with the interpolated variable name of the given placeholders with the ability to change braces
-/// to something other than {...}.
+/// Replaces message with the interpolated variable name of the given placeholders
+/// with the ability to change braces to something other than {...}.
 ///
 /// Examples:
 ///
