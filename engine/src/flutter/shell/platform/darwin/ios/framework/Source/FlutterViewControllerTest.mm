@@ -173,9 +173,17 @@ typedef enum UIAccessibilityContrast : NSInteger {
                     @"UIKeyboardAnimationDurationUserInfoKey" : [NSNumber numberWithDouble:0.25],
                     @"UIKeyboardIsLocalUserInfoKey" : [NSNumber numberWithBool:isLocal]
                   }];
+
+  XCTestExpectation* expectation = [self expectationWithDescription:@"update viewport"];
+  OCMStub([mockEngine updateViewportMetrics:flutter::ViewportMetrics()])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        [expectation fulfill];
+      });
   id viewControllerMock = OCMPartialMock(viewController);
   [viewControllerMock keyboardWillChangeFrame:notification];
   OCMVerify([viewControllerMock startKeyBoardAnimation:0.25]);
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testEnsureViewportMetricsWillInvokeAndDisplayLinkWillInvalidateInViewDidDisappear {
