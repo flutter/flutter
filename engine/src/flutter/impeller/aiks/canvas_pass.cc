@@ -26,4 +26,27 @@ const Entity& CanvasPass::GetPostProcessingEntity() const {
   return post_processing_entity_;
 }
 
+Rect CanvasPass::GetCoverageRect() const {
+  std::optional<Point> min, max;
+  for (const auto& entity : ops_) {
+    auto coverage = entity.GetPath().GetMinMaxCoveragePoints();
+    if (!coverage.has_value()) {
+      continue;
+    }
+    if (!min.has_value()) {
+      min = coverage->first;
+    }
+    if (!max.has_value()) {
+      max = coverage->second;
+    }
+    min = min->Min(coverage->first);
+    max = max->Max(coverage->second);
+  }
+  if (!min.has_value() || !max.has_value()) {
+    return {};
+  }
+  const auto diff = *max - *min;
+  return {min->x, min->y, diff.x, diff.y};
+}
+
 }  // namespace impeller

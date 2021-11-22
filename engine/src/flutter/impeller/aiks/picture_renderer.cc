@@ -29,10 +29,12 @@ bool PictureRenderer::Render(const Surface& surface,
     return false;
   }
 
-  for (const auto& pass : picture.passes) {
-    if (!entity_renderer_.RenderEntities(surface, parent_pass,
-                                         pass.GetPassEntities())) {
-      return false;
+  for (const auto& entry : picture.entries) {
+    if (auto pass = entry.pass) {
+      if (!entity_renderer_.RenderEntities(surface, parent_pass,
+                                           pass->GetPassEntities())) {
+        return false;
+      }
     }
   }
 

@@ -12,15 +12,13 @@
 namespace impeller {
 
 Canvas::Canvas() {
-  xformation_stack_.push({});
-  passes_.emplace_back(CanvasPass{});
+  Save(true);
 }
 
 Canvas::~Canvas() = default;
 
 void Canvas::Save() {
-  FML_DCHECK(xformation_stack_.size() > 0);
-  xformation_stack_.push(xformation_stack_.top());
+  Save(false);
 }
 
 bool Canvas::Restore() {
@@ -28,17 +26,16 @@ bool Canvas::Restore() {
   if (xformation_stack_.size() == 1) {
     return false;
   }
-  xformation_stack_.pop();
+  xformation_stack_.pop_back();
   return true;
 }
 
 void Canvas::Concat(const Matrix& xformation) {
-  const auto current_xformation = xformation_stack_.top().xformation;
-  xformation_stack_.top().xformation = xformation * current_xformation;
+  xformation_stack_.back().xformation = xformation * GetCurrentTransformation();
 }
 
 const Matrix& Canvas::GetCurrentTransformation() const {
-  return xformation_stack_.top().xformation;
+  return xformation_stack_.back().xformation;
 }
 
 void Canvas::Translate(const Vector3& offset) {
@@ -71,6 +68,7 @@ void Canvas::DrawPath(Path path, Paint paint) {
   entity.SetPath(std::move(path));
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(paint.CreateContentsForEntity());
+
   GetCurrentPass().PushEntity(std::move(entity));
 }
 
@@ -86,21 +84,23 @@ void Canvas::ClipPath(Path path) {
   entity.SetPath(std::move(path));
   entity.SetContents(std::make_shared<ClipContents>());
   entity.SetStencilDepth(GetStencilDepth());
+
   GetCurrentPass().PushEntity(std::move(entity));
 }
 
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
 void Canvas::DrawPicture(const Picture& picture) {
-  for (const auto& pass : picture.passes) {
-    CanvasPass new_pass;
-    for (const auto& entity : pass.GetPassEntities()) {
-      auto new_entity = entity;
-      new_entity.SetTransformation(GetCurrentTransformation() *
-                                   entity.GetTransformation());
-      new_pass.PushEntity(std::move(new_entity));
+  for (const auto& stack_entry : picture.entries) {
+    auto new_stack_entry = stack_entry;
+    if (auto pass = new_stack_entry.pass) {
+      for (auto entity : pass->GetPassEntities()) {
+        entity.IncrementStencilDepth(GetStencilDepth());
+        entity.SetTransformation(GetCurrentTransformation() *
+                                 entity.GetTransformation());
+      }
     }
-    passes_.emplace_back(std::move(new_pass));
+    xformation_stack_.emplace_back(std::move(new_stack_entry));
   }
 }
 
@@ -145,21 +145,49 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
 
 Picture Canvas::EndRecordingAsPicture() {
   Picture picture;
-  picture.passes = std::move(passes_);
+  picture.entries = std::move(xformation_stack_);
   return picture;
 }
 
 CanvasPass& Canvas::GetCurrentPass() {
-  FML_DCHECK(!passes_.empty());
-  return passes_.back();
+  for (auto i = xformation_stack_.rbegin(), end = xformation_stack_.rend();
+       i < end; i++) {
+    if (i->pass.has_value()) {
+      return i->pass.value();
+    }
+  }
+  FML_UNREACHABLE();
 }
 
 void Canvas::IncrementStencilDepth() {
-  ++xformation_stack_.top().stencil_depth;
+  ++xformation_stack_.back().stencil_depth;
 }
 
 size_t Canvas::GetStencilDepth() const {
-  return xformation_stack_.top().stencil_depth;
+  return xformation_stack_.back().stencil_depth;
+}
+
+void Canvas::DrawRect(Rect rect, Paint paint) {
+  DrawPath(PathBuilder{}.AddRect(rect).CreatePath(), std::move(paint));
+}
+
+void Canvas::Save(bool create_subpass) {
+  // Check if called from the ctor.
+  if (xformation_stack_.empty()) {
+    FML_DCHECK(create_subpass) << "Base entries must have a pass.";
+    CanvasStackEntry entry;
+    entry.pass = CanvasPass{};
+    xformation_stack_.emplace_back(std::move(entry));
+  }
+
+  auto entry = CanvasStackEntry{};
+
+  entry.xformation = xformation_stack_.back().xformation;
+  entry.stencil_depth = xformation_stack_.back().stencil_depth;
+  if (create_subpass) {
+    entry.pass = CanvasPass{};
+  }
+  xformation_stack_.emplace_back(std::move(entry));
 }
 
 }  // namespace impeller

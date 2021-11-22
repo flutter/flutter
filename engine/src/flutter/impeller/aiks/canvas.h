@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <deque>
 #include <memory>
 #include <optional>
-#include <stack>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -22,11 +22,6 @@
 namespace impeller {
 
 class Entity;
-
-struct CanvasStackEntry {
-  Matrix xformation;
-  size_t stencil_depth = 0u;
-};
 
 class Canvas {
  public:
@@ -56,6 +51,8 @@ class Canvas {
 
   void DrawPath(Path path, Paint paint);
 
+  void DrawRect(Rect rect, Paint paint);
+
   void DrawImage(std::shared_ptr<Image> image, Point offset, Paint paint);
 
   void DrawImageRect(std::shared_ptr<Image> image,
@@ -72,14 +69,15 @@ class Canvas {
   Picture EndRecordingAsPicture();
 
  private:
-  std::stack<CanvasStackEntry> xformation_stack_;
-  std::vector<CanvasPass> passes_;
+  std::deque<CanvasStackEntry> xformation_stack_;
 
   CanvasPass& GetCurrentPass();
 
   void IncrementStencilDepth();
 
   size_t GetStencilDepth() const;
+
+  void Save(bool create_subpass);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

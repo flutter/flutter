@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents.h"
@@ -20,6 +21,8 @@ class CanvasPass {
 
   void PushEntity(Entity entity);
 
+  Rect GetCoverageRect() const;
+
   const std::vector<Entity>& GetPassEntities() const;
 
   void SetPostProcessingEntity(Entity entity);
@@ -29,6 +32,12 @@ class CanvasPass {
  private:
   std::vector<Entity> ops_;
   Entity post_processing_entity_;
+};
+
+struct CanvasStackEntry {
+  Matrix xformation;
+  size_t stencil_depth = 0u;
+  std::optional<CanvasPass> pass;
 };
 
 }  // namespace impeller

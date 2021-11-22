@@ -62,6 +62,10 @@ struct Color {
 
   static constexpr Color Blue() { return {0.0, 0.0, 1.0, 1.0}; }
 
+  constexpr Color WithAlpha(Scalar new_alpha) const {
+    return {red, green, blue, new_alpha};
+  }
+
   static constexpr Color AliceBlue() {
     return {240.0 / 255.0, 248.0 / 255.0, 255.0 / 255.0, 1.0};
   }

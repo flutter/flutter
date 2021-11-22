@@ -42,4 +42,8 @@ uint32_t Entity::GetStencilDepth() const {
   return stencil_depth_;
 }
 
+void Entity::IncrementStencilDepth(uint32_t increment) {
+  stencil_depth_ += increment;
+}
+
 }  // namespace impeller
