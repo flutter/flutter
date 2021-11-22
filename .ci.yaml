@@ -1603,6 +1603,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
