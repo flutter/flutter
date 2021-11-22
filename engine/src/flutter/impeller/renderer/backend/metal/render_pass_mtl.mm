@@ -114,6 +114,9 @@ bool RenderPassMTL::IsValid() const {
 }
 
 void RenderPassMTL::SetLabel(std::string label) {
+  if (label.empty()) {
+    return;
+  }
   label_ = std::move(label);
   transients_buffer_->SetLabel(SPrintF("%s Transients", label_.c_str()));
 }
