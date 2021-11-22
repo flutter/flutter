@@ -1765,13 +1765,24 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     doPaint(trailing);
   }
 
+  Iterable<RenderBox> get _childrenInHitTestOrder sync* {
+    if (leading != null)
+      yield leading!;
+    if (title != null)
+      yield title!;
+    if (subtitle != null)
+      yield subtitle!;
+    if (trailing != null)
+      yield trailing!;
+  }
+
   @override
   bool hitTestSelf(Offset position) => true;
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in children) {
+    for (final RenderBox child in _childrenInHitTestOrder) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,

@@ -91,7 +91,6 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
 mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
   @protected
   RenderBox? childForSlot(S slot) {
-    assert(_slotToChild.containsKey(slot));
     return _slotToChild[slot];
   }
 
@@ -104,7 +103,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
     final RenderBox? oldChild = _slotToChild[slot];
     if (oldChild != null) {
       dropChild(oldChild);
-      _slotToChild[slot] = null;
+      _slotToChild.remove(slot);
     }
     if (child != null) {
       _slotToChild[slot] = child;
