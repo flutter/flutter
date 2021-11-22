@@ -1371,6 +1371,7 @@ targets:
       - .ci.yaml
 
   - name: Linux_android analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94040
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
