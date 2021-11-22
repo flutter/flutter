@@ -88,10 +88,10 @@ void main() {
 
     await crashReporter.informUser(
       CrashDetails(
-          command: 'arg1 arg2 arg3',
-          error: Exception('Dummy exception'),
-          stackTrace: StackTrace.current,
-          doctorText: 'Fake doctor text'),
+        command: 'arg1 arg2 arg3',
+        error: Exception('Dummy exception'),
+        stackTrace: StackTrace.current,
+        doctorText: 'Fake doctor text'),
       file,
     );
 
@@ -345,8 +345,8 @@ class MockCrashReportSender extends MockClient {
     boundary = boundary?.substring(boundary.indexOf('boundary=') + 9);
     crashInfo.fields = Map<String, String>.fromIterable(
       utf8.decode(request.bodyBytes)
-          .split('--$boundary')
-          .map<List<String>?>((String part) {
+        .split('--$boundary')
+        .map<List<String>?>((String part) {
         final Match? nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
         if (nameMatch == null) {
           return null;
