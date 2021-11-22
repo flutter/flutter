@@ -188,7 +188,7 @@ String _replacePlaceholdersBraces(
   String easyMessage = translationForMessage;
   for (final Placeholder placeholder in placeholders) {
     easyMessage = easyMessage.replaceAll(
-        '{${placeholder.name}}', '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}');
+      '{${placeholder.name}}', '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}');
   }
   return easyMessage;
 }
@@ -202,10 +202,10 @@ String _replacePlaceholdersWithVariables(String message, Iterable<Placeholder> p
       variable += 'String';
     }
     messageWithValues = messageWithValues.replaceAll(
-        '${braces[0]}${placeholder.name}${braces[1]}',
-        _needsCurlyBracketStringInterpolation(messageWithValues, placeholder.name)
-            ? '\${$variable}'
-            : '\$$variable'
+      '${braces[0]}${placeholder.name}${braces[1]}',
+      _needsCurlyBracketStringInterpolation(messageWithValues, placeholder.name)
+        ? '\${$variable}'
+        : '\$$variable'
     );
   }
   return messageWithValues;
@@ -302,8 +302,7 @@ String _generateSelectMethod(Message message, String translationForMessage) {
 
   final List<String> cases = <String>[];
 
-  final RegExpMatch? selectMatch =
-    LocalizationsGenerator._selectRE.firstMatch(easyMessage);
+  final RegExpMatch? selectMatch = LocalizationsGenerator._selectRE.firstMatch(easyMessage);
   String? choice;
   if (selectMatch != null && selectMatch.groupCount == 2) {
     choice = selectMatch.group(1);
