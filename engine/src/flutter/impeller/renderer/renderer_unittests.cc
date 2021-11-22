@@ -60,8 +60,7 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(bridge && boston);
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
-  Renderer::RenderCallback callback = [&](const Surface& surface,
-                                          RenderPass& pass) {
+  Renderer::RenderCallback callback = [&](RenderPass& pass) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;
@@ -69,7 +68,7 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
     cmd.BindVertices(vertex_buffer);
 
     VS::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
+    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
 
@@ -125,8 +124,7 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  Renderer::RenderCallback callback = [&](const Surface& surface,
-                                          RenderPass& pass) {
+  Renderer::RenderCallback callback = [&](RenderPass& pass) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline;
@@ -149,7 +147,7 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
     for (size_t i = 0; i < 1; i++) {
       for (size_t j = 0; j < 1; j++) {
         VS::UniformBuffer uniforms;
-        uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize()) *
+        uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
         VS::BindUniformBuffer(
             cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
@@ -301,8 +299,7 @@ TEST_F(RendererTest, CanRenderPath) {
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
 
-  Renderer::RenderCallback callback = [&](const Surface& surface,
-                                          RenderPass& pass) {
+  Renderer::RenderCallback callback = [&](RenderPass& pass) {
     Command cmd;
     cmd.label = "Box";
     cmd.pipeline = box_pipeline.WaitAndGet();
@@ -324,7 +321,7 @@ TEST_F(RendererTest, CanRenderPath) {
     cmd.winding = tessellator.GetFrontFaceWinding();
 
     VS::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(surface.GetSize());
+    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
     VS::BindUniformBuffer(cmd,
                           pass.GetTransientsBuffer().EmplaceUniform(uniforms));
     if (!pass.AddCommand(cmd)) {

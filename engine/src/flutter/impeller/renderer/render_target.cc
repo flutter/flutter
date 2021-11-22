@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/render_pass_descriptor.h"
+#include "impeller/renderer/render_target.h"
 
 #include "impeller/renderer/texture.h"
 
@@ -27,6 +27,11 @@ std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
   }
 
   return found->second.texture->GetSize();
+}
+
+ISize RenderTarget::GetRenderTargetSize() const {
+  auto size = GetColorAttachmentSize(0u);
+  return size.has_value() ? size.value() : ISize{};
 }
 
 RenderTarget& RenderTarget::SetColorAttachment(ColorAttachment attachment,

@@ -7,6 +7,7 @@
 #include <string>
 
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -20,9 +21,15 @@ class Allocator;
 ///             Render passes can be obtained from the command buffer in which
 ///             the pass is meant to encode commands into.
 ///
+/// @see        `CommandBuffer`
+///
 class RenderPass {
  public:
   virtual ~RenderPass();
+
+  const RenderTarget& GetRenderTarget() const;
+
+  ISize GetRenderTargetSize() const;
 
   virtual bool IsValid() const = 0;
 
@@ -52,9 +59,11 @@ class RenderPass {
   virtual bool EncodeCommands(Allocator& transients_allocator) const = 0;
 
  protected:
-  RenderPass();
+  RenderPass(RenderTarget target);
 
  private:
+  const RenderTarget render_target_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };
 

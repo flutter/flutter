@@ -19,8 +19,8 @@ bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
   }
 
   return Playground::OpenPlaygroundHere(
-      [renderer, &picture](const Surface& surface, RenderPass& pass) -> bool {
-        return renderer->Render(surface, pass, picture);
+      [renderer, &picture](RenderPass& pass) -> bool {
+        return renderer->Render(pass, picture);
       });
 }
 

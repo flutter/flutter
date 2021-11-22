@@ -51,7 +51,7 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  if (render_callback && !render_callback(surface, *render_pass)) {
+  if (render_callback && !render_callback(*render_pass)) {
     return false;
   }
 

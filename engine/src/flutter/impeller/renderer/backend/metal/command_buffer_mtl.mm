@@ -53,12 +53,13 @@ void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
 }
 
 std::shared_ptr<RenderPass> CommandBufferMTL::CreateRenderPass(
-    const RenderTarget& desc) const {
+    RenderTarget target) const {
   if (!buffer_) {
     return nullptr;
   }
 
-  auto pass = std::shared_ptr<RenderPassMTL>(new RenderPassMTL(buffer_, desc));
+  auto pass = std::shared_ptr<RenderPassMTL>(
+      new RenderPassMTL(buffer_, std::move(target)));
   if (!pass->IsValid()) {
     return nullptr;
   }

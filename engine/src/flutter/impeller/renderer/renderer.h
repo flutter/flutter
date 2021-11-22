@@ -21,8 +21,7 @@ class RenderPass;
 
 class Renderer {
  public:
-  using RenderCallback =
-      std::function<bool(const Surface& surface, RenderPass& pass)>;
+  using RenderCallback = std::function<bool(RenderPass& pass)>;
 
   Renderer(std::shared_ptr<Context> context);
 

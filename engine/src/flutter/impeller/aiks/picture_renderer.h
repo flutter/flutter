@@ -22,9 +22,7 @@ class PictureRenderer {
 
   bool IsValid() const;
 
-  [[nodiscard]] bool Render(const Surface& surface,
-                            RenderPass& parent_pass,
-                            const Picture& picture);
+  [[nodiscard]] bool Render(RenderPass& parent_pass, const Picture& picture);
 
  private:
   EntityRenderer entity_renderer_;

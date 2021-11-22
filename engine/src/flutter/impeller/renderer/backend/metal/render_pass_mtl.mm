@@ -92,10 +92,10 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
   return result;
 }
 
-RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer,
-                             const RenderTarget& desc)
-    : buffer_(buffer),
-      desc_(ToMTLRenderPassDescriptor(desc)),
+RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
+    : RenderPass(std::move(target)),
+      buffer_(buffer),
+      desc_(ToMTLRenderPassDescriptor(GetRenderTarget())),
       transients_buffer_(HostBuffer::Create()) {
   if (!buffer_ || !desc_) {
     return;

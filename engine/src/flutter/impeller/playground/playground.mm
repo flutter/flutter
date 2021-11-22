@@ -180,11 +180,10 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
     Surface surface(desc);
 
-    Renderer::RenderCallback wrapped_callback =
-        [render_callback](const auto& surface, auto& pass) {
-          pass.SetLabel("Playground Main Render Pass");
-          return render_callback(surface, pass);
-        };
+    Renderer::RenderCallback wrapped_callback = [render_callback](auto& pass) {
+      pass.SetLabel("Playground Main Render Pass");
+      return render_callback(pass);
+    };
 
     if (!renderer_.Render(surface, wrapped_callback)) {
       FML_LOG(ERROR) << "Could not render into the surface.";

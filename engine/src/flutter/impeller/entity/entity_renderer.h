@@ -23,8 +23,7 @@ class EntityRenderer {
 
   bool IsValid() const;
 
-  [[nodiscard]] bool RenderEntities(const Surface& surface,
-                                    RenderPass& parent_pass,
+  [[nodiscard]] bool RenderEntities(RenderPass& parent_pass,
                                     const std::vector<Entity>& entities);
 
  private:
