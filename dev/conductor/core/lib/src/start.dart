@@ -447,7 +447,7 @@ class StartContext extends Context {
       candidateBranch,
       FrameworkRepository.defaultBranch,
     );
-    final bool response = prompt(
+    final bool response = await prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
       'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '
       'Is this correct?',
