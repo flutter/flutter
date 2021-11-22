@@ -13,8 +13,14 @@
 
 namespace impeller {
 
+class Context;
+
 class RenderTarget {
  public:
+  static RenderTarget CreateOffscreen(const Context& context,
+                                      ISize size,
+                                      std::string label = "Offscreen");
+
   RenderTarget();
 
   ~RenderTarget();
