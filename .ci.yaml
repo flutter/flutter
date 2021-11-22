@@ -1724,6 +1724,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android image_list_reported_duration
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94034
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
