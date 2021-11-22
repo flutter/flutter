@@ -103,6 +103,30 @@ TEST_F(AiksTest, CanRenderClips) {
   canvas.ClipPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 500, 500)).CreatePath());
   canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderGroupOpacity) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();  //.WithAlpha(0.5);
+  Paint green;
+  green.color = Color::Green();  //.WithAlpha(0.5);
+  Paint blue;
+  blue.color = Color::Blue();  //.WithAlpha(0.5);
+
+  Paint alpha;
+  alpha.color = Color::Red().WithAlpha(0.5);
+
+  canvas.SaveLayer(alpha);
+
+  canvas.DrawRect({100, 100, 100, 100}, red);
+  canvas.DrawRect({120, 120, 100, 100}, green);
+  canvas.DrawRect({140, 140, 100, 100}, blue);
+
+  canvas.Restore();
+
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

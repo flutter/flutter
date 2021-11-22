@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
@@ -67,6 +68,8 @@ class Path {
       const SmoothingApproximation& approximation = {}) const;
 
   Rect GetBoundingBox() const;
+
+  std::optional<std::pair<Point, Point>> GetMinMaxCoveragePoints() const;
 
  private:
   struct ComponentIndexPair {

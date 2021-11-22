@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 
@@ -81,6 +82,14 @@ struct TPoint {
     double dx = p.x - x;
     double dy = p.y - y;
     return dx * dx + dy * dy;
+  }
+
+  constexpr TPoint Min(const TPoint& p) const {
+    return {std::min<Type>(x, p.x), std::min<Type>(y, p.y)};
+  }
+
+  constexpr TPoint Max(const TPoint& p) const {
+    return {std::max<Type>(x, p.x), std::max<Type>(y, p.y)};
   }
 
   constexpr Type GetDistance(const TPoint& p) const {
