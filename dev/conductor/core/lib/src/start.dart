@@ -345,7 +345,7 @@ class StartContext extends Context {
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
-    
+
     await framework.newBranch(workingBranchName);
     final List<pb.Cherrypick> frameworkCherrypicks = (await _sortCherrypicks(
       repository: framework,
