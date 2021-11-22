@@ -12,8 +12,6 @@
 
 namespace flutter {
 
-inline constexpr int32_t kRootNode = 0;
-
 // Native mac notifications fired. These notifications are not publicly documented.
 static NSString* const AccessibilityLoadCompleteNotification = @"AXLoadComplete";
 static NSString* const AccessibilityInvalidStatusChangedNotification = @"AXInvalidStatusChanged";
@@ -187,9 +185,10 @@ AccessibilityBridgeMacDelegate::MacOSEventsFromAXEvent(ui::AXEventGenerator::Eve
         if (ax_node.data().HasState(ax::mojom::State::kEditable)) {
           events.push_back({
               .name = NSAccessibilityValueChangedNotification,
-              .target = bridge->GetFlutterPlatformNodeDelegateFromID(kRootNode)
-                            .lock()
-                            ->GetNativeViewAccessible(),
+              .target =
+                  bridge->GetFlutterPlatformNodeDelegateFromID(AccessibilityBridge::kRootNodeId)
+                      .lock()
+                      ->GetNativeViewAccessible(),
               .user_info = nil,
           });
         }
