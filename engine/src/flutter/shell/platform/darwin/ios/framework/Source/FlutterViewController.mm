@@ -1200,9 +1200,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       }
       completion:^(BOOL finished) {
         if (self.displayLink == currentDisplayLink) {
+          // Indicates the displaylink captured by this block is the original one,which also
+          // indicates the animation has not been interrupted from its beginning. Moreover,indicates
+          // the animation is over and there is no more animation about to exectute.
           [self invalidateDisplayLink];
-        }
-        if (finished) {
           [self removeKeyboardAnimationView];
           [self ensureViewportMetricsIsCorrect];
         }
