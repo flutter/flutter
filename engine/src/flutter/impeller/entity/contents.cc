@@ -56,7 +56,6 @@ const std::vector<Color>& LinearGradientContents::GetColors() const {
 
 bool LinearGradientContents::Render(const ContentRenderer& renderer,
                                     const Entity& entity,
-                                    const Surface& surface,
                                     RenderPass& pass) const {
   using VS = GradientFillPipeline::VertexShader;
   using FS = GradientFillPipeline::FragmentShader;
@@ -75,8 +74,8 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
   }
 
   VS::FrameInfo frame_info;
-  frame_info.mvp =
-      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation();
 
   FS::GradientInfo gradient_info;
   gradient_info.start_point = start_point_;
@@ -134,7 +133,6 @@ static VertexBuffer CreateSolidFillVertices(const Path& path,
 
 bool SolidColorContents::Render(const ContentRenderer& renderer,
                                 const Entity& entity,
-                                const Surface& surface,
                                 RenderPass& pass) const {
   if (color_.IsTransparent()) {
     return true;
@@ -150,8 +148,8 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
       CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
 
   VS::FrameInfo frame_info;
-  frame_info.mvp =
-      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation();
   frame_info.color = color_;
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
@@ -188,7 +186,6 @@ std::shared_ptr<Texture> TextureContents::GetTexture() const {
 
 bool TextureContents::Render(const ContentRenderer& renderer,
                              const Entity& entity,
-                             const Surface& surface,
                              RenderPass& pass) const {
   if (texture_ == nullptr) {
     return true;
@@ -234,8 +231,8 @@ bool TextureContents::Render(const ContentRenderer& renderer,
   auto& host_buffer = pass.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
-  frame_info.mvp =
-      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation();
 
   Command cmd;
   cmd.label = "TextureFill";
@@ -316,7 +313,6 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
 
 bool SolidStrokeContents::Render(const ContentRenderer& renderer,
                                  const Entity& entity,
-                                 const Surface& surface,
                                  RenderPass& pass) const {
   if (color_.IsTransparent() || stroke_size_ <= 0.0) {
     return true;
@@ -325,8 +321,8 @@ bool SolidStrokeContents::Render(const ContentRenderer& renderer,
   using VS = SolidStrokeVertexShader;
 
   VS::FrameInfo frame_info;
-  frame_info.mvp =
-      Matrix::MakeOrthographic(surface.GetSize()) * entity.GetTransformation();
+  frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation();
 
   VS::StrokeInfo stroke_info;
   stroke_info.color = color_;
@@ -366,7 +362,6 @@ ClipContents::~ClipContents() = default;
 
 bool ClipContents::Render(const ContentRenderer& renderer,
                           const Entity& entity,
-                          const Surface& surface,
                           RenderPass& pass) const {
   using VS = ClipPipeline::VertexShader;
 
@@ -380,7 +375,7 @@ bool ClipContents::Render(const ContentRenderer& renderer,
   VS::FrameInfo info;
   // The color really doesn't matter.
   info.color = Color::SkyBlue();
-  info.mvp = Matrix::MakeOrthographic(surface.GetSize());
+  info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
 
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 

@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/render_pass_descriptor.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 

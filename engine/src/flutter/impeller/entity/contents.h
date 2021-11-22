@@ -28,7 +28,6 @@ class Contents {
 
   virtual bool Render(const ContentRenderer& renderer,
                       const Entity& entity,
-                      const Surface& surface,
                       RenderPass& pass) const = 0;
 
  private:
@@ -44,7 +43,6 @@ class LinearGradientContents final : public Contents {
   // |Contents|
   bool Render(const ContentRenderer& renderer,
               const Entity& entity,
-              const Surface& surface,
               RenderPass& pass) const override;
 
   void SetEndPoints(Point start_point, Point end_point);
@@ -76,7 +74,6 @@ class SolidColorContents final : public Contents {
   // |Contents|
   bool Render(const ContentRenderer& renderer,
               const Entity& entity,
-              const Surface& surface,
               RenderPass& pass) const override;
 
  private:
@@ -102,7 +99,6 @@ class TextureContents final : public Contents {
   // |Contents|
   bool Render(const ContentRenderer& renderer,
               const Entity& entity,
-              const Surface& surface,
               RenderPass& pass) const override;
 
  public:
@@ -129,7 +125,6 @@ class SolidStrokeContents final : public Contents {
   // |Contents|
   bool Render(const ContentRenderer& renderer,
               const Entity& entity,
-              const Surface& surface,
               RenderPass& pass) const override;
 
  private:
@@ -148,7 +143,6 @@ class ClipContents final : public Contents {
   // |Contents|
   bool Render(const ContentRenderer& renderer,
               const Entity& entity,
-              const Surface& surface,
               RenderPass& pass) const override;
 
  private:

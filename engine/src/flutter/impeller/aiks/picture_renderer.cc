@@ -22,16 +22,14 @@ bool PictureRenderer::IsValid() const {
   return is_valid_;
 }
 
-bool PictureRenderer::Render(const Surface& surface,
-                             RenderPass& parent_pass,
-                             const Picture& picture) {
+bool PictureRenderer::Render(RenderPass& parent_pass, const Picture& picture) {
   if (!IsValid()) {
     return false;
   }
 
   for (const auto& entry : picture.entries) {
     if (auto pass = entry.pass) {
-      if (!entity_renderer_.RenderEntities(surface, parent_pass,
+      if (!entity_renderer_.RenderEntities(parent_pass,
                                            pass->GetPassEntities())) {
         return false;
       }

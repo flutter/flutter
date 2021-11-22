@@ -17,10 +17,9 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
       return false;
     }
   }
-  Renderer::RenderCallback callback = [&](const Surface& surface,
-                                          RenderPass& pass) -> bool {
+  Renderer::RenderCallback callback = [&](RenderPass& pass) -> bool {
     std::vector<Entity> entities = {entity};
-    return renderer_->RenderEntities(surface, pass, entities);
+    return renderer_->RenderEntities(pass, entities);
   };
   return Playground::OpenPlaygroundHere(callback);
 }

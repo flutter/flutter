@@ -21,6 +21,8 @@ class RenderTarget {
 
   bool HasColorAttachment(size_t index) const;
 
+  ISize GetRenderTargetSize() const;
+
   std::optional<ISize> GetColorAttachmentSize(size_t index) const;
 
   RenderTarget& SetColorAttachment(ColorAttachment attachment, size_t index);
