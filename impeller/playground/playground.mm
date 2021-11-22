@@ -162,8 +162,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     stencil0_tex.format = PixelFormat::kD32FloatS8UNormInt;
     stencil0_tex.size = color0_tex.size;
     stencil0_tex.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kShaderRead) |
-        static_cast<TextureUsageMask>(TextureUsage::kShaderWrite);
+        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
     auto stencil_texture =
         renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
             StorageMode::kDeviceTransient, stencil0_tex);

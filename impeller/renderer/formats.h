@@ -94,10 +94,10 @@ enum class StoreAction {
 using TextureUsageMask = uint64_t;
 
 enum class TextureUsage : TextureUsageMask {
-  kUnknown,
-  kShaderRead,
-  kShaderWrite,
-  kRenderTarget,
+  kUnknown = 0,
+  kShaderRead = 1 << 0,
+  kShaderWrite = 1 << 1,
+  kRenderTarget = 1 << 2,
 };
 
 enum class WindingOrder {
