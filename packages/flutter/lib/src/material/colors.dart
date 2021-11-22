@@ -71,9 +71,6 @@ class MaterialAccentColor extends ColorSwatch<int> {
   const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.
-  Color get shade50 => this[50]!;
-
-  /// The second lightest shade.
   Color get shade100 => this[100]!;
 
   /// The default shade.
