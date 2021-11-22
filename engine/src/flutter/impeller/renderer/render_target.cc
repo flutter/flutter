@@ -84,8 +84,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
   stencil_tex0.format = PixelFormat::kD32FloatS8UNormInt;
   stencil_tex0.size = size;
   stencil_tex0.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kShaderRead) |
-      static_cast<TextureUsageMask>(TextureUsage::kShaderWrite);
+      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
 
   ColorAttachment color0;
   color0.clear_color = Color::BlackTransparent();
