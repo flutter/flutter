@@ -63,6 +63,8 @@ def main():
       '--manifest-json-file', dest='manifest_json_file', action='store', required=True)
   parser.add_argument(
       '--far-name', dest='far_name', action='store', required=False)
+  parser.add_argument(
+      '--api-level', dest='api_level', action='store', required=False)
 
   args = parser.parse_args()
 
@@ -98,10 +100,18 @@ def main():
   # Use check_output so if anything goes wrong we get the output.
   try:
 
+    build_command = ['build', '--output-package-manifest', args.manifest_json_file]
+
+    if args.api_level is not None:
+      build_command = ['--api-level', args.api_level] + build_command
+
+    archive_command = ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")]
+
     pm_commands = [
-        ['build', '--output-package-manifest', args.manifest_json_file],
-        ['archive', '--output='+ os.path.join(os.path.dirname(output_dir), args.far_name + "-0")],
+        build_command,
+        archive_command
     ]
+
     for pm_command in pm_commands:
       subprocess.check_output(pm_command_base + pm_command)
   except subprocess.CalledProcessError as e:
