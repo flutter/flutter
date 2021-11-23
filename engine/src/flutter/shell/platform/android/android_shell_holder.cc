@@ -311,7 +311,7 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
       config.SetEntrypoint(std::move(entrypoint));
     }
     if (entrypoint_args.size() > 0) {
-      config.SetEntrypointArgs(entrypoint_args);
+      config.SetEntrypointArgs(std::move(entrypoint_args));
     }
   }
   return config;

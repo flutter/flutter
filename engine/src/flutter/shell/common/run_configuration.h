@@ -155,7 +155,7 @@ class RunConfiguration {
   /// @brief      Updates the main application entrypoint arguments.
   ///
   /// @param[in]  entrypoint_args  The entrypoint arguments to use.
-  void SetEntrypointArgs(const std::vector<std::string>& entrypoint_args);
+  void SetEntrypointArgs(std::vector<std::string> entrypoint_args);
 
   //----------------------------------------------------------------------------
   /// @return     The asset manager referencing all previously registered asset
