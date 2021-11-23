@@ -29,5 +29,3 @@ void main() {
     expect(find.ancestor(of: inkMaterialFinder, matching: find.byType(ClipRRect)), findsNothing);
   });
 }
-
-
