@@ -681,7 +681,7 @@ void main() {
       expect(state.incrementLevel, incrementLevel);
     });
 
-    test('StartContext can get engine and framework checkout directories after run', () async {
+    test('StartContext gets engine and framework checkout directories after run', () async {
       stdio.stdin.add('y');
       const String revision2 = 'def789';
       const String revision3 = '123abc';
