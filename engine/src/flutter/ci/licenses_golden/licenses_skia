@@ -1,4 +1,4 @@
-Signature: 34c1a13c0879d3d64b369e149900d81c
+Signature: a212de01eda0692f91e3d1969014d031
 
 UNUSED LICENSES:
 
@@ -555,17 +555,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
+LIBRARY: vulkan
+ORIGIN: ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
-FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
-FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
-FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
-FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
+FILE: ../../../third_party/skia/include/third_party/skcms/BUILD.bazel
+FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/BUILD.bazel
+FILE: ../../../third_party/skia/third_party/skcms/version.sha1
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 Google Inc.
+Copyright (c) 2018 Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -596,11 +593,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-ORIGIN: ../../../third_party/skia/include/third_party/skcms/LICENSE
+LIBRARY: vulkanmemoryallocator
+ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/third_party/skcms/version.sha1
+FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
+FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
+FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
+FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.cpp
+FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/GrVulkanMemoryAllocator.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2018 Google Inc. All rights reserved.
+Copyright 2018 Google Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -801,19 +804,32 @@ FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
 FILE: ../../../third_party/skia/gm/BUILD.bazel
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
+FILE: ../../../third_party/skia/go_repositories.bzl
 FILE: ../../../third_party/skia/include/android/BUILD.bazel
+FILE: ../../../third_party/skia/include/c/BUILD.bazel
 FILE: ../../../third_party/skia/include/codec/BUILD.bazel
 FILE: ../../../third_party/skia/include/config/BUILD.bazel
 FILE: ../../../third_party/skia/include/core/BUILD.bazel
+FILE: ../../../third_party/skia/include/docs/BUILD.bazel
 FILE: ../../../third_party/skia/include/effects/BUILD.bazel
 FILE: ../../../third_party/skia/include/encode/BUILD.bazel
 FILE: ../../../third_party/skia/include/gpu/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/d3d/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/dawn/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/gl/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/gl/egl/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/gl/glx/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/mock/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/mtl/BUILD.bazel
+FILE: ../../../third_party/skia/include/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/include/pathops/BUILD.bazel
 FILE: ../../../third_party/skia/include/ports/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/BUILD.bazel
+FILE: ../../../third_party/skia/include/private/chromium/BUILD.bazel
 FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
-FILE: ../../../third_party/skia/include/third_party/BUILD.bazel
+FILE: ../../../third_party/skia/include/svg/BUILD.bazel
 FILE: ../../../third_party/skia/include/utils/BUILD.bazel
+FILE: ../../../third_party/skia/include/utils/mac/BUILD.bazel
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
@@ -1156,6 +1172,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.h
+FILE: ../../../third_party/skia/modules/skshaper/include/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skshaper/src/BUILD.bazel
 FILE: ../../../third_party/skia/public.bzl
 FILE: ../../../third_party/skia/site/_index.html
 FILE: ../../../third_party/skia/site/about/_index.html
@@ -1193,21 +1211,55 @@ FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/android/BUILD.bazel
+FILE: ../../../third_party/skia/src/c/BUILD.bazel
 FILE: ../../../third_party/skia/src/codec/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/BUILD.bazel
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/effects/BUILD.bazel
+FILE: ../../../third_party/skia/src/effects/imagefilters/BUILD.bazel
+FILE: ../../../third_party/skia/src/fonts/BUILD.bazel
 FILE: ../../../third_party/skia/src/gpu/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/d3d/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/dawn/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/effects/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/geometry/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/android/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/builders/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/egl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/glfw/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/glx/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/iOS/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/mac/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/webgl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gl/win/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/glsl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/gradients/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/mock/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/ops/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/tessellate/shaders/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/text/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/v1/BUILD.bazel
+FILE: ../../../third_party/skia/src/gpu/vk/BUILD.bazel
 FILE: ../../../third_party/skia/src/image/BUILD.bazel
 FILE: ../../../third_party/skia/src/images/BUILD.bazel
+FILE: ../../../third_party/skia/src/lazy/BUILD.bazel
 FILE: ../../../third_party/skia/src/opts/BUILD.bazel
 FILE: ../../../third_party/skia/src/pathops/BUILD.bazel
+FILE: ../../../third_party/skia/src/pdf/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/BUILD.bazel
 FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
 FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
 FILE: ../../../third_party/skia/src/sfnt/BUILD.bazel
 FILE: ../../../third_party/skia/src/shaders/BUILD.bazel
+FILE: ../../../third_party/skia/src/shaders/gradients/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/analysis/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/codegen/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/dsl/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_interp.dehydrated.sksl
@@ -1215,14 +1267,23 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_public.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_rt_shader.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_runtime.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_vert.dehydrated.sksl
+FILE: ../../../third_party/skia/src/sksl/ir/BUILD.bazel
+FILE: ../../../third_party/skia/src/sksl/lex/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
+FILE: ../../../third_party/skia/src/sksl/transform/BUILD.bazel
+FILE: ../../../third_party/skia/src/svg/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
+FILE: ../../../third_party/skia/src/utils/mac/BUILD.bazel
+FILE: ../../../third_party/skia/src/utils/win/BUILD.bazel
+FILE: ../../../third_party/skia/src/xml/BUILD.bazel
+FILE: ../../../third_party/skia/src/xps/BUILD.bazel
 FILE: ../../../third_party/skia/third_party/BUILD.bazel
+FILE: ../../../third_party/skia/third_party/file_map_for_bazel.json
 FILE: ../../../third_party/skia/toolchain/BUILD.bazel
 FILE: ../../../third_party/skia/toolchain/build_toolchain.bzl
 FILE: ../../../third_party/skia/toolchain/clang_toolchain_config.bzl
@@ -2365,6 +2426,7 @@ FILE: ../../../third_party/skia/bench/BigPath.cpp
 FILE: ../../../third_party/skia/bench/BigPath.h
 FILE: ../../../third_party/skia/bench/CanvasSaveRestoreBench.cpp
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
+FILE: ../../../third_party/skia/experimental/bazel_test/hello_world.go
 FILE: ../../../third_party/skia/experimental/graphite/include/BackendTexture.h
 FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
 FILE: ../../../third_party/skia/experimental/graphite/include/GraphiteTypes.h
