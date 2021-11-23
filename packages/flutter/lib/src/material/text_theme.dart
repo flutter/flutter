@@ -139,17 +139,17 @@ class TextTheme with Diagnosticable {
 
   /// Large size of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals
+  /// These styles are reserved for short, important text or numerals.
   final TextStyle? displayLarge;
 
   /// Medium size of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals
+  /// These styles are reserved for short, important text or numerals.
   final TextStyle? displayMedium;
 
   /// Small size of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals
+  /// These styles are reserved for short, important text or numerals.
   final TextStyle? displaySmall;
 
   /// Large size of the headline styles.

@@ -573,7 +573,7 @@ class Typography with Diagnosticable {
   /// English, French, Russian, etc.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// [latest Material Design specification](https://material.io/go/design-typography#typography-styles).
+  /// [2018 Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme englishLike2018 = TextTheme(
     displayLarge : TextStyle(debugLabel: 'englishLike displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
     displayMedium : TextStyle(debugLabel: 'englishLike displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
@@ -616,7 +616,7 @@ class Typography with Diagnosticable {
   /// and Korean.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// latest [Material Design specification](https://material.io/go/design-typography#typography-styles).
+  /// 2018 [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme dense2018 = TextTheme(
     displayLarge : TextStyle(debugLabel: 'dense displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
     displayMedium : TextStyle(debugLabel: 'dense displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
@@ -657,7 +657,7 @@ class Typography with Diagnosticable {
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
-  /// latest [Material Design specification](https://material.io/go/design-typography#typography-styles).
+  /// 2018 [Material Design specification](https://material.io/go/design-typography#typography-styles).
   static const TextTheme tall2018 = TextTheme(
     displayLarge : TextStyle(debugLabel: 'tall displayLarge 2018', fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     displayMedium : TextStyle(debugLabel: 'tall displayMedium 2018', fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
