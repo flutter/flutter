@@ -1432,6 +1432,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v1_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.cc
@@ -1499,6 +1500,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/pointer_delegate_unittests.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/program_metadata.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc

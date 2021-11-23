@@ -27,6 +27,7 @@
 
 #include "engine.h"
 #include "flutter_runner_product_configuration.h"
+#include "program_metadata.h"
 #include "unique_fdio_ns.h"
 
 namespace flutter_runner {
@@ -74,10 +75,11 @@ class ComponentV2 final
   // may be collected after.
   ~ComponentV2();
 
-  static void ParseProgramMetadata(
-      const fuchsia::data::Dictionary& program_metadata,
-      std::string* data_path,
-      std::string* assets_path);
+  /// Parses the program metadata that was provided for the component.
+  ///
+  /// |old_gen_heap_size| will be set to -1 if no value was specified.
+  static ProgramMetadata ParseProgramMetadata(
+      const fuchsia::data::Dictionary& program_metadata);
 
   const std::string& GetDebugLabel() const;
 

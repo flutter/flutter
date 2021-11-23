@@ -92,6 +92,7 @@ template("runner_sources") {
       "platform_view.h",
       "pointer_delegate.cc",
       "pointer_delegate.h",
+      "program_metadata.h",
       "runner.cc",
       "runner.h",
       "surface.cc",
@@ -459,6 +460,7 @@ if (enable_unittests) {
     sources = [
       "accessibility_bridge_unittest.cc",
       "component_v1_unittest.cc",
+      "component_v2_unittest.cc",
       "flutter_runner_fakes.h",
       "focus_delegate_unittests.cc",
       "fuchsia_intl_unittest.cc",
