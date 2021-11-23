@@ -6,11 +6,18 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp(
+    image: NetworkImage(
+      'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
+    ),
+  ));
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key, required this.image}) : super(key: key);
 
+  final ImageProvider image;
   static const String _title = 'Flutter Code Sample';
 
   @override
@@ -19,8 +26,8 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatelessWidget(),
+        body: Center(
+          child: MyStatelessWidget(image: image,),
         ),
       ),
     );
@@ -28,20 +35,20 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({Key? key, required this.image}) : super(key: key);
+
+  final ImageProvider image;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(100),
-      child: Material( // We can deliberately wrap in a Material
+      child: Material(
         child: Ink.image(
           fit: BoxFit.fill,
           width: 300,
           height: 300,
-          image: const NetworkImage(
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-          ),
+          image: image,
           child: InkWell(
               onTap: () { /* ... */ },
               child: const Align(
