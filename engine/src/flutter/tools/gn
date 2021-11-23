@@ -404,6 +404,9 @@ def to_gn_args(args):
     if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64' , 'arm64']:
       gn_args['dart_use_compressed_pointers'] = True
 
+    if args.fuchsia_target_api_level is not None:
+      gn_args['fuchsia_target_api_level'] = args.fuchsia_target_api_level
+
     return gn_args
 
 def parse_args(args):
@@ -508,6 +511,8 @@ def parse_args(args):
                       help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to ' +
                       'true and is enabled on CI.')
   parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
+
+  parser.add_argument('--fuchsia-target-api-level', dest='fuchsia_target_api_level')
 
   # Sanitizers.
   parser.add_argument('--asan', default=False, action='store_true')
