@@ -682,6 +682,7 @@ void main() {
     });
 
     test('StartContext can get engine and framework checkout directories after run', () async {
+      stdio.stdin.add('y');
       const String revision2 = 'def789';
       const String revision3 = '123abc';
       const String branchPointRevision = 'deadbeef';
@@ -728,7 +729,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -781,7 +782,7 @@ void main() {
           command: <String>['git', 'fetch', 'mirror'],
         ),
         const FakeCommand(
-          command: <String>['git', 'checkout', 'upstream/$candidateBranch'],
+          command: <String>['git', 'checkout', candidateBranch],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
