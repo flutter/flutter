@@ -71,6 +71,7 @@ Engine::Engine(Delegate& delegate,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
                FlutterRunnerProductConfiguration product_config,
+               const std::vector<std::string>& dart_entrypoint_args,
                bool for_v1_component)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
@@ -83,7 +84,7 @@ Engine::Engine(Delegate& delegate,
   Initialize(/*=use_flatland*/ false, std::move(view_ref_pair), std::move(svc),
              std::move(runner_services), std::move(settings),
              std::move(fdio_ns), std::move(directory_request),
-             std::move(product_config), for_v1_component);
+             std::move(product_config), dart_entrypoint_args, for_v1_component);
 }
 
 Engine::Engine(Delegate& delegate,
@@ -96,6 +97,7 @@ Engine::Engine(Delegate& delegate,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
                FlutterRunnerProductConfiguration product_config,
+               const std::vector<std::string>& dart_entrypoint_args,
                bool for_v1_component)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
@@ -108,7 +110,7 @@ Engine::Engine(Delegate& delegate,
   Initialize(/*=use_flatland*/ true, std::move(view_ref_pair), std::move(svc),
              std::move(runner_services), std::move(settings),
              std::move(fdio_ns), std::move(directory_request),
-             std::move(product_config), for_v1_component);
+             std::move(product_config), dart_entrypoint_args, for_v1_component);
 }
 
 void Engine::Initialize(
@@ -120,6 +122,7 @@ void Engine::Initialize(
     UniqueFDIONS fdio_ns,
     fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
     FlutterRunnerProductConfiguration product_config,
+    const std::vector<std::string>& dart_entrypoint_args,
     bool for_v1_component) {
   // Flatland uses |view_creation_token_| for linking. Gfx uses |view_token_|.
   FML_CHECK((use_flatland && view_creation_token_.value.is_valid()) ||
@@ -356,6 +359,7 @@ void Engine::Initialize(
   // so it must be called before WarmupSkps() is called below.
   auto run_configuration = flutter::RunConfiguration::InferFromSettings(
       settings, task_runners.GetIOTaskRunner());
+  run_configuration.SetEntrypointArgs(std::move(dart_entrypoint_args));
 
   OnSemanticsNodeUpdate on_semantics_node_update_callback =
       [this](flutter::SemanticsNodeUpdates updates, float pixel_ratio) {

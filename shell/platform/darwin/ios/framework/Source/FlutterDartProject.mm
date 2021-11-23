@@ -263,7 +263,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     for (NSString* arg in entrypointArgs) {
       cppEntrypointArgs.push_back(std::string([arg UTF8String]));
     }
-    config.SetEntrypointArgs(cppEntrypointArgs);
+    config.SetEntrypointArgs(std::move(cppEntrypointArgs));
   }
 
   return config;
