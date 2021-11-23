@@ -161,6 +161,7 @@ class _SlottedRenderObjectElement<S> extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
-    assert(false, 'not reachable');
+    // TODO(goderbauer): Figure out if we should support this. It is probably doable.
+    assert(false, 'Moving render objects is not supported by the SlottedContainerRenderObjectMixin.');
   }
 }
