@@ -29,6 +29,8 @@ import 'dart:js' as js;
 import 'dart:js_util' as js_util;
 // ignore: unused_import
 import 'dart:math' as math;
+// ignore: unused_import
+import 'dart:svg' as svg;
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -474,13 +476,6 @@ void _addUrlStrategyListener() {
   registerHotRestartListener(() {
     jsSetUrlStrategy = null;
   });
-}
-
-/// Sanitizer used to convert const svg filter and clippath snippets to
-/// SvgElement without sanitization.
-class NullTreeSanitizer implements html.NodeTreeSanitizer {
-  @override
-  void sanitizeTree(html.Node node) {}
 }
 
 /// The shared instance of PlatformViewManager shared across the engine to handle

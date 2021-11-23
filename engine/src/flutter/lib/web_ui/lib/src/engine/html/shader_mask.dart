@@ -6,11 +6,10 @@ import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show NullTreeSanitizer;
 import '../browser_detection.dart';
 import '../dom_renderer.dart';
 import 'bitmap_canvas.dart';
-import 'path_to_svg_clip.dart';
+import 'color_filter.dart';
 import 'shaders/shader.dart';
 import 'surface.dart';
 
@@ -155,15 +154,13 @@ class PersistedShaderMask extends PersistedContainerSurface
           break;
       }
 
-      final String code = svgMaskFilterFromImageAndBlendMode(
-          imageUrl, blendModeTemp, maskRect.width, maskRect.height)!;
-
-      _shaderElement =
-          html.Element.html(code, treeSanitizer: NullTreeSanitizer());
+      final SvgFilter svgFilter = svgMaskFilterFromImageAndBlendMode(
+          imageUrl, blendModeTemp, maskRect.width, maskRect.height);
+      _shaderElement = svgFilter.element;
       if (isWebKit) {
-        _childContainer!.style.filter = 'url(#_fmf$_maskFilterIdCounter';
+        _childContainer!.style.filter = 'url(#${svgFilter.id})';
       } else {
-        rootElement!.style.filter = 'url(#_fmf$_maskFilterIdCounter';
+        rootElement!.style.filter = 'url(#${svgFilter.id})';
       }
       domRenderer.addResource(_shaderElement!);
     }
@@ -180,9 +177,9 @@ class PersistedShaderMask extends PersistedContainerSurface
   }
 }
 
-String? svgMaskFilterFromImageAndBlendMode(
+SvgFilter svgMaskFilterFromImageAndBlendMode(
     String imageUrl, ui.BlendMode blendMode, double width, double height) {
-  String? svgFilter;
+  final SvgFilter svgFilter;
   switch (blendMode) {
     case ui.BlendMode.src:
       svgFilter = _srcImageToSvg(imageUrl, width, height);
@@ -208,8 +205,13 @@ String? svgMaskFilterFromImageAndBlendMode(
     case ui.BlendMode.overlay:
       // Since overlay is the same as hard-light by swapping layers,
       // pass hard-light blend function.
-      svgFilter = _blendImageToSvg(imageUrl, 'hard-light', width, height,
-          swapLayers: true);
+      svgFilter = _blendImageToSvg(
+        imageUrl,
+        blendModeToSvgEnum(ui.BlendMode.hardLight)!,
+        width,
+        height,
+        swapLayers: true,
+      );
       break;
     // Several of the filters below (although supported) do not render the
     // same (close but not exact) as native flutter when used as blend mode
@@ -237,7 +239,7 @@ String? svgMaskFilterFromImageAndBlendMode(
     case ui.BlendMode.difference:
     case ui.BlendMode.exclusion:
       svgFilter = _blendImageToSvg(
-          imageUrl, stringForBlendMode(blendMode), width, height);
+          imageUrl, blendModeToSvgEnum(blendMode)!, width, height);
       break;
     case ui.BlendMode.dst:
     case ui.BlendMode.dstATop:
@@ -252,26 +254,6 @@ String? svgMaskFilterFromImageAndBlendMode(
   return svgFilter;
 }
 
-int _maskFilterIdCounter = 0;
-
-String _svgFilterWrapper(String content) {
-  _maskFilterIdCounter++;
-  return '$kSvgResourceHeader<filter id="_fmf$_maskFilterIdCounter" '
-          'filterUnits="objectBoundingBox">' +
-      content +
-      '</filter></svg>';
-}
-
-/// SVG filters that contain feImage, will fail on several browsers
-/// (Firefox etc) if bounds are  not specified. On Firefox percentage
-/// width/height 100% works however fails in Chrome 88. Webkit will
-/// not render if x/y/width/height is specified. So we return explicit size
-/// here unless running on webkit.
-String _buildFeBlend(double width, double height) =>
-    browserEngine == BrowserEngine.webkit
-        ? ''
-        : 'x="0" y="0" width="${width}px" height="${height}px"';
-
 // The color matrix for feColorMatrix element changes colors based on
 // the following:
 //
@@ -285,78 +267,152 @@ String _buildFeBlend(double width, double height) =>
 // G' = g1*R + g2*G + g3*B + g4*A + g5
 // B' = b1*R + b2*G + b3*B + b4*A + b5
 // A' = a1*R + a2*G + a3*B + a4*A + a5
-String _srcInImageToSvg(String imageUrl, double width, double height) {
-  return _svgFilterWrapper(
-    '<feColorMatrix values="0 0 0 0 1 ' // Ignore input, set it to absolute.
-    '0 0 0 0 1 '
-    '0 0 0 0 1 '
-    '0 0 0 1 0" result="destalpha"/>' // Just take alpha channel of destination
-    '<feImage href="$imageUrl" result="image"'
-    ' ${_buildFeBlend(width, height)}>'
-    '</feImage>'
-    '<feComposite in="image" in2="destalpha" '
-    'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
-    '</feComposite>',
+SvgFilter _srcInImageToSvg(String imageUrl, double width, double height) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeColorMatrix(
+    const <double>[
+      0, 0, 0, 0, 1,
+      0, 0, 0, 0, 1,
+      0, 0, 0, 0, 1,
+      0, 0, 0, 1, 0,
+    ],
+    result: 'destalpha',
   );
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
+  );
+  builder.setFeComposite(
+    in1: 'image',
+    in2: 'destalpha',
+    operator: kOperatorArithmetic,
+    k1: 1,
+    k2: 0,
+    k3: 0,
+    k4: 0,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
-String _srcImageToSvg(String imageUrl, double width, double height) {
-  return _svgFilterWrapper('<feImage href="$imageUrl" result="comp"'
-      ' ${_buildFeBlend(width, height)}>'
-      '</feImage>');
+SvgFilter _srcImageToSvg(String imageUrl, double width, double height) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'comp',
+    width: width,
+    height: height,
+  );
+  return builder.build();
 }
 
-String _srcOutImageToSvg(String imageUrl, double width, double height) {
-  return _svgFilterWrapper('<feImage href="$imageUrl" result="image"'
-      ' ${_buildFeBlend(width, height)}>'
-      '</feImage>'
-      '<feComposite in="image" in2="SourceGraphic" operator="out" result="comp">'
-      '</feComposite>');
+SvgFilter _srcOutImageToSvg(String imageUrl, double width, double height) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
+  );
+  builder.setFeComposite(
+    in1: 'image',
+    in2: 'SourceGraphic',
+    operator: kOperatorOut,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
-String _xorImageToSvg(String imageUrl, double width, double height) {
-  return _svgFilterWrapper('<feImage href="$imageUrl" result="image"'
-      ' ${_buildFeBlend(width, height)}>'
-      '</feImage>'
-      '<feComposite in="image" in2="SourceGraphic" operator="xor" result="comp">'
-      '</feComposite>');
+SvgFilter _xorImageToSvg(String imageUrl, double width, double height) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
+  );
+  builder.setFeComposite(
+    in1: 'image',
+    in2: 'SourceGraphic',
+    operator: kOperatorXor,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // The source image and color are composited using :
 // result = k1 *in*in2 + k2*in + k3*in2 + k4.
-String _compositeImageToSvg(String imageUrl, double k1, double k2, double k3,
+SvgFilter _compositeImageToSvg(String imageUrl, double k1, double k2, double k3,
     double k4, double width, double height) {
-  return _svgFilterWrapper(
-    '<feImage href="$imageUrl" result="image" ${_buildFeBlend(width, height)}>'
-    '</feImage>'
-    '<feComposite in="image" in2="SourceGraphic" '
-    'operator="arithmetic" k1="$k1" k2="$k2" k3="$k3" k4="$k4" result="comp">'
-    '</feComposite>',
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
   );
+  builder.setFeComposite(
+    in1: 'image',
+    in2: 'SourceGraphic',
+    operator: kOperatorArithmetic,
+    k1: k1,
+    k2: k2,
+    k3: k3,
+    k4: k4,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // Porter duff source * destination , keep source alpha.
 // First apply color filter to source to change it to [color], then
 // composite using multiplication.
-String _modulateImageToSvg(String imageUrl, double width, double height) {
-  return _svgFilterWrapper(
-    '<feImage href="$imageUrl" result="image"  ${_buildFeBlend(width, height)}>'
-    '</feImage>'
-    '<feComposite in="image" in2="SourceGraphic" '
-    'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
-    '</feComposite>',
+SvgFilter _modulateImageToSvg(String imageUrl, double width, double height) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
   );
+  builder.setFeComposite(
+    in1: 'image',
+    in2: 'SourceGraphic',
+    operator: kOperatorArithmetic,
+    k1: 1,
+    k2: 0,
+    k3: 0,
+    k4: 0,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // Uses feBlend element to blend source image with a color.
-String _blendImageToSvg(
-    String imageUrl, String? feBlend, double width, double height,
+SvgFilter _blendImageToSvg(
+    String imageUrl, SvgBlendMode svgBlendMode, double width, double height,
     {bool swapLayers = false}) {
-  return _svgFilterWrapper(
-    '<feImage href="$imageUrl" result="image" ${_buildFeBlend(width, height)}>'
-            '</feImage>' +
-        (swapLayers
-            ? '<feBlend in="SourceGraphic" in2="image" mode="$feBlend"/>'
-            : '<feBlend in="image" in2="SourceGraphic" mode="$feBlend"/>'),
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeImage(
+    href: imageUrl,
+    result: 'image',
+    width: width,
+    height: height,
   );
+  if (swapLayers) {
+    builder.setFeBlend(
+      in1: 'SourceGraphic',
+      in2: 'image',
+      mode: svgBlendMode.blendMode,
+    );
+  } else {
+    builder.setFeBlend(
+      in1: 'image',
+      in2: 'SourceGraphic',
+      mode: svgBlendMode.blendMode,
+    );
+  }
+  return builder.build();
 }
