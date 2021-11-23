@@ -52,6 +52,13 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               'command should be set in the PATH for this flag to be useful.'
               'This flag can also be used to test local Flutter changes.')
       ..addFlag(
+        'require-skia-gold',
+        defaultsTo: false,
+        help:
+            'Whether we require Skia Gold to be available or not. When this '
+            'flag is true, the tests will fail if Skia Gold is not available.',
+      )
+      ..addFlag(
         'update-screenshot-goldens',
         defaultsTo: false,
         help:
@@ -117,6 +124,10 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// The name of the browser to run tests in.
   String get browserName => stringArg('browser');
 
+  /// When running screenshot tests, require Skia Gold to be available and
+  /// reachable.
+  bool get requireSkiaGold => boolArg('require-skia-gold');
+
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
   bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens');
@@ -144,6 +155,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         testFiles: testFiles,
         isDebug: isDebug,
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+        requireSkiaGold: requireSkiaGold,
         overridePathToCanvasKit: overridePathToCanvasKit,
       ),
     ]);
