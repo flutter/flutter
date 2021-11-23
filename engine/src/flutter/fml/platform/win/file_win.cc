@@ -57,8 +57,6 @@ static std::string GetFullHandlePath(const fml::UniqueFD& handle) {
   const DWORD buffer_size = ::GetFinalPathNameByHandle(
       handle.get(), buffer, MAX_PATH, FILE_NAME_NORMALIZED);
   if (buffer_size == 0) {
-    FML_DLOG(ERROR) << "Could not get file handle path. "
-                    << GetLastErrorMessage();
     return {};
   }
   return WideStringToString({buffer, buffer_size});
@@ -80,8 +78,6 @@ static std::wstring GetTemporaryDirectoryPath() {
   if (result_size > 0) {
     return {wchar_path, result_size};
   }
-  FML_DLOG(ERROR) << "Could not get temporary directory path. "
-                  << GetLastErrorMessage();
   return {};
 }
 
@@ -131,14 +127,14 @@ std::string CreateTemporaryDirectory() {
   UUID uuid;
   RPC_STATUS status = UuidCreateSequential(&uuid);
   if (status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY) {
-    FML_DLOG(ERROR) << "Could not create UUID";
+    FML_DLOG(ERROR) << "Could not create UUID for temporary directory.";
     return {};
   }
 
   RPC_WSTR uuid_string;
   status = UuidToString(&uuid, &uuid_string);
   if (status != RPC_S_OK) {
-    FML_DLOG(ERROR) << "Could not create UUID to string.";
+    FML_DLOG(ERROR) << "Could not map UUID to string for temporary directory.";
     return {};
   }
 
@@ -154,7 +150,7 @@ std::string CreateTemporaryDirectory() {
   auto dir_fd = OpenDirectory(WideStringToString(temp_dir).c_str(), true,
                               FilePermission::kReadWrite);
   if (!dir_fd.is_valid()) {
-    FML_DLOG(ERROR) << "Could not get temporary directory FD. "
+    FML_DLOG(ERROR) << "Could not get temporary directory file descriptor. "
                     << GetLastErrorMessage();
     return {};
   }
@@ -199,7 +195,6 @@ fml::UniqueFD OpenFile(const char* path,
       );
 
   if (handle == INVALID_HANDLE_VALUE) {
-    FML_DLOG(ERROR) << "Could not open file. " << GetLastErrorMessage();
     return {};
   }
 
@@ -252,7 +247,6 @@ fml::UniqueFD OpenDirectory(const char* path,
       );
 
   if (handle == INVALID_HANDLE_VALUE) {
-    FML_DLOG(ERROR) << "Could not open file. " << GetLastErrorMessage();
     return {};
   }
 
@@ -300,8 +294,6 @@ fml::UniqueFD Duplicate(fml::UniqueFD::element_type descriptor) {
 bool IsDirectory(const fml::UniqueFD& directory) {
   BY_HANDLE_FILE_INFORMATION info;
   if (!::GetFileInformationByHandle(directory.get(), &info)) {
-    FML_DLOG(ERROR) << "Could not get file information. "
-                    << GetLastErrorMessage();
     return false;
   }
   return info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
