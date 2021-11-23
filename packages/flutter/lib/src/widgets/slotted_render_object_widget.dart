@@ -1,3 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 
 /// A mixin for a [RenderObjectWidget] that configures a [RenderObject]
@@ -51,8 +57,7 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 /// Mixin for a [RenderBox] configured by a [SlottedMultiChildRenderObjectWidgetMixin].
 ///
 /// The [RenderBox] child currently occupying a given slot can be obtained by
-/// calling [childForSlot]. A list of all non-null child [RenderBox]es is
-/// available via the [children] getter.
+/// calling [childForSlot].
 ///
 /// The type parameter `S` is the type for the slots to be used by this
 /// [RenderObject] and the [SlottedMultiChildRenderObjectWidgetMixin] it was
@@ -64,17 +69,6 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
   /// Returns null if no [RenderBox] is configured for the given slot.
   @protected
   RenderBox? childForSlot(S slot) => _slotToChild[slot];
-
-  /// Returns all non-null [RenderBox] children of this render object.
-  ///
-  /// The order in which the children are returned is not guaranteed and no
-  /// assumption should be made about the order.
-  ///
-  /// See also:
-  ///
-  ///  * [childForSlot] to obtain the child occupying a given slot.
-  @protected
-  Iterable<RenderBox> get children => _slotToChild.values.where((RenderBox? child) => child != null).cast<RenderBox>();
 
   final Map<S, RenderBox?> _slotToChild = <S, RenderBox?>{};
 
@@ -129,7 +123,14 @@ class _SlottedRenderObjectElement<S> extends RenderObjectElement {
     _updateChildren();
   }
 
+  List<S>? _debugPreviousSlots;
+
   void _updateChildren() {
+    assert(() {
+      _debugPreviousSlots ??= widget.slots.toList();
+      return listEquals(_debugPreviousSlots, widget.slots.toList());
+    }(), '${widget.runtimeType}.slots must not change.');
+
     for (final S slot in widget.slots) {
       _updateChild(widget.childForSlot(slot), slot);
     }
