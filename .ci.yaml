@@ -1851,7 +1851,6 @@ targets:
 
   - name: Linux deferred components
     recipe: flutter/deferred_components
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/90071
     properties:
       dependencies: >-
         [
