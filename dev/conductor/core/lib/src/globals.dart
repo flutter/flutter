@@ -23,6 +23,8 @@ const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki
 
 const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
 
+const String kWebsiteReleasesUrl = 'https://docs.flutter.dev/development/tools/sdk/releases';
+
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
