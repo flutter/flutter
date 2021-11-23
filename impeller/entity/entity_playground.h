@@ -6,7 +6,6 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/entity_renderer.h"
 #include "impeller/playground/playground.h"
 
 namespace impeller {
@@ -20,8 +19,6 @@ class EntityPlayground : public Playground {
   bool OpenPlaygroundHere(Entity entity);
 
  private:
-  std::unique_ptr<EntityRenderer> renderer_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPlayground);
 };
 

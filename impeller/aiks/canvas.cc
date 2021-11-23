@@ -94,7 +94,7 @@ void Canvas::DrawPicture(const Picture& picture) {
   for (const auto& stack_entry : picture.entries) {
     auto new_stack_entry = stack_entry;
     if (auto pass = new_stack_entry.pass) {
-      for (auto entity : pass->GetPassEntities()) {
+      for (auto entity : pass->GetEntities()) {
         entity.IncrementStencilDepth(GetStencilDepth());
         entity.SetTransformation(GetCurrentTransformation() *
                                  entity.GetTransformation());

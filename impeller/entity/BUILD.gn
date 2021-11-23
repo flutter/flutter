@@ -27,8 +27,6 @@ impeller_component("entity") {
     "contents.h",
     "entity.cc",
     "entity.h",
-    "entity_renderer.cc",
-    "entity_renderer.h",
   ]
 
   deps = [ ":entity_shaders" ]

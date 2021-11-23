@@ -4,6 +4,8 @@
 
 #include "impeller/entity/entity_playground.h"
 
+#include "impeller/entity/content_renderer.h"
+
 namespace impeller {
 
 EntityPlayground::EntityPlayground() = default;
@@ -11,15 +13,12 @@ EntityPlayground::EntityPlayground() = default;
 EntityPlayground::~EntityPlayground() = default;
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
-  if (!renderer_) {
-    renderer_ = std::make_unique<EntityRenderer>(GetContext());
-    if (!renderer_) {
-      return false;
-    }
+  ContentRenderer renderer(GetContext());
+  if (!renderer.IsValid()) {
+    return false;
   }
   Renderer::RenderCallback callback = [&](RenderPass& pass) -> bool {
-    std::vector<Entity> entities = {entity};
-    return renderer_->RenderEntities(pass, entities);
+    return entity.Render(renderer, pass);
   };
   return Playground::OpenPlaygroundHere(callback);
 }
