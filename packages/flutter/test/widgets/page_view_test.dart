@@ -437,22 +437,22 @@ void main() {
                 TextButton(
                   key: firstPageButton,
                   onPressed: () {
-                    controller.animateToPage(kStates.indexOf(kStates.first), 
+                    controller.animateToPage(kStates.indexOf(kStates.first),
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.easeOutQuart,
                       callPageChangeAtEnd: true,
                     );
-                  }, 
+                  },
                   child: const Text('Animate to first page'),
                 ),
                 TextButton(
                   key: lastPageButton,
                   onPressed: () {
-                    controller.animateToPage(kStates.indexOf(kStates.last), 
+                    controller.animateToPage(kStates.indexOf(kStates.last),
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.easeOutQuart,
                     );
-                  }, 
+                  },
                   child: const Text('Animate to last page'),
                 ),
               ],
