@@ -2611,6 +2611,16 @@ class InputDecoration {
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [Theme.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// This can be resolved with a [MaterialStateProperty].
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
+  /// {@end-tool}
   /// {@endtemplate}
   final TextStyle? labelStyle;
 
@@ -2626,6 +2636,16 @@ class InputDecoration {
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [Theme.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// This can be resolved with a [MaterialStateProperty].
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
+  /// {@end-tool}
   /// {@endtemplate}
   final TextStyle? floatingLabelStyle;
 
@@ -2708,6 +2728,12 @@ class InputDecoration {
   ///
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// By default the color of style will be used by the label of
+  /// [InputDecoration] if [InputDecoration.errorText] is not null. See
+  /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
+  /// an example of how to replicate this behavior if you have specified either
+  /// style.
   /// {@endtemplate}
   final TextStyle? errorStyle;
 
