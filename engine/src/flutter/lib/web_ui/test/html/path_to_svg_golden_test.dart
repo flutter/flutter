@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:svg' as svg;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -186,29 +187,27 @@ Future<void> testMain() async {
 
 html.Element pathToSvgElement(Path path, Paint paint, bool enableFill) {
   final Rect bounds = path.getBounds();
-  final StringBuffer sb = StringBuffer();
-  sb.write('<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" '
-      'width="${bounds.right}" height="${bounds.bottom}">');
-  sb.write('<path ');
+  final svg.SvgSvgElement root = svg.SvgSvgElement();
+  root.style.transform = 'translate(200px, 0px)';
+  root.setAttribute('viewBox', '0 0 ${bounds.right} ${bounds.bottom}');
+  root.width!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, bounds.right);
+  root.height!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, bounds.bottom);
+
+  final svg.PathElement pathElement = svg.PathElement();
+  root.append(pathElement);
   if (paint.style == PaintingStyle.stroke ||
       paint.strokeWidth != 0.0) {
-    sb.write('stroke="${colorToCssString(paint.color)}" ');
-    sb.write('stroke-width="${paint.strokeWidth}" ');
+    pathElement.setAttribute('stroke', colorToCssString(paint.color)!);
+    pathElement.setAttribute('stroke-width', paint.strokeWidth);
     if (!enableFill) {
-      sb.write('fill="none" ');
+      pathElement.setAttribute('fill', 'none');
     }
   }
   if (paint.style == PaintingStyle.fill) {
-    sb.write('fill="${colorToCssString(paint.color)}" ');
+    pathElement.setAttribute('fill', colorToCssString(paint.color)!);
   }
-  sb.write('d="');
-  pathToSvg((path as SurfacePath).pathRef, sb); // This is what we're testing!
-  sb.write('"></path>');
-  sb.write('</svg>');
-  final html.Element svgElement =
-      html.Element.html(sb.toString(), treeSanitizer: NullTreeSanitizer());
-  svgElement.style.transform = 'translate(200px, 0px)';
-  return svgElement;
+  pathElement.setAttribute('d', pathToSvg((path as SurfacePath).pathRef)); // This is what we're testing!
+  return root;
 }
 
 class ArcSample {
@@ -216,6 +215,7 @@ class ArcSample {
   final bool largeArc;
   final bool clockwise;
   final double distance;
+
   ArcSample(this.offset,
       {this.largeArc = false, this.clockwise = false, this.distance = 0});
 

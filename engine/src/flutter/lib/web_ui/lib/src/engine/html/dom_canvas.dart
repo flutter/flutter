@@ -4,11 +4,11 @@
 
 import 'dart:html' as html;
 import 'dart:math' as math;
+import 'dart:svg' as svg;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show NullTreeSanitizer;
 import '../browser_detection.dart';
 import '../dom_renderer.dart';
 import '../engine_canvas.dart';
@@ -273,31 +273,33 @@ String _borderStrokeToCssUnit(double value) {
   return '${value.toStringAsFixed(3)}px';
 }
 
-html.Element pathToSvgElement(
+svg.SvgSvgElement pathToSvgElement(
     SurfacePath path, SurfacePaintData paint, String width, String height) {
-  final StringBuffer sb = StringBuffer();
-  sb.write(
-      '<svg viewBox="0 0 $width $height" width="${width}px" height="${height}px">');
-  sb.write('<path ');
+  // In Firefox some SVG typed attributes are returned as null without a
+  // setter. So we use strings here.
+  final svg.SvgSvgElement root = svg.SvgSvgElement()
+    ..setAttribute('width', '${width}px')
+    ..setAttribute('height', '${height}px')
+    ..setAttribute('viewBox', '0 0 $width $height');
+
+  final svg.PathElement svgPath = svg.PathElement();
+  root.append(svgPath);
   final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
   if (paint.style == ui.PaintingStyle.stroke ||
       (paint.style != ui.PaintingStyle.fill &&
           paint.strokeWidth != 0 &&
           paint.strokeWidth != null)) {
-    sb.write('stroke="${colorToCssString(color)}" ');
-    sb.write('stroke-width="${paint.strokeWidth ?? 1.0}" ');
-    sb.write('fill="none" ');
+    svgPath.setAttribute('stroke', colorToCssString(color)!);
+    svgPath.setAttribute('stroke-width', '${paint.strokeWidth ?? 1.0}');
+    svgPath.setAttribute('fill', 'none');
   } else if (paint.color != null) {
-    sb.write('fill="${colorToCssString(color)}" ');
+    svgPath.setAttribute('fill', colorToCssString(color)!);
   } else {
-    sb.write('fill="#000000" ');
+    svgPath.setAttribute('fill', '#000000');
   }
   if (path.fillType == ui.PathFillType.evenOdd) {
-    sb.write('fill-rule="evenodd" ');
+    svgPath.setAttribute('fill-rule', 'evenodd');
   }
-  sb.write('d="');
-  pathToSvg(path.pathRef, sb);
-  sb.write('"></path>');
-  sb.write('</svg>');
-  return html.Element.html(sb.toString(), treeSanitizer: NullTreeSanitizer());
+  svgPath.setAttribute('d', pathToSvg(path.pathRef));
+  return root;
 }

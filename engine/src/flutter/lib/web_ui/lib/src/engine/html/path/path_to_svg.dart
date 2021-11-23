@@ -12,25 +12,25 @@ import 'path_utils.dart';
 
 /// Converts [path] to SVG path syntax to be used as "d" attribute in path
 /// element.
-void pathToSvg(PathRef pathRef, StringBuffer sb,
-    {double offsetX = 0, double offsetY = 0}) {
+String pathToSvg(PathRef pathRef, {double offsetX = 0, double offsetY = 0}) {
+  final StringBuffer buffer = StringBuffer();
   final PathRefIterator iter = PathRefIterator(pathRef);
   int verb = 0;
   final Float32List outPts = Float32List(PathRefIterator.kMaxBufferSize);
   while ((verb = iter.next(outPts)) != SPath.kDoneVerb) {
     switch (verb) {
       case SPath.kMoveVerb:
-        sb.write('M ${outPts[0] + offsetX} ${outPts[1] + offsetY}');
+        buffer.write('M ${outPts[0] + offsetX} ${outPts[1] + offsetY}');
         break;
       case SPath.kLineVerb:
-        sb.write('L ${outPts[2] + offsetX} ${outPts[3] + offsetY}');
+        buffer.write('L ${outPts[2] + offsetX} ${outPts[3] + offsetY}');
         break;
       case SPath.kCubicVerb:
-        sb.write('C ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
+        buffer.write('C ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
             '${outPts[4] + offsetX} ${outPts[5] + offsetY} ${outPts[6] + offsetX} ${outPts[7] + offsetY}');
         break;
       case SPath.kQuadVerb:
-        sb.write('Q ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
+        buffer.write('Q ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
             '${outPts[4] + offsetX} ${outPts[5] + offsetY}');
         break;
       case SPath.kConicVerb:
@@ -44,15 +44,16 @@ void pathToSvg(PathRef pathRef, StringBuffer sb,
           final double p1y = points[i].dy;
           final double p2x = points[i + 1].dx;
           final double p2y = points[i + 1].dy;
-          sb.write('Q ${p1x + offsetX} ${p1y + offsetY} '
+          buffer.write('Q ${p1x + offsetX} ${p1y + offsetY} '
               '${p2x + offsetX} ${p2y + offsetY}');
         }
         break;
       case SPath.kCloseVerb:
-        sb.write('Z');
+        buffer.write('Z');
         break;
       default:
         throw UnimplementedError('Unknown path verb $verb');
     }
   }
+  return buffer.toString();
 }

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart'  show NullTreeSanitizer;
 import '../dom_renderer.dart';
 import '../shadow.dart';
 import '../util.dart';
@@ -344,7 +344,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     /// we size the inner container to cover full pathBounds instead of sizing
     /// to clipping rect bounds (which is the case for elevation == 0.0 where
     /// we shift outer/inner clip area instead to position clip-path).
-    final String svgClipPath = elevation == 0.0
+    final svg.SvgSvgElement svgClipPath = elevation == 0.0
         ? pathToSvgClipPath(path,
             offsetX: -pathBounds.left,
             offsetY: -pathBounds.top,
@@ -360,8 +360,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     /// svg clip and render elements.
     _clipElement?.remove();
     _svgElement?.remove();
-    _clipElement =
-        html.Element.html(svgClipPath, treeSanitizer: NullTreeSanitizer());
+    _clipElement = svgClipPath;
     domRenderer.append(rootElement!, _clipElement!);
     if (elevation == 0.0) {
       DomRenderer.setClipPath(rootElement!, createSvgClipUrl());
@@ -486,10 +485,7 @@ class PersistedClipPath extends PersistedContainerSurface
   @override
   void apply() {
     _clipElement?.remove();
-    final String svgClipPath =
-        createSvgClipDef(childContainer! as html.HtmlElement, clipPath);
-    _clipElement =
-        html.Element.html(svgClipPath, treeSanitizer: NullTreeSanitizer());
+    _clipElement = createSvgClipDef(childContainer! as html.HtmlElement, clipPath);
     domRenderer.append(childContainer!, _clipElement!);
   }
 
@@ -518,9 +514,9 @@ class PersistedClipPath extends PersistedContainerSurface
 }
 
 /// Creates an svg clipPath and applies it to [element].
-String createSvgClipDef(html.HtmlElement element, ui.Path clipPath) {
+svg.SvgSvgElement createSvgClipDef(html.HtmlElement element, ui.Path clipPath) {
   final ui.Rect pathBounds = clipPath.getBounds();
-  final String svgClipPath = pathToSvgClipPath(clipPath,
+  final svg.SvgSvgElement svgClipPath = pathToSvgClipPath(clipPath,
       scaleX: 1.0 / pathBounds.right, scaleY: 1.0 / pathBounds.bottom);
   DomRenderer.setClipPath(element, createSvgClipUrl());
   // We need to set width and height for the clipElement to cover the

@@ -899,7 +899,7 @@ class ContextStateHandle {
     if (blendMode != _currentBlendMode) {
       _currentBlendMode = blendMode;
       context.globalCompositeOperation =
-          stringForBlendMode(blendMode) ?? 'source-over';
+          blendModeToCssMixBlendMode(blendMode) ?? 'source-over';
     }
   }
 
