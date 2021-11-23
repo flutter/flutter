@@ -13,6 +13,9 @@
 
 namespace impeller {
 
+class Renderer;
+class RenderPass;
+
 class Entity {
  public:
   Entity();
@@ -36,6 +39,8 @@ class Entity {
   void IncrementStencilDepth(uint32_t increment);
 
   uint32_t GetStencilDepth() const;
+
+  bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
 
  private:
   Matrix transformation_;

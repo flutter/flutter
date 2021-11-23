@@ -4,6 +4,8 @@
 
 #include "impeller/aiks/canvas_pass.h"
 
+#include "impeller/entity/content_renderer.h"
+
 namespace impeller {
 
 CanvasPass::CanvasPass() = default;
@@ -11,24 +13,16 @@ CanvasPass::CanvasPass() = default;
 CanvasPass::~CanvasPass() = default;
 
 void CanvasPass::PushEntity(Entity entity) {
-  ops_.emplace_back(std::move(entity));
+  entities_.emplace_back(std::move(entity));
 }
 
-const std::vector<Entity>& CanvasPass::GetPassEntities() const {
-  return ops_;
-}
-
-void CanvasPass::SetPostProcessingEntity(Entity entity) {
-  post_processing_entity_ = std::move(entity);
-}
-
-const Entity& CanvasPass::GetPostProcessingEntity() const {
-  return post_processing_entity_;
+const std::vector<Entity>& CanvasPass::GetEntities() const {
+  return entities_;
 }
 
 Rect CanvasPass::GetCoverageRect() const {
   std::optional<Point> min, max;
-  for (const auto& entity : ops_) {
+  for (const auto& entity : entities_) {
     auto coverage = entity.GetPath().GetMinMaxCoveragePoints();
     if (!coverage.has_value()) {
       continue;
@@ -47,6 +41,25 @@ Rect CanvasPass::GetCoverageRect() const {
   }
   const auto diff = *max - *min;
   return {min->x, min->y, diff.x, diff.y};
+}
+
+const CanvasPass::Subpasses& CanvasPass::GetSubpasses() const {
+  return subpasses_;
+}
+
+bool CanvasPass::AddSubpass(CanvasPass pass) {
+  subpasses_.emplace_back(std::move(pass));
+  return true;
+}
+
+bool CanvasPass::Render(ContentRenderer& renderer,
+                        RenderPass& parent_pass) const {
+  for (const auto& entity : entities_) {
+    if (!entity.Render(renderer, parent_pass)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace impeller

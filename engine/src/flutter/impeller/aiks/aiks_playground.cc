@@ -4,7 +4,7 @@
 
 #include "impeller/aiks/aiks_playground.h"
 
-#include "impeller/aiks/picture_renderer.h"
+#include "impeller/aiks/aiks_renderer.h"
 
 namespace impeller {
 
@@ -13,14 +13,15 @@ AiksPlayground::AiksPlayground() = default;
 AiksPlayground::~AiksPlayground() = default;
 
 bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
-  auto renderer = std::make_shared<PictureRenderer>(GetContext());
-  if (!renderer) {
+  AiksRenderer renderer(GetContext());
+
+  if (!renderer.IsValid()) {
     return false;
   }
 
   return Playground::OpenPlaygroundHere(
-      [renderer, &picture](RenderPass& pass) -> bool {
-        return renderer->Render(pass, picture);
+      [&renderer, &picture](RenderPass& pass) -> bool {
+        return renderer.Render(picture, pass);
       });
 }
 

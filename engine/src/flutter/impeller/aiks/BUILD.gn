@@ -6,6 +6,8 @@ import("../tools/impeller.gni")
 
 impeller_component("aiks") {
   sources = [
+    "aiks_renderer.cc",
+    "aiks_renderer.h",
     "canvas.cc",
     "canvas.h",
     "canvas_pass.cc",
@@ -18,8 +20,6 @@ impeller_component("aiks") {
     "picture.h",
     "picture_recorder.cc",
     "picture_recorder.h",
-    "picture_renderer.cc",
-    "picture_renderer.h",
   ]
 
   public_deps = [

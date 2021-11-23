@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents.h"
@@ -13,8 +14,12 @@
 
 namespace impeller {
 
+class ContentRenderer;
+
 class CanvasPass {
  public:
+  using Subpasses = std::vector<CanvasPass>;
+
   CanvasPass();
 
   ~CanvasPass();
@@ -23,15 +28,17 @@ class CanvasPass {
 
   Rect GetCoverageRect() const;
 
-  const std::vector<Entity>& GetPassEntities() const;
+  const std::vector<Entity>& GetEntities() const;
 
-  void SetPostProcessingEntity(Entity entity);
+  const Subpasses& GetSubpasses() const;
 
-  const Entity& GetPostProcessingEntity() const;
+  bool AddSubpass(CanvasPass pass);
+
+  bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
 
  private:
-  std::vector<Entity> ops_;
-  Entity post_processing_entity_;
+  std::vector<Entity> entities_;
+  Subpasses subpasses_;
 };
 
 struct CanvasStackEntry {
