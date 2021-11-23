@@ -121,8 +121,8 @@ ComponentV2::ComponentV2(
 
   FML_DCHECK(fdio_ns_.is_valid());
 
-  // TODO(fxb/50694): Dart launch arguments.
-  FML_LOG(WARNING) << "program() arguments are currently ignored (fxb/50694).";
+  // TODO(fxb/88391): Dart launch arguments.
+  FML_LOG(WARNING) << "program() arguments are currently ignored (fxb/88391).";
 
   // Determine where data and assets are stored within /pkg.
   std::string data_path;
@@ -254,11 +254,11 @@ ComponentV2::ComponentV2(
   cloned_directory_ptr_.set_error_handler(
       [this](zx_status_t status) { cloned_directory_ptr_.Unbind(); });
 
-  // TODO(fxb/50694): Close handles from ComponentStartInfo::numbered_handles
+  // TODO(fxb/89162): Close handles from ComponentStartInfo::numbered_handles
   // since we're not using them. See documentation from ComponentController:
   // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.component.runner/component_runner.fidl;l=97;drc=e3b39f2b57e720770773b857feca4f770ee0619e
 
-  // TODO(fxb/50694): There's an OnPublishDiagnostics event we may want to
+  // TODO(fxb/89162): There's an OnPublishDiagnostics event we may want to
   // fire for diagnostics. See documentation from ComponentController:
   // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.component.runner/component_runner.fidl;l=181;drc=e3b39f2b57e720770773b857feca4f770ee0619e
 
@@ -523,7 +523,7 @@ void ComponentV2::KillWithEpitaph(zx_status_t epitaph_status) {
 void ComponentV2::Stop() {
   FML_VLOG(-1) << "received Stop event";
 
-  // TODO(fxb/50694): Any other cleanup logic we should do that's appropriate
+  // TODO(fxb/89162): Any other cleanup logic we should do that's appropriate
   // for Stop but not for Kill?
   KillWithEpitaph(ZX_OK);
 }
