@@ -716,7 +716,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   RenderBox? get container => childForSlot(_DecorationSlot.container);
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync* {
+  @override
+  Iterable<RenderBox> get children sync* {
     if (icon != null)
       yield icon!;
     if (input != null)
@@ -816,30 +817,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    for (final RenderBox child in _children)
-      child.attach(owner);
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    for (final RenderBox child in _children)
-      child.detach();
-  }
-
-  @override
-  void redepthChildren() {
-    _children.forEach(redepthChild);
-  }
-
-  @override
-  void visitChildren(RenderObjectVisitor visitor) {
-    _children.forEach(visitor);
-  }
-
-  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (icon != null)
       visitor(icon!);
@@ -871,27 +848,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       visitor(helperError!);
     if (counter != null)
       visitor(counter!);
-  }
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    void add(RenderBox? child, String name) {
-      if (child != null)
-        value.add(child.toDiagnosticsNode(name: name));
-    }
-    add(icon, 'icon');
-    add(input, 'input');
-    add(label, 'label');
-    add(hint, 'hint');
-    add(prefix, 'prefix');
-    add(suffix, 'suffix');
-    add(prefixIcon, 'prefixIcon');
-    add(suffixIcon, 'suffixIcon');
-    add(helperError, 'helperError');
-    add(counter, 'counter');
-    add(container, 'container');
-    return value;
   }
 
   @override
@@ -1571,7 +1527,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in _children) {
+    for (final RenderBox child in children) {
       // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
       final bool isHit = result.addWithPaintOffset(

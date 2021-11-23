@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
@@ -24,6 +25,13 @@ import 'framework.dart';
 /// The type parameter `S` is the type for the slots to be used by this
 /// [RenderObjectWidget] and the [RenderObject] it configures. In the typical
 /// case, `S` is an [Enum] type.
+///
+/// See also:
+///
+///   * [MultiChildRenderObjectWidget], which configures a [RenderObject]
+///     with a single list of children.
+///   * [ListTile], which uses [SlottedMultiChildRenderObjectWidgetMixin] in its
+///     internal (private) implementation.
 mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
   /// Returns a list of all available slots.
   ///
@@ -62,15 +70,90 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 /// The type parameter `S` is the type for the slots to be used by this
 /// [RenderObject] and the [SlottedMultiChildRenderObjectWidgetMixin] it was
 /// configured by. In the typical case, `S` is an [Enum] type.
+///
+/// See also:
+///
+///  * [ContainerRenderObjectMixin], which organizes its children in a single
+///    list.
 mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
-  /// Returns the [RenderBox] child that it currently occupying the provided
+  /// Returns the [RenderBox] child that is currently occupying the provided
   /// `slot`.
   ///
   /// Returns null if no [RenderBox] is configured for the given slot.
   @protected
   RenderBox? childForSlot(S slot) => _slotToChild[slot];
 
-  final Map<S, RenderBox?> _slotToChild = <S, RenderBox?>{};
+  /// Returns an [Iterable] of all non-null children.
+  ///
+  /// This getter is used by the default implementation of [attach], [detach],
+  /// [redepthChildren], [visitChildren], and [debugDescribeChildren] to iterate
+  /// over the children of this [RenderBox]. The base implementation makes no
+  /// guarantee about the order in which the children are returned. Subclasses,
+  /// for which the child order is important should override this getter and
+  /// return the children in the desired order.
+  @protected
+  Iterable<RenderBox> get children => _slotToChild.values;
+
+  /// Returns the debug name for a given `slot`.
+  ///
+  /// This method is called by [debugDescribeChildren] for each slot that is
+  /// currently occupied by a child to obtain a name for that slot for debug
+  /// outputs.
+  ///
+  /// The default implementation calls [EnumName.name] on `slot` it it is an
+  /// [Enum] value and `toString` if it is not.
+  @protected
+  String debugNameForSlot(S slot) {
+    if (slot is Enum) {
+      return slot.name;
+    }
+    return slot.toString();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    for (final RenderBox child in children) {
+      child.attach(owner);
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    for (final RenderBox child in children) {
+      child.detach();
+    }
+  }
+
+  @override
+  void redepthChildren() {
+    children.forEach(redepthChild);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    children.forEach(visitor);
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    final Map<RenderBox, S> childToSlot = Map<RenderBox, S>.fromIterables(
+      _slotToChild.values,
+      _slotToChild.keys,
+    );
+    for (final RenderBox child in children) {
+      _addDiagnostics(child, value, debugNameForSlot(childToSlot[child] as S));
+    }
+    return value;
+  }
+
+  void _addDiagnostics(RenderBox child, List<DiagnosticsNode> value, String name) {
+    value.add(child.toDiagnosticsNode(name: name));
+  }
+
+  final Map<S, RenderBox> _slotToChild = <S, RenderBox>{};
 
   void _setChild(RenderBox? child, S slot) {
     final RenderBox? oldChild = _slotToChild[slot];
