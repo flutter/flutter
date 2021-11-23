@@ -140,6 +140,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
 
   void _updateChild(Widget? widget, S slot) {
     final Element? oldChild = _slotToChild[slot];
+    assert(oldChild == null || oldChild.slot == slot); // Reason why [moveRenderObjectChild] is not reachable.
     final Element? newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       _slotToChild.remove(slot);
@@ -164,7 +165,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
-    // TODO(goderbauer): Figure out if we should support this. It is probably doable.
-    assert(false, 'Moving render objects is not supported by the SlottedContainerRenderObjectMixin.');
+    // Existing elements are never moved to a new slot, see assert in [_updateChild].
+    assert(false, 'not reachable');
   }
 }
