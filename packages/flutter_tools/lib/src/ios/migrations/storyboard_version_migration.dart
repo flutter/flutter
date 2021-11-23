@@ -44,10 +44,7 @@ class StoryboardVersionMigration extends ProjectMigrator {
       '<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121"',
     ];
 
-    for (final String original in originalDocumentHeaders) {
-      if (!line.contains(original)) {
-        continue;
-      }
+    if (originalDocumentHeaders.any(line.contains)) {
       const String mainReplacement = '<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">';
       updatedString = mainReplacement;
       if (!migrationRequired) {
