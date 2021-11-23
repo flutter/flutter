@@ -7,31 +7,30 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/entity.h"
+#include "impeller/entity/content_renderer.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/surface.h"
 
 namespace impeller {
 
-class ContentRenderer;
+struct Picture;
+class RenderPass;
 
-class EntityRenderer {
+class AiksRenderer {
  public:
-  EntityRenderer(std::shared_ptr<Context> context);
+  AiksRenderer(std::shared_ptr<Context> context);
 
-  ~EntityRenderer();
+  ~AiksRenderer();
 
   bool IsValid() const;
 
-  [[nodiscard]] bool RenderEntities(RenderPass& parent_pass,
-                                    const std::vector<Entity>& entities);
+  bool Render(const Picture& picture, RenderPass& parent_pass);
 
  private:
   std::shared_ptr<Context> context_;
   std::unique_ptr<ContentRenderer> content_renderer_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EntityRenderer);
+  FML_DISALLOW_COPY_AND_ASSIGN(AiksRenderer);
 };
 
 }  // namespace impeller

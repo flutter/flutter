@@ -4,6 +4,9 @@
 
 #include "impeller/entity/entity.h"
 
+#include "impeller/entity/content_renderer.h"
+#include "impeller/renderer/render_pass.h"
+
 namespace impeller {
 
 Entity::Entity() = default;
@@ -44,6 +47,14 @@ uint32_t Entity::GetStencilDepth() const {
 
 void Entity::IncrementStencilDepth(uint32_t increment) {
   stencil_depth_ += increment;
+}
+
+bool Entity::Render(ContentRenderer& renderer, RenderPass& parent_pass) const {
+  if (!contents_) {
+    return true;
+  }
+
+  return contents_->Render(renderer, *this, parent_pass);
 }
 
 }  // namespace impeller
