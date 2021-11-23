@@ -26,6 +26,15 @@ import 'framework.dart';
 /// [RenderObjectWidget] and the [RenderObject] it configures. In the typical
 /// case, `S` is an [Enum] type.
 ///
+/// {@tool dartpad}
+/// This example uses the [SlottedMultiChildRenderObjectWidgetMixin] in
+/// combination with the [SlottedContainerRenderObjectMixin] to implement a
+/// widget that provides two slots: topLeft and bottomRight. The widget arranges
+/// the children in those slots diagonally.
+///
+/// ** See code in examples/api/lib/widgets/slotted_render_object_widget/slotted_multi_child_render_object_widget_mixin.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///   * [MultiChildRenderObjectWidget], which configures a [RenderObject]
@@ -73,6 +82,10 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 /// The type parameter `S` is the type for the slots to be used by this
 /// [RenderObject] and the [SlottedMultiChildRenderObjectWidgetMixin] it was
 /// configured by. In the typical case, `S` is an [Enum] type.
+///
+/// See [SlottedMultiChildRenderObjectWidgetMixin] for example code showcasing
+/// how this mixin is used in combination with the
+/// [SlottedMultiChildRenderObjectWidgetMixin].
 ///
 /// See also:
 ///
