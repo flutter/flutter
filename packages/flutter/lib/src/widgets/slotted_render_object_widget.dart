@@ -67,6 +67,9 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 /// The [RenderBox] child currently occupying a given slot can be obtained by
 /// calling [childForSlot].
 ///
+/// Implementors may consider overriding [children] to return the children
+/// of this render object in a consistent order (e.g. hit test order).
+///
 /// The type parameter `S` is the type for the slots to be used by this
 /// [RenderObject] and the [SlottedMultiChildRenderObjectWidgetMixin] it was
 /// configured by. In the typical case, `S` is an [Enum] type.
