@@ -198,14 +198,9 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     root_isolate_create_callback();
   }
 
-  FML_DCHECK(dart_entrypoint_args.empty() ||
-             settings.dart_entrypoint_args.empty());
-  const std::vector<std::string>& args = !dart_entrypoint_args.empty()
-                                             ? dart_entrypoint_args
-                                             : settings.dart_entrypoint_args;
   if (!isolate->RunFromLibrary(dart_entrypoint_library,  //
                                dart_entrypoint,          //
-                               args)) {
+                               dart_entrypoint_args)) {
     FML_LOG(ERROR) << "Could not run the run main Dart entrypoint.";
     return {};
   }
