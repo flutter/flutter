@@ -65,8 +65,9 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
   Color? _backgroundColor;
   set backgroundColor(Color? value) {
     assert(value != null);
-    if (_backgroundColor == value)
+    if (_backgroundColor == value) {
       return;
+    }
     _backgroundColor = value;
     markNeedsPaint();
   }
@@ -186,8 +187,9 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
     }
     return false;
   }
