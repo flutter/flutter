@@ -500,60 +500,16 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/android_tools/sdk/build-tools': {
+  'src/third_party/android_tools/sdk': {
      'packages': [
        {
-        'package': 'flutter/android/sdk/build-tools/${{platform}}',
-        'version': 'version:31.0.0S'
+        'package': 'flutter/android/sdk/all/${{platform}}',
+        'version': 'version:31v2'
        }
      ],
      'condition': 'download_android_deps',
      'dep_type': 'cipd',
    },
-
-  'src/third_party/android_tools/sdk/platform-tools': {
-     'packages': [
-       {
-        'package': 'flutter/android/sdk/platform-tools/${{platform}}',
-        'version': 'version:31.0.2S'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-
-  'src/third_party/android_tools/sdk/platforms': {
-     'packages': [
-       {
-        'package': 'flutter/android/sdk/platforms',
-        'version': 'version:31S'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-
-  'src/third_party/android_tools/sdk/tools': {
-     'packages': [
-       {
-        'package': 'flutter/android/sdk/tools/${{platform}}',
-        'version': 'version:26.1.1'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-
-  'src/third_party/android_tools/sdk/cmdline-tools': {
-     'packages': [
-       {
-        'package': 'flutter/android/sdk/cmdline-tools',
-        'version': 'latest',
-       }
-     ],
-    'condition': 'download_android_deps',
-    'dep_type': 'cipd',
-  },
 
   'src/third_party/android_tools/sdk/licenses': {
      'packages': [
