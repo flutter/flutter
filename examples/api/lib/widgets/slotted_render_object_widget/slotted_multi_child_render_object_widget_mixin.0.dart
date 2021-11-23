@@ -16,13 +16,13 @@ enum _DiagonalSlot {
 class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot> {
   const _Diagonal({
     Key? key,
-    required this.topLeft,
-    required this.bottomRight,
+    this.topLeft,
+    this.bottomRight,
     this.backgroundColor,
   }) : super(key: key);
 
-  final Widget topLeft;
-  final Widget bottomRight;
+  final Widget? topLeft;
+  final Widget? bottomRight;
   final Color? backgroundColor;
 
   @override
@@ -67,8 +67,8 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   // Getters to simplify accessing the slotted children.
-  RenderBox get _topLeft => childForSlot(_DiagonalSlot.topLeft)!;
-  RenderBox get _bottomRight => childForSlot(_DiagonalSlot.bottomRight)!;
+  RenderBox? get _topLeft => childForSlot(_DiagonalSlot.topLeft);
+  RenderBox? get _bottomRight => childForSlot(_DiagonalSlot.bottomRight);
 
   // The size this render object would have if the incoming constraints were
   // unconstrained; calculated during performLayout.
@@ -77,8 +77,12 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
   // Returns children in hit test order.
   @override
   Iterable<RenderBox> get children sync* {
-    yield _topLeft;
-    yield _bottomRight;
+    if (_topLeft != null) {
+      yield _topLeft!;
+    }
+    if (_bottomRight != null) {
+      yield _bottomRight!;
+    }
   }
 
   // LAYOUT
@@ -89,22 +93,30 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
     const BoxConstraints childConstraints = BoxConstraints();
 
     // Lay out the top left child and position it at offset zero.
-    _topLeft.layout(childConstraints, parentUsesSize: true);
-    _positionChild(_topLeft, Offset.zero);
+    Size topLeftSize = Size.zero;
+    if (_topLeft != null) {
+      _topLeft!.layout(childConstraints, parentUsesSize: true);
+      _positionChild(_topLeft!, Offset.zero);
+      topLeftSize = _topLeft!.size;
+    }
 
     // Lay out the bottom right child and position it at the bottom right corner
     // of the top left child.
-    _bottomRight.layout(childConstraints, parentUsesSize: true);
-    _positionChild(
-      _bottomRight,
-      Offset(_topLeft.size.width, _topLeft.size.height),
-    );
+    Size bottomRightSize = Size.zero;
+    if (_bottomRight != null) {
+      _bottomRight!.layout(childConstraints, parentUsesSize: true);
+      _positionChild(
+        _bottomRight!,
+        Offset(topLeftSize.width, topLeftSize.height),
+      );
+      bottomRightSize = _bottomRight!.size;
+    }
 
     // Calculate the overall size and constrains it to the given constraints.
     // Any overflow is marked (in debug mode) during paint.
     _childrenSize = Size(
-      _topLeft.size.width + _bottomRight.size.width,
-      _topLeft.size.height + _bottomRight.size.height,
+      topLeftSize.width + bottomRightSize.width,
+      topLeftSize.height + bottomRightSize.height,
     );
     size = constraints.constrain(_childrenSize);
   }
@@ -127,8 +139,12 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
     }
 
     // Paint the children at the offset calculated during layout.
-    _paintChild(_topLeft, context, offset);
-    _paintChild(_bottomRight, context, offset);
+    if (_topLeft != null) {
+      _paintChild(_topLeft!, context, offset);
+    }
+    if (_bottomRight != null) {
+      _paintChild(_bottomRight!, context, offset);
+    }
 
     // Paint an overflow indicator in debug mode if the children want to be
     // larger than the incoming constraints allow.
@@ -177,29 +193,36 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return _topLeft.getMinIntrinsicWidth(double.infinity) + _bottomRight.getMinIntrinsicWidth(double.infinity);
+    final double topLeftWidth = _topLeft?.getMinIntrinsicWidth(double.infinity) ?? 0;
+    final double bottomRightWith = _bottomRight?.getMinIntrinsicWidth(double.infinity) ?? 0;
+    return topLeftWidth + bottomRightWith;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return _topLeft.getMaxIntrinsicWidth(double.infinity) + _bottomRight.getMaxIntrinsicWidth(double.infinity);
-  }
+    final double topLeftWidth = _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
+    final double bottomRightWith = _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
+    return topLeftWidth + bottomRightWith;  }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return _topLeft.getMinIntrinsicHeight(double.infinity) + _bottomRight.getMinIntrinsicHeight(double.infinity);
+    final double topLeftHeight = _topLeft?.getMinIntrinsicHeight(double.infinity) ?? 0;
+    final double bottomRightHeight = _bottomRight?.getMinIntrinsicHeight(double.infinity) ?? 0;
+    return topLeftHeight + bottomRightHeight;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _topLeft.getMaxIntrinsicHeight(double.infinity) + _bottomRight.getMaxIntrinsicHeight(double.infinity);
+    final double topLeftHeight = _topLeft?.getMaxIntrinsicHeight(double.infinity) ?? 0;
+    final double bottomRightHeight = _bottomRight?.getMaxIntrinsicHeight(double.infinity) ?? 0;
+    return topLeftHeight + bottomRightHeight;
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
-    final Size topLeftSize = _topLeft.computeDryLayout(childConstraints);
-    final Size bottomRightSize = _bottomRight.computeDryLayout(childConstraints);
+    final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(Size(
       topLeftSize.width + bottomRightSize.width,
       topLeftSize.height + bottomRightSize.height,
