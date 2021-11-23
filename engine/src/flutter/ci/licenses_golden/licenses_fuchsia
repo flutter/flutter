@@ -1,4 +1,4 @@
-Signature: 08c598fa6b8af9badbf00c611b666dba
+Signature: 105b043f6bcd867857d777f8d3ceb118
 
 UNUSED LICENSES:
 
@@ -2247,6 +2247,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/capability.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/child.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/collection.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/component.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/environment.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/expose.fidl
@@ -2304,7 +2305,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scope.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/sequencer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/single_threaded_executor.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_creation_tokens.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_identity.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_creation_tokens.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_identity.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/atomic.h
