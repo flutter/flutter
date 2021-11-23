@@ -2196,13 +2196,26 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     markNeedsLayout();
   }
 
+  // The returned list is ordered for hit testing.
+  Iterable<RenderBox> get _children sync* {
+    if (avatar != null) {
+      yield avatar!;
+    }
+    if (label != null) {
+      yield label!;
+    }
+    if (deleteIcon != null) {
+      yield deleteIcon!;
+    }
+  }
+
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
   bool get deleteIconShowing => !deleteDrawerAnimation.isDismissed;
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in children) {
+    for (final RenderBox child in _children) {
       child.attach(owner);
     }
   }
@@ -2210,19 +2223,19 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in children) {
+    for (final RenderBox child in _children) {
       child.detach();
     }
   }
 
   @override
   void redepthChildren() {
-    children.forEach(redepthChild);
+    _children.forEach(redepthChild);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    children.forEach(visitor);
+    _children.forEach(visitor);
   }
 
   @override

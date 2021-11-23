@@ -1387,6 +1387,17 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   RenderBox? get subtitle => childForSlot(_ListTileSlot.subtitle);
   RenderBox? get trailing => childForSlot(_ListTileSlot.trailing);
 
+  // The returned list is ordered for hit testing.
+  Iterable<RenderBox> get _children sync* {
+    if (leading != null)
+      yield leading!;
+    if (title != null)
+      yield title!;
+    if (subtitle != null)
+      yield subtitle!;
+    if (trailing != null)
+      yield trailing!;
+  }
 
   bool get isDense => _isDense;
   bool _isDense;
@@ -1484,25 +1495,25 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
   @override
   void redepthChildren() {
-    children.forEach(redepthChild);
+    _children.forEach(redepthChild);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    children.forEach(visitor);
+    _children.forEach(visitor);
   }
 
   @override
@@ -1765,24 +1776,13 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     doPaint(trailing);
   }
 
-  Iterable<RenderBox> get _childrenInHitTestOrder sync* {
-    if (leading != null)
-      yield leading!;
-    if (title != null)
-      yield title!;
-    if (subtitle != null)
-      yield subtitle!;
-    if (trailing != null)
-      yield trailing!;
-  }
-
   @override
   bool hitTestSelf(Offset position) => true;
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in _childrenInHitTestOrder) {
+    for (final RenderBox child in _children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
