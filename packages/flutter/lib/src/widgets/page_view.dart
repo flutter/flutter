@@ -150,6 +150,12 @@ class PageController extends ScrollController {
   /// direction.
   final double viewportFraction;
 
+  /// This sets a condition if the [PageView] onPageChanged should be called only
+  /// when scrolling reaches the end.
+  ///
+  /// Default vakue is false.
+  bool callPageChangeAtEnd = false;
+
   /// The current page displayed in the controlled [PageView].
   ///
   /// There are circumstances that this [PageController] can't know the current
@@ -191,12 +197,15 @@ class PageController extends ScrollController {
     int page, {
     required Duration duration,
     required Curve curve,
+    bool callPageChangeAtEnd = false,
   }) {
     final _PagePosition position = this.position as _PagePosition;
     if (position._cachedPage != null) {
       position._cachedPage = page.toDouble();
       return Future<void>.value();
     }
+
+    this.callPageChangeAtEnd = callPageChangeAtEnd;
 
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
@@ -935,12 +944,17 @@ class _PageViewState extends State<PageView> {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
+        if (notification.depth == 0 && widget.onPageChanged != null) {
           final PageMetrics metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
-            _lastReportedPage = currentPage;
-            widget.onPageChanged!(currentPage);
+            if (!widget.controller.callPageChangeAtEnd  && notification is ScrollUpdateNotification) {
+              _lastReportedPage = currentPage;
+              widget.onPageChanged!(currentPage);
+            } else if (widget.controller.callPageChangeAtEnd  && notification is ScrollEndNotification) {
+              _lastReportedPage = currentPage;
+              widget.onPageChanged!(currentPage);
+            }
           }
         }
         return false;

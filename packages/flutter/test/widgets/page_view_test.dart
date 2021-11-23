@@ -415,6 +415,63 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('callPageChangeAtEnd parameter calls onPageChanged once', (WidgetTester tester) async {
+    const Key firstPageButton = Key('firstPageButton');
+    const Key lastPageButton = Key('lastPageButton');
+    final PageController controller = PageController();
+    int onPageChangedCalled = 0;
+
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            PageView(
+              controller: controller,
+              onPageChanged: (int value) {
+                onPageChangedCalled = onPageChangedCalled + 1;
+              },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+            ),
+            Column(
+              children: <Widget>[
+                TextButton(
+                  key: firstPageButton,
+                  onPressed: () {
+                    controller.animateToPage(kStates.indexOf(kStates.first), 
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.easeOutQuart,
+                      callPageChangeAtEnd: true,
+                    );
+                  }, 
+                  child: const Text('Animate to first page'),
+                ),
+                TextButton(
+                  key: lastPageButton,
+                  onPressed: () {
+                    controller.animateToPage(kStates.indexOf(kStates.last), 
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.easeOutQuart,
+                    );
+                  }, 
+                  child: const Text('Animate to last page'),
+                ),
+              ],
+            ),
+          ],
+        ),
+    ));
+
+    await tester.tap(find.byKey(lastPageButton));
+    await tester.pumpAndSettle();
+    expect(onPageChangedCalled, 7);
+
+    onPageChangedCalled = 0;
+
+    await tester.tap(find.byKey(firstPageButton));
+    await tester.pumpAndSettle();
+    expect(onPageChangedCalled, 1);
+  });
+
   testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
