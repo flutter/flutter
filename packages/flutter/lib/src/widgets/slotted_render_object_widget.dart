@@ -1,21 +1,98 @@
-// ignore_for_file: public_member_api_docs
-
 import 'framework.dart';
 
+/// A mixin for a [RenderObjectWidget] that configures a [RenderObject]
+/// subclass, which organizes its children in different slots.
+///
+/// Implementors of this mixin have to provide the list of available slots by
+/// overriding [slots]. The list of slots must never change for a given class
+/// implementing this mixin. In the common case, [Enum] values are used as slots
+/// and [slots] is typically implemented to return the value of the enum's
+/// `values` getter.
+///
+/// Furthermore, [childForSlot] must be implemented to return the current
+/// widget configuration for a given slot.
+///
+/// The [RenderObject] returned by [createRenderObject] and updated by
+/// [updateRenderObject] must implement the [SlottedContainerRenderObjectMixin].
+///
+/// The type parameter `S` is the type for the slots to be used by this
+/// [RenderObjectWidget] and the [RenderObject] it configures. In the typical
+/// case, `S` is an [Enum] type.
 mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
-
+  /// Returns a list of all available slots.
+  ///
+  /// The list of slots must be static and must never change for a given class
+  /// implementing this mixin.
+  ///
+  /// Typically, an [Enum] is used to identify the different slots. In that case
+  /// this getter can be implemented by returning what the `value` getter
+  /// of the enum used returns.
   @protected
   Iterable<S> get slots;
 
+  /// Returns the widget that is currently occupying the provided `slot`.
+  ///
+  /// The [RenderObject] configured by this class will be configured to have
+  /// the [RenderObject] produced by the returned [Widget] in the provided
+  /// `slot`.
   @protected
   Widget? childForSlot(S slot);
 
   @override
-  SlottedRenderObjectElement<S> createElement() => SlottedRenderObjectElement<S>(this);
+  SlottedContainerRenderObjectMixin<S> createRenderObject(BuildContext context);
+
+  @override
+  void updateRenderObject(BuildContext context, SlottedContainerRenderObjectMixin<S> renderObject);
+
+  @override
+  RenderObjectElement createElement() => _SlottedRenderObjectElement<S>(this);
 }
 
-class SlottedRenderObjectElement<S> extends RenderObjectElement {
-  SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget) : super(widget);
+/// Mixin for a [RenderBox] configured by a [SlottedMultiChildRenderObjectWidgetMixin].
+///
+/// The [RenderBox] child currently occupying a given slot can be obtained by
+/// calling [childForSlot]. A list of all non-null child [RenderBox]es is
+/// available via the [children] getter.
+///
+/// The type parameter `S` is the type for the slots to be used by this
+/// [RenderObject] and the [SlottedMultiChildRenderObjectWidgetMixin] it was
+/// configured by. In the typical case, `S` is an [Enum] type.
+mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
+  /// Returns the [RenderBox] child that it currently occupying the provided
+  /// `slot`.
+  ///
+  /// Returns null if no [RenderBox] is configured for the given slot.
+  @protected
+  RenderBox? childForSlot(S slot) => _slotToChild[slot];
+
+  /// Returns all non-null [RenderBox] children of this render object.
+  ///
+  /// The order in which the children are returned is not guaranteed and no
+  /// assumption should be made about the order.
+  ///
+  /// See also:
+  ///
+  ///  * [childForSlot] to obtain the child occupying a given slot.
+  @protected
+  Iterable<RenderBox> get children => _slotToChild.values.where((RenderBox? child) => child != null).cast<RenderBox>();
+
+  final Map<S, RenderBox?> _slotToChild = <S, RenderBox?>{};
+
+  void _setChild(RenderBox? child, S slot) {
+    final RenderBox? oldChild = _slotToChild[slot];
+    if (oldChild != null) {
+      dropChild(oldChild);
+      _slotToChild.remove(slot);
+    }
+    if (child != null) {
+      _slotToChild[slot] = child;
+      adoptChild(child);
+    }
+  }
+}
+
+class _SlottedRenderObjectElement<S> extends RenderObjectElement {
+  _SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget) : super(widget);
 
   final Map<S, Element> _slotToChild = <S, Element>{};
 
@@ -85,29 +162,5 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderBox child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
-  }
-}
-
-mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
-  @protected
-  RenderBox? childForSlot(S slot) {
-    return _slotToChild[slot];
-  }
-
-  @protected
-  Iterable<RenderBox> get children => _slotToChild.values.where((RenderBox? child) => child != null).cast<RenderBox>();
-
-  final Map<S, RenderBox?> _slotToChild = <S, RenderBox?>{};
-
-  void _setChild(RenderBox? child, S slot) {
-    final RenderBox? oldChild = _slotToChild[slot];
-    if (oldChild != null) {
-      dropChild(oldChild);
-      _slotToChild.remove(slot);
-    }
-    if (child != null) {
-      _slotToChild[slot] = child;
-      adoptChild(child);
-    }
   }
 }

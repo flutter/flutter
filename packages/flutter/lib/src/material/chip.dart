@@ -2054,7 +2054,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(BuildContext context) {
     return _RenderChip(
       theme: theme,
       textDirection: Directionality.of(context),
