@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show NullTreeSanitizer;
+import '../browser_detection.dart';
 import '../canvaskit/color_filter.dart';
 import '../color_filter.dart';
 import '../dom_renderer.dart';
@@ -135,30 +136,22 @@ class PersistedColorFilter extends PersistedContainerSurface
     }
 
     // Use SVG filter for blend mode.
-    final String? svgFilter =
-        svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
-    if (svgFilter != null) {
-      _filterElement =
-          html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
-      //rootElement!.insertBefore(_filterElement!, childContainer!);
-      domRenderer.addResource(_filterElement!);
-      style.filter = 'url(#_fcf$filterIdCounter)';
-      if (colorFilterBlendMode == ui.BlendMode.saturation ||
-          colorFilterBlendMode == ui.BlendMode.multiply ||
-          colorFilterBlendMode == ui.BlendMode.modulate) {
-        style.backgroundColor = colorToCssString(filterColor);
-      }
+    final SvgFilter svgFilter = svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
+    _filterElement = svgFilter.element;
+    domRenderer.addResource(_filterElement!);
+    style.filter = 'url(#${svgFilter.id})';
+    if (colorFilterBlendMode == ui.BlendMode.saturation ||
+        colorFilterBlendMode == ui.BlendMode.multiply ||
+        colorFilterBlendMode == ui.BlendMode.modulate) {
+      style.backgroundColor = colorToCssString(filterColor);
     }
   }
 
   void _applyMatrixColorFilter(CkMatrixColorFilter colorFilter) {
-    final String? svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
-    if (svgFilter != null) {
-      _filterElement =
-          html.Element.html(svgFilter, treeSanitizer: NullTreeSanitizer());
-      domRenderer.addResource(_filterElement!);
-      childContainer!.style.filter = 'url(#_fcf$filterIdCounter)';
-    }
+    final SvgFilter svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
+    _filterElement = svgFilter.element;
+    domRenderer.addResource(_filterElement!);
+    childContainer!.style.filter = 'url(#${svgFilter.id})';
   }
 
   @override
@@ -171,9 +164,9 @@ class PersistedColorFilter extends PersistedContainerSurface
   }
 }
 
-String? svgFilterFromBlendMode(
+SvgFilter svgFilterFromBlendMode(
     ui.Color? filterColor, ui.BlendMode colorFilterBlendMode) {
-  String? svgFilter;
+  final SvgFilter svgFilter;
   switch (colorFilterBlendMode) {
     case ui.BlendMode.srcIn:
     case ui.BlendMode.srcATop:
@@ -199,8 +192,11 @@ String? svgFilterFromBlendMode(
     case ui.BlendMode.overlay:
       // Since overlay is the same as hard-light by swapping layers,
       // pass hard-light blend function.
-      svgFilter =
-          _blendColorFilterToSvg(filterColor, 'hard-light', swapLayers: true);
+      svgFilter = _blendColorFilterToSvg(
+        filterColor,
+        blendModeToSvgEnum(ui.BlendMode.hardLight)!,
+        swapLayers: true,
+      );
       break;
     // Several of the filters below (although supported) do not render the
     // same (close but not exact) as native flutter when used as blend mode
@@ -228,7 +224,7 @@ String? svgFilterFromBlendMode(
     case ui.BlendMode.difference:
     case ui.BlendMode.exclusion:
       svgFilter = _blendColorFilterToSvg(
-          filterColor, stringForBlendMode(colorFilterBlendMode)!);
+          filterColor, blendModeToSvgEnum(colorFilterBlendMode)!);
       break;
     case ui.BlendMode.src:
     case ui.BlendMode.dst:
@@ -237,33 +233,155 @@ String? svgFilterFromBlendMode(
     case ui.BlendMode.dstOver:
     case ui.BlendMode.clear:
     case ui.BlendMode.srcOver:
-      assert(
-          false,
-          'Invalid svg filter request for blend-mode '
-          '$colorFilterBlendMode');
-      break;
+      throw UnimplementedError(
+        'Blend mode not supported in HTML renderer: $colorFilterBlendMode',
+      );
   }
   return svgFilter;
 }
 
-String? svgFilterFromColorMatrix(List<double> matrix) {
-  filterIdCounter += 1;
-  final StringBuffer sbMatrix = StringBuffer();
-  assert(matrix.length == 20);
-  for (int i = 0; i < 20; i++) {
-    if (i != 0) {
-      sbMatrix.write(' ');
-    }
-    sbMatrix.write(matrix[i]);
+// See: https://www.w3.org/TR/SVG11/types.html#InterfaceSVGUnitTypes
+const int kObjectBoundingBox = 2;
+
+// See: https://www.w3.org/TR/SVG11/filters.html#InterfaceSVGFEColorMatrixElement
+const int kMatrixType = 1;
+
+// See: https://www.w3.org/TR/SVG11/filters.html#InterfaceSVGFECompositeElement
+const int kOperatorOut = 3;
+const int kOperatorAtop = 4;
+const int kOperatorXor = 5;
+const int kOperatorArithmetic = 6;
+
+/// Builds an [SvgFilter].
+class SvgFilterBuilder {
+  static int _filterIdCounter = 0;
+
+  SvgFilterBuilder() : id = '_fcf${++_filterIdCounter}' {
+    filter.id = id;
+
+    // SVG filters that contain `<feImage>` will fail on several browsers
+    // (e.g. Firefox) if bounds are not specified.
+    filter.filterUnits!.baseVal = kObjectBoundingBox;
+
+    // On Firefox percentage width/height 100% works however fails in Chrome 88.
+    filter.x!.baseVal!.valueAsString = '0%';
+    filter.y!.baseVal!.valueAsString = '0%';
+    filter.width!.baseVal!.valueAsString = '100%';
+    filter.height!.baseVal!.valueAsString = '100%';
   }
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feColorMatrix type="matrix" values="$sbMatrix" result="comp"/>'
-      '</filter></svg>';
+
+  final String id;
+  final svg.SvgSvgElement root = kSvgResourceHeader.clone(false) as svg.SvgSvgElement;
+  final svg.FilterElement filter = svg.FilterElement();
+
+  set colorInterpolationFilters(String filters) {
+    filter.setAttribute('color-interpolation-filters', filters);
+  }
+
+  void setFeColorMatrix(List<double> matrix, { required String result }) {
+    final svg.FEColorMatrixElement element = svg.FEColorMatrixElement();
+    element.type!.baseVal = kMatrixType;
+    element.result!.baseVal = result;
+    final svg.NumberList value = element.values!.baseVal!;
+    for (int i = 0; i < matrix.length; i++) {
+      value.appendItem(root.createSvgNumber()..value = matrix[i]);
+    }
+    filter.append(element);
+  }
+
+  void setFeFlood({
+    required String floodColor,
+    required String floodOpacity,
+    required String result,
+  }) {
+    final svg.FEFloodElement element = svg.FEFloodElement();
+    element.setAttribute('flood-color', floodColor);
+    element.setAttribute('flood-opacity', floodOpacity);
+    element.result!.baseVal = result;
+    filter.append(element);
+  }
+
+  void setFeBlend({
+    required String in1,
+    required String in2,
+    required int mode,
+  }) {
+    final svg.FEBlendElement element = svg.FEBlendElement();
+    element.in1!.baseVal = in1;
+    element.in2!.baseVal = in2;
+    element.mode!.baseVal = mode;
+    filter.append(element);
+  }
+
+  void setFeComposite({
+    required String in1,
+    required String in2,
+    required int operator,
+    num? k1,
+    num? k2,
+    num? k3,
+    num? k4,
+    required String result,
+  }) {
+    final svg.FECompositeElement element = svg.SvgElement.tag('feComposite') as svg.FECompositeElement;
+    element.in1!.baseVal = in1;
+    element.in2!.baseVal = in2;
+    element.operator!.baseVal = operator;
+    if (k1 != null) {
+      element.k1!.baseVal = k1;
+    }
+    if (k2 != null) {
+      element.k2!.baseVal = k2;
+    }
+    if (k3 != null) {
+      element.k3!.baseVal = k3;
+    }
+    if (k4 != null) {
+      element.k4!.baseVal = k4;
+    }
+    element.result!.baseVal = result;
+    filter.append(element);
+  }
+
+  void setFeImage({
+    required String href,
+    required String result,
+    required double width,
+    required double height,
+  }) {
+    final svg.FEImageElement element = svg.FEImageElement();
+    element.href!.baseVal = href;
+    element.result!.baseVal = result;
+
+    // WebKit will not render if x/y/width/height is specified. So we return
+    // explicit size here unless running on WebKit.
+    if (browserEngine != BrowserEngine.webkit) {
+      element.x!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, 0);
+      element.y!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, 0);
+      element.width!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, width);
+      element.height!.baseVal!.newValueSpecifiedUnits(svg.Length.SVG_LENGTHTYPE_NUMBER, height);
+    }
+    filter.append(element);
+  }
+
+  SvgFilter build() {
+    root.append(filter);
+    return SvgFilter._(id, root);
+  }
 }
 
-int filterIdCounter = 0;
+class SvgFilter {
+  SvgFilter._(this.id, this.element);
+
+  final String id;
+  final svg.SvgSvgElement element;
+}
+
+SvgFilter svgFilterFromColorMatrix(List<double> matrix) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeColorMatrix(matrix, result: 'comp');
+  return builder.build();
+}
 
 // The color matrix for feColorMatrix element changes colors based on
 // the following:
@@ -278,109 +396,161 @@ int filterIdCounter = 0;
 // G' = g1*R + g2*G + g3*B + g4*A + g5
 // B' = b1*R + b2*G + b3*B + b4*A + b5
 // A' = a1*R + a2*G + a3*B + a4*A + a5
-String _srcInColorFilterToSvg(ui.Color? color) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" color-interpolation-filters="sRGB" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feColorMatrix type="matrix" values="0 0 0 0 1\n' // Ignore input, set it to absolute.
-      '0 0 0 0 1\n'
-      '0 0 0 0 1\n'
-      '0 0 0 1 0" result="destalpha"></feColorMatrix>>' // Just take alpha channel of destination
-      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-      '</feFlood>'
-      '<feComposite in="flood" in2="destalpha" '
-      'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+SvgFilter _srcInColorFilterToSvg(ui.Color? color) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.colorInterpolationFilters = 'sRGB';
+  builder.setFeColorMatrix(
+    const <double>[
+      0, 0, 0, 0, 1,
+      0, 0, 0, 0, 1,
+      0, 0, 0, 0, 1,
+      0, 0, 0, 1, 0,
+    ],
+    result: 'destalpha',
+  );
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  builder.setFeComposite(
+    in1: 'flood',
+    in2: 'destalpha',
+    operator: kOperatorArithmetic,
+    k1: 1,
+    k2: 0,
+    k3: 0,
+    k4: 0,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 /// The destination that overlaps the source is composited with the source and
 /// replaces the destination. dst-atop	CR = CB*αB*αA+CA*αA*(1-αB)	αR=αA
-String _dstATopColorFilterToSvg(ui.Color? color) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-      '</feFlood>'
-      '<feComposite in="SourceGraphic" in2="flood" operator="atop" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+SvgFilter _dstATopColorFilterToSvg(ui.Color? color) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  builder.setFeComposite(
+    in1: 'SourceGraphic',
+    in2: 'flood',
+    operator: kOperatorAtop,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
-String _srcOutColorFilterToSvg(ui.Color? color) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-      '</feFlood>'
-      '<feComposite in="flood" in2="SourceGraphic" operator="out" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+SvgFilter _srcOutColorFilterToSvg(ui.Color? color) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  builder.setFeComposite(
+    in1: 'flood',
+    in2: 'SourceGraphic',
+    operator: kOperatorOut,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
-String _xorColorFilterToSvg(ui.Color? color) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-      '</feFlood>'
-      '<feComposite in="flood" in2="SourceGraphic" operator="xor" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+SvgFilter _xorColorFilterToSvg(ui.Color? color) {
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  builder.setFeComposite(
+    in1: 'flood',
+    in2: 'SourceGraphic',
+    operator: kOperatorXor,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // The source image and color are composited using :
 // result = k1 *in*in2 + k2*in + k3*in2 + k4.
-String _compositeColorFilterToSvg(
+SvgFilter _compositeColorFilterToSvg(
     ui.Color? color, double k1, double k2, double k3, double k4) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-      '</feFlood>'
-      '<feComposite in="flood" in2="SourceGraphic" '
-      'operator="arithmetic" k1="$k1" k2="$k2" k3="$k3" k4="$k4" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  builder.setFeComposite(
+    in1: 'flood',
+    in2: 'SourceGraphic',
+    operator: kOperatorArithmetic,
+    k1: k1,
+    k2: k2,
+    k3: k3,
+    k4: k4,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // Porter duff source * destination , keep source alpha.
 // First apply color filter to source to change it to [color], then
 // composite using multiplication.
-String _modulateColorFilterToSvg(ui.Color color) {
-  filterIdCounter += 1;
+SvgFilter _modulateColorFilterToSvg(ui.Color color) {
   final double r = color.red / 255.0;
   final double b = color.blue / 255.0;
   final double g = color.green / 255.0;
-  return '$kSvgResourceHeader'
-      '<filter id="_fcf$filterIdCounter" '
-      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
-      '<feColorMatrix values="0 0 0 0 $r ' // Ignore input, set it to absolute.
-      '0 0 0 0 $g '
-      '0 0 0 0 $b '
-      '0 0 0 1 0" result="recolor"/>'
-      '<feComposite in="recolor" in2="SourceGraphic" '
-      'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
-      '</feComposite>'
-      '</filter></svg>';
+
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeColorMatrix(
+    <double>[
+      0, 0, 0, 0, r,
+      0, 0, 0, 0, g,
+      0, 0, 0, 0, b,
+      0, 0, 0, 1, 0,
+    ],
+    result: 'recolor',
+  );
+  builder.setFeComposite(
+    in1: 'recolor',
+    in2: 'SourceGraphic',
+    operator: kOperatorArithmetic,
+    k1: 1,
+    k2: 0,
+    k3: 0,
+    k4: 0,
+    result: 'comp',
+  );
+  return builder.build();
 }
 
 // Uses feBlend element to blend source image with a color.
-String _blendColorFilterToSvg(ui.Color? color, String feBlend,
+SvgFilter _blendColorFilterToSvg(ui.Color? color, SvgBlendMode svgBlendMode,
     {bool swapLayers = false}) {
-  filterIdCounter += 1;
-  return '$kSvgResourceHeader'
-          '<filter id="_fcf$filterIdCounter" filterUnits="objectBoundingBox" '
-          'x="0%" y="0%" width="100%" height="100%">'
-          '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
-          '</feFlood>' +
-      (swapLayers
-          ? '<feBlend in="SourceGraphic" in2="flood" mode="$feBlend"/>'
-          : '<feBlend in="flood" in2="SourceGraphic" mode="$feBlend"/>') +
-      '</filter></svg>';
+  final SvgFilterBuilder builder = SvgFilterBuilder();
+  builder.setFeFlood(
+    floodColor: colorToCssString(color) ?? '',
+    floodOpacity: '1',
+    result: 'flood',
+  );
+  if (swapLayers) {
+    builder.setFeBlend(
+      in1: 'SourceGraphic',
+      in2: 'flood',
+      mode: svgBlendMode.blendMode,
+    );
+  } else {
+    builder.setFeBlend(
+      in1: 'flood',
+      in2: 'SourceGraphic',
+      mode: svgBlendMode.blendMode,
+    );
+  }
+  return builder.build();
 }
