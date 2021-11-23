@@ -1,4 +1,4 @@
-Signature: 52d89cdbba6bc2ad69481f60d04fb874
+Signature: ad93988fd8b5931a72ef5ef7e8c5b294
 
 UNUSED LICENSES:
 
@@ -2372,6 +2372,7 @@ FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
 FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlTypes.h
+FILE: ../../../third_party/skia/experimental/graphite/src/Attribute.h
 FILE: ../../../third_party/skia/experimental/graphite/src/BackendTexture.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Caps.h
@@ -2394,6 +2395,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/DrawOrder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawPass.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawTypes.h
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawWriter.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/DrawWriter.h
 FILE: ../../../third_party/skia/experimental/graphite/src/EnumBitMask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Gpu.h
