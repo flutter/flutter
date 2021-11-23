@@ -2969,7 +2969,7 @@ void main() {
   });
 
   group('floatingLabelAlignment', () {
-    Widget buildID({required TextDirection textDirection,
+    Widget buildInputDecoratorWithFloatingLabel({required TextDirection textDirection,
           required bool hasIcon,
           required FloatingLabelAlignment alignment,
           bool borderIsOutline = false,
@@ -2991,7 +2991,7 @@ void main() {
     group('LTR with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3002,7 +3002,7 @@ void main() {
         expect(tester.getTopLeft(find.text('label')).dx, 80.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3015,7 +3015,7 @@ void main() {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3026,7 +3026,7 @@ void main() {
         expect(tester.getCenter(find.text('label')).dx, 420.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3041,7 +3041,7 @@ void main() {
     group('LTR without icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3052,7 +3052,7 @@ void main() {
         expect(tester.getTopLeft(find.text('label')).dx, 40.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3065,7 +3065,7 @@ void main() {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -3076,7 +3076,7 @@ void main() {
         expect(tester.getCenter(find.text('label')).dx, 400.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.ltr,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -3091,7 +3091,7 @@ void main() {
     group('RTL with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3102,7 +3102,7 @@ void main() {
         expect(tester.getTopRight(find.text('label')).dx, 720.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.start,
@@ -3115,7 +3115,7 @@ void main() {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3126,7 +3126,7 @@ void main() {
         expect(tester.getCenter(find.text('label')).dx, 380.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: true,
             alignment: FloatingLabelAlignment.center,
@@ -3141,7 +3141,7 @@ void main() {
     group('RTL without icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3152,7 +3152,7 @@ void main() {
         expect(tester.getTopRight(find.text('label')).dx, 760.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.start,
@@ -3165,7 +3165,7 @@ void main() {
 
       testWidgets('center', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,
@@ -3176,7 +3176,7 @@ void main() {
         expect(tester.getCenter(find.text('label')).dx, 400.0);
 
         await tester.pumpWidget(
-          buildID(
+          buildInputDecoratorWithFloatingLabel(
             textDirection: TextDirection.rtl,
             hasIcon: false,
             alignment: FloatingLabelAlignment.center,

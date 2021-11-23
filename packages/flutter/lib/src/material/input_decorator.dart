@@ -467,7 +467,14 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behavior of the floating label.
+/// Defines **how** the floating label should behave.
+///
+/// See also:
+///
+///  * [InputDecoration.floatingLabelBehavior] which defines the behavior for
+///    [InputDecoration.label] or [InputDecoration.labelText].
+///  * [FloatingLabelAlignment] which defines **where** the floating label
+///    should displayed.
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
@@ -477,14 +484,15 @@ enum FloatingLabelBehavior {
   always,
 }
 
-/// Defines the horizontal alignment of a floating label within an
+/// Defines **where** the floating label should be displayed within an
 /// [InputDecorator].
 ///
 /// See also:
 ///
 ///  * [InputDecoration.floatingLabelAlignment] which defines the alignment for
 ///    [InputDecoration.label] or [InputDecoration.labelText].
-///  * [FloatingLabelBehavior] which defines the behaviour of the floating label.
+///  * [FloatingLabelBehavior] which defines **how** the floating label should
+///    behave.
 @immutable
 class FloatingLabelAlignment {
   const FloatingLabelAlignment._(this._x) : assert(_x != null),
@@ -2931,7 +2939,7 @@ class InputDecoration {
   final int? errorMaxLines;
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
-  /// Defines **how** the floating label should be displayed.
+  /// Defines **how** the floating label should behave.
   ///
   /// When [FloatingLabelBehavior.auto] the label will float to the top only when
   /// the field is focused or has some text content, otherwise it will appear
@@ -2948,8 +2956,8 @@ class InputDecoration {
   ///
   /// See also:
   ///
-  ///  * [floatingLabelAlignment] which defines where the floating label should
-  ///    be displayed.
+  ///  * [floatingLabelAlignment] which defines **where** the floating label
+  ///    should be displayed.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// {@template flutter.material.inputDecoration.floatingLabelAlignment}
@@ -2968,8 +2976,8 @@ class InputDecoration {
   ///
   /// See also:
   ///
-  ///  * [floatingLabelBehavior] which defines how the floating label should be
-  ///    displayed.
+  ///  * [floatingLabelBehavior] which defines **how** the floating label should
+  ///    behave.
   final FloatingLabelAlignment? floatingLabelAlignment;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
