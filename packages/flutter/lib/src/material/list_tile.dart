@@ -1388,7 +1388,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   RenderBox? get trailing => childForSlot(_ListTileSlot.trailing);
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync* {
+  @override
+  Iterable<RenderBox> get children sync* {
     if (leading != null)
       yield leading!;
     if (title != null)
@@ -1744,7 +1745,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in _children) {
+    for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
