@@ -44,6 +44,8 @@ namespace {
 
 constexpr char kDataKey[] = "data";
 constexpr char kAssetsKey[] = "assets";
+constexpr char kOldGenHeapSizeKey[] = "old_gen_heap_size";
+
 constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
 constexpr char kRunnerConfigPath[] = "/config/data/flutter_runner_config";
@@ -59,25 +61,35 @@ std::string DebugLabelForUrl(const std::string& url) {
 
 }  // namespace
 
-void ComponentV1::ParseProgramMetadata(
-    const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
-    std::string* data_path,
-    std::string* assets_path) {
+ProgramMetadata ComponentV1::ParseProgramMetadata(
+    const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata) {
+  ProgramMetadata result;
   if (!program_metadata.has_value()) {
-    return;
+    return result;
   }
+
   for (const auto& pg : *program_metadata) {
     if (pg.key.compare(kDataKey) == 0) {
-      *data_path = "pkg/" + pg.value;
+      result.data_path = "pkg/" + pg.value;
     } else if (pg.key.compare(kAssetsKey) == 0) {
-      *assets_path = "pkg/" + pg.value;
+      result.assets_path = "pkg/" + pg.value;
+    } else if (pg.key.compare(kOldGenHeapSizeKey) == 0) {
+      int64_t specified_old_gen_heap_size =
+          strtol(pg.value.c_str(), nullptr /* endptr */, 10 /* base */);
+      if (specified_old_gen_heap_size != 0) {
+        result.old_gen_heap_size = specified_old_gen_heap_size;
+      } else {
+        FML_LOG(ERROR) << "Invalid old_gen_heap_size: " << pg.value;
+      }
     }
   }
 
   // assets_path defaults to the same as data_path if omitted.
-  if (assets_path->empty()) {
-    *assets_path = *data_path;
+  if (result.assets_path.empty()) {
+    result.assets_path = result.data_path;
   }
+
+  return result;
 }
 
 ActiveComponentV1 ComponentV1::Create(
@@ -128,12 +140,10 @@ ComponentV1::ComponentV1(
     dart_entrypoint_args_ = arguments.value();
   }
 
-  // Determine where data and assets are stored within /pkg.
-  std::string data_path;
-  std::string assets_path;
-  ParseProgramMetadata(startup_info.program_metadata, &data_path, &assets_path);
+  const ProgramMetadata metadata =
+      ParseProgramMetadata(startup_info.program_metadata);
 
-  if (data_path.empty()) {
+  if (metadata.data_path.empty()) {
     FML_DLOG(ERROR) << "Could not find a /pkg/data directory for "
                     << package.resolved_url;
     return;
@@ -172,11 +182,11 @@ ComponentV1::ComponentV1(
     constexpr mode_t mode = O_RDONLY | O_DIRECTORY;
 
     component_assets_directory_.reset(
-        openat(ns_fd.get(), assets_path.c_str(), mode));
+        openat(ns_fd.get(), metadata.assets_path.c_str(), mode));
     FML_DCHECK(component_assets_directory_.is_valid());
 
     component_data_directory_.reset(
-        openat(ns_fd.get(), data_path.c_str(), mode));
+        openat(ns_fd.get(), metadata.data_path.c_str(), mode));
     FML_DCHECK(component_data_directory_.is_valid());
   }
 
@@ -379,6 +389,10 @@ ComponentV1::ComponentV1(
   settings_.application_kernel_list_asset = "app.dilplist";
 
   settings_.log_tag = debug_label_ + std::string{"(flutter)"};
+
+  if (metadata.old_gen_heap_size.has_value()) {
+    settings_.old_gen_heap_size = *metadata.old_gen_heap_size;
+  }
 
   // No asserts in debug or release product.
   // No asserts in release with flutter_profile=true (non-product)
