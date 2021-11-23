@@ -231,6 +231,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
       _debugPreviousSlots ??= widget.slots.toList();
       return listEquals(_debugPreviousSlots, widget.slots.toList());
     }(), '${widget.runtimeType}.slots must not change.');
+    assert(widget.slots.toSet().length == widget.slots.length, 'slots must be unique');
 
     for (final S slot in widget.slots) {
       _updateChild(widget.childForSlot(slot), slot);
