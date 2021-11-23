@@ -352,11 +352,15 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + delete
   //   * Meta + backspace
   static const Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
-    ..._linuxShortcuts,
-    SingleActivator(LogicalKeyboardKey.end, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    ..._commonShortcuts,
+    SingleActivator(LogicalKeyboardKey.home): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
     SingleActivator(LogicalKeyboardKey.home, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
   };
 
   // Web handles its text selection natively and doesn't use any of these
