@@ -3639,6 +3639,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
         UpdateSelectionIntent(state._value, _collapse(textBoundarySelection), SelectionChangedCause.keyboard),
       );
     }
+
     final TextPosition extent = textBoundarySelection.extent;
     final TextPosition newExtent = intent.forward
       ? textBoundary.getTrailingTextBoundaryAt(extent)
@@ -3647,6 +3648,20 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
       : textBoundarySelection.extendTo(newExtent);
+
+    // If collapseAtReversal is true and would have an effect, collapse it.
+    if (!selection.isCollapsed && intent.collapseAtReversal
+        && (selection.baseOffset < selection.extentOffset !=
+        newSelection.baseOffset < newSelection.extentOffset)) {
+      return Actions.invoke(
+        context!,
+        UpdateSelectionIntent(
+          state._value,
+          TextSelection.fromPosition(selection.base),
+          SelectionChangedCause.keyboard,
+        ),
+      );
+    }
 
     return Actions.invoke(
       context!,
