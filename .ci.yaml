@@ -68,7 +68,7 @@ platform_properties:
       os: Mac-10.15
       device_type: none
       mac_model: Macmini8,1
-      xcode: 13a5155e
+      xcode: 13a233
   mac_android:
     properties:
       caches: >-
@@ -110,7 +110,7 @@ platform_properties:
         ]
       os: Mac-10.15
       device_os: iOS-14.4.2
-      xcode: 13a5155e
+      xcode: 13a233
   mac_ios32:
     properties:
       caches: >-
