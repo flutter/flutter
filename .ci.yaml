@@ -8,9 +8,7 @@
 enabled_branches:
   - main
   - master
-  - dev
-  - beta
-  - stable
+  - flutter-\d+\.\d+-candidate\.\d+
 
 platform_properties:
   linux:
