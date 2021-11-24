@@ -652,7 +652,7 @@ public class FlutterViewTest {
     flutterView.onAttachedToWindow();
 
     // Then the WindowManager callback is registered
-    verify(windowInfoRepo, times(1)).addWindowLayoutInfoListener(any(), any());
+    verify(windowInfoRepo, times(1)).addWindowLayoutInfoListener(any(), any(), any());
 
     // When the FlutterView is detached from the window
     flutterView.onDetachedFromWindow();
@@ -695,7 +695,7 @@ public class FlutterViewTest {
     flutterView.onAttachedToWindow();
     ArgumentCaptor<Consumer<WindowLayoutInfo>> wmConsumerCaptor =
         ArgumentCaptor.forClass((Class) Consumer.class);
-    verify(windowInfoRepo).addWindowLayoutInfoListener(any(), wmConsumerCaptor.capture());
+    verify(windowInfoRepo).addWindowLayoutInfoListener(any(), any(), wmConsumerCaptor.capture());
     Consumer<WindowLayoutInfo> wmConsumer = wmConsumerCaptor.getValue();
     wmConsumer.accept(testWindowLayout);
 
