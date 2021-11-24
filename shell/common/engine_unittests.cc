@@ -301,6 +301,45 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
   });
 }
 
+TEST_F(EngineTest, SpawnResetsViewportMetrics) {
+  PostUITaskSync([this] {
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    auto vm_ref = DartVMRef::Create(settings_);
+    EXPECT_CALL(*mock_runtime_controller, GetDartVM())
+        .WillRepeatedly(::testing::Return(vm_ref.get()));
+    ViewportMetrics old_viewport_metrics = ViewportMetrics();
+    const double kViewWidth = 768;
+    const double kViewHeight = 1024;
+    old_viewport_metrics.physical_width = kViewWidth;
+    old_viewport_metrics.physical_height = kViewHeight;
+    mock_runtime_controller->SetViewportMetrics(old_viewport_metrics);
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(mock_runtime_controller));
+
+    auto& old_platform_data = engine->GetRuntimeController()->GetPlatformData();
+    EXPECT_EQ(old_platform_data.viewport_metrics.physical_width, kViewWidth);
+    EXPECT_EQ(old_platform_data.viewport_metrics.physical_height, kViewHeight);
+
+    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
+                               std::string());
+    EXPECT_TRUE(spawn != nullptr);
+    auto& new_viewport_metrics =
+        spawn->GetRuntimeController()->GetPlatformData().viewport_metrics;
+    EXPECT_EQ(new_viewport_metrics.physical_width, 0);
+    EXPECT_EQ(new_viewport_metrics.physical_height, 0);
+  });
+}
+
 TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
   PostUITaskSync([this] {
     intptr_t error_id = 123;
