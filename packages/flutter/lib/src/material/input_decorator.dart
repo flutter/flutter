@@ -2617,7 +2617,12 @@ class InputDecoration {
   /// [InputDecoration.errorStyle] color or [Theme.errorColor].
   ///
   /// {@tool dartpad}
-  /// This can be resolved with a [MaterialStateProperty].
+  /// If it is not your intention to break the default behavior you can replicate
+  /// it by conditionally changing the color in this style.
+  ///
+  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
+  /// which resolves to a text style whose color depends on the decorator's
+  /// error state.
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
   /// {@end-tool}
@@ -2642,7 +2647,12 @@ class InputDecoration {
   /// [InputDecoration.errorStyle] color or [Theme.errorColor].
   ///
   /// {@tool dartpad}
-  /// This can be resolved with a [MaterialStateProperty].
+  /// If it is not your intention to break the default behavior you can replicate
+  /// it by conditionally changing the color in this style.
+  ///
+  /// In this example the [floatingLabelStyle] is specified with a
+  /// [MaterialStateProperty] which resolves to a text style whose color depends
+  /// on the decorator's error state.
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
   /// {@end-tool}
