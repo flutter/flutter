@@ -3242,7 +3242,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab","hostonly","ios","mac"]
+        ["devicelab","ios","mac"]
       task_name: ios_app_with_extensions_test
     scheduler: luci
 
