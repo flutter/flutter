@@ -47,10 +47,8 @@ class StoryboardVersionMigration extends ProjectMigrator {
     if (originalDocumentHeaders.any(line.contains)) {
       const String mainReplacement = '<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">';
       updatedString = mainReplacement;
-      if (!migrationRequired) {
-        // Only print once.
-        logger.printStatus('Updating Xcode storyboard versions.');
-      }
+
+      logger.printStatus('Updating iOS Main.storyboard tools version.');
     }
 
     // Only update plugIn if the document version also needs to be updated to avoid downgrading version.

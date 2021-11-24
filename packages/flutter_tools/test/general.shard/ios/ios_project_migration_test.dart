@@ -710,7 +710,7 @@ keep this 3
       });
     });
 
-    group('update storyboard tools versions', () {
+    group('update Main.storyboard tools version', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger testLogger;
       late FakeIosProject project;
@@ -762,7 +762,7 @@ keep this 3
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Storyboard is migrated to Xcode 12.3 tools version', () {
+      testWithoutContext('storyboard is migrated to Xcode 12.3 tools version', () {
         xcodeMainStoryboard.writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
@@ -794,8 +794,7 @@ keep this 3
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
     </dependencies>
 ''');
-        // Only print once even though 3 lines were changed.
-        expect('Updating Xcode storyboard versions'.allMatches(testLogger.statusText).length, 1);
+        expect(testLogger.statusText, contains('Updating iOS Main.storyboard tools version'));
       });
     });
   });
