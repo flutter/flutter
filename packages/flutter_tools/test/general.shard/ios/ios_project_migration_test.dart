@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migr
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_object_version_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
-import 'package:flutter_tools/src/ios/migrations/storyboard_version_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
@@ -709,94 +708,6 @@ keep this 3
         expect('Updating project for Xcode compatibility'.allMatches(testLogger.statusText).length, 1);
       });
     });
-
-    group('update Main.storyboard tools version', () {
-      late MemoryFileSystem memoryFileSystem;
-      late BufferLogger testLogger;
-      late FakeIosProject project;
-      late File xcodeMainStoryboard;
-
-      setUp(() {
-        memoryFileSystem = MemoryFileSystem();
-        testLogger = BufferLogger.test();
-        project = FakeIosProject();
-        xcodeMainStoryboard = memoryFileSystem.file('Main.storyboard');
-        project.xcodeMainStoryboard = xcodeMainStoryboard;
-      });
-
-      testWithoutContext('skipped if files are missing', () {
-        final StoryboardVersionMigration iosProjectMigration = StoryboardVersionMigration(
-          project,
-          testLogger,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-        expect(xcodeMainStoryboard.existsSync(), isFalse);
-
-        expect(testLogger.traceText, contains('Xcode project main storyboard not found, skipping version migration'));
-        expect(testLogger.statusText, isEmpty);
-      });
-
-      testWithoutContext('skipped if nothing to upgrade', () {
-        const String xcodeMainStoryboardContents = '''
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="1400000" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="1"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
-      ''';
-        xcodeMainStoryboard.writeAsStringSync(xcodeMainStoryboardContents);
-
-        final DateTime projectLastModified = xcodeMainStoryboard.lastModifiedSync();
-
-        final StoryboardVersionMigration iosProjectMigration = StoryboardVersionMigration(
-          project,
-          testLogger,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-
-        expect(xcodeMainStoryboard.lastModifiedSync(), projectLastModified);
-        expect(xcodeMainStoryboard.readAsStringSync(), xcodeMainStoryboardContents);
-
-        expect(testLogger.statusText, isEmpty);
-      });
-
-      testWithoutContext('storyboard is migrated to Xcode 12.3 tools version', () {
-        xcodeMainStoryboard.writeAsStringSync('''
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8150" systemVersion="15A204g" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
-    <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
-    </dependencies>
-''');
-
-        final StoryboardVersionMigration iosProjectMigration = StoryboardVersionMigration(
-          project,
-          testLogger,
-        );
-        expect(iosProjectMigration.migrate(), isTrue);
-
-        expect(xcodeMainStoryboard.readAsStringSync(), '''
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
-    </dependencies>
-''');
-        expect(testLogger.statusText, contains('Updating iOS Main.storyboard tools version'));
-      });
-    });
   });
 }
 
@@ -815,9 +726,6 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File appFrameworkInfoPlist = MemoryFileSystem.test().file('appFrameworkInfoPlist');
-
-  @override
-  File xcodeMainStoryboard = MemoryFileSystem.test().file('xcodeProjectMainStoryboard');
 }
 
 class FakeIOSMigrator extends ProjectMigrator {
