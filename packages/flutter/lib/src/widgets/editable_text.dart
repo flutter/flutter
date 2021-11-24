@@ -1100,20 +1100,28 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  [caretMargin], [cursorPadding] for more control of your cursor layout.
+  ///  * [caretMargin], which sets the space after the last charachter.
+  ///  * [cursorPadding], which determines where your cursor edge ends.
   ///
   ///    Flutter.
   /// {@endtemplate}
   final double cursorWidth;
 
   /// {@template flutter.widgets.editableText.cursorPadding}
-  /// How many pixels between the end of the cursor and the end of the text including caretMargin.
+  /// Cursor padding. 
+  ///
+  /// Cursor padding is the space between the end of the [caretMargin] and the edge of thr cursor.
+  /// normally , no need to change the defalut value unless a fine tunning for the position of the cursor
+  /// is needed.
+  ///
+  /// for example if the [caretMargin] is 8.0 and this value is 3.0 ,the cursor edge will be padded 3.0 pixels.
   ///
   /// Defaults to 1.0.
   ///
   /// See also:
   ///
-  ///  [cursorWidth], [caretMargin] for more control of your cursor layout.
+  ///  * [cursorWidth], which sets the width of the cursor.
+  ///  * [caretMargin], which sets the space after the last charachter.
   ///
   /// {@endtemplate}
   final double cursorPadding;
@@ -1121,9 +1129,16 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.caretMargin}
   /// How many pixels will be added after the last character.
   ///
+  /// Caret Margin is the space trailing after last character ,which is needed to contain the cursor.
+  /// when it is null (which is the defalut value) ,caret margin will be [cursorWidth] + [cursorPadding],
+  /// normally, no need to set this value unless, the width of the caret margin needs fine tunning.
+  /// for example, when using RTL languages with textAlign set to right , the caretMargin
+  /// may be set to 0.0 to get rid of this trailing space entirely.
+  ///
   /// See also:
   ///
-  ///  [cursorWidth], [cursorPadding] for more control of your cursor layout.
+  ///  * [cursorWidth], which set the width of the cursor.
+  ///  * [cursorPadding], which determines where your cursor edge ends.
   ///
   /// {@endtemplate}
   final double? caretMargin;

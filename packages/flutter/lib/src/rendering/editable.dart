@@ -1075,7 +1075,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     markNeedsLayout();
   }
 
-  /// Space after the last character.
+  /// The space trailing after the last character.
+  /// caret margin is the space located after the last character which is needed to contain the cursor.
+  ///
+  /// this can be null, in which case the getter will actually return [cursorWidth]+[cursorPadding].
   double get caretMargin => _caretMargin ?? _cursorWidth + _cursorPadding;
   double? _caretMargin;
   set caretMargin(double? value) {
@@ -1095,6 +1098,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     markNeedsLayout();
   }
 
+  /// Cursor left position.
+  ///
+  /// When [caretMargin] is null this getter returns 0.0.
   double get _cursorLeft => caretMargin - _cursorPadding - _cursorWidth;
 
   /// How tall the cursor will be.
