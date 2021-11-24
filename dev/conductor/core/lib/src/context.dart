@@ -28,7 +28,7 @@ abstract class Context {
   ///
   /// The default implementation reads from STDIN. This can be overriden in UI
   /// implementations that capture user interaction differently.
-  bool prompt(String message) {
+  Future<bool> prompt(String message) async {
     stdio.write('${message.trim()} (y/n) ');
     final String response = stdio.readLineSync().trim();
     final String firstChar = response[0].toUpperCase();

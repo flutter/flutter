@@ -133,7 +133,8 @@ void main() {
       const String nextVersion = '1.2.0-1.1.pre';
       const String incrementLevel = 'n';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -141,21 +142,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -309,7 +309,7 @@ void main() {
       stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
       const String revision2 = 'def789';
       const String revision3 = '123abc';
-      const String branchPointRevision='deadbeef';
+      const String branchPointRevision = 'deadbeef';
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-1.0.pre';
@@ -319,7 +319,8 @@ void main() {
       const String nextVersion = '1.2.0-3.1.pre';
       const String incrementLevel = 'm';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -327,21 +328,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -512,7 +512,8 @@ void main() {
       const String nextVersion = '1.2.0';
       const String incrementLevel = 'z';
 
-      final Directory engine = fileSystem.directory(checkoutsParentDirectory)
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
           .childDirectory('flutter_conductor_checkouts')
           .childDirectory('engine');
 
@@ -520,21 +521,20 @@ void main() {
 
       final List<FakeCommand> engineCommands = <FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            EngineRepository.defaultUpstream,
-            engine.path,
-          ],
-          onRun: () {
-            // Create the DEPS file which the tool will update
-            engine.createSync(recursive: true);
-            depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-          }
-        ),
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
         const FakeCommand(
           command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
         ),
@@ -679,6 +679,202 @@ void main() {
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
       expect(state.incrementLevel, incrementLevel);
+    });
+
+    test('StartContext gets engine and framework checkout directories after run', () async {
+      stdio.stdin.add('y');
+      const String revision2 = 'def789';
+      const String revision3 = '123abc';
+      const String branchPointRevision = 'deadbeef';
+      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+      const String previousVersion = '1.2.0-1.0.pre';
+      // This is a git tag applied to the branch point, not an actual release
+      const String branchPointTag = '1.2.0-3.0.pre';
+      // This is what this release will be
+      const String incrementLevel = 'm';
+
+      final Directory engine = fileSystem
+          .directory(checkoutsParentDirectory)
+          .childDirectory('flutter_conductor_checkouts')
+          .childDirectory('engine');
+
+      final Directory framework = fileSystem
+          .directory(checkoutsParentDirectory)
+          .childDirectory('flutter_conductor_checkouts')
+          .childDirectory('framework');
+
+      final File depsFile = engine.childFile('DEPS');
+
+      final List<FakeCommand> engineCommands = <FakeCommand>[
+        FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: () {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            }),
+        const FakeCommand(
+          command: <String>['git', 'remote', 'add', 'mirror', engineMirror],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'fetch', 'mirror'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', candidateBranch],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'checkout',
+            '-b',
+            'cherrypicks-$candidateBranch',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'status', '--porcelain'],
+          stdout: 'MM path/to/DEPS',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'add', '--all'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'commit', "--message='Update Dart SDK to $nextDartRevision'"],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision2,
+        ),
+      ];
+
+      final List<FakeCommand> frameworkCommands = <FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            FrameworkRepository.defaultUpstream,
+            framework.path,
+          ],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'fetch', 'mirror'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', candidateBranch],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision3,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'checkout',
+            '-b',
+            'cherrypicks-$candidateBranch',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git',
+            'describe',
+            '--match',
+            '*.*.*',
+            '--tags',
+            'refs/remotes/upstream/$candidateBranch',
+          ],
+          stdout: '$previousVersion-42-gabc123',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'merge-base', candidateBranch, 'master'],
+          stdout: branchPointRevision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', branchPointTag, branchPointRevision],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision3,
+        ),
+      ];
+
+      final String operatingSystem = const LocalPlatform().operatingSystem;
+      final Map<String, String> environment = <String, String>{
+        'HOME': '/path/to/user/home',
+      };
+      final Directory homeDir = fileSystem.directory(
+        environment['HOME'],
+      );
+      // Tool assumes this exists
+      homeDir.createSync(recursive: true);
+      platform = FakePlatform(
+        environment: environment,
+        operatingSystem: operatingSystem,
+      );
+
+      final String stateFilePath = fileSystem.path.join(
+        platform.environment['HOME']!,
+        kStateFileName,
+      );
+      final File stateFile = fileSystem.file(stateFilePath);
+
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        ...engineCommands,
+        ...frameworkCommands,
+      ]);
+      checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final StartContext startContext = StartContext(
+          candidateBranch: candidateBranch,
+          checkouts: checkouts,
+          dartRevision: nextDartRevision,
+          engineCherrypickRevisions: <String>[],
+          engineMirror: engineMirror,
+          engineUpstream: EngineRepository.defaultUpstream,
+          frameworkCherrypickRevisions: <String>[],
+          frameworkMirror: frameworkMirror,
+          frameworkUpstream: FrameworkRepository.defaultUpstream,
+          releaseChannel: releaseChannel,
+          incrementLetter: incrementLevel,
+          processManager: processManager,
+          conductorVersion: conductorVersion,
+          stateFile: stateFile);
+
+      await startContext.run();
+
+      expect((await startContext.engine.checkoutDirectory).path, equals(engine.path));
+      expect((await startContext.framework.checkoutDirectory).path, equals(framework.path));
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
