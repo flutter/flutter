@@ -11,6 +11,7 @@ enabled_branches:
   - dev
   - beta
   - stable
+  - flutter-2.8-candidate.8
 
 platform_properties:
   linux:
