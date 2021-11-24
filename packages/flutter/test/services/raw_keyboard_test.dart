@@ -1475,6 +1475,20 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
     });
 
+    test('Multi-char keyboard keys are correctly translated', () {
+      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'án',
+        'charactersIgnoringModifiers': 'án',
+        'modifiers': 0,
+      });
+      final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(const LogicalKeyboardKey(0x1400000000)));
+    });
+
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
