@@ -78,6 +78,16 @@ class DapTestClient {
     return _eventController.stream.where((Event e) => e.event == event);
   }
 
+  /// Returns a stream of custom 'dart.serviceExtensionAdded' events.
+  Stream<Map<String, Object?>> get serviceExtensionAddedEvents =>
+      events('dart.serviceExtensionAdded')
+          .map((Event e) => e.body! as Map<String, Object?>);
+
+  /// Returns a stream of custom 'flutter.serviceExtensionStateChanged' events.
+  Stream<Map<String, Object?>> get serviceExtensionStateChangedEvents =>
+      events('flutter.serviceExtensionStateChanged')
+          .map((Event e) => e.body! as Map<String, Object?>);
+
   /// Returns a stream of 'dart.testNotification' custom events from the
   /// package:test JSON reporter.
   Stream<Map<String, Object?>> get testNotificationEvents =>
@@ -170,6 +180,18 @@ class DapTestClient {
     _channel.sendRequest(request);
     return completer.future;
   }
+
+  /// Returns a Future that completes with the next serviceExtensionAdded
+  /// event for [extension].
+  Future<Map<String, Object?>> serviceExtensionAdded(String extension) => serviceExtensionAddedEvents.firstWhere(
+      (Map<String, Object?> body) => body['extensionRPC'] == extension,
+      orElse: () => throw 'Did not recieve $extension extension added event before stream closed');
+
+  /// Returns a Future that completes with the next serviceExtensionStateChanged
+  /// event for [extension].
+  Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) => serviceExtensionStateChangedEvents.firstWhere(
+      (Map<String, Object?> body) => body['extension'] == extension,
+      orElse: () => throw 'Did not recieve $extension extension state changed event before stream closed');
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
   /// custom [launch] method.
