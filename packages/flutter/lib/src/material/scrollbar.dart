@@ -81,6 +81,8 @@ class Scrollbar extends StatelessWidget {
     this.hoverThickness,
     this.thickness,
     this.radius,
+    this.buttonStyle,
+    this.buttonShape,
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
@@ -110,6 +112,25 @@ class Scrollbar extends StatelessWidget {
   /// null, the default value is 12.0 pixels.
   final double? hoverThickness;
 
+  /// Controls the presentation style of the scrollbar button.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.buttonStyle] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the buttons will
+  /// not show by default.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollbarButtonStyle], the presentation style of the scrollbar button.
+  final MaterialStateProperty<ScrollbarButtonStyle?>? buttonStyle;
+
+  /// The shape that will be used to draw the scrollbar's leading and trailing
+  /// button when [buttonStyle] is not [ScrollbarButtonStyle.none].
+  ///
+  /// If this property is null, then [ScrollbarThemeData.buttonShape] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null,
+  /// [ArrowScrollbarButtonShape] is used by default.
+  final ScrollbarButtonShape? buttonShape;
+
   /// The thickness of the scrollbar in the cross axis of the scrollable.
   ///
   /// If null, the default value is platform dependent. On [TargetPlatform.android],
@@ -137,7 +158,8 @@ class Scrollbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    final ThemeData themeData = Theme.of(context);
+    if (themeData.platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
         isAlwaysShown: isAlwaysShown ?? false,
         thickness: thickness ?? CupertinoScrollbar.defaultThickness,
@@ -157,6 +179,8 @@ class Scrollbar extends StatelessWidget {
       hoverThickness: hoverThickness,
       thickness: thickness,
       radius: radius,
+      stateButtonStyle: buttonStyle,
+      buttonShape: buttonShape ?? themeData.scrollbarTheme.buttonShape ?? const ArrowScrollbarButtonShape(),
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
@@ -175,6 +199,8 @@ class _MaterialScrollbar extends RawScrollbar {
     this.hoverThickness,
     double? thickness,
     Radius? radius,
+    this.stateButtonStyle,
+    ScrollbarButtonShape? buttonShape,
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
     ScrollbarOrientation? scrollbarOrientation,
@@ -185,6 +211,7 @@ class _MaterialScrollbar extends RawScrollbar {
          isAlwaysShown: isAlwaysShown,
          thickness: thickness,
          radius: radius,
+         buttonShape: buttonShape,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
@@ -195,6 +222,7 @@ class _MaterialScrollbar extends RawScrollbar {
 
   final bool? showTrackOnHover;
   final double? hoverThickness;
+  final MaterialStateProperty<ScrollbarButtonStyle?>? stateButtonStyle;
 
   @override
   _MaterialScrollbarState createState() => _MaterialScrollbarState();
@@ -204,6 +232,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late AnimationController _hoverAnimationController;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
+  bool _leadingButtonHovered = false;
+  bool _trailingButtonHovered = false;
+  bool _leadingButtonPressed = false;
+  bool _trailingButtonPressed = false;
   late ColorScheme _colorScheme;
   late ScrollbarThemeData _scrollbarTheme;
   // On Android, scrollbars should match native appearance.
@@ -220,6 +252,16 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
     if (_hoverIsActive) MaterialState.hovered,
+  };
+
+  Set<ScrollbarButtonState> get _leadingButtonStates => <ScrollbarButtonState>{
+    if (_leadingButtonHovered) ScrollbarButtonState.hovered,
+    if (_leadingButtonPressed) ScrollbarButtonState.pressed,
+  };
+
+  Set<ScrollbarButtonState> get _trailingButtonStates => <ScrollbarButtonState>{
+    if (_trailingButtonHovered) ScrollbarButtonState.hovered,
+    if (_trailingButtonPressed) ScrollbarButtonState.pressed,
   };
 
   MaterialStateProperty<Color> get _thumbColor {
@@ -303,6 +345,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     });
   }
 
+  MaterialStateProperty<ScrollbarButtonStyle> get _buttonStyle => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return widget.stateButtonStyle?.resolve(states) ?? _scrollbarTheme.buttonStyle?.resolve(states) ?? ScrollbarButtonStyle.none;
+  });
+
   @override
   void initState() {
     super.initState();
@@ -344,6 +390,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness.resolve(_states)
       ..radius = widget.radius ?? _scrollbarTheme.radius ?? (_useAndroidScrollbar ? null : _kScrollbarRadius)
+      ..buttonStyle = _buttonStyle.resolve(_states)
+      ..leadingButtonStates = _leadingButtonStates
+      ..trailingButtonStates = _trailingButtonStates
+      ..buttonShape = widget.buttonShape
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
@@ -364,6 +414,31 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   @override
+  void handleButtonsPressDown(
+      Offset localPosition, {
+        required bool isLeadingButton,
+        Duration duration = const Duration(milliseconds: 100),
+      }
+      ) {
+    super.handleButtonsPressDown(localPosition, isLeadingButton: isLeadingButton, duration: duration);
+    if (isLeadingButton) {
+      setState(() { _leadingButtonPressed = true; });
+    } else {
+      setState(() { _trailingButtonPressed = true; });
+    }
+  }
+
+  @override
+  void handleButtonsPressUp({ required bool isLeadingButton }) {
+    super.handleButtonsPressUp(isLeadingButton: isLeadingButton);
+    if (isLeadingButton) {
+      setState(() { _leadingButtonPressed = false; });
+    } else {
+      setState(() { _trailingButtonPressed = false; });
+    }
+  }
+
+  @override
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
@@ -376,12 +451,33 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
+
+    if (isPointerOverButtons(event.position, event.kind, isLeadingButton: true)) {
+      setState(() { _leadingButtonHovered = true; });
+    } else {
+      setState(() { _leadingButtonHovered = false; });
+    }
+
+    if (isPointerOverButtons(event.position, event.kind, isLeadingButton: false)) {
+      setState(() { _trailingButtonHovered = true; });
+    } else {
+      setState(() { _trailingButtonHovered = false; });
+    }
   }
+
 
   @override
   void handleHoverExit(PointerExitEvent event) {
     super.handleHoverExit(event);
-    setState(() { _hoverIsActive = false; });
+    setState(() {
+      _hoverIsActive = false;
+      _leadingButtonHovered = false;
+      _trailingButtonHovered = false;
+      // If move out the mouse cursor quicklt, it may not receive the pointer up event.
+      // We should remove the buttons states when hover exit.
+      _leadingButtonPressed = false;
+      _trailingButtonPressed = false;
+    });
     _hoverAnimationController.reverse();
   }
 

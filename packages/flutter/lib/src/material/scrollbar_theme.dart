@@ -10,6 +10,13 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+const double _kArrowButtonsWidth = 8.0;
+const Color _kActiveArrowColor = Color(0xFF505050);
+const Color _kInactiveArrowColor = Color(0xFFA3A3A3);
+const Color _kHoveredBackgroundColor = Color(0xFFD2D2D2);
+const Color _kPressedBackgroundColor = Color(0xFF787878);
+const Color _kWhiteColor = Color(0xFFFFFFFF);
+
 /// Defines default property values for descendant [Scrollbar] widgets.
 ///
 /// Descendant widgets obtain the current [ScrollbarThemeData] object with
@@ -35,6 +42,8 @@ class ScrollbarThemeData with Diagnosticable {
     this.showTrackOnHover,
     this.isAlwaysShown,
     this.radius,
+    this.buttonStyle,
+    this.buttonShape,
     this.thumbColor,
     this.trackColor,
     this.trackBorderColor,
@@ -66,6 +75,14 @@ class ScrollbarThemeData with Diagnosticable {
   /// Overrides the default value of [Scrollbar.radius] in all
   /// descendant widgets.
   final Radius? radius;
+
+  /// Overrides the default value of [Scrollbar.buttonStyle] in all
+  /// descendant [Scrollbar] widgets.
+  final MaterialStateProperty<ScrollbarButtonStyle?>? buttonStyle;
+
+  /// Overrides the default value of [Scrollbar.buttonShape] in all
+  /// descendant [Scrollbar] widgets.
+  final ScrollbarButtonShape? buttonShape;
 
   /// Overrides the default [Color] of the [Scrollbar] thumb in all descendant
   /// [Scrollbar] widgets.
@@ -126,6 +143,8 @@ class ScrollbarThemeData with Diagnosticable {
     bool? isAlwaysShown,
     bool? interactive,
     Radius? radius,
+    MaterialStateProperty<ScrollbarButtonStyle?>? buttonStyle,
+    ScrollbarButtonShape? buttonShape,
     MaterialStateProperty<Color?>? thumbColor,
     MaterialStateProperty<Color?>? trackColor,
     MaterialStateProperty<Color?>? trackBorderColor,
@@ -139,6 +158,8 @@ class ScrollbarThemeData with Diagnosticable {
       isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       interactive: interactive ?? this.interactive,
       radius: radius ?? this.radius,
+      buttonStyle: buttonStyle ?? this.buttonStyle,
+      buttonShape: buttonShape ?? this.buttonShape,
       thumbColor: thumbColor ?? this.thumbColor,
       trackColor: trackColor ?? this.trackColor,
       trackBorderColor: trackBorderColor ?? this.trackBorderColor,
@@ -161,6 +182,8 @@ class ScrollbarThemeData with Diagnosticable {
       isAlwaysShown: t < 0.5 ? a?.isAlwaysShown : b?.isAlwaysShown,
       interactive: t < 0.5 ? a?.interactive : b?.interactive,
       radius: Radius.lerp(a?.radius, b?.radius, t),
+      buttonStyle: _lerpProperties<ScrollbarButtonStyle?>(a?.buttonStyle, b?.buttonStyle, t, (ScrollbarButtonStyle? a, ScrollbarButtonStyle? b, double t) => t < 0.5 ? a : b),
+      buttonShape: t < 0.5 ? a?.buttonShape : b?.buttonShape,
       thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       trackBorderColor: _lerpProperties<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
@@ -178,6 +201,8 @@ class ScrollbarThemeData with Diagnosticable {
       isAlwaysShown,
       interactive,
       radius,
+      buttonStyle,
+      buttonShape,
       thumbColor,
       trackColor,
       trackBorderColor,
@@ -199,6 +224,8 @@ class ScrollbarThemeData with Diagnosticable {
       && other.isAlwaysShown == isAlwaysShown
       && other.interactive == interactive
       && other.radius == radius
+      && other.buttonStyle == buttonStyle
+      && other.buttonShape == buttonShape
       && other.thumbColor == thumbColor
       && other.trackColor == trackColor
       && other.trackBorderColor == trackBorderColor
@@ -210,11 +237,14 @@ class ScrollbarThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    const ScrollbarThemeData defaultData = ScrollbarThemeData();
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<ScrollbarButtonStyle?>>('buttonStyle', buttonStyle, defaultValue: defaultData.buttonStyle));
+    properties.add(DiagnosticsProperty<ScrollbarButtonShape>('buttonShape', buttonShape, defaultValue: defaultData.buttonShape));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackBorderColor', trackBorderColor, defaultValue: null));
@@ -292,4 +322,202 @@ class ScrollbarTheme extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
+}
+
+/// The leading and trailing Scrollbar buttons that are simple arrows.
+class ArrowScrollbarButtonShape extends ScrollbarButtonShape {
+  /// This abstract const constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const ArrowScrollbarButtonShape();
+
+  @override
+  void paint(
+      Canvas canvas,
+      Rect leadingButtonRect,
+      Set<ScrollbarButtonState> leadingButtonStates,
+      Rect trailingButtonRect,
+      Set<ScrollbarButtonState> trailingButtonStates,
+      ScrollbarButtonStyle buttonStyle,
+      Paint trackPaint,
+      Paint borderPaint,
+      ScrollMetrics scrollMetrics,
+      ScrollbarOrientation orientation,
+      ) {
+    final Rect leadingArrowRect, trailingArrowRect;
+    final Offset leadingBorderStart, leadingBorderEnd, trailingBorderStart, trailingBorderEnd;
+    final Path leadingPath, trailingPath;
+    // If the buttons are grouped layout, paint three divider line.
+    final Offset leadingDividerStart, leadingDividerEnd;
+    final Offset middleDividerStart, middleDividerEnd;
+    final Offset trailingDividerStart, trailingDividerEnd;
+
+    switch(orientation) {
+      case ScrollbarOrientation.left:
+      case ScrollbarOrientation.right:
+        if (orientation == ScrollbarOrientation.left) {
+          leadingBorderStart = leadingButtonRect.topRight;
+          leadingBorderEnd = leadingButtonRect.bottomRight;
+          trailingBorderStart = trailingButtonRect.topRight;
+          trailingBorderEnd = trailingButtonRect.bottomRight;
+        } else {
+          leadingBorderStart = leadingButtonRect.topLeft;
+          leadingBorderEnd = leadingButtonRect.bottomLeft;
+          trailingBorderStart = trailingButtonRect.topLeft;
+          trailingBorderEnd = trailingButtonRect.bottomLeft;
+        }
+
+        leadingDividerStart = leadingButtonRect.topLeft;
+        leadingDividerEnd = leadingButtonRect.topRight;
+        middleDividerStart = leadingButtonRect.bottomLeft;
+        middleDividerEnd = leadingButtonRect.bottomRight;
+        trailingDividerStart = trailingButtonRect.bottomLeft;
+        trailingDividerEnd = trailingButtonRect.bottomRight;
+
+        leadingArrowRect = Rect.fromCenter(
+          center: leadingButtonRect.center,
+          width: _kArrowButtonsWidth,
+          height: _kArrowButtonsWidth / 2.0,
+        ).intersect(leadingButtonRect);
+
+        trailingArrowRect = Rect.fromCenter(
+          center: trailingButtonRect.center,
+          width: _kArrowButtonsWidth,
+          height: _kArrowButtonsWidth / 2.0,
+        ).intersect(trailingButtonRect);
+
+        leadingPath = Path()
+          ..moveTo(leadingArrowRect.topCenter.dx, leadingArrowRect.topCenter.dy)
+          ..lineTo(leadingArrowRect.bottomLeft.dx, leadingArrowRect.bottomLeft.dy)
+          ..lineTo(leadingArrowRect.bottomRight.dx, leadingArrowRect.bottomRight.dy);
+        trailingPath = Path()
+          ..moveTo(trailingArrowRect.bottomCenter.dx, trailingArrowRect.bottomCenter.dy)
+          ..lineTo(trailingArrowRect.topLeft.dx, trailingArrowRect.topLeft.dy)
+          ..lineTo(trailingArrowRect.topRight.dx, trailingArrowRect.topRight.dy);
+        break;
+      case ScrollbarOrientation.top:
+      case ScrollbarOrientation.bottom:
+        if (orientation == ScrollbarOrientation.top) {
+          leadingBorderStart = leadingButtonRect.bottomLeft;
+          leadingBorderEnd = leadingButtonRect.bottomRight;
+          trailingBorderStart = trailingButtonRect.bottomLeft;
+          trailingBorderEnd = trailingButtonRect.bottomRight;
+        } else {
+          leadingBorderStart = leadingButtonRect.topLeft;
+          leadingBorderEnd = leadingButtonRect.topRight;
+          trailingBorderStart = trailingButtonRect.topLeft;
+          trailingBorderEnd = trailingButtonRect.topRight;
+        }
+
+        leadingDividerStart = leadingButtonRect.topLeft;
+        leadingDividerEnd = leadingButtonRect.bottomLeft;
+        middleDividerStart = leadingButtonRect.topRight;
+        middleDividerEnd = leadingButtonRect.bottomRight;
+        trailingDividerStart = trailingButtonRect.topRight;
+        trailingDividerEnd = trailingButtonRect.bottomRight;
+
+        leadingArrowRect = Rect.fromCenter(
+          center: leadingButtonRect.center,
+          width: _kArrowButtonsWidth / 2.0,
+          height: _kArrowButtonsWidth,
+        ).intersect(leadingButtonRect);
+
+        trailingArrowRect = Rect.fromCenter(
+          center: trailingButtonRect.center,
+          width: _kArrowButtonsWidth / 2.0,
+          height: _kArrowButtonsWidth,
+        ).intersect(trailingButtonRect);
+
+        leadingPath = Path()
+          ..moveTo(leadingArrowRect.centerLeft.dx, leadingArrowRect.centerLeft.dy)
+          ..lineTo(leadingArrowRect.topRight.dx, leadingArrowRect.topRight.dy)
+          ..lineTo(leadingArrowRect.bottomRight.dx, leadingArrowRect.bottomRight.dy);
+        trailingPath = Path()
+          ..moveTo(trailingArrowRect.centerRight.dx, trailingArrowRect.centerRight.dy)
+          ..lineTo(trailingArrowRect.topLeft.dx, trailingArrowRect.topLeft.dy)
+          ..lineTo(trailingArrowRect.bottomLeft.dx, trailingArrowRect.bottomLeft.dy);
+        break;
+    }
+
+    final Color leadingBackgroundColor;
+    final Color leadingArrowColor;
+    if (_isLeadingButtonInteractive(scrollMetrics)) {
+      if (leadingButtonStates.contains(ScrollbarButtonState.pressed)) {
+        leadingBackgroundColor = _kPressedBackgroundColor;
+        leadingArrowColor = _kWhiteColor;
+      } else if (leadingButtonStates.contains(ScrollbarButtonState.hovered)) {
+        leadingBackgroundColor = _kHoveredBackgroundColor;
+        leadingArrowColor = _kActiveArrowColor;
+      } else {
+        leadingBackgroundColor = trackPaint.color;
+        leadingArrowColor = _kActiveArrowColor;
+      }
+    } else {
+      leadingBackgroundColor = trackPaint.color;
+      leadingArrowColor = _kInactiveArrowColor;
+    }
+    // Paint the leading button.
+    // background
+    canvas.drawRect(leadingButtonRect, Paint()..color = leadingBackgroundColor);
+    // arrow
+    canvas.drawPath(leadingPath, Paint()..color = leadingArrowColor);
+    // border
+    canvas.drawLine(leadingBorderStart, leadingBorderEnd, borderPaint);
+
+    final Color trailingBackgroundColor;
+    final Color trailingArrowColor;
+    if (_isTrailingButtonInteractive(scrollMetrics)) {
+      if (trailingButtonStates.contains(ScrollbarButtonState.pressed)) {
+        trailingBackgroundColor = _kPressedBackgroundColor;
+        trailingArrowColor = _kWhiteColor;
+      } else if (trailingButtonStates.contains(ScrollbarButtonState.hovered)) {
+        trailingBackgroundColor = _kHoveredBackgroundColor;
+        trailingArrowColor = _kActiveArrowColor;
+      } else {
+        trailingBackgroundColor = trackPaint.color;
+        trailingArrowColor = _kActiveArrowColor;
+      }
+    } else {
+      trailingBackgroundColor = trackPaint.color;
+      trailingArrowColor = _kInactiveArrowColor;
+    }
+
+    // Paint the trailing button.
+    // background
+    canvas.drawRect(trailingButtonRect, Paint()..color = trailingBackgroundColor);
+    // arrow
+    canvas.drawPath(trailingPath, Paint()..color = trailingArrowColor);
+    // border
+    canvas.drawLine(trailingBorderStart, trailingBorderEnd, borderPaint);
+    if (buttonStyle == ScrollbarButtonStyle.groupedTrailing || buttonStyle == ScrollbarButtonStyle.groupedLeading) {
+      final Paint dividerPaint = Paint()
+        ..color = _kHoveredBackgroundColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawLine(leadingDividerStart, leadingDividerEnd, dividerPaint);
+      canvas.drawLine(middleDividerStart, middleDividerEnd, dividerPaint);
+      canvas.drawLine(trailingDividerStart, trailingDividerEnd, dividerPaint);
+    }
+  }
+
+  bool _isLeadingButtonInteractive(ScrollMetrics scrollMetrics) {
+    switch(scrollMetrics.axisDirection) {
+      case AxisDirection.down:
+      case AxisDirection.right:
+        return scrollMetrics.extentBefore > 0.0;
+      case AxisDirection.up:
+      case AxisDirection.left:
+        return scrollMetrics.extentAfter > 0.0;
+    }
+  }
+
+  bool _isTrailingButtonInteractive(ScrollMetrics scrollMetrics) {
+    switch(scrollMetrics.axisDirection) {
+      case AxisDirection.down:
+      case AxisDirection.right:
+        return scrollMetrics.extentAfter > 0.0;
+      case AxisDirection.up:
+      case AxisDirection.left:
+        return scrollMetrics.extentBefore > 0.0;
+    }
+  }
 }
