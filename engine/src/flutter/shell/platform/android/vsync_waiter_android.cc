@@ -29,11 +29,13 @@ void VsyncWaiterAndroid::AwaitVSync() {
   auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
   jlong java_baton = reinterpret_cast<jlong>(weak_this);
 
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //
-                            g_async_wait_for_vsync_method_,  //
-                            java_baton                       //
-  );
+  task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //
+                              g_async_wait_for_vsync_method_,  //
+                              java_baton                       //
+    );
+  });
 }
 
 // static
