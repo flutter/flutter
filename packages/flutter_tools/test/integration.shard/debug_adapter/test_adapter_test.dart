@@ -123,7 +123,7 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
   // Second test
   '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════',
   'The following TestFailure was thrown running a test:',
-  '  Expected: false',
+  'Expected: false',
   '  Actual: <true>',
   '',
   'The test description was: can fail',
