@@ -446,6 +446,29 @@ class Cache {
     return overrideUrl;
   }
 
+  String get cipdBaseUrl {
+    final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl == null) {
+      return 'https://chrome-infra-packages.appspot.com/dl';
+    }
+
+    final Uri original;
+    try {
+      original = Uri.parse(overrideUrl);
+    } on FormatException catch (err) {
+      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
+    }
+
+    final String cipdOverride = original.replace(
+      pathSegments: <String>[
+        ...original.pathSegments,
+        'flutter_infra_release',
+        'cipd',
+      ],
+    ).toString();
+    return cipdOverride;
+  }
+
   bool _hasWarnedAboutStorageOverride = false;
 
   void _maybeWarnAboutStorageOverride(String overrideUrl) {
