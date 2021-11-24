@@ -7,50 +7,8 @@
 
 ## Steps
 
-To update the embedding dependencies, just `cd` into this directory,
-modify the dependencies in `build.gradle` and run `gradle updateDependencies`.
-
-Once you have updated the dependencies, you can upload a new version by running
-`cipd create --pkg-def cipd.yaml`. For more, see the Chromium instructions on ["Updating a CIPD
-dependency"](https://chromium.googlesource.com/chromium/src/+/main/docs/cipd_and_3pp.md#Updating-a-CIPD-dependency) for how to upload a package update to CIPD.
-
-On successful upload, you will receive a hash for the upload such as
-
-`cipd: successfully uploaded and verified flutter/android/embedding_bundle:NZvE-rL3E66nHQZb5Vyl9-1Y_1MWEX7KURgOHqX2cYcC`
-
-Let's further annotate the new upload with the current timestamp.
-
-    $ cipd set-tag flutter/android/embedding_bundle --version=<new_version_hash> -tag=last_updated:<timestamp>
-
-Example of a last-updated timestamp: 2019-07-29T15:27:42-0700
-
-You can generate the same date format with `date +%Y-%m-%dT%T%z`.
-
-You can run `cipd describe flutter/android/embedding_bundle
---version=<new_version_hash>` to verify. You should see:
-
-```
-Package:       flutter/android/embedding_bundle
-Instance ID:   <new_version_hash>
-...
-Tags:
- last_updated:<timestamp>
-```
-
-Then update the `DEPS` file (located at /src/flutter/DEPS) to use the new version by pointing to
-your new `last_updated_at` tag.
-
-```
-  'src/third_party/android_embedding_dependencies': {
-     'packages': [
-       {
-        'package': 'flutter/android/embedding_bundle',
-        'version': 'last_updated:<timestamp>'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-```
-
-You can now re-run `gclient sync` to fetch the latest package version.
+1. `cd` into this directory.
+2. Update the dependency in build.gradle.
+3. Update the dependency used in Android unit tests `shell/platform/android/test_runner/build.gradle`
+4. Run `./generate.sh`.
+5. Update tools/androidx/files.json. (This file includes the Maven dependencies used to build Flutter apps).

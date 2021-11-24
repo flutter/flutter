@@ -67,9 +67,9 @@
     ]
   },
   {
-    "url": "https://maven.google.com/androidx/window/window-java/1.0.0-beta03/window-java-1.0.0-beta03.aar",
+    "url": "https://maven.google.com/androidx/window/window-java/1.0.0-beta04/window-java-1.0.0-beta04.aar",
     "out_file_name": "androidx_window_java.aar",
-    "maven_dependency": "androidx.window:window-java:1.0.0-beta03",
+    "maven_dependency": "androidx.window:window-java:1.0.0-beta04",
     "provides": [
       "androidx.window.java.layout.WindowInfoRepositoryCallbackAdapter",
       "androidx.window.layout.DisplayFeature",

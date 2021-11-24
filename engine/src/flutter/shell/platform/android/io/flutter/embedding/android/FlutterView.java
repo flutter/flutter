@@ -38,12 +38,12 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Consumer;
-import androidx.window.java.layout.WindowInfoRepositoryCallbackAdapter;
+import androidx.window.java.layout.WindowInfoTrackerCallbackAdapter;
 import androidx.window.layout.DisplayFeature;
 import androidx.window.layout.FoldingFeature;
 import androidx.window.layout.FoldingFeature.OcclusionType;
 import androidx.window.layout.FoldingFeature.State;
-import androidx.window.layout.WindowInfoRepository;
+import androidx.window.layout.WindowInfoTracker;
 import androidx.window.layout.WindowLayoutInfo;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -454,8 +454,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   protected WindowInfoRepositoryCallbackAdapterWrapper createWindowInfoRepo() {
     try {
       return new WindowInfoRepositoryCallbackAdapterWrapper(
-          new WindowInfoRepositoryCallbackAdapter(
-              WindowInfoRepository.getOrCreate((Activity) getContext())));
+          new WindowInfoTrackerCallbackAdapter(
+              WindowInfoTracker.getOrCreate((Activity) getContext())));
     } catch (NoClassDefFoundError noClassDefFoundError) {
       // Testing environment uses gn/javac, which does not work with aar files. This is why aar
       // are converted to jar files, losing resources and other android-specific files.
@@ -470,7 +470,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   /**
    * Invoked when this is attached to the window.
    *
-   * <p>We register for {@link androidx.window.layout.WindowInfoRepository} updates.
+   * <p>We register for {@link androidx.window.layout.WindowInfoTracker} updates.
    */
   @Override
   protected void onAttachedToWindow() {
@@ -478,14 +478,14 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     this.windowInfoRepo = createWindowInfoRepo();
     if (windowInfoRepo != null) {
       windowInfoRepo.addWindowLayoutInfoListener(
-          ContextCompat.getMainExecutor(getContext()), windowInfoListener);
+          (Activity) getContext(), ContextCompat.getMainExecutor(getContext()), windowInfoListener);
     }
   }
 
   /**
    * Invoked when this is detached from the window.
    *
-   * <p>We unregister from {@link androidx.window.layout.WindowInfoRepository} updates.
+   * <p>We unregister from {@link androidx.window.layout.WindowInfoTracker} updates.
    */
   @Override
   protected void onDetachedFromWindow() {
@@ -497,20 +497,20 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   /**
-   * Refresh {@link androidx.window.layout.WindowInfoRepository} and {@link
-   * android.view.DisplayCutout} display features. Fold, hinge and cutout areas are populated here.
+   * Refresh {@link androidx.window.layout.WindowInfoTracker} and {@link android.view.DisplayCutout}
+   * display features. Fold, hinge and cutout areas are populated here.
    */
   @TargetApi(28)
   protected void setWindowInfoListenerDisplayFeatures(WindowLayoutInfo layoutInfo) {
     List<DisplayFeature> displayFeatures = layoutInfo.getDisplayFeatures();
     List<FlutterRenderer.DisplayFeature> result = new ArrayList<>();
 
-    // Data from WindowInfoRepository display features. Fold and hinge areas are
+    // Data from WindowInfoTracker display features. Fold and hinge areas are
     // populated here.
     for (DisplayFeature displayFeature : displayFeatures) {
       Log.v(
           TAG,
-          "WindowInfoRepository Display Feature reported with bounds = "
+          "WindowInfoTracker Display Feature reported with bounds = "
               + displayFeature.getBounds().toString()
               + " and type = "
               + displayFeature.getClass().getSimpleName());
